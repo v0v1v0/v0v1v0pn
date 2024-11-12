@@ -1,0 +1,325 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>addClusterMembership</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Partition a Network Graph Into Clusters
+</h2>
+
+<h3>Description</h3>
+
+<p>Given a list of network objects returned by
+<code>buildRepSeqNetwork()</code> or
+<code>generateNetworkObjects()</code>,
+partitions the network graph into clusters using the specified clustering
+algorithm, adding a cluster membership variable to the node metadata.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">addClusterMembership(
+  net,
+  cluster_fun = "fast_greedy",
+  cluster_id_name = "cluster_id",
+  overwrite = FALSE,
+  verbose = FALSE,
+  ...,
+  data = deprecated(),
+  fun = deprecated()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+
+<p>A <code>list</code> of network objects conforming to the output of
+<code>buildRepSeqNetwork()</code> or
+<code>generateNetworkObjects()</code>.
+See details.
+Alternatively, this argument accepts the network
+<code>igraph</code>, with the node metadata passed to the
+<code>data</code> argument. However, this alternative functionality is
+deprecated and will eventually be removed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_fun</code></td>
+<td>
+
+<p>A character string specifying the clustering algorithm to use.
+See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_id_name</code></td>
+<td>
+
+<p>A character string specifying the name of the cluster membership variable
+to be added to the node metadata.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+
+<p>Logical. Should the variable specified by <code>cluster_id_name</code> be
+overwritten if it already exists?
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Named optional arguments to the function specified by <code>cluster_fun</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a>
+See <code>net</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a>
+Replaced by <code>cluster_fun</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The list <code>net</code> must contain the named elements
+<code>igraph</code> (of class <code>igraph</code>),
+<code>adjacency_matrix</code> (a <code>matrix</code> or
+<code>dgCMatrix</code> encoding edge connections),
+and <code>node_data</code> (a <code>data.frame</code> containing node metadata),
+all corresponding to the same network. The lists returned by
+<code>buildRepSeqNetwork()</code> and
+<code>generateNetworkObjects()</code>
+are examples of valid inputs for the <code>net</code> argument.
+</p>
+<p>Alternatively, the <code>igraph</code> may be passed to <code>net</code> and the node
+metadata to <code>data</code>. However, this alternative functionality is
+deprecated and will eventually be removed.
+</p>
+<p>A clustering algorithm is used to partition the network graph into clusters
+(densely-connected subgraphs). Each cluster represents a collection of
+clones/cells with similar receptor sequences. The method used to partition
+the graph depends on the choice of clustering algorithm, which is specified
+using the <code>cluster_fun</code> argument.
+</p>
+<p>The available options for <code>cluster_fun</code> are listed below. Each refers
+to an <code>igraph</code> function implementing a
+particular clustering algorithm. Follow the links to learn more about the
+individual clustering algorithms.
+</p>
+
+<ul>
+<li> <p><code>"edge_betweenness"</code>
+</p>
+</li>
+<li> <p><code>"fast_greedy"</code>
+</p>
+</li>
+<li> <p><code>"infomap"</code>
+</p>
+</li>
+<li> <p><code>"label_prop"</code>
+</p>
+</li>
+<li> <p><code>"leading_eigen"</code>
+</p>
+</li>
+<li> <p><code>"leiden"</code>
+</p>
+</li>
+<li> <p><code>"louvain"</code>
+</p>
+</li>
+<li> <p><code>"optimal"</code>
+</p>
+</li>
+<li> <p><code>"spinglass"</code>
+</p>
+</li>
+<li> <p><code>"walktrap"</code>
+</p>
+</li>
+</ul>
+<p>Optional arguments to each clustering algorithm can have their
+values specified using the ellipses (<code>...</code>) argument of
+<code>addClusterMembership()</code>.
+</p>
+<p>Each cluster is assigned a numeric cluster ID. A cluster membership variable,
+whose name is specified by <code>cluster_id_name</code>, is added to the node
+metadata, encoding the cluster membership of the node for each row. The cluster
+membership is encoded as the cluster ID number of the cluster to which the node
+belongs.
+</p>
+<p>The <code>overwrite</code> argument controls whether to overwrite pre-existing data.
+If the variable specified by <code>cluster_id_name</code> is already present in
+the node metadata, then <code>overwrite</code> must be set to <code>TRUE</code> in
+order to perform clustering and overwrite the variable with new cluster
+membership values. Alternatively, by specifying a value for
+<code>cluster_id_name</code> that is not among the variables in the node metadata,
+a new cluster membership variable can be created while preserving the old
+cluster membership variable. In this manner, clustering can be performed
+multiple times on the same network using different clustering algorithms,
+without losing the results.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If the variable specified by <code>cluster_id_name</code> is not present in
+<code>net$node_data</code>, returns a copy of <code>net</code> with this variable
+added to <code>net$node_data</code> encoding the cluster membership of the network
+node corresponding to each row. If the variable is already present and
+<code>overwrite = TRUE</code>, then its values are replaced with the new values
+for cluster membership.
+</p>
+<p>Additionally, if <code>net</code> contains a list named <code>details</code>, then the
+following elements will be added to <code>net$details</code> if they do not
+already exist:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>clusters_in_network</code></td>
+<td>
+
+<p>A named numeric vector of length 1. The first entry's name is the
+name of the clustering algorithm, and its value is the number of clusters
+resulting from performing clustering on the network.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_id_variable</code></td>
+<td>
+
+<p>A named numeric vector of length 1. The first entry's name is the
+name of the clustering algorithm, and its value is the name of the
+corresponding cluster membership variable in the node metadata
+(i.e., the value of <code>cluster_id_name</code>).
+</p>
+</td>
+</tr>
+</table>
+<p>If <code>net$details</code> already contains these elements, they will be updated
+according to whether the cluster membership variable specified by
+<code>cluster_id_name</code>
+is added to <code>net$node_data</code> or already exists and is overwritten.
+In the former case (the cluster membership variable does not already exist),
+the length of each vector
+(<code>clusters_in_network</code>) and (<code>cluster_id_variable</code>)
+is increased by 1, with the new information appended as a new named entry
+to each. In the latter case (the cluster membership variable is overwritten),
+the new information overwrites the name and value of the last entry of each
+vector.
+</p>
+<p>In the event where <code>overwrite = FALSE</code> and <code>net$node_data</code> contains
+a variable with the same name as the value of <code>cluster_id_name</code>, then an
+unaltered copy of <code>net</code> is returned with a message notifying the user.
+</p>
+<p>Under the alternative (deprecated) input format where the node metadata is
+passed to <code>data</code> and the <code>igraph</code> is passed to <code>net</code>, the
+node metadata is returned instead of the list of network objects, with the
+cluster membership variable added or updated as described above.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>addClusterStats()</code>
+<code>labelClusters()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+net &lt;- generateNetworkObjects(
+  toy_data, "CloneSeq"
+)
+
+# Perform cluster analysis,
+# add cluster membership to net$node_data
+net &lt;- addClusterMembership(net)
+
+net$details$clusters_in_network
+net$details$cluster_id_variable
+
+# overwrite values in net$node_data$cluster_id
+# with cluster membership values obtained using "cluster_leiden" algorithm
+net &lt;- addClusterMembership(
+  net,
+  cluster_fun = "leiden",
+  overwrite = TRUE
+)
+
+net$details$clusters_in_network
+net$details$cluster_id_variable
+
+# perform clustering using "cluster_louvain" algorithm
+# saves cluster membership values to net$node_data$cluster_id_louvain
+# (net$node_data$cluster_id retains membership values from "cluster_leiden")
+net &lt;- addClusterMembership(
+  net,
+  cluster_fun = "louvain",
+  cluster_id_name = "cluster_id_louvain",
+)
+
+net$details$clusters_in_network
+net$details$cluster_id_variable
+
+</code></pre>
+
+
+</div>

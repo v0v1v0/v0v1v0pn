@@ -1,0 +1,480 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NFCP_Kalman_filter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Filter an N-factor commodity pricing model though the Kalman filter</h2>
+
+<h3>Description</h3>
+
+<script id="MathJax-script" async src="../../mathjaxr/doc/mathjax/es5/tex-chtml-full.js"></script><p>Given a set of parameters of the N-factor model, filter term structure data using the Kalman filter.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NFCP_Kalman_filter(
+  parameter_values,
+  parameter_names,
+  log_futures,
+  dt,
+  futures_TTM,
+  ME_TTM = NULL,
+  verbose = FALSE,
+  debugging = FALSE,
+  seasonal_trend = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>parameter_values</code></td>
+<td>
+<p><code>vector</code>. Numeric parameter values of an N-factor model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter_names</code></td>
+<td>
+<p><code>vector</code>. Parameter names, where each element of <code>parameter_names</code> must correspond to its respective value
+element in object <code>parameter_values</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log_futures</code></td>
+<td>
+<p><code>matrix</code>. The natural logarithm of observed futures prices. Each row must correspond to quoted futures prices at a particular date and every column must correspond to a unique futures contract.
+NA values are allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt</code></td>
+<td>
+<p><code>numeric</code>. Constant, discrete time step of observations, in years.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>futures_TTM</code></td>
+<td>
+<p><code>vector</code> or <code>matrix</code>.  The time-to-maturity of observed futures contracts, in years, at a given observation date. This time-to-maturity can either be constant (ie. class 'vector') or variable (ie. class 'matrix') across observations.
+The number of columns of 'futures_TTM' must be identical to the number of columns of object 'log_futures'. The number of rows of object 'futures_TTM' must be either 1 or equal to the number of rows of object 'log_futures'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ME_TTM</code></td>
+<td>
+<p><code>vector</code>. the time-to-maturity groupings to consider for observed futures prices. The length of <code>ME_TTM</code> must be equal to the number of 'ME' parameters specified in object 'parameter_names'. The maximum of 'ME_TTM' must be greater than the maximum value of 'futures_TTM'.
+When the number of 'ME' parameter values is equal to one or the number of columns of object 'log_futures', this argument is ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p><code>logical</code>. Should additional information be output? see <b>values</b>. When <code>verbose = F</code>, the <code>NFCP_Kalman_filter</code> function is significantly faster, see <b>details</b>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>debugging</code></td>
+<td>
+<p><code>logical</code>. Should additional filtering information be output? see <b>values</b>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seasonal_trend</code></td>
+<td>
+<p><code>numeric</code>. Optional parameter. This details the trend of the deterministic seasonal component (i.e., where in the season the first observation is located). When not listed, the Kalman filter assumes that observations are at the beginning of the seasonal component.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>NFCP_Kalman_filter</code> applies the Kalman filter algorithm for observable <code>log_futures</code> prices against the input parameters of an N-factor model
+provided through the <code>parameter_values</code> and <code>parameter_names</code> input vectors.
+</p>
+<p>The <code>NFCP_Kalman_filter</code> function is
+designed for subsequent input into optimization functions and is called within the N-factor parameter estimation function <code>NFCP_MLE</code>. The first input to the
+<code>NFCP_Kalman_filter</code> function is a vector of parameters of an
+N-factor model, with elements of this vector corresponding to the parameter names within the elements of input vector <code>parameter_names</code>.
+When <code>logical</code> input <code>verbose = F</code>, the <code>NFCP_Kalman_filter</code> function calls the <code>fkf_SP</code> function of the <code>FKF_SP</code> package, which itself is a wrapper
+of a routine of the Kalman filter written in C utilizing Sequential Processing for maximum computational efficiency (see <code>fkf_SP</code> for more details). When <code>verbose = T</code>,
+the <code>NFCP_Kalman_filter</code> instead applies a Kalman filter algorithm written in base <code>R</code> and outputs several other <code>list objects</code>, including filtered values and
+measures for model fit and robustness (see <b>Returns</b>)
+</p>
+<p><b>The N-factor model</b>
+The N-factor framework was first presented in the work of Cortazar and Naranjo (2006, equations 1-3).
+It is a risk-premium class of commodity pricing model, in which futures prices are given by discounted expected future spot prices,
+where these spot prices are discounted at a given level of risk-premium, known as the cost-of-carry.
+</p>
+<p>The N-factor framework describes the spot price process of a commodity as the correlated sum of \(N\) state variables \(x_t\). The 'NFCP' package also allows for a deterministic,
+cyclical seasonal function \(season(t)\) to be considered.
+</p>
+<p>When <code>GBM = TRUE</code>:
+\[log(S_{t}) = season(t) + \sum_{i=1}^N x_{i,t}\]
+When <code>GBM = FALSE</code>:
+\[log(S_{t}) = E + season(t) + \sum_{i=1}^N x_{i,t}\]
+</p>
+<p>Where <code>GBM</code> determines whether the first factor follows a Brownian Motion or Ornstein-Uhlenbeck process to induce a unit root in the spot price process.
+</p>
+<p>When <code>GBM = TRUE</code>, the first factor corresponds to the spot price, and additional N-1 factors model the cost-of-carry.
+</p>
+<p>When <code>GBM = FALSE</code>, the commodity model assumes that there is a long-term equilibrium the commodity price will tend towards over time, with model volatility a decreasing function of time. This is not the standard approach made in the commodity pricing literature (Cortazar and Naranjo, 2006).
+</p>
+<p>State variables are thus assumed to follow the following processes:
+</p>
+<p>When <code>GBM = TRUE</code>:
+\[dx_{1,t} = \mu^*dt + \sigma_{1} dw_{1}t\]
+</p>
+<p>When <code>GBM = FALSE</code>:
+\[dx_{1,t} = - (\lambda_{1} + \kappa_{1}x_{1,t})dt + \sigma_{1} dw_{1}t\]
+</p>
+<p>And:
+\[dx_{i,t} =_{i\neq1} - (\lambda_{i} + \kappa_{i}x_{i,t})dt + \sigma_{i} dw_{i}t\]
+</p>
+<p>where:
+\[E(w_{i})E(w_{j}) = \rho_{i,j}\]
+</p>
+<p>Additionally, the deterministic seasonal function (if specified) is given by:
+</p>
+\[season(t) = \sum_{i=1} ( season_{i,1} cos(2i\pi) + season_{i,2} sin(2i\pi)\]
+<p>The addition of deterministic, cyclical seasonality as a function of trigonometric variables was first suggested by Hannan, Terrell, and Tuckwell (1970) and first applied to model commodities by Sørensen (2002).
+</p>
+<p>The following constant parameters are defined as:
+</p>
+<p><code>var</code> \(\mu\):  long-term growth rate of the Brownian Motion process.
+</p>
+<p><code>var</code> \(E\): Constant equilibrium level.
+</p>
+<p><code>var</code> \(\mu^*=\mu-\lambda_1\): Long-term risk-neutral growth rate
+</p>
+<p><code>var</code> \(\lambda_{i}\): Risk premium of state variable \(i\).
+</p>
+<p><code>var</code> \(\kappa_{i}\): Reversion rate of state variable \(i\).
+</p>
+<p><code>var</code> \(\sigma_{i}\): Instantaneous volatility of state variable \(i\).
+</p>
+<p><code>var</code> \(\rho_{i,j} \in [-1,1]\): Instantaneous correlation between state variables \(i\) and \(j\).
+</p>
+<p>Including additional factors within the spot-price process allow for additional flexibility (and possibly fit) to the term structure of a commodity.
+The N-factor model nests simpler models within its framework, allowing for the fit of different N-factor models (applied to the same term structure data),
+represented by the log-likelihood, to be directly compared with statistical testing possible through a chi-squared test.
+</p>
+<p><b>Disturbances - Measurement Error</b>:
+</p>
+<p>The Kalman filtering algorithm assumes a given measure of measurement error or disturbance in the measurement equation (ie. matrix \(H\)). Measurement errors can be interpreted as error in the
+model's fit to observed prices, or as errors in the reporting of prices (Schwartz and Smith, 2000). These disturbances are typically assumed independent.
+</p>
+<p><code>var</code> \(ME_i\) measurement error of contract \(i\).
+</p>
+<p>where the measurement error of futures contracts \(ME_i\) is equal to <code>'ME_'</code> [i] (i.e. <code>'ME_1'</code>, <code>'ME_2'</code>, ...) specified in arguments <code>parameter_values</code> and <code>parameter_names</code>.
+</p>
+<p>There are three particular cases on how the measurement error of observations can be treated in the <code>NFCP_Kalman_filter</code> function:
+</p>
+<p><b>Case 1:</b> Only one ME is specified. The Kalman filter assumes that the measurement error of observations are independent and identical.
+</p>
+<p><b>Case 2:</b> One ME is specified for every observed futures contract. The Kalman filter assumes that the measurement error of observations are independent and unique.
+</p>
+<p><b>Case 3:</b> A series of ME's are specified for a given grouping of maturities of futures contracts. The Kalman filter assumes that the measurement error of observations are independent and unique to their respective time-to-maturity.
+</p>
+<p>Grouping of maturities for case 3 is specified through the <code>ME_TTM</code> argument. This is a vector that specifies the maximum maturity to consider for each respective ME parameter argument.
+</p>
+<p>in other words, ME_1 is considered for observations with TTM less than ME_TTM[1], ME_2 is considered for observations with TTM less than ME_TTM[2], ..., etc.
+</p>
+<p>The first case is clearly the simplest to estimate, but can be a restrictive assumption. The second case is clearly the most difficult to estimate, but can be an infeasible assumption when considering all available futures contracts that make up the term structure of a commodity.
+</p>
+<p>Case 3 thus serves to ease the restriction of case 1, and allow the user to make the modeling of measurement error as simple or complex as desired for a given set of maturities.
+</p>
+<p><b>Kalman Filtering</b>
+</p>
+<p>The following section describes the Kalman filter equations used to filter the N-factor model.
+</p>
+<p>The Kalman filter iteration is characterised by a transition and measurement equation.
+The transition equation develops the vector of state variables between discretised time steps (whilst considering a given level of covariance between state variables over time).
+The measurement equation relates the unobservable state vector to a vector of observable measurements (whilst also considering a
+given level of measurement error). The typical Kalman filter algorithm is a Gaussian process state space model.
+</p>
+<p>Transition Equation:
+\[\hat x_{t|t-1} = c_t + G_t \hat x_{t-1} + Q_t \eta_t \]
+Measurement Equation:
+\[\hat y_t = d_t + Z_t \hat x_{t|t-1} + H_t \epsilon_t\]
+</p>
+\[t = 1, \cdots, n \]
+<p>Where \(\eta_t\) and \(\epsilon_t\) are IID \(N(0,I(m))\) and iid \(N(0,I(d))\) respectively.
+</p>
+<p>The state vector follows a normal distribution, \(x_1 \sim N(a_1, P_1)\), with \(a_1\) and \(P_1\) as the mean vector and variance matrix of
+the initial state vector \(x_1\), respectively.
+</p>
+<p>The Kalman filter can be used for parameter estimation through the maximization of the Log-Likelihood value. See <code>NFCP_MLE</code>.
+</p>
+<p><b>Filtering the N-factor model</b>
+</p>
+<p>let \(m\) represent the number of observations at time \(t\)
+</p>
+<p>let \(n\) represent the number of factors in the N-factor model
+</p>
+<p>observable futures prices: \(y_t = [ln(F(t,T_1)), ln(F(t,T_2)), \cdots, ln(F(t,T_m))]'\)
+</p>
+<p>State vector: \(x_t=[x_1t,x_2t,\cdots,x_nt ]'\)
+</p>
+<p>Measurement error: \(diag(H) = [ME_{1}^2, ME_{2}^2, \cdots, ME_{n}^2]\)
+</p>
+<p>When the number of specified ME terms is one, \(s_1 = s_2 = \cdots = s_n = \) \(ME_1^2\)
+</p>
+<p><code>var</code> \(Z\) is an \(m \times n\) matrix, where each element \([i,j]\) is equal to:
+</p>
+\[Z_{i,j} = e^{-\kappa_i T_j}\]
+<p><code>var</code> \(d_t\) is an \(m \times 1\) vector:
+</p>
+\[d_t=[season(T_1) + A(T_1), season(T_2) + A(T_2), \cdots, season(T_m) + A(T_m)]'\]
+<p>Under the assumption that Factor 1 follows a Brownian Motion, <i>A(T)</i> is given by:
+\[A(T) = \mu^*T-\sum_{i=1}^N - \frac{1-e^{-\kappa_i T}\lambda_i}{\kappa_i}+\frac{1}{2}(\sigma_1^2T +
+\sum_{i.j\neq 1} \sigma_i \sigma_j \rho_{i,j} \frac{1-e^{-(\kappa_i+\kappa_j)T}}{\kappa_i+\kappa_j})\]
+</p>
+<p><code>var</code> \(v_t\) is a \(n \times 1\) vector of serially uncorrelated Guassian disturbances with
+\(E(V_t) = 0\)  and \(cov(v_t)=R^2\)
+</p>
+<p>Where:
+</p>
+<p>\(diag(G_t) = [e^{-\kappa_1 \tau}, e^{-\kappa_2 \tau}, \cdots, e^{-\kappa_n \tau}]\)
+</p>
+<p>Where \( \tau =T-t\)
+</p>
+<p><code>var</code> \(w_t\) is an \(n \times 1\) vector of serially uncorrelated Guassian disturbances where:
+\[E(w_t) = 0\] and \(cov(w_t) = Q_t\)
+</p>
+<p><code>var</code> \(c_t=[\mu \Delta t,0,\cdots,0]'\) is an \(N \times 1\) vector of the intercept of the transition equation.
+</p>
+<p><code>var</code> \(Q_t\) is equal to the covariance function, given by:
+</p>
+\[Cov_{1,1}(x_{1,t},x_{1,t}) = \sigma_1^2t\]
+\[Cov_{i,j}(x_{i,t},x_{j,t}) = \sigma_i\sigma_j\rho_{i,j}\frac{1-e^{-(\kappa_i+\kappa_j)t}}{\kappa_i+\kappa_j}\]
+<p>(see also <code>cov_func</code>)
+</p>
+<p><b>Penalising poorly specified models</b>
+</p>
+<p>The Kalman filter returns non-real log-likelihood scores when the prediction error variance matrix becomes singular or its determinant becomes negative. This generally occurs when a poorly specified parameter set is input, such as when measurement error is zero.
+Non-real log-likelihood scores can break optimization and gradients algorithms and functions. To circumvent this, the <code>NFCP_Kalman_filter</code>
+returns a heavily penalized log-likelihood score when <code>verbose = F</code>. Penalized log-likelihood scores are calculated by:
+</p>
+<p><code>stats::runif(1, -2e6, -1e6)</code>
+</p>
+<p><b>Diffuse Kalman filtering</b>
+</p>
+<p>If the initial values of the state vector are not supplied within the <code>parameter_names</code> and <code>parameter_values</code> vectors, a 'diffuse' assumption is used within the Kalman filtering algorithm.
+Initial states of factors that follow an Ornstein-Uhlenbeck are assumed to equal zero.
+The initial state of the first factor, given that it follows a Brownian motion, is assumed equal to the first element of <code>log_futures</code>. This is an
+assumption that the initial estimate of the spot price is equal to the closest to maturity observed futures price.
+</p>
+<p>The initial states of factors that follow an Ornstein-Uhlenbeck have a transient effect on future observations. This makes the diffuse assumption reasonable and further means that initial states cannot generally be accurately estimated.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>NFCP_Kalman_filter</code> returns a <code>numeric</code> object when <code>verbose = F</code>, which corresponds to the log-likelihood of observations.
+When <code>verbose = T</code>, the <code>NFCP_Kalman_filter</code> function returns a <code>list</code> object of length seven with the following objects:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+
+<code>Log-Likelihood</code> </td>
+<td style="text-align: left;"> Log-Likelihood of observations. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>Information Criteria</code> </td>
+<td style="text-align: left;"> <code>vector</code>. The Akaikie and Bayesian Information Criterion. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>X_t</code> </td>
+<td style="text-align: left;"> <code>vector</code>. The final observation of the state vector. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>X</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. Optimal one-step-ahead state vector. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>Y</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. Estimated futures prices. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>V</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. Estimation error. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>Filtered Error</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. positive mean error (high bias), negative mean error (low bias),
+
+mean error (bias) and root mean squared error (RMSE)
+
+of the filtered values to observed futures prices.  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>Term Structure Fit</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. The mean error (Bias), mean absolute error, standard deviation of error
+
+ and root mean squared error (RMSE) of each observed futures contract. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>Term Structure Volatility Fit</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. Theoretical and empirical volatility of observed futures contract returns. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<p>When <code>debugging = T</code>, 9 objects are returned in addition to those returned when <code>verbose = T</code>:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+
+<code>P_t</code> </td>
+<td style="text-align: left;"> <code>array</code>. Covariance matrix of state variables, with the third dimension indexing across time </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>F_t</code> </td>
+<td style="text-align: left;"> <code>vector</code>. Prediction error variance matrix, with the third dimension indexing across time </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>K_t</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. Kalman Gain, with the third dimension indexing across time </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>d</code> </td>
+<td style="text-align: left;"> <code>matrix</code>.  \(d_t\) (see <b>details</b>) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>Z</code> </td>
+<td style="text-align: left;"> <code>matrix</code>.  \(Z_t\) (see <b>details</b>) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>G_t</code> </td>
+<td style="text-align: left;"> <code>matrix</code>.  \(G_t\) (see <b>details</b>)  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>c_t</code> </td>
+<td style="text-align: left;"> <code>vector</code>.  \(C_t\) (see <b>details</b>) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>Q_t</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. \(Q_t\)  (see <b>details</b>) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>H</code> </td>
+<td style="text-align: left;"> <code>matrix</code>. \(H\)  (see <b>details</b>) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Hannan, E. J., et al. (1970). "The seasonal adjustment of economic time series." <em>International economic review</em>, 11(1): 24-52.
+</p>
+<p>Anderson, B. D. O. and J. B. Moore, (1979). <em>Optimal filtering</em> Englewood Cliffs: Prentice-Hall.
+</p>
+<p>Fahrmeir, L. and G. tutz,(1994) <em>Multivariate Statistical Modelling Based on Generalized Linear Models.</em> Berlin: Springer.
+</p>
+<p>Schwartz, E. S., and J. E. Smith, (2000). Short-Term Variations and Long-Term Dynamics in Commodity Prices. <em>Manage. Sci.</em>, 46, 893-911.
+</p>
+<p>Sørensen, C. (2002). "Modeling seasonality in agricultural commodity futures." <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em> 22(5): 393-426.
+</p>
+<p>Cortazar, G., and L. Naranjo, (2006). An N-factor Gaussian model of oil futures prices. <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em>, 26(3), 243-268.
+</p>
+<p>Durbin, J., and S. J. Koopman, (2012). <em>Time series analysis by state space methods.</em> Oxford university press.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+##Example 1 - complete, stitched data.
+##Replicating the Schwartz and Smith (2000)
+##Two-Factor commodity pricing model applied to crude oil:
+
+SS_stitched_filtered &lt;- NFCP_Kalman_filter(
+parameter_values = SS_oil$two_factor,
+parameter_names = names(SS_oil$two_factor),
+log_futures = log(SS_oil$stitched_futures),
+futures_TTM = SS_oil$stitched_TTM,
+## maturity groupings need not be considered here:
+ME_TTM = NULL,
+dt = SS_oil$dt,
+verbose = FALSE)
+
+
+##Example 2 - incomplete, contract data.
+##Replicating the Schwartz and Smith (2000)
+##Two-Factor commodity pricing model applied to all available
+##crude oil contracts:
+
+SS_2F &lt;- SS_oil$two_factor
+##omit stitched contract white noise
+SS_2F &lt;- SS_2F[!grepl("ME",
+             names(SS_2F))]
+
+# Evaluate two different measurement errors
+SS_2F[c("ME_1", "ME_2")] &lt;- c(0.01, 0.04)
+
+## Separate measurement error into two different maturity groupings
+SS_ME_TTM &lt;- c(1,3)
+## ME_1 is applied for observed contracts with less than one year
+## maturity, whilst ME_2 considers contracts with maturity greater
+## than one year, and less than three years
+
+#Kalman filter
+SS_contract_filtered &lt;- NFCP_Kalman_filter(
+parameter_values = SS_2F,
+parameter_names = names(SS_2F),
+## All available contracts are considered
+log_futures = log(SS_oil$contracts),
+## Respective 'futures_TTM' of these contracts are input:
+futures_TTM = SS_oil$contract_maturities,
+ME_TTM = SS_ME_TTM,
+dt = SS_oil$dt,
+verbose = FALSE)
+</code></pre>
+
+
+</div>

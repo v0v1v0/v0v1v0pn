@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>threshold</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrive threshold levels from the exposure matrix</h2>
+
+<h3>Description</h3>
+
+<p>Thresholds are each vertexes exposure at the time of adoption.
+Substantively it is the proportion of adopters required for each ego to adopt. (see <code>exposure</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">threshold(
+  obj,
+  toa,
+  t0 = min(toa, na.rm = TRUE),
+  include_censored = FALSE,
+  lags = 0L,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>Either a <code class="reqn">n\times T</code> matrix (eposure to the innovation obtained from
+<code>exposure</code>) or a <code>diffnet</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>toa</code></td>
+<td>
+<p>Integer vector. Indicating the time of adoption of the innovation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t0</code></td>
+<td>
+<p>Integer scalar. See <code>toa_mat</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_censored</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> (default), threshold</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lags</code></td>
+<td>
+<p>Integer scalar. Number of lags to consider when computing thresholds. <code>lags=1</code>
+defines threshold as exposure at <code class="reqn">T-1</code>, where <code>T</code> is time of adoption.
+levels are not reported for observations adopting in the first time period.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to be passed to <code>exposure</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By default exposure is not computed for vertices adopting at the
+first time period, <code>include_censored=FALSE</code>, as estimating threshold for
+left censored data may yield biased outcomes.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of size <code class="reqn">n</code> indicating the threshold for each node.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon &amp; Thomas W. Valente
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Threshold can be visualized using <code>plot_threshold</code>
+</p>
+<p>Other statistics: 
+<code>bass</code>,
+<code>classify_adopters()</code>,
+<code>cumulative_adopt_count()</code>,
+<code>dgr()</code>,
+<code>ego_variance()</code>,
+<code>exposure()</code>,
+<code>hazard_rate()</code>,
+<code>infection()</code>,
+<code>moran()</code>,
+<code>struct_equiv()</code>,
+<code>vertex_covariate_dist()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generating a random graph with random Times of Adoption
+set.seed(783)
+toa &lt;- sample.int(4, 5, TRUE)
+graph &lt;- rgraph_er(n=5, t=max(toa) - min(toa) + 1)
+
+# Computing exposure using Structural Equivalnece
+adopt &lt;- toa_mat(toa)
+se &lt;- struct_equiv(graph)
+se &lt;- lapply(se, function(x) methods::as((x$SE)^(-1), "dgCMatrix"))
+expo &lt;- exposure(graph, adopt$cumadopt, alt.graph=se)
+
+# Retrieving threshold
+threshold(expo, toa)
+
+# We can do the same by creating a diffnet object
+diffnet &lt;- as_diffnet(graph, toa)
+threshold(diffnet, alt.graph=se)
+</code></pre>
+
+
+</div>

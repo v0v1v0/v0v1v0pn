@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>traceWminim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cluster analysis: disjoint regions</h2>
+
+<h3>Description</h3>
+
+<p>Formation of disjoint regions for Regional Frequency Analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> traceWminim (X, centers)
+ sumtraceW (clusters, X)
+ nearest (clusters, X)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a numeric matrix of characteristics, or an object that can be coerced to
+such a matrix (such as a numeric vector or a data frame with
+all numeric columns)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centers</code></td>
+<td>
+<p>the number of clusters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusters</code></td>
+<td>
+<p>a numeric vector containing the subdivision of <code>X</code> in clusters</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Euclidean distance is used.
+Given <code class="reqn">p</code> different classification variables, the distance between two elements <code class="reqn">i</code> and <code class="reqn">j</code> is:
+</p>
+<p style="text-align: center;"><code class="reqn">d_{i j} = \sqrt{\frac{1}{p} \sum_{h=1}^{p} (x_{h i} - x_{h j})^2}</code>
+</p>
+
+<p>where <code class="reqn">x_{h i}</code> is the value of the <code class="reqn">h</code>-th variable of the <code class="reqn">i</code>-th element.
+</p>
+<p>The function <code>traceWminim</code> is a composition of a jerarchical algorithm, the Ward (1963) one, and an optimisation procedure consisting in the minimisation of:
+</p>
+<p style="text-align: center;"><code class="reqn">W = \sum_{i=1}^k \left( \sum_{j=1}^{n_i} \delta_{i j}^2 \right)</code>
+</p>
+
+<p>where
+<code class="reqn">k</code> is the number of clusters (obtained initially with Ward's algorithm), <code class="reqn">n_i</code> is the number of sites in the <code class="reqn">i</code>-th cluster and <code class="reqn">\delta_{i j}</code> is the Euclidean distance between the <code class="reqn">j</code>-th element of the <code class="reqn">i</code>-th group and the center of mass of the <code class="reqn">i</code>-th cluster.
+<code class="reqn">W</code> is calculated with <code>sumtraceW</code>.
+The algorithm consist in moving a site from one cluster to another if this makes <code class="reqn">W</code> decrease.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>traceWminim</code> gives a vector defining the subdivision of elements characterized by <code>X</code> in n=<code>centers</code> clusters.
+</p>
+<p><code>sumtraceW</code> gives <code class="reqn">W</code> (it is used by <code>traceWminim</code>).
+</p>
+<p><code>nearest</code> gives the nearest site to the centers of mass of clusters (it is used by <code>traceWminim</code>).
+</p>
+
+
+<h3>Note</h3>
+
+<p>For information on the package and the Author, and for all the references, see <code>nsRFA</code>.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>roi</code>, <code>AD.dist</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(hydroSIMN)
+parameters
+summary(parameters)
+
+# traceWminim
+param &lt;- parameters[c("Hm","Ybar")]
+n &lt;- dim(param)[1]; k &lt;- dim(param)[2]
+param.norm &lt;- (param - matrix(apply(param,2,mean),nrow=n,ncol=k,
+               byrow=TRUE))/matrix(apply(param,2,sd),
+               nrow=n,ncol=k,byrow=TRUE)
+clusters &lt;- traceWminim(param.norm,4); 
+names(clusters) &lt;- parameters["cod"][,]
+clusters
+
+annualflows
+summary(annualflows)
+x &lt;- annualflows["dato"][,]
+cod &lt;- annualflows["cod"][,]
+
+fac &lt;- factor(annualflows["cod"][,],
+              levels=names(clusters[clusters==1]))
+x1 &lt;- annualflows[!is.na(fac),"dato"]
+cod1 &lt;- annualflows[!is.na(fac),"cod"]
+#HW.tests(x1,cod1)          # it takes some time
+
+fac &lt;- factor(annualflows["cod"][,],
+              levels=names(clusters[clusters==3]))
+x3 &lt;- annualflows[!is.na(fac),"dato"]
+cod3 &lt;- annualflows[!is.na(fac),"cod"]
+#HW.tests(x3,cod3)          # it takes some time
+</code></pre>
+
+
+</div>

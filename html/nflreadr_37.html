@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>join_coalesce</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Coalescing join</h2>
+
+<h3>Description</h3>
+
+<p>EXPERIMENTAL! This function joins two dataframes together by key, and then coalesces any
+columns that have shared names (i.e. fills in NAs). A utility function primarily
+used internally within nflverse to help build player IDs
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">join_coalesce(
+  x,
+  y,
+  by = NULL,
+  type = c("left", "inner", "full"),
+  ...,
+  by.x = NULL,
+  by.y = NULL,
+  sort = TRUE,
+  incomparables = c(NA, NaN)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x, y</code></td>
+<td>
+<p>dataframes. Will be coerced to data.table</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>keys to join on, as a plain or named character vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>one of "left" (all rows of x and matching rows of y),
+"inner" (matching rows of x and y), "full" (all rows of x and y)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other args passed to <code>merge.data.frame()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by.x, by.y</code></td>
+<td>
+<p>alternate form of keys to join on - if provided, will override <code>by</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sort</code></td>
+<td>
+<p>whether to sort output by the join keys</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incomparables</code></td>
+<td>
+<p>keys to NOT match on, i.e. NA should not match on NA.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a data.frame joining x and y dataframes together, with every column from
+both x and y and patching NA values in x with those in y.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+x &lt;- data.frame(id1 = c(NA_character_,letters[1:4]), a = c(1,NA,3,NA,5), b = 1:5 * 10)
+y &lt;- data.frame(id2 = c(letters[3:11],NA_character_), a = -(1:10), c = 1:10 * 100)
+
+join_coalesce(x,y, by = c("id1"="id2"))
+join_coalesce(x,y, by.x = "id1", by.y = "id2")
+join_coalesce(x,y, by = c("id1"="id2"), type = "inner")
+join_coalesce(x,y, by = c("id1"="id2"), type = "full")
+
+</code></pre>
+
+
+</div>

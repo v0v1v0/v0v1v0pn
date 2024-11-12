@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nMm2par</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Multivariate Normal Mixture Model to parameter for MLE</h2>
+
+<h3>Description</h3>
+
+<p>From a <code>"norMmix"</code>(-like) object, return the numeric
+parameter vector in our MLE parametrization.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  nMm2par(obj,
+        model = c("EII", "VII", "EEI", "VEI", "EVI",
+                  "VVI", "EEE", "VEE", "EVV", "VVV"),
+        meanFUN = mean.default,
+        checkX = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>a <code>list</code> containing </p>
+
+<dl>
+<dt>
+<code>sig</code>:</dt>
+<dd>
+<p>covariance matrix array,</p>
+</dd>
+<dt>
+<code>mu</code>:</dt>
+<dd>
+<p>mean vector matrix,</p>
+</dd>
+<dt>
+<code>w</code>:</dt>
+<dd>
+<p>= weights,</p>
+</dd>
+<dt>
+<code>k</code>:</dt>
+<dd>
+<p>= number of components,</p>
+</dd>
+<dt>
+<code>p</code>:</dt>
+<dd>
+<p>= dimension</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>a <code>character</code> string specifying the (Sigma)
+model, one of those listed above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meanFUN</code></td>
+<td>
+<p>a <code>function</code> to compute a mean (of variances typically).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>checkX</code></td>
+<td>
+<p>a boolean. check for positive definiteness of covariance matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This transformation forms a vector from the parameters of a normal
+mixture. These consist of weights, means and covariance matrices.
+</p>
+<p>Covariance matrices are given as D and L from the LDLt decomposition
+</p>
+
+
+<h3>Value</h3>
+
+<p>vector containing encoded parameters of the mixture.
+first, the centered log ratio of the weights, then the means, and then the model specific encoding
+of the covariances.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>the <em>inverse</em> function of <code>nMm2par()</code> is <code>par2nMm()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">A &lt;- MW24
+nMm2par(A, model = A$model)
+# [1] -0.3465736  0.0000000  0.0000000  0.0000000  0.0000000  0.0000000
+# [7] -2.3025851
+
+## All MW* models in {norMmix} pkg:
+pkg &lt;- "package:norMmix"
+lMW &lt;- mget(ls(pattern = "^MW", pkg), envir=as.environment(pkg))
+lM.par &lt;- lapply(lMW, nMm2par)
+## but these *do* differ  ___ FIXME __ 
+modMW &lt;- vapply(lMW, `[[`, "model", FUN.VALUE = "XYZ")
+cbind(modMW, lengths(lM.par),  npar = sapply(lMW, npar))[order(modMW),]
+</code></pre>
+
+
+</div>

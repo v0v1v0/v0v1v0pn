@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netinf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Infer latent diffusion network</h2>
+
+<h3>Description</h3>
+
+<p>Infer a network of diffusion ties from a set of cascades. Each cascade 
+is defined by pairs of node ids and infection times.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netinf(cascades, trans_mod = "exponential", n_edges = NULL,
+  p_value_cutoff = NULL, params = NULL, quiet = FALSE,
+  trees = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cascades</code></td>
+<td>
+<p>an object of class cascade containing node and cascade 
+information. See <code>as_cascade_long</code> and 
+<code>as_cascade_wide</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trans_mod</code></td>
+<td>
+<p>character, indicating the choice of model: 
+<code>"exponential"</code>, <code>"rayleigh"</code> or <code>"log-normal"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_edges</code></td>
+<td>
+<p>integer, number of edges to infer. Leave unspecified if using 
+<code>p_value_cutoff</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_value_cutoff</code></td>
+<td>
+<p>numeric, in the interval (0, 1). If 
+specified, edges are inferred in each iteration until the Vuong test for 
+edge addition reaches the p-value cutoff or when the maximum 
+possible number of edges is reached. Leave unspecified if using 
+<code>n_edges</code> to explicitly specify number of edges to infer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>params</code></td>
+<td>
+<p>numeric, Parameters for diffusion model. If left unspecified 
+reasonable parameters are inferred from the data. See details for how to 
+specify parameters for the different distributions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>logical, Should output on progress by suppressed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trees</code></td>
+<td>
+<p>logical, Should the inferred cascade trees be returned. Note, 
+that this will lead to a different the structure of the function output. 
+See section Value for details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The algorithm is describe in detail in Gomez-Rodriguez et al. (2010). 
+Additional information can be found on the 
+netinf website (<a href="http://snap.stanford.edu/netinf/">http://snap.stanford.edu/netinf/</a>).
+</p>
+
+<ul>
+<li>
+<p> Exponential distribution: <code>trans_mod = "exponential"</code>,
+<code>params = c(lambda)</code>. 
+Parametrization: <code class="reqn">\lambda e^{-\lambda x}</code>.
+</p>
+</li>
+<li>
+<p> Rayleigh distribution: <code>trans_mod = "rayleigh"</code>,
+<code>params = c(alpha)</code>. 
+Parametrization: <code class="reqn">\frac{x}{\alpha^2} \frac{e^{-x^2}}{2\alpha^2}</code>.
+</p>
+</li>
+<li>
+<p> Log-normal distribution: <code>trans_mod = "log-normal"</code>,
+<code>params = c(mu, sigma)</code>. 
+Parametrization: <code class="reqn">\frac{1}{x\sigma\sqrt{2\pi}}e^{-\frac{(ln x - \mu)^2}{2\sigma^2}}</code>.
+</p>
+</li>
+</ul>
+<p>If higher performance is required and for very large data sets, a faster pure C++ 
+implementation is available in the Stanford Network Analysis Project (SNAP). 
+The software can be downloaded at <a href="http://snap.stanford.edu/netinf/">http://snap.stanford.edu/netinf/</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns the inferred diffusion network as an edgelist in an object of 
+class <code>diffnet</code> and <code>data.frame</code>. The first 
+column contains the sender, the second column the receiver node. The 
+third column contains the improvement in fit from adding the edge that is
+represented by the row. The output additionally has the following 
+attributes:
+</p>
+
+<ul>
+<li> <p><code>"diffusion_model"</code>: The diffusion model used to infer the 
+diffusion network.
+</p>
+</li>
+<li> <p><code>"diffusion_model_parameters"</code>: The parameters for the 
+model that have been inferred by the approximate profile MLE 
+procedure.
+</p>
+</li>
+</ul>
+<p>If the argument <code>trees</code> is set to <code>TRUE</code>, the output is a list
+with the first element being the <code>data.frame</code> described above, and 
+the second element being the trees in edge-list form in a single 
+<code>data.frame</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>M. Gomez-Rodriguez, J. Leskovec, A. Krause. Inferring Networks of Diffusion 
+and Influence.The 16th ACM SIGKDD Conference on Knowledge Discovery and 
+Data Mining (KDD), 2010.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Data already in cascades format:
+data(cascades)
+out &lt;- netinf(cascades, trans_mod = "exponential", n_edges = 5, params = 1)
+
+# Starting with a dataframe
+df &lt;- simulate_rnd_cascades(10, n_nodes = 20)
+cascades2 &lt;- as_cascade_long(df, node_names = unique(df$node_name))
+out &lt;- netinf(cascades2, trans_mod = "exponential", n_edges = 5, params = 1)
+
+</code></pre>
+
+
+</div>

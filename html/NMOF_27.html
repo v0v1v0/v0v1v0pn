@@ -1,0 +1,246 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vanillaBond</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Pricing Plain-Vanilla Bonds
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the theoretical price and yield-to-maturity of a list of
+cashflows.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">vanillaBond(cf, times, df, yields)
+ytm(cf, times, y0 = 0.05, tol = 1e-05, maxit = 1000L, offset = 0)
+
+duration(cf, times, yield, modified = TRUE, raw = FALSE)
+convexity(cf, times, yield, raw = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cf</code></td>
+<td>
+
+<p>Cashflows; a numeric vector or a matrix. If a matrix, cashflows
+should be arranged in rows; times-to-payment correspond to columns.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times</code></td>
+<td>
+
+<p>times-to-payment; a numeric vector
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+
+<p>discount factors; a numeric vector
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yields</code></td>
+<td>
+
+<p>optional (instead of discount factors); zero yields to compute
+discount factor; if of length one, a flat zero curve is assumed
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yield</code></td>
+<td>
+
+<p>numeric vector of length one (both duration and
+convexity assume a flat yield curve)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y0</code></td>
+<td>
+
+<p>starting value
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+
+<p>tolerance
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+
+<p>maximum number of iterations
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+
+<p>numeric: a ‘base’ rate over which to compute the yield to
+maturity.  See Details and Examples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modified</code></td>
+<td>
+
+<p>logical: return modified duration? (default <code>TRUE</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>raw</code></td>
+<td>
+
+<p>logical: default <code>FALSE</code>. Compute
+duration/convexity as derivative of cashflows'
+present value? Use this if you want to approximate
+the change in the bond price by a Taylor series
+(see Examples).
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>vanillaBond</code> computes the present value of a vector of
+cashflows; it may thus be used to evaluate not just bonds but any
+instrument that can be reduced to a deterministic set of cashflows.
+</p>
+<p><code>ytm</code> uses Newton's method to compute the yield-to-maturity of a
+bond (a.k.a. internal interest rate). When used with a bond, the initial
+outlay (i.e. the bonds dirty price) needs be included in the vector of
+cashflows.  For a coupon bond, a good starting value <code>y0</code> is
+the coupon divided by the dirty price of the bond.
+</p>
+<p>An <code>offset</code> can be specified either as a single number or as a
+vector of zero rates.  See Examples.
+</p>
+
+
+
+
+
+<h3>Value</h3>
+
+<p>numeric
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NS</code>, <code>NSS</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## ytm
+cf &lt;- c(5, 5, 5, 5, 5, 105)   ## cashflows
+times &lt;- 1:6                  ## maturities
+y &lt;- 0.0127                   ## the "true" yield
+b0 &lt;- vanillaBond(cf, times, yields = y)
+cf &lt;- c(-b0, cf); times &lt;- c(0, times)
+ytm(cf, times)
+
+## ... with offset
+cf &lt;- c(5, 5, 5, 5, 5, 105)   ## cashflows
+times &lt;- 1:6                  ## maturities
+y &lt;- 0.02 + 0.01              ## risk-free 2% + risk-premium 1%
+b0 &lt;- vanillaBond(cf, times, yields = y)
+cf &lt;- c(-b0, cf); times &lt;- c(0, times)
+ytm(cf, times, offset = 0.02) ## ... only the risk-premium
+
+cf &lt;- c(5, 5, 5, 5, 5, 105)   ## cashflows
+times &lt;- 1:6                  ## maturities
+y &lt;- NS(c(6,9,10,5)/100, times) ## risk-premium 1%
+b0 &lt;- vanillaBond(cf, times, yields = y + 0.01)
+cf &lt;- c(-b0, cf); times &lt;- c(0, times)
+ytm(cf, times, offset = c(0,y)) ## ... only the risk-premium
+
+## bonds
+cf &lt;- c(5, 5, 5, 5, 5, 105)   ## cashflows
+times &lt;- 1:6                  ## maturities
+df &lt;- 1/(1+y)^times           ## discount factors
+all.equal(vanillaBond(cf, times, df),
+          vanillaBond(cf, times, yields = y))
+
+## ... using Nelson--Siegel
+vanillaBond(cf, times, yields = NS(c(0.03,0,0,1), times))
+
+## several bonds
+##   cashflows are numeric vectors in a list 'cf',
+##   times-to-payment are are numeric vectors in a
+##   list 'times'
+
+times &lt;- list(1:3,
+              1:4,
+              0.5 + 0:5)
+cf &lt;- list(c(6, 6,          106),
+           c(4, 4, 4,       104),
+           c(2, 2, 2, 2, 2, 102))
+
+alltimes &lt;- sort(unique(unlist(times)))
+M &lt;- array(0, dim = c(length(cf), length(alltimes)))
+for (i in seq_along(times))
+    M[i, match(times[[i]], alltimes)] &lt;- cf[[i]]
+rownames(M) &lt;- paste("bond.", 1:3, sep = "")
+colnames(M) &lt;- format(alltimes, nsmall = 1)
+
+vanillaBond(cf = M, times = alltimes, yields = 0.02)
+
+## duration/convexity
+cf &lt;- c(5, 5, 5, 5, 5, 105)   ## cashflows
+times &lt;- 1:6                  ## maturities
+y &lt;- 0.0527                   ## yield to maturity
+
+d &lt;- 0.001                   ## change in yield (+10 bp)
+vanillaBond(cf, times, yields = y + d) - vanillaBond(cf, times, yields = y)
+
+duration(cf, times, yield = y, raw = TRUE) * d
+
+duration(cf, times, yield = y, raw = TRUE) * d +
+    convexity(cf, times, yield = y, raw = TRUE)/2 * d^2
+
+</code></pre>
+
+
+</div>

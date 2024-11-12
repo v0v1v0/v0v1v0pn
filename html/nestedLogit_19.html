@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nestedHypotheses</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hypothesis-Testing and Related Methods for <code>"nestedLogit"</code> Objects</h2>
+
+<h3>Description</h3>
+
+<p>Various methods for testing hypotheses about nested logit models.
+</p>
+
+<dl>
+<dt><code>Anova</code></dt>
+<dd>
+<p>Calculates type-II or type-III analysis-of-variance tables for <code>"nestedLogit"</code> objects;
+see <code>Anova</code> in the <span class="pkg">car</span> package.</p>
+</dd>
+<dt><code>anova</code></dt>
+<dd>
+<p>Computes sequential analysis of variance (or deviance) tables for one or more fitted
+<code>"nestedLogit"</code>  objects; see <code>anova</code>.</p>
+</dd>
+<dt><code>linearHypothesis</code></dt>
+<dd>
+<p>Computes Wald tests for linear hypotheses;
+see <code>linearHypothesis</code> in the <span class="pkg">car</span> package.</p>
+</dd>
+<dt><code>logLik</code></dt>
+<dd>
+<p>Returns the log-likelihood and degrees of freedom for the nested-dichotomies model.
+(and through it <code>AIC</code> and <code>BIC</code> model-comparison statistics).</p>
+</dd>
+</dl>
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nestedLogit'
+Anova(mod, ...)
+
+## S3 method for class 'Anova.nestedLogit'
+print(x, ...)
+
+## S3 method for class 'nestedLogit'
+linearHypothesis(model, ...)
+
+## S3 method for class 'nestedLogit'
+anova(object, object2, ...)
+
+## S3 method for class 'anova.nestedLogit'
+print(x, ...)
+
+## S3 method for class 'nestedLogit'
+logLik(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments to be passed down. In the case of <code>linearHypothesis</code>,
+the second argument is typically the <code>hypothesis.matrix</code>. See the
+Details section of <code>linearHypothesis</code>. In the case of <code>anova</code>,
+additional sequential <code>"nestedLogit"</code> models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x, object, object2, mod, model</code></td>
+<td>
+<p>in most cases, an object of class <code>"nestedLogit"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+
+<ul>
+<li>
+<p> The <code>Anova</code> and <code>anova</code> methods return objects
+of class <code>"Anova.nestedLogit"</code> and <code>"anova.nestedLogit"</code>, respectively,
+each of which contains a list of <code>"anova"</code> objects (see <code>anova</code>)
+and is usually printed.
+</p>
+</li>
+<li>
+<p> The <code>linearHypothesis</code> method is called for its side effect, printing
+the result of linear hypothesis tests, and invisibly returns <code>NULL</code>.
+</p>
+</li>
+<li>
+<p> The <code>logLik</code> method returns an object of class <code>"logLik"</code> (see <code>logLik</code>).
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>John Fox
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Anova</code>, <code>anova</code>,
+<code>linearHypothesis</code>, <code>logLik</code>, <code>AIC</code>,
+<code>BIC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># define continuation dichotomies for level of education
+cont.dichots &lt;- continuationLogits(c("l.t.highschool",
+                                     "highschool",
+                                     "college",
+                                     "graduate"))
+# fit a nested model for the GSS data examining education degree in relation to parent &amp; year
+m &lt;- nestedLogit(degree ~ parentdeg + year,
+                 cont.dichots,
+                 data=GSS)
+
+# Anova and anova tests
+car::Anova(m) # type-II (partial) tests
+
+anova(update(m, . ~ . - year), m) # model comparison
+
+# Wald test
+car::linearHypothesis(m, c("parentdeghighschool", "parentdegcollege",
+                           "parentdeggraduate"))
+
+# log-liklihood, AIC, and BIC
+logLik(m)
+AIC(m)
+BIC(m)
+</code></pre>
+
+
+</div>

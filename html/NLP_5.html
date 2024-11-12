@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>AnnotatedPlainTextDocument</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Annotated Plain Text Documents</h2>
+
+<h3>Description</h3>
+
+<p>Create annotated plain text documents from plain text and collections
+of annotations for this text.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">AnnotatedPlainTextDocument(s, a, meta = list())
+annotation(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>a <code>String</code> object, or something coercible to this
+using <code>as.String()</code> (e.g., a character string with
+appropriate encoding information).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>an <code>Annotation</code> object with annotations for
+<code>s</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta</code></td>
+<td>
+<p>a named or empty list of document metadata tag-value
+pairs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object inheriting from class
+<code>"AnnotatedPlainTextDocument"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Annotated plain text documents combine plain text with annotations for
+the text.
+</p>
+<p>A typical workflow is to use <code>annotate()</code> with suitable
+annotator pipelines to obtain the annotations, and then use
+<code>AnnotatedPlainTextDocument()</code> to combine these with the text
+being annotated.  This yields an object inheriting from
+<code>"AnnotatedPlainTextDocument"</code> and <code>"TextDocument"</code>,
+from which the text and annotations can be obtained using,
+respectively, <code>as.character()</code> and <code>annotation()</code>.
+</p>
+<p>There are methods for class <code>"AnnotatedPlainTextDocument"</code> and
+generics
+<code>words()</code>,
+<code>sents()</code>,
+<code>paras()</code>,
+<code>tagged_words()</code>,
+<code>tagged_sents()</code>,
+<code>tagged_paras()</code>,
+<code>chunked_sents()</code>,
+<code>parsed_sents()</code> and
+<code>parsed_paras()</code>
+providing structured views of the text in such documents.  These all
+require the necessary annotations to be available in the annotation
+object used.
+</p>
+<p>The methods for generics
+<code>tagged_words()</code>,
+<code>tagged_sents()</code> and
+<code>tagged_paras()</code>
+provide a mechanism for mapping POS tags via the <code>map</code> argument,
+see section <b>Details</b> in the help page for
+<code>tagged_words()</code> for more information.
+The POS tagset used will be inferred from the <code>POS_tagset</code>
+metadata element of the annotation object used.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>AnnotatedPlainTextDocument()</code>, an annotated plain text
+document object inheriting from
+<code>"AnnotatedPlainTextTextDocument"</code> and
+<code>"TextDocument"</code>.
+</p>
+<p>For <code>annotation()</code>, an <code>Annotation</code> object.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>TextDocument</code> for basic information on the text document
+infrastructure employed by package <span class="pkg">NLP</span>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Use a pre-built annotated plain text document obtained by employing an
+## annotator pipeline from package 'StanfordCoreNLP', available from the
+## repository at &lt;https://datacube.wu.ac.at&gt;, using the following code:
+##   require("StanfordCoreNLP")
+##   s &lt;- paste("Stanford University is located in California.",
+##              "It is a great university.")
+##   p &lt;- StanfordCoreNLP_Pipeline(c("pos", "lemma", "parse"))
+##   d &lt;- AnnotatedPlainTextDocument(s, p(s))
+
+d &lt;- readRDS(system.file("texts", "stanford.rds", package = "NLP"))
+
+d
+
+## Extract available annotation:
+a &lt;- annotation(d)
+a
+
+## Structured views:
+sents(d)
+tagged_sents(d)
+tagged_sents(d, map = Universal_POS_tags_map)
+parsed_sents(d)
+
+## Add (trivial) paragraph annotation:
+s &lt;- as.character(d)
+a &lt;- annotate(s, Simple_Para_Token_Annotator(blankline_tokenizer), a)
+d &lt;- AnnotatedPlainTextDocument(s, a)
+## Structured view:
+paras(d)
+</code></pre>
+
+
+</div>

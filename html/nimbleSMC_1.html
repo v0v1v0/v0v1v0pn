@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>buildAuxiliaryFilter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an auxiliary particle filter algorithm to estimate log-likelihood.</h2>
+
+<h3>Description</h3>
+
+<p>Create an auxiliary particle filter algorithm for a given NIMBLE state space model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">buildAuxiliaryFilter(model, nodes, control = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A NIMBLE model object, typically representing a state space model or a hidden Markov model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>A character vector specifying the stochastic latent model nodes 
+over which the particle filter will stochastically integrate to
+estimate the log-likelihood function.  All provided nodes must be stochastic.
+Can be one of three forms: a variable name, in which case all elements in the variable
+are taken to be latent (e.g., 'x'); an indexed variable, in which case all indexed elements are taken
+to be latent (e.g., 'x[1:100]' or 'x[1:100, 1:2]'); or a vector of multiple nodes, one per time point,
+in increasing time order (e.g., c("x[1:2, 1]", "x[1:2, 2]", "x[1:2, 3]", "x[1:2, 4]")).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list specifying different control options for the particle filter.  Options are described in the details section below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Each of the <code>control()</code> list options are described in detail here:
+</p>
+
+<dl>
+<dt>lookahead</dt>
+<dd>
+<p>The lookahead function used to calculate auxiliary weights.  Can choose between <code>'mean'</code> and <code>'simulate'</code>.
+Defaults to <code>'simulate'</code>.</p>
+</dd>
+<dt>resamplingMethod</dt>
+<dd>
+<p>The type of resampling algorithm to be used within the particle filter.  Can choose between <code>'default'</code> (which uses NIMBLE's <code>rankSample()</code> function), <code>'systematic'</code>, <code>'stratified'</code>, <code>'residual'</code>, and <code>'multinomial'</code>.  Defaults to <code>'default'</code>. Resampling methods other than <code>'default'</code> are currently experimental.</p>
+</dd>
+<dt>saveAll</dt>
+<dd>
+<p>Indicates whether to save state samples for all time points (<code>TRUE</code>), or only for the most recent time point (<code>FALSE</code>)</p>
+</dd>
+<dt>smoothing</dt>
+<dd>
+<p>Decides whether to save smoothed estimates of latent states, i.e., samples from f(x[1:t]|y[1:t]) if <code>smoothing = TRUE</code>, or instead to save filtered samples from f(x[t]|y[1:t]) if <code>smoothing = FALSE</code>. <code>smoothing = TRUE</code> only works if <code>saveAll = TRUE</code>.</p>
+</dd>
+<dt>timeIndex</dt>
+<dd>
+<p>An integer used to manually specify which dimension of the latent state variable indexes time. This need only be set if the number of time points is less than or equal to the size of the latent state at each time point.</p>
+</dd>
+<dt>initModel</dt>
+<dd>
+<p>A logical value indicating whether to initialize the model before running the filtering algorithm.  Defaults to TRUE.</p>
+</dd>
+</dl>
+<p>The auxiliary particle filter modifies the bootstrap filter (<code>buildBootstrapFilter</code>)
+by adding a lookahead step to the algorithm: before propagating particles from one time
+point to the next via the transition equation, the auxiliary filter calculates a weight
+for each pre-propogated particle by predicting how well the particle will agree with the
+next data point.  These pre-weights are used to conduct an initial resampling step before
+propagation. 
+</p>
+<p>The resulting specialized particle filter algorthm will accept a
+single integer argument (<code>m</code>, default 10,000), which specifies the number
+of random \'particles\' to use for estimating the log-likelihood.  The algorithm 
+returns the estimated log-likelihood value, and saves
+unequally weighted samples from the posterior distribution of the latent
+states in the <code>mvWSamples</code> modelValues object, with corresponding logged weights in <code>mvWSamples['wts',]</code>.
+An equally weighted sample from the posterior can be found in the <code>mvEWsamp</code> modelValues object.  
+</p>
+<p>The auxiliary particle filter uses a lookahead function to select promising particles before propagation.  This function can eithre be the expected
+value of the latent state at the next time point (<code>lookahead = 'mean'</code>) or a simulation from the distribution of the latent state at the next time point (<code>lookahead = 'simulate'</code>), conditioned on the current particle.
+</p>
+<p>@section <code>returnESS()</code> Method:
+Calling the <code>returnESS()</code> method of an auxiliary particle filter after that filter has been <code>run()</code> for a given model will return a vector of ESS (effective
+sample size) values, one value for each time point.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nicholas Michaud
+</p>
+
+
+<h3>References</h3>
+
+<p>Pitt, M.K., and Shephard, N. (1999). Filtering via simulation: Auxiliary particle filters. <em>Journal of the American Statistical Association</em> 94(446): 590-599.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other particle filtering methods: 
+<code>buildBootstrapFilter</code>,
+<code>buildEnsembleKF</code>,
+<code>buildIteratedFilter2()</code>,
+<code>buildLiuWestFilter</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## For illustration only.
+exampleCode &lt;- nimbleCode({
+  x0 ~ dnorm(0, var = 1)
+  x[1] ~ dnorm(.8 * x0, var = 1)
+  y[1] ~ dnorm(x[1], var = .5)
+  for(t in 2:10){
+    x[t] ~ dnorm(.8 * x[t-1], var = 1)
+    y[t] ~ dnorm(x[t], var = .5)
+  }
+})
+
+model &lt;- nimbleModel(code = exampleCode, data = list(y = rnorm(10)),
+                     inits = list(x0 = 0, x = rnorm(10)))
+my_AuxF &lt;- buildAuxiliaryFilter(model, 'x',
+                control = list(saveAll = TRUE, lookahead = 'mean'))
+## Now compile and run, e.g.,
+## Cmodel &lt;- compileNimble(model)
+## Cmy_AuxF &lt;- compileNimble(my_AuxF, project = model)
+## logLik &lt;- Cmy_AuxF$run(m = 1000)
+## ESS &lt;- Cmy_AuxF$returnESS()
+## aux_X &lt;- as.matrix(Cmy_AuxF$mvEWSamples, 'x')
+</code></pre>
+
+
+</div>

@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>alc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterative anisotropic local constant smoothing
+</h2>
+
+<h3>Description</h3>
+
+<p>This function implements the method in Thompson, J.R.J. (2024) for iterative smoothing
+of change-point data that utilizes oversmoothed estimates of the underlying data
+generating process to inform re-smoothing. The function calculates a local constant
+estimator <code class="reqn">\tilde{g}(X)</code> of <code class="reqn">Y=g(X)+\epsilon</code>, and then utilizes <code class="reqn">\tilde{g}(x)</code>
+in the range kernel of another local constant estimator. This process is iterated
+for a specified number of resmooth iterations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">alc(X,Y,bw.fixed.value=NULL,resmooths=1,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>numeric matrix of <code class="reqn">p</code> columns of the observations for continuous explanatory variables.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+
+<p>numeric vector of the continuous response variable.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw.fixed.value</code></td>
+<td>
+
+<p>numeric value for the bandwidth of the range kernel. Setting this value sets the
+iterative smoothing bandwidths to be the local constant estimator bandwidths for
+domain kernels and the set value for the range kernel. Default is <code>NULL</code>, which
+isan optimal bandwidth selection procedure during each re-smooth through the
+<code>npreg</code> function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resmooths</code></td>
+<td>
+
+<p>integer number of resmooth iterations. Default is 1 resmooth, which is a suggested starting point
+for iterative smoothing.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional specifications for <code>np</code> smoothing, such as optimal bandwidth selection
+procedure, kernel type,  regression estimator, and so on. See <code>npreg</code> function for
+more details and defaults.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The code here returns a <code>npregression</code> object of the iteratively smoothed estimator.
+For more details, see the <code>npreg</code> function in the <code>np</code> package.
+</p>
+
+
+<h3>References</h3>
+
+<p>Thompson, J.R.J. (2024) “Iterative Smoothing for Change-point Regression Function Estimation”, <em>Journal of Applied Statistics</em>, 1-25. &lt;doi:10.1080/02664763.2024.2352759&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npreg</code>, <code>npregbw</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(np)
+options(np.messages=FALSE)
+
+## 1D Simulated change-point data
+changepoint.data &lt;- changepoint.sim1D(500)
+
+## Isotropic local constant model
+bw.lc &lt;- npregbw(Y~X,data=changepoint.data)
+model.lc &lt;- npreg(bw.lc)
+
+## Anisotropic local constant model with one resmooth iteration
+model.alc &lt;- alc(changepoint.data$X,changepoint.data$Y)
+
+## Plot isotropic and anistropic smoothers
+plot(changepoint.data$X,changepoint.data$Y,xlab = "X",ylab = "Y",
+     pch=1,col="grey",las=1)
+lines(changepoint.data$X,model.lc$mean,col="blue",lty=1)
+lines(changepoint.data$X,model.alc$mean,col="red",lty=1)
+
+## 2D Simulated image change-point data
+## This simulation and estimation can take up to 5 minutes
+library(reshape2)
+changepoint.data &lt;- changepoint.sim2D(data.dim=c(50,50))
+image(changepoint.data)
+
+## Melt the 2D image data for model estimation
+changepoint.data.melt &lt;- melt(id.var=1:nrow(changepoint.data), changepoint.data)
+
+## Isotropic local constant model
+bw.lc &lt;- npregbw(xdat=changepoint.data.melt[,1:2],ydat=changepoint.data.melt[,3])
+model.lc &lt;- npreg(bw.lc)
+
+image(1:dim(changepoint.data)[1], 1:dim(changepoint.data)[2],
+      matrix(model.lc$mean, nrow=dim(changepoint.data)[1], byrow=FALSE))
+
+## Anisotropic local constant model with one resmooth iteration and
+## and fixed range kernel bandwidth
+model.alc &lt;- alc(changepoint.data.melt[,1:2],changepoint.data.melt[,3],bw.fixed.value=10)
+
+image(1:dim(changepoint.data)[1], 1:dim(changepoint.data)[2],
+      matrix(model.alc$mean, nrow=dim(changepoint.data)[1], byrow=FALSE))
+
+## 2D real fire spread change-point data
+  data("fireData")
+  changepoint.data &lt;- fireData[,,1,20]
+
+  ## Plot with pixel locations
+  image(1:dim(changepoint.data)[1], 1:dim(changepoint.data)[2],
+      matrix(changepoint.data, nrow=dim(changepoint.data)[1], byrow=FALSE))
+
+  ## Melt the 2D image data for model estimation
+  changepoint.data.melt &lt;- melt(id.var=1:nrow(changepoint.data), changepoint.data)
+
+  ## Isotropic local constant model
+  bw.lc &lt;- npregbw(xdat=changepoint.data.melt[,1:2],ydat=changepoint.data.melt[,3])
+  model.lc &lt;- npreg(bw.lc)
+
+  image(1:dim(changepoint.data)[1], 1:dim(changepoint.data)[2],
+      matrix(model.lc$mean, nrow=dim(changepoint.data)[1], byrow=FALSE))
+
+  ## Anisotropic local constant model with one resmooth iteration and
+  ## and fixed range kernel bandwidth
+  model.alc &lt;- alc(changepoint.data.melt[,1:2],changepoint.data.melt[,3],bw.fixed.value=10)
+
+  image(1:dim(changepoint.data)[1], 1:dim(changepoint.data)[2],
+      matrix(model.alc$mean, nrow=dim(changepoint.data)[1], byrow=FALSE))
+  
+options(np.messages=TRUE)
+</code></pre>
+
+
+</div>

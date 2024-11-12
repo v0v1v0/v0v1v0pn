@@ -1,0 +1,380 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npregivderiv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonparametric Instrumental Derivatives
+</h2>
+
+<h3>Description</h3>
+
+<p><code>npregivderiv</code> uses the approach of Florens, Racine and Centorrino
+(forthcoming) to compute the partial derivative of a nonparametric
+estimation of an instrumental regression function <code class="reqn">\varphi</code>
+defined by conditional moment restrictions stemming from a structural
+econometric model: <code class="reqn">E [Y - \varphi (Z,X) | W ] = 0</code>, and involving endogenous variables <code class="reqn">Y</code> and <code class="reqn">Z</code> and
+exogenous variables <code class="reqn">X</code> and instruments <code class="reqn">W</code>. The derivative
+function <code class="reqn">\varphi'</code> is the solution of an ill-posed inverse
+problem, and is computed using Landweber-Fridman regularization.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npregivderiv(y,
+             z,
+             w,
+             x = NULL,
+             zeval = NULL,
+             weval = NULL,
+             xeval = NULL,
+             random.seed = 42,
+             iterate.max = 1000,
+             iterate.break = TRUE,
+             constant = 0.5,
+             start.from = c("Eyz","EEywz"),
+             starting.values = NULL,
+             stop.on.increase = TRUE,
+             smooth.residuals = TRUE,
+             ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>z</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of endogenous regressors. The data
+types may be continuous, discrete (unordered and ordered factors),
+or some combination thereof.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of instruments. The data types may be
+continuous, discrete (unordered and ordered factors), or some
+combination thereof.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>an <code class="reqn">r</code>-variate data frame of exogenous regressors. The data
+types may be continuous, discrete (unordered and ordered factors),
+or some combination thereof.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zeval</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of endogenous regressors on which the
+regression will be estimated (evaluation data). By default, evaluation
+takes place on the data provided by <code>z</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weval</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of instruments on which the regression
+will be estimated (evaluation data). By default, evaluation
+takes place on the data provided by <code>w</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xeval</code></td>
+<td>
+
+<p>an <code class="reqn">r</code>-variate data frame of exogenous regressors on which the
+regression will be estimated (evaluation data). By default,
+evaluation takes place on the data provided by <code>x</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+
+<p>an integer used to seed R's random number generator. This ensures
+replicability of the numerical search. Defaults to 42.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterate.max</code></td>
+<td>
+
+<p>an integer indicating the maximum number of iterations permitted
+before termination occurs for Landweber-Fridman iteration.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterate.break</code></td>
+<td>
+
+<p>a logical value indicating whether to compute all objects up to
+<code>iterate.max</code> or to break when a potential optimum arises
+(useful for inspecting full stopping rule profile up to
+<code>iterate.max</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constant</code></td>
+<td>
+
+<p>the constant to use for Landweber-Fridman iteration.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.from</code></td>
+<td>
+<p> a character string indicating whether to start from
+<code class="reqn">E(Y|z)</code> (default, <code>"Eyz"</code>) or from <code class="reqn">E(E(Y|z)|z)</code> (this can
+be overridden by providing <code>starting.values</code> below)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starting.values</code></td>
+<td>
+<p> a value indicating whether to commence
+Landweber-Fridman assuming
+<code class="reqn">\varphi'_{-1}=starting.values</code> (proper
+Landweber-Fridman) or instead begin from <code class="reqn">E(y|z)</code> (defaults to
+<code>NULL</code>, see details below)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop.on.increase</code></td>
+<td>
+
+<p>a logical value (defaults to <code>TRUE</code>) indicating whether to halt
+iteration if the stopping criterion (see below) increases over the
+course of one iteration (i.e. it may be above the iteration tolerance
+but increased).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth.residuals</code></td>
+<td>
+
+<p>a logical value (defaults to <code>TRUE</code>) indicating whether to
+optimize bandwidths for the regression of <code class="reqn">y-\varphi(z)</code>
+on <code class="reqn">w</code> or for the regression of <code class="reqn">\varphi(z)</code> on
+<code class="reqn">w</code> during Landweber-Fridman iteration.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+ 
+<p>additional arguments supplied to <code>npreg</code> and <code>npksum</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note that Landweber-Fridman iteration presumes that
+<code class="reqn">\varphi_{-1}=0</code>, and so for derivative estimation we
+commence iterating from a model having derivatives all equal to
+zero. Given this starting point it may require a fairly large number
+of iterations in order to converge. Other perhaps more reasonable
+starting values might present themselves. When <code>start.phi.zero</code>
+is set to <code>FALSE</code> iteration will commence instead using
+derivatives from the conditional mean model <code class="reqn">E(y|z)</code>. Should the
+default iteration terminate quickly or you are concerned about your
+results, it would be prudent to verify that this alternative starting
+value produces the same result. Also, check the norm.stop vector for
+any anomalies (such as the error criterion increasing immediately).
+</p>
+<p>Landweber-Fridman iteration uses an optimal stopping rule based upon
+<code class="reqn">||E(y|w)-E(\varphi_k(z,x)|w)||^2 </code>. However, if insufficient training is conducted the estimates can be
+overly noisy. To best guard against this eventuality set <code>nmulti</code>
+to a larger number than the default <code>nmulti=1</code> for
+<code>npreg</code>.
+</p>
+<p>Iteration will terminate when either the change in the value of
+<code class="reqn">||(E(y|w)-E(\varphi_k(z,x)|w))/E(y|w)||^2
+  </code> from iteration to iteration is
+less than <code>iterate.diff.tol</code> or we hit <code>iterate.max</code> or
+<code class="reqn">||(E(y|w)-E(\varphi_k(z,x)|w))/E(y|w)||^2
+  </code> stops falling in value and
+starts rising.  </p>
+
+
+<h3>Value</h3>
+
+<p><code>npregivderiv</code> returns a list with components <code>phi.prime</code>,
+<code>phi</code>, <code>num.iterations</code>, <code>norm.stop</code> and
+<code>convergence</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function currently supports univariate <code>z</code> only.  This
+function should be considered to be in ‘beta test’ status until
+further notice.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Carrasco, M. and J.P. Florens and E. Renault (2007), “Linear
+Inverse Problems in Structural Econometrics Estimation Based on
+Spectral Decomposition and Regularization,” In: James J. Heckman and
+Edward E. Leamer, Editor(s), Handbook of Econometrics, Elsevier, 2007,
+Volume 6, Part 2, Chapter 77, Pages 5633-5751
+</p>
+<p>Darolles, S. and Y. Fan and J.P. Florens and E. Renault (2011),
+“Nonparametric instrumental regression,” Econometrica, 79,
+1541-1565.
+</p>
+<p>Feve, F. and J.P. Florens (2010), “The practice of
+non-parametric estimation by solving inverse problems: the example of
+transformation models,” Econometrics Journal, 13, S1-S27.
+</p>
+<p>Florens, J.P. and J.S. Racine and S. Centorrino (forthcoming),
+“Nonparametric instrumental derivatives,” Journal of
+Nonparametric Statistics.
+</p>
+<p>Fridman, V. M. (1956), “A method of successive approximations
+for Fredholm integral equations of the first kind,” Uspeskhi,
+Math. Nauk., 11, 233-334, in Russian.
+</p>
+<p>Horowitz, J.L. (2011), “Applied nonparametric instrumental
+variables estimation,” Econometrica, 79, 347-394.
+</p>
+<p>Landweber, L. (1951), “An iterative formula for Fredholm
+integral equations of the first kind,” American Journal of
+Mathematics, 73, 615-24.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics:
+Theory and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2004), “Cross-validated Local Linear
+Nonparametric Regression,” Statistica Sinica, 14, 485-512.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npregiv,npreg</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## This illustration was made possible by Samuele Centorrino
+## &lt;samuele.centorrino@univ-tlse1.fr&gt;
+
+set.seed(42)
+n &lt;- 1500
+
+## For trimming the plot (trim .5% from each tail)
+
+trim &lt;- 0.005
+
+## The DGP is as follows:
+
+## 1) y = phi(z) + u
+
+## 2) E(u|z) != 0 (endogeneity present)
+
+## 3) Suppose there exists an instrument w such that z = f(w) + v and
+## E(u|w) = 0
+
+## 4) We generate v, w, and generate u such that u and z are
+## correlated. To achieve this we express u as a function of v (i.e. u =
+## gamma v + eps)
+
+v &lt;- rnorm(n,mean=0,sd=0.27)
+eps &lt;- rnorm(n,mean=0,sd=0.05)
+u &lt;- -0.5*v + eps
+w &lt;- rnorm(n,mean=0,sd=1)
+
+## In Darolles et al (2011) there exist two DGPs. The first is
+## phi(z)=z^2 and the second is phi(z)=exp(-abs(z)) (which is
+## discontinuous and has a kink at zero).
+
+fun1 &lt;- function(z) { z^2 }
+fun2 &lt;- function(z) { exp(-abs(z)) }
+
+z &lt;- 0.2*w + v
+
+## Generate two y vectors for each function.
+
+y1 &lt;- fun1(z) + u
+y2 &lt;- fun2(z) + u
+
+## You set y to be either y1 or y2 (ditto for phi) depending on which
+## DGP you are considering:
+
+y &lt;- y1
+phi &lt;- fun1
+
+## Sort on z (for plotting)
+
+ivdata &lt;- data.frame(y,z,w,u,v)
+ivdata &lt;- ivdata[order(ivdata$z),]
+rm(y,z,w,u,v)
+attach(ivdata)
+
+model.ivderiv &lt;- npregivderiv(y=y,z=z,w=w)
+
+ylim &lt;-c(quantile(model.ivderiv$phi.prime,trim),
+         quantile(model.ivderiv$phi.prime,1-trim))
+
+plot(z,model.ivderiv$phi.prime,
+     xlim=quantile(z,c(trim,1-trim)),
+     main="",
+     ylim=ylim,
+     xlab="Z",
+     ylab="Derivative",
+     type="l",
+     lwd=2)
+rug(z)     
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

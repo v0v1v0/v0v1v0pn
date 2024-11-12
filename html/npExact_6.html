@@ -1,0 +1,244 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npMeanPaired</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A test for the mean difference between two bounded random variables given
+matched pairs.</h2>
+
+<h3>Description</h3>
+
+<p>This test requires that the user knows bounds before gathering the data
+such that the properties of the data generating process imply that all
+observations will be within these bounds. The data input consists of pairs
+of observations, each pair consisting of an observation of each random
+variable, different pairs being independently generated. No further
+distributional assumptions are made.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npMeanPaired(x1, x2, lower = 0, upper = 1, alpha = 0.05,
+  alternative = "two.sided", epsilon = 1 * 10^(-6),
+  iterations = 5000, max.iterations = 100000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x1, x2</code></td>
+<td>
+<p>the (non-empty) numerical data vectors which contain the
+variables to be tested. The first values of the vectors are assumed to be
+the first matched pair of observations, the second values the second
+matched pair and so on.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower, upper</code></td>
+<td>
+<p>the theoretical lower and upper bounds on the data
+outcomes known ex-ante before gathering the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the type I error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>a character string describing the alternative
+hypothesis, can take values "greater", "less" or "two.sided".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>the tolerance in terms of probability of the Monte Carlo
+simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>the number of iterations used, should not be changed if
+the exact solution should be derived</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.iterations</code></td>
+<td>
+<p>the maximum number of iterations that should be
+carried out. This number could be increased to achieve greater accuracy in
+cases where the difference between the threshold probability and theta is
+small. Default: <code>10000</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Under alternative = "greater", it is a test of the null hypothesis
+<code class="reqn">H_0: E(x_1) \le E(x_2)</code> against the alternative hypothesis <code class="reqn">H_1:
+E(x_1) &gt; E(x_2)</code>.
+</p>
+<p>This test uses the known bounds of the variables to transform the data into
+[0, 1]. Then a random transformation is used to turn the data into
+binary-valued variables. On this variables the exact McNemar Test with
+level <code>pseudoalpha</code> is performed and the result recorded. The random
+transformation and the test are then repeated <code>iterations</code> times. If
+the average rejection probability <code>probrej</code> of the iterations is at
+least <code>theta</code>, then the null hypothesis is rejected. If however
+<code>probrej</code> is too close to the threshold <code>theta</code> then the number
+of iterations is increased. The algorithm keeps increasing the number of
+iterations until the bound on the mistake involved by running these
+iterations is below <code>epsilon</code>. This error epsilon is incorporated into
+the overall level <code>alpha</code> in order to maintain that the test is exact.
+</p>
+<p><code>theta</code> (and a value <code>mu</code> of the difference between the two means
+in the set of the alternative hypothesis) is found in an optimization
+procedure. <code>theta</code> and <code>mu</code> are chosen as to maximize the set of
+data generating processes belonging to the alternative hypothesis that
+yield type II error probability below 0.5. Please see the cited paper below
+for further information.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with class "nphtest" containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p> a character string indicating the name and type of the test
+that was performed.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p> a character string giving the
+name(s) of the data.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p> a character string describing
+the alternative hypothesis.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimate</code></td>
+<td>
+<p> the sample means of the
+given data.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probrej</code></td>
+<td>
+<p> numerical estimate of the rejection
+probability of the randomized test, derived by taking an average of
+<code>iterations</code> realizations of the rejection probability.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bounds</code></td>
+<td>
+<p> the lower and upper bounds of the variables.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.value</code></td>
+<td>
+<p> the specified hypothesized value of the difference of
+the variable means.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p> the type I error.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p> the
+parameter that minimizes the type II error.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pseudoalpha</code></td>
+<td>
+
+<p><code>theta</code>*<code>alpha</code>, this is the level used when calculating the
+average rejection probability during the iterations.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rejection</code></td>
+<td>
+
+<p>logical indicator for whether or not the null hypothesis can be rejected.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p> the number of iterations that were performed.  </p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Karl Schlag, Christian Pechhacker and Oliver Reiter
+</p>
+
+
+<h3>References</h3>
+
+<p>Schlag, Karl H. 2008, A New Method for Constructing Exact Tests
+without Making any Assumptions, Department of Economics and Business
+Working Paper 1109, Universitat Pompeu Fabra. Available at
+<a href="https://ideas.repec.org/p/upf/upfgen/1109.html">https://ideas.repec.org/p/upf/upfgen/1109.html</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><a href="https://homepage.univie.ac.at/karl.schlag/statistics.php">https://homepage.univie.ac.at/karl.schlag/statistics.php</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## test whether pain after the surgery is less than before the surgery
+data(pain)
+npMeanPaired(pain$before, pain$after, lower = 0, upper = 100)
+
+## when the computer was used in the surgery
+before_pc &lt;- pain[pain$pc == 1, "before"]
+after_pc &lt;- pain[pain$pc == 1, "after"]
+npMeanPaired(before_pc, after_pc, lower = 0, upper = 100)
+
+## test whether uncertainty decreased from the first to the second round
+data(uncertainty)
+npMeanPaired(uncertainty$w1, uncertainty$w2, upper = 60) ## or
+with(uncertainty, npMeanPaired(w1, w2, upper = 60))
+
+</code></pre>
+
+
+</div>

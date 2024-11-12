@@ -1,0 +1,139 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>addHMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add HMC sampler</h2>
+
+<h3>Description</h3>
+
+<p>Add a No-U-Turn (NUTS) Hamiltonian Monte Carlo (HMC) sampler to an existing nimble MCMC configuration object
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">addHMC(
+  conf,
+  target = character(),
+  type = "NUTS",
+  control = list(),
+  replace = FALSE,
+  print = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>A nimble MCMC configuration object, as returned by 'configureMCMC'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>A character vector of continuous-valued stochastic node names to sample.  If this argument contains any discrete-valued nodes, an error is produced and no HMC sampler is added.  If this argument is omitted, then no HMC sampler is added.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A character string specifying the type of HMC sampler to add, either "NUTS" or "NUTS_classic".  See 'help(NUTS)' or 'help(NUTS_classic)' for details of each sampler.  The default sampler type is "NUTS".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>Optional named list of control parameters to be passed as the 'control' argument to the HMC sampler.  See 'help(NUTS)' or 'help(NUTS_classic)' for details of the control list elements accepted by each sampler.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace</code></td>
+<td>
+<p>Logical argument.  If 'TRUE', any existing samplers operating on the specified nodes will be removed, prior to adding the HMC sampler.  Default value is 'FALSE'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print</code></td>
+<td>
+<p>Logical argument whether to print the newly added HMC sampler.  Default value is 'TRUE'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional named arguments passed through ... will be used as additional control list elements.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function adds an HMC sampler to an MCMC configuration object.  Use this function if you have already created an MCMC configuration and want to add an HMC sampler.  Optionally, using 'replace = TRUE', this function will also remove any existing samplers operating on the target node(s).
+</p>
+<p>Either the 'NUTS_classic' or the 'NUTS' sampler can be added.  Both implement variants of No-U-Turn HMC sampling, however the 'NUTS' sampler uses more modern adapatation techniques.  See 'help(NUTS)' or 'help(NUTS_classic)' for details.
+</p>
+<p>Use 'conf$addSampler' instead if you need more fine-grained control.  See 'help(configureMCMC)' in nimble.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Invisibly returns an object of class 'MCMCconf', but this function is primary called for its side effect.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Turek
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>configureHMC</code> <code>buildHMC</code> <code>configureMCMC</code> <code>addSampler</code> <code>sampler_NUTS</code> <code>sampler_NUTS_classic</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">code &lt;- nimbleCode({
+    b0 ~ dnorm(0, 0.001)
+    b1 ~ dnorm(0, 0.001)
+    sigma ~ dunif(0, 10000)
+    for(i in 1:N) {
+        mu[i] &lt;- b0 + b1 * x[i]
+        y[i] ~ dnorm(mu[i], sd = sigma)
+    }
+})
+
+N &lt;- 10
+constants &lt;- list(N = N, x = 1:N)
+data &lt;- list(y = 1:N)
+inits &lt;- list(b0 = 1, b1 = 0.1, sigma = 1)
+
+Rmodel &lt;- nimbleModel(code, constants, data, inits, buildDerivs = TRUE)
+
+## create default MCMC configuration object
+conf &lt;- configureMCMC(Rmodel)
+
+## remove default samplers operating on b0 and b1
+conf$removeSamplers(c("b0", "b1"))
+
+## add an HMC sampler operating on b0 and b1
+addHMC(conf, target = c("b0", "b1"))
+
+Rmcmc &lt;- buildMCMC(conf)
+
+# Cmodel &lt;- compileNimble(Rmodel)
+# Cmcmc &lt;- compileNimble(Rmcmc, project = Rmodel)
+# samples &lt;- runMCMC(Cmcmc)
+</code></pre>
+
+
+</div>

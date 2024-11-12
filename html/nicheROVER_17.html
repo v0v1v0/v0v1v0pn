@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rniw</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Random draws from a Normal-Inverse-Wishart distribution.</h2>
+
+<h3>Description</h3>
+
+<p>Generates random draws from a Normal-Inverse-Wishart (NIW) distribution. Can be used to compare prior to posterior parameter distributions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rniw(n, lambda, kappa, Psi, nu)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of samples to draw.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Location parameter. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>Scale parameter. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Psi</code></td>
+<td>
+<p>Scale matrix.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+<p>Degrees of freedom.  See 'Details'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The NIW distribution <code class="reqn">p(\mu, \Sigma | \lambda, \kappa, \Psi, \nu)</code> is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">
+\Sigma \sim W^{-1}(\Psi, \nu), \quad \mu | \Sigma \sim N(\lambda, \Sigma/\kappa).
+</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>Returns a list with elements <code>mu</code> and <code>Sigma</code> of sizes <code>c(n,length(lambda))</code> and <code>c(nrow(Psi),ncol(Psi),n)</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rwish()</code>, <code>niw.mom()</code>, <code>niw.coeffs()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">d &lt;- 4 # number of dimensions
+nu &lt;- 7 # degrees of freedom
+Psi &lt;- crossprod(matrix(rnorm(d^2), d, d)) # scale
+lambda &lt;- rnorm(d)
+kappa &lt;- 2
+n &lt;- 1e4
+
+niw.sim &lt;- rniw(n, lambda, kappa, Psi, nu)
+
+# diagonal elements of Sigma^{-1} are const * chi^2
+S &lt;- apply(niw.sim$Sigma, 3, function(M) diag(solve(M)))
+
+ii &lt;- 2
+const &lt;- solve(Psi)[ii,ii]
+hist(S[ii,], breaks = 100, freq = FALSE,
+     main = parse(text = paste0("\"Histogram of \"*(Sigma^{-1})[", ii,ii,"]")),
+     xlab = parse(text = paste0("(Sigma^{-1})[", ii,ii,"]")))
+curve(dchisq(x/const, df = nu)/const,
+      from = min(S[ii,]), to = max(S[ii,]), col = "red", add = TRUE)
+
+# elements of mu have a t-distribution
+mu &lt;- niw.sim$mu
+
+ii &lt;- 4
+const &lt;- sqrt(Psi[ii,ii]/(kappa*(nu-d+1)))
+hist(mu[,ii], breaks = 100, freq = FALSE,
+     main = parse(text = paste0("\"Histogram of \"*mu[", ii, "]")),
+     xlab = parse(text = paste0("mu[", ii, "]")))
+curve(dt((x-lambda[ii])/const, df = nu-d+1)/const, add = TRUE, col = "red")
+</code></pre>
+
+
+</div>

@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>numero.summary</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarize subgroup statistics</h2>
+
+<h3>Description</h3>
+
+<p>Estimates subgroup statistics after self-organizing map
+analysis</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">numero.summary(results, topology, data = NULL, capacity = 10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>results</code></td>
+<td>
+
+<p>A list object that contains the self-organizing map and its
+statistical colorings.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>topology</code></td>
+<td>
+
+<p>A SOM topology with additional labels that indicate selected regions.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A matrix or a data frame.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>capacity</code></td>
+<td>
+
+<p>Maximum number of subgroups to compare.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The input <code>results</code> must contain the output from
+<code>numero.evaluate()</code> or similar.
+</p>
+<p>The input argument <code>topology</code> must be a definition of a SOM with
+additional columns as in the output from <code>numero.subgroup()</code>.
+</p>
+<p>The function first looks for row names in <code>data</code> that are also included
+in <code>results</code>. The rows are then divided into subgroups according to the
+district assignments in <code>results</code> and the region labels in
+<code>topology</code>. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame of summary statistics, see <code>nroSummary()</code>
+for details. The data frame also contains additional information on which
+variables were used for the training of the SOM.
+</p>
+<p>The attribute 'layout' is added to the output. It indicates the location
+on the map and the subgroup name and label for each data row that were
+included in the analysis.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ville-Petteri Makinen
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Set identities and manage missing data.
+dataset &lt;- numero.clean(dataset, identity = "INDEX")
+
+# Prepare training variables.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- numero.prepare(data = dataset, variables = trvars)
+
+# Create a self-organizing map.
+sm &lt;- numero.create(data = trdata)
+qc &lt;- numero.quality(model = sm)
+
+# Evaluate map statistics for all variables.
+stats &lt;- numero.evaluate(model = qc, data = dataset)
+
+# Define subgroups.
+x &lt;- stats$planes[,"uALB"]
+tops &lt;- which(x &gt;= quantile(x, 0.75, na.rm=TRUE))
+bottoms &lt;- which(x &lt;= quantile(x, 0.25, na.rm=TRUE))
+elem &lt;- data.frame(stats$map$topology, stringsAsFactors = FALSE)
+elem$REGION &lt;- "MiddleAlb"
+elem$REGION[tops] &lt;- "HighAlb"
+elem$REGION[bottoms] &lt;- "LowAlb"
+elem$REGION.label &lt;- "M"
+elem$REGION.label[tops] &lt;- "H"
+elem$REGION.label[bottoms] &lt;- "L"
+
+# Compare subgroups.
+cmp &lt;- numero.summary(results = stats, topology = elem, data = dataset)
+</code></pre>
+
+
+</div>

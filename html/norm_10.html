@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mda.norm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Monotone data augmentation for incomplete multivariate normal data
+</h2>
+
+<h3>Description</h3>
+
+<p>Monotone data augmentation under the usual noninformative prior, as
+described in Chapter 6 of Schafer (1996).  This function simulates one
+or more iterations of a single Markov chain. One iteration consists of
+a random imputation of the missing data given the observed data and
+the current parameter value (I-step), followed by a draw from the
+posterior distribution of the parameter given the observed data and
+the imputed data (P-step). The I-step imputes only enough data to
+complete a monotone pattern, which typically makes this algorithm
+converge more quickly than <code>da.norm</code>, particularly when the observed
+data are nearly monotone. The order of the variables in the original
+data matrix determines the monotone pattern to be completed. For fast
+convergence, it helps to order the variables according to their rates
+of missingness, with the most observed (least missing) variable on the
+left and the least observed variable on the right.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mda.norm(s, theta, steps=1, showits=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+
+<p>summary list of an incomplete normal data matrix produced by the
+function <code>prelim.norm</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+
+<p>starting value of the parameter.  This is a parameter vector in packed
+storage, such as one created by the function <code>makeparam.norm</code>. One
+obvious choice for a starting value is an ML estimate or posterior
+mode produced by <code>em.norm.</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>steps</code></td>
+<td>
+
+<p>number of monotone data augmentation iterations to be simulated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>showits</code></td>
+<td>
+
+<p>if <code>TRUE</code>, reports the iterations so the user can monitor the progress
+of the algorithm.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a parameter vector, the result of the last P-step. If the
+value of <code>steps</code> was large enough to guarantee approximate
+stationarity, then this parameter can be regarded as a proper draw
+from the observed-data posterior, independent of <code>start</code>.
+</p>
+
+
+<h3>WARNING</h3>
+
+<p>Before this function may be used, the random number generator seed
+must be initialized with <code>rngseed</code> at least once in the current S
+session.
+</p>
+
+
+<h3>References</h3>
+
+<p>Chapter 6 of Schafer (1996).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rngseed</code>, <code>em.norm</code>, <code>prelim.norm</code>, and <code>getparam.norm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(mdata)
+s &lt;- prelim.norm(mdata)
+thetahat &lt;- em.norm(s)   #find the MLE for a starting value
+rngseed(1234567)   #set random number generator seed
+theta &lt;- mda.norm(s,thetahat,steps=20,showits=TRUE)  # take 20 steps
+getparam.norm(s,theta) # look at result
+</code></pre>
+
+
+</div>

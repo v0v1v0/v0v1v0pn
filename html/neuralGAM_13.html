@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.neuralGAM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Produces predictions from a fitted <code>neuralGAM</code> object</h2>
+
+<h3>Description</h3>
+
+<p>Takes a fitted <code>neuralGAM</code> object produced by
+<code>neuralGAM()</code> and produces predictions given a new set of values for the model covariates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'neuralGAM'
+predict(object, newdata = NULL, type = "link", terms = NULL, verbose = 1, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a fitted 'neuralGAM' object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>A data frame or list containing the values of covariates at which
+predictions are required. If not provided, the function returns the predictions
+for the original training data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>when <code>type="link"</code> (default), the linear
+predictor is returned. When <code>type="terms"</code> each component of the linear
+predictor is returned separately on each column of a <code>data.frame</code>. When
+<code>type="response"</code> predictions on the scale of the response are returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>If <code>type="terms"</code>, then only results for the terms named
+in this list will be returned. If <code>NULL</code> then no terms are excluded (default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Verbosity mode (0 = silent, 1 = print messages). Defaults to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other options.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Predicted values according to <code>type</code> parameter.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+n &lt;- 24500
+
+seed &lt;- 42
+set.seed(seed)
+
+x1 &lt;- runif(n, -2.5, 2.5)
+x2 &lt;- runif(n, -2.5, 2.5)
+x3 &lt;- runif(n, -2.5, 2.5)
+
+f1 &lt;-x1**2
+f2 &lt;- 2*x2
+f3 &lt;- sin(x3)
+f1 &lt;- f1 - mean(f1)
+f2 &lt;- f2 - mean(f2)
+f3 &lt;- f3 - mean(f3)
+
+eta0 &lt;- 2 + f1 + f2 + f3
+epsilon &lt;- rnorm(n, 0.25)
+y &lt;- eta0 + epsilon
+train &lt;- data.frame(x1, x2, x3, y)
+
+library(neuralGAM)
+ngam &lt;- neuralGAM(y ~ s(x1) + x2 + s(x3), data = train,
+                 num_units = 1024, family = "gaussian",
+                 activation = "relu",
+                 learning_rate = 0.001, bf_threshold = 0.001,
+                 max_iter_backfitting = 10, max_iter_ls = 10,
+                 seed = seed
+                 )
+n &lt;- 5000
+x1 &lt;- runif(n, -2.5, 2.5)
+x2 &lt;- runif(n, -2.5, 2.5)
+x3 &lt;- runif(n, -2.5, 2.5)
+test &lt;- data.frame(x1, x2, x3)
+
+# Obtain linear predictor
+eta &lt;- predict(ngam, test, type = "link")
+
+# Obtain predicted response
+yhat &lt;- predict(ngam, test, type = "response")
+
+# Obtain each component of the linear predictor
+terms &lt;- predict(ngam, test, type = "terms")
+
+# Obtain only certain terms:
+terms &lt;- predict(ngam, test, type = "terms", terms = c("x1", "x2"))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

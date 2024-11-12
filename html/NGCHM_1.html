@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NGCHM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Next Generation Clustered Heat Map (NGCHM) Construction Library</h2>
+
+<h3>Description</h3>
+
+<p>NGCHM provides tools for defining the contents of a new NGCHM,
+and for compiling and installing it on a NGCHM server.
+</p>
+
+
+<h3>Details</h3>
+
+<p>Typical usage (see example) is to create a base NGCHM using chmNew; extend it with at
+least one ngchmLayer; typically extend it further with an additional
+ngchmLayer, row and column dendrograms, classification bars, and popup menu entries;
+compile and install it on an available ngchmServer.
+</p>
+<p>Note:
+</p>
+
+<ul>
+<li> <p><code>chmNew()</code> requires <strong>git</strong> to be installed.
+</p>
+</li>
+<li> <p><code>chmExportToFile()</code>, <code>chmExportToHTML()</code>, and <code>chmExportToPDF()</code> require
+<strong>Java 11</strong> and the <strong><a href="https://github.com/MD-Anderson-Bioinformatics/NGCHMSupportFiles">NGCHMSupportFiles</a></strong>
+package. The NGCHMSupportFiles package
+can be installed with: <br><br><code>install.packages('NGCHMDemoData', </code> <br><code>repos = c('https://md-anderson-bioinformatics.r-universe.dev',</code> <br><code>'https://cloud.r-project.org'))</code>
+</p>
+</li>
+</ul>
+<h3>Initialization</h3>
+
+<p>When first loaded the NGCHM library reads configuration files in
+the directories specified by the NGCHMCONFIGPATH environment variable.  This is
+a colon (:) separated list of directory names.  If not set it defaults to
+/etc/ngchm:/usr/local/ngchm:/opt/ngchm:$HOME/.ngchm.
+See NGCHM-initialization for details.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>chmNew()</code>
+</p>
+<p><code>chmAdd()</code>
+</p>
+<p><code>chmExportToFile()</code>
+</p>
+<p><code>chmExportToPDF()</code>
+</p>
+<p><code>chmSetCollection()</code>
+</p>
+<p><code>chmInstall()</code>
+</p>
+<p>ngchm
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Examples using `chmNew()` require git to be installed.
+# The NGCHMSupportFiles package is required by chmExportToFile and chmExportToPDF
+# The NGCHMDemoData package is used to create a demo NGCHM
+## Not run: 
+  if (requireNamespace("NGCHMSupportFiles", quietly = TRUE)) {
+    if (requireNamespace("NGCHMDemoData", quietly = TRUE)) {
+      library(NGCHMSupportFiles)
+      library(NGCHMDemoData)
+      data(TCGA.GBM.EXPR, package = "NGCHMDemoData")
+      chm1 &lt;- chmNew("gbm", TCGA.GBM.EXPR[1:50, 1:50],
+        rowAxisType = "bio.gene.hugo",
+        colAxisType = "bio.tcga.barcode.sample.vial.portion.analyte.aliquot"
+      )
+      chmExportToFile(chm1, tempfile("gbm", fileext = ".ngchm"))
+      chmExportToPDF(chm1, tempfile("gbm", fileext = ".pdf"))
+    }
+  }
+  mat &lt;- matrix(rnorm(100), nrow = 10)
+  rownames(mat) &lt;- sprintf("ABCA%d", 1:10)
+  colnames(mat) &lt;- sprintf("Sample%d", 1:10)
+  chm &lt;- chmNew("my-chm", mat)
+  chmSetCollection("//server/collection")
+  chmInstall(chm)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

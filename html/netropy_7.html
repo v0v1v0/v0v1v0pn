@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>joint_entropy</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Joint Entropy</h2>
+
+<h3>Description</h3>
+
+<p>Computes the joint entropies between all pairs of (discrete)
+variables in a multivariate data set.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">joint_entropy(dat, dec = 3)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>dataframe with rows as observations and columns as variables.
+Variables must all be observed or transformed categorical with finite range spaces.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dec</code></td>
+<td>
+<p>the precision given in number of decimals for which
+the frequency distribution of unique entropy values is created. Default is 3.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The joint entropy <em>J(X,Y)</em> of discrete variables <em>X</em> and <em>Y</em>
+is a measure of dependence or association between them, defined as
+<br></p>
+<p><em>J(X,Y) = H(X) + H(Y) - H(X,Y)</em>.
+<br></p>
+<p>Two variables are independent if their joint entropy,
+i.e. their mutual information, is equal to zero.
+The frequency distributions can be used to decide upon convenient thresholds for
+constructing association graphs.
+</p>
+
+
+<h3>Value</h3>
+
+<p>List with
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>matrix</code></td>
+<td>
+<p>an upper triangular joint entropy matrix (univariate entropies in the diagonal).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freq</code></td>
+<td>
+<p>a dataframe giving the frequency distributions of unique joint entropy values.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Termeh Shafie
+</p>
+
+
+<h3>References</h3>
+
+<p>Frank, O., &amp; Shafie, T. (2016). Multivariate entropy analysis of network data.
+<em>Bulletin of Sociological Methodology/Bulletin de Méthodologie Sociologique</em>, 129(1), 45-63.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>assoc_graph</code>, <code>entropy_bivar</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># use internal data set
+data(lawdata)
+df.att &lt;- lawdata[[4]]
+
+# three steps of data editing:
+# 1. categorize variables 'years' and 'age' based on
+# approximately three equally size groups (values based on cdf)
+# 2. make sure all outcomes start from the value 0 (optional)
+# 3. remove variable 'senior' as it consists of only unique values (thus redundant)
+df.att.ed &lt;- data.frame(
+    status = df.att$status,
+    gender = df.att$gender,
+    office = df.att$office - 1,
+    years = ifelse(df.att$years &lt;= 3, 0,
+        ifelse(df.att$years &lt;= 13, 1, 2)
+    ),
+    age = ifelse(df.att$age &lt;= 35, 0,
+        ifelse(df.att$age &lt;= 45, 1, 2)
+    ),
+    practice = df.att$practice,
+    lawschool = df.att$lawschool - 1
+)
+
+# calculate joint entropies
+J &lt;- joint_entropy(df.att.ed)
+# joint entropy matrix
+J$matrix
+# frequency distribution of joint entropy values
+J$freq
+</code></pre>
+
+
+</div>

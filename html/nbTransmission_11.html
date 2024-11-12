@@ -1,0 +1,249 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nbProbabilities</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimates relative transmission probabilities</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>nbProbabilities</code> uses naive Bayes and an interative estimation
+procedure to estimate relative transmission probabilities
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nbProbabilities(
+  orderedPair,
+  indIDVar,
+  pairIDVar,
+  goldStdVar,
+  covariates,
+  label = "",
+  l = 1,
+  n = 10,
+  m = 1,
+  nReps = 10,
+  progressBar = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>orderedPair</code></td>
+<td>
+<p>The name of the ordered pair-level dataset with the covariates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indIDVar</code></td>
+<td>
+<p>The name (in quotes) of the column with the individual ID. 
+(data frame <code>orderedPair</code> must have columns called <code>&lt;indIDVar&gt;.1</code> and <code>&lt;indIDVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pairIDVar</code></td>
+<td>
+<p>The name (in quotes) of the column with the unique pair ID variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>goldStdVar</code></td>
+<td>
+<p>The name (in quotes) of the column with a logical vector defining
+training links/non-links</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariates</code></td>
+<td>
+<p>A character vector containing the covariate column names (in quotes).
+All covariates need to be categorical factor variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>An optional label string for the run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>l</code></td>
+<td>
+<p>Laplace smoothing parameter that is added to each cell.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>The number of folds for nxm cross validation (should be at least 10).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>The number of times to create n folds in nxm cross validation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nReps</code></td>
+<td>
+<p>The number of times to randomly select the "true" infector (should be at least 10).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progressBar</code></td>
+<td>
+<p>A logical indicating if a progress bar should be printed (default is TRUE).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This algorithm takes a dataset of ordered possible infector-infectee pairs in an
+infectious disease outbreak or cluster and estimates the relative probability the cases are
+linked by direct transmission using a classification technique called naive Bayes (NB).
+NB is a simple machine learning algorithm that uses Bayes rule to estimate the
+probability of an outcome in a prediction dataset given a set of covariates from
+the observed frequencies in a training dataset.
+</p>
+<p>The input dataset - <code>orderedPair</code> - should represent ordered pairs of cases
+(where the potential infector was observed before the infectee) and have
+a unique identifier for each pair (<code>pairIDVar</code>) as well as the individual ids that are
+included in the pair (<code>&lt;indIDVar&gt;.1</code> and <code>&lt;indIDVar&gt;.2</code>). If cases are concurrent
+(meaning the order cannot determined) both orders can be included.
+</p>
+<p>A subset of pairs should also have pathogen WGS, contact investigation,  or some other
+'gold standard' defined by <code>goldStdVar</code> which should be a logical vector with
+<code>TRUE</code> indicating links, <code>FALSE</code> nonlinks, and <code>NA</code> if
+the pair cannot be used to train (does not have the information or is indeterminate).
+These pairs will be used to a training dataset of probable links and non/links.
+The covariates can be any categorical variables and could represent
+spatial, clinical, demographic, and temporal characteristics of the case pair. 
+</p>
+<p>Because the outcomes in the training set represent probable and not certain 
+transmission events and a given case could have mulitple probable infectors, 
+the algorithm uses an iterative estimation procedure. This procedure randomly chooses one
+link of all of the possible links to include in the training dataset <code>nReps</code>
+times, and then uses <code>mxn</code> cross prediction to give all pairs a turn 
+in the prediction dataset.
+</p>
+<p>The output of this function is a list of two dataframes: one with the estimates of the
+transmission probabilities (<code>probabilities</code>) and the other with the contribution of
+the covariates to the probabilities in the form of odds ratios (<code>estimates</code>). The 
+95
+for multiple imputation, to pool the error across all iterations.
+</p>
+
+
+<h3>Value</h3>
+
+<p>List containing two data frames:
+</p>
+
+<ol>
+<li> <p><code>probabilities</code> - a data frame of transmission probabilities. Column names:
+</p>
+
+<ul>
+<li> <p><code>label</code> - the optional label of the run.
+</p>
+</li>
+<li> <p><code>&lt;pairIDVar&gt;</code> - the pair ID with the name specified.
+</p>
+</li>
+<li> <p><code>pAvg</code> - the mean transmission probability for the pair over all iterations.
+</p>
+</li>
+<li> <p><code>pSD</code> - the standard deviation of the transmission probability for the pair
+over all iterations.
+</p>
+</li>
+<li> <p><code>pScaled</code> - the mean relative transmission probability for the pair over.
+all iterations: pAvg scaled so that the probabilities for all infectors per infectee add to 1.
+</p>
+</li>
+<li> <p><code>pRank</code> - the rank of the probability of the the pair out of all pairs for that
+infectee (in case of ties all values have the minimum rank of the group).
+</p>
+</li>
+<li> <p><code>nEstimates</code> - the number of probability estimates that contributed to pAvg. This
+represents the number of prediction datasets this pair was included in over the <code>nxm</code>
+cross prediction repeated <code>nReps</code> times.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>estimates</code> - a data frame with the contribution of covariates. Column names:
+</p>
+
+<ul>
+<li> <p><code>label</code> - the optional label of the run
+</p>
+</li>
+<li> <p><code>level</code> - the covariate name and level
+</p>
+</li>
+<li> <p><code>nIter</code> - the number of iterations included in the estimates: <code>n*m*nReps</code>
+</p>
+</li>
+<li> <p><code>logorMean</code> - the mean value of the log odds ratio across iterations
+</p>
+</li>
+<li> <p><code>logorSE</code> - the standard error of the log odds ratio across iterations
+</p>
+</li>
+<li> <p><code>logorCILB</code> - the lower bound of the 95
+across iterations
+</p>
+</li>
+<li> <p><code>logorCIUB</code> - the upper bound of the 95
+across iterations
+</p>
+</li>
+</ul>
+</li>
+</ol>
+<h3>References</h3>
+
+<p>Barnard J. and Rubin D. Small-Sample Degrees of Freedom with Multiple Imputation
+<em>Biometrika</em>. 1999 Dec;86(4):948-55.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Use the pairData dataset which represents a TB-like outbreak
+# First create a dataset of ordered pairs
+orderedPair &lt;- pairData[pairData$infectionDiffY &gt;= 0, ]
+
+## Create a variable called snpClose that will define probable links
+# (&lt;3 SNPs) and nonlinks (&gt;12 SNPs) all pairs with between 2-12 SNPs
+# will not be used to train.
+orderedPair$snpClose &lt;- ifelse(orderedPair$snpDist &lt; 3, TRUE,
+                        ifelse(orderedPair$snpDist &gt; 12, FALSE, NA))
+table(orderedPair$snpClose)
+
+## Running the algorithm
+#NOTE should run with nReps &gt; 1.
+resGen &lt;- nbProbabilities(orderedPair = orderedPair,
+                            indIDVar = "individualID",
+                            pairIDVar = "pairID",
+                            goldStdVar = "snpClose",
+                            covariates = c("Z1", "Z2", "Z3", "Z4", "timeCat"),
+                            label = "SNPs", l = 1,
+                            n = 10, m = 1, nReps = 1)
+                            
+## Merging the probabilities back with the pair-level data
+nbResults &lt;- merge(resGen[[1]], orderedPair, by = "pairID", all = TRUE)
+
+</code></pre>
+
+
+</div>

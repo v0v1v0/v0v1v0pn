@@ -1,0 +1,201 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>buildAPT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an APT function, from an MCMCconf object</h2>
+
+<h3>Description</h3>
+
+<p>Adapted from nimble::buildMCMC. Accepts a single required argument, which
+may be of class MCMCconf, or inherit from class modelBaseClass (a
+NIMBLE model object).  Returns an APT function; see details
+section.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">buildAPT(conf, Temps, monitorTmax = TRUE, ULT = 1e+06, thinPrintTemps = 1, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>An object of class MCMCconf that specifies the model, samplers,
+monitors, and thinning intervals for the resulting MCMC function.  See
+<code>configureMCMC</code> for details of creating MCMCconf objects.
+Alternatively, <code>MCMCconf</code> may a NIMBLE model object, in which case an
+MCMC function corresponding to the default MCMC configuration for this
+model is returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Temps</code></td>
+<td>
+<p>A numeric vector giving the initial temperature ladder.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>monitorTmax</code></td>
+<td>
+<p>A logical indicator (default = TRUE) controlling if MCMC output should be stored at the hottest rung of the temperature ladder. Useful when monitoring the behaviour of APT. When TRUE mvSamples and mvSamples2 monitor T=1 and mvSamplesTmax and mvSamples2Tmax provide identically defined monitors (i.e. for exactly the same nodes) for T=Tmax.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ULT</code></td>
+<td>
+<p>A numeric value (default = 1E6) that provides an upper limit to temperature during APT.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thinPrintTemps</code></td>
+<td>
+<p>A numeric value controlling how often temperatures of the temperature ladder should be printed to screen when runtime parameter printTemps is TRUE. The default value of 1 is often too verbose. A good value to use is niter/10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to <code>configureMCMC</code> if
+<code>conf</code> is a NIMBLE model object</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Calling buildAPT(conf,Temps,monitorTmax,ULT,thinPrintTemps) will
+produce an uncompiled (R) APT function object, say 'myAPT'.
+</p>
+<p>The uncompiled MCMC function will have arguments:
+</p>
+<p><code>niter</code> The number of iterations to run the MCMC.
+</p>
+<p><code>reset</code> Boolean specifying whether to reset the internal MCMC
+sampling algorithms to their initial state (in terms of self-adapting
+tuning parameters), and begin recording posterior sample chains anew.
+Specifying <code>reset=FALSE</code> allows the MCMC algorithm to continue running
+from where it left off, appending additional posterior samples to the
+already existing sample chains. Generally, <code>reset=FALSE</code> should only
+be used when the MCMC has already been run (default = TRUE).
+</p>
+<p><code>resetMV</code>: Boolean specifying whether to begin recording posterior sample chains anew. This
+argument is only considered when using <code>reset = FALSE</code>.  Specifying <code>reset = FALSE,
+resetMV = TRUE</code> allows the MCMC algorithm to continue running from where it left off, but
+without appending the new posterior samples to the already existing samples, i.e. all previously
+obtained samples will be erased. This option can help reduce memory usage during burn-in
+(default = FALSE).
+</p>
+<p><code>resetTempering</code> Boolean specifying whether to reset the
+flexibility of the temperature ladder's adaptation process.
+</p>
+<p><code>simulateAll</code> Boolean specifying whether to simulate into all
+stochastic nodes.  This will overwrite the current values in all stochastic
+nodes (default = FALSE).
+</p>
+<p><code>time</code> Boolean specifying whether to record runtimes of the
+individual internal MCMC samplers.  When <code>time=TRUE</code>, a vector of
+runtimes (measured in seconds) can be extracted from the MCMC using the
+method <code>mcmc$getTimes()</code> (default = FALSE).
+</p>
+<p><code>adaptTemps</code> Boolean specifying whether the temperature
+ladder will be adapted or not.
+</p>
+<p><code>printTemps</code> Boolean specifying whether the temperature
+ladder will be printed during the MCMC. The print frequency is
+controlled by thinPrintTemps. The output includes (in order):
+iteration number of current MCMC run;
+total number of iterations of the tempering scheme - this will include itterations from previous MCMC runs unless resetTempering=TRUE;
+the number of rows in mvSamples;
+the number of rows in mvSamples2;
+the temperature ladder.
+</p>
+<p><code>tuneTemper1</code> Numeric tuning parameter of the adaptation
+process of the temperature ladder. See source code for
+buildAPT. Defaults to 10.
+</p>
+<p><code>tuneTemper2</code> Numeric tuning parameter of the adaptation
+process of the temperature ladder. See source code for
+buildAPT. Defaults to 1.
+</p>
+<p><code>progressBar</code> Boolean specifying whether to display a progress bar
+during MCMC execution (default = TRUE).  The progress bar can be
+permanently disabled by setting the system option
+<code>nimbleOptions(MCMCprogressBar = FALSE)</code>.
+</p>
+<p><code>thin</code> Thinning to be applied to monitor.
+</p>
+<p><code>thin2</code> Thinning to be applied to monitor2
+</p>
+<p>Samples corresponding to the <code>monitors</code> and <code>monitors2</code> from the
+MCMCconf are stored into the interval variables <code>mvSamples</code> and
+<code>mvSamples2</code>, respectively. These may be accessed and converted into R
+matrix objects via: <code>as.matrix(mcmc$mvSamples)</code>
+<code>as.matrix(mcmc$mvSamples2)</code>
+</p>
+<p>The uncompiled (R) MCMC function may be compiled to a compiled MCMC object,
+taking care to compile in the same project as the R model object, using:
+<code>Cmcmc &lt;- compileNimble(Rmcmc, project=Rmodel)</code>
+</p>
+<p>The compiled function will function identically to the uncompiled object,
+except acting on the compiled model object.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Calling <code>buildAPT</code> returns an uncompiled APT function object. This is very similar to how NIMBLE's <code>buildMCMC</code> function returns an uncompiled MCMC function object. See <code>?buildMCMC</code>. Users should be familiar with the chapter 'MCMC' of the NIMBLE manual.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>David Pleydell, Daniel Turek
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## See the nimbleAPT vignette for more details.
+bugsCode &lt;- nimbleCode({
+  for (ii in 1:nObs) {
+    y[ii,1:2] ~ dmnorm(mean=absCentroids[1:2], cholesky=cholCov[1:2,1:2], prec_param=0)
+  }
+  absCentroids[1:2] &lt;- abs(centroids[1:2])
+  for (ii in 1:2) {
+    centroids[ii] ~ dnorm(0, sd=1E3)
+  }
+})
+
+nObs      &lt;- 100
+centroids &lt;- rep(-3, 2)
+covChol   &lt;- chol(diag(2))
+
+rModel &lt;- nimbleModel(bugsCode,
+                      constants=list(nObs=nObs, cholCov=covChol),
+                      inits=list(centroids=centroids))
+simulate(rModel, "y")
+rModel &lt;- nimbleModel(bugsCode,
+                      constants=list(nObs=nObs, cholCov=covChol),
+                      data=list(y=rModel$y),
+                      inits=list(centroids=centroids))
+
+conf &lt;- configureMCMC(rModel, nodes="centroids", monitors="centroids", enableWAIC = TRUE)
+conf$removeSamplers()
+conf$addSampler("centroids[1]", type="sampler_RW_tempered", control=list(temperPriors=TRUE))
+conf$addSampler("centroids[2]", type="sampler_RW_tempered", control=list(temperPriors=TRUE))
+aptR &lt;- buildAPT(conf, Temps=1:5, ULT= 1000, print=TRUE)
+
+
+
+
+</code></pre>
+
+
+</div>

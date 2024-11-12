@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>varSelectionRF</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Variable selection function that can be provided to <code>nonlinearICP</code> - it
+is then applied to pre-select a set of variables before running the ICP procedure
+on this subset. Here, the variable selection is based on random forest variable
+importance measures.</h2>
+
+<h3>Description</h3>
+
+<p>Variable selection function that can be provided to <code>nonlinearICP</code> - it
+is then applied to pre-select a set of variables before running the ICP procedure
+on this subset. Here, the variable selection is based on random forest variable
+importance measures.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">varSelectionRF(X, Y, env, verbose, nSelect = sqrt(ncol(X)),
+  useMtry = sqrt(ncol(X)), ntree = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A (nxp)-dimensional matrix (or data frame) with n observations of p variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Response vector (n x 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>Indicator of the experiment or the intervention type an observation belongs to.
+A numeric vector of length n. Has to contain at least two different unique values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If <code>FALSE</code>, most messages are supressed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nSelect</code></td>
+<td>
+<p>Number of variables to select. Defaults to <code>sqrt(ncol(X))</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useMtry</code></td>
+<td>
+<p>Random forest parameter <code>mtry</code>. Defaults to <code>sqrt(ncol(X))</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntree</code></td>
+<td>
+<p>Random forest parameter <code>ntree</code>. Defaults to 100.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector containing the indices of the selected variables.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1
+require(CondIndTests)
+data("simData")
+targetVar &lt;- 2
+# choose environments where we did not intervene on var
+useEnvs &lt;- which(simData$interventionVar[,targetVar] == 0)
+ind &lt;- is.element(simData$environment, useEnvs)
+X &lt;- simData$X[ind,-targetVar]
+Y &lt;- simData$X[ind,targetVar]
+E &lt;- as.factor(simData$environment[ind])
+chosenIdx &lt;- varSelectionRF(X = X, Y = Y, env = E, verbose = TRUE)
+cat(paste("Variable(s)", paste(chosenIdx, collapse=", "), "was/were chosen."))
+</code></pre>
+
+
+</div>

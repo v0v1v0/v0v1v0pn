@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>loc_est</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Local linear frontier estimator
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes the local linear smoothing frontier estimator of Hall, Park and Stern (1998) and Hall and Park (2004).    
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">loc_est(xtab, ytab, x, h, method="u", control = list("tm_limit" = 700))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>determines the bandwidth at which the local linear estimate will be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a character equal to "u" (unconstrained estimator) or "m" (improved version of the unconstrained estimator).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of parameters to the GLPK solver. See *Details* of help(Rglpk_solve_LP).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In the unconstrained case (option <code>method="u"</code>), the implemented estimator of <code class="reqn">\varphi(x)</code> is defined by
+</p>
+<p style="text-align: center;"><code class="reqn">
+\hat \varphi_{n,LL}(x) = \min  \Big\{ z : {\rm there~exists~} \theta ~{\rm such~that~} y_i \leq z + \theta(x_i - x)</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">{\rm for~all}~i~{\rm such~that~}x_i \in (x-h,x+h) \Big\},</code>
+</p>
+
+<p>where the bandwidth <code class="reqn">h</code> has to be fixed by the user in the 4th argument of the function.
+This estimator may lack of smoothness in case of small samples and has no guarantee of being monotone  even if the true frontier is so.  
+Following the curvature of the monotone frontier <code class="reqn">\varphi</code>, the unconstrained  estimator <code class="reqn">\hat \varphi_{n,LL}</code>  is likely to exhibit substantial bias, especially at the sample boundaries 
+(see Daouia et al (2016) for numerical illustrations). A simple way to remedy to this drawback is by imposing the extra condition <code class="reqn">\theta \geq 0</code> in the definition of <code class="reqn">\hat \varphi_{n,LL}(x)</code> to get 
+</p>
+<p style="text-align: center;"><code class="reqn">
+\tilde \varphi_{n,LL}(x) = \min  \Big\{ z : {\rm there~exists~} \theta\geq 0 ~{\rm such~that~} y_i \leq z + \theta(x_i - x)</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">{\rm for~all}~i~{\rm such~that~}x_i \in (x-h,x+h) \Big\}.</code>
+</p>
+
+<p>As shown in Daouia et al (2016), this version only reduces the vexing bias and border defects of the original estimator when the true frontier is monotone. 
+The option <code>method="m"</code> indicates that the improved fit <code class="reqn">\tilde \varphi_{n,LL}(x)</code> should be utilized in place of <code class="reqn">\hat \varphi_{n,LL}(x)</code>. 
+Hall and Park (2004) proposed a bootstrap procedure for selecting the optimal 
+bandwidth <code class="reqn">h</code> in  <code class="reqn">\hat \varphi_{n,LL}(x)</code> and <code class="reqn">\tilde \varphi_{n,LL}(x)</code> (see the function <code>loc_est_bw</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>. Returns a vector of NA if no solution has been found by the solver (GLPK). 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hohsuk Noh.
+</p>
+
+
+<h3>References</h3>
+
+<p>Daouia, A., Noh, H. and Park, B.U. (2016). Data Envelope fitting with constrained polynomial splines. <em>Journal of the Royal Statistical Society: Series B</em>, <b>78</b>(1), 3-30. doi:10.1111/rssb.12098.
+</p>
+<p>Hall, P. and Park, B.U. (2004). Bandwidth choice for local polynomial estimation of smooth boundaries. <em>Journal of Multivariate Analysis</em>, 91, 240-261. 
+</p>
+<p>Hall, P., Park, B.U. and Stern, S.E. (1998). On polynomial estimators of frontiers and boundaries. <em>Journal of Multivariate Analysis</em>, 66, 71-98.  
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>loc_est_bw</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("nuclear")
+x.nucl &lt;- seq(min(nuclear$xtab), max(nuclear$xtab), 
+ length.out=101) 
+# 1. Unconstrained estimator
+# Optimal bandwidths over 100 bootstrap replications
+## Not run: 
+h.nucl.u &lt;- loc_est_bw(nuclear$xtab, nuclear$ytab, 
+ x.nucl, h=40, B=100, method="u")
+
+## End(Not run)
+(h.nucl.u&lt;-79.11877)
+y.nucl.u&lt;-loc_est(nuclear$xtab, nuclear$ytab, x.nucl, 
+ h=h.nucl.u, method="u")
+
+# 2. improved version of the estimator
+# Optimal bandwidths over 100 bootstrap replications
+## Not run:  
+h.nucl.m &lt;- loc_est_bw(nuclear$xtab, nuclear$ytab, 
+ x.nucl, h=40, B=100, method="m")
+
+## End(Not run) 
+(h.nucl.m&lt;-79.12)
+y.nucl.m&lt;-loc_est(nuclear$xtab, nuclear$ytab, x.nucl, 
+ h=h.nucl.m, method="m") 
+
+# 3. Representation 
+plot(x.nucl, y.nucl.u, lty=1, lwd=4, col="magenta", type="l")
+lines(x.nucl, y.nucl.m, lty=2, lwd=4, col="cyan") 
+points(ytab~xtab, data=nuclear)
+legend("topleft",legend=c("unconstrained", "improved"), 
+ col=c("magenta","cyan"), lwd=4, lty=c(1,2))
+</code></pre>
+
+
+</div>

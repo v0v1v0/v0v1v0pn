@@ -1,0 +1,188 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neon_read</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>read in neon tabular data</h2>
+
+<h3>Description</h3>
+
+<p>read in neon tabular data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neon_read(
+  table = NA,
+  product = NA,
+  site = NA,
+  start_date = NA,
+  end_date = NA,
+  ext = NA,
+  timestamp = NA,
+  release = NA,
+  dir = neon_dir(),
+  files = NULL,
+  sensor_metadata = TRUE,
+  keep_filename = FALSE,
+  altrep = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>table</code></td>
+<td>
+<p>the name of a downloaded NEON table in the store,
+see neon_index</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>product</code></td>
+<td>
+<p>A NEON <code>productCode</code> or list of product codes, see examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>site</code></td>
+<td>
+<p>4-letter site code(s) to filter on. Leave as <code>NA</code> to search all.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start_date</code></td>
+<td>
+<p>Download only files as recent as (<code>YYYY-MM-DD</code>). Leave
+as <code>NA</code> to download up to the most recent available data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end_date</code></td>
+<td>
+<p>Download only files up to end_date (<code>YYYY-MM-DD</code>). Leave as
+<code>NA</code> to download all prior data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ext</code></td>
+<td>
+<p>only match files with this file extension(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timestamp</code></td>
+<td>
+<p>only match timestamps prior this. See details in <code>neon_index()</code>.
+Should be a datetime POSIXct object (or coerce-able string)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>release</code></td>
+<td>
+<p>Select only data files associated with a particular release tag,
+see <a href="https://www.neonscience.org/data-samples/data-management/data-revisions-releases">https://www.neonscience.org/data-samples/data-management/data-revisions-releases</a>,
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dir</code></td>
+<td>
+<p>Location where files should be downloaded. By default will
+use the appropriate applications directory for your system
+(see <code>tools::R_user_dir()</code>).  This default also be configured by
+setting the environmental variable <code>NEONSTORE_HOME</code>, see Sys.setenv or
+Renviron.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>files</code></td>
+<td>
+<p>optionally, specify a vector of file paths directly (e.g. as
+provided from neon_index) and specify <code>table</code> argument as NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensor_metadata</code></td>
+<td>
+<p>logical, default TRUE. Should we add
+metadata fields from file names of sensor data into the table?  Adds
+DomainID, SiteID, horizontalPosition, verticalPosition, and publicationDate.
+Results in slower parsing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_filename</code></td>
+<td>
+<p>Should we include a column indicating the original
+file name for each row?  Can be a useful source of additional metadata that
+NEON may omit from the raw files (i.e. <code>siteID</code>), but will also result in
+slower parsing.  Default <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>altrep</code></td>
+<td>
+<p>enable or disable altrep.  Logical, default <code>FALSE</code>. Setting to
+<code>TRUE</code> can speed up reading, but may cause vroom::vroom to throw
+<code style="white-space: pre;">⁠mapping error: Too many open files⁠</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to vroom::vroom, can usually be omitted.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>NEON's tabular data files are separated out into separate .csv
+files for each site for each month of sampling.  In principle,
+each file has identical columns.  vroom::vroom can read in a
+data table that has been sharded into many files like this much
+much faster than other parsers can read in each table iteratively,
+(and thus can greatly out-perform the 'stacking" methods in <code>neonUtilities</code>).
+</p>
+<p>When reading in very large numbers of files, it may be helpful to set
+<code>altrep = FALSE</code> to opt out of <code>vroom</code>'s fast altrep mechanism, which
+can cause <code>neon_read()</code> to fail when stacking thousands of files.
+</p>
+<p>Unfortunately, not all datasets are entirely consistent in their use
+of columns.  <code>neon_read</code> works around this by parsing such tables in
+groups of matching schema, which is still reasonably fast.
+</p>
+<p>NEON sensor data products currently do not include important metadata columns
+containing DomainID, SiteID, horizontalPosition, verticalPosition, and
+publicationDate in the data files themselves, but only encode this in the
+in the raw file names. All though these values are shared across a raw
+data file, this information is lost when stacking the tables unless explicit
+columns are added to the data.  This requires us to parse the files
+one-by-one, which is much slower.  By default this information is added to
+the table, altering the stacked table schema from that of the raw table.
+Disable this behavior by setting <code>sensor_metadata = FALSE</code>.  Future
+NEON sensor data products may start including this information in
+the raw data files, as is already the case for observational data.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+neon_read("brd_countdata-expanded")
+
+## Sensor inputs will add metadata columns by default
+neon_read("waq_instantaneous", site = c("CRAM","SUGG"))
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,204 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ttest_filter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Univariate filters</h2>
+
+<h3>Description</h3>
+
+<p>A selection of simple univariate filters using t-test, Wilcoxon test, one-way
+ANOVA or correlation (Pearson or Spearman) for ranking variables. These
+filters are designed for speed. <code>ttest_filter</code> uses the <code>Rfast</code> package,
+<code>wilcoxon_filter</code> (Mann-Whitney) test uses
+matrixTests::row_wilcoxon_twosample, <code>anova_filter</code> uses
+matrixTests::col_oneway_welch (Welch's F-test) from the <code>matrixTests</code>
+package. Can be applied to all or a subset of predictors. For mixed datasets
+(combined continuous &amp; categorical) see <code>stat_filter()</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ttest_filter(
+  y,
+  x,
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  type = c("index", "names", "full"),
+  keep_factors = TRUE,
+  ...
+)
+
+anova_filter(
+  y,
+  x,
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  type = c("index", "names", "full"),
+  keep_factors = TRUE,
+  ...
+)
+
+wilcoxon_filter(
+  y,
+  x,
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  type = c("index", "names", "full"),
+  exact = FALSE,
+  keep_factors = TRUE,
+  ...
+)
+
+correl_filter(
+  y,
+  x,
+  method = "pearson",
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  type = c("index", "names", "full"),
+  keep_factors = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Response vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Matrix or dataframe of predictors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_vars</code></td>
+<td>
+<p>Vector of column names within <code>x</code> which are always retained
+in the model (i.e. not filtered). Default <code>NULL</code> means all predictors will
+be passed to <code>filterFUN</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfilter</code></td>
+<td>
+<p>Number of predictors to return. If <code>NULL</code> all predictors with
+p-values &lt; <code>p_cutoff</code> are returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_cutoff</code></td>
+<td>
+<p>p value cut-off</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rsq_cutoff</code></td>
+<td>
+<p>r^2 cutoff for removing predictors due to collinearity.
+Default <code>NULL</code> means no collinearity filtering. Predictors are ranked based
+on t-test. If 2 or more predictors are collinear, the first ranked
+predictor by t-test is retained, while the other collinear predictors are
+removed. See <code>collinear()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of vector returned. Default "index" returns indices, "names"
+returns predictor names, "full" returns a matrix of p values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_factors</code></td>
+<td>
+<p>Logical affecting factors with 3 or more levels.
+Dataframes are coerced to a matrix using data.matrix. Binary
+factors are converted to numeric values 0/1 and analysed as such. If
+<code>keep_factors</code> is <code>TRUE</code> (the default), factors with 3 or more levels are
+not filtered and are retained. If <code>keep_factors</code> is <code>FALSE</code>, they are
+removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments, including <code>rsq_method</code> passed to <code>collinear()</code>
+or arguments passed to matrixTests::row_wilcoxon_twosample in
+<code>wilcoxon_filter()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exact</code></td>
+<td>
+<p>Logical whether exact or approximate p-value is calculated.
+Default is <code>FALSE</code> for speed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Type of correlation, either "pearson" or "spearman".</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Integer vector of indices of filtered parameters (type = "index") or
+character vector of names (type = "names") of filtered parameters in order
+of t-test p-value. If <code>type</code> is <code>"full"</code> full output from
+Rfast::ttests is returned.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lm_filter()</code> <code>stat_filter()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## sigmoid function
+sigmoid &lt;- function(x) {1 / (1 + exp(-x))}
+
+## load iris dataset and simulate a binary outcome
+data(iris)
+dt &lt;- iris[, 1:4]
+colnames(dt) &lt;- c("marker1", "marker2", "marker3", "marker4")
+dt &lt;- as.data.frame(apply(dt, 2, scale))
+y2 &lt;- sigmoid(0.5 * dt$marker1 + 2 * dt$marker2) &gt; runif(nrow(dt))
+y2 &lt;- factor(y2, labels = c("C1", "C2"))
+
+ttest_filter(y2, dt)  # returns index of filtered predictors
+ttest_filter(y2, dt, type = "name")  # shows names of predictors
+ttest_filter(y2, dt, type = "full")  # full results table
+
+data(iris)
+dt &lt;- iris[, 1:4]
+y3 &lt;- iris[, 5]
+anova_filter(y3, dt)  # returns index of filtered predictors
+anova_filter(y3, dt, type = "full")  # shows names of predictors
+anova_filter(y3, dt, type = "name")  # full results table
+
+</code></pre>
+
+
+</div>

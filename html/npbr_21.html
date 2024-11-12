@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>poly_est</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Polynomial frontier estimators</h2>
+
+<h3>Description</h3>
+
+<p>Computes the polynomial-type estimators of frontiers and boundaries proposed by Hall, Park and Stern (1998).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">poly_est(xtab, ytab, x, deg, control = list("tm_limit" = 700))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deg</code></td>
+<td>
+<p>an integer (polynomial degree).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of parameters to the GLPK solver. See *Details* of help(Rglpk_solve_LP).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The data edge is modeled by a single polynomial <code class="reqn">\varphi_{\theta}(x) = \theta_0+\theta_1 x+\cdots+\theta_p x^p</code> 
+of known degree <code class="reqn">p</code> that envelopes the full data and minimizes the area under its graph for <code class="reqn">x\in[a,b]</code>, with <code class="reqn">a</code> and <code class="reqn">b</code> 
+being respectively the lower and upper endpoints of the design points <code class="reqn">x_1,\ldots,x_n</code>.
+The implemented function is the estimate <code class="reqn">\hat\varphi_{n,p}(x) = \hat\theta_0+\hat\theta_1 x+\cdots+\hat\theta_p x^p</code>
+of <code class="reqn">\varphi(x)</code>, where  <code class="reqn">\hat\theta=(\hat\theta_0,\hat\theta_1,\cdots,\hat\theta_p)^T</code>
+minimizes
+<code class="reqn">\int_{a}^b \varphi_{\theta}(x) \,dx</code>
+over <code class="reqn">\theta\in\R^{p+1}</code> subject to the envelopment constraints
+<code class="reqn">\varphi_{\theta}(x_i)\geq y_i</code>,  <code class="reqn">i=1,\ldots,n</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>. Returns a vector of NA if no solution has been found by the solver (GLPK). 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hohsuk Noh.
+</p>
+
+
+<h3>References</h3>
+
+<p>Hall, P., Park, B.U. and Stern, S.E. (1998). On polynomial estimators of frontiers and boundaries. <em>Journal of Multivariate Analysis</em>, 66, 71-98. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>loc_est</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("air")
+x.air &lt;- seq(min(air$xtab), max(air$xtab), 
+ length.out = 101)
+# Optimal polynomial degrees via the AIC criterion
+(p.aic.air &lt;- poly_degree(air$xtab, air$ytab, 
+ type = "AIC"))
+# Polynomial boundaries estimate 
+y.poly.air&lt;-poly_est(air$xtab, air$ytab, x.air, 
+ deg = p.aic.air)
+# Representation
+plot(x.air, y.poly.air, lty = 1, lwd = 4, 
+ col = "magenta", type = "l")
+points(ytab~xtab, data = air)  
+legend("topleft",legend = paste("degree =", p.aic.air), 
+ col = "magenta", lwd = 4, lty = 1)  
+</code></pre>
+
+
+</div>

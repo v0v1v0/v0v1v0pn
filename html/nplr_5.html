@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getEstimates</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Function to Estimate x Given y.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function takes as its first argument a model returned by <code>nplr()</code>. By inverting the logistic model, it estimates the x values corresponding to one (or a vector of) y target(s) provided. The standard error of the model, defined as the mean squared error on the fitted values, is used to estimate a confidence interval on the predicted x values, according to the specified <code>conf.level</code>. see <code>Details</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  ## S4 method for signature 'nplr'
+getEstimates(object, targets = seq(.9, .1, by = -.1), B = 1e4, conf.level = .95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p> : an object of class <code>nplr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>targets</code></td>
+<td>
+<p> : one, of a vector of, numerical value(s) for which the corresponding x has to be estimated. Default are target values from .9 to .1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p> : the length of the y distribution from which the x confidence interval is estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level</code></td>
+<td>
+<p> : the estimated x confidence interval, bounded by (1-conf.level)/2 and 1 - (1-conf.level)/2 (by default .95, which gives x.025 and x.975).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In n-parameter logistic regressions, none of the parameters follow any particular distribution from which confidence intervals can be estimated. To overcome this issue, the standard error is used to generate a normal distribution of the target(s) passed to the function. The quantiles of that distribution are used in order to provide estimated bounds for the corresponding x value, with respect to <code>conf.level</code>.
+See also <code>Warning</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data set containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p> : the target value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.05</code></td>
+<td>
+<p> : the lower bound of the estimated 95% confidence interval (default). If another value is passed to conf.level, x will be labelled as x.(1-conf.level)/2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> : the estimated value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.95</code></td>
+<td>
+<p> : the upper bound of the estimated 95% confidence interval (default). If another value is passed to conf.level, x will be labelled as x.1-(1-conf.level)/2.</p>
+</td>
+</tr>
+</table>
+<h3>Warning</h3>
+
+<p>Notice that, if any <code class="reqn">target&lt;=B</code> or <code class="reqn">target&gt;=T</code>, in other words outside the 2 asymptotes, the maximal (or minimal) possible value the model can estimates is returned.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The data used in the examples are samples from the NCI-60 Growth Inhibition Data: <a href="https://wiki.nci.nih.gov/display/NCIDTPdata/NCI-60+Growth+Inhibition+Data">https://wiki.nci.nih.gov/display/NCIDTPdata/NCI-60+Growth+Inhibition+Data</a>,
+except for multicell.tsv which are simulated data.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Frederic Commo, Brian M. Bot
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nplr</code>, <code>plot.nplr</code>, , <code>nplrAccessors</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Using the PC-3 data
+  require(nplr)
+  path &lt;- system.file("extdata", "pc3.txt", package="nplr")
+  pc3 &lt;- read.delim(path)
+  model &lt;- nplr(x = pc3$CONC, y = pc3$GIPROP)
+  getEstimates(model)
+  getEstimates(model, c(.3, .6), conf.level = .9)
+</code></pre>
+
+
+</div>

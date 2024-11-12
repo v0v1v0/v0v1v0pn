@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Numerify</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert all possible columns of a data.frame to numeric</h2>
+
+<h3>Description</h3>
+
+<p>Importing data from csv files can often lead to numeric variables being
+coded as factors or strings. This will not work well with many R functions.
+This function provides a quick way to deal with this across a whole data frame
+while attempting to leave columns untouched that are not genuinely numeric data.
+In edge cases you might need to adjust 'threshold' to get the correct result,
+usually an issue if mostly numeric columns often have strings amongst them, for
+instance a column with mostly numbers, but occassionally pipe-separated values
+like '4.4|5.0|6.1', etc.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Numerify(df, except = NULL, force = FALSE, digits = NA, thresh = 0.9)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data.frame to transform to numeric (where possible)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>except</code></td>
+<td>
+<p>avoid changing any colnames in this array</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force</code></td>
+<td>
+<p>force all columns to numeric without checking types</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>if a non-NA integer value is used, will round numeric columns
+to this many decimal places after making numeric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>threshold to decide that a variable is numeric. NA values will
+be ignored in the test. Then it looks at the proportion of values that are
+successfully coerced to numeric without giving 'NA'. If this threshold is
+0.9, then any column where at least 90
+converted to numeric type, will be kept as numeric, else they will be left
+as they were.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data.frame with numeric type for any applicable columns
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nicholas Cooper
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">df &lt;- data.frame(first=c(1:5),
+ second=paste(6:10),
+ third=c("jake", "fred", "cathy", "sandra", "mike"))
+sapply(sapply(df, is), "[", 1) # check type of each column
+dfN &lt;- Numerify(df)
+sapply(sapply(dfN, is), "[", 1) # now second column is numeric
+df2 &lt;- data.frame(first=c(1:10),
+ second=paste(c(NA, NA, 6:10, "5|6", "7|8", 1)),
+ third=rep(c("jake", "fred", "cathy", "sandra", "mike"),2))
+sapply(sapply(df2, is), "[", 1)
+df2N1 &lt;- Numerify(df2, thresh=0.7)
+df2N2 &lt;- Numerify(df2, thresh=0.8)
+sapply(sapply(df2N1, is), "[", 1) # at this threshold second column goes to numeric
+sapply(sapply(df2N2, is), "[", 1) # second column stays a string at this threshold
+</code></pre>
+
+
+</div>

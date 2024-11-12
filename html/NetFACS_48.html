@@ -1,0 +1,156 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prepare.netfacs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Take data that are not currently in format and turn them into the correct format for netfacs function</h2>
+
+<h3>Description</h3>
+
+<p>The <code>netfacs</code> function requires data to be entered with the element data as a matrix of each element by each event,
+with occurrence marked as 1 and non-occurrence marked as 0.<br>
+This is often not the case, so this function transforms data in other routine formats to have the right look.<br>
+Specifically, users can define whether they want to enter 'photos', which indicates that all elements in an event are simply strung together in a vector; or they define 'video', in which case it is assumed that each element has a start and an end point in a specified video
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prepare.netfacs(
+  elements,
+  type = c("video", "photo"),
+  video.id = NULL,
+  start.time = NULL,
+  duration = NULL,
+  separator = ",",
+  frame.duration = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>elements</code></td>
+<td>
+<p>vector with either one element per index (for videos) or all elements that occurred in the whole event (for photos)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>either 'video' or 'photo'. If 'photo', the function separates the string and returns a matrix of the correct dimensions. If 'video', the function creates a matrix using the highest common factor of all 'durations' and for each of those 'frames' assigns whether each element was present or absent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>video.id</code></td>
+<td>
+<p>name of the video, so all cases are treated together. For photos, can be entered so that photos can be matched to IDs after</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.time</code></td>
+<td>
+<p>for videos, time when the element is first active</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>duration</code></td>
+<td>
+<p>for videos, how long is the element active for</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>separator</code></td>
+<td>
+<p>for photos, how are elements separated in the list</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frame.duration</code></td>
+<td>
+<p>for videos, how long is a 'frame' supposed to last? If NULL, frame duration is the shortest 'duration' of any element specified</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The assumption for this function is that for photos, elements are stored like this: <br>
+'AU1/AU2/AU3/AU4'<br>
+'AU1/AU3/AU4'<br>
+'AU1/AU2'<br><br>
+For videos, the assumption is that they are stored in a data frame like this: <br>
+element = AU1, video.id = 1, start.time = 0.5, duration = 2sec
+</p>
+
+
+<h3>Value</h3>
+
+<p>Function returns a list with element.matrix (the matrix of elements and when they occurred) and video.info (the supporting information, e.g. video names, durations, frames etc)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># for a photo
+au.photos &lt;- c(
+  "AU1/AU5/AU9",
+  "AU1/AU2",
+  "AU1/AU2/AU10",
+  "AU1/AU2",
+  "AU5/AU17/AU18",
+  "AU6/AU12"
+)
+au.names &lt;- c("photo1", "photo2", "photo3", "photo4", "photo5", "photo6")
+au.prepared &lt;- prepare.netfacs(
+  elements = au.photos,
+  type = "photo",
+  video.id = au.names,
+  separator = "/"
+)
+au.prepared$element.matrix
+au.prepared$video.info
+
+# for a video
+aus &lt;- c(
+  "AU1", "AU5", "AU9",
+  "AU1", "AU2",
+  "AU1", "AU2", "AU10",
+  "AU1", "AU2",
+  "AU5", "AU17", "AU18",
+  "AU6", "AU12"
+)
+video.names &lt;- c(
+  rep("video1", 3),
+  rep("video2", 2),
+  rep("video3", 3),
+  rep("video4", 2),
+  rep("video5", 3),
+  rep("video6", 2)
+)
+start.times &lt;- c(
+  0.1, 0.2, 0.3,
+  0.1, 0.3,
+  0.1, 0.4, 0.4,
+  0.1, 0.2,
+  0.1, 0.5, 0.6,
+  0.1, 0.2
+)
+durations &lt;- rep(0.3, times = length(start.times))
+frame.dur &lt;- 0.05
+au.prepared &lt;- prepare.netfacs(
+  elements = aus,
+  type = "video",
+  video.id = video.names,
+  start.time = start.times,
+  duration = durations,
+  frame.duration = frame.dur
+)
+head(au.prepared$element.matrix)
+head(au.prepared$video.info)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_performance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A plot method combining a time series of performance results.</h2>
+
+<h3>Description</h3>
+
+<p>A plot method combining a time series of performance results.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_performance(
+  x,
+  var = "rank",
+  add = FALSE,
+  offset = NULL,
+  log = FALSE,
+  col = 1,
+  ylim = NULL,
+  text.padding = 0.9,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>data.frame</code> obtained by combined results from <code>performance.origin</code> with variables <code>X1</code> for time point, <code>start</code> for true origin, <code>est</code> for estimated origin, and performance variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>character, variable to be plotted, <code>performance.origin</code> returns <code>rank</code>, <code>spj</code>, and <code>dist</code>, default is <code>'rank'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>logical, should be added to another performance plot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p><code>POSIXct</code>, starting time of spreading</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>logical, should y-axis be logarithmized?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>numeric or character, color of lines</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>numeric vector, range of y axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.padding</code></td>
+<td>
+<p>a numeric value specifying the factor for the text position relative to the y values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further graphical parameters passed to default <code>plot</code> function</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run:  
+### delays on Goettingen bus network
+# compute effective distance
+data(ptnGoe)
+goenet &lt;- igraph::as_adjacency_matrix(ptnGoe, sparse=FALSE)
+p &lt;- goenet/rowSums(goenet)
+eff &lt;- eff_dist(p)
+# apply source estimation
+data(delayGoe)
+if (requireNamespace("aplyr", quietly = TRUE)) {
+   res &lt;- alply(.data=delayGoe[11:20,-c(1:2)], .margins=1, .fun=origin_edm, 
+                distance=eff, silent=TRUE, .progress='text')
+   perfGoe &lt;- ldply(Map(performance, x = res, start = 2, list(graph = ptnGoe)))
+   # performance plots
+   plot_performance(perfGoe, var='rank', ylab='rank of correct detection', text.padding=0.5)
+   plot_performance(perfGoe, var='dist', ylab='distance to correct detection')
+}
+
+### delays on Athens metro network
+# compute effective distance
+data(ptnAth)
+athnet &lt;- igraph::as_adjacency_matrix(ptnAth, sparse=FALSE)
+p &lt;- athnet/rowSums(athnet)
+eff &lt;- eff_dist(p)
+# apply source estimation
+data(delayAth)
+if (requireNamespace("aplyr", quietly = TRUE)) {
+   res &lt;- alply(.data=delayAth[11:20,-c(1:2)], .margins=1, .fun=origin_edm, 
+             distance=eff, silent=TRUE, .progress='text')
+   perfAth &lt;- ldply(Map(performance, x = res, start = as.list(delayAth$k0),
+                     list(graph = ptnAth)))
+   # performance plots
+   plot_performance(perfAth, var='rank', ylab='rank of correct detection',text.padding=0.5)
+   plot_performance(perfAth, var='dist', ylab='distance to correct detection')
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

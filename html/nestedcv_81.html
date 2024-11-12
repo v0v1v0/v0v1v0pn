@@ -1,0 +1,69 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>repeatfolds</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create folds for repeated nested CV</h2>
+
+<h3>Description</h3>
+
+<p>Create folds for repeated nested CV
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">repeatfolds(y, repeats = 5, n_outer_folds = 10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Outcome vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repeats</code></td>
+<td>
+<p>Number of repeats</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_outer_folds</code></td>
+<td>
+<p>Number of outer CV folds</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List containing indices of outer CV folds
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data("iris")
+dat &lt;- iris
+y &lt;- dat$Species
+x &lt;- dat[, 1:4]
+
+## set up fixed fold indices
+set.seed(123, "L'Ecuyer-CMRG")
+folds &lt;- repeatfolds(y, repeats = 3, n_outer_folds = 4)
+
+res &lt;- nestcv.glmnet(y, x, family = "multinomial", alphaSet = 1,
+                     n_outer_folds = 4, cv.cores = 2) |&gt;
+       repeatcv(3, repeat_folds = folds)
+res
+
+</code></pre>
+
+
+</div>

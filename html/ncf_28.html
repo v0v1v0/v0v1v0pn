@@ -1,0 +1,286 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Sncf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nonparametric (cross-)correlation function for spatio-temporal data</h2>
+
+<h3>Description</h3>
+
+<p><code>Sncf</code> is the function to estimate the nonparametric (cross-)correlation function using a smoothing spline as an equivalent kernel. The function requires multiple observations at each location (use <code>spline.correlog</code> otherwise).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Sncf(
+  x,
+  y,
+  z,
+  w = NULL,
+  df = NULL,
+  type = "boot",
+  resamp = 1000,
+  npoints = 300,
+  save = FALSE,
+  filter = FALSE,
+  fw = 0,
+  max.it = 25,
+  xmax = FALSE,
+  na.rm = FALSE,
+  latlon = FALSE,
+  circ = FALSE,
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of length n representing the x coordinates (or longitude; see latlon).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>vector of length n representing the y coordinates (or latitude).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>matrix of dimension n x p representing p observation at each location.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>an optional second matrix of dimension n x p for species 2 (to estimate the spatial cross-correlation function).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>degrees of freedom for the spline. Default is sqrt(n).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>takes the value "boot" (default) to generate a bootstrap distribution or "perm" to generate a null distribution for the estimator</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resamp</code></td>
+<td>
+<p>the number of resamples for the bootstrap or the null distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npoints</code></td>
+<td>
+<p>the number of points at which to save the value for the spline function (and confidence envelope / null distribution).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save</code></td>
+<td>
+<p>If TRUE, the whole matrix of output from the resampling is saved (a resamp x npoints dimensional matrix).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter</code></td>
+<td>
+<p>If TRUE, the Fourier filter method of Hall and coworkers is applied to ensure positive semi-definiteness of the estimator. (more work may be needed on this.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fw</code></td>
+<td>
+<p>If filter is TRUE, it may be useful to truncate the function at some distance w sets the truncation distance. when set to zero no truncation is done.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.it</code></td>
+<td>
+<p>the maximum iteration for the Newton method used to estimate the intercepts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xmax</code></td>
+<td>
+<p>If FALSE, the max observed in the data is used. Otherwise all distances greater than xmax is omitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>If TRUE, NA's will be dealt with through pairwise deletion of missing values for each pair of time series – it will dump if any one pair has less than two (temporally) overlapping observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latlon</code></td>
+<td>
+<p>If TRUE, coordinates are latitude and longitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>circ</code></td>
+<td>
+<p>If TRUE, the observations are assumed to be angular (in radians), and circular correlation is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>If TRUE, the counter is suppressed during execution.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Missing values are allowed – values are assumed missing at random. 
+</p>
+<p>The circ argument computes a circular version of the Pearson's product moment correlation (see <code>cor2</code>). This option is to calculate the 'nonparametric phase coherence function' (Grenfell et al. 2001)
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "Sncf" is returned, consisting of the following components: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>real</code></td>
+<td>
+<p>the list of estimates from the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$cbar</code></td>
+<td>
+<p>the regional average correlation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$x.intercept</code></td>
+<td>
+<p>the lowest value at which the function is = 0. If correlation is initially negative, the distance is given as negative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$e.intercept</code></td>
+<td>
+<p>the lowest value at which the function 1/e.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$y.intercept</code></td>
+<td>
+<p>the extrapolated value at x=0 (nugget).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$cbar.intercept</code></td>
+<td>
+<p>distance at which regional average correlation is reach.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$predicted$x</code></td>
+<td>
+<p>the x-axes for the fitted covariance function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$predcited$y</code></td>
+<td>
+<p>the values for the covariance function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot</code></td>
+<td>
+<p>a list with the analogous output from the bootstrap or null distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$summary</code></td>
+<td>
+<p>gives the full vector of output for the x.intercept, y.intercept, e.intercept, cbar.intercept, cbar and a quantile summary for the resampling distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$boot</code></td>
+<td>
+<p>If save=TRUE, the full raw matrices from the resampling is saved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.distance</code></td>
+<td>
+<p>the maximum spatial distance considered.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ottar N. Bjornstad <a href="mailto:onb1@psu.edu">onb1@psu.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Hall, P. and Patil, P. (1994) Properties of nonparametric estimators of autocovariance for stationary random fields. Probability Theory and Related Fields, 99:399-424. &lt;doi:10.1007/BF01199899&gt;
+</p>
+<p>Hall, P., Fisher, N.I. and Hoffmann, B. (1994) On the nonparametric estimation of covariance functions. Annals of Statistics, 22:2115-2134 &lt;doi:10.1214/aos/1176325774&gt;.
+</p>
+<p>Bjornstad, O.N. and Falck, W. (2001) Nonparametric spatial covariance functions: estimation and testing. Environmental and Ecological Statistics, 8:53-70 &lt;doi:10.1023/A:1009601932481&gt;.
+</p>
+<p>Bjornstad, O.N., Ims, R.A. and Lambin, X. (1999) Spatial population dynamics: Analysing patterns and processes of population synchrony. Trends in Ecology and Evolution, 11:427-431 &lt;doi:10.1016/S0169-5347(99)01677-8&gt;.
+</p>
+<p>Bjornstad, O. N., and J. Bascompte. (2001) Synchrony and second order spatial correlation in host-parasitoid systems. Journal of Animal Ecology 70:924-933 &lt;doi:10.1046/j.0021-8790.2001.00560.x&gt;.
+</p>
+<p>Grenfell, B.T., Bjornstad, O.N., &amp; Kappey, J. (2001) Travelling waves and spatial hierarchies in measles epidemics. Nature 414:716-723. &lt;doi:10.1038/414716a&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Sncf2D</code>, <code>Sncf.srf</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># first generate some sample data
+x &lt;- expand.grid(1:20, 1:5)[, 1]
+y &lt;- expand.grid(1:20, 1:5)[, 2]
+# z data from an exponential random field
+z &lt;- cbind(
+   rmvn.spa(x = x, y = y, p = 2, method = "exp"),
+   rmvn.spa(x = x, y = y, p = 2, method = "exp")
+  )
+# w data from a gaussian random field
+w &lt;- cbind(
+  rmvn.spa(x = x, y = y, p = 2, method = "gaus"), 
+  rmvn.spa(x = x, y = y, p = 2, method = "gaus")
+  )
+# multivariate nonparametric covariance function
+fit1 &lt;- Sncf(x = x, y = y, z = z, resamp = 0)
+## Not run: plot.Sncf(fit1)
+summary(fit1)
+
+# multivariate nonparametric cross-covariance function
+fit2 &lt;- Sncf(x = x, y = y, z = z, w = w, resamp = 0)
+## Not run: plot(fit2)
+summary(fit2)
+</code></pre>
+
+
+</div>

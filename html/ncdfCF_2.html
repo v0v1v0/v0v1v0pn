@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>aoi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Area of Interest</h2>
+
+<h3>Description</h3>
+
+<p>This function constructs the area of interest of an analysis. It
+consists of an extent and a resolution of longitude and latitude, all in
+decimal degrees.
+</p>
+<p>The AOI is used to define the subset of data to be extracted from a
+variable that has an auxiliary longitude-latitude grid (see the
+CFAuxiliaryLongLat class) at a specified resolution. The variable thus
+has a primary coordinate system where the horizontal components are not a
+geographic system of longitude and latitude coordinates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">aoi(lonMin, lonMax, latMin, latMax, resX, resY)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lonMin, lonMax, latMin, latMax</code></td>
+<td>
+<p>The minimum and maximum values of the
+longitude and latitude of the AOI, in decimal degrees. The longitude values
+must agree with the range of the longitude in the variable to which this
+AOI will be applied, e.g. <code style="white-space: pre;">⁠[-180,180]⁠</code> or <code style="white-space: pre;">⁠[0,360]⁠</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resX, resY</code></td>
+<td>
+<p>The separation between adjacent grid cell, in the longitude
+and latitude directions respectively, in decimal degrees. The permitted
+values lie within the range <code style="white-space: pre;">⁠[0.01 ... 10]⁠</code>. If <code>resY</code> is missing it will
+use the value of <code>resX</code>, yielding square grid cells.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Following the CF Metadata Conventions, axis coordinates represent
+the center of grid cells. So when specifying <code>aoi(20, 30, -10, 10, 1, 2)</code>,
+the south-west grid cell coordinate is at <code style="white-space: pre;">⁠(20.5, -9)⁠</code>. If the axes of the
+longitude-latitude grid have bounds, then the bounds will coincide with the
+AOI and the <code>CFVariable$subset()</code> method that uses the AOI will attach
+those bounds as attributes to the resulting array.
+</p>
+<p>If no resolution is specified, it will be determined from the separation
+between adjacent grid cells in both longitude and latitude directions in
+the middle of the area of interest. If no extent is specified (meaning,
+none of the values; if some but not all values are specified an error will
+be thrown), then the whole extent of the variable is used, extended
+outwards by the bounds if they are set or half the resolution otherwise.
+Thus, to get the entire extent of the variable but in a longitude-latitude
+grid and with a resolution comparable to the resolution at the original
+Cartesian coordinate system of the variable, simply pass <code>aoi()</code> as an
+argument to CFVariable$subset(). Note that any missing
+arguments are calculated internally and stored in the returned object, but
+only after the call to <code>CFVariable$subset()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The return value of the function is an <code>R6</code> object which uses
+reference semantics. Making changes to the returned object will be visible
+in all copies made of the object.
+</p>
+
+
+<h3>Caching</h3>
+
+<p>In data collections that are composed of multiple variables in a single
+netCDF resource, a single auxiliary longitude-latitude grid may be
+referenced by multiple variables, such as in <a href="https://www.myroms.org">ROMS</a>
+data which may have dozens of variables using a shared grid. When
+subsetting with an AOI, the instance of this class is cached to improve
+performance. The successive calls to <code>CFVariable$subset()</code> should use the
+same object returned from a single call to this function for this caching
+to work properly.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">aoi &lt;- aoi(20, 60, -40, -20, 0.5)
+aoi
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,356 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cdROC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cumulative/dynamic ROC curve estimate
+</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates a time-dependent ROC curve following the cumulative/dynamic approach and returns a 'cdroc' object. This object can be <code>printed</code> or <code>plotted</code>. To deal with the right censored problem different statistics can be considered: those ones proposed by <em>Martinez-Camblor et al. (2016)</em> based on the hazard Cox regression model (semiparametric) or the Kaplan-Meier estimator (non-parametric); and the one included in <em>Li et al. (2016)</em> based on the kernel-weighted Kaplan-Meier method. See <em>References</em> below.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cdROC(stime, status, marker, predict.time, ...)
+## Default S3 method:
+cdROC(stime, status, marker, predict.time, method=c('Cox', 'KM', 'wKM'),
+      kernel=c('normal', 'Epanechnikov', 'other'), h=1,
+      kernel.fun = function(x,xi,h){u &lt;- (x-xi)/h; 1/(2*h)*(abs(u) &lt;= 1)},
+      ci=FALSE, boot.n=100, conf.level=0.95, seed=2032, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>stime </code></td>
+<td>
+
+<p>vector of observed times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>status </code></td>
+<td>
+
+<p>vector of status (takes the value 0 if the subject is censored and 1 otherwise).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marker </code></td>
+<td>
+
+<p>vector of (bio)marker values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predict.time </code></td>
+<td>
+
+<p>considered time point (scalar).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method </code></td>
+<td>
+
+<p>procedure used to estimate the probability. One of "Cox" (method based on Cox regression), "KM" (method based on Kaplan-Meier estimator) or "wKM" (method based on kernel-weighted Kaplan-Meier estimator).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel </code></td>
+<td>
+
+<p>procedure used to calculate the kernel function. One of "normal", "Epanechnikov" or "other".  Only considered if <code>method='wKM'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h </code></td>
+<td>
+
+<p>bandwith used to calculate the kernel function. Only considered if <code>method='wKM'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel.fun </code></td>
+<td>
+
+<p>if <code>method='wKM'</code> and <code>kernel='other'</code>, function used to calculate the kernel function. It has three input parameters: <code>x</code>=vector, <code>xi</code>=value around which the kernel weight should be computed, <code>h</code>=bandwidth. Default: Uniform kernel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci </code></td>
+<td>
+
+<p>if TRUE, a confidence interval for the area under the curve is computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.n </code></td>
+<td>
+
+<p>number of bootstrap replicates considered to build the confidence interval. Default: 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level </code></td>
+<td>
+
+<p>the width of the confidence band as a number in (0,1). Default: 0.95, resulting in a 95% confidence band.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed </code></td>
+<td>
+
+<p>seed considered to generate bootstrap replicates (for reproducibility).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>... </code></td>
+<td>
+
+<p>additional arguments for <code>cdROC</code>. Ignored.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Assuming that larger values of the marker are associated with higher probabilities of occurrence of the event, the cumulative sensitivity and the dynamic specificity are defined by:
+</p>
+<p><code class="reqn">Se^C(x,t) = P(</code><code>marker</code> <code class="reqn">&gt; x | </code><code>stime</code> <code class="reqn">\le t)</code>   and   <code class="reqn">Sp^D(x,t) = P(</code><code>marker</code> <code class="reqn">\le x |</code> <code>stime</code> <code class="reqn">&gt; t)</code>.
+</p>
+<p>The resulting ROC curve is known as the cumulative/dynamic ROC curve, <code class="reqn">R_t^{C/D}</code>, where <code class="reqn">t = </code> <code>predict.time</code>.
+</p>
+<p>Data censored before <code class="reqn">t</code> is the major handicap with regard to the estimation of the time-dependent ROC curve. In order to estimate the probability of surviving beyond <code class="reqn">t</code> for the <code class="reqn">i</code>-th subject, <code class="reqn">\hat{P}_i</code>, three different methods are considered:
+</p>
+
+<ul>
+<li>
+<p>A semiparametric one, using a proportional hazard Cox regression model:
+</p>
+<p>The hazard function is estimated by <code class="reqn">\lambda(t) = \lambda_0(t) \cdot exp(\beta \cdot X)</code> where <code class="reqn">X</code> denotes the marker.
+</p>
+<p>The probability is estimated by <code class="reqn">\hat{P}_i = \frac{\hat{S}(t | X = x_i)}{\hat{S}(z_i | X = x_i)}</code> where <code class="reqn">z_i</code> stands for the observed time of the <code class="reqn">i</code>-th subject and <code class="reqn">\hat{S}</code> is the survival function estimated from the Cox regression model.
+</p>
+</li>
+<li>
+<p>A non-parametric one, using the Kaplan-Meier estimator directly:
+</p>
+<p>The probability is estimated by <code class="reqn">\hat{P}_i = \frac{\hat{S}(t)}{\hat{S}(z_i)}</code> where <code class="reqn">z_i</code> stands for the observed time of the <code class="reqn">i</code>-th subject and <code class="reqn">\hat{S}</code> is the survival function estimated by the Kaplan-Meier method referred to those subjects satisfying <code class="reqn">X \le x_i</code>.
+</p>
+</li>
+<li>
+<p>A non-parametric one, using the kernel-weighted Kaplan-Meier estimator:
+</p>
+<p>The survival function is estimated by <code class="reqn">\hat{S}(t | X = x_i) = \prod_{s \leq t} \left[ 1- \frac{\sum_{j=1}^n K_h(x_j,x_i) I(z_j = s) status_j}{\sum_{j=1}^n K_h(x_j,x_i) I(z_j = s)} \right]</code> where <code class="reqn">z_j</code> stands for the observed time of the <code class="reqn">j</code>-th subject, <code class="reqn">I</code> is the indicator function and <code class="reqn">status_j</code> takes the value 0 if the <code class="reqn">j</code>-th subject is censored and 1 otherwise.
+</p>
+<p>Two different methods can be considered in order to define the kernel function, <code class="reqn">K_h(x_j,x_i)</code>:
+</p>
+
+<ul>
+<li>
+<p><code>kernel='normal'</code>: 
+</p>
+<p><code class="reqn">K_h(x_j,x_i) =  \frac{1}{h \sqrt{2 \pi}} exp\{ - \frac{(x_j - x_i)^2}{2 h^2} \}</code>
+</p>
+</li>
+<li>
+<p><code>kernel='Epanechnikov'</code>: 
+</p>
+<p><code class="reqn">K_h(x_j,x_i) = \frac{3}{4h} \left( 1 - \frac{x_j - x_i}{h}  \right) I(|x_j - x_i| \le h)</code>
+</p>
+</li>
+</ul>
+<p>where <code class="reqn">h</code> is the bandwidth considered for kernel weights.
+</p>
+<p>If the user decide to use another kernel function, <code>kernel='other'</code>, it should be defined by the <code>kernel.fun</code> input parameter, which has three parameters following this order: <code>x</code> is a vector, <code>xi</code> is the value around which the kernel weight should be computed and <code>h</code> is the bandwidth.
+</p>
+<p>The probability is estimated by <code class="reqn">\hat{P}_i = \frac{\hat{S}(t | X = x_i)}{\hat{S}(z_i | X = x_i)}</code> where <code class="reqn">z_i</code> stands for the observed time of the <code class="reqn">i</code>-th subject and <code class="reqn">\hat{S}</code> is the survival function estimated by the kernel-weighted Kaplan-Meier method considered above.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A list of class 'cdroc' with the following content:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>TP </code></td>
+<td>
+
+<p>vector of sensitivities (true positive rates).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TN </code></td>
+<td>
+
+<p>vector of specificities (true negative rates).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutPoints </code></td>
+<td>
+
+<p>vector of thresholds considered for the (bio)marker. It coincides with the <code>marker</code> vector adding <code class="reqn">min(</code><code>marker</code><code class="reqn">)-1</code> and <code class="reqn">max(</code><code>marker</code><code class="reqn">)+1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auc </code></td>
+<td>
+
+<p>area under the curve estimate by trapezoidal rule.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci </code></td>
+<td>
+
+<p>if TRUE, a confidence interval for the area under the curve has been computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.n </code></td>
+<td>
+
+<p>number of bootstrap replicates considered to build the confidence interval. Default: 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level </code></td>
+<td>
+
+<p>the width of the confidence band as a number in (0,1). Default: 0.95, resulting in a 95% confidence band.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed </code></td>
+<td>
+
+<p>seed considered to generate bootstrap replicates (for reproducibility).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meanAuc </code></td>
+<td>
+
+<p>bootstrap area under the curve estimate (mean along bootstrap replicates).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ciAuc</code></td>
+<td>
+
+<p>bootstrap confidence interval for the area under the curve.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aucs</code></td>
+<td>
+
+<p>vector of bootstrap area under the curve estimates.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stime </code></td>
+<td>
+
+<p>vector of observed times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>status </code></td>
+<td>
+
+<p>vector of status (takes the value 0 if the subject is censored and 1 otherwise).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marker </code></td>
+<td>
+
+<p>vector of (bio)marker values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predict.time </code></td>
+<td>
+
+<p>considered time point (scalar).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method </code></td>
+<td>
+
+<p>procedure used in order to estimate the probability.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel </code></td>
+<td>
+
+<p>procedure used to calculate the kernel function. Only considered if <code>method='wKM'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h </code></td>
+<td>
+
+<p>bandwith used to calculate the kernel function. Only considered if <code>method='wKM'</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p><code>survfit</code> and <code>Surv</code> functions in <code>survival</code> package are used in order to estimate the survival functions in both methodologies. Additionally, <code>coxph</code> from the same package is used to fit the Cox proportional hazard regression model in the semiparametric approach.
+</p>
+
+
+<h3>References</h3>
+
+<p>Martinez-Camblor P., F-Bayon G., Perez-Fernandez S., 2016, Cumulative/dynamic ROC curve estimation, <em>Journal of Statistical Computation and Simulation</em>, <b>86</b>(17), 3582-3594.
+</p>
+<p>Li L., Greene T., Hu B., 2016, A simple method to estimate the time-dependent receiver operating characteristic curve and the area under the curve with right censored data, <em>Statistical Methods in Medical Research</em>, DOI: 10.1177/0962280216680239.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Basic example. Data
+set.seed(123)
+stime &lt;- rchisq(50,3)
+status &lt;- sample(c(rep(1,40), rep(0,10)))
+marker &lt;- max(stime) - stime + rnorm(50,0,2)
+
+# Cumulative/dynamic ROC curve estimate at time 2.8 (Cox method is used) with 0.95 confidence
+# interval for the area under the curve
+cdROC(stime, status, marker, 2.8, ci=TRUE)
+
+# Cumulative/dynamic ROC curve estimate at time 3.1 (Kaplan-Meier method is used)
+cdROC(stime, status, marker, 3.1, method="KM")
+
+# Cumulative/dynamic ROC curve estimate at time 3 (kernel-weighted Kaplan-Meier method with
+# gaussian kernel and bandwidth 1 is used)
+cdROC(stime, status, marker, 3, method="wKM")
+
+# Cumulative/dynamic ROC curve estimate at time 3 (kernel-weighted Kaplan-Meier method with
+# biweight kernel and bandwidth equals to 2 is used)
+cdROC(stime, status, marker, 3, method="wKM", kernel="other", h=2,
+      kernel.fun = function(x,xi,h){u &lt;- (x-xi)/h; 15/(16*h)*(1-u^2)^2*(abs(u)&lt;=1)})
+</code></pre>
+
+
+</div>

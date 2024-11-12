@@ -1,0 +1,77 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>decideAndJump</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates a nimbleFunction for executing the Metropolis-Hastings jumping decision,
+and updating values in the model, or in a carbon copy modelValues object, accordingly.</h2>
+
+<h3>Description</h3>
+
+<p>This nimbleFunction generator must be specialized to three required arguments: a model, a modelValues, and a character vector of node names.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">decideAndJump(model, mvSaved, target, UNUSED)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>An uncompiled or compiled NIMBLE model object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mvSaved</code></td>
+<td>
+<p>A modelValues object containing identical variables and logProb variables as the model. Can be created by <code>modelValues(model)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>A character vector providing the target node.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>UNUSED</code></td>
+<td>
+<p>Unused placeholder argument.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Calling decideAndJump(model, mvSaved, target) will generate a specialized nimbleFunction with four required numeric arguments:
+</p>
+<p>modelLP1: The model log-probability associated with the newly proposed value(s)
+</p>
+<p>modelLP0: The model log-probability associated with the original value(s)
+</p>
+<p>propLP1: The log-probability associated with the proposal forward-transition
+</p>
+<p>propLP0: The log-probability associated with the proposal reverse-tranisiton
+</p>
+<p>Executing this function has the following effects:
+– Calculate the (log) Metropolis-Hastings ratio, as logMHR = modelLP1 - modelLP0 - propLP1 + propLP0
+– Make the proposal acceptance decision based upon the (log) Metropolis-Hastings ratio
+– If the proposal is accepted, the values and associated logProbs of all calcNodes are copied from the model object into the mvSaved object
+– If the proposal is rejected, the values and associated logProbs of all calcNodes are copied from the mvSaved object into the model object
+– Return a logical value, indicating whether the proposal was accepted
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Turek
+</p>
+
+
+</div>

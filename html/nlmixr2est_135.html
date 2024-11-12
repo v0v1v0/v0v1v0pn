@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlmixr2Hess</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Hessian</h2>
+
+<h3>Description</h3>
+
+<p>Unlike 'stats::optimHess' which assumes the gradient is accurate,
+nlmixr2Hess does not make as strong an assumption that the gradient
+is accurate but takes more function evaluations to calculate the
+Hessian.  In addition, this procedures optimizes the forward
+difference interval by <code>nlmixr2Gill83</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlmixr2Hess(par, fn, ..., envir = parent.frame())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>par</code></td>
+<td>
+<p>Initial values for the parameters to be optimized over.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn</code></td>
+<td>
+<p>A function to be minimized (or maximized), with first
+argument the vector of parameters over which minimization is to take
+place.  It should return a scalar result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Extra arguments sent to <code>nlmixr2Gill83</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>envir</code></td>
+<td>
+<p>an environment within which to evaluate the call.  This
+will be most useful if <code>what</code> is a character string and
+the arguments are symbols or quoted expressions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If you have an analytical gradient function, you should use
+'stats::optimHess'
+</p>
+
+
+<h3>Value</h3>
+
+<p>Hessian matrix based on Gill83
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matthew Fidler
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nlmixr2Gill83</code>, <code>optimHess</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> func0 &lt;- function(x){ sum(sin(x))  }
+ x &lt;- (0:10)*2*pi/10
+ nlmixr2Hess(x, func0)
+
+fr &lt;- function(x) {   ## Rosenbrock Banana function
+    x1 &lt;- x[1]
+    x2 &lt;- x[2]
+    100 * (x2 - x1 * x1)^2 + (1 - x1)^2
+}
+grr &lt;- function(x) { ## Gradient of 'fr'
+    x1 &lt;- x[1]
+    x2 &lt;- x[2]
+    c(-400 * x1 * (x2 - x1 * x1) - 2 * (1 - x1),
+       200 *      (x2 - x1 * x1))
+}
+
+h1 &lt;- optimHess(c(1.2,1.2), fr, grr)
+
+h2 &lt;- optimHess(c(1.2,1.2), fr)
+
+## in this case h3 is closer to h1 where the gradient is known
+
+h3 &lt;- nlmixr2Hess(c(1.2,1.2), fr)
+</code></pre>
+
+
+</div>

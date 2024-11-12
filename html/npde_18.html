@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npde.cens.method</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Method used to handle censored data</h2>
+
+<h3>Description</h3>
+
+<p>Specifies the method used to handle censored data (data below the limit of quantification LOQ
+</p>
+
+
+<h3>Details</h3>
+
+<p>Several methods are available to handle censored data.
+</p>
+
+<dl>
+<dt>omit</dt>
+<dd>
+<p>pd and npde for censored data will be set to NA</p>
+</dd>
+<dt>cdf</dt>
+<dd>
+<p>for an observation ycens_ij under the LOQ, a pd_ij will be imputed in the uniform distribution [0-pLOQ_ij] where pLOQ_ij is the probability that y_ij is below LOQ, according to the model; 
+the predictive distribution will then be used to obtain a corresponding y*_ij. 
+This is also performed for all simulated data, and the npde are then computed on the completed dataset containing the observed y_ij for the uncensored data and the y*_ij imputed for the censored data. This method is the default.</p>
+</dd>
+<dt>ipred</dt>
+<dd>
+<p>an observation ycens_ij is replaced by the individual prediction according to the model (ipred, which must be present in the dataset). Simulated data are left untouched.</p>
+</dd>
+<dt>ppred</dt>
+<dd>
+<p>an observation ycens_ij is replaced by the population prediction according to the model. Simulated data are left untouched.</p>
+</dd>
+<dt>loq</dt>
+<dd>
+<p>an observation ycens_ij is replaced by the value of the LOQ. Simulated data are left untouched.</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>This is not a function and does not have a return value, this is a statistical method.
+</p>
+<p>More details can be found in the PDF documentation.
+</p>
+
+
+<h3>References</h3>
+
+<p>K. Brendel, E. Comets, C. Laffont, C. Laveille, and F.
+Mentre. Metrics for external model evaluation with an application to the
+population pharmacokinetics of gliclazide. <em>Pharmaceutical Research</em>,
+23:2036–49, 2006.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# You need to have gridExtra installed to successfully run this example
+if(requireNamespace("gridExtra", quietly=TRUE)) {
+  data(warfarin)
+  data(simwarfarinCov)
+  wcov&lt;-autonpde(namobs=warfarin,namsim=simwarfarinCov, iid=1,ix=2,iy=4,icov=c(3,6:8),
+  namsav="warfCov", units=list(x="hr",y="mg/L", covariates=c("mg","kg","-","yr")))
+  
+  # Diagnostic plots for warfarin with a covariate model
+  plot(wcov)
+  
+  # Covariate plots
+  xwt.scatt&lt;-plot(wcov, plot.type="x.scatter", covsplit=TRUE, which.cov="wt")
+  xwt.qqplot&lt;-plot(wcov, plot.type="qqplot", covsplit=TRUE, which.cov="wt")
+  xwt.box&lt;-plot(wcov, plot.type="covariates", which.cov="wt")
+  xsex.scatt&lt;-plot(wcov, plot.type="x.scatter", covsplit=TRUE, which.cov="sex")
+  xsex.qqplot&lt;-plot(wcov, plot.type="qqplot", covsplit=TRUE, which.cov="sex")
+  xsex.box&lt;-plot(wcov, plot.type="covariates", which.cov="sex")
+  
+  # Transforming the reference profile for npd, compared to a VPC plot
+  plot.tnpd&lt;-plot(wcov, plot.type="x.scatter", ref.prof=list(id=2), 
+  main="tnpd with reference profile ID=2")
+  plot.vpc&lt;-plot(wcov, plot.type="vpc", main="VPC")
+  gridExtra::grid.arrange(grobs=list(plot.tnpd, plot.vpc), nrow=1, ncol=2)
+  }
+
+## End(Not run)
+</code></pre>
+
+
+</div>

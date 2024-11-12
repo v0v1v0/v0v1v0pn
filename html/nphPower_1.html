@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cal_event</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Event Rate Calculation</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the event rate given the hazards and drop-out
+distribution parameters
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cal_event(ratio, lambda1, lambda0, entry, fup, l_shape, l_scale)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ratio</code></td>
+<td>
+<p>allocation ratio</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda1</code></td>
+<td>
+<p>hazard rate for treatment group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda0</code></td>
+<td>
+<p>hazard rate for control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry</code></td>
+<td>
+<p>enrollment period time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fup</code></td>
+<td>
+<p>follow-up period time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>l_shape</code></td>
+<td>
+<p>shape parameter of weibull distribution for drop-out</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>l_scale</code></td>
+<td>
+<p>scale parameter of weibull distribution for drop-out</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The event rate is calculated based on the following assumptions: 1)
+patients are uniformly enrolled within <code>entry</code> time; 2) survival
+times for treatment and control are from exponential distribution; 3)
+the drop-out times for treatment and control follow the weibull distribution.
+The final rate is obtained via numeric integration:
+</p>
+<p style="text-align: center;"><code class="reqn">
+P=\int_{t_{fup}}^{t_{enrl}+t_{fup}} \Big \{
+\int_0^{t}r(u)exp\big [-\int_0^u[r(x)+l(x)]dx \big]d(u) \Big \}
+\frac{1}{t_{enrl}} dt
+</code>
+</p>
+
+<p>where <code class="reqn">r(x)</code> is the hazard of event and <code class="reqn">l(x)</code> is the hazard
+of drop-out; <code class="reqn">t_{enrl}</code> is the entry time and <code class="reqn">t_{fup}</code> is the
+follow-up duration.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>ep1</code></td>
+<td>
+<p>event rate for treatment group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ep0</code></td>
+<td>
+<p>event rate for control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ep</code></td>
+<td>
+<p>mean event rate weighted by the randomization ratio</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># median survival time for treatment and control: 16 months vs 12  months
+# entry time: 12 months ; follow-up time: 18 months
+# the shape parameter for weibull drop-out : 0.5
+# median time for drop-out : 48 =&gt;
+# scale parameter: 48/log(2)^(1/0.5)=100
+  RR &lt;- 1; l1 &lt;- log(2)/16; l0 &lt;- log(2)/12
+  t_enrl &lt;- 12; t_fup &lt;- 18
+
+  cal_event(1,l1,l0,t_enrl,t_fup,0.5,100)
+</code></pre>
+
+
+</div>

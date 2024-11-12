@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_nhdplus</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get National Hydrography Dataset V2 Subsets (Multirealization)</h2>
+
+<h3>Description</h3>
+
+<p>Subsets NHDPlusV2 features by location (POINT), area (POLYGON),
+or set of COMIDs. Multi realizations are supported allowing you to query
+for flowlines, catchments, or outlets.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_nhdplus(
+  AOI = NULL,
+  comid = NULL,
+  nwis = NULL,
+  realization = "flowline",
+  streamorder = NULL,
+  t_srs = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>AOI</code></td>
+<td>
+<p>sf (MULTI)POINT or (MULTI)POLYGON. An 'area of interest' can
+be provided as either a location (sf POINT) or area (sf POLYGON)
+in any Spatial Reference System.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comid</code></td>
+<td>
+<p>numeric or character. Search for NHD features by COMID(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nwis</code></td>
+<td>
+<p>numeric or character. Search for NHD features by
+collocated NWIS identifiers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>realization</code></td>
+<td>
+<p>character. What realization to return.
+Default is flowline and options include: outlet, flowline, catchment,
+and all</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>streamorder</code></td>
+<td>
+<p>numeric or character. Only return NHD flowlines with a
+streamorder greater then or equal to this value
+for input value and higher.
+Only usable with AOI and flowline realizations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t_srs</code></td>
+<td>
+<p>character (PROJ string or EPSG code) or numeric (EPSG code).
+A user specified - target -Spatial Reference System (SRS/CRS) for returned objects.
+Will default to the CRS of the input AOI if provided, and to 4326 for ID requests.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The returned object(s) will have the same
+Spatial Reference System (SRS) as the input AOI. If a individual or set of
+IDs are used to query, then the default geoserver CRS of EPSG:4326 is
+preserved. In all cases, a user-defined SRS can be passed to <code>t_srs</code>
+which will override all previous SRS (either input or default).
+All buffer and distance operations are handled internally using in
+EPSG:5070 Albers Equal Area projection
+</p>
+
+
+<h3>Value</h3>
+
+<p>sfc a single, or list, of simple feature objects
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+ point &lt;- sf::st_sfc(sf::st_point(c(-119.845, 34.4146)), crs = 4326)
+ get_nhdplus(point)
+ get_nhdplus(point, realization = "catchment")
+ get_nhdplus(point, realization = "all")
+ get_nhdplus(comid = 101)
+ get_nhdplus(nwis  = c(11120000, 11120500))
+ area &lt;- sf::st_as_sfc(sf::st_bbox(c(xmin = -119.8851, xmax =-119.8361,
+ ymax = 34.42439, ymin = 34.40473), crs = 4326))
+ get_nhdplus(area)
+ get_nhdplus(area, realization = "flowline", streamorder = 3)
+ 
+</code></pre>
+
+
+</div>

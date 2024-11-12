@@ -1,0 +1,277 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neg.reg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test for Evaluating Negligible Effect Between a Predictor and Outcome in a Multiple Regression Model</h2>
+
+<h3>Description</h3>
+
+<p>This function evaluates whether a certain predictor variable in a multiple regression model can be considered statistically and practically negligible according to a predefined interval. i.e., minimally meaningful effect size (MMES)/smallest effect size of interest (SESOI). Where the effect tested is the relationship between the predictor of interest and the outcome variable, holding all other predictors constant.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neg.reg(
+  data = NULL,
+  formula = NULL,
+  predictor = NULL,
+  b = NULL,
+  se = NULL,
+  nop = NULL,
+  n = NULL,
+  eil,
+  eiu,
+  alpha = 0.05,
+  test = "AH",
+  std = FALSE,
+  bootstrap = TRUE,
+  nboot = 1000,
+  plots = TRUE,
+  saveplots = FALSE,
+  seed = NA,
+  ...
+)
+
+## S3 method for class 'neg.reg'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data.frame or matrix which includes the variables considered in the regression model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>an argument of the form y~x1+x2...xn which defines the regression model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictor</code></td>
+<td>
+<p>name of the variable/predictor upon which the test will be applied</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>effect size of the regression coefficient of interest, can be in standardized or unstandardized units</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>standard error associated with the above regression coefficient effect size, pay close attention to standardized vs. unstandardized</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nop</code></td>
+<td>
+<p>number of predictors (excluding intercept) in the regression model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>the sample size used in the regression analysis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eil</code></td>
+<td>
+<p>lower bound of the equivalence interval measured in the same units as the regression coefficients (can be either standardized or unstandardized)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eiu</code></td>
+<td>
+<p>upper bound of the equivalence interval measured in the same units as the regression coefficients (can be either standardized or unstandardized)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>desired alpha level, default is .05</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>AH is the default based on recommendation in Alter &amp; Counsell (2020), TOST is an additional option</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>std</code></td>
+<td>
+<p>indicate if eil and eiu along with b (when dataset is not entered) are in standardized units</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstrap</code></td>
+<td>
+<p>logical, default is TRUE, incorporating bootstrapping when calculating regression coefficients, SE, and CIs</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>1000 is the default. indicate if other number of bootstrapping iterations is desired</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+<p>logical, plotting the results. TRUE is set as default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>saveplots</code></td>
+<td>
+<p>FALSE for no, "png" and "jpeg" for different formats</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>to reproduce previous analyses using bootstrapping, the user can set their seed of choice</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>extra arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>neg.reg</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function evaluates whether a certain predictor variable in a multiple regression model can be considered statistically and practically negligible according to a predefined interval. i.e., minimally meaningful effect size (MMES)/smallest effect size of interest (SESOI). Where the effect tested is the relationship between the predictor of interest and the outcome variable, holding all other predictors constant.
+</p>
+<p>Unlike the most common null hypothesis significance tests looking to detect a difference or the existence of an effect statistically different than zero, in negligible effect testing, the hypotheses are flipped: In essence, H0 states that the effect is non-negligible, whereas H1 states that the effect is in fact statistically and practically negligible.
+</p>
+<p>The statistical tests are based on Anderson-Hauck (1983) and Schuirmann's (1987) Two One-Sided Test (TOST) equivalence testing procedures; namely addressing the question of whether the estimated effect size (and its associated uncertainty) of a predictor variable in a multiple regression model is smaller than the what the user defines as negligible effect size. Defining what is considered negligible effect is done by specifying the negligible (equivalence) interval: its upper (eiu) and lower (eil) bounds.
+</p>
+<p>The negligible (equivalence) interval should be set based on the context of the research. Because the predictor's effect size can be in either standardized or unstandardized units, setting eil and eiu is a matter of determining what magnitude of the relationship between predictor and outcome in either standardized or unstandardized units is the minimally meaningful effect size (MMES) given the context of the research.
+</p>
+<p>It is necessary to be consistent with the units of measurement. For example, unstandardized negligible interval bounds (i.e., eil and eiu) must only be used when std = FALSE (default). If the effect size (b), standard error (se), and sample size (n) are entered manually as arguments (i.e., without the dataset), these should also be in the same units of measurements. Whereas if the user prefers to specify eiu and eil in standardized unites, std = TRUE should be specified. In which case, any units entered into the function must also be in standardized form. Mixing unstandardized and standardized units would yield inaccurate results and likely lead to invalid conclusions. Thus, users must be cognizant of the measurement units of the negligible interval.
+</p>
+<p>There are two main approaches to using neg.reg. The first (and more recommended) is by inserting a dataset ('data' argument) into the function. If the user/s have access to the dataset, they should use the following set of arguments: data, formula, predictor, bootstrap (optional), nboot (optional), and seed (optional). However, this function also accommodates cases where no dataset is available. In this case, users should use the following set of arguments instead: b, se, n, and nop. In either situation, users must specify the negligible interval bounds (eiu and eil). Other optional arguments and features include: alpha, std, test, plots, and saveplots.
+</p>
+<p>The proportional distance (PD; effect size/eiu) estimates the proportional distance of the estimated effect to eiu, and acts as an alternative effect size measure.
+</p>
+<p>The confidence interval for the PD is computed via bootstrapping (percentile bootstrap), unless the user does not insert a dataset. In which case, the PD confidence interval is calculated by dividing the upper and lower CI bounds for the effect size estimate by the absolute value of the negligible interval bounds.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>list</code> containing the following:
+</p>
+
+<ul>
+<li> <p><code>formula</code> The regression model
+</p>
+</li>
+<li> <p><code>effect</code> Specifying if effect size is in standardized or unstandardized units
+</p>
+</li>
+<li> <p><code>test</code> Test type, i.e., Anderson-Hauck (AH) or Two One-Sided Tests (TOST)
+</p>
+</li>
+<li> <p><code>t.value</code> t test statistic. If TOST was specified, only the smaller of the t values will be presented
+</p>
+</li>
+<li> <p><code>df</code> Degrees of freedom associated with the test statistic
+</p>
+</li>
+<li> <p><code>n</code> Sample size
+</p>
+</li>
+<li> <p><code>p.value</code> p value associated with the test statistic. If TOST was specified, only the larger of the p values will be presented
+</p>
+</li>
+<li> <p><code>eil</code> Lower bound of the negligible effect (equivalence) interval
+</p>
+</li>
+<li> <p><code>eiu</code> Upper bound of the negligible effect (equivalence) interval
+</p>
+</li>
+<li> <p><code>predictor</code> Variable name of the predictor in question
+</p>
+</li>
+<li> <p><code>b</code> Effect size of the specified predictor
+</p>
+</li>
+<li> <p><code>se</code> Standard error associated with the effect size point estimate (in the same units)
+</p>
+</li>
+<li> <p><code>l.ci</code> Lower bound of the 1-alpha CI for the effect size
+</p>
+</li>
+<li> <p><code>u.ci</code> Upper bound of the 1-alpha CI for the effect size
+</p>
+</li>
+<li> <p><code>pd</code> Proportional distance
+</p>
+</li>
+<li> <p><code>pd.l.ci</code> Lower bound of the 1-alpha CI for the PD
+</p>
+</li>
+<li> <p><code>pd.u.ci</code> Upper bound of the 1-alpha CI for the PD
+</p>
+</li>
+<li> <p><code>seed</code> Seed identity if bootstrapping is used
+</p>
+</li>
+<li> <p><code>decision</code> NHST decision
+</p>
+</li>
+<li> <p><code>alpha</code> Nominal Type I error rate
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Udi Alter <a href="mailto:udialter@gmail.com">udialter@gmail.com</a> and
+Alyssa Counsell <a href="mailto:a.counsell@torontomu.ca">a.counsell@torontomu.ca</a> and
+Rob Cribbie <a href="mailto:cribbie@yorku.ca">cribbie@yorku.ca</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Negligible Regression Coefficient (equivalence interval: -.1 to .1)
+pr1 &lt;- stats::rnorm(20, mean = 0, sd= 1)
+pr2 &lt;- stats::rnorm(20, mean = 0, sd= 1)
+dp &lt;- stats::rnorm(20, mean = 0, sd= 1)
+dat &lt;- data.frame(pr1,pr2,dp)
+
+# dataset available (unstandardized coefficients, AH procedure, using bootstrap-generated CIs):
+neg.reg(formula=dp~pr1+pr2,data=dat,predictor=pr1,eil=-.1,eiu=.1,nboot=5)
+neg.reg(formula=dat$dp ~ dat$pr1 + dat$pr2, predictor= pr1, eil= -.25, eiu= .25, nboot=5)
+
+# dataset unavailable (standardized coefficients, TOST procedure):
+neg.reg(b= .017, se= .025, nop= 3, n= 500, eil=-.1,eiu=.1, std=TRUE, test="TOST")
+# end.
+
+
+
+</code></pre>
+
+
+</div>

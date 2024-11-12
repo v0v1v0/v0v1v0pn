@@ -1,0 +1,231 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>element</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Theme Elements for Image Grobs</h2>
+
+<h3>Description</h3>
+
+<p>In conjunction with the ggplot2::theme system, the following <code>element_</code>
+functions enable images in non-data components of the plot, e.g. axis text.
+</p>
+
+<ul>
+<li> <p><code>element_nfl_logo()</code>: draws NFL team logos instead of their abbreviations.
+</p>
+</li>
+<li> <p><code>element_nfl_wordmark()</code>: draws NFL team wordmarks instead of their abbreviations.
+</p>
+</li>
+<li> <p><code>element_nfl_headshot()</code>: draws NFL player headshots instead of their GSIS IDs.
+</p>
+</li>
+<li> <p><code>element_path()</code>: draws images from valid image URLs instead of the URL.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">element_nfl_logo(
+  alpha = NULL,
+  colour = NA,
+  hjust = NULL,
+  vjust = NULL,
+  color = NULL,
+  size = 0.5
+)
+
+element_nfl_wordmark(
+  alpha = NULL,
+  colour = NA,
+  hjust = NULL,
+  vjust = NULL,
+  color = NULL,
+  size = 0.5
+)
+
+element_nfl_headshot(
+  alpha = NULL,
+  colour = NA,
+  hjust = NULL,
+  vjust = NULL,
+  color = NULL,
+  size = 0.5
+)
+
+element_path(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The alpha channel, i.e. transparency level, as a numerical value
+between 0 and 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colour, color</code></td>
+<td>
+<p>The image will be colorized with this color. Use the
+special character <code>"b/w"</code> to set it to black and white. For more information
+on valid color names in ggplot2 see
+<a href="https://ggplot2.tidyverse.org/articles/ggplot2-specs.html?q=colour#colour-and-fill">https://ggplot2.tidyverse.org/articles/ggplot2-specs.html?q=colour#colour-and-fill</a>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hjust, vjust</code></td>
+<td>
+<p>The horizontal and vertical adjustment respectively.
+Must be a numerical value between 0 and 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>The output grob size in <code>cm</code> (!).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed on to ggpath::element_path</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The elements translate NFL team abbreviations or NFL player GSIS IDs
+into logo images or player headshots, respectively.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An S3 object of class <code>element</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>geom_nfl_logos()</code>, <code>geom_nfl_headshots()</code>, <code>geom_nfl_wordmarks()</code>,
+and <code>geom_from_path()</code> for more information on valid team abbreviations,
+player IDs, and other parameters.
+</p>
+<p>The examples on <a href="https://nflplotr.nflverse.com/articles/nflplotR.html">https://nflplotr.nflverse.com/articles/nflplotR.html</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(nflplotR)
+library(ggplot2)
+
+team_abbr &lt;- valid_team_names()
+# remove conference logos from this example
+team_abbr &lt;- team_abbr[!team_abbr %in% c("AFC", "NFC", "NFL")]
+
+df &lt;- data.frame(
+  random_value = runif(length(team_abbr), 0, 1),
+  teams = team_abbr
+)
+
+# use logos for x-axis
+ggplot(df, aes(x = teams, y = random_value)) +
+  geom_col(aes(color = teams, fill = teams), width = 0.5) +
+  scale_color_nfl(type = "secondary") +
+  scale_fill_nfl(alpha = 0.4) +
+  theme_minimal() +
+  theme(axis.text.x = element_nfl_logo())
+
+# use logos for y-axis
+ggplot(df, aes(y = teams, x = random_value)) +
+  geom_col(aes(color = teams, fill = teams), width = 0.5) +
+  scale_color_nfl(type = "secondary") +
+  scale_fill_nfl(alpha = 0.4) +
+  theme_minimal() +
+  theme(axis.text.y = element_nfl_logo())
+
+#############################################################################
+# Headshot Examples
+#############################################################################
+library(nflplotR)
+library(ggplot2)
+
+# Silence an nflreadr message that is irrelevant here
+old &lt;- options(nflreadr.cache_warning = FALSE)
+
+dfh &lt;- data.frame(
+  random_value = runif(9, 0, 1),
+  player_gsis = c("00-0033873",
+                  "00-0026498",
+                  "00-0035228",
+                  "00-0031237",
+                  "00-0036355",
+                  "00-0019596",
+                  "00-0033077",
+                  "00-0012345",
+                  "00-0031280")
+)
+
+# use headshots for x-axis
+ggplot(dfh, aes(x = player_gsis, y = random_value)) +
+  geom_col(width = 0.5) +
+  theme_minimal() +
+  theme(axis.text.x = element_nfl_headshot(size = 1))
+
+# use headshots for y-axis
+ggplot(dfh, aes(y = player_gsis, x = random_value)) +
+  geom_col(width = 0.5) +
+  theme_minimal() +
+  theme(axis.text.y = element_nfl_headshot(size = 1))
+
+# Restore old options
+options(old)
+
+#############################################################################
+# Wordmarks and other Images
+#############################################################################
+
+library(ggplot2)
+
+dt &lt;- data.table::as.data.table(mtcars)[,
+  `:=`(
+    team = sample(c("LAC", "BUF", "DAL", "ARI"), nrow(mtcars), TRUE),
+    player = sample(
+      c("00-0033873", "00-0035228", "00-0036355", "00-0019596"),
+      nrow(mtcars),
+      TRUE
+    )
+  )
+]
+
+ggplot(dt, aes(x = mpg, y = disp)) +
+  geom_point() +
+  facet_wrap(vars(team)) +
+  labs(
+    title = tools::toTitleCase("These are random teams and data"),
+    subtitle = "I just want to show how the nflplotR theme elements work",
+    caption = "https://github.com/nflverse/nflseedR/raw/master/man/figures/caption.png"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_text(face = "bold"),
+    axis.title = element_blank(),
+    # make wordmarks of team abbreviations
+    strip.text = element_nfl_wordmark(size = 1),
+    # load image from url in caption
+    plot.caption = element_path(hjust = 1, size = 0.4)
+  )
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_dyad_var</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Dyad Variables</h2>
+
+<h3>Description</h3>
+
+<p>Transforms vertex variables or observed directed/undirected ties
+into dyad variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_dyad_var(var, type = "att")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>variable vector (actor attribute) or adjacency matrix (ties)
+to be transformed to a dyad variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>either 'att' for actor attribute (default) or 'tie' for relations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Dyad variables are given as pairs of incident vertex variables
+or actor attributes. Here, unique pairs of original attribute values
+constitute the outcome space. Note that the actor  attributes need
+to be categorical with finite range spaces. For example, binary
+attribute yields outcome space (0,0), (0,1), (1,0), (1,1) coded as (0),(1),(2),(3).
+Warning message is shown if actor attribute has too many unique outcomes
+as it will yield too many possible outcomes once converted in to a dyad variable.
+<br></p>
+<p>For directed relations, pairs of indicators from the adjacency matrix constitute
+the four outcomes representing possible combinations of sending and receiving ties:
+(0,0), (0,1), (1,0), (1,1) coded as (0),(1),(2),(3).
+<br></p>
+<p>For undirected relations, an indicator variable which is directly read from the
+adjacency matrix represents the dyadic variable.
+<br></p>
+
+
+<h3>Value</h3>
+
+<p>Dataframe with three columns:
+first two columns show the vertex pairs <code>u</code> and <code>v</code> where <code>u&lt;v</code> ,
+and the third column gives the value of the transformed dyadic variable <code>var</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Termeh Shafie
+</p>
+
+
+<h3>References</h3>
+
+<p>Frank, O., &amp; Shafie, T. (2016). Multivariate entropy analysis of network data.
+<em>Bulletin of Sociological Methodology/Bulletin de Méthodologie Sociologique</em>, 129(1), 45-63.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>get_triad_var</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># use internal data set
+data(lawdata)
+adj.advice &lt;- lawdata[[1]]
+adj.cowork &lt;- lawdata[[3]]
+df.att &lt;- lawdata[[4]]
+
+# three steps of data editing of attribute dataframe:
+# 1. categorize variables 'years' and 'age' based on
+# approximately three equally size groups (values based on cdf)
+# 2. make sure all outcomes start from the value 0 (optional)
+# 3. remove variable 'senior' as it consists of only unique values (thus redundant)
+df.att.ed &lt;- data.frame(
+    status = df.att$status,
+    gender = df.att$gender,
+    office = df.att$office - 1,
+    years = ifelse(df.att$years &lt;= 3, 0,
+        ifelse(df.att$years &lt;= 13, 1, 2)
+    ),
+    age = ifelse(df.att$age &lt;= 35, 0,
+        ifelse(df.att$age &lt;= 45, 1, 2)
+    ),
+    practice = df.att$practice,
+    lawschool = df.att$lawschool - 1
+)
+
+# actor attribute converted to dyad variable
+dyad.gend &lt;- get_dyad_var(df.att.ed$gender, "att")
+
+# directed tie converted to dyad variable
+dyad.adv &lt;- get_dyad_var(adj.advice, "tie")
+
+# undirected tie converted to dyad variable
+dyad.cwk &lt;- get_dyad_var(adj.cowork, "tie")
+</code></pre>
+
+
+</div>

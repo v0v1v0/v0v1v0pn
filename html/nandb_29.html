@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>number</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate number from image series.</h2>
+
+<h3>Description</h3>
+
+<p>Given a time stack of images, <code>number()</code> performs a calculation of the number
+for each pixel.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">number(
+  img,
+  def,
+  thresh = NULL,
+  detrend = FALSE,
+  quick = FALSE,
+  filt = NULL,
+  s = 1,
+  offset = 0,
+  readout_noise = 0,
+  gamma = 1,
+  parallel = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>A 4-dimensional array of images indexed by <code>img[y, x, channel, frame]</code> (an object of class ijtiff::ijtiff_img). The image to perform the
+calculation on. To perform this on a file that has not yet been read in,
+set this argument to the path to that file (a string).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>def</code></td>
+<td>
+<p>A character. Which definition of number do you want to use, <code>"n"</code>
+or <code>"N"</code>?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>The threshold or thresholding method (see
+<code>autothresholdr::mean_stack_thresh()</code>) to use on the image prior to
+detrending and number calculations. If there are many channels, this may be
+specified as a vector or list, one element for each channel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detrend</code></td>
+<td>
+<p>Detrend your data with <code>detrendr::img_detrend_rh()</code>. This is
+the best known detrending method for brightness analysis. For more
+fine-grained control over your detrending, use the <code>detrendr</code> package. If
+there are many channels, this may be specified as a vector, one element for
+each channel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quick</code></td>
+<td>
+<p><code>FALSE</code> repeats the detrending procedure (which has some inherent
+randomness) a few times to hone in on the best detrend. <code>TRUE</code> is quicker,
+performing the routine only once. <code>FALSE</code> is better.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filt</code></td>
+<td>
+<p>Do you want to smooth (<code>filt = 'mean'</code>) or median (<code>filt = 'median'</code>) filter the number image using <code>smooth_filter()</code> or
+<code>median_filter()</code> respectively? If selected, these are invoked here with a
+filter radius of 1 (with corners included, so each median is the median of
+9 elements) and with the option <code>na_count = TRUE</code>. If you want to
+smooth/median filter the number image in a different way, first calculate
+the numbers without filtering (<code>filt = NULL</code>) using this function and then
+perform your desired filtering routine on the result. If there are many
+channels, this may be specified as a vector, one element for each channel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>A positive number. The <code class="reqn">S</code>-factor of microscope acquisition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset, readout_noise</code></td>
+<td>
+<p>Microscope acquisition parameters. See reference
+Dalal et al.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>Factor for correction of number <code class="reqn">n</code> due to the illumination
+profile. The default (<code>gamma = 1</code>) has no effect. Changing gamma will have
+the effect of dividing the result by <code>gamma</code>, so the result with <code>gamma = 0.5</code> is two times the result with <code>gamma = 1</code>. For a Gaussian illumination
+profile, use <code>gamma = 0.3536</code>; for a Gaussian-Lorentzian illumination
+profile, use <code>gamma = 0.0760</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Would you like to use multiple cores to speed up this
+function? If so, set the number of cores here, or to use all available
+cores, use <code>parallel = TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A matrix, the number image.
+</p>
+
+
+<h3>References</h3>
+
+<p>Digman MA, Dalal R, Horwitz AF, Gratton E. Mapping the Number of
+Molecules and Brightness in the Laser Scanning Microscope. Biophysical
+Journal. 2008;94(6):2320-2332. doi: <a href="https://doi.org/10.1529/biophysj.107.114645">10.1529/biophysj.107.114645</a>.
+</p>
+<p>Dalal, RB, Digman, MA, Horwitz, AF, Vetri, V, Gratton, E (2008).
+Determination of particle number and brightness using a laser scanning
+confocal microscope operating in the analog mode. Microsc. Res. Tech., 71,
+1:69-81. doi: <a href="https://doi.org/10.1002/jemt.20526">10.1002/jemt.20526</a>.
+</p>
+<p>Hur K-H, Macdonald PJ, Berk S, Angert CI, Chen Y, Mueller JD (2014)
+Quantitative Measurement of Brightness from Living Cells in the Presence of
+Photodepletion. PLoS ONE 9(5): e97440. doi: <a href="https://doi.org/10.1371/journal.pone.0097440">10.1371/journal.pone.0097440</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+img &lt;- ijtiff::read_tif(system.file("extdata", "50.tif", package = "nandb"))
+ijtiff::display(img[, , 1, 1])
+num &lt;- number(img, "N", thresh = "Huang")
+num &lt;- number(img, "n", thresh = "tri")
+
+</code></pre>
+
+
+</div>

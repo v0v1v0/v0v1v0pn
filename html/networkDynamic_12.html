@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>activity.attribute</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Activity Attributes for Dynamically Extended Networks </h2>
+
+<h3>Description</h3>
+
+<p>Dynamically extended networks are <code>networkDynamic</code> class objects (extensions of network objects) whose vertex and edge elements include timing information. This page describes the types of timing information currently available, and the general syntax for setting or querying this information.
+</p>
+
+
+<h3>Details</h3>
+
+<p>Currently, each edge and vertex in a dynamically extended network is presumed to be in one of two states at any given point in time:  (“active” or “inactive”).  The state of a network element (i.e., edge or vertex) is governed by an attribute with the name “active”, which is considered a reserved term for purposes of this package.
+</p>
+<p>The activity attribute consists of a two-column numeric matrix.  Each
+row contains an activity spell, and the two columns 
+encode onset and terminus times respectively. Elements are presumed
+inactive until the onset of their first activity spell, and are
+likewise presumed inactive after the termination of their last active spell.
+</p>
+<p>Spells are taken to span the period from the onset
+(inclusive) to the terminus (exclusive), so [onset,terminus). 
+They must be consecutive, ordered forward in time, and strictly
+non-overlapping.  
+</p>
+<p>The syntax for defining or querying spells can specify either an instantaneous time point or an interval.  The commands for this include <code>at=</code>,  <code>onset=</code>, <code>terminus=</code> and <code>length=</code>.  Any numeric values may be used in the interval specifications, including  <code>Inf</code> and <code>-Inf</code>, (with some restrictions, see below).  A spell with <code>onset=-Inf</code> represents onset censoring. A spell with <code>terminus=Inf</code> represents terminus censoring. <code>Inf</code> and <code>-Inf</code> cannot be used with the <code>at</code> specification. Similarly, <code>onset</code> can not be <code>Inf</code> and <code>terminus</code> can not be <code>-Inf</code>.
+</p>
+<p>The general syntax rules for specifying spells are as follows:
+</p>
+<p>To specify a spell as a single time point:
+</p>
+
+<ul>
+<li>
+<p> use the <code>at</code> argument, or
+</p>
+</li>
+<li>
+<p> use <code>onset=terminus</code>. 
+</p>
+</li>
+</ul>
+<p>To specify a spell as a particular interval, one of the following combinations of <code>onset</code>, <code>terminus</code> and <code>length</code> is required:
+</p>
+
+<ul>
+<li> <p><code>onset</code> and <code>terminus</code> 
+</p>
+</li>
+<li> <p><code>onset</code> and <code>length</code> 
+</p>
+</li>
+<li> <p><code>terminus</code> and <code>length</code>  
+</p>
+</li>
+</ul>
+<p>The special “null” spell is used to designate elements that are never active (i.e., have no valid activity spells).  These can only be set by the <code>deactivate</code> function (see <code>activity.attribute</code>) and by convention are stored as <code>c(Inf,Inf)</code>.  “Null” spells are incompatible with other spells, and should be replaced whenever an activation enters the element's event history.
+</p>
+<p>Although it is possible to access and modify the activity spells using network attribute methods (e.g., <code>get.edge.attribute</code>)  it is not recommended, and extreme care should be taken to preserve the structure of the spell matrix. The preferred way to modify the spells of a network element is with the <code>activate</code> related methods. Vertices and edges with specific activity ranges can be selected using <code>network.extensions</code>.
+</p>
+<p>In addition, a number of special functions are also provided to simplify common tasks related to the <code>active</code> attribute (noted below). 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ayn Leslie-Cook <a href="mailto:aynlc3@uw.edu">aynlc3@uw.edu</a>, Carter T. Butts <a href="mailto:buttsc@uci.edu">buttsc@uci.edu</a> </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>is.active</code>, <code>activate</code>, <code>activate.vertices</code>,<code>activate.edges</code>, <code>deactivate.vertices</code>,<code>deactivate.edges</code>,<code>network.extensions</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">triangle &lt;- network.initialize(3)  # create a toy network
+
+activate.vertices(triangle,onset=1,terminus=5,v=1) 
+activate.vertices(triangle,onset=1,terminus=10,v=2)
+activate.vertices(triangle,onset=4,terminus=10,v=3)
+deactivate.vertices(triangle,onset=2, length=2, v=1)
+
+get.vertex.activity(triangle) # vertex spells
+</code></pre>
+
+
+</div>

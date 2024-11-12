@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cv.npcs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compare the performance of the NPMC-CX, NPMC-ER, and vanilla models through cross-validation or bootstrapping methods</h2>
+
+<h3>Description</h3>
+
+<p>Compare the performance of the NPMC-CX, NPMC-ER, and vanilla models through cross-validation or bootstrapping methods. The function will return a summary of evaluation which includes various evaluation metrics, and visualize the class-specific error rates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cv.npcs(
+  x,
+  y,
+  classifier,
+  alpha,
+  w,
+  fold = 5,
+  stratified = TRUE,
+  partition_ratio = 0.7,
+  resample = c("bootstrapping", "cv"),
+  seed = 1,
+  verbose = TRUE,
+  plotit = TRUE,
+  trControl = list(),
+  tuneGrid = list()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>matrix; the predictor matrix of complete data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>numeric/factor/string; the response vector of complete data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classifier</code></td>
+<td>
+<p>string; Model to use for npcs function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the levels we want to control for error rates of each class. The length must be equal to the number of classes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>the weights in objective function. Should be a vector of length K, where K is the number of classes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fold</code></td>
+<td>
+<p>integer; number of folds in CV or number of bootstrapping iterations, default=5</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stratified</code></td>
+<td>
+<p>logical; if TRUE, sample will be split into groups based on the proportion of response vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partition_ratio</code></td>
+<td>
+<p>numeric; the proportion of data to be used for model construction when parameter resample=="bootstrapping"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resample</code></td>
+<td>
+<p>string; the resampling method
+</p>
+
+<ul>
+<li>
+<p> bootstrapping: bootstrapping, which iteration number is set by parameter "fold"
+</p>
+</li>
+<li>
+<p> cv: cross validation, the number of folds is set by parameter "fold"
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>random seed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical; if TRUE, cv.npcs will print the progress. If FALSE, the model will remain silent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotit</code></td>
+<td>
+<p>logical; if TRUE, the output list will return a box plot summarizing the error rates of vanilla model and NPMC model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trControl</code></td>
+<td>
+<p>list; resampling method within each fold</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tuneGrid</code></td>
+<td>
+<p>list; for hyperparameters tuning or setting</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># data generation: case 1 in Tian, Y., &amp; Feng, Y. (2021) with n = 1000
+set.seed(123, kind = "L'Ecuyer-CMRG")
+train.set &lt;- generate_data(n = 1000, model.no = 1)
+x &lt;- train.set$x
+y &lt;- train.set$y
+test.set &lt;- generate_data(n = 2000, model.no = 1)
+x.test &lt;- test.set$x
+y.test &lt;- test.set$y
+alpha &lt;- c(0.05, NA, 0.01)
+w &lt;- c(0, 1, 0)
+# contruct the multi-class NP problem
+
+cv.npcs.knn &lt;- cv.npcs(x, y, classifier = "knn", w = w, alpha = alpha)
+# result summary and visualization
+cv.npcs.knn$summaries
+cv.npcs.knn$plot
+
+</code></pre>
+
+
+</div>

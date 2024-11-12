@@ -1,0 +1,416 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>np.boot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonparametric Bootstrap Resampling
+</h2>
+
+<h3>Description</h3>
+
+<p>Nonparametric bootstrap resampling for univariate and multivariate statistics. Computes bootstrap estimates of the standard error, bias, and covariance. Also computes five different types of bootstrap confidence intervals: normal approximation interval, basic (reverse percentile) interval, percentile interval, studentized (bootstrap-<em>t</em>) interval, and bias-corrected and accelerated (BCa) interval.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">np.boot(x, statistic, ..., R = 9999, level = c(0.9, 0.95, 0.99),
+        method = c("norm", "basic", "perc", "stud", "bca")[-4], 
+        sdfun = NULL, sdrep = 99, jackknife = NULL, 
+        parallel = FALSE, cl = NULL, boot.dist = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>vector of data (for univariate data) or vector of row indices (for multivariate data). See examples for bootstrapping multivariate data.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+
+<p>function that takes in <code>x</code> (and possibly additional arguments passed using <code>...</code>) and returns a vector containing the statistic(s). See examples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional named arguments for the <code>statistic</code> function.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+
+<p>number of bootstrap replicates  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+
+<p>desired confidence level(s) for the computed intervals. Default computes 90%, 95%, and 99% confidence intervals.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>method(s) for computing confidence intervals. Partial matching is allowed. Any subset of allowable methods is permitted (default computes all intervals except studentized). Set <code>method = NULL</code> to produce no confidence intervals.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sdfun</code></td>
+<td>
+
+<p>function for computing the standard deviation of <code>statistic</code>. Should produce a vector the same length as the output of <code>statistic</code>. Only applicable if <code>"stud" %in% method</code>. If <code>NULL</code>, an inner bootstrap is used to estimate the standard deviation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sdrep</code></td>
+<td>
+
+<p>number of bootstrap replicates for the inner bootstrap used to estimate the standard deviation of <code>statistic</code>. Only applicable if <code>"stud" %in% method</code> and <code>sdfun = NULL</code>. Larger values produce more accurate estimates (see Note).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jackknife</code></td>
+<td>
+
+<p>function that takes in <code>x</code> (and possibly additional arguments passed using <code>...</code>) and returns a vector containing the jackknife statistic(s). Should produce a vector the same length as the output of <code>statistic</code>. Only applicable if <code>"bca" %in% method</code>. If <code>NULL</code>, the jackknife function is defined as the statistic function (default). See the last example for a case when <code>statistic</code> and <code>jackknife</code> are different.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+
+<p>Logical indicating if the <code>parallel</code> package should be used for parallel computing (of the bootstrap distribution). Defaults to <code>FALSE</code>, which implements sequential computing.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+
+<p>Cluster for parallel computing, which is used when <code>parallel = TRUE</code>. Note that if <code>parallel = TRUE</code> and <code>cl = NULL</code>, then the cluster is defined as <code>makeCluster(2L)</code> to use two cores. To make use of all available cores, use the code <code>cl = makeCluster(detectCores())</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.dist</code></td>
+<td>
+
+<p>Logical indicating if the bootstrap distribution should be returned (see Note).  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The first three intervals (normal, basic, and percentile) are only first-order accurate, whereas the last two intervals (studentized and BCa) are both second-order accurate. Thus, the results from the studentized and BCa intervals tend to provide more accurate coverage rates.
+</p>
+<p>Unless the standard deviation function for the studentized interval is input via the <code>sdfun</code> argument, the studentized interval can be quite computationally costly. This is because an inner bootstrap is needed to estimate the standard deviation of the statistic for each (outer) bootstrap replicate—and you may want to increase the default number of inner bootstrap replicates (see Note).
+</p>
+<p>The efficiency of the BCa interval will depend on the sample size <code class="reqn">n</code> and the computational complexity of the (jackknife) statistic estimate. Assuming that <code class="reqn">n</code> is not too large and the jackknife statistic is not too difficult to compute, the BCa interval can be computed reasonably quickly—especially in comparison the studentized interval with an inner bootstrap.
+</p>
+<p>Computational details of the various confidence intervals are described in Efron and Tibshirani (1994) and in Davison and Hinkley (1997). For a useful and concise discussion of the various intervals, see Carpenter and Bithell (2000).
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>t0 </code></td>
+<td>
+<p>Observed statistic, computed using <code>statistic(x, ...)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se </code></td>
+<td>
+<p>Bootstrap estimate of the standard error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bias </code></td>
+<td>
+<p>Bootstrap estimate of the bias.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cov </code></td>
+<td>
+<p>Bootstrap estimate of the covariance (for multivariate statistics).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normal </code></td>
+<td>
+<p>Normal approximation confidence interval(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>basic </code></td>
+<td>
+<p>Basic (reverse percentile) confidence interval(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percent </code></td>
+<td>
+<p>Percentile confidence interval(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>student </code></td>
+<td>
+<p>Studentized (bootstrap-<em>t</em>) confidence interval(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bca </code></td>
+<td>
+<p>Bias-corrected and accelerated (BCa) confidence interval(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z0 </code></td>
+<td>
+<p>Bias-correction factor(s). Only provided if <code>bca %in% method</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acc </code></td>
+<td>
+<p>Acceleration factor(s). Only provided if <code>bca %in% method</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.dist </code></td>
+<td>
+<p>Bootstrap distribution of statistic(s). Only provided if <code>boot.dist = TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R </code></td>
+<td>
+<p>Number of bootstrap replicates (same as input).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level </code></td>
+<td>
+<p>Confidence level (same as input).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sdfun </code></td>
+<td>
+<p>Standard deviation function for statistic (same as input).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sdrep </code></td>
+<td>
+<p>Number of inner bootstrap replicates (same as input).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jackknife </code></td>
+<td>
+<p>Jackknife function (same as input).</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>If <code>boot.dist = TRUE</code>, the output <code>boot.dist</code> will be a matrix of dimension <code>R</code> by <code>length(statistic(x, ...))</code> if the statistic is multivariate. Otherwise the bootstrap distribution will be a vector of length <code>R</code>.
+</p>
+<p>For the <code>"stud"</code> method, the default of <code>sdrep = 99</code> may produce a crude estimate of the standard deviation of the statistic(s). For more accurate estimates, the value of <code>sdrep</code> may need to be set substantially larger, e.g., <code>sdrep = 999</code>. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Carpenter, J., &amp; Bithell, J. (2000). Bootstrap confidence intervals: when, which, what? A practical guide for medical statisticians. <em>Statistics in Medicine, 19</em>(9), 1141-1164. doi: 10.1002/(SICI)1097-0258(20000515)19:9%3C1141::AID-SIM479%3E3.0.CO;2-F 
+</p>
+<p>Davison, A. C., &amp; Hinkley, D. V. (1997). <em>Bootstrap Methods and Their Application</em>. Cambridge University Press. doi: 10.1017/CBO9780511802843
+</p>
+<p>Efron, B., &amp; Tibshirani, R. J. (1994). <em>An Introduction to the Boostrap</em>. Chapman &amp; Hall/CRC. doi: 10.1201/9780429246593
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">######***######   UNIVARIATE DATA   ######***######
+
+### Example 1: univariate statistic (median)
+
+# generate 100 standard normal observations
+set.seed(1)
+n &lt;- 100
+x &lt;- rnorm(n)
+
+# nonparametric bootstrap
+npbs &lt;- np.boot(x = x, statistic = median)
+npbs
+
+
+### Example 2: multivariate statistic (quartiles)
+
+# generate 100 standard normal observations
+set.seed(1)
+n &lt;- 100
+x &lt;- rnorm(n)
+
+# nonparametric bootstrap
+npbs &lt;- np.boot(x = x, statistic = quantile, 
+                probs = c(0.25, 0.5, 0.75))
+npbs
+
+
+
+######***######   MULTIVARIATE DATA   ######***######
+
+### Example 1: univariate statistic (correlation)
+
+# correlation matrix square root (with rho = 0.5)
+rho &lt;- 0.5
+val &lt;- c(sqrt(1 + rho), sqrt(1 - rho))
+corsqrt &lt;- matrix(c(val[1], -val[2], val), 2, 2) / sqrt(2)
+
+# generate 100 bivariate observations (with rho = 0.5)
+n &lt;- 100
+set.seed(1)
+data &lt;- cbind(rnorm(n), rnorm(n)) %*% corsqrt
+
+# define statistic function
+statfun &lt;- function(x, data) cor(data[x,1], data[x,2])
+
+# nonparametric bootstrap
+npbs &lt;- np.boot(x = 1:n, statistic = statfun, data = data)
+npbs
+
+
+### Example 2: multivariate statistic (variances and covariance)
+
+# correlation matrix square root (with rho = 0.5)
+rho &lt;- 0.5
+val &lt;- c(sqrt(1 + rho), sqrt(1 - rho))
+corsqrt &lt;- matrix(c(val[1], -val[2], val), 2, 2) / sqrt(2)
+
+# generate 100 bivariate observations (with rho = 0.5)
+n &lt;- 100
+set.seed(1)
+data &lt;- cbind(rnorm(n), rnorm(n)) %*% corsqrt
+
+# define statistic function
+statfun &lt;- function(x, data) {
+  cmat &lt;- cov(data[x,])
+  ltri &lt;- lower.tri(cmat, diag = TRUE)
+  cvec &lt;- cmat[ltri]
+  names(cvec) &lt;- c("var(x1)", "cov(x1,x2)", "var(x2)")
+  cvec
+}
+
+# nonparametric bootstrap
+npbs &lt;- np.boot(x = 1:n, statistic = statfun, data = data)
+npbs
+
+
+
+## Not run: 
+
+######***######   REGRESSION   ######***######
+
+### Example 1: bootstrap cases
+
+# generate 100 observations
+n &lt;- 100
+set.seed(1)
+x &lt;- seq(0, 1, length.out = n)
+y &lt;- 1 + 2 * x + rnorm(n)
+data &lt;- data.frame(x = x, y = y)
+
+# define statistic function
+statfun &lt;- function(x, data) {
+  xmat &lt;- cbind(1, data$x[x])
+  xinv &lt;- solve(crossprod(xmat)) %*% t(xmat)
+  coef &lt;- as.numeric(xinv %*% data$y[x])
+  names(coef) &lt;- c("(Intercept)", "x")
+  coef
+}
+
+# nonparametric bootstrap
+npbs &lt;- np.boot(x = 1:n, statistic = statfun, data = data)
+npbs
+
+
+### Example 2: bootstrap residuals
+
+# generate 100 observations
+n &lt;- 100
+set.seed(1)
+x &lt;- seq(0, 1, length.out = n)
+y &lt;- 1 + 2 * x + rnorm(n)
+
+# prepare data
+xmat &lt;- cbind(1, x)
+xinv &lt;- solve(crossprod(xmat)) %*% t(xmat)
+fit &lt;- xmat %*% xinv %*% y
+data &lt;- list(fit = fit, resid = y - fit, xinv = xinv, x = x)
+
+# define statistic function
+statfun &lt;- function(x, data) {
+  ynew &lt;- data$fit + data$resid[x]
+  coef &lt;- as.numeric(data$xinv %*% ynew)
+  names(coef) &lt;- c("(Intercept)", "x")
+  coef
+}
+
+# define jackknife function
+jackfun &lt;- function(x, data){
+  ynew &lt;- data$fit[x] + data$resid[x]
+  xmat &lt;- cbind(1, data$x[x])
+  xinv &lt;- solve(crossprod(xmat)) %*% t(xmat)
+  coef &lt;- as.numeric(xinv %*% ynew)
+  names(coef) &lt;- c("(Intercept)", "x")
+  coef
+}
+
+# nonparametric bootstrap
+npbs &lt;- np.boot(x = 1:n, statistic = statfun, data = data, 
+                jackknife = jackfun)
+npbs
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

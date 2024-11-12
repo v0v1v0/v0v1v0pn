@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getSparseY</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sparse Matrix Preparation</h2>
+
+<h3>Description</h3>
+
+<p>R utility function to turn a two or three-dimensional detection array into a sparse matrix representation (see Turek et al., 2021 &lt;doi.org/10.1002/ecs2.3385&gt;  for more details).
+Used in the implementation of the <code>dbinomLocal_normal</code> and <code>dpoisLocal_normal</code> functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getSparseY(x, noDetections = -1, nMaxTraps = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A two- or three-dimensional observation data array with dimensions : number of  individuals, number of traps, (and number of detection occasions/sessions).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noDetections</code></td>
+<td>
+<p>The value indicating no detection. Defaults to -1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nMaxTraps</code></td>
+<td>
+<p>The maximum number of traps at which detections can occur. 
+It is necessary to artificially augment the sparse detection array when using the random generation functionality of the rbinomLocal_normal or rpoisLocal_normal functions.
+When simulating detection data, augmenting the size of the detection array is necessary to avoids artificially limiting the number of detectors at which individuals can be detected.
+Default value is maxDetNums * 2, which doubles the maximum number of traps at which an individual can be detected. 
+We generally recommend using <em>numLocalIndicesMax</em> obtained from <code>getLocalObjects</code> when aiming at randomly generating detections from rbinomLocal_normal or rpoisLocal_normal.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>getSparseY</code> function is used in advance of model building to create a sparse matrix representation of the observation data. 
+It creates and returns a list of objects:
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of objects which constitute a sparse representation of the observation data:
+</p>
+
+<ul>
+<li> <p><em>detNums</em> A matrix with number of traps at which each individual (in rows) was detected at each occasions/sessions (in columns).
+</p>
+</li>
+<li> <p><em>maxDetNums</em> The maximum number of traps at which an individual was detected (i.e., the maximum of <em>detNums</em>).
+</p>
+</li>
+<li> <p><em>detIndices</em> An array of dimensions n.individuals, maxDetNums, and number of occasions/sessions, which contains the IDs of the traps where each individual was detected.
+</p>
+</li>
+<li> <p><em>y</em> An array of dimensions n.individuals, maxDetNums, and occasions/sessions, which contains the number of observations of each individual at the traps it was detected at.
+</p>
+</li>
+<li> <p><em>yCombined</em> An array that combines <em>detNums</em>, <em>y</em>, and <em>detIndices</em> by columns (in that specific order). 
+Note that  <em>y</em>, and <em>detIndices</em> are augmented before combining, such that the maximum number of detectors at which an individual can be detected is equal to <em>nMaxTraps</em>
+Consequently, the number of columns of <em>lengthYCombined</em> is 2*nMaxTraps + 1.
+</p>
+</li>
+<li> <p><em>lengthYCombined</em> Dimension of the augmented lengthYCombined object to be specified as the argument <em>lengthYCombined</em> of the <code>dbinomLocal_normal</code>  or <code>dpoisLocal_normal</code> functions when simulating detection data.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Cyril Milleret
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">y.full &lt;- matrix(rbinom(5000, 5, 0.02), ncol = 100)
+
+y &lt;- getSparseY(y.full)
+
+</code></pre>
+
+
+</div>

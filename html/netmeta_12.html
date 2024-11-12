@@ -1,0 +1,209 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>forest.netbind</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forest plot showing results of two or more network meta-analyses</h2>
+
+<h3>Description</h3>
+
+<p>Forest plot to show network estimates of two or more network
+meta-analyses.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'netbind'
+forest(
+  x,
+  pooled = ifelse(x$x$random, "random", "common"),
+  equal.size = TRUE,
+  leftcols = "studlab",
+  leftlabs = "Treatment",
+  rightcols = c("effect", "ci"),
+  rightlabs = NULL,
+  subset.treatments,
+  digits = gs("digits.forest"),
+  digits.prop = max(gs("digits.pval") - 2, 2),
+  backtransf = x$backtransf,
+  lab.NA = "",
+  smlab,
+  ...
+)
+
+## S3 method for class 'netbind'
+plot(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netbind</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pooled</code></td>
+<td>
+<p>A character string indicating whether results for the
+common (<code>"common"</code>) or random effects model (<code>"random"</code>)
+should be plotted. Can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal.size</code></td>
+<td>
+<p>A logical indicating whether all squares should
+be of equal size. Otherwise, the square size is proportional to
+the precision of estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>leftcols</code></td>
+<td>
+<p>A character vector specifying columns to be plotted
+on the left side of the forest plot (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>leftlabs</code></td>
+<td>
+<p>A character vector specifying labels for columns on
+left side of the forest plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rightcols</code></td>
+<td>
+<p>A character vector specifying columns to be
+plotted on the right side of the forest plot (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rightlabs</code></td>
+<td>
+<p>A character vector specifying labels for columns
+on right side of the forest plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset.treatments</code></td>
+<td>
+<p>A character vector specifying treatments
+to show in forest plot as comparators to the reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits for treatment
+effects and confidence intervals, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.prop</code></td>
+<td>
+<p>Minimal number of significant digits for the
+direct evidence proportion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether results should be
+back transformed in forest plots. If <code>backtransf = TRUE</code>,
+results for <code>sm = "OR"</code> are presented as odds ratios rather
+than log odds ratios, for example.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lab.NA</code></td>
+<td>
+<p>A character string to label missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smlab</code></td>
+<td>
+<p>A label printed at top of figure. By default, text
+indicating either common or random effects model is printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments for <code>forest.meta</code>
+function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A forest plot, also called confidence interval plot, is drawn in
+the active graphics window.
+</p>
+<p>The arguments <code>leftcols</code> and <code>rightcols</code> can be used to
+specify columns which are plotted on the left and right side of the
+forest plot, respectively. If argument <code>rightcols</code> is
+<code>FALSE</code>, no columns will be plotted on the right side.
+</p>
+<p>For more information see help page of <code>forest.meta</code>
+function.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netbind</code>, <code>netcomb</code>,
+<code>forest.meta</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Linde2016)
+
+# Only consider studies including Face-to-face PST (to reduce
+# runtime of example)
+#
+face &lt;- subset(Linde2016, id %in% c(16, 24, 49, 118))
+
+# Standard random effects NMA model (with placebo as reference
+# treatment)
+#
+net1 &lt;- netmeta(lnOR, selnOR, treat1, treat2, id,
+  data = face, reference.group = "placebo",
+  sm = "OR", common = FALSE)
+
+# Additive CNMA model with placebo as inactive component and
+# reference
+#
+nc1 &lt;- netcomb(net1, inactive = "placebo")
+
+# Combine results of standard NMA and CNMA
+#
+nb1 &lt;- netbind(nc1, net1,
+  name = c("Additive CNMA", "Standard NMA"),
+  col.study = c("red", "black"),
+  col.square = c("red", "black"))
+forest(nb1,
+  col.by = "black", addrow.subgroups = FALSE,
+  fontsize = 10, spacing = 0.7, squaresize = 0.9,
+  label.left = "Favours Placebo",
+  label.right = "Favours other")
+
+</code></pre>
+
+
+</div>

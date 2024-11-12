@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NFCP_parameters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Specify the constant parameters of an N-factor model</h2>
+
+<h3>Description</h3>
+
+<script id="MathJax-script" async src="../../mathjaxr/doc/mathjax/es5/tex-chtml-full.js"></script><p>the <code>NFCP_parameters</code> function specifies the parameters of
+a commodity pricing model under the N-factor framework first described by Cortazar and Naranjo (2006).
+This function is a recommended starting position for the application of N-factor models within the <code>NFCP</code> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NFCP_parameters(
+  N_factors,
+  GBM,
+  initial_states,
+  N_ME,
+  N_season = 0,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>N_factors</code></td>
+<td>
+<p><code>numeric</code>. Number of state variables in the spot price process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>GBM</code></td>
+<td>
+<p><code>logical</code>. If <code>GBM = T</code>, factor 1 of the model is assumed to follow a Brownian Motion, inducing a unit-root in the spot price process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_states</code></td>
+<td>
+<p><code>logical</code>. If <code>initial_states = T</code>, the initial state vector is specified as unknown parameters of the commodity pricing model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N_ME</code></td>
+<td>
+<p><code>numeric</code>. The number of independent measuring errors of observable futures contracts to consider in the Kalman filter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N_season</code></td>
+<td>
+<p><code>numeric</code>. The number of deterministic, cyclical seasonal factors to include in the spot price process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p><code>logical</code>. If <code>verbose = T</code>, the stochastic differential equation of the spot price process is printed when the function is called.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>The N-factor model</b>
+The N-factor framework was first presented in the work of Cortazar and Naranjo (2006, equations 1-3).
+It is a risk-premium class of commodity pricing model, in which futures prices are given by discounted expected future spot prices,
+where these spot prices are discounted at a given level of risk-premium, known as the cost-of-carry.
+</p>
+<p>The N-factor framework describes the spot price process of a commodity as the correlated sum of \(N\) state variables \(x_t\). The 'NFCP' package also allows for a deterministic,
+cyclical seasonal function \(season(t)\) to be considered.
+</p>
+<p>When <code>GBM = TRUE</code>:
+\[log(S_{t}) = season(t) + \sum_{i=1}^N x_{i,t}\]
+When <code>GBM = FALSE</code>:
+\[log(S_{t}) = E + season(t) + \sum_{i=1}^N x_{i,t}\]
+</p>
+<p>Where <code>GBM</code> determines whether the first factor follows a Brownian Motion or Ornstein-Uhlenbeck process to induce a unit root in the spot price process.
+</p>
+<p>When <code>GBM = TRUE</code>, the first factor corresponds to the spot price, and additional N-1 factors model the cost-of-carry.
+</p>
+<p>When <code>GBM = FALSE</code>, the commodity model assumes that there is a long-term equilibrium the commodity price will tend towards over time, with model volatility a decreasing function of time. This is not the standard approach made in the commodity pricing literature (Cortazar and Naranjo, 2006).
+</p>
+<p>State variables are thus assumed to follow the following processes:
+</p>
+<p>When <code>GBM = TRUE</code>:
+\[dx_{1,t} = \mu^*dt + \sigma_{1} dw_{1}t\]
+</p>
+<p>When <code>GBM = FALSE</code>:
+\[dx_{1,t} = - (\lambda_{1} + \kappa_{1}x_{1,t})dt + \sigma_{1} dw_{1}t\]
+</p>
+<p>And:
+\[dx_{i,t} =_{i\neq 1} - (\lambda_{i} + \kappa_{i}x_{i,t})dt + \sigma_{i} dw_{i}t\]
+</p>
+<p>where:
+\[E(w_{i})E(w_{j}) = \rho_{i,j}\]
+</p>
+<p>Additionally, the deterministic seasonal function (if specified) is given by:
+</p>
+\[season(t) = \sum_{i=1} ( season_{i,1} cos(2i\pi) + season_{i,2} sin(2i\pi)\]
+<p>The addition of deterministic, cyclical seasonality as a function of trigonometric variables was first suggested by Hannan, Terrell, and Tuckwell (1970) and first applied to model commodities by Sørensen (2002).
+</p>
+<p>The following constant parameters are defined as:
+</p>
+<p><code>var</code> \(\mu\):  long-term growth rate of the Brownian Motion process.
+</p>
+<p><code>var</code> \(E\): Constant equilibrium level.
+</p>
+<p><code>var</code> \(\mu^*=\mu-\lambda_1\): Long-term risk-neutral growth rate
+</p>
+<p><code>var</code> \(\lambda_{i}\): Risk premium of state variable \(i\).
+</p>
+<p><code>var</code> \(\kappa_{i}\): Reversion rate of state variable \(i\).
+</p>
+<p><code>var</code> \(\sigma_{i}\): Instantaneous volatility of state variable \(i\).
+</p>
+<p><code>var</code> \(\rho_{i,j} \in [-1,1]\): Instantaneous correlation between state variables \(i\) and \(j\).
+</p>
+<p>Including additional factors within the spot-price process allow for additional flexibility (and possibly fit) to the term structure of a commodity.
+The N-factor model nests simpler models within its framework, allowing for the fit of different N-factor models (applied to the same term structure data),
+represented by the log-likelihood, to be directly compared with statistical testing possible through a chi-squared test.
+</p>
+<p><b>Disturbances - Measurement Error</b>:
+</p>
+<p>The Kalman filtering algorithm assumes a given measure of measurement error or disturbance in the measurement equation (ie. matrix \(H\)). Measurement errors can be interpreted as error in the
+model's fit to observed prices, or as errors in the reporting of prices (Schwartz and Smith, 2000). These disturbances are typically assumed independent by the commodity pricing literature.
+</p>
+<p><code>var</code> \(ME_i\) measurement error of contract \(i\).
+</p>
+<p>where the measurement error of futures contracts \(ME_i\) is equal to <code>'ME_'</code> [i] (i.e. <code>'ME_1'</code>, <code>'ME_2'</code>, ...) specified in arguments <code>parameter_values</code> and <code>parameter_names</code>.
+</p>
+<p>There are three particular cases on how the measurement error of observations can be treated in the <code>NFCP_Kalman_filter</code> function:
+</p>
+<p><b>Case 1:</b> Only one ME is specified. The Kalman filter assumes that the measurement error of observations are independent and identical.
+</p>
+<p><b>Case 2:</b> One ME is specified for every observed futures contract. The Kalman filter assumes that the measurement error of observations are independent and unique.
+</p>
+<p><b>Case 3:</b> A series of ME's are specified for a given grouping of maturities of futures contracts. The Kalman filter assumes that the measurement error of observations are independent and unique to their respective time-to-maturity.
+</p>
+<p>Grouping of maturities for case 3 is specified through the <code>ME_TTM</code> argument. This is a vector that specifies the maximum maturity to consider for each respective ME parameter argument.
+</p>
+<p>in other words, ME_1 is considered for observations with TTM less than ME_TTM[1], ME_2 is considered for observations with TTM less than ME_TTM[2], ..., etc.
+</p>
+<p>The first case is clearly the simplest to estimate, but can be a restrictive assumption. The second case is clearly the most difficult to estimate, but can be an infeasible assumption when considering all available futures contracts that make up the term structure of a commodity.
+</p>
+<p>Case 3 thus serves to ease the restriction of case 1, and allow the user to make the modeling of measurement error as simple or complex as desired for a given set of maturities.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of parameter names for a specified N-factor spot price process. This vector is ideal for application within many other functions within the <code>NFCP</code> package
+</p>
+
+
+<h3>References</h3>
+
+<p>Hannan, E. J., et al. (1970). "The seasonal adjustment of economic time series." <em>International economic review</em> 11(1): 24-52.
+</p>
+<p>Schwartz, E. S., and J. E. Smith, (2000). Short-Term Variations and Long-Term Dynamics in Commodity Prices. <em>Manage. Sci.</em>, 46, 893-911.
+</p>
+<p>Sørensen, C. (2002). "Modeling seasonality in agricultural commodity futures." <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em> 22(5): 393-426.
+</p>
+<p>Cortazar, G., and L. Naranjo, (2006). An N-factor Gaussian model of oil futures prices. <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em>, 26(3), 243-268.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##Generate parameter of a Two-factor model Crude Oil model
+##as first presented by Schwartz and Smith (2000):
+two_factor_parameters &lt;- NFCP_parameters(N_factors = 2,
+                                        GBM = TRUE,
+                                        initial_states = FALSE,
+                                        N_ME = 5)
+print(two_factor_parameters)
+</code></pre>
+
+
+</div>

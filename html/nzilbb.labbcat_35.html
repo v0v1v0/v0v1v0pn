@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getMatchAlignments</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Gets temporal alignments of matches on a given layer.</h2>
+
+<h3>Description</h3>
+
+<p>Gets labels and start/end offsets of annotations on a given layer, identified by given
+match IDs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getMatchAlignments(
+  labbcat.url,
+  match.ids,
+  layer.ids,
+  target.offset = 0,
+  annotations.per.layer = 1,
+  anchor.confidence.min = 50,
+  include.match.ids = FALSE,
+  page.length = 1000,
+  no.progress = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>labbcat.url</code></td>
+<td>
+<p>URL to the LaBB-CAT instance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>match.ids</code></td>
+<td>
+<p>A vector of annotation IDs, e.g. the MatchId column, or the URL column,
+of a results set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layer.ids</code></td>
+<td>
+<p>A vector of layer IDs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.offset</code></td>
+<td>
+<p>The distance from the original target of the match, e.g.
+</p>
+
+<ul>
+<li>
+<p><em>0</em> – find annotations of the match target itself,
+</p>
+</li>
+<li>
+<p><em>1</em> – find annotations of the token immediately <em>after</em> match target
+</p>
+</li>
+<li>
+<p><em>-1</em> – find annotations of the token immediately <em>before</em> match target
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>annotations.per.layer</code></td>
+<td>
+<p>The number of annotations on the given layer to
+retrieve. In most cases, there's only one annotation available. However, tokens
+may, for example, be annotated with ‘all possible phonemic transcriptions’, in which
+case using a value of greater than 1 for this parameter provides other phonemic
+transcriptions, for tokens that have more than one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>anchor.confidence.min</code></td>
+<td>
+<p>The minimum confidence for alignments, e.g.
+</p>
+
+<ul>
+<li>
+<p><em>0</em> – return all alignments, regardless of confidence;
+</p>
+</li>
+<li>
+<p><em>50</em> – return only alignments that have been at least automatically aligned;
+</p>
+</li>
+<li>
+<p><em>100</em> – return only manually-set alignments.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.match.ids</code></td>
+<td>
+<p>Whether or not the data frame returned includes the original
+MatchId column or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>page.length</code></td>
+<td>
+<p>In order to prevent timeouts when there are a large number of
+matches or the network connection is slow, rather than retrieving matches in one
+big request, they are retrieved using many smaller requests. This parameter
+controls the number of results retrieved per request.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.progress</code></td>
+<td>
+<p>TRUE to supress visual progress bar. Otherwise, progress bar will be
+shown when interactive().</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>You can specify a threshold for confidence in the alignment, which is a value from 0
+(not aligned) to 100 (manually aligned). The default is 50 (automatically aligned), so
+only alignments that have been at least automatically aligned are specified. For cases
+where there's a token but its alignment confidence falls below the threshold, a label
+is returned, but the start/end times are NA.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with label, start time, and end time, for each layer.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getMatches</code>
+<code>getMatchLabels</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## define the LaBB-CAT URL
+labbcat.url &lt;- "https://labbcat.canterbury.ac.nz/demo/"
+
+## Perform a search
+results &lt;- getMatches(labbcat.url, list(segment="I"))
+
+## Get the segment following the token, with alignment if it's been manually aligned
+following.segment &lt;- getMatchAlignments(labbcat.url, results$MatchId, "segment",
+    target.offset=1, anchor.confidence.min=100)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

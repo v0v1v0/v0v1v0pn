@@ -1,0 +1,215 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getLCSM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a Latent Change Score Model with a Time-invariant Covariate (If Any)</h2>
+
+<h3>Description</h3>
+
+<p>This function fits a latent change score model with or without time-invariant covariates to the provided data.
+It manages model setup, optimization, and if requested, outputs parameter estimates and standard errors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getLCSM(
+  dat,
+  t_var,
+  y_var,
+  curveFun,
+  intrinsic = TRUE,
+  records,
+  growth_TIC = NULL,
+  starts = NULL,
+  res_scale = NULL,
+  tries = NULL,
+  OKStatus = 0,
+  jitterD = "runif",
+  loc = 1,
+  scale = 0.25,
+  paramOut = FALSE,
+  names = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>A wide-format data frame, with each row corresponding to a unique ID. It contains the observed variables with
+repeated measurements and occasions, and time-invariant covariates (TICs) if any.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t_var</code></td>
+<td>
+<p>A string specifying the prefix of the column names corresponding to the time variable at each study wave.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_var</code></td>
+<td>
+<p>A string specifying the prefix of the column names corresponding to the outcome variable at each study wave.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>curveFun</code></td>
+<td>
+<p>A string specifying the functional form of the growth curve. Supported options for latent change score
+models include: <code>"quadratic"</code> (or <code>"QUAD"</code>), <code>"negative exponential"</code> (or <code>"EXP"</code>), <code>"Jenss-Bayley"</code>
+(or <code>"JB"</code>), and <code>"nonparametric"</code> (or <code>"NonP"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intrinsic</code></td>
+<td>
+<p>A logical flag indicating whether to build an intrinsically nonlinear longitudinal model. Default is
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>records</code></td>
+<td>
+<p>A numeric vector specifying indices of the study waves.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>growth_TIC</code></td>
+<td>
+<p>A string or character vector specifying the column name(s) of time-invariant covariate(s) contributing to the
+variability of growth factors if any. Default is <code>NULL</code>, indicating no growth TICs are included in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starts</code></td>
+<td>
+<p>A list containing initial values for the parameters. Default is <code>NULL</code>, indicating no user-specified
+initial values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res_scale</code></td>
+<td>
+<p>A numeric value representing the scaling factor for the initial calculation of the residual variance. This
+value should be between <code>0</code> and <code>1</code>, exclusive. By default, this is <code>NULL</code>, as it is unnecessary when the
+user specifies the initial values using the <code>starts</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tries</code></td>
+<td>
+<p>An integer specifying the number of additional optimization attempts. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OKStatus</code></td>
+<td>
+<p>An integer (vector) specifying acceptable status codes for convergence. Default is <code>0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jitterD</code></td>
+<td>
+<p>A string specifying the distribution for jitter. Supported values are: <code>"runif"</code> (uniform
+distribution), <code>"rnorm"</code> (normal distribution), and <code>"rcauchy"</code> (Cauchy distribution). Default is <code>"runif"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc</code></td>
+<td>
+<p>A numeric value representing the location parameter of the jitter distribution. Default is <code>1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>A numeric value representing the scale parameter of the jitter distribution. Default is <code>0.25</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>paramOut</code></td>
+<td>
+<p>A logical flag indicating whether to output the parameter estimates and standard errors. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>A character vector specifying parameter names. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>myMxOutput</code>. Depending on the <code>paramOut</code> argument, the object may contain the following slots:
+</p>
+
+<ul>
+<li> <p><code>mxOutput</code>: This slot contains the fitted latent change score model. A summary of this model can be obtained using the
+<code>ModelSummary()</code> function.
+</p>
+</li>
+<li> <p><code>Estimates</code> (optional): If <code>paramOut = TRUE</code>, a data frame with parameter estimates and standard errors. The content
+of this slot can be printed using the <code>printTable()</code> method for S4 objects.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul>
+<li> <p>Liu, J., &amp; Perera, R. A. (2023). Estimating Rate of Change for Nonlinear Trajectories in the Framework of Individual Measurement
+Occasions: A New Perspective on Growth Curves. Behavior Research Methods. <a href="https://doi.org/10.3758/s13428-023-02097-2">doi:10.3758/s13428-023-02097-2</a>
+</p>
+</li>
+<li> <p>Liu, J. (2022). "Jenss–Bayley Latent Change Score Model With Individual Ratio of the Growth Acceleration in the Framework
+of Individual Measurement Occasions." Journal of Educational and Behavioral Statistics, 47(5), 507–543.
+<a href="https://doi.org/10.3102/10769986221099919">doi:10.3102/10769986221099919</a>
+</p>
+</li>
+<li> <p>Grimm, K. J., Zhang, Z., Hamagami, F., &amp; Mazzocco, M. (2013). "Modeling Nonlinear Change via Latent Change and Latent
+Acceleration Frameworks: Examining Velocity and Acceleration of Growth Trajectories." Multivariate Behavioral Research, 48(1),
+117-143. <a href="https://doi.org/10.1080/00273171.2012.755111">doi:10.1080/00273171.2012.755111</a>
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Load ECLS-K (2011) data
+data("RMS_dat")
+RMS_dat0 &lt;- RMS_dat
+# Re-baseline the data so that the estimated initial status is for the starting point of the study
+baseT &lt;- RMS_dat0$T1
+RMS_dat0$T1 &lt;- (RMS_dat0$T1 - baseT)/12
+RMS_dat0$T2 &lt;- (RMS_dat0$T2 - baseT)/12
+RMS_dat0$T3 &lt;- (RMS_dat0$T3 - baseT)/12
+RMS_dat0$T4 &lt;- (RMS_dat0$T4 - baseT)/12
+RMS_dat0$T5 &lt;- (RMS_dat0$T5 - baseT)/12
+RMS_dat0$T6 &lt;- (RMS_dat0$T6 - baseT)/12
+RMS_dat0$T7 &lt;- (RMS_dat0$T7 - baseT)/12
+RMS_dat0$T8 &lt;- (RMS_dat0$T8 - baseT)/12
+RMS_dat0$T9 &lt;- (RMS_dat0$T9 - baseT)/12
+# Standardized time-invariant covariates
+RMS_dat0$ex1 &lt;- scale(RMS_dat0$Approach_to_Learning)
+RMS_dat0$ex2 &lt;- scale(RMS_dat0$Attention_focus)
+
+
+# Fit nonparametric change score model for reading development
+## Fit model
+NonP_LCSM &lt;- getLCSM(
+  dat = RMS_dat0, t_var = "T", y_var = "R", curveFun = "nonparametric",
+  intrinsic = FALSE, records = 1:9, res_scale = 0.1
+  )
+
+
+</code></pre>
+
+
+</div>

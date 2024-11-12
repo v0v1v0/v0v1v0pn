@@ -1,0 +1,230 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>piechart</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A flexible piechart.</h2>
+
+<h3>Description</h3>
+
+<p>While similar to <code>graphics::pie()</code>, this function is much more
+flexible as it allows providing different parameters for each slice of the pie.
+Furthermore, it allows adding the plot to the current device, making it possible
+to create compound piecharts.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">piechart(
+  x,
+  labels = names(x),
+  radius = 1,
+  doughnut = 0,
+  origin = c(0, 0),
+  edges = 200,
+  slice.off = 0,
+  init.angle = 0,
+  last.angle = 360,
+  tick.len = 0.1,
+  text.args = list(),
+  segments.args = list(),
+  skip.plot.slices = FALSE,
+  add = FALSE,
+  rescale = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Numeric vector. Values that specify the area of the slices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+<p>Character vector of length <code>length(x)</code>. Passed to
+<code>graphics::text()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radius</code></td>
+<td>
+<p>Numeric vector. Radious of each slice (can be a scalar).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doughnut</code></td>
+<td>
+<p>Numeric scalar. Radious of each inner circle (doughnut) (can be a scalar).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>origin</code></td>
+<td>
+<p>Numeric vector of length 2. Coordinates of the origin.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edges</code></td>
+<td>
+<p>Numeric scalar. Smoothness of the slices curve (can be a vector).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slice.off</code></td>
+<td>
+<p>Numeric vector. When <code style="white-space: pre;">⁠!=0⁠</code>, specifies how much to
+move the slice away from the origin. When scalar is recycled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.angle</code></td>
+<td>
+<p>Numeric scalar. Angle from where to start drawing in degrees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>last.angle</code></td>
+<td>
+<p>Numeric scalar. Angle where to finish drawing in degrees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tick.len</code></td>
+<td>
+<p>Numeric scalar. Size of the tick marks as proportion of the radius.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.args</code></td>
+<td>
+<p>List. Further arguments passed to <code>graphics::text()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>segments.args</code></td>
+<td>
+<p>List. Further arguments passed to <code>graphics::segments()</code>
+when drawing the tickmarks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skip.plot.slices</code></td>
+<td>
+<p>Logical scalar. When <code>FALSE</code>, slices are not drawn.
+This can be useful if, for example, the user only wants to draw the labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> it is added to the current device.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> (default), the y-coordinates of
+the polygons (slices), text and tickmarks will be rescaled such that the
+aspectt ratio is preserved, i.e. looks like a circle.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to <code>graphics::polygon()</code>
+(see details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function is a wrapper of <code>graphics::polygon()</code>,
+so all parameters such as color, density, border, etc. are passed directly
+by <code>mapply()</code> so that are specified one per slice. The coordinates
+of the slices are computed internally.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>slices</code></td>
+<td>
+<p>A list of length <code>length(x)</code> with the coordinates of each
+slice.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>textcoords</code></td>
+<td>
+<p>A numeric matrix of size <code>length(x)*2</code> with
+coordinates where the labels can be put at.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha0</code></td>
+<td>
+<p>A numeric vector of size <code>length(x)</code> with the starting
+degree in radians of the slice.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha1</code></td>
+<td>
+<p>A numeric vector of size <code>length(x)</code> with the ending
+degree in radians of the slice.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p>https://commons.wikimedia.org/wiki/File:Nightingale-mortality.jpg
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Example 1 -----------------------------------------------------------------
+# A set of 3 nested rings rings starting at 315 deg. and ending at 270 deg.
+
+# Values to plot
+vals &lt;- c(1,2,3,10)
+
+# Outer (includes labels)
+piechart(vals, col=grDevices::blues9[5:8], border=NA, doughnut = .5,
+    radius=.75, labels=vals, init.angle = 315, last.angle = 270)
+
+# Middle
+piechart(vals, col=grDevices::blues9[3:6], border=NA, doughnut = .3,
+    radius=.5, add=TRUE, init.angle = 315, last.angle = 270)
+
+# Inner
+piechart(vals, col=grDevices::blues9[1:4], border="gray", doughnut = .1,
+    radius=.3, add=TRUE, init.angle = 315, last.angle = 270)
+
+# Example 2 -----------------------------------------------------------------
+# Passing values to polygon and playing with the radius and slice.off
+
+piechart(1:10, density=(1:10)^2/2, slice.off = (1:10)/30, doughnut = .5,
+  radius = sqrt(10:1),
+  # Here we are setting random labels...
+  labels=sapply(1:10, function(x) paste(sample(letters, x, TRUE), collapse=""))
+  )
+
+</code></pre>
+
+
+</div>

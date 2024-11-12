@@ -1,0 +1,76 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>combineAnalyses</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Combine results of multiple permutation procedures</h2>
+
+<h3>Description</h3>
+
+<p>This function takes the output from multiple runs of 
+<code>modulePreservation</code>, combines their results, and returns a new
+set of permutation test P-values. This is useful for parallelising 
+calculations across multiple machines.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">combineAnalyses(pres1, pres2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>pres1, pres2</code></td>
+<td>
+<p>lists returned by <code>modulePreservation</code>.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>The calls to 'modulePreservation' must have been identical for both input
+lists, with the exception of the number of threads used and the number of
+permutations calculated.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A nested list containing the same elements as 
+<code>modulePreservation</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("NetRep")
+
+# Set up input lists for each input matrix type across datasets. The list
+# elements can have any names, so long as they are consistent between the
+# inputs.
+network_list &lt;- list(discovery=discovery_network, test=test_network)
+data_list &lt;- list(discovery=discovery_data, test=test_data)
+correlation_list &lt;- list(discovery=discovery_correlation, test=test_correlation)
+labels_list &lt;- list(discovery=module_labels)
+
+pres1 &lt;- modulePreservation(
+ network=network_list, data=data_list, correlation=correlation_list,
+ moduleAssignments=labels_list, nPerm=1000, discovery="discovery", 
+ test="test", nThreads=2
+)
+
+pres2 &lt;- modulePreservation(
+ network=network_list, data=data_list, correlation=correlation_list, 
+ moduleAssignments=labels_list, nPerm=1000, discovery="discovery", 
+ test="test", nThreads=2
+)
+
+combined &lt;- combineAnalyses(pres1, pres2)
+
+</code></pre>
+
+
+</div>

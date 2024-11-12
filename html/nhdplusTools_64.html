@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>navigate_network</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Navigate Network</h2>
+
+<h3>Description</h3>
+
+<p>Provides a full feature network navigation function that
+will work with local or web service data. Parameter details provide
+context.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">navigate_network(
+  start,
+  mode = "UM",
+  network = NULL,
+  output = "flowlines",
+  distance_km = 10,
+  trim_start = FALSE,
+  trim_stop = FALSE,
+  trim_tolerance = 5
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>list, integer, sf, or sfc if list must be a valid NLDI feature
+if integer must be a valid comid. If sf, must contain a "comid" field.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>character chosen from c(UM, DM, UT, or DD)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p>sf should be compatible with network navigation functions
+If NULL, network will be derived from requests to the NLDI</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>character flowline or a valid NLDI data source</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distance_km</code></td>
+<td>
+<p>numeric distance to navigate in km</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trim_start</code></td>
+<td>
+<p>logical should start be trimmed or include entire catchment?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trim_stop</code></td>
+<td>
+<p>logical should stop(s) be trimmed or include entire catchment(s)?
+# Not supported</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trim_tolerance</code></td>
+<td>
+<p>numeric from 0 to 100 percent of flowline length. If amount
+to trim is less than this tolerance, no trim will be applied.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+navigate_network(list(featureSource = "nwissite", featureID = "USGS-06287800"),
+                "UM",
+                output = "flowlines",
+                trim_start = TRUE)
+
+
+source(system.file("extdata", "walker_data.R", package = "nhdplusTools"))
+hydro_location &lt;- list(comid = 5329339,
+                      reachcode = "18050005000078",
+                       reach_meas = 30)
+
+hydro_location &lt;- sf::st_sf(
+  hydro_location,
+  geom = nhdplusTools::get_hydro_location(data.frame(hydro_location),
+                                          walker_flowline))
+
+net &lt;- navigate_network(hydro_location,
+                       mode = "DM", network = walker_flowline,
+                       trim_start = TRUE, distance_km = 20)
+
+plot(sf::st_geometry(walker_flowline))
+plot(sf::st_geometry(hydro_location), add = TRUE)
+plot(sf::st_geometry(net), add = TRUE, col = "blue", lwd = 2)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,391 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cpm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Connectome-based Predictive Modeling</h2>
+
+<h3>Description</h3>
+
+<p>Suite of functions for Connectome-based Predictive Modeling (CPM).
+<strong>See and cite Finn et al., 2015; Rosenberg et al., 2016; Shen et al., 2017</strong>
+</p>
+
+<ul>
+<li>
+<p><code>cpmIV</code>
+</p>
+<p>Internal Validation method (Rosenberg et al., 2016; Shen et al., 2017). Using a leave-one-out approach,
+this method correlates a behavioral statistic <code>bstat</code> with each edge of a whole-brain network across
+participants. Using the significant edges in the network <code>thresh</code>, a connectome model
+is built (without the participant's network). A linear regression model is fit, with the behavioral
+statistic being regressed on the connectome model. The left out participants connectome model is then
+used with the linear regression weights to compute their predicted behavioral score. This is repeated
+for every participant. The predicted scores are correlated with their observed score. Significant values
+suggest that the connectome is related to the behavioral statistic
+</p>
+</li>
+<li>
+<p><code>cpmIVperm</code>
+</p>
+<p>Performs a permutation test of the results obtained by <code>cpmIV</code>. The permutation test quantifies
+whether the results obtained by the original <code>cpmIV</code> are significantly different than a random model
+(see Shen et al., 2017)
+</p>
+</li>
+<li>
+<p><code>cpmEV</code>
+</p>
+<p>UNDER DEVELOPMENT. External Validation method (Beaty et al., 2018). Performs similar function as <code>cpmIV</code> but uses data
+to train <code>train_na</code> the connectome model using a behavioral statistic <code>train_b</code>.
+This training connectome model is then used to predict another dataset <code>valid_na</code>,
+using the same behavioral statistic <code>valid_b</code>. The full training dataset <code>FALSE</code> or
+the leave-one-out <code>overlap = TRUE</code> approach can be used
+</p>
+</li>
+<li>
+<p><code>cpmFP</code>
+</p>
+<p>Fingerprinting method (Finn et al., 2015). Uses CPM approach to identify participants across two
+sessions
+</p>
+</li>
+<li>
+<p><code>cpmFPperm</code>
+</p>
+<p>Fingerprinting method (Finn et al., 2015). Uses permutation method to estimate the significance of
+of the <code>cpmFP</code> results
+</p>
+</li>
+<li>
+<p><code>cpmPlot</code>
+</p>
+<p>Plots the CPM results
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">cpmIV(neuralarray, bstat, kfolds, covar, thresh = .01,
+      connections = c("separate", "overall"), groups = NULL,
+      method = c("mean", "sum"), model = c("linear","quadratic","cubic"),
+      corr = c("pearson","spearman"), nEdges, 
+      standardize = FALSE, cores, progBar = TRUE, plots = TRUE)
+      
+cpmIVperm(iter = 1000, ...)
+      
+cpmEV(train_na, train_b, valid_na, valid_b, thresh = .01,
+      overlap = FALSE, progBar = TRUE)
+      
+cpmFP(session1, session2, progBar = TRUE)
+
+cpmFPperm(session1, session2, iter = 1000, progBar = TRUE)
+
+cpmPlot(cpm.obj, visual.nets = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>neuralarray</code></td>
+<td>
+<p>Array from <code>convertConnBrainMat</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bstat</code></td>
+<td>
+<p>Behavioral statistic for each participant with neural data (a vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kfolds</code></td>
+<td>
+<p>Numeric.
+Number of <em>k</em>-fold validation samples.
+Defaults to the number of participants in the sample (i.e., <em>n</em>),
+which is also known as leave-one-out validation.
+Recommended folds are <code>5</code> and <code>10</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covar</code></td>
+<td>
+<p>Covariates to be included in predicting relevant edges (<strong>time consuming</strong>).
+<strong>Must</strong> be input as a <code>list()</code> (see examples)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>Sets an <code class="reqn">\alpha</code> threshold for edge weights to be retained.
+Defaults to <code>.01</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>connections</code></td>
+<td>
+<p>Character.
+Should positive and negative correlations be separated or used together?
+Defaults to <code>"separate"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+<p>Allows grouping variables to be used for plotting points.
+<strong>Must</strong> be a vector.
+Defaults to <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Use <code>"mean"</code> or <code>"sum"</code> of edge strengths in the positive and negative connectomes.
+Defaults to <code>"mean"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Regression model to use for fitting the data.
+Defaults to <code>"linear"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corr</code></td>
+<td>
+<p>Correlation method for assessing the relationship between the behavioral measure and edges between ROIs.
+Defaults to <code>"pearson"</code>.
+Set to <code>"spearman"</code> for non-linear or monotonic associations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nEdges</code></td>
+<td>
+<p>Number of participants that are required
+to have an edge to appear in the plots.
+Defaults to 10 percent of edges in participants</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardize</code></td>
+<td>
+<p>Should the behavioral statistic (<code>bstat</code>) be standardized?
+Defaults to <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Number of computer processing cores to use when performing covariate analyses.
+Defaults to <em>n</em> - 1 total number of cores.
+Set to any number between 1 and maximum amount of cores on your computer</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progBar</code></td>
+<td>
+<p>Should progress bar be displayed?
+Defaults to <code>TRUE</code>.
+Set to <code>FALSE</code> for no progress bar</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+<p>Should plots be plotted?
+Defaults to <code>TRUE</code>.
+Set to <code>FALSE</code> to hide plots</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>train_na</code></td>
+<td>
+<p>Training dataset
+(an array from <code>convertConnBrainMat</code> function)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>train_b</code></td>
+<td>
+<p>Behavioral statistic for each participant for the <strong>training</strong> neural data (a vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valid_na</code></td>
+<td>
+<p>Validation dataset
+(an array from <code>convertConnBrainMat</code> function)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valid_b</code></td>
+<td>
+<p>Behavioral statistic for each participant for the <strong>validation</strong> neural data (a vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlap</code></td>
+<td>
+<p>Should leave-one-out cross-validation be used?
+Defaults to <code>FALSE</code> (use full dataset, no leave-one-out).
+Set to <code>TRUE</code> to select edges that appear in every leave-one-out cross-validation network (<em>time consuming</em>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>session1</code></td>
+<td>
+<p>Array from <code>convertConnBrainMat</code> function
+(first session)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>session2</code></td>
+<td>
+<p>Array from <code>convertConnBrainMat</code> function
+(second session)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Number of iterations to perform.
+Defaults to <code>1000</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cpm.obj</code></td>
+<td>
+<p><code>cpm</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visual.nets</code></td>
+<td>
+<p>Boolean.
+Uses <code>qgraph</code> to plot connectivity
+between the networks as a network.
+Defaults to <code>FALSE</code>.
+Set to <code>TRUE</code> to visualize the networks</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed from a <code>cpm</code> function</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>cpmIV</code> and <code>cpmEV</code>:
+</p>
+<p>Returns a list containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>results</code></td>
+<td>
+<p>A matrix containing: r coefficient (<code>r</code>), p-value (<code>p-value</code>),
+mean absolute error (<code>mae</code>), root mean square error (<code>rmse</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posMask</code></td>
+<td>
+<p>Positive connectivity for input in
+<a href="https://bioimagesuiteweb.github.io/webapp/connviewer.html">BioImage Suite Connectivity Viewer</a></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>negMask</code></td>
+<td>
+<p>Negative connectivity for input in
+<a href="https://bioimagesuiteweb.github.io/webapp/connviewer.html">BioImage Suite Connectivity Viewer</a></p>
+</td>
+</tr>
+</table>
+<p><code>cpmIVperm</code>:
+</p>
+<p>Returns a matrix containing <em>p</em>-values for positive and negative prediction models 
+</p>
+<p><code>cpmFP</code>:
+</p>
+<p>Returns a matrix containing the percentage
+and number of correctly identified subjects for sessions 1 and 2
+</p>
+<p><code>cpmPlot</code>:
+</p>
+<p>Returns plot of connectivity differences between the
+positive and negative masks
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Alexander Christensen &lt;alexpaulchristensen@gmail.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Beaty, R. E., Kenett, Y. N., Christensen, A. P., Rosenberg, M. D., Benedek, M., Chen, Q.,
+Fink, A., Qiu, J., Kwapil, T. R., Kane, M. J., &amp; Silvia, P. J. (2018).
+Robust prediction of individual creative ability from brain functional connectivity.
+<em>Proceedings of the National Academy of Sciences</em>, <em>115</em>, 1087-1092.
+</p>
+<p>Finn, E. S., Shen, X., Scheinost, D., Rosenberg, M. D., Huang, J., Chun, M. M., Papademetris, X., Constable, R. T. (2015).
+Functional connectome fingerprinting: Identifying individuals using patterns of brain connectivity.
+<em>Nature Neuroscience</em>, <em>18</em>, 1664-1671.
+</p>
+<p>Rosenberg, M. D., Finn, E. S., Scheinost, D., Papademetris, X., Shen, X., Constable, R. T., Chun, M. M. (2016).
+A neuromarker of sustained attention from whole-brain functional connectivity.
+<em>Nature Neuroscience</em>, <em>19</em>, 165-171.
+</p>
+<p>Shen, X. Finn, E. S., Scheinost, D., Rosenberg, M. D., Chun, M. M., Papademetris, X., Constable, R. T. (2017).
+Using connectome-based predictive modeling to predict individual behavior from brain connectivity.
+<em>Nature Protocols</em>, <em>12</em>, 506-518.
+</p>
+<p>Wei, T. &amp; Simko, V.(2017).
+R package "corrplot": Visualization of a correlation matrix (Version 0.84).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load data
+behav &lt;- behavOpen
+
+## Not run: 
+
+# Create path to temporary file
+temp &lt;- tempfile()
+
+# Download to temporary file
+googledrive::drive_download(
+paste("https://drive.google.com/file/d/",
+"1T7_mComB6HPxJxZZwwsLLSYHXsOuvOBt",
+"/view?usp=sharing", sep = ""),
+path = temp
+)
+
+# Load resting state brain data
+load(temp)
+
+# Run cpmIV
+res &lt;- cpmIV(neuralarray = restOpen, bstat = behav, cores = 4)
+
+# Plot cpmIV results
+cpmPlot(res)
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

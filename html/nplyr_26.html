@@ -1,0 +1,186 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nest_separate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Separate a character column into multiple columns in a column of nested data frames</h2>
+
+<h3>Description</h3>
+
+<p><code>nest_separate()</code> is used to separate a single character column into multiple
+columns using a regular expression or a vector of character positions in a
+list of nested data frames.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nest_separate(
+  .data,
+  .nest_data,
+  col,
+  into,
+  sep = "[^[:alnum:]]+",
+  remove = TRUE,
+  convert = FALSE,
+  extra = "warn",
+  fill = "warn",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>A data frame, data frame extension (e.g., a tibble), or a lazy
+data frame (e.g., from dbplyr or dtplyr).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.nest_data</code></td>
+<td>
+<p>A list-column containing data frames</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Column name or position within. Must be present in all data frames
+in <code>.nest_data</code>. This is passed to <code>tidyselect::vars_pull()</code>.
+</p>
+<p>This argument is passed by expression and supports quasiquotation (you can
+unquote column names or column positions).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>into</code></td>
+<td>
+<p>Names of new variables to create as character vector.
+Use <code>NA</code> to omit the variable in the output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>Separator between columns.
+</p>
+<p>If character, <code>sep</code> is interpreted as a regular expression. The default
+value is a regular expression that matches any sequence of
+non-alphanumeric values.
+</p>
+<p>If numeric, <code>sep</code> is interpreted as character positions to split at. Positive
+values start at 1 at the far-left of the string; negative value start at -1 at
+the far-right of the string. The length of <code>sep</code> should be one less than
+<code>into</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove</code></td>
+<td>
+<p>If <code>TRUE</code>, remove input column from output data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convert</code></td>
+<td>
+<p>If <code>TRUE</code>, will run <code>type.convert()</code> with
+<code>as.is = TRUE</code> on new columns. This is useful if the component
+columns are integer, numeric or logical.
+</p>
+<p>NB: this will cause string <code>"NA"</code>s to be converted to <code>NA</code>s.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extra</code></td>
+<td>
+<p>If <code>sep</code> is a character vector, this controls what
+happens when there are too many pieces. There are three valid options:
+</p>
+
+<ul>
+<li> <p><code>"warn"</code> (the default): emit a warning and drop extra values.
+</p>
+</li>
+<li> <p><code>"drop"</code>: drop any extra values without a warning.
+</p>
+</li>
+<li> <p><code>"merge"</code>: only splits at most <code>length(into)</code> times
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fill</code></td>
+<td>
+<p>If <code>sep</code> is a character vector, this controls what
+happens when there are not enough pieces. There are three valid options:
+</p>
+
+<ul>
+<li> <p><code>"warn"</code> (the default): emit a warning and fill from the right
+</p>
+</li>
+<li> <p><code>"right"</code>: fill with missing values on the right
+</p>
+</li>
+<li> <p><code>"left"</code>: fill with missing values on the left
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed on to <code>tidyr::separate()</code> methods.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>nest_separate()</code> is a wrapper for <code>tidyr::separate()</code> and maintains the functionality
+of <code>separate()</code> within each nested data frame. For more information on <code>separate()</code>
+please refer to the documentation in <a href="https://tidyr.tidyverse.org/">'tidyr'</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of the same type as <code>.data</code>. Each object in the column <code>.nest_data</code>
+will have the specified column split according to the regular expression or
+the vector of character positions.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other tidyr verbs: 
+<code>nest_drop_na()</code>,
+<code>nest_extract()</code>,
+<code>nest_fill()</code>,
+<code>nest_replace_na()</code>,
+<code>nest_unite()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123)
+gm &lt;- gapminder::gapminder %&gt;% mutate(comb = paste(continent,year,sep = "-"))
+gm_nest &lt;- gm %&gt;% tidyr::nest(country_data = -continent)
+
+gm_nest %&gt;% 
+  nest_separate(.nest_data = country_data,
+                col = comb,
+                into = c("var1","var2"),
+                sep = "-")
+</code></pre>
+
+
+</div>

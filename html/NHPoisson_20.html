@@ -1,0 +1,285 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>globalval.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform a global validation analysis for a NHPP</h2>
+
+<h3>Description</h3>
+
+<p>This function performs a thorough validation analysis for a fitted NHPP. 
+It calculates
+the (generalized) uniform  and the raw (or scaled) residuals, performs residual plots
+for the uniform  residuals, and time residual and lurking variable plots for the 
+raw  or scaled residuals.
+It also  plots the fitted and  empirical estimations of the NHPP intensity.
+Optionally, it also performs a  residual QQplot.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">globalval.fun(mlePP, lint = NULL, nint = NULL, Xvar = NULL, 
+namXvar = NULL, Xvart = NULL, namXvart = NULL,  h = NULL, typeRes = NULL,
+typeResLV="Pearson",typeI = "Disjoint", nsim = 100, clevel = 0.95, 
+resqqplot = FALSE, nintLP = 100, tit = "", flow = 0.5, addlow = FALSE, 
+histWgraph=TRUE,plotDisp=c(2,2), indgraph = FALSE, scax = NULL, scay = NULL, 
+legcex = 0.5, cores = 1, xlegend = "topleft", fixed.seed=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mlePP</code></td>
+<td>
+<p>An object of class <code>mlePP-class</code>; usually,
+the output  from <code>fitPP.fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lint</code></td>
+<td>
+<p>Length of the  intervals  used to calculate the residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nint</code></td>
+<td>
+<p>Number of intervals  used to calculate the residuals. 
+Intervals of equal length are considered.  Only used if typeI="Disjoint".
+In that case, only one of  the arguments lint or nint must be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xvar</code></td>
+<td>
+<p>Optional. Matrix of the lurking variables (each column is a variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>namXvar</code></td>
+<td>
+<p>Optional. Vector of names of the variables in Xvar.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xvart</code></td>
+<td>
+<p>Optional. Matrix of the variables for the 
+residual plots (each column is a variable). A time  plot is performed in all the cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>namXvart</code></td>
+<td>
+<p>Optional. Vector of names of the variables in Xvart.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>Optional. Weight function  to calculate the scaled residuals.
+By default,  Pearson residuals with </p>
+<p style="text-align: center;"><code class="reqn">h(t)=1/\sqrt{\hat \lambda(t)}</code>
+</p>
+<p> are calculated.
+This function is used to calculate both the  scaled residuals and the residuals 
+for the lurking variables (except if typeResLV="Raw").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeRes</code></td>
+<td>
+<p>Optional. Label indicating the type of scaled residuals. By default,  
+Pearson residuals  are calculated and label is "Pearson".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeResLV</code></td>
+<td>
+<p>Label indicating the type of residuals ("Raw" or any type of 
+scaled residuals such as "Pearson") to calculate the residuals for the lurking variable
+plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeI</code></td>
+<td>
+<p>Label indicating  the type ("Overlapping" or "Disjoint") of intervals
+used to calculate the residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clevel</code></td>
+<td>
+<p>Confidence level of the  residual envelopes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resqqplot</code></td>
+<td>
+<p>Logical  flag. It is is TRUE, a residual qqplot is carried out.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Number of simulations  for the  residual qqplot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nintLP</code></td>
+<td>
+<p>Number of levels considered in the lurking variables. It is used as argument
+nint in the call of the function <code>graphResCov.fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tit</code></td>
+<td>
+<p>Character string. A title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flow</code></td>
+<td>
+<p>Argument f for the lowess smoother of the raw (or scaled) residual 
+plots, see <code>lowess</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>addlow</code></td>
+<td>
+<p>Logical flag. If it is TRUE, a lowess is added in the residual plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>histWgraph</code></td>
+<td>
+<p> Logical flag.   If it is TRUE,  a new graphical device is opened
+with the option <code>record=TRUE</code>, so that the history of all plots is recorded in the new device. 
+This option may not work on some platforms; for example, RStudio does not allow the user to open
+new  graphical devices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotDisp</code></td>
+<td>
+<p> A vector of the form <code>c(nr, nc)</code>.  The residual plots  in <code>graphresU.fun</code>, 
+<code>graphres.fun</code> and <code>graphResCov.fun</code>
+will be drawn in a nr<code class="reqn">\times</code>nc layout. It is used as argument <code>mfrow</code> in <code>par</code>. By default,  
+a 2 <code class="reqn">\times</code> 2 layout is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indgraph</code></td>
+<td>
+<p>Logical flag. If it is TRUE, the validation plots (except the residual versus variables plots) in 
+<code>graphresU.fun</code> are carried out in four
+1 <code class="reqn">\times</code> 1 layouts. By default,  a 2 <code class="reqn">\times</code> 2 layout is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scax</code></td>
+<td>
+<p>Optional. Vector of two values indicating  the range of values for the x-axis 
+in the fitted and empirical  rate plot. An adequate range is selected by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scay</code></td>
+<td>
+<p>Optional. Vector of two values indicating  the range of values for the x-axis
+in the fitted and empirical  rate plot. An adequate range is selected by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legcex</code></td>
+<td>
+<p>cex argument  for the legend in the  residual time plots 
+(see <code>par</code> for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Optional. Number of cores of the computer
+to be used in the calculations. Default: one core is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlegend</code></td>
+<td>
+<p>Argument xlegend used in the call of the function 
+<code>graphrate.fun</code>; see that function for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>An integer or NULL. It is the argument for <code>resQQplot.fun</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If typeI="Overlapping", argument lint is compulsory. If 
+typeI="Disjoint", only one of the arguments lint or  nlint must be specified.</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the same elements that <code>CalcRes.fun</code> or 
+<code>CalcResD.fun</code>
+(depending on the value of the argument typeI).</p>
+
+
+<h3>References</h3>
+
+<p>Cebrian, A.C., Abaurrea, J. and Asin, J. (2015). NHPoisson: An R Package for 
+Fitting and Validating Nonhomogeneous Poisson Processes. 
+<em>Journal of Statistical Software</em>, 64(6), 1-24.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>graphres.fun</code>, <code>graphrate.fun</code>, <code>resQQplot.fun</code>,
+<code>graphResCov.fun</code>, <code>graphresU.fun</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(BarTxTn)
+
+covB&lt;-cbind(cos(2*pi*BarTxTn$dia/365), sin(2*pi*BarTxTn$dia/365), 
+	BarTxTn$TTx,BarTxTn$Txm31,BarTxTn$Txm31**2)
+
+
+modB&lt;-fitPP.fun(tind=TRUE,covariates=covB, 
+	POTob=list(T=BarTxTn$Tx, thres=318),
+	tit="BAR Tx; cos, sin, TTx, Txm31, Txm31**2", 
+	start=list(b0=-100,b1=1,b2=10,b3=0,b4=0,b5=0),CIty="Transf",modCI=TRUE,
+	modSim=TRUE,dplot=FALSE)
+
+#Since  only one graphical device is opened  and  the argument histWgraph is TRUE 
+#by default, the different plots can be scrolled up and down with the "Page Up" 
+#and "Page Down" keys.
+
+aux&lt;-globalval.fun(mlePP=modB,lint=153,	typeI="Disjoint", 
+	typeRes="Raw",typeResLV="Raw",	resqqplot=FALSE)
+
+#If typeRes and typeResLV are not specified, Pearson residuals are calculated
+#by default.
+
+aux&lt;-globalval.fun(mlePP=modB,lint=153,	typeI="Disjoint", 
+	resqqplot=FALSE)
+
+
+</code></pre>
+
+
+</div>

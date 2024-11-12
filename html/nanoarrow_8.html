@@ -1,0 +1,100 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>as_nanoarrow_vctr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Experimental Arrow encoded arrays as R vectors</h2>
+
+<h3>Description</h3>
+
+<p>This experimental vctr class allows zero or more Arrow arrays to
+present as an R vector without converting them. This is useful for arrays
+with types that do not have a non-lossy R equivalent, and helps provide an
+intermediary object type where the default conversion is prohibitively
+expensive (e.g., a nested list of data frames). These objects will not
+survive many vctr transformations; however, they can be sliced without
+copying the underlying arrays.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">as_nanoarrow_vctr(x, ..., schema = NULL, subclass = character())
+
+nanoarrow_vctr(schema = NULL, subclass = character())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object that works with <code>as_nanoarrow_array_stream()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Passed to <code>as_nanoarrow_array_stream()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>schema</code></td>
+<td>
+<p>An optional <code>schema</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subclass</code></td>
+<td>
+<p>An optional subclass of nanoarrow_vctr to prepend to the
+final class name.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The nanoarrow_vctr is currently implemented similarly to <code>factor()</code>: its
+storage type is an <code>integer()</code> that is a sequence along the total length
+of the vctr and there are attributes that are required to resolve these
+indices to an array + offset. Sequences typically have a very compact
+representation in recent versions of R such that this has a cheap storage
+footprint even for large arrays. The attributes are currently:
+</p>
+
+<ul>
+<li> <p><code>schema</code>: The nanoarrow_schema shared by each chunk.
+</p>
+</li>
+<li> <p><code>chunks</code>: A <code>list()</code> of <code>nanoarrow_array</code>.
+</p>
+</li>
+<li> <p><code>offsets</code>: An <code>integer()</code> vector beginning with <code>0</code> and followed by the
+cumulative length of each chunk. This allows the chunk index + offset
+to be resolved from a logical index with <code>log(n)</code> complexity.
+</p>
+</li>
+</ul>
+<p>This implementation is preliminary and may change; however, the result of
+<code>as_nanoarrow_array_stream(some_vctr[begin:end])</code> should remain stable.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vctr of class 'nanoarrow_vctr'
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">array &lt;- as_nanoarrow_array(1:5)
+as_nanoarrow_vctr(array)
+
+</code></pre>
+
+
+</div>

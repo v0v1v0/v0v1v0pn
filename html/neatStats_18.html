@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rbind_loop</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Merge by Columns in Loops</h2>
+
+<h3>Description</h3>
+
+<p>Merges rows by columns in a loop using the <code>enum</code>
+function. On first iteration, indicated by <code>enum</code>, initiates a
+new <code>data.table</code> with the data to merge as first row. On all
+following iterations, adds data to merge as subsequent rows (using
+<code>data.table::rbindlist</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rbind_loop(merged, ..., hush = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>merged</code></td>
+<td>
+<p>The name of the <code>data.table</code> for the merged data
+(without quotes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Any number of data to be merged. Each argument must be one of the
+following: a <code>data.frame</code> (or <code>data.table</code>) with
+either single row or two column; a named vector or a named list (with single
+elements); or a single value with parameter name (e.g. date = 1989 or id =
+"jdoe"). Data with two columns will be transposed using first column as
+column names and second column as corresponding values. See Details,
+Examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hush</code></td>
+<td>
+<p>Logical. If <code>TRUE</code> (default), prints message when the data
+frame for merging is initiated.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In each call, all data passed to the function (via <code>...</code>) will
+be merged into a single row, and that single row will be added to the
+"<code>merged</code>" data table.
+</p>
+<p>See an extensive example via https://github.com/gasparl/neatstats.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>enum</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+my_vector = c('aa', 'bb', 'cxyz', 'last')
+for (elem in enum(my_vector)) {
+    cat(elem, fill = TRUE)
+    rbind_loop(
+        merged_data, # data frame name for merging
+        item = elem[2],
+        number = elem[1],
+        whatever = paste0('number (', elem[1], ')')
+    )
+}
+# merged_data now contains all merged rows
+print(merged_data)
+# item number   whatever
+# 1   aa      1 number (1)
+# 2   bb      2 number (2)
+# 3 cxyz      3 number (3)
+# 4 last      4 number (4)
+
+
+# example with other data types
+for (elem in enum(my_vector)) {
+    cat(elem, fill = TRUE)
+    dframe1 = data.frame(item = elem[2],
+                         number = elem[1])
+    print(elem[1])
+    asnum = as.numeric(elem[1])
+    dframe2 = data.frame(
+        my_cols = c('index', 'squared', 'multiple'),
+        my_vals = c(elem[1], asnum ** 2, asnum * 10)
+    )
+    my_list = list(ls_item = elem[2], ls_num = elem[1])
+    my_vec = c(v_item = elem[2], v_num = elem[1])
+    rbind_loop(
+        merged_data,
+        dframe1, # data frame with single row
+        dframe2, # data frame with two columns
+        my_list, # named list
+        my_vec, # named vector
+        single_val = elem[2], # single element
+        constant = "whatever" # other single element
+    )
+}
+
+# again merged_data contains all merged rows
+# (previous content, if any, were removed)
+print(merged_data)
+
+
+# example with differring columns
+for (elem in enum(my_vector)) {
+    cat(elem, fill = TRUE)
+    dframe = data.frame(item = elem[2],
+                        number = elem[1])
+    asnum = as.numeric(elem[1])
+    if (asnum %% 2 == 0) {
+        dframe$sqr = asnum ** 2
+    }
+    rbind_loop(merged_data,
+               dframe)
+}
+
+# merged_data contains all new merged rows
+# with NAs where sqr was not added
+print(merged_data)
+
+# example with data.table added
+library('data.table')
+for (elem in enum(my_vector)) {
+    cat(elem, fill = TRUE)
+    dframe = data.frame(item = elem[2],
+                        number = elem[1])
+    asnum = as.numeric(elem[1])
+    dtable = data.table(item2 = paste('DT', elem[2]),
+                        number2 = asnum + 9)
+    if (asnum %% 2 == 0) {
+        dframe$sqr = asnum ** 2
+    }
+    rbind_loop(merged_data,
+               dframe,
+               dtable)
+}
+
+print(merged_data)
+
+# an extensive example to show how to collect and aggregate raw data is
+# available via the README file at the repository:
+# https://github.com/gasparl/neatstats
+
+</code></pre>
+
+
+</div>

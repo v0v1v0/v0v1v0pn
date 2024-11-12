@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>adjustedlassoCoefficients</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return Adjusted adaptive lasso coefficients after finding optimal t</h2>
+
+<h3>Description</h3>
+
+<p>Return Adjusted adaptive lasso coefficients after finding optimal t
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">adjustedlassoCoefficients(
+  fit,
+  varsVec,
+  covarsVec,
+  catvarsVec,
+  constraint = 1e-08,
+  stratVar = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>nlmixr2 fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varsVec</code></td>
+<td>
+<p>character vector of variables that need to be added</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covarsVec</code></td>
+<td>
+<p>character vector of covariates that need to be added</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>catvarsVec</code></td>
+<td>
+<p>character vector of categorical covariates that need to be added</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraint</code></td>
+<td>
+<p>theta cutoff. below cutoff then the theta will be fixed to zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stratVar</code></td>
+<td>
+<p>A variable to stratify on for cross-validation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other parameters to be passed to optimalTvaluelasso</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>return data frame of final lasso coefficients
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vishal Sarsani
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+one.cmt &lt;- function() {
+  ini({
+    tka &lt;- 0.45; label("Ka")
+    tcl &lt;- log(c(0, 2.7, 100)); label("Cl")
+    tv &lt;- 3.45; label("V")
+    eta.ka ~ 0.6
+    eta.cl ~ 0.3
+    eta.v ~ 0.1
+    add.sd &lt;- 0.7
+  })
+  model({
+    ka &lt;- exp(tka + eta.ka)
+    cl &lt;- exp(tcl + eta.cl)
+    v &lt;- exp(tv + eta.v)
+    linCmt() ~ add(add.sd)
+  })
+}
+
+d &lt;- nlmixr2data::theo_sd
+d$SEX &lt;-0
+d$SEX[d$ID&lt;=6] &lt;-1
+
+fit &lt;- nlmixr2(one.cmt, d, est = "saem", control = list(print = 0))
+varsVec &lt;- c("ka","cl","v")
+covarsVec &lt;- c("WT")
+catvarsVec &lt;- c("SEX")
+
+# Adaptive Lasso coefficients:
+
+lassoDf &lt;- adjustedlassoCoefficients(fit,varsVec,covarsVec,catvarsVec)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

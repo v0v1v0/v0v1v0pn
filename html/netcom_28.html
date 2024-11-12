@@ -1,0 +1,256 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>null_fit_optim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Empirical parameterization via null distributions</h2>
+
+<h3>Description</h3>
+
+<p>Helper function to find the best fitting version of a mechanism by searching across the null distributions associated with a process + parameter combination.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">null_fit_optim(
+  parameter,
+  process,
+  network,
+  net_size,
+  iters,
+  neighborhood,
+  directed,
+  DD_kind,
+  DD_weight,
+  net_kind,
+  mechanism_kind,
+  method,
+  size_different,
+  power_max,
+  connectance_max,
+  divergence_max,
+  best_fit_sd,
+  max_norm,
+  cause_orientation,
+  cores,
+  null_dist_trim,
+  ks_dither,
+  ks_alternative,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>parameter</code></td>
+<td>
+<p>The parameter being tested for its ability to generate networks alike the input 'network'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>process</code></td>
+<td>
+<p>Name of mechanism. Currently only "ER", "PA", "DD", "DM" "SW", and "NM" are supported. Future versions will accept user-defined network-generating functions and associated parameters. ER = Erdos-Renyi random. PA = Preferential Attachment. DD = Duplication and Divergence. DM = Duplication and Mutation. SW = Small World. NM = Niche Model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p>The network being compared to a hypothesized 'process' with a given 'parameter' value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_size</code></td>
+<td>
+<p>Number of nodes in the network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iters</code></td>
+<td>
+<p>Number of replicates in the null distribution. Note that length(null_dist) = ((iters^2)-iters)/2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neighborhood</code></td>
+<td>
+<p>The range of nodes that form connected communities. Note: This implementation results in overlap of communities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>Whether the target network is directed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DD_kind</code></td>
+<td>
+<p>A vector of network properties to be used to compare networks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DD_weight</code></td>
+<td>
+<p>A vector of weights for the relative importance of the network properties in DD_kind being used to compare networks. Should be the same length as DD_kind.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_kind</code></td>
+<td>
+<p>If the network is an adjacency matrix ("matrix") or an edge list ("list").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mechanism_kind</code></td>
+<td>
+<p>Either "canonical" or "grow" can be used to simulate networks. If "grow" is used, note that here it will only simulate pure mixtures made of a single mechanism.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size_different</code></td>
+<td>
+<p>If there is a difference in the size of the networks used in the null distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>power_max</code></td>
+<td>
+<p>The maximum power of attachment in the Preferential Attachment process (PA).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>connectance_max</code></td>
+<td>
+<p>The maximum connectance parameter for the Niche Model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>divergence_max</code></td>
+<td>
+<p>The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>best_fit_sd</code></td>
+<td>
+<p>Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_norm</code></td>
+<td>
+<p>Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cause_orientation</code></td>
+<td>
+<p>The orientation of directed adjacency matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>The number of cores to run the classification on. When set to 1 parallelization will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null_dist_trim</code></td>
+<td>
+<p>= Number between zero and one that determines how much of each network comparison distribution (unknown network compared to simulated networks, simulated networks compared to each other) should be used. Prevents p-value convergence with large sample sizes. Defaults to 1, which means all comparisons are used (no trimming).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ks_dither</code></td>
+<td>
+<p>The KS test cannot compute exact p-values when every pairwise network distance is not unique. Adding small amounts of noise makes each distance unique. We are not aware of a study on the impacts this has on accuracy so it is set to zero by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ks_alternative</code></td>
+<td>
+<p>Governs the KS test. Assuming best_fit_sd is not too large, this can be set to "greater" because the target network cannot be more alike identically simulated networks than they are to each other. In practice we have found "greater" and "less" produce numerical errors. Only "two.sided", "less", and "greater" are supported through stats::ks.test().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Defaults to TRUE. Whether to print all messages.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note: Currently each process is assumed to have a single governing parameter.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A number measuring how different the input network is from the parameter + process combination.
+</p>
+
+
+<h3>References</h3>
+
+<p>Langendorf, R. E., &amp; Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import netcom
+library(netcom)
+
+# Adjacency matrix
+size &lt;- 10
+network &lt;- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+
+# Calculate how similar the input network is to Small-World networks with 
+# a rewiring probability of 0.28.
+null_fit_optim(
+     parameter = 0.28, 
+     process = "SW", 
+     network = network, 
+     net_size = 12, 
+     iters = 20,
+     neighborhood = max(1, round(0.1 * net_size)),
+     net_kind = "matrix", 
+     mechanism_kind = "grow", 
+     power_max = 5, 
+     connectance_max = 0.5, 
+     divergence_max = 0.5, 
+     cores = 1, 
+     directed = TRUE, 
+     method = "DD", 
+     size_different = FALSE,
+     cause_orientation = "row", 
+     DD_kind = c(
+         "in", "out", "entropy_in", "entropy_out", 
+         "clustering_coefficient", "page_rank", "communities"
+     ), 
+     DD_weight = 1, 
+     best_fit_sd = 0,
+     max_norm = FALSE,
+     null_dist_trim = 0,
+     ks_dither = 0,
+     ks_alternative = "two.sided",
+     verbose = FALSE
+)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,468 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>BayesianMCMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bayesian MCMC frequency analysis</h2>
+
+<h3>Description</h3>
+
+<p>Bayesian Markov Chain Monte Carlo algorithm for flood frequency analysis with historical and other information. The user can choose between a local and a regional analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> BayesianMCMC (xcont, xhist=NA, infhist=NA, suphist=NA, 
+               nbans=NA, seuil=NA, nbpas=1000, nbchaines=3, 
+               confint=c(0.05, 0.95), dist="GEV",
+               apriori=function(...){1}, 
+               parameters0=NA, varparameters0=NA)
+ BayesianMCMCcont (x, nbpas=NA)
+ BayesianMCMCreg (xcont, scont, xhist=NA, infhist=NA, suphist=NA, shist=NA, 
+                  nbans=NA, seuil=NA, nbpas=1000, nbchaines=3,
+                  confint=c(0.05, 0.95), dist="GEV",
+                  apriori=function(...){1},
+                  parameters0=NA, varparameters0=NA) 
+ BayesianMCMCregcont (x, nbpas=NA)
+ plotBayesianMCMCreg_surf (x, surf, ask=FALSE, ...)
+ ## S3 method for class 'BayesianMCMC'
+ plot(x, which=1, ask=FALSE, ...)
+ ## S3 method for class 'BayesianMCMC'
+ print(x, ...)
+ ## S3 method for class 'BayesianMCMCreg'
+ plot(x, which=1, ask=FALSE, ...)
+ ## S3 method for class 'BayesianMCMCreg'
+ print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>BayesianMCMC</code>, output of function <code>BayesianMCMC</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xcont</code></td>
+<td>
+<p>vector of systematic data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scont</code></td>
+<td>
+<p>vector of upstream catchment surfaces of systematic data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xhist</code></td>
+<td>
+<p>vector of historical data and/or extreme discharges at ungauged sites</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>infhist</code></td>
+<td>
+<p>vector of inferior limit for historical data and/or extreme discharges at ungauged sites</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suphist</code></td>
+<td>
+<p>vector of superior limit for historical data and/or extreme discharges at ungauged sites</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shist</code></td>
+<td>
+<p>vector of upstream catchment surfaces of extreme discharges at ungauged sites </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbans</code></td>
+<td>
+<p>period (in years) over which every threshold has not been exceeded except for the historical data and/or extreme discharges at ungauged sites. If several values of xhist for a same threshold, put the number of years associated to the threshold on the first row, then put 0 (see examples)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seuil</code></td>
+<td>
+<p>threshold not exceeded in the historical period except for the historical data and/or extreme discharges at ungauged sites (several thresholds allowed).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbpas</code></td>
+<td>
+<p>number of iterations for the MCMC algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbchaines</code></td>
+<td>
+<p>number of chains for the MCMC algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confint</code></td>
+<td>
+<p>confidence limits for the flood quantiles</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>distribution: normal <code>"NORM"</code>, log-normal with 2 parameters <code>"LN"</code>, Exponential <code>"EXP"</code>, Gumbel <code>"GUMBEL"</code>, Generalized Extreme Value <code>"GEV"</code>, Generalized Logistic <code>"GENLOGIS"</code>, Generalized Pareto <code>"GENPAR"</code>, log-normal with 3 parameters <code>"LN3"</code>, Pearson type III <code>"P3"</code>, (log-Pearson type III <code>"LP3"</code>, not implemented yet)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>apriori</code></td>
+<td>
+<p>function of the parameters of the model ‘proportional to’ their a-priori guessed distribution.
+The default fuction returns always 1, i.e. there is no a-priori information</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameters0</code></td>
+<td>
+<p>initial values of the parameters for the MCMC algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varparameters0</code></td>
+<td>
+<p>initial values of the parameter variances for the MCMC algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+<p>a number of a vector of numbers that defines the graph to plot (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ask</code></td>
+<td>
+<p>if TRUE, the interactive mode is run</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surf</code></td>
+<td>
+<p>a particular surface (number or vector), not necessarily being a surface included in the scont or shist vectors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>Supported cases</b>
+</p>
+<p>These functions are taking 4 cases into account, depending on the type of data provided:
+- Using only the systematic data: xcont provided, xhist=NA, infhist=NA and suphist=NA
+- Using censored information, historical flood known: xcont and xhist provided, infhist=NA and suphist=NA
+- Using censored information, historical flood unknown precisely but its lower limit known: xcont and infhist provided, xhist=NA and suphist=NA
+- Taking into account flood estimation intervals: infhist and suphist (respectively lower and upper limits) provided, xcont provided, xhist=NA  
+- Please note that every other case is NOT supported. For example, you can't have some historical flood values perfectly known as well as some other for which you only know a lower limit or an interval.
+</p>
+<p>Regarding the perception thresholds:
+- By definition, the number of exceedances of each perception threshold within its application period has to be known precisely, and all the floods exceeding the threshold have to be included in xhist (or infhist or suphist).  
+- Several thresholds are allowed.
+- It is possible to include in xhist (or infhist or suphist) historical values that do not exceed the associated perception threshold.
+- If for one or several thresholds you only know that this or these threshold have never been exceeded and no more information is available on floods that did not exceed the threshold(s), this case is also supported. In this case, put for the historical flood corresponding to the threshold xhist=-1 (or infhist=-1 or infhist=suphist=-1). 
+</p>
+<p><b>Bayesian inference</b>
+</p>
+<p>Bayesian inference uses a numerical estimate of the degree of belief in a hypothesis before evidence has been observed and calculates a numerical estimate of the degree of belief in the hypothesis after evidence has been observed.
+The name ‘Bayesian’ comes from the frequent use of Bayes' theorem in the inference process.
+In our case the problem is: which is the probability that a frequency function <code class="reqn">P</code> (of type defined in <code>dist</code>) has parameters <code class="reqn">\theta</code>, given that we have observed the realizations <code class="reqn">D</code> (defined in <code>xcont</code>, <code>xhist</code>, <code>infhist</code>, <code>suphist</code>, <code>nbans</code>, <code>seuil</code>).
+The Bayes' theorem writes
+</p>
+<p style="text-align: center;"><code class="reqn">P(\theta|D) = \frac{P(D|\theta) \cdot P(\theta)}{P(D)}</code>
+</p>
+
+<p>where 
+<code class="reqn">P(\theta|D)</code> is the conditional probability of <code class="reqn">\theta</code>, given <code class="reqn">D</code> (it is also called the posterior probability because it is derived from or depends upon the specified value of <code class="reqn">D</code>) and is the result we are interested in;
+<code class="reqn">P(\theta)</code> is the prior probability or marginal probability of <code class="reqn">\theta</code> (‘prior’ in the sense that it does not take into account any information about <code class="reqn">D</code>), and can be given using the input <code>apriori</code> (it can be used to account for causal information); 
+<code class="reqn">P(D|\theta)</code> is the conditional probability of <code class="reqn">D</code> given <code class="reqn">\theta</code> and it is defined choosing <code>dist</code> and depending on the availability of historical data;
+<code class="reqn">P(D)</code> is the prior or marginal probability of <code class="reqn">D</code>, and acts as a normalizing constant.
+Intuitively, Bayes' theorem in this form describes the way in which one's beliefs about observing <code class="reqn">\theta</code> are updated by having observed <code class="reqn">D</code>.
+</p>
+<p>Since complex models cannot be processed in closed form by a Bayesian analysis, namely because of the extreme difficulty in computing the normalization factor <code class="reqn">P(D)</code>, simulation-based Monte Carlo techniques as the MCMC approaches are used.
+</p>
+<p><b>MCMC Metropolis algorithm</b>
+</p>
+<p>Markov chain Monte Carlo (MCMC) methods (which include random walk Monte Carlo methods), are a class of algorithms for sampling from probability distributions based on constructing a Markov chain that has the desired distribution as its equilibrium distribution. The state of the chain after a large number of steps is then used as a sample from the desired distribution.
+The quality of the sample improves as a function of the number of steps.
+</p>
+<p>The MCMC is performed here through a simple Metropolis algorithm, i.e. a Metropolis-Hastings algorithm with symmetric proposal density.
+The Metropolis-Hastings algorithm can draw samples from any probability distribution <code class="reqn">P(x)</code>, requiring only that a function proportional to the density can be calculated at <code class="reqn">x</code>.
+In Bayesian applications, the normalization factor is often extremely difficult to compute, so the ability to generate a sample without knowing this constant of proportionality is a major virtue of the algorithm.
+The algorithm generates a Markov chain in which each state <code class="reqn">x_t + 1</code> depends only on the previous state <code class="reqn">x_t</code>.
+The algorithm uses a Gaussian proposal density <code class="reqn">N(x_t, \sigma_x)</code>, which depends on the current state <code class="reqn">x_t</code>, to generate a new proposed sample <code class="reqn">x'</code>.
+This proposal is accepted as the next value <code class="reqn">x_t + 1 = x'</code> if <code class="reqn">\alpha</code> drawn from <code class="reqn">U(0,1)</code> satisfies
+</p>
+<p style="text-align: center;"><code class="reqn">\alpha &lt; \frac{P(x')}{P(x_t)}</code>
+</p>
+
+<p>If the proposal is not accepted, then the current value of <code class="reqn">x</code> is retained (<code class="reqn">x_t + 1 = x_t</code>).
+</p>
+<p>The Markov chain is started from a random initial value <code class="reqn">x_0</code> and the algorithm is run for many iterations until this initial state is forgotten. 
+These samples, which are discarded, are known as burn-in. 
+The remaining set of accepted values of <code class="reqn">x</code> represent a sample from the distribution <code class="reqn">P(x)</code>.
+As a Gaussian proposal density (or a lognormal one for definite-positive parameters) is used, the variance parameter <code class="reqn">\sigma_x^2</code> has to be tuned during the burn-in period.
+This is done by calculating the acceptance rate, which is the fraction of proposed samples that is accepted in a window of the last <code class="reqn">N</code> samples. 
+The desired acceptance rate depends on the target distribution, however it has been shown theoretically that the ideal acceptance rate for a one dimensional Gaussian distribution is approx 50%, decreasing to approx 23% for an N-dimensional Gaussian target distribution.
+If <code class="reqn">\sigma_x^2</code> is too small the chain will mix slowly (i.e., the acceptance rate will be too high, so the sampling will move around the space slowly and converge slowly to <code class="reqn">P(x)</code>).
+If <code class="reqn">\sigma_x^2</code> is too large the acceptance rate will be very low because the proposals are likely to land in regions of much lower probability density.
+The desired acceptance rate is fixed here to 34%.
+</p>
+<p>The MCMC algorithm is based on a code developed by Eric Gaume on Scilab.
+It is still unstable and not all the distributions have been tested.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>BayesianMCMC</code> and <code>BayesianMCMCcont</code> (which just continues the simulations of <code>BayesianMCMC</code> for local analyses and <code>BayesianMCMCreg</code> and <code>BayesianMCMCregcont</code> for regional analyses return the following values:
+</p>
+<p><code>BayesianMCMCreg</code> and <code>BayesianMCMCregcont</code> (which just continues the simulations of <code>BayesianMCMC</code> starting from its output) return the following values:
+</p>
+<p><code>parameters</code> matrix (nbpas)x(nbchaines) with the simulated sets of parameters with the MCMC algorithm;
+</p>
+<p><code>parametersML</code> set of parameters correspondent to the maximum likelihood;
+</p>
+<p><code>returnperiods</code> return periods for which <code>quantilesML</code> and <code>intervals</code> are calculated;
+</p>
+<p><code>quantilesML</code> quantiles correspondent to <code>returnperiods</code> for the distribution whose parameters are <code>parametersML</code>;
+</p>
+<p><code>logML</code> maximum log-likelihood;
+</p>
+<p><code>intervals</code> confidence intervals for the quantiles <code>quantilesML</code> for limits <code>confint</code>;
+</p>
+<p><code>varparameters</code> matrix (nbpas)x(nbchaines)x(number of parameters) with the simulated variances for the MCMC algorithm;
+</p>
+<p><code>vraisdist</code> likelihoods for the sets <code>parameters</code>;
+</p>
+<p><code>propsaut</code> vector showing the evolution of the acceptance rate during the Bayesian MCMC fitting;
+</p>
+<p><code>plot.BayesianMCMC</code> and <code>plot.BayesianMCMCreg</code> (for a normalized surface of 1 km2) plot the following figures:
+</p>
+<p><code>1</code> data as plotting position (the Cunanne plotting position <code class="reqn">a = 0.4</code> is used), fitted distribution (maximum likelihood) and confidence intervals;
+</p>
+<p><code>2</code> diagnostic plot of the MCMC simulation (parameters);
+</p>
+<p><code>3</code> diagnostic plot of the MCMC simulation (likelihood and MCMC acceptance rate);
+</p>
+<p><code>4</code> posterior distribution of parameters obtained with the MCMC simulation (cloud plots);
+</p>
+<p><code>5</code> a-priori distribution of parameters (contour plots);
+</p>
+<p><code>plotBayesianMCMCreg_surf</code> plots the same plot as the first one given by <code>plot.BayesianMCMCreg</code> but for each surface in argument, as well as its mean as a function of the surfaces; 
+</p>
+
+
+<h3>Note</h3>
+
+<p>For information on the package and the Author, and for all the references, see <code>nsRFA</code>.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Eric Gaume, Alberto Viglione, Jose Luis Salinas, Olivier Payrastre, Chi Cong N'guyen, Karine Halbert</p>
+
+
+<h3>See Also</h3>
+
+<p>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(2988)
+serie &lt;- rand.GEV(120, xi=40, alfa=20, k=-0.4)
+serie100 &lt;- serie[1:100]
+serie100[serie100 &lt; 250] &lt;- NA
+serie20 &lt;- serie[101:120]
+serie &lt;- c(serie100, serie20)
+
+
+plot(serie, type="h", ylim=c(0, 600), xlab="", 
+     ylab="Annual flood peaks [m3/s]", lwd=3)
+abline(h=0)
+points(serie100, col=2)
+
+
+## Not run: 
+# Using only sistematic data
+only_sist &lt;- BayesianMCMC (xcont=serie20, nbpas=5000, nbchaines=3, varparameters0=c(70, 20, 0.5), 
+                           confint=c(0.05, 0.95), dist="GEV")
+plot(only_sist, which=c(1:3), ask=TRUE, ylim=c(1,600))
+only_sist &lt;- BayesianMCMCcont(only_sist)
+plot(only_sist, which=c(1:3), ask=TRUE, ylim=c(1,600))
+only_sist &lt;- BayesianMCMCcont(only_sist)
+plot(only_sist, which=c(1:3), ask=TRUE, ylim=c(1,600))
+
+
+
+# Adding the information that the threshold 250 m3/s was exceeded 
+#   3 times in the past 100 years
+with_hist_thresh &lt;- BayesianMCMC (xcont=serie20, infhist=rep(250,3), 
+                                  nbans=100, seuil=250,
+                                  nbpas=5000, nbchaines=3, 
+                                  confint=c(0.05, 0.95), dist="GEV")
+plot(with_hist_thresh, which=c(1:3), ask=TRUE, ylim=c(1,600))
+
+
+
+# Assuming that the 3 historical events are known with high uncertainty
+with_hist_limits &lt;- BayesianMCMC (xcont=serie20,  
+                                  infhist=c(320,320,250), 
+                                  suphist=c(360,400,270), 
+                                  nbans=100, seuil=250,
+                                  nbpas=5000, nbchaines=3, 
+                                  confint=c(0.05, 0.95), dist="GEV")
+plot(with_hist_limits, which=c(1:3), ask=TRUE, ylim=c(1,600))
+
+
+
+# Assuming that the 3 historical events are perfectly known
+with_hist_known &lt;- BayesianMCMC (xcont=serie20, xhist=serie100[!is.na(serie100)], 
+                                 nbans=100, seuil=250,
+                                 nbpas=5000, nbchaines=3, 
+                                 confint=c(0.05, 0.95), dist="GEV")
+plot(with_hist_known, which=c(1:3), ask=TRUE, ylim=c(1,600))
+
+
+
+
+# Perception threshold without available information on floods
+without_info &lt;- BayesianMCMC (xcont=serie20, xhist=-1, 
+                                 nbans=100, seuil=2400,
+                                 nbpas=5000, nbchaines=3, 
+                                 confint=c(0.05, 0.95), dist="GEV")
+plot(without_info, which=c(1:3), ask=TRUE, ylim=c(1,600))
+
+
+
+
+# Using one reasonable a-priori distribution
+fNORM3 &lt;- function (x) {
+ # x = vector of values
+ # mu = vector of means
+ mu = c(44, 26, -0.40)
+ # CM = covariance matrix
+ CM = matrix(c(13, 7.8, -0.055,
+               7.8, 15, -0.42,
+               -0.055, -0.42, 0.056), nrow=3, ncol=3)
+ CMm1 &lt;- solve(CM)
+ term2 &lt;- exp(-((x - mu) %*% CMm1 %*% (x - mu))/2)
+ term1 &lt;- 1/(2*pi)^(3/2)/sqrt(det(CM))
+ term1*term2
+}
+
+with_hist_known2 &lt;- BayesianMCMC (xcont=serie20, xhist=serie100[!is.na(serie100)], 
+                                  nbans=100, seuil=250,
+                                  nbpas=5000, nbchaines=3, apriori=fNORM3,
+                                  confint=c(0.05, 0.95), dist="GEV")
+plot(with_hist_known2, 5)
+plot(with_hist_known2, 4)
+plot(with_hist_known, 4)
+plot(with_hist_known)
+plot(with_hist_known2)
+
+
+
+# Using one non-reasonable a-priori distribution
+fNORM3 &lt;- function (x) {
+ # x = vector of values
+ # mu = vector of means
+ mu = c(30, 50, -0.10)
+ # CM = covariance matrix
+ CM = matrix(c(13, 7.8, -0.055,
+               7.8, 15, -0.42,
+               -0.055, -0.42, 0.056), nrow=3, ncol=3)
+ CMm1 &lt;- solve(CM)
+ term2 &lt;- exp(-((x - mu) %*% CMm1 %*% (x - mu))/2)
+ term2
+}
+
+with_hist_known3 &lt;- BayesianMCMC (xcont=serie20, xhist=serie100[!is.na(serie100)], 
+                                  nbans=100, seuil=250,
+                                  nbpas=5000, nbchaines=3, apriori=fNORM3,
+                                  confint=c(0.05, 0.95), dist="GEV")
+plot(with_hist_known3, 5)
+plot(with_hist_known3, 4)
+plot(with_hist_known, 4)
+plot(with_hist_known)
+plot(with_hist_known3)
+
+## End(Not run)
+
+## Not run: 
+# Assuming that the historical events are perfectly known and there are 4 different thresholds 
+# The data file is presenting this way: 
+
+# xhist nbans seuil 
+#  6000    55  6000 
+#  7400    28  7250 
+#  6350     8  3050 
+#  4000     0  3050 
+#  4550     0  3050 
+#  3950     0  3050 
+#  7550    58  2400 
+#  4650     0  2400 
+#  3950     0  2400 
+
+## Warning: nbans and seuil should have the same length as xhist. 
+
+# So when a threshold is exceeded several times, replicate it as many times it is exceeded 
+# and part the number of years of exceedance into the number of times of exceedance 
+# (the way you part the nbans vector is not important, what is important is that you have 
+# length(nbans)=length(xhist) and the total of years for one same threshold equals the number 
+# of years covered by the perception threshold) 
+xhist_thres &lt;- c(6000, 7400, 6350, 4000, 4550, 3950, 7550, 4650, 3950) 
+seuil_thres &lt;- c(6000, 7250, rep(3050, 4), rep(2400, 3)) 
+nbans_thres &lt;- c(55, 28, 8, 0, 0, 0, 58, 0, 0) 
+
+# The threshold at 6000 has been exceeded for 55 years, the one at 7250 for 28 years, 
+# the one at 3050 for 8 years and the one at 2400 for 58 years 
+with_hist_known_several_thresholds &lt;- BayesianMCMC (xcont=serie20, 
+                                                    xhist=xhist_thres, 
+                                                    nbans=nbans_thres, seuil=seuil_thres, 
+                                                    nbpas=5000, nbchaines=3, 
+                                                    confint=c(0.05, 0.95), dist="GEV", 
+                                                    varparameters0=c(NA, NA, 0.5)) 
+plot(with_hist_known_several_thresholds, which=c(1:3), ask=TRUE)
+
+
+## REGIONAL:
+# Regional analysis, assuming that the 3 historical events are perfectly known and 
+# there are 2 perception thresholds
+regional_with_hist_known &lt;- BayesianMCMCreg (xcont=serie20, 
+                                             scont=c(rep(507,9),rep(2240,11)), 
+                                             xhist=serie100[!is.na(serie100)],
+				             shist=c(495, 495, 87), 
+                                             nbans=c(100, 0, 50), seuil=c(312, 312, 221),
+                                             nbpas=5000, nbchaines=3, 
+                                             confint=c(0.05, 0.95), dist="GEV", 
+                                             varparameters0=c(NA, NA, NA, 0.5))
+plot(regional_with_hist_known, which=1:3, ask=TRUE, ylim=c(1,600))
+
+surf=c(571, 2240)
+plotBayesianMCMCreg_surf(regional_with_hist_known, surf)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>annotate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Annotate text strings</h2>
+
+<h3>Description</h3>
+
+<p>Compute annotations by iteratively calling the given annotators with
+the given text and current annotations, and merging the newly computed
+annotations with the current ones.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">annotate(s, f, a = Annotation())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>a <code>String</code> object, or something coercible to this
+using <code>as.String</code> (e.g., a character string with
+appropriate encoding information).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>an <code>Annotator</code> or
+<code>Annotator_Pipeline</code> object, or something coercible to
+the latter via <code>as.Annotator_Pipeline()</code> (such as a list
+of annotator objects).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>an <code>Annotation</code> object giving the annotations to
+start with.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>Annotation</code> object containing the iteratively computed
+and merged annotations.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## A simple text.
+s &lt;- String("  First sentence.  Second sentence.  ")
+##           ****5****0****5****0****5****0****5**
+
+## A very trivial sentence tokenizer.
+sent_tokenizer &lt;-
+function(s) {
+    s &lt;- as.String(s)
+    m &lt;- gregexpr("[^[:space:]][^.]*\\.", s)[[1L]]
+    Span(m, m + attr(m, "match.length") - 1L)
+}
+## (Could also use Regexp_Tokenizer() with the above regexp pattern.)
+## A simple sentence token annotator based on the sentence tokenizer.
+sent_token_annotator &lt;- Simple_Sent_Token_Annotator(sent_tokenizer)
+
+## Annotate sentence tokens.
+a1 &lt;- annotate(s, sent_token_annotator)
+a1
+
+## A very trivial word tokenizer.
+word_tokenizer &lt;-
+function(s) {
+    s &lt;- as.String(s)
+    ## Remove the last character (should be a period when using
+    ## sentences determined with the trivial sentence tokenizer).
+    s &lt;- substring(s, 1L, nchar(s) - 1L)
+    ## Split on whitespace separators.
+    m &lt;- gregexpr("[^[:space:]]+", s)[[1L]]
+    Span(m, m + attr(m, "match.length") - 1L)
+}
+## A simple word token annotator based on the word tokenizer.
+word_token_annotator &lt;- Simple_Word_Token_Annotator(word_tokenizer)
+
+## Annotate word tokens using the already available sentence token
+## annotations.
+a2 &lt;- annotate(s, word_token_annotator, a1)
+a2
+
+## Can also perform sentence and word token annotations in a pipeline:
+p &lt;- Annotator_Pipeline(sent_token_annotator, word_token_annotator)
+annotate(s, p)
+</code></pre>
+
+
+</div>

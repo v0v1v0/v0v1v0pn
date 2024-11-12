@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>local_mfdr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate local mFDR for all features</h2>
+
+<h3>Description</h3>
+
+<p><code>local_mfdr()</code> is called by <code>summary.ncvreg()</code>, which typically offers a more convenient interface to users.
+If, however, you are working with local mfdrs programmatically rather than interactively, you probably want to
+use <code>local_mfdr()</code>, which skips the sorting, filtering, and print formatting of <code>summary.ncvreg()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">local_mfdr(
+  fit,
+  lambda,
+  X = NULL,
+  y = NULL,
+  method = c("ashr", "kernel"),
+  sigma,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>A fitted <code>ncvreg</code> or <code>ncvsurv</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>The value of lambda at which inference should be carried out.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X, y</code></td>
+<td>
+<p>The design matrix and response used to fit the model; in most cases, it is not necessary to provide
+<code>X</code> and <code>y</code> as they are returned by <code>ncvreg</code>, but see the <code>returnX</code> argument in <code>ncvreg()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>What method should be used to calculate the local fdr?  Options are <code>ashr</code> (which tends to be more
+accurate) and <code>kernel</code> (which requires no additional packages).  The default is to use <code>ashr</code> if the package is
+installed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>For linear regression models, users can supply an estimate of the residual standard deviation.
+The default is to use RSS / DF, where degrees of freedom are approximated using the number of nonzero coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to <code>ashr::ash()</code> if using <code>method='ashr'</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If all features are penalized, then the object returns a data frame with one row per feature and four columns:
+</p>
+
+<ul>
+<li> <p><code>Estimate</code>: The coefficient estimate from the penalized regression fit
+</p>
+</li>
+<li> <p><code>z</code>: A test statistic that approximately follows a standard normal distribution under the null hypothesis that the
+feature is marginally independent of the outcome
+</p>
+</li>
+<li> <p><code>mfdr</code>: The estimated marginal local false discovery rate
+</p>
+</li>
+<li> <p><code>Selected</code>: Features with nonzero coefficient estimates are given an asterisk
+</p>
+</li>
+</ul>
+<p>If some features are penalized and others are not, then a list is returned with two elements: <code>pen.vars</code>, which consists
+of the data frame described above, and <code>unpen.vars</code>, a data frame with four columns: <code>Estimate</code>, <code>SE</code>, <code>Statistic</code>, and
+<code>p.value</code>.  The standard errors and p-values are based on a classical <code>lm</code>/<code>glm</code>/<code>coxph</code> model using the effect of the
+penalized features as an offset.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>summary.ncvreg()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Linear regression
+data(Prostate)
+fit &lt;- ncvreg(Prostate$X, Prostate$y)
+local_mfdr(fit, 0.1)
+
+fit &lt;- ncvreg(Prostate$X, Prostate$y, penalty.factor=rep(0:1, each=4))
+local_mfdr(fit, 0.1)
+
+# Logistic regression
+data(Heart)
+X &lt;- Heart$X
+y &lt;- Heart$y
+fit &lt;- ncvreg(X, y, family='binomial')
+local_mfdr(fit, 0.1)
+
+# Cox regression
+data(Lung)
+X &lt;- Lung$X
+y &lt;- Lung$y
+fit &lt;- ncvsurv(X, y)
+local_mfdr(fit, 0.1)
+</code></pre>
+
+
+</div>

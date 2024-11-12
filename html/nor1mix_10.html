@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>norMix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mixtures of Univariate Normal Distributions</h2>
+
+<h3>Description</h3>
+
+<p>Objects of class <code>norMix</code> represent finite mixtures of
+(univariate) normal (aka Gaussian) distributions.  Methods for
+construction, printing, plotting, and basic computations are provided.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">norMix(mu, sig2 = rep(1,m), sigma = rep(1,m),
+       w = NULL, name = NULL, long.name = FALSE)
+
+is.norMix(obj)
+ m.norMix(obj)
+var.norMix(x, ...)
+## S3 method for class 'norMix'
+mean(x, ...)
+## S3 method for class 'norMix'
+print(x, ...)
+## S3 method for class 'norMix'
+x[i,j, drop=TRUE]
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>numeric vector of length <code class="reqn">K</code>, say, specifying the means
+<code class="reqn">\mu</code> of the <code class="reqn">K</code> normal components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sig2</code></td>
+<td>
+<p><b>deprecated!</b> numeric vector of length <code class="reqn">K</code>,
+specifying the variances <code class="reqn">\sigma^2</code> of the <code class="reqn">K</code> normal
+components.  Do specify <code>sigma</code> instead!</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>numeric vector of length <code class="reqn">K</code>, specifying the standard deviations
+<code class="reqn">\sigma</code> of the <code class="reqn">K</code> normal components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>numeric vector of length <code class="reqn">K</code>, specifying the mixture proportions
+<code class="reqn">\pi_j</code> of the normal components, <code class="reqn">j = 1,\dots,K</code>.
+Defaults to equal proportions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>optional name tag of the result (used for printing).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>long.name</code></td>
+<td>
+<p>logical indicating if the <code>name</code> attribute
+should use punctuation and hence be slightly larger than by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obj,x </code></td>
+<td>
+<p>an object of class <code>norMix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i,j,drop</code></td>
+<td>
+<p>for indexing, see the generic <code>[</code> extractor function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to methods.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The (one dimensional) normal mixtures, <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> objects of class
+<code>"norMix"</code>, are constructed by <code>norMix</code> and tested for by
+<code>is.norMix</code>.  <code>m.norMix()</code> returns the number of mixture
+components; the <code>mean()</code> method for <code>class "norMix"</code>
+returns the (theoretical / true) mean <code class="reqn">E[X]</code> and 
+<code>var.norMix()</code> 
+the true variance <code class="reqn">E[(X- E[X])^2]</code> where
+<code class="reqn">X \sim \langle\mathit{norm.mixt}\rangle</code>.
+</p>
+<p>The subsetting aka “extract” method (<code>x[i,j]</code>; for generic
+<code>[</code>)—when called as <code>x[i,]</code>—will typically return a
+<code>"norMix"</code> object unless matrix indexing selects only one row in
+which case <code>x[i, , drop=FALSE]</code> will return the normal mixture
+(of one component only).
+</p>
+<p>For further methods (density, random number generation, fitting,
+...), see below. 
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>norMix</code> returns objects of class <code>"norMix"</code> which are
+currently implemented as 3-column matrix with column names <code>mu</code>,
+<code>sigma</code>, and <code>w</code>, and further attributes.
+The user should rarely need to access the underlying structure
+directly.
+</p>
+
+
+<h3>Note</h3>
+
+<p>For <em>estimation</em> of the parameters of such a normal mixture,
+we provide a smart parametrization and an efficient implementation of
+the direct MLE or also the EM algorithm, see
+<code>norMixMLE()</code> which includes <code>norMixEM()</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martin Maechler</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dnorMix</code> for the density,
+<code>pnorMix</code> for the cumulative distribution
+and the quantile function (<code>qnorMix</code>), and
+<code>rnorMix</code> for random numbers and
+<code>plot.norMix</code>, the plot method.
+</p>
+<p><code>MarronWand</code> has the Marron-Wand densities as normal mixtures.
+</p>
+<p><code>norMixMLE()</code> and <code>norMixEM()</code> provide <em>fitting</em>
+of univariate normal mixtures to data.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ex &lt;- norMix(mu = c(1,2,5))# defaults: sigma = 1, equal proportions ('w')
+ex
+plot(ex, p.comp = TRUE)# looks like a mixture of only 2; 'p.comp' plots components
+
+## The 2nd Marron-Wand example, see also  ?MW.nm2
+ex2 &lt;- norMix(name = "#2 Skewed",
+                mu = c(0, .5, 13/12),
+	     sigma = c(1, 2/3, 5/9),
+		 w = c(.2, .2, .6))
+
+m.norMix  (ex2)
+mean      (ex2)
+var.norMix(ex2)
+(e23 &lt;- ex2[2:3,]) # (with re-normalized weights)
+stopifnot(is.norMix(e23),
+          all.equal(var.norMix(ex2),     719/1080, tol=1e-14),
+          all.equal(var.norMix(ex ),      35/9,    tol=1e-14),
+          all.equal(var.norMix(ex[2:3,]), 13/4,    tol=1e-14),
+          all.equal(var.norMix(e23), 53^2/(12^3*4),tol=1e-14)
+)
+
+plot(ex2, log = "y")# maybe "revealing"
+</code></pre>
+
+
+</div>

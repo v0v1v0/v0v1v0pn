@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>numero.plot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot results from SOM analysis</h2>
+
+<h3>Description</h3>
+
+<p>Plot map colorings and save them as vector graphics</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">numero.plot(results, variables = NULL, topology = NULL, folder = NULL,
+            prefix = "figure", reference = NULL, subplot = NULL,
+	    gain = 1, detach = FALSE, capacity = 500, font = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>results</code></td>
+<td>
+
+<p>A list object that contains the self-organizing map and its
+statistical colorings.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+
+<p>A string vector that contains names of variables to show.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>topology</code></td>
+<td>
+
+<p>The topology of a SOM with subgroup labels.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>folder</code></td>
+<td>
+
+<p>Folder path for saving figures.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prefix</code></td>
+<td>
+
+<p>Prefix for each figure file (if saving enabled).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference</code></td>
+<td>
+
+<p>Reference color ranges and scales.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gain</code></td>
+<td>
+
+<p>Modifier for overall color intensity.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subplot</code></td>
+<td>
+
+<p>A two-element vector that sets out the number of rows and
+columns for subplots per figure.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detach</code></td>
+<td>
+
+<p>Use detached windows for figures.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>capacity</code></td>
+<td>
+
+<p>Maximum number of subplots to show on screen.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>font</code></td>
+<td>
+
+<p>Multiplier to adjust font size for SVG and HTML output,
+see <code>nroPlot.save()</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The input <code>results</code> must contain the output from
+<code>numero.evaluate()</code> or similar.
+</p>
+<p>The input argument <code>topology</code> can be the topology of a SOM or with
+additional columns as in the output from <code>numero.subgroup()</code>.
+</p>
+<p>The input argument <code>reference</code> follows the output format from
+<code>numero.evaluate()</code>.
+</p>
+<p>Possible values for <code>detach</code> include "X11", "aqua", TRUE or FALSE.
+Using multiple figures may result in different behaviour in terminal vs.
+RStudio instances. The default behaviour is to create detached windows for each
+figure when the X11 display server is available (e.g. in Linux). To use
+detached windows in Mac, use the value "aqua". Setting <code>detach = TRUE</code>
+will use a more general approach, however, some systems may behave
+unpredictably. To create multiple figures that remain docked within the
+RStudio work window, set <code>detach = FALSE</code>.
+</p>
+<p>If a destination folder is provided, all plots are saved in files
+without plotting them on screen.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The number of figures that were created.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ville-Petteri Makinen
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Set identities and manage missing data.
+dataset &lt;- numero.clean(dataset, identity = "INDEX")
+
+# Prepare training variables.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- numero.prepare(data = dataset, variables = trvars,
+    batch = "MALE", confounders = c("AGE", "T1D_DURAT"))
+
+# Create a self-organizing map.
+sm &lt;- numero.create(data = trdata)
+qc &lt;- numero.quality(model = sm)
+
+# Evaluate map statistics for all variables.
+stats &lt;- numero.evaluate(model = qc, data = dataset)
+
+# Plot map colorings.
+numero.plot(results = stats)
+</code></pre>
+
+
+</div>

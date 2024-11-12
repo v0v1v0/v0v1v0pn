@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nimbleExternalCall</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a nimbleFunction that wraps a call to external compiled code</h2>
+
+<h3>Description</h3>
+
+<p>Given C header information, a function that takes scalars or pointers can be called from a compiled nimbleFunction.  If non-scalar return values are needed, an argument can be selected to behave as the return value in nimble.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nimbleExternalCall(
+  prototype,
+  returnType,
+  Cfun,
+  headerFile,
+  oFile,
+  where = getNimbleFunctionEnvironment()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>prototype</code></td>
+<td>
+<p>Argument type information.  This can be provided as an R function using <code>nimbleFunction</code> type declarations or as a list of <code>nimbleType</code> objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnType</code></td>
+<td>
+<p>Return object type information.  This can be provided similarly to <code>prototype</code> as either a <code>nimbleFunction</code> type declaration or as a <code>nimbleType</code> object.  In the latter case, the name will be ignored. If there is no return value, this should be <code>void()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Cfun</code></td>
+<td>
+<p>Name of the external function (character).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>headerFile</code></td>
+<td>
+<p>Name (possibly including file path) of the header file where Cfun is declared.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oFile</code></td>
+<td>
+<p>Name (possibly including path) of the .o file where Cfun has been compiled.  Spaces in the path may cause problems.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>where</code></td>
+<td>
+<p>An optional <code>where</code> argument passed to <code>setRefClass</code> for where the reference class definition generated for this nimbleFunction will be stored.  This is needed due to R package namespace issues but should never need to be provided by a user.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The only argument types allowed in Cfun are <code>double</code>, <code>int</code>, and <code>bool</code>, corresponding to <code>nimbleFunction</code> types <code>double</code>, <code>integer</code>, and <code>logical</code>, respectively.
+</p>
+<p>If the dimensionality is greater than zero, the arguments in <code>Cfun</code> should be pointers.  This means it will typically be necessary to pass additional integer arguments telling <code>Cfun</code> the size(s) of non-scalar arguments.
+</p>
+<p>The return argument can only be a scalar or void.  Since non-scalar arguments are passed by pointer, you can use an argument to return results from <code>Cfun</code>.  If you wish to have a <code>nimbleFunction</code> that uses one argument of <code>Cfun</code> as a return object, you can wrap the result of <code>nimbleExternalCall</code> in another <code>nimbleFunction</code> that allocates the return object.  This is useful for using <code>Cfun</code> in a <code>nimbleModel</code>.  See example below.
+</p>
+<p>Note that a <code>nimbleExternalCall</code> can only be executed in a compiled <code>nimbleFunction</code>, not an uncompiled one.
+</p>
+<p>If you have problems with spaces in file paths (e.g. for <code>oFile</code>), try compiling everything locally by including <code>dirName = "."</code> as an argument to <code>compileNimble</code>.
+</p>
+<p>Note that if you use <code>Rcpp</code> to generate object files, NIMBLE's use of the <code>--preclean</code> option to <code>R CMD SHLIB</code> can cause failures, so you may need to run <code>nimbleOptions(precleanCompilation=FALSE)</code> to prevent removal of needed object files.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>nimbleFunction</code> that takes the indicated input arguments, calls <code>Cfun</code>, and returns the result.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Perry de Valpine
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nimbleRcall</code> for calling arbitrary R code from compiled <code>nimbleFunction</code>s.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+sink('add1.h')
+cat('
+ extern "C" {
+ void my_internal_function(double *p, double*ans, int n);
+ }
+')
+sink()
+sink('add1.cpp') 
+cat('
+ #include &lt;cstdio&gt;
+ #include "add1.h"
+ void my_internal_function(double *p, double *ans, int n) {
+   printf("In my_internal_function\\n");
+     /* cat reduces the double slash to single slash */ 
+   for(int i = 0; i &lt; n; i++) 
+     ans[i] = p[i] + 1.0;
+ }
+')
+sink()
+system('g++ add1.cpp -c -o add1.o')
+Radd1 &lt;- nimbleExternalCall(function(x = double(1), ans = double(1),
+n = integer()){}, Cfun =  'my_internal_function',
+headerFile = file.path(getwd(), 'add1.h'), returnType = void(),
+oFile = file.path(getwd(), 'add1.o'))
+## If you need to use a function with non-scalar return object in model code,
+## you can wrap it  in another nimbleFunction like this:
+model_add1 &lt;- nimbleFunction(
+     run = function(x = double(1)) {
+         ans &lt;- numeric(length(x))
+         Radd1(x, ans, length(x))
+         return(ans)
+         returnType(double(1))
+     })
+demoCode &lt;- nimbleCode({
+     for(i in 1:4) {x[i] ~ dnorm(0,1)} ## just to get a vector
+     y[1:4] &lt;- model_add1(x[1:4])
+})
+demoModel &lt;- nimbleModel(demoCode, inits = list(x = rnorm(4)),
+check = FALSE, calculate = FALSE)
+CdemoModel &lt;- compileNimble(demoModel, showCompilerOutput = TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

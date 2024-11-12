@@ -1,0 +1,868 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sampler_BASE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MCMC Sampling Algorithms</h2>
+
+<h3>Description</h3>
+
+<p>Details of the MCMC sampling algorithms provided with the NIMBLE MCMC engine; HMC samplers are in the <code>nimbleHMC</code> package and particle filter samplers are in the <code>nimbleSMC</code> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sampler_BASE()
+
+sampler_prior_samples(model, mvSaved, target, control)
+
+sampler_posterior_predictive(model, mvSaved, target, control)
+
+sampler_binary(model, mvSaved, target, control)
+
+sampler_categorical(model, mvSaved, target, control)
+
+sampler_noncentered(model, mvSaved, target, control)
+
+sampler_RW(model, mvSaved, target, control)
+
+sampler_RW_block(model, mvSaved, target, control)
+
+sampler_RW_llFunction(model, mvSaved, target, control)
+
+sampler_slice(model, mvSaved, target, control)
+
+sampler_ess(model, mvSaved, target, control)
+
+sampler_AF_slice(model, mvSaved, target, control)
+
+sampler_crossLevel(model, mvSaved, target, control)
+
+sampler_RW_llFunction_block(model, mvSaved, target, control)
+
+sampler_RW_multinomial(model, mvSaved, target, control)
+
+sampler_RW_dirichlet(model, mvSaved, target, control)
+
+sampler_RW_wishart(model, mvSaved, target, control)
+
+sampler_RW_lkj_corr_cholesky(model, mvSaved, target, control)
+
+sampler_RW_block_lkj_corr_cholesky(model, mvSaved, target, control)
+
+sampler_CAR_normal(model, mvSaved, target, control)
+
+sampler_CAR_proper(model, mvSaved, target, control)
+
+sampler_polyagamma(model, mvSaved, target, control)
+
+sampler_RJ_fixed_prior(model, mvSaved, target, control)
+
+sampler_RJ_indicator(model, mvSaved, target, control)
+
+sampler_RJ_toggled(model, mvSaved, target, control)
+
+sampler_CRP_concentration(model, mvSaved, target, control)
+
+sampler_CRP(model, mvSaved, target, control)
+
+sampler_slice_CRP_base_param(model, mvSaved, target, control)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>(uncompiled) model on which the MCMC is to be run</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mvSaved</code></td>
+<td>
+<p><code>modelValues</code> object to be used to store MCMC samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>node(s) on which the sampler will be used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>named list that controls the precise behavior of the sampler, with elements specific to <code>samplertype</code>.  The default values for control list are specified in the setup code of each sampling algorithm.  Descriptions of each sampling algorithm, and the possible customizations for each sampler (using the <code>control</code> argument) appear below.</p>
+</td>
+</tr>
+</table>
+<h3>Hamiltonian Monte Carlo samplers</h3>
+
+<p>Hamiltonian Monte Carlo (HMC) samplers are provided separately in the <code>nimbleHMC</code> R package.  After loading <code>nimbleHMC</code>, see <code>help(HMC)</code> for details.
+</p>
+
+
+<h3>Particle filter samplers</h3>
+
+<p>As of Version 0.10.0 of NIMBLE, the <code>RW_PF</code> and <code>RW_PF_block</code> samplers are provided separately in the 'nimbleSMC' package. After loading <code>nimbleSMC</code>, see <code>help(samplers)</code> for details.
+</p>
+
+
+<h3><code>sampler_base</code></h3>
+
+<p>base class for new samplers
+</p>
+<p>When you write a new sampler for use in a NIMBLE MCMC (see <a href="https://r-nimble.org/html_manual/cha-welcome-nimble.html">User Manual</a>), you must include <code>contains = sampler_BASE</code>.
+</p>
+
+
+<h3>binary sampler</h3>
+
+<p>The binary sampler performs Gibbs sampling for binary-valued (discrete 0/1) nodes.  This can only be used for nodes following either a <code>dbern(p)</code> or <code>dbinom(p, size=1)</code> distribution.
+</p>
+<p>The binary sampler accepts no control list arguments.
+</p>
+
+
+<h3>categorical sampler</h3>
+
+<p>The categorical sampler performs Gibbs sampling for a single node, which generally would follow a categorical (<code>dcat</code>) distribution.  The categorical sampler can be assigned to other distributions as well, in which case the number of possible outcomes (1, 2, 3, ..., k) of the distribution must be specified using the 'length' control argument.
+</p>
+<p>The categorical sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> length. A character string or a numeric argument.  When a character string, this should be the name of a parameter of the distribution of the target node being sampled.  The length of this distribution parameter (considered as a 1-dimensional vector) will be used to determine the number of possible outcomes of the target node's distribution.  When a numeric value, this value will be used as the number of possible outcomes of the target node's distribution.  (default = "prob")
+</p>
+</li>
+<li>
+<p> check. A logical argument.  When FALSE, no check for a 'dcat' prior distribution for the target node takes place. (default = TRUE)
+</p>
+</li>
+</ul>
+<h3>RW sampler</h3>
+
+<p>The RW sampler executes adaptive Metropolis-Hastings sampling with a normal proposal distribution (Metropolis, 1953), implementing the adaptation routine given in Shaby and Wells, 2011.  This sampler can be applied to any scalar continuous-valued stochastic node, and can optionally sample on a log scale.
+</p>
+<p>The RW sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> log. A logical argument, specifying whether the sampler should operate on the log scale. (default = FALSE)
+</p>
+</li>
+<li>
+<p> reflective. A logical argument, specifying whether the normal proposal distribution should reflect to stay within the range of the target distribution. (default = FALSE)
+</p>
+</li>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the scale (proposal standard deviation) throughout the course of MCMC execution to achieve a theoretically desirable acceptance rate. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation.  Every adaptInterval MCMC iterations (prior to thinning), the RW sampler will perform its adaptation procedure.  This updates the scale variable, based upon the sampler's achieved acceptance rate over the past adaptInterval iterations. (default = 200)
+</p>
+</li>
+<li>
+<p> adaptFactorExponent. Exponent controling the rate of decay of the scale adaptation factor.  See Shaby and Wells, 2011, for details. (default = 0.8)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the normal proposal standard deviation.  If adaptive = FALSE, scale will never change. (default = 1)
+</p>
+</li>
+</ul>
+<p>The RW sampler cannot be used with options log=TRUE and reflective=TRUE, i.e. it cannot do reflective sampling on a log scale.
+</p>
+<p>After an MCMC algorithm has been configuration and built, the value of the proposal standard deviation of a RW sampler can be modified using the setScale method of the sampler object.  This use the scalar argument to modify the current value of the proposal standard deviation, as well as modifying the initial (pre-adaptation) value to which the proposal standard deviation is reset, at the onset of a new MCMC chain.
+</p>
+
+
+<h3>RW_block sampler</h3>
+
+<p>The RW_block sampler performs a simultaneous update of one or more model nodes, using an adaptive Metropolis-Hastings algorithm with a multivariate normal proposal distribution (Roberts and Sahu, 1997), implementing the adaptation routine given in Shaby and Wells, 2011.  This sampler may be applied to any set of continuous-valued model nodes, to any single continuous-valued multivariate model node, or to any combination thereof. <br></p>
+<p>The RW_block sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the scale (a coefficient for the entire proposal covariance matrix) and propCov (the multivariate normal proposal covariance matrix) throughout the course of MCMC execution.  If only the scale should undergo adaptation, this argument should be specified as TRUE. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptScaleOnly. A logical argument, specifying whether adaption should be done only for scale (TRUE) or also for provCov (FALSE).  This argument is only relevant when adaptive = TRUE.  When adaptScaleOnly = FALSE, both scale and propCov undergo adaptation; the sampler tunes the scaling to achieve a theoretically good acceptance rate, and the proposal covariance to mimic that of the empirical samples.  When adaptScaleOnly = TRUE, only the proposal scale is adapted. (default = FALSE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation.  Every adaptInterval MCMC iterations (prior to thinning), the RW_block sampler will perform its adaptation procedure, based on the past adaptInterval iterations. (default = 200)
+</p>
+</li>
+<li>
+<p> adaptFactorExponent. Exponent controling the rate of decay of the scale adaptation factor.  See Shaby and Wells, 2011, for details. (default = 0.8)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the scalar multiplier for propCov.  If adaptive = FALSE, scale will never change. (default = 1)
+</p>
+</li>
+<li>
+<p> propCov. The initial covariance matrix for the multivariate normal proposal distribution.  This element may be equal to the character string 'identity', in which case the identity matrix of the appropriate dimension will be used for the initial proposal covariance matrix. (default = 'identity')
+</p>
+</li>
+<li>
+<p> tries. The number of times this sampler will repeatedly operate on each MCMC iteration.  Each try consists of a new proposed transition and an accept/reject decision of this proposal.  Specifying tries &gt; 1 can help increase the overall sampler acceptance rate and therefore chain mixing. (default = 1)
+</p>
+</li>
+</ul>
+<p>After an MCMC algorithm has been configuration and built, the value of the proposal standard deviation of a RW_block sampler can be modified using the setScale method of the sampler object.  This use the scalar argument to will modify the current value of the proposal standard deviation, as well as modifying the initial (pre-adaptation) value which the proposal standard deviation is reset to, at the onset of a new MCMC chain.
+</p>
+<p>Operating analogous to the setScale method, the RW_block sampler also has a setPropCov method.  This method accepts a single matrix-valued argument, which will modify both the current and initial (used at the onset of a new MCMC chain) values of the multivariate normal proposal covariance.
+</p>
+<p>Note that modifying elements of the control list may greatly affect the performance of this sampler. In particular, the sampler can take a long time to find a good proposal covariance when the elements being sampled are not on the same scale. We recommend providing an informed value for <code>propCov</code> in this case (possibly simply a diagonal matrix that approximates the relative scales), as well as possibly providing a value of <code>scale</code> that errs on the side of being too small. You may also consider decreasing <code>adaptFactorExponent</code> and/or <code>adaptInterval</code>, as doing so has greatly improved performance in some cases.
+</p>
+
+
+<h3>RW_llFunction sampler</h3>
+
+<p>Sometimes it is useful to control the log likelihood calculations used for an MCMC updater instead of simply using the model.  For example, one could use a sampler with a log likelihood that analytically (or numerically) integrates over latent model nodes.  Or one could use a sampler with a log likelihood that comes from a stochastic approximation such as a particle filter, allowing composition of a particle MCMC (PMCMC) algorithm (Andrieu et al., 2010).  The RW_llFunction sampler handles this by using a Metropolis-Hastings algorithm with a normal proposal distribution and a user-provided log-likelihood function.  To allow compiled execution, the log-likelihood function must be provided as a specialized instance of a nimbleFunction.  The log-likelihood function may use the same model as the MCMC as a setup argument, but if so the state of the model should be unchanged during execution of the function (or you must understand the implications otherwise).
+</p>
+<p>The RW_llFunction sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the scale (proposal standard deviation) throughout the course of MCMC execution. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation. (default = 200)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the normal proposal standard deviation. (default = 1)
+</p>
+</li>
+<li>
+<p> llFunction. A specialized nimbleFunction that accepts no arguments and returns a scalar double number.  The return value must be the total log-likelihood of all stochastic dependents of the target nodes – and, if includesTarget = TRUE, of the target node(s) themselves –  or whatever surrogate is being used for the total log-likelihood.  This is a required element with no default.
+</p>
+</li>
+<li>
+<p> includesTarget. Logical variable indicating whether the return value of llFunction includes the log-likelihood associated with target.  This is a required element with no default.
+</p>
+</li>
+</ul>
+<h3>slice sampler</h3>
+
+<p>The slice sampler performs slice sampling of the scalar node to which it is applied (Neal, 2003).  This sampler can operate on either continuous-valued or discrete-valued scalar nodes.  The slice sampler performs a 'stepping out' procedure, in which the slice is iteratively expanded to the left or right by an amount sliceWidth.  This sampler is optionally adaptive, governed by a control list element, whereby the value of sliceWidth is adapted towards the observed absolute difference between successive samples.
+</p>
+<p>The slice sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler will adapt the value of sliceWidth throughout the course of MCMC execution. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation. (default = 200)
+</p>
+</li>
+<li>
+<p> sliceWidth. The initial value of the width of each slice, and also the width of the expansion during the iterative 'stepping out' procedure. (default = 1)
+</p>
+</li>
+<li>
+<p> sliceMaxSteps. The maximum number of expansions which may occur during the 'stepping out' procedure. (default = 100)
+</p>
+</li>
+<li>
+<p> maxContractions. The maximum number of contractions of the interval that may occur during sampling (this prevents infinite looping in unusual situations). (default = 100)
+</p>
+</li>
+<li>
+<p> maxContractionsWarning. A logical argument specifying whether to warn when the maximum number of contractions is reached. (default = TRUE)
+</p>
+</li>
+</ul>
+<h3>ess sampler</h3>
+
+<p>The ess sampler performs elliptical slice sampling of a single node, which must follow either a univariate or multivariate normal distribution (Murray, 2010).  The algorithm is an extension of slice sampling (Neal, 2003), generalized to context of the Gaussian distribution.  An auxiliary variable is used to identify points on an ellipse (which passes through the current node value) as candidate samples, which are accepted contingent upon a likelihood evaluation at that point.  This algorithm requires no tuning parameters and therefore no period of adaptation, and may result in very efficient sampling from Gaussian distributions.
+</p>
+<p>The ess sampler accepts the following control list arguments.
+</p>
+
+<ul>
+<li>
+<p> maxContractions. The maximum number of contractions of the interval that may occur during sampling (this prevents infinite looping in unusual situations). (default = 100)
+</p>
+</li>
+<li>
+<p> maxContractionsWarning. A logical argument specifying whether to warn when the maximum number of contractions is reached. (default = TRUE)
+</p>
+</li>
+</ul>
+<h3>AF_slice sampler</h3>
+
+<p>The automated factor slice sampler conducts a slice sampling algorithm on one or more model nodes.  The sampler uses the eigenvectors of the posterior covariance between these nodes as an orthogonal basis on which to perform its 'stepping Out' procedure.  The sampler is adaptive in updating both the width of the slices and the values of the eigenvectors.  The sampler can be applied to any set of continuous or discrete-valued model nodes, to any single continuous or discrete-valued multivariate model node, or to any combination thereof. 
+The automated factor slice sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> sliceWidths.  A numeric vector of initial slice widths.  The length of the vector must be equal to the sum of the lengths of all nodes being used by the automated factor slice sampler.  Defaults to a vector of 1's.
+</p>
+</li>
+<li>
+<p> sliceAdaptFactorMaxIter.  The number of iterations for which the factors (eigenvectors) will continue to adapt to the posterior correlation. (default = 15000)
+</p>
+</li>
+<li>
+<p> sliceAdaptFactorInterval.  The interval on which to perform factor adaptation. (default = 200)
+</p>
+</li>
+<li>
+<p> sliceAdaptWidthMaxIter.  The maximum number of iterations for which to adapt the widths for a given set of factors. (default = 512)
+</p>
+</li>
+<li>
+<p> sliceAdaptWidthTolerance. The tolerance for when widths no longer need to adapt, between 0 and 0.5. (default = 0.1)
+</p>
+</li>
+<li>
+<p> sliceMaxSteps.  The maximum number of expansions which may occur during the 'stepping out' procedure. (default = 100)
+</p>
+</li>
+<li>
+<p> maxContractions. The maximum number of contractions of the interval that may occur during sampling (this prevents infinite looping in unusual situations). (default = 100)
+</p>
+</li>
+<li>
+<p> maxContractionsWarning. A logical argument specifying whether to warn when the maximum number of contractions is reached. (default = TRUE)
+</p>
+</li>
+</ul>
+<h3>crossLevel sampler</h3>
+
+<p>This sampler is constructed to perform simultaneous updates across two levels of stochastic dependence in the model structure.  This is possible when all stochastic descendents of node(s) at one level have conjugate relationships with their own stochastic descendents.  In this situation, a Metropolis-Hastings algorithm may be used, in which a multivariate normal proposal distribution is used for the higher-level nodes, and the corresponding proposals for the lower-level nodes undergo Gibbs (conjugate) sampling.  The joint proposal is either accepted or rejected for all nodes involved based upon the Metropolis-Hastings ratio. This sampler is a conjugate version of Scheme 3 in Knorr-Held and Rue (2002). It can also be seen as a Metropolis-based version of collapsed Gibbs sampling (in particular Sampler 3 of van Dyk and Park (2008)). 
+</p>
+<p>The requirement that all stochastic descendents of the target nodes must themselves have only conjugate descendents will be checked when the MCMC algorithm is built.  This sampler is useful when there is strong dependence across the levels of a model that causes problems with convergence or mixing.
+</p>
+<p>The crossLevel sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. Logical argument, specifying whether the multivariate normal proposal distribution for the target nodes should be adaptived. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation. (default = 200)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the scalar multiplier for propCov. (default = 1)
+</p>
+</li>
+<li>
+<p> propCov. The initial covariance matrix for the multivariate normal proposal distribution.  This element may be equal to the character string 'identity' or any positive definite matrix of the appropriate dimensions. (default = 'identity')
+</p>
+</li>
+</ul>
+<h3>RW_llFunction_block sampler</h3>
+
+<p>Sometimes it is useful to control the log likelihood calculations used for an MCMC updater instead of simply using the model.  For example, one could use a sampler with a log likelihood that analytically (or numerically) integrates over latent model nodes.  Or one could use a sampler with a log likelihood that comes from a stochastic approximation such as a particle filter, allowing composition of a particle MCMC (PMCMC) algorithm (Andrieu et al., 2010) (but see samplers listed below for NIMBLE's direct implementation of PMCMC).  The <code>RW_llFunction_block</code> sampler handles this by using a Metropolis-Hastings algorithm with a multivariate normal proposal distribution and a user-provided log-likelihood function.  To allow compiled execution, the log-likelihood function must be provided as a specialized instance of a nimbleFunction.  The log-likelihood function may use the same model as the MCMC as a setup argument, but if so the state of the model should be unchanged during execution of the function (or you must understand the implications otherwise).
+</p>
+<p>The RW_llFunction_block sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the proposal covariance throughout the course of MCMC execution. (default is TRUE)
+</p>
+</li>
+<li>
+<p> adaptScaleOnly. A logical argument, specifying whether adaption should be done only for scale (TRUE) or also for provCov (FALSE).  This argument is only relevant when adaptive = TRUE.  When adaptScaleOnly = FALSE, both scale and propCov undergo adaptation; the sampler tunes the scaling to achieve a theoretically good acceptance rate, and the proposal covariance to mimic that of the empirical samples.  When adaptScaleOnly = TRUE, only the proposal scale is adapted. (default = FALSE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation. (default = 200)
+</p>
+</li>
+<li>
+<p> adaptFactorExponent. Exponent controling the rate of decay of the scale adaptation factor.  See Shaby and Wells, 2011, for details. (default = 0.8)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the scalar multiplier for propCov.  If adaptive = FALSE, scale will never change. (default = 1)
+</p>
+</li>
+<li>
+<p> propCov. The initial covariance matrix for the multivariate normal proposal distribution.  This element may be equal to the character string 'identity', in which case the identity matrix of the appropriate dimension will be used for the initial proposal covariance matrix. (default = 'identity')
+</p>
+</li>
+<li>
+<p> llFunction. A specialized nimbleFunction that accepts no arguments and returns a scalar double number.  The return value must be the total log-likelihood of all stochastic dependents of the target nodes – and, if includesTarget = TRUE, of the target node(s) themselves –  or whatever surrogate is being used for the total log-likelihood.  This is a required element with no default.
+</p>
+</li>
+<li>
+<p> includesTarget. Logical variable indicating whether the return value of llFunction includes the log-likelihood associated with target.  This is a required element with no default.
+</p>
+</li>
+</ul>
+<h3>RW_multinomial sampler</h3>
+
+<p>This sampler updates latent multinomial distributions, using Metropolis-Hastings proposals to move observations between pairs of categories.  Each proposal moves one or more observations from one category to another category, and acceptance or rejection follows standard Metropolis-Hastings theory.  The number of observations in the proposed move is randomly drawn from a discrete uniform distribution, which is bounded above by the 'maxMove' control argument.  The RW_multinomial sampler can make multiple independent attempts at transitions on each sampling iteration, which is govered by the 'tries' control argument.
+</p>
+<p>The <code>RW_multinomial</code> sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> maxMove.  An integer argument, specifying the upper bound for the number of observations to propose moving, on each independent propose/accept/reject step.  The number to move is drawn from a discrete uniform distribution, with lower limit one, and upper limit given by the minimum of 'maxMove' and the number of observations in the category. The default value for 'maxMove' is 1/20 of the total number of observations comprising the target multinomial distribution (given by the 'size' parameter of the distribution).
+</p>
+</li>
+<li>
+<p> tries.  An integer argument, specifying the number of independent Metropolis-Hastings proposals (and subsequent acceptance or rejection) that are attempted each time the sampler operates.  For example, if 'tries' is one, then a single proposal (of moving one or more observations to a different category) will be made, and either accepted or rejected.  If tries is two, this process is repeated twice.  The default value for 'tries' scales as the cube root of the total number of observations comprising the target multinomial distribution (given by the 'size' parameter of the distribution).
+</p>
+</li>
+</ul>
+<h3>RW_dirichlet sampler</h3>
+
+<p>This sampler is designed for sampling non-conjugate Dirichlet distributions.  The sampler performs a series of Metropolis-Hastings updates (on the log scale) to each component of a gamma-reparameterization of the target Dirichlet distribution.  The acceptance or rejection of these proposals follows a standard Metropolis-Hastings procedure.
+</p>
+<p>The <code>RW_dirichlet</code> sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should independently adapt the scale (proposal standard deviation, on the log scale) for each componentwise Metropolis-Hasting update, to achieve a theoretically desirable acceptance rate for each. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation.  Every adaptInterval MCMC iterations (prior to thinning), the sampler will perform its adaptation procedure.  (default = 200)
+</p>
+</li>
+<li>
+<p> adaptFactorExponent. Exponent controling the rate of decay of the scale adaptation factor.  See Shaby and Wells, 2011, for details. (default = 0.8)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the proposal standard deviation (on the log scale) for each component of the reparameterized Dirichlet distribution.  If adaptive = FALSE, the proposal standard deviations will never change. (default = 1)
+</p>
+</li>
+</ul>
+<h3>RW_wishart sampler</h3>
+
+<p>This sampler is designed for sampling non-conjugate Wishart and inverse-Wishart distributions.  More generally, it can update any symmetric positive-definite matrix (for example, scaled covariance or precision matrices).  The sampler performs block Metropolis-Hastings updates following a transformation to an unconstrained scale (Cholesky factorization of the original matrix, then taking the log of the main diagonal elements.
+</p>
+<p>The <code>RW_wishart</code> sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the scale and proposal covariance for the multivariate normal Metropolis-Hasting proposals, to achieve a theoretically desirable acceptance rate for each. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation.  Every adaptInterval MCMC iterations (prior to thinning), the sampler will perform its adaptation procedure.  (default = 200)
+</p>
+</li>
+<li>
+<p> adaptFactorExponent. Exponent controling the rate of decay of the scale adaptation factor.  See Shaby and Wells, 2011, for details. (default = 0.8)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the scalar multiplier for the multivariate normal Metropolis-Hastings proposal covariance.  If adaptive = FALSE, scale will never change. (default = 1)
+</p>
+</li>
+</ul>
+<h3>RW_block_lkj_corr_cholesky sampler</h3>
+
+<p>This sampler is designed for sampling non-conjugate LKJ correlation Cholesky factor distributions. The sampler performs a blocked Metropolis-Hastings update following a transformation to an unconstrained scale (using the signed stickbreaking approach documented in Section 10.12 of the Stan Language Reference Manual, version 2.27). 
+</p>
+<p>The <code>RW_block_lkj_corr_cholesky</code> sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the scale (a coefficient for the entire proposal covariance matrix) and propCov (the multivariate normal proposal covariance matrix) throughout the course of MCMC execution.  If only the scale should undergo adaptation, this argument should be specified as TRUE. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptScaleOnly. A logical argument, specifying whether adaption should be done only for scale (TRUE) or also for provCov (FALSE).  This argument is only relevant when adaptive = TRUE.  When adaptScaleOnly = FALSE, both scale and propCov undergo adaptation; the sampler tunes the scaling to achieve a theoretically good acceptance rate, and the proposal covariance to mimic that of the empirical samples.  When adaptScaleOnly = TRUE, only the proposal scale is adapted. (default = FALSE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation.  Every adaptInterval MCMC iterations (prior to thinning), the RW_block sampler will perform its adaptation procedure, based on the past adaptInterval iterations. (default = 200)
+</p>
+</li>
+<li>
+<p> adaptFactorExponent. Exponent controling the rate of decay of the scale adaptation factor.  See Shaby and Wells, 2011, for details. (default = 0.8)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the scalar multiplier for propCov.  If adaptive = FALSE, scale will never change. (default = 1)
+</p>
+</li>
+<li>
+<p> propCov. The initial covariance matrix for the multivariate normal proposal distribution.  This element may be equal to the character string 'identity', in which case the identity matrix of the appropriate dimension will be used for the initial proposal covariance matrix. (default = 'identity')
+</p>
+</li>
+</ul>
+<p>This is the default sampler for the LKJ distribution. However, blocked samplers may perform poorly if the adaptation configuration is poorly chosen. See the comments in the RW_block section of this documentation.
+</p>
+
+
+<h3>RW_lkj_corr_cholesky sampler</h3>
+
+<p>This sampler is designed for sampling non-conjugate LKJ correlation Cholesky factor distributions. The sampler performs individual Metropolis-Hastings updates following a transformation to an unconstrained scale (using the signed stickbreaking approach documented in Section 10.12 of the Stan Language Reference Manual, version 2.27). 
+</p>
+<p>The <code>RW_lkj_corr_cholesky</code> sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the scales of the univariate normal Metropolis-Hasting proposals, to achieve a theoretically desirable acceptance rate for each. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation.  Every adaptInterval MCMC iterations (prior to thinning), the sampler will perform its adaptation procedure.  (default = 200)
+</p>
+</li>
+<li>
+<p> adaptFactorExponent. Exponent controling the rate of decay of the scale adaptation factor.  See Shaby and Wells, 2011, for details. (default = 0.8)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the scalar multiplier for the multivariate normal Metropolis-Hastings proposal covariance.  If adaptive = FALSE, scale will never change. (default = 1)
+</p>
+</li>
+</ul>
+<p>Note that this sampler is likely run much more slowly than the blocked sampler for the LKJ distribution, as updating each single element will generally incur the full cost of updating all dependencies of the entire matrix.
+</p>
+
+
+<h3>polyagamma sampler</h3>
+
+<p>The polyagamma sampler uses Pólya-gamma data augmentation to do conjugate sampling for the parameters in the linear predictor of a logistic regression model (Polson et al., 2013), analogous to the Albert-Chib data augmentation scheme for probit regression. This sampler is not assigned as a default sampler by <code>configureMCMC</code> and so can only be used if manually added to an MCMC configuration.
+</p>
+<p>As an example, consider model code containing:
+</p>
+<pre>for(i in 1:n) {
+  logit(prob[i]) &lt;- beta0 + beta1*x1[i] + beta2*x2[i] + u[group[i]] 
+  y[i] ~ dbinom(prob = prob[i], size = size[i])
+}
+for(j in 1:num_groups)
+  u[j] ~ dnorm(0, sd = sigma_group)
+</pre>
+<p>where <code>beta0</code>, <code>beta1</code>, and <code>beta2</code> are fixed effects with normal priors, <code>u</code> is a random effect associated with groups of data, and <code>group[i]</code> gives the group index of the i-th observation, <code>y[i]</code>. In this model, the parameters <code>beta0</code>, <code>beta1</code>, <code>beta2</code>, and all the <code>u[j]</code> can be jointly sampled by the polyagamma sampler, i.e., they will be its target nodes.
+</p>
+<p>After building a model (calling <code>nimbleModel</code>) containing the above code, one would configure the sampler as follows:
+</p>
+<pre>MCMCconf &lt;- configureMCMC(model)
+logistic_nodes &lt;- c("beta0", "beta1", "beta2", "u")
+# Optionally, remove default samplers.
+MCMCconf$removeSamplers(logistic_nodes) 
+MCMCconf$addSampler(target = logistic_nodes, type = "polyagamma",
+  control = list(fixedDesignColumns=TRUE))
+</pre>
+<p>As shown here, the stochastic dependencies (<code>y[i]</code> here) of the target nodes must follow <code>dbin</code> or <code>dbern</code> distributions. The logit transformation of their probability parameter must be a linear function (technically an affine function) of the target nodes, which themselves must have <code>dnorm</code> or <code>dmnorm</code> priors. Zero inflation to account for structural zeroes is also supported, allowed as discussed below. The stochastic dependencies will often but not always be the observations in the logistic regression and will be referred to as 'responses' henceforth. Internally, the sampler draws latent values from the Pólya-gamma distribution, one per response. These latent values are then used to draw from the multivariate normal conditional distribution of the target nodes.
+</p>
+<p>Importantly, note that because the Pólya-gamma draws are not retained when an iteration of the sampler finishes, one generally wants to apply the sampler to all parameter nodes involved in the linear predictor of the logistic regression, to avoid duplicative Pólya-gamma draws of the latent values. If there are stochastic indices (e.g., if <code>group[i]</code> above is stochastic), the Pólya-gamma sampler can still be used, but the stochastic nodes cannot be sampled by it and must have separate sampler(s). It is also possible in some models that regression parameters can be split into (conditionally independent) groups that can be sampled independently, e.g., if one has distinct logistic regression specifications for different sets of responses in the model.
+</p>
+<p>Sampling involves use of the design matrix. The design matrix includes one column corresponding to each regression covariate as well as one columnar block corresponding to each random effect. In the example above, the columns would include a vector of ones (to multiply <code>beta0</code>), the vectors <code>x1</code> and <code>x2</code>, and a vector of indicators for each <code>u[j]</code> (with a 1 in row <code>i</code> if <code>group[i]</code> is <code>j</code>), resulting in <code>3+num_groups</code> columns. Note that the polyagamma sampler can determine the design matrix from the model, even when written as above such that the design matrix is not explicitly in the model code. It is also possible to write model code for the linear prediction using matrix multiplication and an explicit design matrix, but that is not necessary.
+</p>
+<p>Often the design matrix is fixed in advance, but in some cases elements of the matrix may be stochastic and sampled during the MCMC. That would be the case if there are missing values (e.g., missing covariate values (declared as stochastic nodes)) or stochastic indexing (e.g., unknown assignment of responses to clusters, as mentioned above). Note that changes in the values of any of the <code>beta</code> or <code>u[j]</code> target nodes in the example above do not change the design matrix.
+</p>
+<p>Recalculating the elements of the design matrix at every iteration is costly and will likely greatly slow the sampler. To alleviate this, users can specify which columns of the design matrix are fixed (non-stochastic) using the <code>fixedDesignColumns</code> control argument. If all columns are fixed, which will often be the case, this argument can be specified simply as <code>TRUE</code>. Note that the sampler does not determine if any or all columns are fixed, so users wishing to take advantage of the large speed gains from having fixed columns should provide this control argument. Columns indicated as fixed will be determined (if necessary) when the sampler is first run and retained for subsequent iterations.
+</p>
+<p>By default, NIMBLE will determine the design matrix (and as discussed above will do so repeatedly at each iteration for any columns not indicated as being fixed). If the matrix has no stochastic elements, users may choose to provide the matrix directly to the sampler via the <code>designMatrix</code> control argument. This will save time in computing the matrix initially but likely will have limited benefit relative to the cost of running many iterations of MCMC and therefore can be omitted in most cases.
+</p>
+<p>The sampler allows for binomial responses with stochastic sizes. This would be the case in the above example if the <code>size[i]</code> values are themselves declared as unobserved stochastic nodes and thus are sampled by MCMC.
+</p>
+<p>The sampler allows for zero inflation of the response probability in that the probability determined by the inverse logit transformation of the linear predictor can be multipled by one or more binary scalar nodes to produce the response probability. These binary nodes must be specified via the <code>dbern</code> distribution or the <code>dbin</code> distribution with size equal to one. This functionality is intended for use in cases where another part of the model introduces structural zeroes, such as in determining occupancy in ecological occupancy models. An example would be if the above were modified by <code>y[i] ~ dbinom(prob = z[i] * p[i], size = size[i])</code>, where each <code>z[i]</code> is either 0 or 1.
+</p>
+<p>The polyagamma sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> fixedDesignColumns. Either a single logical value indicating if the design matrix is fixed (non-stochastic) or a logical vector indicating which columns are fixed. In the latter case, the columns must be ordered exactly as the ordering of target node elements given by <code>model$expandNodeNames(target, returnScalarComponents = TRUE)</code>, where <code>target</code> is the same as the <code>target</code> argument to <code>configureMCMC$addSampler</code> above. (default = FALSE)
+</p>
+</li>
+<li>
+<p> designMatrix. The full design matrix with rows corresponding to the ordering of the responses and columns ordered exactly as the ordering of target node elements given by <code>model$expandNodeNames(target, returnScalarComponents = TRUE)</code>, where <code>target</code> is the same as the <code>target</code> argument to <code>configureMCMC$addSampler</code> above. If provided, all columns are assumed to be fixed, ignoring the <code>fixedDesignColumns</code> control element.
+</p>
+</li>
+<li>
+<p> nonTargetNodes. Additional stochastic nodes involved in the linear predictor that are not to be sampled as part of the sampler. This must include any nodes specifying stochastic indexes (e.g., <code>"group"</code> if the <code>group[i]</code> values are stochastic) and any parameters considered known or that for any reason one does not want to sample. Providing <code>nonTargetNodes</code> is required in order to allow NIMBLE to check for the presence of zero inflation.  
+</p>
+</li>
+<li>
+<p> check. A logical value indicating whether NIMBLE should check various conditions required for validity of the sampler. This is provided for rare cases where the checking may be overly conservative and a user is sure that the sampler is valid and wants to override the checking. (default = TRUE)
+</p>
+</li>
+</ul>
+<h3>noncentered sampler</h3>
+
+<p>The noncentered sampler is designed to sample the mean or standard deviation of a set of centered random effects while also moving the random effects values to possibly allow better mixing. The noncentered sampler deterministically shifts or scales the dependent node values to be consistent with the proposed value of the target (the mean or the standard deviation) such that the effect is to sample in a noncentered parameterization (Yu and Meng 2011), via an on-the-fly reparameterization. This can improve mixing by updating the target node based on information in the model nodes whose parent nodes are the dependent nodes of the target (i.e,. the "grandchild" nodes of the target; these will often be data nodes). This comes at the extra computational cost of calculating the logProbability of the "grandchild" nodes.
+</p>
+<p>It is still necessary to have other samplers on the random effects values.
+</p>
+<p>Mathematically, the noncentered sampler operates in one dimension of a transformed parameter space. When sampling a mean, all random effects will be shifted by the same amount as the mean. When sampling a standard deviation, all random effects (relative to their means) will be scaled by the same factor as the standard deviation.
+Consider a model that includes the following code:
+</p>
+<pre>for(i in 1:n)
+   y[i] ~ dnorm(beta1*x[i] + u[group[i]], sd = sigma_obs)
+for(j in 1:num_groups)
+   u[j] ~ dnorm(beta0, sd = sigma_group)
+</pre>
+<p>where <code>u</code> is a random effect associated with groups of data, and <code>group[i]</code> gives the group index of the i-th observation. This model has a centered random effect, because the <code>u[j]</code> have the intercept <code>beta0</code> as their mean. In basic univariate sampling, updates to <code>beta0</code> or to <code>sigma_group</code> do not change <code>u[j]</code>, making only small moves possible if <code>num_groups</code> is large. When the noncentered sampler considers a new value for <code>beta0</code>, it will shift all the <code>u[j]</code> so that (in this case) their prior probabilities do not change. If the noncentered sampler considers a new value for <code>sigma_group</code>, it will rescale all the <code>u[j]</code> accordingly.
+</p>
+<p>The effect of such a sampling strategy is to update <code>beta0</code> and <code>sigma_group</code> as if the model had been written in a different (noncentered) way. For updating <code>beta0</code>, it would be:
+</p>
+<pre>for(i in 1:n)
+   y[i] ~ dnorm(beta0 + beta1*x[i] + u[group[i]], sd = sigma_obs)
+for(j in 1:num_groups)
+   u[j] ~ dnorm(0, sd = sigma_group)
+</pre>
+<p>For updating <code>sigma_group</code>, it would be:
+</p>
+<pre>for(i in 1:n)
+   y[i] ~ dnorm(beta1*x[i] + u[group[i]] * sigma_group, sd = sigma_obs)
+for(j in 1:num_groups)
+   u[j] ~ dnorm(beta0, sd = 1)
+</pre>
+<p>Whether centered or noncentered parameterizations result in better sampling can depend on the model and the data. Therefore Yu and Meng (2011) recommended an "interweaving" strategy of using both kinds of samplers. Adding the noncentered sampler (on either the mean or standard deviation or both) to an existing MCMC configuration for a model specified using the centered parameterization (and with a sampler already assigned to the target node) produces an overall sampling approach that is a variation on the interweaving strategy of Yu and Meng (2011). This provides the benefits of sampling in both the centered and noncentered parameterizations in a single MCMC. 
+</p>
+<p>There is a higher computational cost to the noncentered sampler (or to writing the model directly in one of the equivalent ways shown). The cost is that when updating <code>beta0</code> or <code>sigma_group</code>, the relevant log probabilities calculations will include (in this case) all the of <code>y[i]</code>, i.e. the "grandchild" nodes of <code>beta0</code> or <code>sigma_group</code>.
+</p>
+<p>The noncentered sampler is not assigned by default by <code>configureMCMC</code> but must be manually added. For example:
+</p>
+<pre>MCMCconf &lt;- configureMCMC(model)
+MCMCconf$addSampler(target = "beta0", type = "noncentered",
+  control = list(param = "location", sampler = "RW"))
+MCMCconf$addSampler(target = "sigma_group", type = "noncentered",
+  control = list(param = "scale", sampler = "RW"))
+</pre>
+<p>While the target node will generally be either the mean (location) or standard deviation (scale) of a set of other nodes (e.g., random effects), it could in theory be used in other contexts and one can choose whether the transformation is a shift or a scale operation. In a shift operation (e.g., when the sampling target is a mean), the dependent nodes are set to their previous values plus the difference between the proposed value and previous value for the target. In a scale operation (e.g., when the sampling target is the standard deviation), the dependent nodes minus their means are multiplied by the ratio of the proposed value to the previous value for the target and the previous value for the target. Whether to shift or scale is determined from the <code>param</code> element of the control list.
+</p>
+<p>The sampling algorithm for the target node can either be adaptive Metropolis random walk (which uses NIMBLE's <code>RW</code> sampler) or slice sampling (which uses NIMBLE's <code>slice</code> sampler), determined from the <code>sampler</code> element of the control list. In either case, the underlying sampling accounts for the Jacobian of the deterministic shifting or scaling of the dependent nodes (in the case of shifting, the Jacobian is equal to 1 and has no impact). When the target is the standard deviation of normally-distributed dependent nodes, the Jacobian cancels with the prior distribution for the dependent nodes, and the update is in effect based only on the prior for the target and the distribution of the "grandchild" nodes. 
+</p>
+<p>The <code>noncentered</code> sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> sampler. A character string, either <code>"RW"</code> or <code>"slice"</code> specifying the type of sampler to be used for the target node. (default = <code>"RW"</code>)
+</p>
+</li>
+<li>
+<p> param. A character string, either <code>"location"</code> or <code>"scale"</code> specifying whether sampling is done as shifting or scaling the dependent nodes. (default = <code>"location"</code>)
+</p>
+</li>
+</ul>
+<h3>CAR_normal sampler</h3>
+
+<p>The CAR_normal sampler operates uniquely on improper (intrinsic) Gaussian conditional autoregressive (CAR) nodes, those with a <code>dcar_normal</code> prior distribution.  It internally assigns one of three univariate samplers to each dimension of the target node: a posterior predictive, conjugate, or RW sampler; however these component samplers are specialized to operate on dimensions of a <code>dcar_normal</code> distribution.
+</p>
+<p>The CAR_normal sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li> <p><code>carUseConjugacy</code>. A logical argument, specifying whether to assign conjugate samplers for conjugate components of the target node. If <code>FALSE</code>, a RW sampler would be assigned instead. (default = TRUE)
+</p>
+</li>
+<li> <p><code>adaptive</code>. A logical argument, specifying whether any component RW samplers should adapt the scale (proposal standard deviation), to achieve a theoretically desirable acceptance rate. (default = <code>TRUE</code>)
+</p>
+</li>
+<li> <p><code>adaptInterval</code>. The interval on which to perform adaptation for any component RW samplers.  Every <code>adaptInterval</code> MCMC iterations (prior to thinning), component RW samplers will perform an adaptation procedure.  This updates the <code>scale</code> variable, based upon the sampler's achieved acceptance rate over the past <code>adaptInterval</code> iterations. (default = 200)
+</p>
+</li>
+<li> <p><code>scale</code>. The initial value of the normal proposal standard deviation for any component RW samplers.  If <code>adaptive = FALSE</code>, <code>scale</code> will never change. (default = 1)
+</p>
+</li>
+</ul>
+<h3>CAR_proper sampler</h3>
+
+<p>The CAR_proper sampler operates uniquely on proper Gaussian conditional autoregressive (CAR) nodes, those with a <code>dcar_proper</code> prior distribution.  It internally assigns one of three univariate samplers to each dimension of the target node: a posterior predictive, conjugate, or RW sampler, however these component samplers are specialized to operate on dimensions of a <code>dcar_proper</code> distribution.
+</p>
+<p>The CAR_proper sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li> <p><code>carUseConjugacy</code>. A logical argument, specifying whether to assign conjugate samplers for conjugate components of the target node. If <code>FALSE</code>, a RW sampler would be assigned instead. (default = <code>TRUE</code>)
+</p>
+</li>
+<li> <p><code>adaptive</code>. A logical argument, specifying whether any component RW samplers should adapt the scale (proposal standard deviation), to achieve a theoretically desirable acceptance rate. (default = <code>TRUE</code>)
+</p>
+</li>
+<li> <p><code>adaptInterval</code>. The interval on which to perform adaptation for any component RW samplers.  Every adaptInterval MCMC iterations (prior to thinning), component RW samplers will perform an adaptation procedure.  This updates the scale variable, based upon the sampler's achieved acceptance rate over the past adaptInterval iterations. (default = 200)
+</p>
+</li>
+<li> <p><code>scale</code>. The initial value of the normal proposal standard deviation for any component RW samplers.  If <code>adaptive = FALSE</code>, <code>scale</code> will never change. (default = 1)
+</p>
+</li>
+</ul>
+<h3>CRP sampler</h3>
+
+<p>The CRP sampler is designed for fitting models involving Dirichlet process mixtures. It is exclusively assigned by NIMBLE's default MCMC configuration to nodes having the Chinese Restaurant Process distribution, <code>dCRP</code>. It executes sequential sampling of each component of the node (i.e., the cluster membership of each element being clustered). Internally, either of two samplers can be assigned, depending on conjugate or non-conjugate structures within the model. For conjugate and non-conjugate model structures, updates are based on Algorithm 2 and Algorithm 8 in Neal (2000), respectively.
+</p>
+
+<ul>
+<li> <p><code>checkConjugacy</code>. A logical argument, specifying whether to assign conjugate samplers if valid. (default = <code>TRUE</code>)
+</p>
+</li>
+<li> <p><code>printTruncation</code>. A logical argument, specifying whether to print a warning when the MCMC attempts to use more clusters than the maximum number specified in the model. Only relevant where the user has specified the maximum number of clusters to be less than the number of observations. (default = <code>TRUE</code>)
+</p>
+</li>
+</ul>
+<h3>CRP_concentration sampler</h3>
+
+<p>The CRP_concentration sampler is designed for Bayesian nonparametric mixture modeling. It is exclusively assigned to the concentration parameter of the Dirichlet process when the model is specified using the Chinese Restaurant Process distribution, <code>dCRP</code>. This sampler is assigned by default by NIMBLE's default MCMC configuration and can only be used when the prior for the concentration parameter is a gamma distribution. The assigned sampler is an augmented beta-gamma sampler as discussed in Section 6 in Escobar and West (1995).
+</p>
+
+
+<h3>prior_samples sampler</h3>
+
+<p>The prior_samples sampler uses a provided set of numeric values (<code>samples</code>) to define the prior distribution of one or more model nodes.  One every MCMC iteration, the prior_samples sampler takes value(s) from the numeric values provided, and stores these value(s) into the target model node(s).  This allows one to define the prior distribution of model parameters empirically, using a set of numeric <code>samples</code>, presumably obtained previously using MCMC.  The <code>target</code> node may be either a single scalar node (scalar case), or a collection of model nodes.
+</p>
+<p>The prior_samples sampler provides two options for selection of the value to use on each MCMC iteration.  The default behaviour is to take sequential values from the <code>samples</code> vector (scalar case), or in the case of multiple dimensions, sequential rows of the <code>samples</code> matrix are used.  The alternative behaviour, by setting the control argument <code>randomDraws = TRUE</code>, will instead use random draws from the <code>samples</code> vector (scalar case), or randomly selected rows of the <code>samples</code> matrix in the multidimensional case.
+</p>
+<p>If the default of sequential selection of values is used, and the number of MCMC iterations exceeds the length of the <code>samples</code> vector (scalar case) or the number of rows of the <code>samples</code> matrix, then <code>samples</code> will be recycled as necessary for the number of MCMC iterations.  A message to this effect is also printed at the beginning of the MCMC chain.
+</p>
+<p>Logically, prior_samples samplers might want to operate first, in advance of other samplers, on every MCMC iteration.  By default, at the time of MCMC building, all prior_samples samplers are re-ordered to appear first in the list of MCMC samplers.  This behaviour can be subverted, however, by setting nimbleOptions(MCMCorderPriorSamplesSamplersFirst = FALSE).
+</p>
+<p>The prior_samples sampler can be assigned to non-stochastic model nodes (nodes which are not assigned a prior distribution in the model). In fact, it is recommended that nodes being assigned a prior_samples are not provided with a prior distribution in the model, and rather, that these nodes only appear on the right-hand-side of model declaration lines.  In such case that a prior_samples sampler is assigned to a nodes with a prior distribution, the prior distribution will be overridden by the sample values provided to the sampler; however, the node will still be a stochastic node for other purposes, and will contribute to the model joint-density (using the sample values provided relative to the prior distribution), will have an MCMC sampler assigned to it by default, and also may introduce potential for confusion.  In this case, a message is issued at the time of MCMC building.
+</p>
+<p>The prior_samples sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li> <p><code>samples</code>. A numeric vector or matrix.  When the <code>target</code> node is a single scalar-valued node, <code>samples</code> should be a numeric vector.  When the <code>target</code> node specifies d &gt; 2 model dimensions, <code>samples</code> should be a matrix containing d columns.  The <code>samples</code> control argument is required.
+</p>
+</li>
+<li> <p><code>randomDraws</code>. A logical argument, specifying whether to use a random draw from <code>samples</code> on each iteration.  If <code>samples</code> is a matrix, then a randomly-selected row of the <code>samples</code> matrix is used.  When <code>FALSE</code>, sequential values (or sequential matrix rows) are used (default = <code>FALSE</code>).
+</p>
+</li>
+</ul>
+<h3>posterior_predictive sampler</h3>
+
+<p>The posterior_predictive sampler operates only on posterior predictive stochastic nodes. A posterior predictive node is a node that is not itself data and has no data nodes in its entire downstream (descendant) dependency network. Note that such nodes play no role in inference for model parameters but have often been included in BUGS models to make predictions, including for posterior predictive checks. As of version 0.13.0, NIMBLE samples model parameters without conditioning on the posterior predictive nodes and samples conditionally from the posterior predictive nodes as the last step of each MCMC iteration.
+</p>
+<p>(Also note that NIMBLE allows posterior predictive values to be simulated independently of running MCMC, for example by writing a nimbleFunction to do so.  This means that in many cases where terminal stochastic (posterior predictive) nodes have been included in BUGS models, they are not needed when using NIMBLE.)
+</p>
+<p>The posterior_predictive sampler functions by simulating new values for all downstream (dependent) nodes using their conditional distributions, as well as updating the associated model probabilities.  A posterior_predictive sampler will automatically be assigned to all trailing non-data stochastic nodes in a model, or when possible, to any node at a point in the model after which all downstream (dependent) stochastic nodes are non-data.
+</p>
+<p>The posterior_predictive sampler accepts no control list arguments.
+</p>
+
+
+<h3>RJ_fixed_prior sampler</h3>
+
+<p>This sampler proposes addition/removal for variable of interest in the framework of variable selection using reversible jump MCMC, with a specified prior probability of inclusion.  A normal proposal distribution is used to generate proposals for the addition of the variable. This is a specialized sampler used by <code>configureRJ</code> function, when the model code is written without using indicator variables. See <code>help{configureRJ}</code> for details. It is not intended for direct assignment.
+</p>
+
+
+<h3>RJ_indicator sampler</h3>
+
+<p>This sampler proposes transitions of a binary indicator variable, corresponding to a variable of interest, in the framework of variable selection using reversible jump MCMC.  This is a specialized sampler used by <code>configureRJ</code> function, when the model code is written using indicator variables. See <code>help{configureRJ}</code> for details. It is not intended for direct assignment.
+</p>
+
+
+<h3>RJ_toggled sampler</h3>
+
+<p>This sampler operates in the framework of variable selection using reversible jump MCMC.  Specifically, it conditionally performs updates of the target variable of interest using the originally-specified sampling configuration, when variable is "in the model".  This is a specialized sampler used by <code>configureRJ</code> when adding a reversible jump MCMC . See <code>help{configureRJ}</code> for details. It is not intended for direct assignment.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Turek
+</p>
+
+
+<h3>References</h3>
+
+<p>Andrieu, C., Doucet, A., and Holenstein, R. (2010). Particle Markov Chain Monte Carlo Methods. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, 72(3), 269-342.
+</p>
+<p>Hoffman, Matthew D., and Gelman, Andrew (2014). The No-U-Turn Sampler: Adaptively setting path lengths in Hamiltonian Monte Carlo. <em>Journal of Machine Learning Research</em>, 15(1): 1593-1623.
+</p>
+<p>Escobar, M. D., and West, M. (1995). Bayesian density estimation and inference using mixtures. <em>Journal of the American Statistical Association</em>, 90(430), 577-588.
+</p>
+<p>Knorr-Held, L. and Rue, H. (2003). On block updating in Markov random field models for disease mapping. <em>Scandinavian Journal of Statistics</em>, 29, 597-614.
+</p>
+<p>Metropolis, N., Rosenbluth, A. W., Rosenbluth, M. N., Teller, A. H., and Teller, E. (1953). Equation of State Calculations by Fast Computing Machines. <em>The Journal of Chemical Physics</em>, 21(6), 1087-1092.
+</p>
+<p>Murray, I., Prescott Adams, R., and MacKay, D. J. C. (2010). Elliptical Slice Sampling. <em>arXiv e-prints</em>, arXiv:1001.0175.
+</p>
+<p>Neal, R. M. (2000). Markov chain sampling methods for Dirichlet process mixture models. <em>Journal of Computational and Graphical Statistics</em>, 9(2), 249-265.
+</p>
+<p>Neal, R. M. (2003). Slice Sampling. <em>The Annals of Statistics</em>, 31(3), 705-741.
+</p>
+<p>Neal, R. M. (2011). MCMC Using Hamiltonian Dynamics. <em>Handbook of Markov Chain Monte Carlo</em>, CRC Press, 2011.
+</p>
+<p>Pitt, M. K. and Shephard, N. (1999). Filtering via simulation: Auxiliary particle filters. <em>Journal of the American Statistical Association</em> 94(446), 590-599.
+</p>
+<p>Polson, N.G., Scott, J.G., and J. Windle. (2013). Bayesian inference for logistic models using Pólya-gamma latent variables. Journal of the American Statistical Association, 108(504), 1339–1349. https://doi.org/10.1080/01621459.2013.829001
+</p>
+<p>Roberts, G. O. and S. K. Sahu (1997). Updating Schemes, Correlation Structure, Blocking and Parameterization for the Gibbs Sampler. <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, 59(2), 291-317.
+</p>
+<p>Shaby, B. and M. Wells (2011). <em>Exploring an Adaptive Metropolis Algorithm</em>. 2011-14. Department of Statistics, Duke University.
+</p>
+<p>Stan Development Team (2020). <em>Stan Language Reference Manual, Version 2.22, Section 10.12</em>.
+</p>
+<p>Tibbits, M. M.,  Groendyke, C.,  Haran, M., and Liechty, J. C. (2014).  Automated Factor Slice Sampling.  <em>Journal of Computational and Graphical Statistics</em>, 23(2), 543-563.
+</p>
+<p>van Dyk, D.A. and T. Park. (2008). Partially collapsed Gibbs Samplers. <em>Journal of the American Statistical Association</em>, 103(482), 790-796.
+</p>
+<p>Yu, Y. and Meng, X. L. (2011). To center or not to center: That is not the question - An ancillarity-sufficiency interweaving strategy (ASIS) for boosting MCMC efficiency. Journal of Computational and Graphical Statistics, 20(3), 531–570. https://doi.org/10.1198/jcgs.2011.203main
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>configureMCMC</code> <code>addSampler</code> <code>buildMCMC</code> <code>runMCMC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## y[1] ~ dbern() or dbinom():
+# mcmcConf$addSampler(target = 'y[1]', type = 'binary')   
+
+# mcmcConf$addSampler(target = 'a', type = 'RW',
+#    control = list(log = TRUE, adaptive = FALSE, scale = 3))
+# mcmcConf$addSampler(target = 'b', type = 'RW',
+#    control = list(adaptive = TRUE, adaptInterval = 200))
+# mcmcConf$addSampler(target = 'p', type = 'RW',
+#    control = list(reflective = TRUE))
+
+## a, b, and c all continuous-valued:
+# mcmcConf$addSampler(target = c('a', 'b', 'c'), type = 'RW_block')   
+
+# mcmcConf$addSampler(target = 'p', type = 'RW_llFunction',
+#    control = list(llFunction = RllFun, includesTarget = FALSE))
+
+# mcmcConf$addSampler(target = 'y[1]', type = 'slice',
+#    control = list(adaptive = FALSE, sliceWidth = 3))
+# mcmcConf$addSampler(target = 'y[2]', type = 'slice',
+#    control = list(adaptive = TRUE, sliceMaxSteps = 1))
+
+# mcmcConf$addSampler(target = 'x[1:10]', type = 'ess')   ## x[1:10] ~ dmnorm()
+
+# mcmcConf$addSampler(target = 'p[1:5]', type = 'RW_dirichlet')   ## p[1:5] ~ ddirch()
+
+## y[1] is a posterior predictive node:
+# mcmcConf$addSampler(target = 'y[1]', type = 'posterior_predictive')   
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,175 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>resQQplot.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform a qqplot for the residuals of a NHPP</h2>
+
+<h3>Description</h3>
+
+<p>This function  performs a qqplot comparing the empirical quantiles of the 
+residuals with the expected quantiles under the fitted NHPP,
+calculated by a Monte Carlo approach.
+</p>
+<p>It calls the auxiliary function <code>resSim.fun</code> 
+(not intended for the users), see Details section.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">resQQplot.fun(nsim, objres, covariates, clevel = 0.95, cores = 1, 
+tit ="", fixed.seed=NULL, histWgraph=TRUE)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Number of simulations for the calculations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>objres</code></td>
+<td>
+<p>A list with the same elements of the output list from the
+function <code>CalcRes.fun</code> or <code>CalcResD.fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariates</code></td>
+<td>
+<p>Matrix of covariates to fit the NHPP (each column is a covariate).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clevel</code></td>
+<td>
+<p>Confidence level of the  residual envelope.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Optional. Number of cores of the computer to be used in the 
+calculations. Default: one core is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tit</code></td>
+<td>
+<p>Character string. A title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>An integer or NULL. If it is an integer, that is the value  used to set the seed 
+in  random  generation processes. It it is NULL, a random seed is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>histWgraph</code></td>
+<td>
+<p> Logical flag.  Only used in Windows platforms. If it is TRUE,  a new graphical device is opened
+with the option <code>record=TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The expected quantiles are calculated as the median values  of the simulated samples. 
+Confidence intervals for each quantile <code class="reqn">r_{(i)}</code> with pointwise  significance level 
+<code>clevel</code>  are calculated as quantiles of probability 1-clevel /2 and clevel/2 
+of the simulated sample for each residual. 
+</p>
+<p>All type of residuals (disjoint or overlapping and Pearson or raw residuals) are 
+supported by this function. However, the  qqplot for overlapping residuals can  be
+a high time consuming process. So,  disjoint
+residuals should be prefered in this function.
+</p>
+<p>The  auxiliary function <code>resSim.fun</code> generates a NHPP with intensity <code class="reqn">\lambda(t)</code>,
+fits the model using the covariate matrix  and calculates the residuals.</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>resmed</code></td>
+<td>
+<p>Numeric vector containing the mean of the simulated residuals 
+in each point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ressup</code></td>
+<td>
+<p>Numeric vector of the upper values of the simulated envelopes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resinf</code></td>
+<td>
+<p>Numeric vector of the lower values of the simulated envelopes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>objres</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Cebrian, A.C., Abaurrea, J. and Asin, J. (2015). NHPoisson: An R Package for 
+Fitting and Validating Nonhomogeneous Poisson Processes. 
+<em>Journal of Statistical Software</em>, 64(6), 1-24.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>simNHP.fun</code>, <code>GenEnv.fun</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+X1&lt;-rnorm(500)
+X2&lt;-rnorm(500)
+
+aux&lt;-fitPP.fun(tind=TRUE,covariates=cbind(X1,X2), 
+	posE=round(runif(40,1,500)), inddat=rep(1,500),
+	tim=c(1:500), tit="Simulated example", start=list(b0=1,b1=0,b2=0),dplot=FALSE)
+
+auxRes&lt;-CalcResD.fun(mlePP=aux,lint=50)
+
+
+#if we want reproducible results, we can fixed the seed in the generation process
+#(the number of cores used in the calculations must also be the same to reproduce
+# the result)
+
+auxqq&lt;-resQQplot.fun(nsim=50,objres=auxRes, covariates=cbind(X1,X2), fixed.seed=123)
+
+</code></pre>
+
+
+</div>

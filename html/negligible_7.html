@@ -1,0 +1,188 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neg.intcont</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Negligible Interaction Test for Continuous Predictors</h2>
+
+<h3>Description</h3>
+
+<p>Testing for the presence of a negligible interaction between two continuous predictor variables
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neg.intcont(
+  outcome = NULL,
+  pred1 = NULL,
+  pred2 = NULL,
+  eiL,
+  eiU,
+  standardized = TRUE,
+  nbootpd = 1000,
+  data = NULL,
+  alpha = 0.05,
+  plot = TRUE,
+  save = FALSE
+)
+
+## S3 method for class 'neg.intcont'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>outcome</code></td>
+<td>
+<p>continuous outcome variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred1</code></td>
+<td>
+<p>first continuous predictor variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred2</code></td>
+<td>
+<p>second continuous predictor variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eiL</code></td>
+<td>
+<p>lower limit of the negligible effect (equivalence) interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eiU</code></td>
+<td>
+<p>upper limit of the negligible effect (equivalence) interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardized</code></td>
+<td>
+<p>logical; should the solution be based on standardized variables (and eiL/eiU)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbootpd</code></td>
+<td>
+<p>number of bootstrap samples for the calculation of the CI for the proportional distance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>optional data file containing the categorical variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>nominal acceptable Type I error rate level</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical; should a plot be printed out with the effect and the proportional distance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save</code></td>
+<td>
+<p>logical; should the plot be saved</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>neg.intcont</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>extra arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function evaluates whether the interaction between two continuous predictor variables is negligible. This can be important for deciding whether to remove an interaction term from a model or to evaluate a hypothesis related to negligible interaction.
+</p>
+<p>eiL/eiU represent the bounds of the negligible effect (equivalence) interval (i.e., the minimally meaningful effect size, MMES) and should be set based on the context of the research. When standardized = TRUE, Acock (2014) suggests that the MMES for correlations can also be applied to standardized effects - Acock, A. C. (2014). A Gentle Introduction to Stata (4th ed.). Texas: Stata Press.
+</p>
+<p>User can input the outcome variable and two predictor variable names directly (i.e., without a data statement), or can use the data statement to indicate the dataset in which the variables can be found.
+</p>
+<p>The advantage of this approach when standardized = TRUE and there are only two predictors is that the Delta method is adopted. However, for general cases researchers can also use the neg.reg function.
+</p>
+<p>The proportional distance (interaction coefficient/negligible effect bound) estimates the proportional distance of the effect from 0 to negligible effect bound, and acts as an alternative effect size measure.
+</p>
+<p>The confidence interval for the proportional distance is computed via bootstrapping (percentile bootstrap).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>list</code> containing the following:
+</p>
+
+<ul>
+<li> <p><code>intcoef</code> Interaction coefficient
+</p>
+</li>
+<li> <p><code>intcil</code> Lower bound of the 1-alpha CI for the interaction coefficient
+</p>
+</li>
+<li> <p><code>intciu</code> Upper bound of the 1-alpha CI for the interaction coefficient
+</p>
+</li>
+<li> <p><code>eiL</code> Lower bound of the negligible effect (equivalence) interval
+</p>
+</li>
+<li> <p><code>eiU</code> Upper bound of the negligible effect (equivalence) interval
+</p>
+</li>
+<li> <p><code>sprs</code> Semi-partial correlation squared for the interaction term
+</p>
+</li>
+<li> <p><code>PD</code> Proportional distance
+</p>
+</li>
+<li> <p><code>CI95L</code> Lower bound of the 1-alpha CI for the PD
+</p>
+</li>
+<li> <p><code>CI95U</code> Upper bound of the 1-alpha CI for the PD
+</p>
+</li>
+<li> <p><code>alpha</code> Nominal Type I error rate
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Rob Cribbie <a href="mailto:cribbie@yorku.ca">cribbie@yorku.ca</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">y&lt;-rnorm(25)
+x1&lt;-rnorm(25)
+x2&lt;-rnorm(25)
+d&lt;-data.frame(y,x1,x2)
+neg.intcont(outcome = y, pred1 = x1, pred2 = x2, data = d,
+eiL = -.25, eiU = .25, standardized = TRUE, nbootpd = 100)
+</code></pre>
+
+
+</div>

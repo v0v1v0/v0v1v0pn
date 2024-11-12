@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>abc_smc_nltt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A function to perform Approximate Bayesian Computation within a
+Sequential Markov Chain (ABC-SMC), for diversification analysis
+of phylogenetic trees.</h2>
+
+<h3>Description</h3>
+
+<p>This function performs ABC-SMC as described in Toni 2009
+for given diversification model, provided a phylogenetic tree.
+ABC-SMC is not limited to only using the normalized LTT as statistic.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">abc_smc_nltt(
+    tree, statistics, simulation_function, init_epsilon_values,
+    prior_generating_function, prior_density_function,
+    number_of_particles = 1000, sigma = 0.05, stop_rate = 1e-05
+  )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tree</code></td>
+<td>
+<p>an object of class <code>"phylo"</code>; the tree upon which we want
+to fit our diversification model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistics</code></td>
+<td>
+<p>A vector containing functions that take a tree
+as an argument and return a single scalar value (the statistic).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simulation_function</code></td>
+<td>
+<p>A function that implements the
+diversification model and returns an object of class <code>"phylo"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init_epsilon_values</code></td>
+<td>
+<p>A vector containing the initial threshold values
+for the summary statistics from the vector <code>statistics</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_generating_function</code></td>
+<td>
+<p>Function to generate parameters
+from the prior distribution of these parameters (e.g. a function returning
+lambda and mu in case of the birth-death model)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_density_function</code></td>
+<td>
+<p>Function to calculate the prior probability
+of a set of parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number_of_particles</code></td>
+<td>
+<p>Number of particles to be used
+per iteration of the ABC-SMC algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>Standard deviation of the perturbance distribution
+(perturbance distribution is a gaussian with mean 0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop_rate</code></td>
+<td>
+<p>If the acceptance rate drops below <code>stopRate</code>,
+stop the ABC-SMC algorithm  and assume convergence.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A matrix with <code>n</code> columns,
+where <code>n</code> is the number of parameters you are trying to estimate.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Thijs Janzen
+</p>
+
+
+<h3>References</h3>
+
+<p>Toni, T., Welch, D., Strelkowa, N., Ipsen, A.,
+&amp; Stumpf, M.P.H. (2009). Approximate Bayesian computation scheme for
+parameter inference and model selection in dynamical systems.
+Journal of the Royal Society Interface, 6(31), 187-202.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+
+  prior_gen &lt;- function() {
+    return( rexp(n=2, rate=0.1) )
+  }
+
+  prior_dens &lt;- function(val) {
+    return( dexp( val[1], rate = 0.1) * dexp( val[2], rate = 0.1) )
+  }
+
+  require(TESS)
+
+  treeSim &lt;- function(params) {
+    t &lt;- TESS.sim.age(n=1, lambda = params[1], mu = params[2], age = 10)[[1]]
+    return(t)
+  }
+
+  obs &lt;- treeSim(c(0.5,0.1))
+
+  statWrapper &lt;- function(tree1) {
+    return( nLTTstat_exact(tree1, obs, "abs"))
+  }
+
+  stats &lt;- c(statWrapper)
+
+  results &lt;-  abc.smc.nltt(
+    obs, stats, treeSim, init_epsilon_values = 0.2,
+    prior_generating_function = prior_gen,
+    prior_density_function = prior_dens,
+    number_of_particles = 1000, sigma = 0.05, stop_rate = 1e-5
+  )
+
+  
+## End(Not run) # end of dontrun
+</code></pre>
+
+
+</div>

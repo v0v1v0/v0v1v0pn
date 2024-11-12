@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rescale_vertex_igraph</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Rescale vertex size to be used in <code>plot.igraph</code>.</h2>
+
+<h3>Description</h3>
+
+<p>This function rescales a vertex size before passing it to
+<code>plot.igraph</code> so that the resulting vertices
+have the desired size relative to the x-axis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rescale_vertex_igraph(
+  vertex.size,
+  par.usr = par("usr"),
+  minmax.relative.size = getOption("diffnet.minmax.relative.size", c(0.01, 0.04)),
+  adjust = 200
+)
+
+igraph_vertex_rescale(
+  vertex.size,
+  par.usr = par("usr"),
+  minmax.relative.size = getOption("diffnet.minmax.relative.size", c(0.01, 0.04)),
+  adjust = 200
+)
+
+vertex_rescale_igraph(
+  vertex.size,
+  par.usr = par("usr"),
+  minmax.relative.size = getOption("diffnet.minmax.relative.size", c(0.01, 0.04)),
+  adjust = 200
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>vertex.size</code></td>
+<td>
+<p>Numeric vector of unscaled vertices' sizes. This is unit-free.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par.usr</code></td>
+<td>
+<p>Integer vector of length 4 with the coordinates of plotting region.
+by default uses <code>par("usr")</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minmax.relative.size</code></td>
+<td>
+<p>A numeric vector of length 2. Represents the
+desired min and max vertex sizes relative to the x-axis in terms of percentage
+(see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjust</code></td>
+<td>
+<p>Numeric scalar. Adjustment made to the resulting adjusted size
+(see details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>minmax.relative.size</code> limits the minimum and maximum size that a vertex
+can take in the plot relative to the x-axis scale. The values for the x-axis
+scale are by default retrieved by accessing to <code>par("usr")</code>. By default
+the vertex are rescaled to be at least 1% of the size of the plotting region
+and no more than 5% of the plotting region, <code>minmax.relative.size=c(.01, .05)</code>.
+</p>
+<p>The default value for <code>adjust</code> is taken from <code>igraph</code>
+version 1.0.1. In particular, the function <code>igraph:::.igraph.shape.circle.plot</code>,
+in which before passing the <code>vertex.size</code> to the function
+<code>symbols</code>, the vertex size is reduced by 200.
+</p>
+<p>The rescaling is as follows:
+</p>
+<p style="text-align: center;"><code class="reqn">%
+ v' = \frac{v - \underbar v}{\bar v - \underbar v}\times (\bar s - \underbar s) + \underbar s
+</code>
+</p>
+
+<p>Where <code class="reqn">v</code> is the vertex size, <code class="reqn">\bar v</code> and <code class="reqn">\underbar v</code> are
+the max and min values of <code class="reqn">v</code> respectively, and <code class="reqn">\bar s</code> and
+<code class="reqn">\underbar s</code> are the max and min size that vertices take in terms
+of <code>minmax.relative.size</code> and <code>par.usr</code>. The adjusted value <code class="reqn">v'</code>
+is then multiplied by <code>adjust</code>.
+</p>
+<p><code>igraph_vertex_rescale</code> and <code>vertex_rescale_igraph</code> are aliases.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An integer vector of the same length as <code>vertex.size</code> with
+rescaled values.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other visualizations: 
+<code>dgr()</code>,
+<code>diffusionMap()</code>,
+<code>drawColorKey()</code>,
+<code>grid_distribution()</code>,
+<code>hazard_rate()</code>,
+<code>plot_adopters()</code>,
+<code>plot_diffnet2()</code>,
+<code>plot_diffnet()</code>,
+<code>plot_infectsuscep()</code>,
+<code>plot_threshold()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(igraph)
+
+# Random graph and coordinates
+set.seed(2134)
+g &lt;- barabasi.game(10)
+coords &lt;- layout_nicely(g)
+
+# Random size and figures
+size &lt;- runif(10)
+size &lt;- cbind(size, size)
+shap &lt;- sample(c("circle", "square"),10,TRUE)
+
+# Plotting
+oldpar &lt;- par(no.readonly = TRUE)
+par(mfrow=c(2,2), mai=rep(.5,4))
+for (i in seq(1, 1000, length.out = 4)) {
+  # New plot-window
+  plot.new()
+  plot.window(xlim=range(coords[,1]*i), ylim=range(coords[,2]*i))
+
+  # plotting graph
+  plot(g, layout=coords*i, add=TRUE, rescale=FALSE,
+       vertex.shape = shap,
+       vertex.size  = rescale_vertex_igraph(size) # HERE WE RESCALE!
+  )
+
+  # Adding some axis
+  axis(1, lwd=0, lwd.ticks = 1)
+  axis(2, lwd=0, lwd.ticks = 1)
+  box()
+}
+
+par(oldpar)
+
+</code></pre>
+
+
+</div>

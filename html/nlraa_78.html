@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_lme</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate values from an object of class <code>lme</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Simulate values from an object of class lme. Unequal variances, 
+as modeled using the ‘weights’ option are supported, and there is
+experimental code for considering the ‘correlation’ structure.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_lme(
+  object,
+  nsim = 1,
+  psim = 1,
+  value = c("matrix", "data.frame"),
+  data = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>lme</code> or <code>gls</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of samples, default 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psim</code></td>
+<td>
+<p>parameter simulation level, 0: for fitted values, 1: for simulation from 
+fixed parameters (assuming a fixed vcov matrix), 2: for simulation considering the 
+uncertainty in the residual standard error (sigma), this returns data which
+will appear similar to the observed values. 3: in addition samples a new set of random effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>whether to return a matrix (default) or an augmented data frame</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data argument is needed when using this function inside user defined functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (it is possible to supply a newdata this way)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is based on <code>predict.lme</code> function
+</p>
+<p>It uses function <code>mvrnorm</code> to generate new values for the coefficients
+of the model using the Variance-Covariance matrix <code>vcov</code>. This variance-covariance matrix 
+refers to the one for the parameters 'beta', not the one for the residuals.
+</p>
+
+
+<h3>Value</h3>
+
+<p>It returns a vector with simulated values with length equal to the number of rows 
+in the original data
+</p>
+
+
+<h3>Note</h3>
+
+<p>I find the simulate.merMod in the lme4 pacakge confusing. There is use.u and several versions of re.form.
+From the documentation it seems that if use.u = TRUE, then the current values of the random effects are used.
+This would mean that it is equivalent to psim = 2 in this function. Then use.u = FALSE, would be equivalent 
+to psim = 3. re.form allows for specifying the formula of the random effects.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.lme</code> and ‘simulate.merMod’ in the ‘lme4’ package.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(nlme)
+data(Orange)
+
+fm1 &lt;- lme(circumference ~ age, random = ~ 1 | Tree, data = Orange)
+
+sims &lt;- simulate_lme(fm1, nsim = 10)
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,162 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_datasets</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>get_datasets</h2>
+
+<h3>Description</h3>
+
+<p>The <code>get_datasets()</code> function is a wrapper for the Neotoma <code>datasets</code> API
+endpoint.
+The function takes parameters defined by the user and returns dataset
+information supplied by the Neotoma Paleoecological Database.
+The user may define all or none of the possible fields.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_datasets(x = NA, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A single datasetid, or a vector of unique dataset ids.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>accepted arguments, see details for more information.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A <code>dataset</code> is an element nested within <code>neotoma2</code> site objects. The
+<code>get_datasets()</code> call returns a list of individual <code>site</code> objects with
+<code>collunits</code> (collection units) that contain valid, matching <code>dataset</code>
+elements.
+So, <code>get_sites()</code> returns only site metadata. <code>get_datasets()</code> returns
+site metadata, plus metadata about the individual datasets present at that
+site.
+The <code>get_datasets()</code> function searches for each site within Neotoma
+that matches the query parameters, and returns them as a <code>sites</code> object,
+a list of <code>site</code> objects, plus returns all the additional metadata for
+the datasets at that site.
+The <code>get_datasets()</code> command wraps the Neotoma API
+(<a href="https://api.neotomadb.org">api.neotomadb.org</a>) call for <code>datasets</code>.
+The call itself uses a SQL query which accepts any one of the following
+parameters:
+</p>
+
+<ul>
+<li> <p><code>siteid</code>  The unique site ID (integer) in Neotoma. Can be passed as a
+vector of site IDs.
+</p>
+</li>
+<li> <p><code>sitename</code>  The site name, or approximate match using the % wildcard.
+</p>
+</li>
+<li> <p><code>database</code>  The constituent database for the record. See
+<code>get_table("constituentdatabases")</code>
+</p>
+</li>
+<li> <p><code>datasettype</code> Neotoma contains data for a number of dataset types.
+This returns a subset of data types. For a complete list of available
+dataset types, run <code>neotoma2::get_table('datasettypes')</code>
+</p>
+</li>
+<li> <p><code>altmin</code>  The minimum altitude range for site elevation (in meters).
+</p>
+</li>
+<li> <p><code>altmax</code>  The maximum altitude range for site elevation (in meters).
+</p>
+</li>
+<li> <p><code>datasetid</code>  The unique dataset ID (integer) in Neotoma. Can be passed
+as a vector of dataset IDs.
+</p>
+</li>
+<li> <p><code>doi</code>  The dataset DOI for a dataset contained within a site. Can be
+passed as a vector of DOIs.
+</p>
+</li>
+<li> <p><code>gpid</code>  The geopolitical name or identifier containing a site. Can be
+passed as a vector of names.
+</p>
+</li>
+<li> <p><code>keywords</code>  Keywords for samples within a set of sites. For example
+"modern" indicates a sample within the record uses the keyword "modern".
+</p>
+</li>
+<li> <p><code>contacts</code>  Contact names or IDs associated with a site.
+</p>
+</li>
+<li> <p><code>ageyoung</code>  A minimum spanning age for the record, in years before
+radiocarbon present (1950).
+</p>
+</li>
+<li> <p><code>ageold</code>  A maximum spanning age for the record, in years before
+radiocarbon present (1950).
+</p>
+</li>
+<li> <p><code>ageof</code>  An age which must be contained within the range of sample ages
+for a site.
+</p>
+</li>
+<li> <p><code>taxa</code>  The names of taxa which must be present within samples in a
+record.
+</p>
+</li>
+<li> <p><code>all_data</code> The API only downloads the first 25 records of the query.
+For the complete records, use <code>all_data=TRUE</code>
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>The function returns either a single item of class <code>"try-error"</code>
+describing the reason for failure (either misdefined parameters or an error
+from the Neotoma API), or list of site objects, each containing one or more
+<code>collunit</code> objects, with fully populated <code>datasets</code> elements.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Socorro Dominguez <a href="mailto:s.dominguez@ht-data.com">s.dominguez@ht-data.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# To find all datasets with a min altitude of 12 and a max altitude of 25:
+sites_12to25 &lt;- get_datasets(altmin=12, altmax=25)
+# To find all datasets in Brazil
+brazil &lt;- '{"type": "Polygon",
+"coordinates": [[
+ [-73.125, -9.102096738726443],
+ [-56.953125,-33.137551192346145],
+ [-36.5625,-7.710991655433217],
+ [-68.203125,13.923403897723347],
+ [-73.125,-9.102096738726443]]]}'
+brazil_datasets &lt;- get_datasets(loc = brazil[1], limit=2)
+# To obtain the dataset metadata:
+datasets(brazil_datasets)
+# There is insufficient metadata at this point to obtain information
+# about taxa present at the site. We must use get_downloads() to
+# obtain the full set of sample information:
+# This fails: taxa(brazil_datasets)
+
+</code></pre>
+
+
+</div>

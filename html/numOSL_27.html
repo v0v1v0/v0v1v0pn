@@ -1,0 +1,376 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fastED</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fast-component equivalent dose calculation
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimating a fast-, medium-, or slow-component equivalent dose using decay curves obtained from the single aliquot regenerative-dose (SAR) method.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fastED(Sigdata, Redose, delay.off = c(0,0), ncomp = 2, 
+       constant = TRUE, compIDX = 1, control.args = list(), 
+       typ = "cw", model = "gok", origin = FALSE, errMethod = "sp", 
+       nsim = 500, weight.decomp = FALSE, weight.fitGrowth = TRUE, 
+       trial = TRUE, nofit.rgd = NULL, outpdf = NULL, log = "x", 
+       lwd = 2, test.dose = NULL, agID = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Sigdata</code></td>
+<td>
+<p>matrix(<b>required</b>): a series of decay curves stored in a matrix column by column, the first column denotes stimulation time values, see details. 
+Data structure of this kind can be obtained using function pickBINdata by setting argument <code>force.matrix=TRUE</code>, see examples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Redose</code></td>
+<td>
+<p>vector(<b>required</b>): regenerative dose values. Example: <code>Redose=c(1,2,3,4,0,1)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delay.off</code></td>
+<td>
+<p>vector(with default): a two-elment vector indicating the "Delay" and "Off"<br>
+values of the decay curves, i.e., <code>delay.off[1]=Delay</code>,<code>delay.off[2]=Off</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncomp</code></td>
+<td>
+<p>integer(with default): number of components to be decomposed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constant</code></td>
+<td>
+<p>logical(with default): logical value indicating if a constant background should be subtracted from the decay curve, see function decomp for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compIDX</code></td>
+<td>
+<p>integer(with default): index of the component to be extracted. For example, <code>compIDX=1</code> and <code>compIDX=2</code> indicate respectively that 
+the fast- and medium-component signals will be used to calculate the equivalent dose. The index should not exceed the number of components to be decomposed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.args</code></td>
+<td>
+<p>list(with default): arguments used in the differential evolution algorithm, see function decomp for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typ</code></td>
+<td>
+<p>character(with default): type of an OSL decay curve, only CW-OSL decay curve can be analyzed currently</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>character(with default): model used for growth curve fitting, see function<br> 
+fitGrowth for available models</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>origin</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be forced to pass the origin</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errMethod</code></td>
+<td>
+<p>character(with default): method used for equivalent dose error assessment. See function calED for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>integer(with default): desired number of randomly simulated equivalent dose obtained by Monte Carlo simulation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight.decomp</code></td>
+<td>
+<p>character(with default): logical value indicating if the decay curve should be fitted using a weighted procedure, see function decomp for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight.fitGrowth</code></td>
+<td>
+<p>character(with default): logical value indicating if the growth curve should be fitted using a weighted procedure, see function fitGrowth for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be fitted using other models if the given model fails, see function fitGrowth for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nofit.rgd</code></td>
+<td>
+<p>integer(optional): regenerative doses that will not be used during the fitting. 
+For example, if <code>nofit.rgd=1</code> then the first regenerative dose will not be used during fast-, medium-, or slow-component growth curve fitting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outpdf</code></td>
+<td>
+<p>character(optional): if specified, results of fast-, medium-, or slow-component equivalent dose calculation will be written to a PDF file 
+named <code>"outpdf"</code> and saved to the current work directory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>character(with default): a character string which contains "x" if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic and "xy" or "yx" if both axes are to be logarithmic</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>numeric(with default): width of curves (lines)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test.dose</code></td>
+<td>
+<p>numeric(optional): test dose of decay curves</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agID</code></td>
+<td>
+<p>vector(optional): a three-elemenet vector indicating aliquot (grain) ID, i.e.,<br><code>agID[1]=NO</code>, <code>agID[2]=Position</code>, <code>agID[3]=Grain</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function fastED is used to estimate a fast-, medium-, or slow-component equivalent dose using data sets obtained from the SAR protocol (Murray and Wintle, 2000). The routine trys to decompose a series of decay curves to a specified number of components, then the numbers of trapped electrons from the fast-, medium-, or slow-component will be used to construct the growth curve to estimate a fast-, medium-, or slow-component equivalent dose. See function decomp, fitGrowth, and calED for more details concerning decay curve decomposition, growth curve fitting, and equivalent dose calculation, respectively.<br><br>
+Argument <code>Sigdata</code> is a column-matrix made up with stimulation time values and a number of decay curves:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<b>Column.no</b> </td>
+<td style="text-align: left;">  <b>Description</b>                                     </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>I</code>         </td>
+<td style="text-align: left;">   Stimulation time values                               </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>II</code>        </td>
+<td style="text-align: left;">   Natural-dose signal values                            </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>III</code>       </td>
+<td style="text-align: left;">   Test-dose signal values for the natural-dose          </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>IV</code>        </td>
+<td style="text-align: left;">   The 1th Regenerative-dose signal values               </td>
+</tr>
+<tr>
+<td style="text-align: left;"> 
+<code>V</code>         </td>
+<td style="text-align: left;">   Test-dose signal values for the 1th regenerative-dose </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>VI</code>        </td>
+<td style="text-align: left;">   The 2th regenerative-dose signal values               </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>VII</code>       </td>
+<td style="text-align: left;">   Test-dose signal values for the 2th regenerative-dose </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>...</code>       </td>
+<td style="text-align: left;">   ...
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return an invisible list containing the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>decomp.pars</code></td>
+<td>
+<p>a list containing optimized parameters of successfully fitted decay curves</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Curvedata</code></td>
+<td>
+<p>data sets used for building the fast-, medium-, or slow-component growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ltx</code></td>
+<td>
+<p>sensitivity-corrected natural-dose fast-, medium-, or slow-component signal and its standard error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LMpars</code></td>
+<td>
+<p>optimizaed parameters for the fast-, medium-, or slow-component growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>minimized objective for the fast-, medium-, or slow-component growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>avg.error</code></td>
+<td>
+<p>average fit error for the fast-, medium-, or slow-component growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RCS</code></td>
+<td>
+<p>reduced chi-square value for the fast-, medium-, or slow-component growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FOM</code></td>
+<td>
+<p>figure of merit value for the fast-, medium-, or slow-component growth curve in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calED.method</code></td>
+<td>
+<p>method used for calculating the fast-, medium-, or slow-component equivalent dose, i.e., <code>"Interpolation"</code> or <code>"Extrapolation"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mcED</code></td>
+<td>
+<p>randomly simulated fast-, medium-, or slow-component equivalent doses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ED</code></td>
+<td>
+<p>fast-, medium-, or slow-component equivalent dose and its standard error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ConfInt</code></td>
+<td>
+<p>68 percent and 95 percent confidence interval of the fast-, medium-, or slow-component equivalent dose</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RecyclingRatio1</code></td>
+<td>
+<p>the first fast-, medium-, or slow-component recycling ratio and its standard error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RecyclingRatio2</code></td>
+<td>
+<p>the second fast-, medium-, or slow-component recycling ratio and its standard error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RecyclingRatio3</code></td>
+<td>
+<p>the third fast-, medium-, or slow-component recycling ratio and its standard error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Recuperation1</code></td>
+<td>
+<p>the first fast-, medium-, or slow-component recuperation (i.e., ratio of the sensitivity-corrected zero-dose 
+signal to natural-dose signal) and its standard error in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Recuperation2</code></td>
+<td>
+<p>the second fast-, medium-, or slow-component recuperation (i.e., ratio of the sensitivity-corrected zero-dose 
+signal to the maximum regenerative-dose signal) and its standard error in percent</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Argument <code>test.dose</code> and <code>agID</code> have nothing to do with fast-, medium-, or slow-component equivalent dose calculation. They are used only for plotting purpose.<br><br>
+The number of trapped electrons that corresponds to the largest, the second largest, and the third largest decay rates will be regarded as the fast-, medium-, and slow-component signals, respectively, 
+which cannot always ensure that pure fast-, medium-, or slow-component signals be extracted if an ultra-fast decaying component appears.<br><br>
+The authors thank Professor Sheng-Hua Li and Professor Geoff Duller for their helpful discussions concerning fast-component equivalent dose calculation.
+</p>
+
+
+<h3>References</h3>
+
+<p>Li SH, Li B, 2006. Dose measurement using the fast component of LM-OSL signals from quartz. 
+Radiation Measurements, 41(5): 534-541.
+</p>
+<p>Murray AS, Wintle AG, 2000. Luminescence dating of quartz using improved single-aliquot regenerative-dose protocol. 
+Radiation Measurements, 32(1): 57-73.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>pickBINdata; Signaldata; fitGrowth; decomp; calED
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> ### Example 1 (not run):
+ # data(Signaldata)
+ # fastED(Signaldata$cw,Redose=c(80,160,240,320,0, 80)*0.13,
+ #        ncomp=3, constant=FALSE, compIDX=1, outpdf="fastED1")
+
+ # fastED(Signaldata$cw,Redose=c(80,160,240,320,0, 80)*0.13,
+ #        ncomp=3, constant=FALSE, compIDX=2, outpdf="mediumED1")
+
+ # fastED(Signaldata$cw,Redose=c(80,160,240,320,0, 80)*0.13,
+ #        ncomp=3, constant=FALSE, compIDX=3, outpdf="slowED1")
+
+ ### Example 2 (not run):
+ # data(BIN)
+ # obj_pickBIN &lt;- pickBINdata(BIN, Position=6, Grain=0, 
+ #                            LType="OSL", force.matrix=TRUE)
+ # fastED(obj_pickBIN$BINdata[[1]], ncomp=2, constant=TRUE,
+ #        Redose=c(100,200,300,400,0,100)*0.13, outpdf="fastED2")
+
+</code></pre>
+
+
+</div>

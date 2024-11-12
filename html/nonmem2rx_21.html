@@ -1,0 +1,444 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nonmem2rx</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert a NONMEM source file to a rxode model (nlmixr2-syle)</h2>
+
+<h3>Description</h3>
+
+<p>Convert a NONMEM source file to a rxode model (nlmixr2-syle)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nonmem2rx(
+  file,
+  inputData = NULL,
+  nonmemOutputDir = NULL,
+  rename = NULL,
+  tolowerLhs = TRUE,
+  thetaNames = TRUE,
+  etaNames = TRUE,
+  cmtNames = TRUE,
+  updateFinal = TRUE,
+  determineError = TRUE,
+  validate = getOption("nonmem2rx.validate", TRUE),
+  nonmemData = FALSE,
+  strictLst = FALSE,
+  unintFixed = FALSE,
+  extended = getOption("nonmem2rx.extended", FALSE),
+  nLinesPro = 20L,
+  delta = 1e-04,
+  usePhi = TRUE,
+  useExt = TRUE,
+  useCov = TRUE,
+  useXml = TRUE,
+  useLst = TRUE,
+  mod = ".mod",
+  cov = ".cov",
+  phi = ".phi",
+  lst = getOption("nonmem2rx.lst", ".lst"),
+  xml = ".xml",
+  ext = ".ext",
+  scanLines = getOption("nonmem2rx.scanLines", 50L),
+  save = getOption("nonmem2rx.save", NA),
+  saveTime = getOption("nonmem2rx.saveTime", 15),
+  overwrite = getOption("nonmem2rx.overwrite", TRUE),
+  load = getOption("nonmem2rx.load", TRUE),
+  compress = getOption("nonmem2rx.compress", TRUE),
+  keep = getOption("nonmem2rx.keep", c("dfSub", "dfObs", "thetaMat", "sigma"))
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>NONMEM run file, like an <code>.xml</code> or <code>.lst</code> file or even
+a control stream</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inputData</code></td>
+<td>
+<p>this is a path to the input dataset (or <code>NULL</code> to
+determine from the dataset).  Often the input dataset may be
+different from the place it points to in the control stream
+because directories can be created to run NONMEM from a script.
+Because of this, when this is specified the input data will be
+assumed to be from here instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonmemOutputDir</code></td>
+<td>
+<p>This is a path the the nonmem output
+directory.  When not <code>NULL</code> it will assume that the diretory for
+the output files is located here instead of where the control
+stream currently exists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rename</code></td>
+<td>
+<p>When not <code>NULL</code> this should be a named character
+vector that contains the parameters that should be renamed.  For
+example, if the model uses the variable <code>YTYPE</code> and has <code>CMT</code> it
+isn't compatible with <code>rxode2</code>/<code>nlmixr2</code>. You can change this for
+the input dataset and the model to create a new model that still
+reproduces the NONMEM output by specifying
+<code>rename=c(dvid="YTYPE")</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tolowerLhs</code></td>
+<td>
+<p>Boolean to change the lhs to lower case (default:
+<code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thetaNames</code></td>
+<td>
+<p>this could be a boolean indicating that the theta
+names should be changed to the comment-labeled names (default:
+<code>TRUE</code>). This could also be a character vector of the theta names
+(in order) to be replaced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>etaNames</code></td>
+<td>
+<p>this could be a boolean indicating that the eta
+names should be changed to the comment-labeled names (default:
+<code>TRUE</code>). This could also be a character vector of the theta names
+(in order) to be replaced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cmtNames</code></td>
+<td>
+<p>this could be a boolean indicating that the
+compartment names should be changed to the named compartments in
+the <code style="white-space: pre;">⁠$MODEL⁠</code> by <code>COMP = (name)</code> (default: <code>TRUE</code>). This could
+also be a character vector of the compartment names (in order) to
+be replaced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>updateFinal</code></td>
+<td>
+<p>Update the parsed model with the model estimates
+from the <code>.lst</code> output file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>determineError</code></td>
+<td>
+<p>Boolean to try to determine the <code>nlmixr2</code>-style residual
+error model (like <code>ipred ~ add(add.sd)</code>), otherwise endpoints are
+not defined in the <code>rxode2</code>/<code>nlmixr2</code> model (default: <code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validate</code></td>
+<td>
+<p>Boolean that this tool will attempt to "validate"
+the model by solving the derived model under pred conditions
+(etas are zero and eps values are zero)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonmemData</code></td>
+<td>
+<p>Boolean that tells <code>nonmem2rx</code> to read in the
+nonmem data (if possible) even if the model will not be validated
+(like if it is a simulation run or missing final parameter
+estimates).  By default this is <code>FALSE</code>, nonmem data will not be
+integrated into the nonmem2rx ui.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strictLst</code></td>
+<td>
+<p>The list parsing needs to be correct for a
+successful load (default <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unintFixed</code></td>
+<td>
+<p>Treat uninteresting values as fixed parameters (default <code>FALSE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extended</code></td>
+<td>
+<p>Translate extended control streams from tools like
+wings for NONMEM</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nLinesPro</code></td>
+<td>
+<p>The number of lines to check for the $PROBLEM
+statement.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>this is the offset for NONMEM times that are tied</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>usePhi</code></td>
+<td>
+<p>if present, use the NONMEM phi file to extract etas
+(default <code>TRUE</code>), otherwise defaults to etas in the tables (if
+present)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useExt</code></td>
+<td>
+<p>if present, use the NONMEM ext file to extract
+parameter estimates (default <code>TRUE</code>), otherwise defaults to
+parameter estimates extracted in the NONMEM output</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useCov</code></td>
+<td>
+<p>if present, use the NONMEM cov file to import the
+covariance, otherwise import the covariance with list file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useXml</code></td>
+<td>
+<p>if present, use the NONMEM xml file to import much of
+the NONMEM information</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useLst</code></td>
+<td>
+<p>if present, use the NONMEM lst file to extract NONMEM
+information</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod</code></td>
+<td>
+<p>the NONMEM output extension, defaults to <code>.mod</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cov</code></td>
+<td>
+<p>the NONMEM covariance file extension, defaults to <code>.cov</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi</code></td>
+<td>
+<p>the NONMEM eta/phi file extension, defaults to <code>.phi</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lst</code></td>
+<td>
+<p>the NONMEM output extension, defaults to <code>.lst</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xml</code></td>
+<td>
+<p>the NONMEM xml file extension , defaults to <code>.xml</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ext</code></td>
+<td>
+<p>the NONMEM ext file extension, defaults to <code>.ext</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scanLines</code></td>
+<td>
+<p>number of lines to scan for comment chars when
+<code style="white-space: pre;">⁠IGNORE=@⁠</code>, default is 50</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save</code></td>
+<td>
+<p>This can be:
+</p>
+
+<ul>
+<li>
+<p> a <code>NULL</code> (meaning don't save),
+</p>
+</li>
+<li>
+<p> a logical (default <code>FALSE</code>, don't save) that when <code>TRUE</code> will use
+the base name of the control stream, append <code>.qs</code> and save the file
+using <code>qs::qsave()</code>
+</p>
+</li>
+<li>
+<p> A path to a file to write
+</p>
+<p>Note that this file will be saved with qs::qsave() and can be
+loaded with qs::qread()
+</p>
+</li>
+<li>
+<p> A <code>NA</code> value which means save if the whole process (including
+validation) takes too much time
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>saveTime</code></td>
+<td>
+<p>The time that the translation/validation needs (in
+secs) before it will save to avoid having to rerun the model
+(default 15 for 15 seconds)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>is a boolean to allow overwriting the save file
+(see <code>load</code> for more information).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>load</code></td>
+<td>
+<p>a boolean that says to load the save file (if it
+exists) instead of re-running the translation and validation.
+Note if <code>overwrite=TRUE</code> and <code>load=TRUE</code> then this will overwrite
+based on time stamp of the files.  If the save file is newer than
+the input file, then load that file, otherwise regenerate and
+overwrite.  This works best if you point to an output file, like
+a <code>.xml</code> or listing file instead of the control stream</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compress</code></td>
+<td>
+<p>a boolean indicating if the UI should be a
+compressed UI.  If you are using this for simulation with old
+versions of rxode2, the compressed ui is not supported, so this
+should be <code>FALSE</code>. Otherwise use <code>TRUE</code> if you are using a newer
+rxode2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep</code></td>
+<td>
+<p>is a character vector of imported model items that are
+kept in the model itself; The defaults is "sigma" which keeps the
+sigma matrix in the model itself.  You can add rxode2 solving
+options that are imported from NONMEM to keep in the model.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Since some of these options you may want to set per project, the
+following options are queried:
+</p>
+
+<ul>
+<li> <p><code>nonmem2rx.validate</code> - boolean to validate the model (default: <code>TRUE</code>)
+</p>
+</li>
+<li> <p><code>nonmem2rx.lst</code> - default extension for output (default: <code>.lst</code>)
+</p>
+</li>
+<li> <p><code>nonmem2rx.save</code> - should nonmem2rx save the model output?
+</p>
+</li>
+<li> <p><code>nonmem2rx.overwrite</code> - should nonmem2rx save output be
+overwritten (default <code>TRUE</code>)
+</p>
+</li>
+<li> <p><code>nonmem2rx.load</code> - should nonmem2rx load a saved model instead of
+translating and validating again? (default <code>TRUE</code>)
+</p>
+</li>
+<li> <p><code>nonmem2rx.extended</code> - should nonmem2rx support extended control
+streams? (default <code>FALSE</code>)
+</p>
+</li>
+<li> <p><code>nonmem2rx.compress</code> - should the ui be compressed or
+uncompressed (default: <code>TRUE</code>)
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>rxode2 function
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# You can run a translation without validating the input.  This is
+# a faster way to import a dataset (and allows the CRAN machines to
+# run a quick example)
+
+mod &lt;- nonmem2rx(system.file("mods/cpt/runODE032.ctl", package="nonmem2rx"), lst=".res",
+                save=FALSE, validate=FALSE, compress=FALSE)
+
+
+
+# Though by default you likely wish to validate the input
+
+mod &lt;- nonmem2rx(system.file("mods/cpt/runODE032.ctl", package="nonmem2rx"),
+                 lst=".res", save=FALSE)
+
+mod
+
+# you can plot to compare the pred/ipred differences
+
+plot(mod)
+
+# if you want to see the individual differences
+# you can by plotting by page of plots
+
+plot(mod, nrow=2, ncol=2, page=1, log="y")
+
+# or select which pages you want to print
+
+plot(mod, nrow=2, ncol=2, page=c(1,3), log="y")
+
+
+#' or even  all the individuals with
+# plot(page=TRUE)
+
+plot(mod, nrow=5, ncol=5, page=TRUE, log="y")
+
+# you can also convert to a nlmixr2 object, but need babelmixr2 for
+# that conversion
+
+
+
+</code></pre>
+
+
+</div>

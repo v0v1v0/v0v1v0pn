@@ -1,0 +1,177 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cenfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute an ECDF for Censored Data
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes an estimate of an empirical cumulative distribution function
+(ECDF) for censored data using the Kaplan-Meier method.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">    cenfit(obs, censored, groups, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+
+<p>Either a numeric vector of observations or a formula.
+See examples below.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>censored</code></td>
+<td>
+
+<p>A logical vector indicating TRUE where an observation in ‘obs’ is
+censored (a less-than value) and FALSE otherwise.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+
+<p>A factor vector used for grouping ‘obs’ into subsets.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional items that are common to this function and the <code>survfit</code>
+function from the ‘survival’ package.  See Details.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This, and related routines, are front ends to routines in the
+<code>survival</code> package.  Since the survival routines can not handle
+left-censored data, these routines transparently handle “flipping" input
+data and resultant calculations.  Additionally provided are query and
+prediction methods for <code>cenfit</code> objects.
+</p>
+<p>There are many additional options that are supported and documented
+in <code>survfit</code>.  Only a few have application to the geosciences.
+However, the most important is ‘conf.int’.  This is the level for
+a two-sided confidence interval on the ECDF.  The default is 0.95.
+</p>
+<p>If you are using the formula interface:  The <code>censored</code> and
+<code>groups</code> parameters are not specified – all information is provided
+via a formula as the <code>obs</code> parameter.  The formula must have a
+<code>Cen</code> object as the response on the left of the <code>~</code> operator and,
+if desired, terms separated by + operators on the right.  
+</p>
+
+
+<h3>Value</h3>
+
+<p>a <code>cenfit</code> object.
+Methods defined for <code>cenfit</code> objects are provided for
+<code>print</code>, <code>plot</code>, <code>lines</code>, <code>predict</code>,
+<code>mean</code>, <code>median</code>, <code>sd</code>, <code>quantile</code>.
+</p>
+<p>If the input formula contained factoring groups 
+(ie., <code>cenfit(obs, censored, groups)</code>, individual ECDFs can be
+obtained by indexing (eg., <code>model[1]</code>, etc.).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>R. Lopaka Lee &lt;rclee@usgs.gov&gt;
+</p>
+<p>Dennis Helsel &lt;dhelsel@practicalstats.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Helsel, Dennis R. (2005).  Nondectects and Data Analysis; Statistics for
+censored environmental data.  John Wiley and Sons, USA, NJ.
+</p>
+<p>Dorey, F. J. and Korn, E. L. (1987).  Effective sample sizes for
+confidence intervals for survival probabilities.  <em>Statistics in
+Medicine</em> 6, 679-87.
+</p>
+<p>Fleming, T. H. and Harrington, D.P. (1984).  Nonparametric estimation of
+the survival distribution in censored data.  <em>Comm. in Statistics</em>
+13, 2469-86.
+</p>
+<p>Kalbfleisch, J. D. and Prentice, R. L. (1980).  <em>The Statistical
+Analysis of Failure Time Data.</em> Wiley, New York.
+</p>
+<p>Link, C. L. (1984). Confidence intervals for the survival function using
+Cox's proportional hazards model with covariates.  <em>Biometrics</em>
+40, 601-610.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>survfit</code>,
+<code>Cen</code>, 
+<code>plot-methods</code>, 
+<code>mean-methods</code>, 
+<code>sd-methods</code>, 
+<code>median-methods</code>, 
+<code>quantile-methods</code>, 
+<code>predict-methods</code>, 
+<code>lines-methods</code>, 
+<code>summary-methods</code>, 
+<code>cendiff</code> 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+    # Create a Kaplan-Meier ECDF, plot and summarize it.
+
+    data(Cadmium)
+
+    obs      = Cadmium$Cd
+    censored = Cadmium$CdCen
+
+    mycenfit = cenfit(obs, censored) 
+
+    plot(mycenfit)
+    summary(mycenfit)
+    quantile(mycenfit, conf.int=TRUE)
+    median(mycenfit)
+    mean(mycenfit)
+    sd(mycenfit)
+    predict(mycenfit, c(10, 20, 100), conf.int=TRUE)
+
+    # With groups
+    groups = Cadmium$Region
+
+    cenfit(obs, censored, groups)
+    
+    # Formula interface -- no groups
+    cenfit(Cen(obs, censored)) 
+
+    # Formula interface -- with groups
+    cenfit(Cen(obs, censored)~groups) 
+</code></pre>
+
+
+</div>

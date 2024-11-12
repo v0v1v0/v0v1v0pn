@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prepPed</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prepares a pedigree by sorting and adding 'founders'</h2>
+
+<h3>Description</h3>
+
+<p>This function takes a pedigree, adds missing founders, and then sorts the
+pedigree.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prepPed(pedigree, gender = NULL, check = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pedigree</code></td>
+<td>
+<p>An object, where the first 3 columns correspond to: ID, Dam,
+&amp; Sire. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gender</code></td>
+<td>
+<p>An optional character for the name of the column in
+<code>pedigree</code> that corresponds to the gender/sex of individuals. If
+specified, <code>prepPed</code> will assign a gender to any founders it adds to
+the pedigree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>check</code></td>
+<td>
+<p>A logical argument indicating if checks on the validity of the
+pedigree structure should be made</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Many functions (both in nadiv and from other programs) dealing with
+pedigrees must first sort a pedigree such that individuals appear in the ID
+column in rows preceding where they appear in either the Dam or Sire
+column.  Further, these functions and programs require that all individuals
+in the dam and sire columns of a pedigree also have an entry in the ID
+column.  This function easily prepares data sets to accommodate these
+requirements using a very fast topological sorting algorithm.
+</p>
+<p>NOTE: more columns than just a pedigree can be passed in the <code>pedigree</code>
+argument.  In the case of missing founders, these columns are given NA
+values for all rows where founders have been added to the pedigree.  The
+entire object supplied to <code>pedigree</code> is ordered, ensuring that all
+information remains connected to the individual
+</p>
+<p>Missing parents (e.g., base population) should be denoted by either 'NA',
+'0', or '*'.
+</p>
+<p>When a non-null argument is given to <code>gender</code>, dams without an entry in
+the ID column (that are subsequently added to the pedigree) are given the
+gender designated for other dams (and similarly for sires).
+</p>
+<p>The <code>check</code> argument performs checks on the format of the pedigree
+supplied to try and identify any issues regarding the notation of missing
+values and validity of the basic pedigree for further processing.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The pedigree object (can have more columns than just ID, Dam, and
+Sire), where: (1) the ID column contains an ID for all individuals from the
+original pedigree object's ID, Dam, and Sire columns (i.e., founders are
+added) and (2) the pedigree is now sorted so that individuals are not in
+rows preceding either their Dam or Sire.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>genAssign</code>, <code>prunePed</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# First create an unordered pedigree with (4) missing founders
+  warcolak_unsuitable &lt;- warcolak[sample(seq(5, nrow(warcolak), 1),
+	size = (nrow(warcolak) - 4), replace = FALSE), ]
+  nrow(warcolak)
+  nrow(warcolak_unsuitable)
+# Fix and sort the pedigree
+## Automatically assign the correct gender to the added founders
+### Also sort the data accompanying each individual
+  warcolak_fixed_ordered &lt;- prepPed(warcolak_unsuitable, gender = "sex")
+  head(warcolak_fixed_ordered)
+
+</code></pre>
+
+
+</div>

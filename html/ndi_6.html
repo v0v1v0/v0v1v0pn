@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bravo</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Educational Isolation Index based on Bravo <em>et al.</em> (2021)</h2>
+
+<h3>Description</h3>
+
+<p>Compute the spatial Educational Isolation Index (Bravo) of selected educational attainment category(ies).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bravo(geo = "tract", year = 2020, subgroup, quiet = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>geo</code></td>
+<td>
+<p>Character string specifying the geography of the data either census tracts <code>geo = "tract"</code> (the default) or counties <code>geo = "county"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>Numeric. The year to compute the estimate. The default is 2020, and the years 2009 onward are currently available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subgroup</code></td>
+<td>
+<p>Character string specifying the educational attainment category(ies). See Details for available choices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Logical. If TRUE, will display messages about potential missing census information. The default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to <code>get_acs</code> to select state, county, and other arguments for census characteristics</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function will compute the spatial Educational Isolation Index (EI) of U.S. census tracts or counties for a specified geographical extent (e.g., the entire U.S. or a single state) based on Bravo <em>et al.</em> (2021) <a href="https://doi.org/10.3390/ijerph18179384">doi:10.3390/ijerph18179384</a> who originally designed the metric for the educational isolation of individual without a college degree. This function provides the computation of EI for any of the U.S. Census Bureau educational attainment levels.
+</p>
+<p>The function uses the <code>get_acs</code> function to obtain U.S. Census Bureau 5-year American Community Survey characteristics used for the geospatial computation. The yearly estimates are available for 2009 onward when ACS-5 data are available but are available from other U.S. Census Bureau surveys. The five educational attainment levels (U.S. Census Bureau definitions) are:
+</p>
+
+<ul>
+<li> <p><strong>B06009_002</strong>: Less than high school graduate <code>"LtHS"</code>
+</p>
+</li>
+<li> <p><strong>B06009_003</strong>: High school graduate (includes equivalency) <code>"HSGiE"</code>
+</p>
+</li>
+<li> <p><strong>B06009_004</strong>: Some college or associate's degree <code>"SCoAD"</code>
+</p>
+</li>
+<li> <p><strong>B06009_005</strong>: Bachelor's degree <code>"BD"</code>
+</p>
+</li>
+<li> <p><strong>B06009_006</strong>: Graduate or professional degree <code>"GoPD"</code>
+</p>
+</li>
+</ul>
+<p>Note: If <code>year = 2009</code>, then the ACS-5 data (2005-2009) are from the <strong>B15002</strong> question.
+</p>
+<p>Use the internal <code>state</code> and <code>county</code> arguments within the <code>get_acs</code> function to specify geographic extent of the data output. NOTE: Current version does not correct for edge effects (e.g., census geographies along the specified spatial extent border, coastline, or U.S.-Mexico / U.S.-Canada border) may have few neighboring census geographies, and EI values in these census geographies may be unstable. A stop-gap solution for the former source of edge effect is to compute the EI for neighboring census geographies (i.e., the states bordering a study area of interest) and then use the estimates of the study area of interest.
+</p>
+<p>A census geography (and its neighbors) that has nearly all of its population with the specified educational attainment category (e.g., a Bachelor's degree or more) will have an EI value close to 1. In contrast, a census geography (and its neighbors) that is nearly none of its population with the specified educational attainment category (e.g., less than a Bachelor's degree) will have an EI value close to 0.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class 'list'. This is a named list with the following components:
+</p>
+
+<dl>
+<dt><code>ei</code></dt>
+<dd>
+<p>An object of class 'tbl' for the GEOID, name, EI, and raw census values of specified census geographies.</p>
+</dd>
+<dt><code>missing</code></dt>
+<dd>
+<p>An object of class 'tbl' of the count and proportion of missingness for each census variable used to compute EI.</p>
+</dd>
+</dl>
+<h3>See Also</h3>
+
+<p><code>get_acs</code> for additional arguments for geographic extent selection (i.e., <code>state</code> and <code>county</code>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Wrapped in \dontrun{} because these examples require a Census API key.
+  
+  # Tract-level metric (2020)
+  bravo(geo = "tract", state = "GA", 
+        year = 2020, subgroup = c("LtHS", "HSGiE"))
+  
+  # County-level metric (2020)
+  bravo(geo = "county", state = "GA",
+        year = 2020, subgroup = c("LtHS", "HSGiE"))
+  
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

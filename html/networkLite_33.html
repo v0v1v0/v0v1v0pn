@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>networkLite</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>networkLite Constructor Utilities</h2>
+
+<h3>Description</h3>
+
+<p>Constructor methods for <code>networkLite</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">networkLite(x, ...)
+
+## S3 method for class 'edgelist'
+networkLite(
+  x,
+  attr = list(vertex.names = seq_len(net_attr[["n"]]), na = logical(net_attr[["n"]])),
+  net_attr = attributes(x)[setdiff(names(attributes(x)), c("class", "dim", "dimnames",
+    "vnames", "row.names", "names", "mnext"))],
+  ...,
+  atomize = FALSE
+)
+
+## S3 method for class 'matrix'
+networkLite(
+  x,
+  attr = list(vertex.names = seq_len(net_attr[["n"]]), na = logical(net_attr[["n"]])),
+  net_attr = attributes(x)[setdiff(names(attributes(x)), c("class", "dim", "dimnames",
+    "vnames", "row.names", "names", "mnext"))],
+  ...,
+  atomize = FALSE
+)
+
+## S3 method for class 'numeric'
+networkLite(x, directed = FALSE, bipartite = FALSE, ...)
+
+networkLite_initialize(x, directed = FALSE, bipartite = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Either an <code>edgelist</code> class network representation, or a number
+specifying the network size. The <code>edgelist</code> may be either a <code>tibble</code>
+or a <code>matrix</code>. If a <code>tibble</code> is passed, it should have integer columns
+named <code>".tail"</code> and <code>".head"</code> for the tails and heads of edges,
+and may include edge attributes as additional columns. If a
+<code>matrix</code> is passed, it should have two columns, the first being
+the tails of edges and the second being the heads of edges; edge
+attributes are not supported for <code>matrix</code> arguments. Edges
+should be sorted, first on tails then on heads. See
+<code>network::as.edgelist</code> for information on producing such
+<code>edgelist</code> objects from <code>network</code> objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>attr</code></td>
+<td>
+<p>A named list of vertex attributes, coerced to <code>tibble</code>.
+Each element of <code>attr</code> should be an atomic vector or list of
+length equal to the number of nodes in the network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_attr</code></td>
+<td>
+<p>A named list of network attributes. Must include the network
+size attribute named <code>"n"</code>. Defaults to a subset of the <code>attr</code>-style
+attributes of <code>x</code> for backwards compatibility; it is recommended that
+new code specify <code>net_attr</code> explicitly rather than relying on this
+default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>atomize</code></td>
+<td>
+<p>Logical; should we call <code>atomize</code> on the
+<code>networkLite</code> before returning it? Note that unlike
+<code>as.networkLite</code>, the default value here is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed, bipartite</code></td>
+<td>
+<p>Common network attributes that may be set via
+arguments to the <code>networkLite.numeric</code> method.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Currently there are several distinct <code>networkLite</code> constructor
+methods available.
+</p>
+<p>The <code>edgelist</code> method takes an <code>edgelist</code> class object <code>x</code>, a named
+list of vertex attributes <code>attr</code>, and a named list of network attributes
+<code>net_attr</code>, and returns a <code>networkLite</code> object, which is a named list with
+fields <code>el</code>, <code>attr</code>, and <code>gal</code>, corresponding to the arguments <code>x</code>, <code>attr</code>,
+and <code>net_attr</code>. Missing network attributes <code>directed</code> and <code>bipartite</code> are
+defaulted to <code>FALSE</code>; the network size attribute <code>n</code> must not be missing.
+</p>
+<p>The <code>numeric</code> method takes a number <code>x</code> as well as the network
+attributes <code>directed</code> and <code>bipartite</code> (defaulting to <code>FALSE</code>),
+and returns an empty <code>networkLite</code> with these network attributes and
+number of nodes <code>x</code>.
+</p>
+<p>The constructor <code>networkLite_initialize</code> is also available for creating
+an empty <code>networkLite</code>, and its <code>x</code> argument should be a number
+indicating the size of the <code>networkLite</code> to create.
+</p>
+<p>Within <code>EpiModel</code>, the <code>networkLite</code> data structure is used in the
+calls to <code>ergm</code> and <code>tergm</code> <code>simulate</code> and <code>summary</code>
+functions.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>networkLite</code> object constructed according to the inputs.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">edgelist &lt;- cbind(c(1, 2, 3), c(2, 4, 7))
+attr(edgelist, "n") &lt;- 10 # network size
+vertex_attributes &lt;- list(a = 1:10, b = runif(10))
+nwL &lt;- networkLite(edgelist, vertex_attributes)
+nwL
+
+</code></pre>
+
+
+</div>

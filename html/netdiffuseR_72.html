@@ -1,0 +1,273 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>diffusionMap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates a heatmap based on a graph layout and a vertex attribute</h2>
+
+<h3>Description</h3>
+
+<p>Using bi-dimensional kernel smoothers, creates a heatmap based on a graph layout
+and colored accordingly to <code>x</code>. This visualization technique is intended
+to be used with large graphs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">diffusionMap(graph, ...)
+
+diffmap(graph, ...)
+
+## Default S3 method:
+diffusionMap(
+  graph,
+  x,
+  x.adj = round_to_seq,
+  layout = NULL,
+  jitter.args = list(),
+  kde2d.args = list(n = 100),
+  sharp.criter = function(x, w) {
+     wvar(x, w) &gt; (max(x, na.rm = TRUE) - min(x, na.rm
+    = TRUE))^2/12
+ },
+  ...
+)
+
+## S3 method for class 'diffnet'
+diffusionMap(graph, slice = nslices(graph), ...)
+
+## S3 method for class 'diffnet_diffmap'
+image(x, ...)
+
+## S3 method for class 'diffnet_diffmap'
+print(x, ...)
+
+## S3 method for class 'diffnet_diffmap'
+plot(x, y = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>A square matrix of size <code class="reqn">n\times n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An vector of length <code class="reqn">n</code>. Usually a <code>toa</code> vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.adj</code></td>
+<td>
+<p>Function to adjust <code>x</code>. If not <code>NULL</code> then it is applied
+to <code>x</code> at the beginning (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layout</code></td>
+<td>
+<p>Either a <code class="reqn">n\times 2</code> matrix of coordinates or a layout
+function applied to <code>graph</code> (must return coordinates).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jitter.args</code></td>
+<td>
+<p>A list including arguments to be passed to <code>jitter</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kde2d.args</code></td>
+<td>
+<p>A list including arguments to be passed to <code>kde2d</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sharp.criter</code></td>
+<td>
+<p>A function choose whether to apply a weighted mean for each cell,
+or randomize over the values present in that cell (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slice</code></td>
+<td>
+<p>Integer scalar. Slice of the network to be used as baseline for drawing the graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The image is created using the function <code>kde2d</code> from
+the <span class="pkg">MASS</span> package. The complete algorithm follows:
+</p>
+
+<ol>
+<li> <p><code>x</code> is coerced into integer and the range is adjusted to start from 1.
+<code>NA</code> are replaced by zero.
+</p>
+</li>
+<li>
+<p> If no <code>layout</code> is passed, layout is computed using
+<code>layout_nicely</code> from <span class="pkg">igraph</span>
+</p>
+</li>
+<li>
+<p> Then, a <code>kde2d</code> map is computed for each level of <code>x</code>. The
+resulting matrices are added up as a weighted sum. This only holds if
+at the cell level the function <code>sharp.criter</code> returns <code>FALSE</code>.
+</p>
+</li>
+<li>
+<p> The jitter function is applied to the repeated coordinates.
+</p>
+</li>
+<li>
+<p> 2D kernel is computed using <code>kde2d</code> over the coordinates.
+</p>
+</li>
+</ol>
+<p>The function <code>sharp.criter</code> must take two values, a vector of levels and a
+vector of weights. It must return a logical scalar with value equal to <code>TRUE</code>
+when a randomization at the cell level must be done, in which case the final
+value of the cell is chosen using <code>sample(x, 1, prob=w)</code>.
+</p>
+<p>The resulting matrix can be passed to <code>image</code> or similar.
+</p>
+<p>The argument <code>x.adj</code> uses by default the function <code>round_to_seq</code>
+which basically maps <code>x</code> to a fix length sequence of numbers such that
+<code>x.adj(x)</code> resembles an integer sequence.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class <code>diffnet_diffmap</code>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coords</code></td>
+<td>
+<p>A matrix of size <code class="reqn">n\times 2</code> of vertices coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>map</code></td>
+<td>
+<p>Output from <code>kde2d</code>. This is a list with 3 elements, vectors
+<code>x</code>, <code>y</code> and matrix <code>z</code> of size <code class="reqn">n\times n</code> (passed
+via <code>kde2d.args</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>Bandwidth passed to <code>kde2d</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>References</h3>
+
+<p>Vega Yon, George G., and Valente, Thomas W., Visualizing Large Annotated
+Networks as Heatmaps using Weighted Averages based on Kernel Smoothers (Working paper).
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other visualizations: 
+<code>dgr()</code>,
+<code>drawColorKey()</code>,
+<code>grid_distribution()</code>,
+<code>hazard_rate()</code>,
+<code>plot_adopters()</code>,
+<code>plot_diffnet2()</code>,
+<code>plot_diffnet()</code>,
+<code>plot_infectsuscep()</code>,
+<code>plot_threshold()</code>,
+<code>rescale_vertex_igraph()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Example with a random graph --------------------------------------------------
+
+set.seed(1231)
+
+# Random scale-free diffusion network
+x &lt;- rdiffnet(500, 4, seed.graph="scale-free", seed.p.adopt = .025,
+                           rewire = FALSE, seed.nodes = "central",
+                           rgraph.arg=list(self=FALSE, m=4),
+                           threshold.dist = function(id) runif(1,.2,.4))
+
+# Diffusion map (no random toa)
+dm0 &lt;- diffusionMap(x, kde2d.args=list(n=150, h=.5), layout=igraph::layout_with_fr)
+
+# Random
+diffnet.toa(x) &lt;- sample(x$toa, size = nnodes(x))
+
+# Diffusion map (random toa)
+dm1 &lt;- diffusionMap(x, layout = dm0$coords, kde2d.args=list(n=150, h=.5))
+
+oldpar &lt;- par(no.readonly = TRUE)
+col &lt;- colorRampPalette(blues9)(100)
+par(mfrow=c(1,2), oma=c(1,0,0,0))
+image(dm0, col=col, main="Non-random Times of Adoption\nAdoption from the core.")
+image(dm1, col=col, main="Random Times of Adoption")
+par(mfrow=c(1,1))
+mtext("Both networks have the same distribution on times of adoption", 1,
+      outer = TRUE)
+par(oldpar)
+
+# Example with Brazilian Farmers --------------------------------------------
+dn &lt;- brfarmersDiffNet
+
+# Setting last TOA as NA
+diffnet.toa(dn)[dn$toa == max(dn$toa)] &lt;-
+  NA
+
+# Coordinates
+coords &lt;- sna::gplot.layout.fruchtermanreingold(
+  as.matrix(dn$graph[[1]]), layout.par=NULL
+)
+
+# Plotting diffusion
+plot_diffnet2(dn, layout=coords, vertex.size = 300)
+
+# Adding diffusion map
+out &lt;- diffusionMap(dn, layout=coords, kde2d.args=list(n=100, h=50))
+col &lt;- adjustcolor(colorRampPalette(c("white","lightblue", "yellow", "red"))(100),.5)
+with(out$map, .filled.contour(x,y,z,pretty(range(z), 100),col))
+
+</code></pre>
+
+
+</div>

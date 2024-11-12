@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.nn</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Neural network prediction</h2>
+
+<h3>Description</h3>
+
+<p>Prediction of artificial neural network of class <code>nn</code>, produced by <code>neuralnet()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nn'
+predict(object, newdata, rep = 1, all.units = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Neural network of class <code>nn</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>New data of class <code>data.frame</code> or <code>matrix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rep</code></td>
+<td>
+<p>Integer indicating the neural network's repetition which should be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.units</code></td>
+<td>
+<p>Return output for all units instead of final output only.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Matrix of predictions. Each column represents one output unit. 
+If <code>all.units=TRUE</code>, a list of matrices with output for each unit.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Marvin N. Wright
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(neuralnet)
+
+# Split data
+train_idx &lt;- sample(nrow(iris), 2/3 * nrow(iris))
+iris_train &lt;- iris[train_idx, ]
+iris_test &lt;- iris[-train_idx, ]
+
+# Binary classification
+nn &lt;- neuralnet(Species == "setosa" ~ Petal.Length + Petal.Width, iris_train, linear.output = FALSE)
+pred &lt;- predict(nn, iris_test)
+table(iris_test$Species == "setosa", pred[, 1] &gt; 0.5)
+
+# Multiclass classification
+nn &lt;- neuralnet((Species == "setosa") + (Species == "versicolor") + (Species == "virginica")
+                 ~ Petal.Length + Petal.Width, iris_train, linear.output = FALSE)
+pred &lt;- predict(nn, iris_test)
+table(iris_test$Species, apply(pred, 1, which.max))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getWindowCoords</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get lower and upper windows coordinates</h2>
+
+<h3>Description</h3>
+
+<p>The <code>getWindowCoords</code> is an R utility function to create lower and upper habitat and observation windows coordinates, as well an habitat grid with cell ids. 
+Those objects are necessary to run all point process (pp) functions. All input data should be scaled to the habitat grid using <code>scaleCoordsToHabitatGrid</code>. 
+Note that we assume homogeneous window sizes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getWindowCoords(
+  scaledHabGridCenter = scaledHabGridCenter,
+  scaledObsGridCenter = NULL,
+  plot.check = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>scaledHabGridCenter</code></td>
+<td>
+<p>A matrix with the scaled "x" and "y" habitat windows grid cell centers (after using <code>scaleCoordsToHabitatGrid</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaledObsGridCenter</code></td>
+<td>
+<p>A matrix with the scaled "x" and "y" observation windows grid cell centers (afer using <code>scaleCoordsToHabitatGrid</code>). 
+This is an optional argument and only necessary when modelling detection as a point process (e.g. <code>dpoisppDetection_normal</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.check</code></td>
+<td>
+<p>A visualization option (if TRUE); displays habitat and detection windows.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of objects :
+</p>
+
+<ul>
+<li> <p><em>lowerHabCoords</em> A matrix with the "x" and "y" lower habitat window coordinates.
+</p>
+</li>
+<li> <p><em>upperHabCoords</em> A matrix with the "x" and "y" upper habitat window coordinates.
+</p>
+</li>
+<li> <p><em>habitatGrid</em> A matrix of habitat cell ID that can be used to lookup efficiently the cell ID from a coordinate scaled to the habitat grid:
+habitatGrid[trunc(scaledHabGridCenter[1,"y"]) + 1, trunc(scaledHabGridCenter[1,"x"]) + 1]. See <code>scaleCoordsToHabitatGrid</code> for more details.
+</p>
+</li>
+<li> <p><em>lowerObsCoords</em> A matrix with the "x" and "y" lower observation window coordinates. Only returned when <em>scaledObsGridCenter</em> is provided.
+</p>
+</li>
+<li> <p><em>upperObsCoords</em> A matrix with the "x" and "y" upper observation window coordinates. Only returned when <em>scaledObsGridCenter</em> is provided.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Cyril Milleret
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">coordsGridCenter &lt;- expand.grid(list(x = seq(50.5, 100, 1),
+                                     y = seq(100.5, 150, 1)))
+coordsData &lt;- expand.grid(list(x = seq(60, 90, 1),
+                               y = seq(110, 140, 1)))
+
+plot(coordsGridCenter[,2] ~ coordsGridCenter[,1])
+points(coordsData[,2] ~ coordsData[,1], col="red")
+scaled &lt;- scaleCoordsToHabitatGrid(coordsData = coordsData
+                                   , coordsHabitatGridCenter = coordsGridCenter)
+plot(scaled$coordsHabitatGridCenterScaled[,2] ~ scaled$coordsHabitatGridCenterScaled[,1])
+points(scaled$coordsDataScaled[,2] ~ scaled$coordsDataScaled[,1], col="red")
+
+LowerAndUpperCoords &lt;- getWindowCoords(scaledHabGridCenter = scaled$coordsHabitatGridCenterScaled,
+                                         scaledObsGridCenter = scaled$coordsDataScaled)
+
+# Plot habitat window cell centers and lower/upper coordinates 
+plot(scaled$coordsHabitatGridCenterScaled[,2] ~ 
+     scaled$coordsHabitatGridCenterScaled[,1], 
+     pch=16, cex=0.3, col=grey(0.5))
+points(LowerAndUpperCoords$lowerHabCoords[,2] ~ 
+       LowerAndUpperCoords$lowerHabCoords[,1],
+       pch=16, cex=0.3, col=grey(0.1))
+points(LowerAndUpperCoords$upperHabCoords[,2] ~
+       LowerAndUpperCoords$upperHabCoords[,1],
+       pch=16, cex=0.3, col=grey(0.1))
+
+# Plot observation window cells center and lower/upper coordinates
+points(scaled$coordsDataScaled[,2]~scaled$coordsDataScaled[,1], pch=16,
+ cex=0.3, col = adjustcolor("red",alpha.f = 0.8))
+points(LowerAndUpperCoords$lowerObsCoords[,2] ~ 
+        LowerAndUpperCoords$lowerObsCoords[,1],
+       pch=16, cex=0.3, col = adjustcolor("red", alpha.f = 0.8))
+points(LowerAndUpperCoords$upperObsCoords[,2] ~
+       LowerAndUpperCoords$upperObsCoords[,1],
+       pch=16, cex=0.3, col = adjustcolor("red", alpha.f = 0.8))
+       
+</code></pre>
+
+
+</div>

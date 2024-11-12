@@ -1,0 +1,182 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nimIntegrate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Integration of One-Dimensional Functions</h2>
+
+<h3>Description</h3>
+
+<p>NIMBLE wrapper around R's builtin <code>integrate</code>. Adaptive quadrature
+of functions of one variable over a finite or infinite interval.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nimIntegrate(
+  f,
+  lower,
+  upper,
+  param,
+  subdivisions = 100L,
+  rel.tol = .Machine$double.eps^0.25,
+  abs.tol = .Machine$double.eps^0.25,
+  stop.on.error = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>nimbleFunction of one input for which the integral is desired.
+See below for details on requirements for how <code>f</code> must be defined.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+<p>an optional scalar lower bound for the input of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+<p>an optional scalar upper bound for the input of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>additional parameter(s) to the function
+that are fixed with respect to the integration. If <code>f</code>
+takes no additional arguments (beyond the variable of
+integration), this must be provided but need not be used in
+<code>f</code>. Can be of length one or more.
+parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subdivisions</code></td>
+<td>
+<p>the maximum number of subintervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rel.tol</code></td>
+<td>
+<p>relative accuracy requested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>abs.tol</code></td>
+<td>
+<p>absolute accuracy requested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop.on.error</code></td>
+<td>
+<p>logical. If <code>TRUE</code> (the default) an error stops the
+function. Otherwise some errors will give a result with the error
+code given in the third element of the result vector.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>f</code> should take two arguments, the first of type
+<code>double(1)</code>, i.e., vector. <code>f</code> should be vectorized
+in that it should also return a <code>double(1)</code> object, containing
+the result of applying the function to each element of the first
+argument. (The result can be calculated using vectorized NIMBLE code or
+using a loop.) The second argument is required to also be of type
+<code>double(1)</code>, containing any additional parameter(s) to the function
+that are not being integrated over. This argument can be unused in
+the function if the function does not need additional parameters.
+Note that this must be of type <code>double(1)</code> even if <code>param</code>
+contains a single element (NIMBLE will manage the lengths behind the
+scenes).
+</p>
+<p>Note that unlike with R's <code>integrate</code>, additional parameters
+must be passed as part of a vector, specified via <code>param</code>,
+and cannot be passed as individual named arguments.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector with three values, the first the estimate of the integral,
+the second an estimate of the modulus of the absolute error, and the third
+a result code corresponding to the <code>message</code> returned by <code>integrate</code>.
+The numerical result code can be interpreted as follows:
+</p>
+
+<ul>
+<li> <p><code>0</code>: "OK"
+</p>
+</li>
+<li> <p><code>1</code>: "maximum number of subdivisions reached"
+</p>
+</li>
+<li> <p><code>2</code>: "roundoff error was detected"
+</p>
+</li>
+<li> <p><code>3</code>: "extremely bad integrand behaviour"
+</p>
+</li>
+<li> <p><code>4</code>: "roundoff error is detected in the extrapolation table"
+</p>
+</li>
+<li> <p><code>5</code>: "the integral is probably divergent"
+</p>
+</li>
+<li> <p><code>6</code>: "the input is invalid"
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Christopher Paciorek, Paul van Dam-Bates, Perry de Valpine
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>integrate</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">integrand &lt;- nimbleFunction(
+   run = function(x = double(1), theta = double(1)) {
+       return(x*theta[1])   
+   returnType(double(1))
+ }
+)
+
+fun &lt;- nimbleFunction(
+   run = function(theta = double(0), lower = double(0), upper = double(0)) {
+       param = c(theta, 0)  # cannot be scalar, so pad with zero.
+       output = integrate(integrand, lower, upper, param)
+       returnType(double(1))
+       return(output)
+ })
+
+fun(3.1415927, 0, 1)
+## Not run: 
+cfun &lt;- compileNimble(fun)
+cfun(3.1415927, 0, 1)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

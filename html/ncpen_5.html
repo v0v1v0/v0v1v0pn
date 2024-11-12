@@ -1,0 +1,320 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cv.ncpen</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>cv.ncpen: cross validation for <code>ncpen</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>performs k-fold cross-validation (CV) for nonconvex penalized regression models
+over a sequence of the regularization parameter <code>lambda</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cv.ncpen(y.vec, x.mat, family = c("gaussian", "linear", "binomial",
+  "logit", "poisson", "multinomial", "cox"), penalty = c("scad", "mcp",
+  "tlp", "lasso", "classo", "ridge", "sridge", "mbridge", "mlog"),
+  x.standardize = TRUE, intercept = TRUE, lambda = NULL,
+  n.lambda = NULL, r.lambda = NULL, w.lambda = NULL, gamma = NULL,
+  tau = NULL, alpha = NULL, df.max = 50, cf.max = 100,
+  proj.min = 10, add.max = 10, niter.max = 30, qiter.max = 10,
+  aiter.max = 100, b.eps = 1e-06, k.eps = 1e-04, c.eps = 1e-06,
+  cut = TRUE, local = FALSE, local.initial = NULL, n.fold = 10,
+  fold.id = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y.vec</code></td>
+<td>
+<p>(numeric vector) response vector.
+Must be 0,1 for <code>binomial</code> and 1,2,..., for <code>multinomial</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.mat</code></td>
+<td>
+<p>(numeric matrix) design matrix without intercept.
+The censoring indicator must be included at the last column of the design matrix for <code>cox</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>(character) regression model. Supported models are
+<code>gaussian</code> (or <code>linear</code>),
+<code>binomial</code> (or <code>logit</code>),
+<code>poisson</code>,
+<code>multinomial</code>,
+and <code>cox</code>.
+Default is <code>gaussian</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>(character) penalty function.
+Supported penalties are
+<code>scad</code> (smoothly clipped absolute deviation),
+<code>mcp</code> (minimax concave penalty),
+<code>tlp</code> (truncated LASSO penalty),
+<code>lasso</code> (least absolute shrinkage and selection operator),
+<code>classo</code> (clipped lasso = mcp + lasso),
+<code>ridge</code> (ridge),
+<code>sridge</code> (sparse ridge = mcp + ridge),
+<code>mbridge</code> (modified bridge) and
+<code>mlog</code> (modified log).
+Default is <code>scad</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.standardize</code></td>
+<td>
+<p>(logical) whether to standardize <code>x.mat</code> prior to fitting the model (see details).
+The estimated coefficients are always restored to the original scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>(logical) whether to include an intercept in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>(numeric vector) user-specified sequence of <code>lambda</code> values.
+Default is supplied automatically from samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.lambda</code></td>
+<td>
+<p>(numeric) the number of <code>lambda</code> values.
+Default is 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.lambda</code></td>
+<td>
+<p>(numeric) ratio of the smallest <code>lambda</code> value to largest.
+Default is 0.001 when n&gt;p, and 0.01 for other cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w.lambda</code></td>
+<td>
+<p>(numeric vector) penalty weights for each coefficient (see references).
+If a penalty weight is set to 0, the corresponding coefficient is always nonzero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>(numeric) additional tuning parameter for controlling shrinkage effect of <code>classo</code> and <code>sridge</code> (see references).
+Default is half of the smallest <code>lambda</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>(numeric) concavity parameter of the penalties (see reference).
+Default is 3.7 for <code>scad</code>, 2.1 for <code>mcp</code>, <code>classo</code> and <code>sridge</code>, 0.001 for <code>tlp</code>, <code>mbridge</code> and <code>mlog</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>(numeric) ridge effect (weight between the penalty and ridge penalty) (see details).
+Default value is 1. If penalty is <code>ridge</code> and <code>sridge</code> then <code>alpha</code> is set to 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.max</code></td>
+<td>
+<p>(numeric) the maximum number of nonzero coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cf.max</code></td>
+<td>
+<p>(numeric) the maximum of absolute value of nonzero coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proj.min</code></td>
+<td>
+<p>(numeric) the projection cycle inside CD algorithm (largely internal use. See details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.max</code></td>
+<td>
+<p>(numeric) the maximum number of variables added in CCCP iterations (largely internal use. See references).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>niter.max</code></td>
+<td>
+<p>(numeric) maximum number of iterations in CCCP.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qiter.max</code></td>
+<td>
+<p>(numeric) maximum number of quadratic approximations in each CCCP iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aiter.max</code></td>
+<td>
+<p>(numeric) maximum number of iterations in CD algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.eps</code></td>
+<td>
+<p>(numeric) convergence threshold for coefficients vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k.eps</code></td>
+<td>
+<p>(numeric) convergence threshold for KKT conditions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.eps</code></td>
+<td>
+<p>(numeric) convergence threshold for KKT conditions (largely internal use).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cut</code></td>
+<td>
+<p>(logical) convergence threshold for KKT conditions  (largely internal use).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>local</code></td>
+<td>
+<p>(logical) whether to use local initial estimator for path construction. It may take a long time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>local.initial</code></td>
+<td>
+<p>(numeric vector) initial estimator for <code>local=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.fold</code></td>
+<td>
+<p>(numeric) number of folds for CV.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fold.id</code></td>
+<td>
+<p>(numeric vector) fold ids from 1 to k that indicate fold configuration.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Two kinds of CV errors are returned: root mean squared error and negative log likelihood.
+The results depends on the random partition made internally.
+To choose an optimal coefficients form the cv results, use <code>coef.cv.ncpen</code>.
+<code>ncpen</code> does not search values of <code>gamma</code>, <code>tau</code> and <code>alpha</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object with S3 class <code>cv.ncpen</code>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>ncpen.fit</code></td>
+<td>
+<p>ncpen object fitted from the whole samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fold.index</code></td>
+<td>
+<p>fold ids of the samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rmse</code></td>
+<td>
+<p>rood mean squared errors from CV.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>like</code></td>
+<td>
+<p>negative log-likelihoods from CV.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>sequence of <code>lambda</code> used for CV.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Dongshin Kim, Sunghoon Kwon, Sangin Lee
+</p>
+
+
+<h3>References</h3>
+
+<p>Fan, J. and Li, R. (2001). Variable selection via nonconcave penalized likelihood and its oracle properties.
+<em>Journal of the American statistical Association</em>, 96, 1348-60.
+Zhang, C.H. (2010). Nearly unbiased variable selection under minimax concave penalty.
+<em>The Annals of statistics</em>, 38(2), 894-942.
+Shen, X., Pan, W., Zhu, Y. and Zhou, H. (2013). On constrained and regularized high-dimensional regression.
+<em>Annals of the Institute of Statistical Mathematics</em>, 65(5), 807-832.
+Kwon, S., Lee, S. and Kim, Y. (2016). Moderately clipped LASSO.
+<em>Computational Statistics and Data Analysis</em>, 92C, 53-67.
+Kwon, S. Kim, Y. and Choi, H.(2013). Sparse bridge estimation with a diverging number of parameters.
+<em>Statistics and Its Interface</em>, 6, 231-242.
+Huang, J., Horowitz, J.L. and Ma, S. (2008). Asymptotic properties of bridge estimators in sparse high-dimensional regression models.
+<em>The Annals of Statistics</em>, 36(2), 587-613.
+Zou, H. and Li, R. (2008). One-step sparse estimates in nonconcave penalized likelihood models.
+<em>Annals of statistics</em>, 36(4), 1509.
+Lee, S., Kwon, S. and Kim, Y. (2016). A modified local quadratic approximation algorithm for penalized optimization problems.
+<em>Computational Statistics and Data Analysis</em>, 94, 275-286.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.cv.ncpen</code>, <code>coef.cv.ncpen</code>, <code>ncpen</code>, <code>predict.ncpen</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### linear regression with scad penalty
+sam =  sam.gen.ncpen(n=200,p=10,q=5,cf.min=0.5,cf.max=1,corr=0.5,family="gaussian")
+x.mat = sam$x.mat; y.vec = sam$y.vec
+fit = cv.ncpen(y.vec=y.vec,x.mat=x.mat,n.lambda=10,family="gaussian", penalty="scad")
+coef(fit)
+
+</code></pre>
+
+
+</div>

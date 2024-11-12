@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MLM Trials</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Genomic mixed model
+</h2>
+
+<h3>Description</h3>
+
+<p>This function was developed to solve a mixel model for multi-environmental trials and/or replicated trials when genomic is available. The model includes a semi-parametric term to account for spatial variation when the field layout of the experiment is know. Covariates (fixed effects), genetics (random effect) and spatial term are fitted all in a single step.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gmm(y,gen,dta=NULL,it=75,bi=25,th=1,model="BRR",...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>Numeric vector of phenotypes of length <code class="reqn">obs</code> (missing values are allowed). <code>NA</code> is allowed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gen</code></td>
+<td>
+
+<p>Numeric matrix, with dimension <code class="reqn">n</code> x <code class="reqn">p</code>. Attention: Rows must be named with genotype IDs. Missing values are replaced by the SNP expectation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dta</code></td>
+<td>
+
+<p>Data frame with <code class="reqn">obs</code> number of rows containg the genotype ID, spatial information and any other set covariates. Make sure to add a column called "ID" (with capital letters) informing the genotype ID with some match in the object <code>gen</code>. For the spatial adjustment, it is necessary to add three numeric columns (not factors) to <code>dta</code>: "Block", "Row" and "Col" (case sensitive), where Block may refer to a field block or an enviroment without blocks Therefore, make sure that blocks from different environments are named differently. Row and Col provide the coordinates for the identification of neighbor plots.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>it</code></td>
+<td>
+
+<p>Integer. Total numeric of MCMC iterations used to fit the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bi</code></td>
+<td>
+
+<p>Integer. Burn-in of MCMC iterations, i.e., number of iteration to be discarted prior to model convergence.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>th</code></td>
+<td>
+
+<p>Integer. Thinning parameter: saves only 1 interation every <code>th</code>. Thinning is used to reduce the auto-correlation between Markov chains.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>Prediction model: The options are: <code>BRR</code>, <code>BayesA</code>, <code>GBLUP</code> and <code>RKHS</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Pass arguments to the function that builds the spatial splines <code>NNsrc</code>: rho and dist. By default, <code>rho=1</code> and <code>dist=3</code>. To check how it looks like in the field, type <code>NNsrc(rho=1,dist=3)</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The general model is <code class="reqn">y=Xb+Zu+f(x)+e</code>, where <code class="reqn">y</code> is the response variable, <code class="reqn">Xb</code> refers to the fixed effects, <code class="reqn">Zu</code> regards the genetic effect, <code class="reqn">f(x)</code> represents the field variation, and <code class="reqn">e</code> is the vector of residuals. In this model <code class="reqn">u</code> is a link function that represents the genetic component, which depends on the model specified.
+</p>
+<p>For whole-genome regression models (BRR or BayesA), <code class="reqn">u = Ma</code>, where <code class="reqn">M</code> is the matrix of genotypes. For kernel models (RKHS and GBLUP), <code class="reqn">u=N(0,K\sigma2a)</code>, where K is either a Gaussian kernel (RKHS) or a linear kernel (GBLUP). To avoid over-representation of genotypes, <code class="reqn">u</code> is not weighted according to the number of observations of each genotype.
+</p>
+<p>Unobserved genotypes not provided in <code>dta</code> but provided in <code>gen</code> are predicted in the output of the function. Genotypes without genotypic information are transfered to the fixed effect (eg. checks). Missing loci are imputed with the expectation. If <code>dta</code> is not provided, the function will work as a regular genomic prediction model, so the length of <code>y</code> must match the number of rows of <code>gen</code>.
+</p>
+<p>In whole-genome regression models, the regularization of the genetic term is either based on chosen prior (t, Gaussian), Gaussian (from ridge regression) and t (from BayesA). Kernel models (GBLUP and RKHS) are regularized as Gaussian process, which is similar to a ridge regression of Eigenvectors where the regularization of Eigenpairs also relies on the Eigenvalues.
+</p>
+<p>If there is a large number of trials and users acknowledge the necessity of sparse matrices, we recommend installing the Matrix package and run the following code that enables sparsity:
+</p>
+<p><code>source(system.file("add","sparseGMM.R",package="NAM"))</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function gmm returns a list containing the fitted values (<code>hat</code>), observed values (<code>obs</code>), intercept (<code>mu</code>, incidence matrix of genotypes (<code>Z</code>) and the vector of breeding values (<code>EBV</code>). If fixed effects are provided, it also returns the design matrices and coefficients of fixed effects (<code>X</code>,<code>b</code>). If the model was kernel or regression, output will include
+the random effect coefficients (<code>g</code>), variance components of markers (<code>Vg</code>) and residuals (<code>Ve</code>). Kernel models regress the Eigenvectors of the kernel, weighted by the Eigenvalue. The coefficient (<code>cxx</code>) used in the <code>BRR</code> model to convert marker variance <code class="reqn">Vb</code> into genetic variance <code class="reqn">Va</code>. If spatial information is provided, the output includes the fitted spatial term (<code>sp</code>).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Alencar Xavier
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+  # Checking heritability
+data(tpod)
+fit = gmm(y,gen,model = 'BRR')
+fit$Vg*fit$cxx / (fit$Vg*fit$cxx+fit$Ve)
+  
+# For a demo with wulti-environmental trial type:
+# demo(fittingMET)
+  
+
+## End(Not run)
+</code></pre>
+
+
+</div>

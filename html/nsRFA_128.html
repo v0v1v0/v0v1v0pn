@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Lmoments</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hosking and Wallis sample L-moments</h2>
+
+<h3>Description</h3>
+
+<p><code>Lmoments</code> provides the estimate of L-moments of a sample or regional L-moments of a region.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> Lmoments (x)
+ regionalLmoments (x,cod)
+ LCV (x)
+ LCA (x)
+ Lkur (x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector representing a data-sample (or data from many samples defined with <code>cod</code> in the case of <code>regionalLmoments</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cod</code></td>
+<td>
+<p>array that defines the data subdivision among sites</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The estimation of L-moments is based on a sample of size <code class="reqn">n</code>, arranged in ascending order.
+Let <code class="reqn">x_{1:n} \le x_{2:n} \le \dots \le x_{n:n}</code> be the ordered sample.
+An unbiased estimator of the probability weighted moments <code class="reqn">\beta_r</code> is:
+</p>
+<p style="text-align: center;"><code class="reqn">b_r = n^{-1} \sum_{j=r+1}^n \frac{(j-1)(j-2)\dots(j-r)}{(n-1)(n-2)\dots(n-r)} x_{j:n}</code>
+</p>
+
+<p>The sample L-moments are defined by:
+</p>
+<p style="text-align: center;"><code class="reqn">l_1 = b_0</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">l_2 = 2b_1 - b_0</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">l_3 = 6b_2 - 6b_1 + b_0</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">l_4 = 20b_3-30b_2+12b_1-b_0</code>
+</p>
+
+<p>and in general
+</p>
+<p style="text-align: center;"><code class="reqn">l_{r+1} = \sum_{k=0}^r \frac{(-1)^{r-k}(r+k)!}{(k!)^2(r-k)!} b_k</code>
+</p>
+
+<p>where <code class="reqn">r=0,1,\dots,n-1</code>.
+</p>
+<p>The sample L-moment ratios are defined by
+</p>
+<p style="text-align: center;"><code class="reqn">t_r=l_r/l_2</code>
+</p>
+
+<p>and the sample L-CV by
+</p>
+<p style="text-align: center;"><code class="reqn">t=l_2/l_1</code>
+</p>
+
+<p>Sample regional L-CV, L-skewness and L-kurtosis coefficients are defined as
+</p>
+<p style="text-align: center;"><code class="reqn">t^R = \frac{\sum_{i=1}^k n_i t^{(i)}}{ \sum_{i=1}^k n_i}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">t_3^R =\frac{ \sum_{i=1}^k n_i t_3^{(i)}}{ \sum_{i=1}^k n_i}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">t_4^R =\frac{ \sum_{i=1}^k n_i t_4^{(i)}}{\sum_{i=1}^k n_i}</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p><code>Lmoments</code> gives the L-moments (<code class="reqn">l_1</code>, <code class="reqn">l_2</code>, <code class="reqn">t</code>, <code class="reqn">t_3</code>, <code class="reqn">t_4</code>), <code>regionalLmoments</code> gives the regional weighted L-moments (<code class="reqn">l_1^R</code>, <code class="reqn">l_2^R</code>, <code class="reqn">t^R</code>, <code class="reqn">t_3^R</code>, <code class="reqn">t_4^R</code>), <code>LCV</code> gives the coefficient of L-variation, <code>LCA</code> gives the L-skewness and <code>Lkur</code> gives the L-kurtosis of <code>x</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>For information on the package and the Author, and for all the references, see <code>nsRFA</code>.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mean</code>, <code>var</code>, <code>sd</code>, <code>HOMTESTS</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- rnorm(30,10,2)
+Lmoments(x)
+
+data(hydroSIMN)
+annualflows
+summary(annualflows)
+x &lt;- annualflows["dato"][,]
+cod &lt;- annualflows["cod"][,]
+split(x,cod)
+camp &lt;- split(x,cod)$"45"
+Lmoments(camp)
+sapply(split(x,cod),Lmoments)
+
+regionalLmoments(x,cod)
+</code></pre>
+
+
+</div>

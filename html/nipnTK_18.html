@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>greensIndex</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Green's Index of Dispersion</h2>
+
+<h3>Description</h3>
+
+<p>Implementation of the Green's Index of Dispersion by bootstrap. The sampling
+distribution of the Green's Index is not well described hence bootstrapping
+is used to test whether the distribution of cases across primary sampling
+units is random.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">greensIndex(data, psu, case, replicates = 999)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Survey dataset (as an R data.frame)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psu</code></td>
+<td>
+<p>Name of variable holding PSU (cluster) data as a character
+vector of length = 1 (e.g. <code>psu</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>case</code></td>
+<td>
+<p>Name of variable holding case status as a character vector of
+length = 1 (e.g. <em>GAM</em>). The function assumes that case status is
+coded with 1 = case</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replicates</code></td>
+<td>
+<p>Number of bootstrap replicates (default is 9999)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The value of Green's Index can range between <code>-1/(n - 1)</code> for maximum
+uniformity (specific to the dataset) and one for maximum clumping. The
+interpretation of Green’s Index is straightforward:</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+   <strong>Green's Index Value</strong> </td>
+<td style="text-align: left;"> <strong>Interpretation</strong> </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   <em>Green's Index close to 0</em> </td>
+<td style="text-align: left;"> Random </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   <em>Green's Index greater than 0</em> </td>
+<td style="text-align: left;"> Clumped (i.e. more clumped than random) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   <em>Green’s Index less than 0</em> </td>
+<td style="text-align: left;"> Uniform (i.e. more uniform than random) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of class <code>GI</code> with names:</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+   <strong>Variable</strong> </td>
+<td style="text-align: left;"> <strong>Description</strong> </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   <em>GI</em> </td>
+<td style="text-align: left;"> Estimate of Green's index </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   <em>LCL</em> </td>
+<td style="text-align: left;"> 95\% LCL for GI </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   <em>UCL</em> </td>
+<td style="text-align: left;"> 95\% UCL for GI </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   <em>minGI</em> </td>
+<td style="text-align: left;"> Minimum possible GI (maximum uniformity) for the data </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   <em>p</em> </td>
+<td style="text-align: left;"> <code>p-value</code> (H0: = Random distribution of cases across PSUs) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Apply Green's Index using anthropometric data from a SMART survey in Sudan
+# (flag.ex01)
+svy &lt;- flag.ex01
+svy$flag &lt;- 0
+svy$flag &lt;- ifelse(!is.na(svy$haz) &amp; (svy$haz &lt; -6 | svy$haz &gt; 6),
+                   svy$flag + 1, svy$flag)
+svy$flag &lt;- ifelse(!is.na(svy$whz) &amp; (svy$whz &lt; -5 | svy$whz &gt; 5),
+                   svy$flag + 2, svy$flag)
+svy$flag &lt;- ifelse(!is.na(svy$waz) &amp; (svy$waz &lt; -6 | svy$waz &gt; 5),
+                   svy$flag + 4, svy$flag)
+svy &lt;- svy[svy$flag == 0, ]
+svy$stunted &lt;- ifelse(svy$haz &lt; -2, 1, 2)
+
+## set seed to 0 to replicate results
+set.seed(0)
+greensIndex(data = svy, psu = "psu", case = "stunted")
+
+</code></pre>
+
+
+</div>

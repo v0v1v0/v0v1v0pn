@@ -1,0 +1,663 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NMsim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate from an estimated Nonmem model</h2>
+
+<h3>Description</h3>
+
+<p>Supply a data set and an estimation input control stream, and
+NMsim can create neccesary files (control stream, data files), run
+the simulation and read the results. It has additional methods for
+other simulation types available, can do multiple simulations at
+once and more. Please see vignettes for an introduction to how to
+get the most out of this.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NMsim(
+  file.mod,
+  data,
+  dir.sims,
+  name.sim,
+  order.columns = TRUE,
+  file.ext = NULL,
+  script = NULL,
+  subproblems = NULL,
+  reuse.results = FALSE,
+  seed.R,
+  seed.nm,
+  args.psn.execute,
+  table.vars,
+  table.options,
+  text.sim = "",
+  method.sim = NMsim_default,
+  typical = FALSE,
+  execute = TRUE,
+  sge = FALSE,
+  nc = 1,
+  transform = NULL,
+  method.execute,
+  method.update.inits,
+  create.dirs = TRUE,
+  dir.psn,
+  modify.model,
+  sim.dir.from.scratch = TRUE,
+  col.row,
+  args.NMscanData,
+  path.nonmem = NULL,
+  nmquiet,
+  progress,
+  as.fun,
+  suffix.sim,
+  text.table,
+  system.type = NULL,
+  dir.res,
+  file.res,
+  wait,
+  auto.dv = TRUE,
+  clean,
+  quiet = FALSE,
+  check.mod = TRUE,
+  seed,
+  list.sections,
+  format.data.complete = "rds",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file.mod</code></td>
+<td>
+<p>Path(s) to the input control stream(s) to run the
+simulation on. The output control stream is for now assumed to
+be stored next to the input control stream and ending in .lst
+instead of .mod. The .ext file must also be present. If
+simulating known subjects, the .phi is necessary too.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The simulation data as a <code>data.frame</code> or a list
+of <code>data.frame</code>s. If a list, the model(s) will be run on
+each of the data sets in the list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dir.sims</code></td>
+<td>
+<p>The directory in which NMsim will store all
+generated files. Default is to create a folder called 'NMsim'
+next to 'file.mod'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name.sim</code></td>
+<td>
+<p>Give all filenames related to the simulation a
+suffix. A short string describing the sim is recommended like
+"ph3_regimens".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order.columns</code></td>
+<td>
+<p>reorder columns by calling
+<code>NMdata::NMorderColumns</code> before saving dataset and
+running simulations? Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file.ext</code></td>
+<td>
+<p>Optionally provide a parameter estimate file from
+Nonmem. This is normally not needed since 'NMsim' will by
+default use the ext file stored next to the input control
+stream (replacing the file name extension with '.ext'). If
+using method.update.inits="psn", this argument cannot be
+used. If you want provide parameters to be used for the
+simulation, look at the 'ext' argument to 'NMsim_VarCov'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>script</code></td>
+<td>
+<p>The path to the script where this is run. For
+stamping of dataset so results can be traced back to code.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subproblems</code></td>
+<td>
+<p>Number of subproblems to use as
+<code>SUBPROBLEMS</code> in <code>$SIMULATION</code> block in Nonmem. The
+default is subproblem=0 which means not to use
+<code>SUBPROBLEMS</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reuse.results</code></td>
+<td>
+<p>If simulation results found on file, should
+they be used? If TRUE and reading the results fail, the
+simulations will still be rerun.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed.R</code></td>
+<td>
+<p>A value passed to <code>set.seed()</code>. It may be
+better use <code>seed.R</code> rather than calling <code>set.seed()</code>
+manually because the seed can then be captured and stored by
+<code>NMsim()</code> for reproducibility. See <code>seed.nm</code> for
+finer control of the seeds that are used in the Nonmem control
+streams.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed.nm</code></td>
+<td>
+<p>Control Nonmem seeds. If a numeric, a vector or a
+'data.frame', these are used as the the seed values (a single
+value or vector will be recycled so make sure the dimesnsions
+are right, the number of columns in a <code>data.frame</code> will
+dictate the number of seeds in each Nonmem control stream. Use
+a list with elements 'values', and 'dist' and others for
+detailed control of the random sources. See <code>?NMseed</code> for
+details on what arguments can be passed this way.
+</p>
+<p>Default is to draw seeds betwen
+0 and 2147483647 (the values supported by Nonmem) for each
+simulation. You can pass a function that will be evaluated
+(say to choose a different pool of seeds to draw from).
+</p>
+<p>To avoid changing an exisiting seed in a control stream, use
+<code>seed.nm="asis"</code>.
+</p>
+<p>In case <code>method.sim=NMsim_EBE</code>, seeds are not used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.psn.execute</code></td>
+<td>
+<p>A charachter string that will be passed as
+arguments PSN's 'execute'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>table.vars</code></td>
+<td>
+<p>Variables to be printed in output table as a
+character vector or a space-separated string of variable
+names. The default is to export the same tables as listed in
+the input control stream. If <code>table.vars</code> is provided,
+all output tables in estimation control streams are dropped
+and replaced by a new one with just the provided variables. If
+many variables are exported, and much fewer are used, it can
+speed up NMsim significantly to only export what is needed
+(sometimes this is as little as "PRED IPRED"). Nonmem writes
+data slowly so reducing output data can make a big difference
+in execution time. See <code>table.options</code> too.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>table.options</code></td>
+<td>
+<p>A character vector or a string of
+space-separated options. Only used if <code>table.vars</code> is
+provided. If constructing a new output table with
+<code>table.vars</code> the default is to add two options,
+<code>NOAPPEND</code> and <code>NOPRINT</code>. You can modeify that with
+<code>table.options</code>. Do not try to modify output filename -
+<code>NMsim</code> takes care of that.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.sim</code></td>
+<td>
+<p>A character string to be pasted into
+$SIMULATION. This must not contain seed or SUBPROBLEM which
+are handled separately. Default is to include "ONLYSIM". To
+avoid that, use text.sim="".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method.sim</code></td>
+<td>
+<p>A function (not quoted) that creates the
+simulation control stream and other necessary files for a
+simulation based on the estimation control stream, the data,
+etc. The default is called <code>NMsim_default</code> which will
+replace any estimation and covariance step by a simulation
+step. See details section on oter methods, and see examples
+and especially vignettes on how to use the different provided
+methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typical</code></td>
+<td>
+<p>Run with all ETAs fixed to zero? Technically all ETAs=0 is obtained by replacing
+<code>$OMEGA</code> by a zero matrix. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>execute</code></td>
+<td>
+<p>Execute the simulation or only prepare it?
+'execute=FALSE' can be useful if you want to do additional
+tweaks or simulate using other parameter estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sge</code></td>
+<td>
+<p>Submit to cluster? Default is not to, but this is very
+useful if creating a large number of simulations,
+e.g. simulate with all parameter estimates from a bootstrap
+result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nc</code></td>
+<td>
+<p>Number of cores used in parallelization. This is so far
+only supported with <code>method.execute="psn"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform</code></td>
+<td>
+<p>A list defining transformations to be applied
+after the Nonmem simulations and before plotting. For each
+list element, its name refers to the name of the column to
+transform, the contents must be the function to apply.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method.execute</code></td>
+<td>
+<p>Specify how to call Nonmem. Options are
+"psn" (PSN's execute), "nmsim" (an internal method similar to
+PSN's execute), and "direct" (just run Nonmem directly and
+dump all the temporary files). "nmsim" has advantages over
+"psn" that makes it the only supported method when
+type.sim="NMsim_EBE". "psn" has the simple advantage that
+the path to nonmem does not have to be specified if "execute"
+is in the system search path. So as long as you know where
+your Nonmem executable is, "nmsim" is recommended. The default
+is "nmsim" if path.nonmem is specified, and "psn" if not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method.update.inits</code></td>
+<td>
+<p>The initial values of all parameters
+are by updated from the estimated model before running the
+simulation. NMsim can do this with a native function or use
+PSN to do it - or the step can be skipped to not update the
+values. The possible values are
+</p>
+
+<ul>
+<li>
+<p>"psn"
+uses PSN's "update_inits". Requires a functioning PSN
+installation and possibly that <code>dir.psn</code> is correctly
+set. The advantages of this method are that it keeps comments
+in the control stream and that it is a method known to many.
+</p>
+</li>
+<li>
+<p>"nmsim"
+Uses a simple internal method to update the parameter values
+based on the ext file.  The advantages of "nmsim" are it does not
+require PSN, and that it does not rely on code-interpretation for generation of simulation control streams. "nmsim" fixes the whole
+OMEGA and SIGMA matrices as single blocks making the $OMEGA and
+$SIGMA sections of the control streams less easy to read. On the
+other hand, this method is robust because it avoids any
+interpretation of BLOCK structure or other code in the control
+streams.
+</p>
+</li>
+<li>
+<p>"none" Do nothing. This is useful if the model to simulate
+has not been estimated but parameter values have been manually put
+into the respective sections in the control stream.
+</p>
+<p>On linux/mac, The default is to use "PSN" if found. On Windows, "nmsim"
+is the default.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>create.dirs</code></td>
+<td>
+<p>If the directories specified in dir.sims and
+dir.res do not exists, should it be created? Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dir.psn</code></td>
+<td>
+<p>The directory in which to find PSN's executables
+('execute' and 'update_inits'). The default is to rely on the
+system's search path. So if you can run 'execute' and
+'update_inits' by just typing that in a terminal, you don't
+need to specify this unless you want to explicitly use a
+specific installation of PSN on your system.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modify.model</code></td>
+<td>
+<p>Named list of additional control stream
+section edits. Note, these can be functions that define how to
+edit sections. This is an advanced feature which is not needed
+to run most simulations. It is however powerful for some types
+of analyses, like modifying parameter values. See vignettes
+for further information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sim.dir.from.scratch</code></td>
+<td>
+<p>If TRUE (default) this will wipe the
+simulation directory before running new simulations. The
+directory that will be emptied is _not_ dir.sims where you may
+keep many or all your simulations. It is the subdirectory
+named based on the run name and <code>name.sim</code>. The reason it
+is advised to wipe this directory is that if you in a previous
+simulation created simulation runs that are now obsolete, you
+could end up reading those too when collecting the
+results. NMsim will delete previously generated simulation
+control streams with the same name, but this option goes
+further. An example where it is important is if you first ran
+1000 replications, fixed something and now rand 500. If you
+choose FALSE here, you can end up with the results of 500 new
+and 500 old simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.row</code></td>
+<td>
+<p>Only used if data is not supplied (which is most
+likely for simulations for VPCs) A column name to use for a
+row identifier. If none is supplied,
+<code>NMdataConf()[['col.row']]</code> will be used. If the column
+already exists in the data set, it will be used as is, if not
+it will be added.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.NMscanData</code></td>
+<td>
+<p>If <code>execute=TRUE&amp;sge=FALSE</code>, NMsim
+will normally read the results using <code>NMreadSim</code>. Use
+this argument to pass additional arguments (in a list) to that
+function if you want the results to be read in a specific
+way. This can be if the model for some reason drops rows, and
+you need to merge by a row identifier. You would do
+'args.NMscanData=list(col.row="ROW")' to merge by a column
+called 'ROW'. This is only used in rare cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path.nonmem</code></td>
+<td>
+<p>The path to the Nonmem executable to use. The
+could be something like "/usr/local/NONMEM/run/nmfe75" (which
+is a made up example). No default is available. You should be
+able to figure this out through how you normally execute
+Nonmem, or ask a colleague.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmquiet</code></td>
+<td>
+<p>Silent console messages from Nonmem? The default
+behaviour depends. It is FALSE if there is only one model to
+execute and 'progress=FALSE'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress</code></td>
+<td>
+<p>Track progress? Default is 'TRUE' if 'quiet' is
+FALSE and more than one model is being simulated. The progress
+tracking is based on the number of models completed, not the
+status of the individual models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>The default is to return data as a data.frame. Pass
+a function (say 'tibble::as_tibble') in as.fun to convert to
+something else. If data.tables are wanted, use
+as.fun="data.table". The default can be configured using
+NMdataConf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffix.sim</code></td>
+<td>
+<p>Deprecated. Use name.sim instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.table</code></td>
+<td>
+<p>A character string including the variables to
+export from Nonmem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>system.type</code></td>
+<td>
+<p>A charachter string, either \"windows\" or
+\"linux\" - case insensitive. Windows is only experimentally
+supported. Default is to use <code>Sys.info()[["sysname"]]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dir.res</code></td>
+<td>
+<p>Provide a path to a directory in which to save rds
+files with paths to results. Default is to use dir.sims. After
+running 'NMreadSim()' on these files, the original simulation
+files can be deleted. Hence, providing both 'dir.sims' and
+'dir.res' provides a structure that is simple to
+clean. 'dir.sims' can be purged when 'NMreadSim' has been run
+and only small 'rds' and 'fst' files will be kept in
+'dir.res'. Notice, in case multiple models are simulated,
+multiple 'rds' (to be read with 'NMreadSim()') files will be
+created by default. In cases where multiple models are
+simulated, see 'file.res' to get just one file refering to all
+simulation results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file.res</code></td>
+<td>
+<p>Path to an rds file that will contain a table of
+the simulated models and other metadata. This is needed for
+subsequently retrieving all the results using
+'NMreadSim()'. The default is to create a file called
+'NMsim_..._MetaData.rds' under the <code>dir.res</code> directory
+where ... is based on the model name. However, if multiple
+models (<code>file.mod</code>) are simulated, this will result in
+multiple rds files. Specifying a path ensures that one rds
+file containing information about all simulated models will be
+created. Notice if <code>file.res</code> is supplied, <code>dir.res</code>
+is not used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wait</code></td>
+<td>
+<p>Wait for simulations to finish? Default is to do so if
+simulations are run locally but not to if they are sent to the
+cluster. Waiting for them means that the results will be read
+when simulations are done. If not waiting, path(s) to 'rds'
+files to read will be returned. Pass them through
+'NMreadSim()' (which also supports waiting for the simulations
+to finish).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auto.dv</code></td>
+<td>
+<p>Add a column called 'DV' to simulation data sets if
+a column of that name is not found? Nonmem is generally
+dependent on a 'DV' column in input data but this is typically
+uninformative in simulation data sets and hence easily
+forgotten when generating simulation data sets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clean</code></td>
+<td>
+<p>The degree of cleaning (file removal) to do after
+Nonmem execution. If 'method.execute=="psn"', this is passed
+to PSN's 'execute'. If 'method.execute=="nmsim"' a similar
+behavior is applied, even though not as granular. NMsim's
+internal method only distinguishes between 0 (no cleaning),
+any integer 1-4 (default, quite a bit of cleaning) and 5
+(remove temporary dir completely).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>If TRUE, messages from what is going on will be
+suppressed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>check.mod</code></td>
+<td>
+<p>Check the provided control streams for contents
+that may cause issues for simulation. Default is 'TRUE', and
+it is only recommended to disable this if you are fully aware
+of such a feature of your control stream, you know how it
+impacts simulation, and you want to get rid of warnings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Deprecated. See <code>seed.R</code> and <code>seed.nm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>list.sections</code></td>
+<td>
+<p>Deprecated. Use modify.model instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format.data.complete</code></td>
+<td>
+<p>For development purposes - users do
+not need this argument. Controls what format the complete
+input data set is saved in.  Possible values are 'rds'
+(default), 'fst' (experimental) and 'csv'. 'fst' may be faster
+and use less disk space but factor levels may be lost from
+input data to output data. 'csv' will also lead to loss of
+additional information such as factor levels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed to <code>method.sim</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Loosely speaking, the argument <code>method.sim</code> defines
+_what_ NMsim will do, <code>method.execute</code> define _how_ it
+does it. <code>method.sim</code> takes a function that converts an
+estimation control stream into whatever should be
+run. Features like replacing '$INPUT', '$DATA', '$TABLE', and
+handling seeds are NMsim features that are done in addition to
+the <code>method.sim</code>. Also the <code>modeify.model</code> argument
+is handled in addition to the <code>method.sim</code>. The
+<code>subproblems</code> and <code>seed</code> arguments are available to
+all methods creating a <code>$SIMULATION</code> section.
+</p>
+<p>Notice, the following functions are internally available to
+'NMsim' so you can run them by say <code>method.sim=NMsim_EBE</code>
+without quotes. To see the code of that method, type
+<code>NMsim_EBE</code>.
+</p>
+
+<ul>
+<li> <p><code>NMsim_default</code> The default behaviour. Replaces any
+$ESTIMATION and $COVARIANCE sections by a $SIMULATION section.
+</p>
+</li>
+<li> <p><code>NMsim_asis</code> The simplest of all method. It does nothing (but
+again, <code>NMsim</code> handles '$INPUT', '$DATA', '$TABLE' and
+more. Use this for instance if you already created a simulation
+(or estimation actually) control stream and want NMsim to run it
+on different data sets.
+</p>
+</li>
+<li> <p><code>NMsim_typical</code> Deprecated. Use <code>typical=TRUE</code> instead. 
+</p>
+</li>
+<li> <p><code>NMsim_EBE</code> Simulates _known_ ETAs. By default, the ETA
+values are automatically taken from the estimation run. This is
+what is refered to as emperical Bayes estimates, hence the name of
+the method "NMsim_EBE". However, the user can also provide a
+different '.phi' file which may contain simulated ETA values (see
+the 'file.phi' argument). ID values in the simulation data set
+must match ID values in the phi file for this step to work. If
+refering to estimated subjects, the .phi file from the estimation
+run must be found next to the .lst file from the estimation with
+the same file name stem (say 'run1.lst' and 'run1.phi'). Again, ID
+values in the (simulation) input data must be ID values that were
+used in the estimation too. The method Runs an <code>$ESTIMATION
+MAXEVAL=0</code> but pulls in ETAs for the ID's found in data. No
+<code>$SIMULATION</code> step is run which unfortunately means no
+residual error will be simulated.
+</p>
+</li>
+<li> <p><code>NMsim_VarCov</code> Like <code>NMsim_default</code> but '$THETA',
+'$OMEGA', and 'SIGMA' are drawn from distribution estimated in
+covariance step. This means that a successful covariance step must
+be available from the estimation. NB. A multivariate normal
+distribution is used for all parameters, including '$OMEGA' and
+'$SIGMA' which is not the correct way to do this. In case the
+simulation leads to negative diagonal elements in $OMEGA and
+$SIGMA, those values are truncated at zero. This method is only
+valid for simulation of '$THETA' variability. The method accepts a
+table of parameter values that can be produced with other tools
+than 'NMsim'. For simulation with parameter variability based on
+bootstrap results, use <code>NMsim_default</code>.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A data.frame with simulation results (same number of rows
+as input data). If 'sge=TRUE' a character vector with paths to
+simulation control streams.
+</p>
+
+
+</div>

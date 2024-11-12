@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nd.gdd</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Graph Diffusion Distance</h2>
+
+<h3>Description</h3>
+
+<p>Graph Diffusion Distance (<code>nd.gdd</code>) quantifies the difference between two weighted graphs of same size. It takes
+an idea from heat diffusion process on graphs via graph Laplacian exponential kernel matrices. For a given
+adjacency matrix <code class="reqn">A</code>, the graph Laplacian is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">L := D-A</code>
+</p>
+
+<p>where <code class="reqn">D_{ii}=\sum_j A_{ij}</code>. For two adjacency matrices <code class="reqn">A_1</code> and <code class="reqn">A_2</code>,
+GDD is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">d_{gdd}(A_1,A_2) = max_t \sqrt{\| \exp(-tL_1) -\exp(-tL_2)   \|_F^2}</code>
+</p>
+
+<p>where <code class="reqn">\exp(\cdot)</code> is matrix exponential, <code class="reqn">\|\cdot\|_F</code> a Frobenius norm, and <code class="reqn">L_1</code> and <code class="reqn">L_2</code>
+Laplacian matrices corresponding to <code class="reqn">A_1</code> and <code class="reqn">A_2</code>, respectively.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nd.gdd(A, out.dist = TRUE, vect = seq(from = 0.1, to = 1, length.out = 10))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>a list of length <code class="reqn">N</code> containing adjacency matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.dist</code></td>
+<td>
+<p>a logical; <code>TRUE</code> for computed distance matrix as a <code>dist</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vect</code></td>
+<td>
+<p>a vector of parameters <code class="reqn">t</code> whose values will be used.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a named list containing </p>
+
+<dl>
+<dt>D</dt>
+<dd>
+<p>an <code class="reqn">(N\times N)</code> matrix or <code>dist</code> object containing pairwise distance measures.</p>
+</dd>
+<dt>maxt</dt>
+<dd>
+<p>an <code class="reqn">(N\times N)</code> matrix whose entries are maximizer of the cost function.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Hammond DK, Gur Y, Johnson CR (2013).
+“Graph Diffusion Distance: A Difference Measure for Weighted Graphs Based on the Graph Laplacian Exponential Kernel.”
+In <em>Proceedings of the IEEE global conference on information and signal processing (GlobalSIP'13)</em>, 419–422.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## load data and extract a subset
+data(graph20)
+gr.small = graph20[c(1:5,11:15)]
+
+## compute distance matrix
+output = nd.gdd(gr.small, out.dist=FALSE)
+
+## visualize
+opar = par(no.readonly=TRUE)
+par(pty="s")
+image(output$D[,10:1], main="two group case", col=gray((0:32)/32), axes=FALSE)
+par(opar)
+
+</code></pre>
+
+
+</div>

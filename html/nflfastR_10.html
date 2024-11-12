@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculate_series_conversion_rates</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute Series Conversion Information from Play by Play</h2>
+
+<h3>Description</h3>
+
+<p>A "Series" begins on a 1st and 10 and each team attempts to either earn
+a new 1st down (on offense) or prevent the offense from converting a new
+1st down (on defense). Series conversion rate represents how many series
+have been either converted to a new 1st down or ended in a touchdown.
+This function computes series conversion rates on offense and defense from
+nflverse play-by-play data along with other series results.
+The function automatically removes series that ended in a QB kneel down.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculate_series_conversion_rates(pbp, weekly = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pbp</code></td>
+<td>
+<p>Play-by-play data as returned by <code>load_pbp()</code>, <code>build_nflfastR_pbp()</code>, or
+<code>fast_scraper()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weekly</code></td>
+<td>
+<p>If <code>TRUE</code>, returns week-by-week stats, otherwise,
+season-by-season stats in argument <code>pbp</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame of series information including the following columns:
+</p>
+
+<dl>
+<dt>season</dt>
+<dd>
+<p>The NFL season</p>
+</dd>
+<dt>team</dt>
+<dd>
+<p>NFL team abbreviation</p>
+</dd>
+<dt>week</dt>
+<dd>
+<p>Week if <code>weekly</code> is <code>TRUE</code></p>
+</dd>
+<dt>off_n</dt>
+<dd>
+<p>The number of series the offense played (excludes QB kneel
+downs, kickoffs, extra point/two point conversion attempts, non-plays, and
+plays that do not list a "posteam")</p>
+</dd>
+<dt>off_scr</dt>
+<dd>
+<p>The rate at which a series ended in either new 1st down or
+touchdown while the offense was on the field</p>
+</dd>
+<dt>off_scr_1st</dt>
+<dd>
+<p>The rate at which an offense earned a 1st down
+or scored a touchdown on 1st down</p>
+</dd>
+<dt>off_scr_2nd</dt>
+<dd>
+<p>The rate at which an offense earned a 1st down
+or scored a touchdown on 2nd down</p>
+</dd>
+<dt>off_scr_3rd</dt>
+<dd>
+<p>The rate at which an offense earned a 1st down
+or scored a touchdown on 3rd down</p>
+</dd>
+<dt>off_scr_4th</dt>
+<dd>
+<p>The rate at which an offense earned a 1st down
+or scored a touchdown on 4th down</p>
+</dd>
+<dt>off_1st</dt>
+<dd>
+<p>The rate of series that ended in a new 1st down while the
+offense was on the field (does not include offensive touchdown)</p>
+</dd>
+<dt>off_td</dt>
+<dd>
+<p>The rate of series that ended in an offensive touchdown while the
+offense was on the field</p>
+</dd>
+<dt>off_fg</dt>
+<dd>
+<p>The rate of series that ended in a field goal attempt while the
+offense was on the field</p>
+</dd>
+<dt>off_punt</dt>
+<dd>
+<p>The rate of series that ended in a punt while the
+offense was on the field</p>
+</dd>
+<dt>off_to</dt>
+<dd>
+<p>The rate of series that ended in a turnover (including on downs), in an
+opponent score, or at the end of half (or game) while the
+offense was on the field</p>
+</dd>
+<dt>def_n</dt>
+<dd>
+<p>The number of series the defense played (excludes QB kneel
+downs, kickoffs, extra point/two point conversion attempts, non-plays, and
+plays that do not list a "posteam")</p>
+</dd>
+<dt>def_scr</dt>
+<dd>
+<p>The rate at which a series ended in either new 1st down or
+touchdown while the defense was on the field</p>
+</dd>
+<dt>def_scr_1st</dt>
+<dd>
+<p>The rate at which a defense allowed a
+1st down or touchdown on 1st down</p>
+</dd>
+<dt>def_scr_2nd</dt>
+<dd>
+<p>The rate at which a defense allowed a
+1st down or touchdown on 2nd down</p>
+</dd>
+<dt>def_scr_3rd</dt>
+<dd>
+<p>The rate at which a defense allowed a
+1st down or touchdown on 3rd down</p>
+</dd>
+<dt>def_scr_4th</dt>
+<dd>
+<p>The rate at which a defense allowed a
+1st down or touchdown on 4th down</p>
+</dd>
+<dt>def_1st</dt>
+<dd>
+<p>The rate of series that ended in a new 1st down while the
+defense was on the field (does not include offensive touchdown)</p>
+</dd>
+<dt>def_td</dt>
+<dd>
+<p>The rate of series that ended in an offensive touchdown while the
+defense was on the field</p>
+</dd>
+<dt>def_fg</dt>
+<dd>
+<p>The rate of series that ended in a field goal attempt while the
+defense was on the field</p>
+</dd>
+<dt>def_punt</dt>
+<dd>
+<p>The rate of series that ended in a punt while the
+defense was on the field</p>
+</dd>
+<dt>def_to</dt>
+<dd>
+<p>The rate of series that ended in a turnover (including on downs), in an
+opponent score, or at the end of half (or game) while the
+defense was on the field</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+try({# to avoid CRAN test problems
+  pbp &lt;- nflfastR::load_pbp(2021)
+
+  weekly &lt;- calculate_series_conversion_rates(pbp, weekly = TRUE)
+  dplyr::glimpse(weekly)
+
+  overall &lt;- calculate_series_conversion_rates(pbp, weekly = FALSE)
+  dplyr::glimpse(overall)
+})
+
+</code></pre>
+
+
+</div>

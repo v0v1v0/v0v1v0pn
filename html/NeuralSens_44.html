@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>print.summary.SensMLP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Print method of the summary SensMLP Class</h2>
+
+<h3>Description</h3>
+
+<p>Print the sensitivity metrics of a <code>SensMLP</code> object.
+This metrics are the mean sensitivity, the standard deviation
+of sensitivities and the mean of sensitivities square
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'summary.SensMLP'
+print(x, round_digits = NULL, boot.alpha = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>summary.SensMLP</code> object created by summary method of <code>SensMLP</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round_digits</code></td>
+<td>
+<p><code>integer</code> number of decimal places, default <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.alpha</code></td>
+<td>
+<p><code>float</code> significance level to show statistical metrics. If <code>NULL</code>,
+boot.alpha inherits from <code>x</code> is used. Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional parameters</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Pizarroso J, Portela J, Muñoz A (2022). NeuralSens: Sensitivity Analysis of
+Neural Networks. Journal of Statistical Software, 102(7), 1-36.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load data -------------------------------------------------------------------
+data("DAILY_DEMAND_TR")
+fdata &lt;- DAILY_DEMAND_TR
+
+## Parameters of the NNET ------------------------------------------------------
+hidden_neurons &lt;- 5
+iters &lt;- 250
+decay &lt;- 0.1
+
+################################################################################
+#########################  REGRESSION NNET #####################################
+################################################################################
+## Regression dataframe --------------------------------------------------------
+# Scale the data
+fdata.Reg.tr &lt;- fdata[,2:ncol(fdata)]
+fdata.Reg.tr[,3] &lt;- fdata.Reg.tr[,3]/10
+fdata.Reg.tr[,1] &lt;- fdata.Reg.tr[,1]/1000
+
+# Normalize the data for some models
+preProc &lt;- caret::preProcess(fdata.Reg.tr, method = c("center","scale"))
+nntrData &lt;- predict(preProc, fdata.Reg.tr)
+
+#' ## TRAIN nnet NNET --------------------------------------------------------
+# Create a formula to train NNET
+form &lt;- paste(names(fdata.Reg.tr)[2:ncol(fdata.Reg.tr)], collapse = " + ")
+form &lt;- formula(paste(names(fdata.Reg.tr)[1], form, sep = " ~ "))
+
+set.seed(150)
+nnetmod &lt;- nnet::nnet(form,
+                           data = nntrData,
+                           linear.output = TRUE,
+                           size = hidden_neurons,
+                           decay = decay,
+                           maxit = iters)
+# Try SensAnalysisMLP
+sens &lt;- NeuralSens::SensAnalysisMLP(nnetmod, trData = nntrData, plot = FALSE)
+print(summary(sens))
+</code></pre>
+
+
+</div>

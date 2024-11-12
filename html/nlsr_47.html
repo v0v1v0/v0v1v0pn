@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>wrapnlsr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>wrapnlsr</h2>
+
+<h3>Description</h3>
+
+<p>Provides class nls solution to a nonlinear least squares solution 
+using the Nash Marquardt tools.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">wrapnlsr(formula = NULL,  data = NULL,  start = NULL,  control = NULL,
+    trace = FALSE, subset = NULL, lower = -Inf, upper = Inf,  weights = NULL,
+    ...)                           
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>The modeling formula. Looks like 'y~b1/(1+b2*exp(-b3*T))'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame containing data for variables
+used in the formula that are NOT the parameters. This
+data may also be defined in the parent frame i.e.,
+'global' to this function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>MUST be a named vector with all elements present
+e.g., start=c(b1=200, b2=50, b3=0.3)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of control parameters. See nlsr.control().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>TRUE for console output during execution (default FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>an optional vector specifying a subset of observations 
+to be used in the fitting process. NOT used currently by nlxb()
+or nlfb() and will throw an error if present and not NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+<p>a vector of lower bounds on the parameters. 
+If a single number, this will be applied to all parameters
+Default <code>-Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+<p>a vector of upper bounds on the parameters. If a single number, 
+this will be applied to all parameters. Default <code>Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A vector of (usually fixed) weights. The objective function that will be 
+minimized is the sum of squares where each residual is multiplied by the 
+square root of the corresponding weight. Default <code>NULL</code> implies 
+unit weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional data needed to evaluate the modeling functions</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A solution object of type <code>nls</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nlsr)
+cat("kvanderpoel.R test of wrapnlsr\n")
+x&lt;-c(1,3,5,7)
+y&lt;-c(37.98,11.68,3.65,3.93)
+pks28&lt;-data.frame(x=x,y=y)
+fit0&lt;-try(nls(y~(a+b*exp(1)^(-c*x)), data=pks28, start=c(a=0,b=1,c=1), 
+              trace=TRUE))
+print(fit0)
+fit1&lt;-nlxb(y~(a+b*exp(-c*x)), data=pks28, start=c(a=0,b=1,c=1), trace = TRUE)
+print(fit1) 
+cat("\n\n or better\n")
+fit2&lt;-wrapnlsr(y~(a+b*exp(-c*x)), data=pks28, start=c(a=0,b=1,c=1), 
+               lower=-Inf, upper=Inf, trace = TRUE)
+fit2
+
+weed &lt;- c(5.308, 7.24, 9.638, 12.866, 17.069, 23.192, 31.443,
+          38.558, 50.156, 62.948, 75.995, 91.972)
+tt &lt;- 1:12
+weeddf &lt;- data.frame(tt, weed)
+hobbsu &lt;- weed ~ b1/(1+b2*exp(-b3*tt))
+st2 &lt;- c(b1=200, b2=50, b3=0.3)
+wts &lt;- 0.5^tt # a straight scaling comes via wts &lt;- rep(0.01, 12)
+lo &lt;- c(200, 0, 0)
+up &lt;- c(1000, 1000, 1000)
+whuw2 &lt;-  try(wrapnlsr(start=st2, formula=hobbsu, data=weeddf, subset=2:11,
+                  weights=wts, trace=TRUE, lower=lo, upper=up))
+summary(whuw2)
+deviance(whuw2)
+whuw2a &lt;-  try(nlsr(start=st2, formula=hobbsu, data=weeddf, subset=2:11,
+                  weights=wts, trace=TRUE, lower=lo, upper=up))
+summary(whuw2a)
+deviance(whuw2a)
+</code></pre>
+
+
+</div>

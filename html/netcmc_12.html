@@ -1,0 +1,334 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>uni</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+A function that generates samples for a univariate fixed effects model.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function generates samples for a univariate fixed effects model, which is
+given by
+</p>
+<p style="text-align: center;"><code class="reqn">Y_{i_s}|\mu_{i_s} \sim f(y_{i_s}| \mu_{i_s}, \sigma_{e}^{2}) ~~~ i=1,\ldots, N_{s},~s=1,\ldots,S ,</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">g(\mu_{i_s}) = \boldsymbol{x}^\top_{i_s} \boldsymbol{\beta},</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\boldsymbol{\beta} \sim \textrm{N}(\boldsymbol{0}, \alpha\boldsymbol{I}),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\sigma_{e}^{2} \sim \textrm{Inverse-Gamma}(\alpha_{3}, \xi_{3}).</code>
+</p>
+
+<p>The covariates for the <code class="reqn">i</code>th individual in the <code class="reqn">s</code>th spatial unit or other grouping are included in a <code class="reqn">p \times 1</code> vector <code class="reqn">\boldsymbol{x}_{i_s}</code>. The corresponding <code class="reqn">p \times 1</code> vector of fixed effect parameters are denoted by <code class="reqn">\boldsymbol{\beta}</code>, which has an assumed multivariate Gaussian prior with mean <code class="reqn">\boldsymbol{0}</code> and diagonal covariance matrix <code class="reqn">\alpha\boldsymbol{I}</code> that can be chosen by the user. A conjugate Inverse-Gamma prior is specified for <code class="reqn">\sigma_{e}^{2}</code>, and the corresponding hyperparamaterers (<code class="reqn">\alpha_{3}</code>, <code class="reqn">\xi_{3}</code>) can be chosen by the user.
+</p>
+<p>The exact specification of each of the likelihoods (binomial, Gaussian, and Poisson) are given below:
+</p>
+<p style="text-align: center;"><code class="reqn">\textrm{Binomial:} ~ Y_{i_s} \sim \textrm{Binomial}(n_{i_s}, \theta_{i_s}) ~ \textrm{and} ~ g(\mu_{i_s}) = \textrm{ln}(\theta_{i_s} / (1 - \theta_{i_s})),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\textrm{Gaussian:} ~ Y_{i_s} \sim \textrm{N}(\mu_{i_s}, \sigma_{e}^{2}) ~ \textrm{and} ~ g(\mu_{i_s}) = \mu_{i_s},</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\textrm{Poisson:} ~ Y_{i_s} \sim \textrm{Poisson}(\mu_{i_s}) ~ \textrm{and} ~ g(\mu_{i_s}) = \textrm{ln}(\mu_{i_s}).</code>
+</p>
+
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">uni(formula, data, trials, family, numberOfSamples = 10, burnin = 0, thin = 1, seed = 1,
+trueBeta = NULL, trueSigmaSquaredE = NULL, covarianceBetaPrior = 10^5, 
+a3 = 0.001, b3 = 0.001)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>A formula for the covariate part of the model using a similar 
+syntax to that used in the lm() function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>An optional data.frame containing the  variables in the formula.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trials</code></td>
+<td>
+
+<p>A vector the same length as the response containing the total number of trials 
+<code class="reqn">n_{i_s}</code>. Only used if <code class="reqn">\texttt{family}</code>=“binomial".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+
+<p>The data likelihood model that must be “gaussian"
+, “poisson" or “binomial".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numberOfSamples</code></td>
+<td>
+
+<p>The number of samples to generate pre-thin.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+
+<p>The number of MCMC samples to discard as the burn-in period.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+
+<p>The value by which to thin <code class="reqn">\texttt{numberOfSamples}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+
+<p>A seed for the MCMC algorithm.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueBeta</code></td>
+<td>
+
+<p>If available, the true values of the <code class="reqn">\boldsymbol{\beta}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueSigmaSquaredE</code></td>
+<td>
+
+<p>If available, the true value of <code class="reqn">\sigma_{e}^{2}</code>. Only used if <code class="reqn">\texttt{family}</code>=“gaussian".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covarianceBetaPrior</code></td>
+<td>
+
+<p>A scalar prior <code class="reqn">\alpha</code> for the covariance parameter of the 
+beta prior, such that the covariance is <code class="reqn">\alpha\boldsymbol{I}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a3</code></td>
+<td>
+
+<p>The shape parameter for the Inverse-Gamma distribution 
+<code class="reqn">\alpha_{3}</code>. Only used if <code class="reqn">\texttt{family}</code>=“gaussian".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b3</code></td>
+<td>
+
+<p>The scale parameter for the Inverse-Gamma distribution 
+<code class="reqn">\xi_{3}</code>. Only used if <code class="reqn">\texttt{family}</code>=“gaussian".
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+
+<p>The matched call.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>The response used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>The design matrix used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardizedX</code></td>
+<td>
+
+<p>The standardized design matrix used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+
+<p>The matrix of simulated samples from the posterior
+distribution of each parameter in the model (excluding random effects).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betaSamples</code></td>
+<td>
+
+<p>The matrix of simulated samples from the posterior 
+distribution of <code class="reqn">\boldsymbol{\beta}</code> parameters in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmaSquaredESamples</code></td>
+<td>
+
+<p>The vector of simulated samples from the posterior 
+distribution of <code class="reqn">\sigma_{e}^{2}</code> in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acceptanceRates</code></td>
+<td>
+
+<p>The acceptance rates of parameters in the model from the MCMC 
+sampling scheme.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeTaken</code></td>
+<td>
+
+<p>The time taken for the model to run.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+
+<p>The number of MCMC samples to discard as the burn-in period.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+
+<p>The value by which to thin <code class="reqn">\texttt{numberOfSamples}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DBar</code></td>
+<td>
+
+<p>DBar for the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posteriorDeviance</code></td>
+<td>
+
+<p>The posterior deviance for the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posteriorLogLikelihood</code></td>
+<td>
+
+<p>The posterior log likelihood for the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd</code></td>
+<td>
+
+<p>The number of effective parameters in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DIC</code></td>
+<td>
+
+<p>The DIC for the model.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George Gerogiannis
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  #################################################
+  #### Run the model on simulated data
+  #################################################
+  
+  #### Generate the covariates and response data
+  observations &lt;- 100
+  X &lt;- matrix(rnorm(2 * observations), ncol = 2)
+  colnames(X) &lt;- c("x1", "x2")
+  beta &lt;- c(2, -2, 2)
+  logit &lt;- cbind(rep(1, observations), X) %*% beta
+  prob &lt;- exp(logit) / (1 + exp(logit))
+  trials &lt;- rep(50, observations)
+  Y &lt;- rbinom(n = observations, size = trials, prob = prob)
+  data &lt;- data.frame(cbind(Y, X))
+  
+  #### Run the model
+  formula &lt;- Y ~ x1 + x2
+  ## Not run: model &lt;- uni(formula = formula, data = data, family="binomial", 
+                        trials = trials, numberOfSamples = 10000, 
+                        burnin = 10000, thin = 10, seed = 1)
+## End(Not run)
+                        
+</code></pre>
+
+
+</div>

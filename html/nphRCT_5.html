@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim_events_delay</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate survival data from a two-arm trial</h2>
+
+<h3>Description</h3>
+
+<p>Simulate survival data from a two-arm trial with
+survival times on the control arm and experimental arm simulated from an exponential distribution
+or piecewise exponential distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim_events_delay(event_model, recruitment_model, n_c, n_e, max_cal_t)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>event_model</code></td>
+<td>
+<p>List containing information to simulate event times, including:
+</p>
+
+<ul>
+<li> <p><code>duration_c</code> Vector of durations corresponding to each of the periods of the control arm.
+</p>
+</li>
+<li> <p><code>duration_e</code> Vector of durations corresponding to each of the periods of the experimental arm.
+</p>
+</li>
+<li> <p><code>lambda_c</code> Vector of parameters <code class="reqn">\lambda</code> in the exponential distribution corresponding to each of the periods of the control arm.
+</p>
+</li>
+<li> <p><code>lambda_e</code> Vector of parameters <code class="reqn">\lambda</code> in the exponential distribution corresponding to each of the periods of the experimental arm.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recruitment_model</code></td>
+<td>
+<p>List containing information to simulate recruitment times, including:
+</p>
+
+<ul>
+<li> <p><code>rec_model</code> Character string specifying the type of recruitment model. Either the power model <code>"power"</code>
+or piecewise constant model <code>"pw_constant"</code>.
+</p>
+</li>
+<li> <p><code>rec_power</code> Parameter used to model recruitment according to power model, see Details.
+</p>
+</li>
+<li> <p><code>rec_period</code> Parameter used to model recruitment according to power model, see Details.
+</p>
+</li>
+<li> <p><code>rec_rate</code> Parameter used to model recruitment according to piecewise constant model, see Details.
+</p>
+</li>
+<li> <p><code>rec_duration</code> Parameter used to model recruitment according to piecewise constant model, see Details.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_c</code></td>
+<td>
+<p>Number of individuals on the control arm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_e</code></td>
+<td>
+<p>Number of individuals on the event arm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_cal_t</code></td>
+<td>
+<p>Calendar time at which the trial ends, all observations are censored at this time.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Survival times are simulated from an exponential distribution with rate parameter <code class="reqn">\lambda</code>,
+<code class="reqn">f(t)=\lambda exp(-\lambda t)</code>. This distribution has a median value of <code class="reqn">log(2)/\lambda</code>;
+this can be a useful fact when setting the rates <code>lambda_c</code> and <code>lambda_e</code>.
+The survival times can be simulated from a piecewise exponential distribution, setting one/multiple
+durations and <code class="reqn">\lambda</code> parameters for the control and experimental arms.
+</p>
+<p>Recruitment is modeled using either the power model or the piecewise constant model.
+</p>
+<p>The power model is defined as:
+<code class="reqn">P(recruited\_before\_T) = (T / rec\_period) ^ {rec\_power}</code>, where
+<code class="reqn">rec\_period</code> is the time at the end of recruitment period, and <code class="reqn">rec\_power</code> controls the rate of recruitment.
+</p>
+<p>Alternatively, recruitment can be modelled using the piecewise constant model.
+In the simple case with only one time period defined in <code>rec_duration</code>, the times between each of the individuals entering follow-up
+are samples from the exponential distribution with rate parameter <code class="reqn">\lambda</code>,
+<code class="reqn">f(t)=\lambda exp(-\lambda t)</code>. The number of recruitment times defined in <code>n_c</code> or <code>n_e</code> is returned, regardless of the
+length of duration <code>rec_duration.</code>
+</p>
+<p>In the case with multiple time periods defined in <code>rec_duration</code>, the number of events in each period is sampled from the
+Poisson distribution <code class="reqn">P(K=k)=\lambda^k \exp{(-\lambda}/k!)</code>, where <code class="reqn">k</code> is the number of events. The rate parameter
+<code class="reqn">\lambda</code> is equal to <code>rec_rate</code> multiplied by the duration of the time period in <code>rec_duration</code>. The recruitment times
+are then sampled uniformly from the corresponding time period. In the case that
+insufficient recruitment times have been simulated by the end of the last time period, the additional recruitment times will be
+simulated after the end of the last time period.
+</p>
+<p>All observations are censored at the calendar time defined in argument <code>max_cal_t</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Data frame with columns <code>event_time</code>, <code>event_status</code> (<code>1</code> = event, <code>0</code> = censored), and treatment arm indicator <code>group</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nphRCT)
+set.seed(1)
+sim_data &lt;- sim_events_delay(
+  event_model=list(
+    duration_c = 36,
+    duration_e = c(6,30),
+    lambda_c = log(2)/9,
+    lambda_e = c(log(2)/9,log(2)/18)
+  ),
+  recruitment_model=list(
+    rec_model="power",
+    rec_period = 12,
+    rec_power = 1
+  ),
+  n_c=50,
+  n_e=50,
+  max_cal_t = 36
+)
+</code></pre>
+
+
+</div>

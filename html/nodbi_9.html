@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>docdb_query</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get documents or parts with filtering query</h2>
+
+<h3>Description</h3>
+
+<p>Complements the databases' native query and filtering functions
+by using <code>jqr::jqr()</code>.
+If <code>query = "{}"</code> and neither <code>fields</code>
+nor <code>listfields</code> is specified, runs <code>docdb_get()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">docdb_query(src, key, query, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>src</code></td>
+<td>
+<p>Source object, result of call to any of functions
+<code>src_mongo()</code>, <code>src_sqlite()</code>, <code>src_elastic()</code>, <code>src_couchdb()</code>
+<code>src_duckdb()</code> or <code>src_postgres()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>key</code></td>
+<td>
+<p>(character) The name of the container in the
+database backend (corresponds to <code>collection</code> for MongoDB,
+<code>dbname</code> for CouchDB, <code>index</code> for Elasticsearch, and to
+a table name for DuckDB, SQLite and PostgreSQL)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>query</code></td>
+<td>
+<p>(character) A JSON query string, see examples.
+Can use comparisons / tests (<code style="white-space: pre;">⁠$lt⁠</code>, <code style="white-space: pre;">⁠$lte⁠</code>, <code style="white-space: pre;">⁠$gt⁠</code>, <code style="white-space: pre;">⁠$gte⁠</code>,
+<code style="white-space: pre;">⁠$ne⁠</code>, <code style="white-space: pre;">⁠$in⁠</code>, <code style="white-space: pre;">⁠$regex⁠</code>), with logic operators (<code style="white-space: pre;">⁠$and⁠</code>,
+<code style="white-space: pre;">⁠$or⁠</code>, <code>(</code>, <code style="white-space: pre;">⁠)⁠</code>), including nested queries, see examples.
+<code style="white-space: pre;">⁠$regex⁠</code> is case-sensitive.
+Note that the query should target a field that holds a
+scalar or an array of scalars, not more complex objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Optional parameters:
+</p>
+
+<ul>
+<li>
+<p> Specify <code>fields</code> as a JSON string of fields to be returned
+from anywhere in the tree, or to be excluded from being returned,
+e.g. <code>fields  = '{"nameOfMy.SubFieldToInclude:" 1, "_id": 0}'</code>
+and see examples. If <code>fields</code> is not specified, the complete
+JSON document is returned. For <code>src_postgres()</code>, only fewer
+than 50 fields can be requested to be returned by the function.
+</p>
+</li>
+<li>
+<p> Specify <code>limit</code> (integer) for the maximum number of documents
+to be returned. If <code>NULL</code> or not set (default), 10,000 for
+Elasticsearch and all documents for MongoDB, SQLite,
+CouchDB, PostgreSQL, and DuckDB.
+</p>
+</li>
+<li>
+<p> Specify <code>listfields = TRUE</code> to return just the names of
+all fields, from all documents or from the maximum number of
+documents as specified in <code>limit</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data frame with requested documents, may have nested
+lists in columns; <code>NULL</code> if no documents could be found.
+If <code>listfields</code> is specified: a vector of all field names
+in dot path notation.
+</p>
+
+
+<h3>Note</h3>
+
+<p>A dot in <code>query</code> or <code>fields</code> is interpreted as a dot path,
+pointing to a field nested within another, e.g. <code>friends.id</code> in
+the example.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+src &lt;- src_sqlite()
+
+docdb_create(src, "myKey", mtcars)
+docdb_create(src, "myKey", contacts)
+docdb_create(src, "myKey", mapdata)
+
+docdb_query(src, "myKey", query = '{"mpg":21}')
+docdb_query(src, "myKey", query = '{"mpg":21, "gear": {"$lte": 4}}')
+docdb_query(src, "myKey", query = '{"mpg":21}', fields = '{"_id":0, "mpg":1, "cyl":1}')
+docdb_query(src, "myKey", query = '{"_id": {"$regex": "^.+0.*$"}}', fields = '{"gear": 1}')
+
+docdb_query(src, "myKey", query = '{"$and": [{"mpg": {"$lte": 18}}, {"gear": {"$gt": 3}}]}')
+docdb_query(src, "myKey", query = '{}', fields = '{"_id":0, "mpg":1, "cyl":1}')
+
+docdb_query(src, "myKey", query = '{"$and": [{"age": {"$gt": 21}},
+ {"friends.name": {"$regex": "^B[a-z]{3,9}.*"}}]}')
+docdb_query(src, "myKey", query = '{"$or": [{"rows.elements.status": "OK"}, {"$and": [
+ {"_id": "5cd6785325ce3a94dfc54096"}, {"friends.name": {"$regex": "^B[a-z]{3,90}.*"}}]}]}')
+docdb_query(src, "myKey", query = '{"$and": [{"_id": "5cd6785325ce3a94dfc54096"},
+ {"friends.name": {"$regex": "^B[a-z]{3,90}.*"}}]}')
+docdb_query(src, "myKey", query = '{"origin_addresses": {"$in": ["Santa Barbara, CA, USA",
+ "New York, NY, USA"]}}', fields = '{"age": 1, "friends.id": 1, "_id": 0,
+ "rows.elements.status": 1}')
+
+docdb_query(src, "myKey", query = '{"rows.elements.status": "OK"}', listfields = TRUE)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

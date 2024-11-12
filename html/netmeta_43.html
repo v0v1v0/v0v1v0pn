@@ -1,0 +1,313 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netcontrib</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Contribution matrix in network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>This function generates the contribution of direct comparisons to
+every network treatment comparison. The output is a matrix where
+rows represent network treatment effects and columns represent the
+contribution of direct treatment effects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netcontrib(
+  x,
+  method = "shortestpath",
+  hatmatrix.F1000 = FALSE,
+  common = x$common,
+  random = x$random,
+  nchar.trts = x$nchar.trts,
+  warn.deprecated = gs("warn.deprecated"),
+  verbose = FALSE,
+  ...
+)
+
+## S3 method for class 'netcontrib'
+print(
+  x,
+  common = x$x$common,
+  random = x$x$random,
+  digits = 4,
+  nchar.trts = x$nchar.trts,
+  legend = TRUE,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netmeta</code> or <code>netcontrib</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character string indicating which method is to
+calculate the contribution matrix. Either <code>"randomwalk"</code>,
+<code>"shortestpath"</code>, <code>"cccp"</code>, or <code>"pseudoinverse"</code>,
+can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hatmatrix.F1000</code></td>
+<td>
+<p>A logical indicating whether hat matrix
+given in F1000 article should be used for <code>method =
+"shortestpath"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether a contribution matrix
+should be printed for the common effects network meta-analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether a contribution matrix
+should be printed for the random effects network meta-analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.trts</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique treatment names (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical indicating whether progress information
+should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>A logical indicating whether a legend should be
+printed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In network meta-analysis (NMA), it is important to assess the
+influence of limitations or other characteristics of individual
+studies on the estimates obtained from the network. To this end,
+the contribution matrix shows how much each direct treatment effect
+contributes to each treatment effect estimate from network
+meta-analysis.
+</p>
+<p>We use ideas from graph theory to derive the proportion that is
+contributed by each direct treatment effect. We start with the
+'projection' matrix in a two-step network meta-analysis model,
+called the H matrix, which is analogous to the hat matrix in a
+linear regression model. H entries are translated to proportion
+contributions based on the observation that the rows of H can be
+interpreted as flow networks.  A stream is defined as the
+composition of a path and its associated flow (Papakonstantinou et
+al., 2018).
+</p>
+<p>To account for multi-arm trials, we use the H matrix from a
+two-step (aggregate) version of the graph theoretical NMA model
+(Davies et al., 2022). This H matrix can be obtained from
+<code>hatmatrix</code> with argument <code>method = "davies"</code>.
+</p>
+<p>Four methods are implemented to estimate the proportion
+contributions:
+</p>
+<p>(1) If argument <code>method = "randomwalk"</code>, an analytical
+random-walk (RW) approach is used (Davies et al., 2022). Here, the
+"full" version of the aggregate H matrix (<code>hatmatrix</code>
+with arguments <code>method = "davies"</code> and <code>type = "full"</code>)
+is used to define RW transition matrices. For each pair of
+treatments (ij) in the network, the elements in the corresponding
+row of H-full define a transition matrix from node i to node j. We
+use the <b>igraph</b> package to find every (directed) path from
+node i to node j. The flow through each path is then equal to the
+probability that a walker takes that path. This is simply the
+product of the transition probabilities associated with each edge
+along the path.
+</p>
+<p>(2) If argument <code>method = "shortestpath"</code>, an iterative
+algorithm is used (Papakonstantinou et al., 2018). Broadly
+speaking, each iteration of the algorithm consists of the following
+steps: (i) A path in the evidence flow network is selected. (ii)
+The minimum flow through the edges making up the path is
+identified. This is assigned as the flow associated with the
+path. (iii) The flow of the path is subtracted from the values of
+flow in the edges that make up that path. This means that the edge
+corresponding to the minimum flow in that path is removed from the
+graph. (iv) A new path is then selected from the remaining
+graph. The process repeats until all the evidence flow in the edges
+has been assigned to a path.
+</p>
+<p>In the original F1000 paper (Papakonstantinou et al., 2018), the
+hat matrix used did not account for correlations due to multi-arm
+trials. For reproducibility the result of this version can be
+obtained by specifying <code>hatmatrix.F1000 = TRUE</code> for
+<code>method = "shortestpath"</code>. For other purposes, this method is
+not recommended.
+</p>
+<p>(3) If argument <code>method = "cccp"</code>, contributions are estimated
+using <code>l1</code> from R package <b>cccp</b> (Rücker et
+al., 2023, unpublished).
+</p>
+<p>(4) If argument <code>method = "pseudoinverse"</code>, contributions are
+derived from an L2 solution based on a Moore-Penrose pseudoinverse
+(Rücker et al., 2023, unpublished).
+</p>
+<p>Once the streams have been identified by any method, the proportion
+contribution of each direct comparison is equal to the sum over the
+flow of evidence in each path containing that edge divided by the
+number of edges that make up that path.
+</p>
+<p>By default, treatment names are not abbreviated in
+printouts. However, in order to get more concise printouts,
+argument <code>nchar.trts</code> can be used to define the minimum number
+of characters for abbreviated treatment names (see
+<code>abbreviate</code>, argument <code>minlength</code>). R function
+<code>treats</code> is utilised internally to create abbreviated
+treatment names.
+</p>
+<p>Calculation of network contributions can be compute-intensive for
+the random-walk approach in large networks. Crude information on
+the computation progress is printed if argument <code>verbose</code> is
+<code>TRUE</code>. In addition, computation times are printed if R
+package <b>tictoc</b> is installed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>netcontrib</code> with corresponding
+<code>print</code> function. The object is a list containing the
+following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>Numeric matrix of percentage contributions of direct
+comparisons for each network comparison for the common effects
+model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>Numeric matrix of percentage contributions of direct
+comparisons for each network comparison for the random effects
+model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tictoc.common</code></td>
+<td>
+<p>Computation times under common effects model
+(if R package <b>tictoc</b> is installed).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tictoc.random</code></td>
+<td>
+<p>Computation times under random effects model
+(if R package <b>tictoc</b> is installed).</p>
+</td>
+</tr>
+</table>
+<p>with the contribution matrices for common and random NMA. Each
+matrix has the percentage contributions of each direct comparison
+as columns for each network comparison, direct or indirect as rows.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Theodoros Papakonstantinou <a href="mailto:dev@tpapak.com">dev@tpapak.com</a>, Annabel
+Davies <a href="mailto:annabel.davies@manchester.ac.uk">annabel.davies@manchester.ac.uk</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Davies AL, Papakonstantinou T, Nikolakopoulou A, Rücker G, Galla T
+(2022):
+Network meta-analysis and random walks.
+<em>Statistics in Medicine</em>,
+<b>41</b>, 2091–2114
+</p>
+<p>Papakonstantinou, T., Nikolakopoulou, A., Rücker, G., Chaimani, A.,
+Schwarzer, G., Egger, M., Salanti, G. (2018):
+Estimating the contribution of studies in network meta-analysis:
+paths, flows and streams.
+<em>F1000Research</em>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Use the Woods dataset
+#
+data("Woods2010")
+p1 &lt;- pairwise(treatment, event = r, n = N,
+  studlab = author, data = Woods2010, sm = "OR")
+
+net1 &lt;- netmeta(p1)
+cm &lt;- netcontrib(net1)
+cm
+
+netcontrib(net1, method = "r")
+
+</code></pre>
+
+
+</div>

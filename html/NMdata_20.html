@@ -1,0 +1,210 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>flagsCount</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an overview of number of retained and discarded datapoints.</h2>
+
+<h3>Description</h3>
+
+<p>Generate an overview of number of observations disregarded due to
+different reasons. And how many are left after each exclusion
+flag.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">flagsCount(
+  data,
+  tab.flags,
+  file,
+  col.id = "ID",
+  col.flagn,
+  col.flagc,
+  by = NULL,
+  flags.increasing = FALSE,
+  flagc.0 = "Analysis set",
+  name.all.data = "All available data",
+  grp.incomp = "EVID",
+  save = TRUE,
+  as.fun = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The dataset including both FLAG and flag columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tab.flags</code></td>
+<td>
+<p>A data.frame containing at least these named
+columns: FLAG, flag, condition. Condition is disregarded for
+FLAG==0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>A file to write the table of flag counts to. Will
+probably be removed and put in a separate function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.id</code></td>
+<td>
+<p>The name of the subject ID column. Default is "ID".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.flagn</code></td>
+<td>
+<p>The name of the column containing the numerical
+flag values in tab.flags. This will be added to data. Use the
+same as when flagsAssign was called (if that was
+used). Default value is FLAG and can be configured using
+NMdataConf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.flagc</code></td>
+<td>
+<p>The name of the column containing the character
+flag values in data and tab.flags. Use the same as when
+flagsAssign was called (if that was used). Default value is
+flag and can be configured using NMdataConf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>An optional column to group the counting by. This could
+be "STUDY", "DRUG", "EVID", or a combination of multiple
+columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flags.increasing</code></td>
+<td>
+<p>The flags are applied by either decreasing
+(default) or increasing value of col.flagn. By using
+decreasing order, you can easily adjust the Nonmem IGNORE
+statement from IGNORE(FLAG.NE.0) to say IGNORE(FLAG.GT.10) if
+BLQ's have FLAG=10, and you decide to include these in the
+analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flagc.0</code></td>
+<td>
+<p>The character flag to assign to rows that are not
+matched by exclusion conditions (numerical flag 0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name.all.data</code></td>
+<td>
+<p>What to call the total set of data before
+applying exclusion flags. Default is "All available data".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grp.incomp</code></td>
+<td>
+<p>Column(s) that distinct incompatible subsets of
+data. Default is "EVID" meaning that if different values of
+EVID are found in data, the function will return an
+error. This is a safeguard not to mix data unintentionally
+when counting flags.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save</code></td>
+<td>
+<p>Save file? Default is TRUE, meaning that a file will
+be written if file argument is supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>The default is to return a data.table if input data
+is a data.table, and return a data.frame for all other input
+classes. Pass a function in as.fun to convert to something
+else. If data is not a data.table, default can be configured
+using NMdataConf.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is used to count flags as assigned by the
+flagsAssign function.
+</p>
+<p>Notice that the character flags reported in the output table are
+taken from tab.flags. The data column named by the value of
+col.flagc (default is flag) is not used.
+</p>
+<p>In the returned table, N.discarded is the difference in number of
+subjects since previous step. If two is reported, it can mean
+that the remaining one observation of these two subjects are
+discarded due to this flag. The majority of the samples can
+have been discarded by earlier flags.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A summary table with number of discarded and retained
+subjects and observations when applying each condition in the
+flag table. "discarded" means that the reduction of number of
+observations and subjects resulting from the flag, "retained"
+means the numbers that are left after application of the
+flag. The default is "both" which will report both. Class as
+defined by as.fun.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other DataCreate: 
+<code>NMorderColumns()</code>,
+<code>NMstamp()</code>,
+<code>NMwriteData()</code>,
+<code>addTAPD()</code>,
+<code>findCovs()</code>,
+<code>findVars()</code>,
+<code>flagsAssign()</code>,
+<code>mergeCheck()</code>,
+<code>tmpcol()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+pk &lt;- readRDS(file=system.file("examples/data/xgxr2.rds",package="NMdata"))
+dt.flags &lt;- data.frame(
+       flagn=10,
+       flagc="Below LLOQ",
+       condition=c("BLQ==1")
+)
+pk &lt;- flagsAssign(pk,dt.flags,subset.data="EVID==0",col.flagn="flagn",col.flagc="flagc")
+pk &lt;- flagsAssign(pk,subset.data="EVID==1",flagc.0="Dosing",
+        col.flagn="flagn",col.flagc="flagc")
+unique(pk[,c("EVID","flagn","flagc","BLQ")])
+flagsCount(pk[EVID==0],dt.flags,col.flagn="flagn",col.flagc="flagc")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

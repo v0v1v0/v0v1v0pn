@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SStrlin</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>self start for a trilinear Function</h2>
+
+<h3>Description</h3>
+
+<p>Self starter for a tri-linear function with parameters a (intercept), b (first slope), xs1 (first break-point), c (second slope), xs2 (second break-point) and d (third slope)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">trlin(x, a, b, xs1, c, xs2, d)
+
+SStrlin(x, a, b, xs1, c, xs2, d)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>input vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>the intercept</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>the first-phase slope</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xs1</code></td>
+<td>
+<p>first break-point of transition between first-phase linear and second-phase linear</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>the second-phase slope</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xs2</code></td>
+<td>
+<p>second break-point of transition between second-phase linear and third-phase linear</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>the third-phase slope</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This is a special case with just three parts (and two break points) but a more general approach 
+is to consider a segmented function with several breakpoints and linear segments. 
+Splines would be even more general. Also this model assumes that there are two break-points that needs 
+to be estimated. The guess for the initial values splits the dataset in half, so it this will work
+when one break-point is in the first half and the second is in the second half.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a numeric vector of the same length as x containing parameter estimates for equation specified
+</p>
+<p>trlin: vector of the same length as x using the tri-linear function
+</p>
+
+
+<h3>See Also</h3>
+
+<p>package <span class="pkg">segmented</span>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(ggplot2)
+set.seed(1234)
+x &lt;- 1:30
+y &lt;- trlin(x, 0.5, 2, 10, 0.1, 20, 1.75) + rnorm(30, 0, 0.5)
+dat &lt;- data.frame(x = x, y = y)
+fit &lt;- nls(y ~ SStrlin(x, a, b, xs1, c, xs2, d), data = dat)
+## plot
+ggplot(data = dat, aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_line(aes(y = fitted(fit)))
+## Minimal example
+## This is probably about the smallest dataset you 
+## should use with this function
+dat2 &lt;- data.frame(x = 1:8, y = c(1.1, 1.9, 3.1, 2.5, 1.4, 0.9, 2.2, 2.9))
+fit2 &lt;- nls(y ~ SStrlin(x, a, b, xs1, c, xs2, d), data = dat2)
+## expangin for plotting
+ndat &lt;- data.frame(x = seq(1, 8, by = 0.1))
+ndat$prd &lt;- predict(fit2, newdata = ndat)
+ggplot() + 
+  geom_point(data = dat2, aes(x = x, y = y)) + 
+  geom_line(data = ndat, aes(x = x, y = prd))
+
+
+</code></pre>
+
+
+</div>

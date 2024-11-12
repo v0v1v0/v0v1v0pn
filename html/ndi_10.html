@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>krieger</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Index of Concentration at the Extremes based on Feldman <em>et al.</em> (2015) and Krieger <em>et al.</em> (2016)</h2>
+
+<h3>Description</h3>
+
+<p>Compute the aspatial Index of Concentration at the Extremes (Krieger).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">krieger(geo = "tract", year = 2020, quiet = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>geo</code></td>
+<td>
+<p>Character string specifying the geography of the data either census tracts <code>geo = "tract"</code> (the default) or counties <code>geo = "county"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>Numeric. The year to compute the estimate. The default is 2020, and the years 2009 onward are currently available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Logical. If TRUE, will display messages about potential missing census information. The default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to <code>get_acs</code> to select state, county, and other arguments for census characteristics</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function will compute three aspatial Index of Concentration at the Extremes (ICE) of U.S. census tracts or counties for a specified geographical extent (e.g., entire U.S. or a single state) based on Feldman <em>et al.</em> (2015) <a href="https://doi.org/10.1136/jech-2015-205728">doi:10.1136/jech-2015-205728</a> and Krieger <em>et al.</em> (2016) <a href="https://doi.org/10.2105/AJPH.2015.302955">doi:10.2105/AJPH.2015.302955</a>. The authors expanded the metric designed by Massey in a chapter of Booth &amp; Crouter (2001) <a href="https://doi.org/10.4324/9781410600141">doi:10.4324/9781410600141</a> who initially designed the metric for residential segregation. This function computes five ICE metrics:
+</p>
+
+<ul>
+<li> <p><strong>Income</strong>: 80th income percentile vs. 20th income percentile
+</p>
+</li>
+<li> <p><strong>Education</strong>: less than high school vs. four-year college degree or more
+</p>
+</li>
+<li> <p><strong>Race/Ethnicity</strong>: white non-Hispanic vs. black non-Hispanic
+</p>
+</li>
+<li> <p><strong>Income and race/ethnicity combined</strong>: white non-Hispanic in 80th income percentile vs. black alone (including Hispanic) in 20th income percentile
+</p>
+</li>
+<li> <p><strong>Income and race/ethnicity combined</strong>: white non-Hispanic in 80th income percentile vs. white non-Hispanic in 20th income percentile
+</p>
+</li>
+</ul>
+<p>The function uses the <code>get_acs</code> function to obtain U.S. Census Bureau 5-year American Community Survey characteristics used for the geospatial computation. The yearly estimates are available for 2009 onward when ACS-5 data are available but are available from other U.S. Census Bureau surveys. The ACS-5 groups used in the computation of the five ICE metrics are:
+</p>
+
+<ul>
+<li> <p><strong>B03002</strong>: HISPANIC OR LATINO ORIGIN BY RACE
+</p>
+</li>
+<li> <p><strong>B15002</strong>: SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER
+</p>
+</li>
+<li> <p><strong>B19001</strong>: HOUSEHOLD INCOME IN THE PAST 12 MONTHS (IN 20XX INFLATION-ADJUSTED DOLLARS)
+</p>
+</li>
+<li> <p><strong>B19001B</strong>: HOUSEHOLD INCOME IN THE PAST 12 MONTHS (IN 20XX INFLATION-ADJUSTED DOLLARS) (BLACK OR AFRICAN AMERICAN ALONE HOUSEHOLDER)
+</p>
+</li>
+<li> <p><strong>B19001H</strong>: HOUSEHOLD INCOME IN THE PAST 12 MONTHS (IN 20XX INFLATION-ADJUSTED DOLLARS) (WHITE ALONE, NOT HISPANIC OR LATINO HOUSEHOLDER)
+</p>
+</li>
+</ul>
+<p>Use the internal <code>state</code> and <code>county</code> arguments within the <code>get_acs</code> function to specify geographic extent of the data output.
+</p>
+<p>ICE metrics can range in value from -1 (most deprived) to 1 (most privileged). A value of 0 can thus represent two possibilities: (1) none of the residents are in the most privileged or most deprived categories, or (2) an equal number of persons are in the most privileged and most deprived categories, and in both cases indicates that the area is not dominated by extreme concentrations of either of the two groups.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class 'list'. This is a named list with the following components:
+</p>
+
+<dl>
+<dt><code>ice</code></dt>
+<dd>
+<p>An object of class 'tbl' for the GEOID, name, ICE metrics, and raw census values of specified census geographies.</p>
+</dd>
+<dt><code>missing</code></dt>
+<dd>
+<p>An object of class 'tbl' of the count and proportion of missingness for each census variable used to compute the ICEs.</p>
+</dd>
+</dl>
+<h3>See Also</h3>
+
+<p><code>get_acs</code> for additional arguments for geographic extent selection (i.e., <code>state</code> and <code>county</code>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Wrapped in \dontrun{} because these examples require a Census API key.
+  
+  # Tract-level metric (2020)
+  krieger(geo = "tract", state = "GA", year = 2020)
+  
+  # County-level metric (2020)
+  krieger(geo = "county", state = "GA", year = 2020)
+  
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

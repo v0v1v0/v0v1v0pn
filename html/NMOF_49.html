@@ -1,0 +1,240 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mvFrontier</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Computing Mean–Variance Efficient Portfolios
+</h2>
+
+<h3>Description</h3>
+
+<p>Compute mean–variance efficient portfolios and efficient frontiers.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mvFrontier(m, var, wmin = 0, wmax = 1, n = 50, rf = NA,
+           groups = NULL, groups.wmin = NULL, groups.wmax = NULL)
+mvPortfolio(m, var, min.return, wmin = 0, wmax = 1, lambda = NULL,
+            groups = NULL, groups.wmin = NULL, groups.wmax = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+
+<p>vector of expected returns
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+
+<p>expected variance–covariance matrix
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wmin</code></td>
+<td>
+
+<p>numeric: minimum weights
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wmax</code></td>
+<td>
+
+<p>numeric: maximum weights
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>number of points on the efficient frontier
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.return</code></td>
+<td>
+
+<p>minimal required return
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rf</code></td>
+<td>
+
+<p>risk-free rate
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+
+<p>risk–reward trade-off
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+
+<p>a list of group definitions
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups.wmin</code></td>
+<td>
+
+<p>a numeric vector
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups.wmax</code></td>
+<td>
+
+<p>a numeric vector
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>mvPortfolio</code> computes a single mean–variance
+efficient portfolio, using package <span class="pkg">quadprog</span>.
+It does so by minimising portfolio variance, subject
+to constraints on minimum return and budget (weights
+need to sum to one), and min/max constraints on the
+weights.
+</p>
+<p>If <code class="reqn">\lambda</code>
+is specified, the function ignores the <code>min.return</code>
+constraint and instead solves the model
+</p>
+<p style="text-align: center;"><code class="reqn">\min_w\ \ -\lambda \mbox{\code{m}}'w + (1-\lambda)
+     w'\mbox{\code{var}\,}w</code>
+</p>
+
+<p>in which <code class="reqn">w</code> are the weights. If
+<code class="reqn">\lambda</code>
+is a vector of length 2, then the model becomes
+</p>
+<p style="text-align: center;"><code class="reqn">\min_w\ \ -\lambda_1 \mbox{\code{m}\,}'w + \lambda_2
+     w'\mbox{\code{var}\,}w</code>
+</p>
+
+<p>which may be more convenient
+(e.g. for setting <code class="reqn">\lambda_1</code> to 1).
+</p>
+<p><code>mvFrontier</code> computes returns, volatilities and
+compositions for portfolios along an efficient frontier.
+If <code>rf</code> is not <code>NA</code>, cash is included as an asset.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>mvPortfolio</code>, a numeric vector of weights.
+</p>
+<p>For <code>mvFrontier</code>, a list of three components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>return</code></td>
+<td>
+<p>returns of portfolios</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>volatility</code></td>
+<td>
+<p>volatilities of portfolios</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A matrix of portfolio weights.
+Each column holds the weights for one portfolio on the
+frontier. If <code>rf</code> is specified, an additional row
+is added, providing the cash weight.</p>
+</td>
+</tr>
+</table>
+<p>The <em>i</em>-th portfolio on the frontier corresponds
+to the <em>i</em>-th elements of <code>return</code> and
+<code>volatility</code>, and the <em>i</em>-th column of
+<code>portfolio</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>minvar</code> for computing the minimum-variance portfolio
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">na &lt;- 4
+vols &lt;- c(0.10, 0.15, 0.20,0.22)
+m &lt;- c(0.06, 0.12, 0.09, 0.07)
+const_cor &lt;- function(rho, na) {
+    C &lt;- array(rho, dim = c(na, na))
+    diag(C) &lt;- 1
+    C
+}
+var &lt;- diag(vols) %*% const_cor(0.5, na) %*% diag(vols)
+
+wmax &lt;- 1          # maximum holding size
+wmin &lt;- 0.0          # minimum holding size
+rf &lt;- 0.02
+
+if (requireNamespace("quadprog")) {
+  p1 &lt;- mvFrontier(m, var, wmin = wmin, wmax = wmax, n = 50)
+  p2 &lt;- mvFrontier(m, var, wmin = wmin, wmax = wmax, n = 50, rf = rf)
+  plot(p1$volatility, p1$return, pch = 19, cex = 0.5, type = "o",
+       xlab = "Expected volatility",
+       ylab = "Expected return")
+  lines(p2$volatility, p2$return, col = grey(0.5))
+  abline(v = 0, h = rf)
+} else
+  message("Package 'quadprog' is required")
+</code></pre>
+
+
+</div>

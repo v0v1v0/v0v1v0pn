@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>find_at_risk</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate at-risk table</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the number of individuals at risk and number of events at each distinct event time
+(and censoring time if <code>include_cens==TRUE</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">find_at_risk(formula, data, include_cens = TRUE, timefix = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>Formula object. The response (on the left of the <code>~</code> operator) must be a survival object as returned by the <code>Surv</code> function.
+The terms (on the right of the <code>~</code> operator) must include the treatment arm indicator, and additionally can include strata using the <code>strata</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data frame containing time-to-event data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_cens</code></td>
+<td>
+<p>Boolean indicating whether to include values corresponding to censoring times</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timefix</code></td>
+<td>
+<p>Deal with floating point issues (as in the survival package). Default is TRUE. May need to set FALSE for simulated data.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data frame
+</p>
+<p>Returns a data frame with the following columns:
+</p>
+
+<ul>
+<li>
+<p> time <code>t_j</code>
+</p>
+</li>
+<li>
+<p> number of events in each of the treatments at <code>t_j</code>
+</p>
+</li>
+<li>
+<p> combined number of events in both treatments at event time <code>t_j</code>
+</p>
+</li>
+<li>
+<p> number of individuals at risk in each of the treatment groups just before time <code>t_j</code>
+</p>
+</li>
+<li>
+<p> combined number of individuals at risk in both treatment groups just before time <code>t_j</code>
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nphRCT)
+set.seed(1)
+sim_data &lt;- sim_events_delay(
+  event_model=list(
+    duration_c = 36,
+    duration_e = c(6,30),
+    lambda_c = log(2)/9,
+    lambda_e = c(log(2)/9,log(2)/18)
+  ),
+  recruitment_model=list(
+    rec_model="power",
+    rec_period = 12,
+    rec_power = 1
+  ),
+  n_c=5,
+  n_e=5,
+  max_cal_t = 36
+)
+#with censoring times included
+find_at_risk(formula=survival::Surv(event_time,event_status)~group,
+  data=sim_data,
+  include_cens=TRUE)
+#with censoring times excluded
+find_at_risk(formula=survival::Surv(event_time,event_status)~group,
+  data=sim_data,
+  include_cens=FALSE)
+</code></pre>
+
+
+</div>

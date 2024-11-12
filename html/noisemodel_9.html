@@ -1,0 +1,205 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>asy_spa_ln</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Asymmetric sparse label noise</h2>
+
+<h3>Description</h3>
+
+<p>Introduction of <em>Asymmetric sparse label noise</em> into a classification dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## Default S3 method:
+asy_spa_ln(x, y, levelO, levelE, order = levels(y), sortid = TRUE, ...)
+
+## S3 method for class 'formula'
+asy_spa_ln(formula, data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data frame of input attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a factor vector with the output class of each sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levelO</code></td>
+<td>
+<p>a double with the noise level in [0,1] to be introduced into each odd class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levelE</code></td>
+<td>
+<p>a double with the noise level in [0,1] to be introduced into each even class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>a character vector indicating the order of the classes (default: <code>levels(y)</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sortid</code></td>
+<td>
+<p>a logical indicating if the indices must be sorted at the output (default: <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other options to pass to the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula with the output class and, at least, one input attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame in which to interpret the variables in the formula.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><em>Asymmetric sparse label noise</em> randomly selects (<code>levelO</code>·100)% of the samples
+in each odd class and (<code>levelE</code>·100)% of the samples
+in each even class -the order of the class labels is determined by
+<code>order</code>. Then, each odd class is flipped to the next class, whereas each even class
+is flipped to the previous class. If the dataset has an odd number of classes, the last class is not corrupted.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>ndmodel</code> with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xnoise</code></td>
+<td>
+<p>a data frame with the noisy input attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ynoise</code></td>
+<td>
+<p>a factor vector with the noisy output class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numnoise</code></td>
+<td>
+<p>an integer vector with the amount of noisy samples per class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idnoise</code></td>
+<td>
+<p>an integer vector list with the indices of noisy samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numclean</code></td>
+<td>
+<p>an integer vector with the amount of clean samples per class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idclean</code></td>
+<td>
+<p>an integer vector list with the indices of clean samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distr</code></td>
+<td>
+<p>an integer vector with the samples per class in the original data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the full name of the noise introduction model used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>a list of the argument values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the function call.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Noise model adapted from the papers in References.
+</p>
+
+
+<h3>References</h3>
+
+<p>J. Wei and Y. Liu. 
+<strong>When optimizing f-divergence is robust with label noise</strong>. 
+In <em>Proc. 9th International Conference on Learning Representations</em>, pages 1-11, 2021.
+url:<a href="https://openreview.net/forum?id=WesiCoRVQ15">https://openreview.net/forum?id=WesiCoRVQ15</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mind_bdir_ln</code>, <code>fra_bdir_ln</code>, <code>print.ndmodel</code>, <code>summary.ndmodel</code>, <code>plot.ndmodel</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load the dataset
+data(iris2D)
+
+# usage of the default method
+set.seed(9)
+outdef &lt;- asy_spa_ln(x = iris2D[,-ncol(iris2D)], y = iris2D[,ncol(iris2D)], 
+                       levelO = 0.1, levelE = 0.3, order = c("virginica", "setosa", "versicolor"))
+
+# show results
+summary(outdef, showid = TRUE)
+plot(outdef)
+
+# usage of the method for class formula
+set.seed(9)
+outfrm &lt;- asy_spa_ln(formula = Species ~ ., data = iris2D, 
+                        levelO = 0.1, levelE = 0.3, order = c("virginica", "setosa", "versicolor"))
+
+# check the match of noisy indices
+identical(outdef$idnoise, outfrm$idnoise)
+
+</code></pre>
+
+
+</div>

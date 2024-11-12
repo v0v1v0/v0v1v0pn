@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LOGNORM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Three parameter lognormal distribution and L-moments</h2>
+
+<h3>Description</h3>
+
+<p><code>LOGNORM</code> provides the link between L-moments of a sample and the three parameter
+log-normal distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">f.lognorm (x, xi, alfa, k)
+F.lognorm (x, xi, alfa, k)
+invF.lognorm (F, xi, alfa, k)
+Lmom.lognorm (xi, alfa, k)
+par.lognorm (lambda1, lambda2, tau3)
+rand.lognorm (numerosita, xi, alfa, k)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of quantiles</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xi</code></td>
+<td>
+<p>vector of lognorm location parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alfa</code></td>
+<td>
+<p>vector of lognorm scale parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>vector of lognorm shape parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F</code></td>
+<td>
+<p>vector of probabilities</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda1</code></td>
+<td>
+<p>vector of sample means</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda2</code></td>
+<td>
+<p>vector of L-variances</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau3</code></td>
+<td>
+<p>vector of L-CA (or L-skewness)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numerosita</code></td>
+<td>
+<p>numeric value indicating the length of the vector to be generated</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See <a href="https://en.wikipedia.org/wiki/Log-normal_distribution">https://en.wikipedia.org/wiki/Log-normal_distribution</a> for an introduction to the lognormal distribution.
+</p>
+<p><b>Definition</b>
+</p>
+<p>Parameters (3): <code class="reqn">\xi</code> (location), <code class="reqn">\alpha</code> (scale), <code class="reqn">k</code> (shape).
+</p>
+<p>Range of <code class="reqn">x</code>: <code class="reqn">-\infty &lt; x \le \xi + \alpha / k</code> if <code class="reqn">k&gt;0</code>;
+<code class="reqn">-\infty &lt; x &lt; \infty</code> if <code class="reqn">k=0</code>;
+<code class="reqn">\xi + \alpha / k \le x &lt; \infty</code> if <code class="reqn">k&lt;0</code>.
+</p>
+<p>Probability density function:
+</p>
+<p style="text-align: center;"><code class="reqn">f(x) = \frac{e^{ky-y^2/2}}{\alpha \sqrt{2\pi}}</code>
+</p>
+
+<p>where <code class="reqn">y = -k^{-1}\log\{1 - k(x - \xi)/\alpha\}</code> if <code class="reqn">k \ne 0</code>,
+<code class="reqn">y = (x-\xi)/\alpha</code> if <code class="reqn">k=0</code>.
+</p>
+<p>Cumulative distribution function:
+</p>
+<p style="text-align: center;"><code class="reqn">F(x) = \Phi(x)</code>
+</p>
+
+<p>where
+<code class="reqn">\Phi(x)=\int_{-\infty}^x \phi(t)dt</code>.
+</p>
+<p>Quantile function:
+<code class="reqn">x(F)</code> has no explicit analytical form.
+</p>
+<p><code class="reqn">k=0</code> is the Normal distribution with parameters <code class="reqn">\xi</code> and <code class="reqn">alpha</code>.
+</p>
+<p><b>L-moments</b>
+</p>
+<p>L-moments are defined for all values of <code class="reqn">k</code>.
+</p>
+<p style="text-align: center;"><code class="reqn">\lambda_1 = \xi + \alpha(1 - e^{k^2/2})/k</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\lambda_2 = \alpha/k e^{k^2/2} [1 - 2 \Phi(-k/\sqrt{2})]</code>
+</p>
+
+<p>There are no simple expressions for the L-moment ratios <code class="reqn">\tau_r</code> with <code class="reqn">r \ge 3</code>.
+Here we use the rational-function approximation given in Hosking and Wallis (1997, p. 199).
+</p>
+<p><b>Parameters</b>
+</p>
+<p>The shape parameter <code class="reqn">k</code> is a function of <code class="reqn">\tau_3</code> alone.
+No explicit solution is possible.
+Here we use the approximation given in Hosking and Wallis (1997, p. 199).
+</p>
+<p>Given <code class="reqn">k</code>, the other parameters are given by
+</p>
+<p style="text-align: center;"><code class="reqn">\alpha = \frac{\lambda_2 k e^{-k^2/2}}{1-2 \Phi(-k/\sqrt{2})}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\xi = \lambda_1 - \frac{\alpha}{k} (1 - e^{k^2/2})</code>
+</p>
+
+<p><code>Lmom.lognorm</code> and <code>par.lognorm</code> accept input as vectors of equal length. In <code>f.lognorm</code>, <code>F.lognorm</code>, <code>invF.lognorm</code> and <code>rand.lognorm</code> parameters (<code>xi</code>, <code>alfa</code>, <code>k</code>) must be atomic.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>f.lognorm</code> gives the density <code class="reqn">f</code>, <code>F.lognorm</code> gives the distribution function <code class="reqn">F</code>, <code>invFlognorm</code> gives the quantile function <code class="reqn">x</code>, <code>Lmom.lognorm</code> gives the L-moments (<code class="reqn">\lambda_1</code>, <code class="reqn">\lambda_2</code>, <code class="reqn">\tau_3</code>, <code class="reqn">\tau_4</code>), <code>par.lognorm</code> gives the parameters (<code>xi</code>, <code>alfa</code>, <code>k</code>), and <code>rand.lognorm</code> generates random deviates.
+</p>
+
+
+<h3>Note</h3>
+
+<p>For information on the package and the Author, and for all the references, see <code>nsRFA</code>.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rnorm</code>, <code>runif</code>, <code>EXP</code>, <code>GENLOGIS</code>, <code>GENPAR</code>, <code>GEV</code>, <code>GUMBEL</code>, <code>KAPPA</code>, <code>P3</code>; <code>DISTPLOTS</code>, <code>GOFmontecarlo</code>, <code>Lmoments</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(hydroSIMN)
+annualflows
+summary(annualflows)
+x &lt;- annualflows["dato"][,]
+fac &lt;- factor(annualflows["cod"][,])
+split(x,fac)
+
+camp &lt;- split(x,fac)$"45"
+ll &lt;- Lmoments(camp)
+parameters &lt;- par.lognorm(ll[1],ll[2],ll[4])
+f.lognorm(1800,parameters$xi,parameters$alfa,parameters$k)
+F.lognorm(1800,parameters$xi,parameters$alfa,parameters$k)
+invF.lognorm(0.7529877,parameters$xi,parameters$alfa,parameters$k)
+Lmom.lognorm(parameters$xi,parameters$alfa,parameters$k)
+rand.lognorm(100,parameters$xi,parameters$alfa,parameters$k)
+
+Rll &lt;- regionalLmoments(x,fac); Rll
+parameters &lt;- par.lognorm(Rll[1],Rll[2],Rll[4])
+Lmom.lognorm(parameters$xi,parameters$alfa,parameters$k)
+</code></pre>
+
+
+</div>

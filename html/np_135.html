@@ -1,0 +1,434 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npuniden.sc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Kernel Shape Constrained Bounded Univariate Density Estimation
+</h2>
+
+<h3>Description</h3>
+
+<p><code>npuniden.sc</code> computes shape constrained kernel univariate
+unconditional density estimates given a vector of continuously
+distributed training data and a bandwidth. Lower and upper bounds
+[<code>a</code>,<code>b</code>] can be supplied (default is [0,1]) and if <code>a</code>
+is set to <code>-Inf</code> there is only one bound on the right, while if
+<code>b</code> is set to <code>Inf</code> there is only one bound on the left.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npuniden.sc(X = NULL,
+            Y = NULL,
+            h = NULL,
+            a = 0,
+            b = 1,
+            lb = NULL,
+            ub = NULL,
+            extend.range = 0,
+            num.grid = 0,
+            function.distance = TRUE,
+            integral.equal = FALSE,
+            constraint = c("density",
+                           "mono.incr",
+                           "mono.decr",
+                           "concave",
+                           "convex",
+                           "log-concave",
+                           "log-convex"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>a required numeric vector of training data lying in <code class="reqn">[a,b]</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+
+<p>an optional numeric vector of evaluation data lying in <code class="reqn">[a,b]</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+
+<p>a bandwidth (<code class="reqn">&gt;0</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+
+<p>an optional lower bound on the support of <code>X</code> or <code>Y</code> (defaults to 0)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+
+<p>an optional upper bound on the support of <code>X</code> or <code>Y</code> (defaults to 1)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lb</code></td>
+<td>
+
+<p>a scalar lower bound (<code class="reqn">\ge 0</code>) to be used in conjunction with
+<code>constraint="density"</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ub</code></td>
+<td>
+
+<p>a scalar upper bound (<code class="reqn">\ge 0</code> and <code class="reqn">\ge</code> <code>lb</code>) to be used
+in conjunction with <code>constraint="density"</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extend.range</code></td>
+<td>
+
+<p>number specifying the fraction by which the range of the training data
+should be extended for the additional grid points (passed to the
+function <code>extendrange</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.grid</code></td>
+<td>
+
+<p>number of additional grid points (in addition to <code>X</code> and
+<code>Y</code>) placed on an equi-spaced grid spanning
+<code>extendrange(c(X,Y),f=extend.range)</code> (if <code>num.grid=0</code> no
+additional grid points will be used regardless of the value of
+<code>extend.range</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>function.distance</code></td>
+<td>
+
+<p>a logical value that, if <code>TRUE</code>, minimizes the squared deviation between
+the constrained and unconstrained estimates, otherwise, minimizes the
+squared deviation between the constrained and unconstrained weights
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>integral.equal</code></td>
+<td>
+
+<p>a logical value, that, if <code>TRUE</code>, adjusts the constrained estimate
+to have the same probability mass over the range <code>X</code>, <code>Y</code>,
+and the additional grid points
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraint</code></td>
+<td>
+
+<p>a character string indicating whether the estimate is to be
+constrained to be monotonically increasing
+(<code>constraint="mono.incr"</code>), decreasing
+(<code>constraint="mono.incr"</code>), convex (<code>constraint="convex"</code>),
+concave (<code>constraint="concave"</code>), log-convex
+(<code>constraint="log-convex"</code>), or log-concave
+(<code>constraint="log-concave"</code>)
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Typical usages are (see below for a complete list of options and also
+the examples at the end of this help file)
+</p>
+<pre>
+    model &lt;- npuniden.sc(X,a=-2,b=3)
+  </pre>
+<p><code>npuniden.sc</code> implements a methods for estimating a univariate
+density function defined over a continuous random variable in the
+presence of bounds subject to a variety of shape constraints.  The
+bounded estimates use the truncated Gaussian kernel function.
+</p>
+<p>Note that for the log-constrained estimates, the derivative estimate
+returned is that for the log-constrained estimate not the non-log
+value of the estimate returned by the function. See Example 5 below
+hat manually plots the log-density and returned derivative (no
+transformation is needed when plotting the density estimate itself).
+</p>
+<p>If the quadratic program solver fails to find a solution, the
+unconstrained estimate is returned with an immediate warning. Possible
+causes to be investigated are undersmoothing, sparsity, and the
+presence of non-sample grid points. To investigate the possibility of
+undersmoothing try using a larger bandwidth, to investigate sparsity
+try decreasing <code>extend.range</code>, and to investigate non-sample grid
+points try setting <code>num.grid</code> to <code>0</code>.
+</p>
+<p>Mean square error performance seems to improve generally when using
+additional grid points in the empirical support of <code>X</code> and
+<code>Y</code> (i.e., in the observed range of the data sample) but appears
+to deteriorate when imposing constraints beyond the empirical support
+(i.e., when <code>extend.range</code> is positive). Increasing the number of
+additional points beyond a hundred or so appears to have a limited
+impact.
+</p>
+<p>The option <code>function.distance=TRUE</code> appears to perform better for
+imposing convexity, concavity, log-convexity and log-concavity, while
+<code>function.distance=FALSE</code> appears to perform better for imposing
+monotonicity, whether increasing or decreasing (based on simulations
+for the Beta(s1,s2) distribution with sample size <code class="reqn">n=100</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>f </code></td>
+<td>
+<p>unconstrained density estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f.sc </code></td>
+<td>
+<p>shape constrained density estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se.f </code></td>
+<td>
+<p>asymptotic standard error of the unconstrained density estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se.f.sc </code></td>
+<td>
+<p>asymptotic standard error of the shape constrained density estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f.deriv </code></td>
+<td>
+<p>unconstrained derivative estimate (of order 1 or 2 or log thereof)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f.sc.deriv </code></td>
+<td>
+<p>shape constrained derivative estimate (of order 1 or 2 or log thereof)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F </code></td>
+<td>
+<p>unconstrained distribution estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F.sc </code></td>
+<td>
+<p>shape constrained distribution estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>integral.f</code></td>
+<td>
+<p>the integral of the unconstrained estimate over <code>X</code>, <code>Y</code>, and the additional grid points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>integral.f.sc</code></td>
+<td>
+<p>the integral of the constrained estimate over <code>X</code>, <code>Y</code>, and the additional grid points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solve.QP </code></td>
+<td>
+<p>logical, if <code>TRUE</code> <code>solve.QP</code> succeeded, otherwise failed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>attempts </code></td>
+<td>
+<p>number of attempts when <code>solve.QP</code> fails (max = 9)</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Du, P. and C. Parmeter and J. Racine, “Shape Constrained Kernel Density Estimation”, manuscript.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The <span class="pkg">logcondens</span>, <span class="pkg">LogConDEAD</span>, and <span class="pkg">scdensity</span> packages,
+and the function <code>npuniden.boundary</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+n &lt;- 100
+set.seed(42)
+
+## Example 1: N(0,1), constrain the density to lie within lb=.1 and ub=.2
+
+X &lt;- sort(rnorm(n))
+h &lt;- npuniden.boundary(X,a=-Inf,b=Inf)$h
+foo &lt;- npuniden.sc(X,h=h,constraint="density",a=-Inf,b=Inf,lb=.1,ub=.2)
+ylim &lt;- range(c(foo$f.sc,foo$f))
+plot(X,foo$f.sc,type="l",ylim=ylim,xlab="X",ylab="Density")
+lines(X,foo$f,col=2,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+
+## Example 2: Beta(5,1), DGP is monotone increasing, impose valid
+## restriction
+
+X &lt;- sort(rbeta(n,5,1))
+h &lt;- npuniden.boundary(X)$h
+
+foo &lt;- npuniden.sc(X=X,h=h,constraint=c("mono.incr"))
+
+par(mfrow=c(1,2))
+ylim &lt;- range(c(foo$f.sc,foo$f))
+plot(X,foo$f.sc,type="l",ylim=ylim,xlab="X",ylab="Density")
+lines(X,foo$f,col=2,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+
+ylim &lt;- range(c(foo$f.sc.deriv,foo$f.deriv))
+plot(X,foo$f.sc.deriv,type="l",ylim=ylim,xlab="X",ylab="First Derivative")
+lines(X,foo$f.deriv,col=2,lty=2)
+abline(h=0,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+
+## Example 3: Beta(1,5), DGP is monotone decreasing, impose valid
+## restriction
+
+X &lt;- sort(rbeta(n,1,5))
+h &lt;- npuniden.boundary(X)$h
+
+foo &lt;- npuniden.sc(X=X,h=h,constraint=c("mono.decr"))
+
+par(mfrow=c(1,2))
+ylim &lt;- range(c(foo$f.sc,foo$f))
+plot(X,foo$f.sc,type="l",ylim=ylim,xlab="X",ylab="Density")
+lines(X,foo$f,col=2,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+
+ylim &lt;- range(c(foo$f.sc.deriv,foo$f.deriv))
+plot(X,foo$f.sc.deriv,type="l",ylim=ylim,xlab="X",ylab="First Derivative")
+lines(X,foo$f.deriv,col=2,lty=2)
+abline(h=0,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+ 
+## Example 4: N(0,1), DGP is log-concave, impose invalid concavity
+## restriction
+
+X &lt;- sort(rnorm(n))
+h &lt;- npuniden.boundary(X,a=-Inf,b=Inf)$h
+
+foo &lt;- npuniden.sc(X=X,h=h,a=-Inf,b=Inf,constraint=c("concave"))
+
+par(mfrow=c(1,2))
+ylim &lt;- range(c(foo$f.sc,foo$f))
+plot(X,foo$f.sc,type="l",ylim=ylim,xlab="X",ylab="Density")
+lines(X,foo$f,col=2,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+ylim &lt;- range(c(foo$f.sc.deriv,foo$f.deriv))
+
+plot(X,foo$f.sc.deriv,type="l",ylim=ylim,xlab="X",ylab="Second Derivative")
+lines(X,foo$f.deriv,col=2,lty=2)
+abline(h=0,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+
+## Example 45: Beta(3/4,3/4), DGP is convex, impose valid restriction
+
+X &lt;- sort(rbeta(n,3/4,3/4))
+h &lt;- npuniden.boundary(X)$h
+
+foo &lt;- npuniden.sc(X=X,h=h,constraint=c("convex"))
+
+par(mfrow=c(1,2))
+ylim &lt;- range(c(foo$f.sc,foo$f))
+plot(X,foo$f.sc,type="l",ylim=ylim,xlab="X",ylab="Density")
+lines(X,foo$f,col=2,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+
+ylim &lt;- range(c(foo$f.sc.deriv,foo$f.deriv))
+plot(X,foo$f.sc.deriv,type="l",ylim=ylim,xlab="X",ylab="Second Derivative")
+lines(X,foo$f.deriv,col=2,lty=2)
+abline(h=0,lty=2)
+rug(X)
+legend("topleft",c("Constrained","Unconstrained"),lty=1:2,col=1:2,bty="n")
+
+## Example 6: N(0,1), DGP is log-concave, impose log-concavity
+## restriction
+
+X &lt;- sort(rnorm(n))
+h &lt;- npuniden.boundary(X,a=-Inf,b=Inf)$h
+
+foo &lt;- npuniden.sc(X=X,h=h,a=-Inf,b=Inf,constraint=c("log-concave"))
+
+par(mfrow=c(1,2))
+
+ylim &lt;- range(c(log(foo$f.sc),log(foo$f)))
+plot(X,log(foo$f.sc),type="l",ylim=ylim,xlab="X",ylab="Log-Density")
+lines(X,log(foo$f),col=2,lty=2)
+rug(X)
+legend("topleft",c("Constrained-log","Unconstrained-log"),lty=1:2,col=1:2,bty="n")
+
+ylim &lt;- range(c(foo$f.sc.deriv,foo$f.deriv))
+plot(X,foo$f.sc.deriv,type="l",ylim=ylim,xlab="X",ylab="Second Derivative of Log-Density")
+lines(X,foo$f.deriv,col=2,lty=2)
+abline(h=0,lty=2)
+rug(X)
+legend("topleft",c("Constrained-log","Unconstrained-log"),lty=1:2,col=1:2,bty="n")
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

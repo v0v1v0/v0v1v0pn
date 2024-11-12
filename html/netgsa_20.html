@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>zoomPathway</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Zoom in on pathway in igraph</h2>
+
+<h3>Description</h3>
+
+<p>Plots the gene to gene interactions for a given pathway in igraph.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">zoomPathway(x, pway, graph_layout = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A NetGSA object returned from calling <code>NetGSA()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pway</code></td>
+<td>
+<p>Name of pathway to plot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph_layout</code></td>
+<td>
+<p>(Optional) Layout function to pass to igraph plots. This function should only take one parameter (an igraph object). For example one might create a custom layout by setting the spring.length and spring.constant with: <code>my_layout &lt;- function(graph) layout_with_graphopt(graph = graph, spring.length = 1000, spring.constant = 0.00004)</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Generates igraph plot for gene to gene interactions for a given pathway
+</p>
+
+
+<h3>Value</h3>
+
+<p>No return value, called for side effects
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michael Hellstern
+</p>
+
+
+<h3>References</h3>
+
+<p>Ma, J., Shojaie, A. &amp; Michailidis, G. (2016) Network-based pathway enrichment analysis with incomplete network information. Bioinformatics 32(20):165–3174. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.NetGSA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## load the data
+data("breastcancer2012_subset")
+
+## consider genes from just 2 pathways
+genenames    &lt;- unique(c(pathways[["Adipocytokine signaling pathway"]], 
+                         pathways[["Adrenergic signaling in cardiomyocytes"]]))
+sx           &lt;- x[match(rownames(x), genenames, nomatch = 0L) &gt; 0L,]
+
+db_edges       &lt;- obtainEdgeList(rownames(sx), databases = c("kegg", "reactome"))
+adj_cluster    &lt;- prepareAdjMat(sx, group, databases = db_edges, cluster = TRUE)
+out_cluster    &lt;- NetGSA(adj_cluster[["Adj"]], sx, group, 
+                         pathways_mat[c(1,2), rownames(sx)], lklMethod = "REHE", sampling = FALSE)
+plot(out_cluster)
+my_layout &lt;- function(graph) layout_with_graphopt(graph = graph, 
+                                                  spring.length = 1000, 
+                                                  spring.constant = 0.00004)
+zoomPathway(out_cluster, "Adipocytokine signaling pathway", my_layout)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

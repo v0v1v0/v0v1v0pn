@@ -1,0 +1,196 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Bootstrap.Stage.2.NormTable</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bootstraps confidence intervals for a normative table</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>Stage.2.NormTable()</code> is used to derive a normative table that shows the percentile ranks <code class="reqn">\hat{\pi}_0</code> that correspond to a wide range of raw test scores <code class="reqn">Y_0</code>  (stratified by the relevant independent variables). The function <code>Bootstrap.Stage.2.NormTable()</code> can be used to obtain confidence intervals (CIs) around the point estimates of the percentile ranks <code class="reqn">\hat{\pi}_0</code> in the normative table. A non-parametric bootstrap is used to compute these CIs (for details, see Chapter 8 in Van der Elst, 2023). 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Bootstrap.Stage.2.NormTable(Stage.2.NormTable,
+CI=.99, Number.Bootstraps=2000, Seed=123, 
+Rounded=FALSE, Show.Fitted.Boot=FALSE, verbose=TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Stage.2.NormTable</code></td>
+<td>
+<p>A fitted object of class <code>Stage.2.NormTable</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>The desired CI around the percentile ranks. Default <code>CI=.99</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Number.Bootstraps</code></td>
+<td>
+<p>The number of bootstrap samples that are taken. Default <code>Number.Bootstraps=2000</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Seed</code></td>
+<td>
+<p>The seed to be used in the bootstrap (for repoducibility). Default <code>Seed = 123</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Rounded</code></td>
+<td>
+<p>Logical. Should the percentile ranks that are shown in the normative table be rounded to a whole number? Default <code>Rounded=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Show.Fitted.Boot</code></td>
+<td>
+<p>Logical. Should the fitted Stage 1 models for the bootstrap samples be printed? Default <code>Show.Fitted.Boot=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical value indicating whether verbose output should be generated.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details, see Chapter 8 in Van der Elst (2023).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>Stage.2.NormTable</code> with components,
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>NormTable.With.CI</code></td>
+<td>
+<p>The normative table with the bootstrapped CI.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>The CI used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Homoscedasticity</code></td>
+<td>
+<p>Logical. Was homoscedasticity assumed in the normative conversion? For details, see <code>Stage.2.NormTable</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Normality</code></td>
+<td>
+<p>Logical. Was normality assumed in the  in the normative conversion? For details, see <code>Stage.2.NormTable</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NormTable.With.CI.Min</code></td>
+<td>
+<p>A table with the lower bounds of the CIs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NormTable.With.CI.Max</code></td>
+<td>
+<p>A table with the upper bounds of the CIs.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Wim Van der Elst
+</p>
+
+
+<h3>References</h3>
+
+<p>Van der Elst, W. (2024). <em>Regression-based normative data for psychological assessment: A hands-on approach using R.</em> Springer Nature. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Stage.2.NormTable</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> # Time-intensive part
+# Replicate the bootstrap results that were obtained in 
+# Case study 1 of Chapter 8 in Van der Elst (2023)
+# -----------------------------------------------------
+library(NormData) # load the NormData package
+data(GCSE)        # load the GCSE dataset
+
+# Fit the Stage 1 model
+Model.1.GCSE &lt;- Stage.1(Dataset=GCSE, 
+  Model=Science.Exam~Gender)
+
+# Normative table with CIs
+NormTable.GCSE &lt;- Stage.2.NormTable(
+  Stage.1.Model=Model.1.GCSE, 
+  Test.Scores=seq(from=10, to=85, by=5),
+  Grid.Norm.Table=data.frame(Gender=c("F", "M")), 
+  Rounded = FALSE)
+summary(NormTable.GCSE)
+
+# Bootstrap the CIs
+Bootstrap_NormTable.GCSE &lt;- Bootstrap.Stage.2.NormTable(
+  Stage.2.NormTable = NormTable.GCSE)
+summary(Bootstrap_NormTable.GCSE)
+
+
+# Replicate the bootstrap results that were obtained in 
+# Case study 2 of Chapter 8 in Van der Elst (2023)
+# ------------------------------------------------
+library(NormData)   # load the NormData package
+data(Substitution)  # load the Substitution dataset
+
+# Make the new variable Age.C (= Age centered) that is 
+# needed to fit the final Stage 1 model, 
+# and add it to the Substitution dataset
+Substitution$Age.C &lt;- Substitution$Age - 50
+
+# Fit the final Stage 1 model
+Substitution.Model.9 &lt;- Stage.1(Dataset=Substitution, 
+  Alpha=0.005, Model=LDST~Age.C+LE, Order.Poly.Var=1) 
+
+summary(Substitution.Model.9)
+
+# Make the normative table
+NormTable.LDST &lt;- Stage.2.NormTable(
+Stage.1.Model=Substitution.Model.9, 
+  Test.Scores=seq(from=25, to=40, by=5),
+  Grid.Norm.Table=expand.grid(
+  Age.C=seq(from=-30, to=30, by = 1), 
+  LE=c("Low", "Average", "High")), Rounded = FALSE)
+
+# Bootstrap the CIs
+Bootstrap_NormTable.LDST &lt;- Bootstrap.Stage.2.NormTable(
+  Stage.2.NormTable = NormTable.LDST)
+
+summary(Bootstrap_NormTable.LDST)
+
+</code></pre>
+
+
+</div>

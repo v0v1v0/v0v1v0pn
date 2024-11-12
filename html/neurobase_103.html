@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>maskEmptyImageDimensions-methods</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply Masking from Empty Image Dimensions</h2>
+
+<h3>Description</h3>
+
+<p>Simple wrapper for replacing indices with a value
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">maskEmptyImageDimensions(img, inds, reorient = FALSE, mask.value = 0, ...)
+
+## S4 method for signature 'nifti'
+maskEmptyImageDimensions(img, inds, reorient = FALSE, mask.value = 0, ...)
+
+## S4 method for signature 'character'
+maskEmptyImageDimensions(img, inds, reorient = FALSE, mask.value = 0, ...)
+
+## S4 method for signature 'factor'
+maskEmptyImageDimensions(img, inds, reorient = FALSE, mask.value = 0, ...)
+
+## S4 method for signature 'list'
+maskEmptyImageDimensions(img, inds, reorient = FALSE, mask.value = 0, ...)
+
+## S4 method for signature 'array'
+maskEmptyImageDimensions(img, inds, reorient = FALSE, mask.value = 0, ...)
+
+## S4 method for signature 'anlz'
+maskEmptyImageDimensions(img, inds, reorient = FALSE, mask.value = 0, ...)
+
+## S4 method for signature 'ANY'
+maskEmptyImageDimensions(img, inds, reorient = FALSE, mask.value = 0, ...)
+
+mask_empty_dim(img, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>image, nifti object, or array</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inds</code></td>
+<td>
+<p>indices of subset from <code>getEmptyImageDimensions</code> or
+<code>dropEmptyImageDimensions</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reorient</code></td>
+<td>
+<p>Should image be reoriented if a filename?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask.value</code></td>
+<td>
+<p>Value to replace voxels outside the mask.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Object of class <code>nifti</code> or <code>array</code> if <code>nifti</code>
+is not supplied
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>mask_empty_dim</code> is a shorthand for 
+<code>maskEmptyImageDimensions</code> with all the same arguments.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getEmptyImageDimensions</code>, 
+<code>dropEmptyImageDimensions</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(5)
+dims = rep(10, 3)
+arr = array(rnorm(prod(dims)), dim = dims)
+arr[,,10] = 0
+nim = oro.nifti::nifti(arr)
+inds = getEmptyImageDimensions(nim)
+inds_arr = getEmptyImageDimensions(arr)
+res = maskEmptyImageDimensions(nim, inds = inds, mask.value = NA)
+res2 = maskEmptyImageDimensions(arr, inds = inds_arr, mask.value = NA)
+testthat::expect_equal(array(res, dim = dim(res)), 
+array(res2, dim = dim(res2)))
+
+set.seed(5)
+dims = rep(10, 3)
+arr = array(rnorm(prod(dims)), dim = dims)
+arr[,,10] = 0
+nim = oro.nifti::nifti(arr)
+inds = getEmptyImageDimensions(nim)
+rnifti = RNifti::asNifti(nim)
+timg = tempimg(nim)
+limg = list(factor(timg), factor(timg))
+mask_empty_dim(nim, inds = inds)
+func = function(...) maskEmptyImageDimensions(..., inds = inds)
+func(arr)
+func(nim)
+func(rnifti)
+func(timg)
+func(limg)
+
+</code></pre>
+
+
+</div>

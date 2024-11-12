@@ -1,0 +1,385 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netcomplex</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate effect of arbitrary complex interventions in component
+network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>Calculate effect of arbitrary complex interventions (i.e.,
+combinations of several components) in component network
+meta-analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netcomplex(
+  x,
+  complex,
+  common = x$common,
+  random = x$random,
+  level = x$level.ma,
+  nchar.comps = x$nchar.trts,
+  backtransf = x$backtransf,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+
+## S3 method for class 'netcomplex'
+print(
+  x,
+  common = x$common,
+  random = x$random,
+  backtransf = x$backtransf,
+  nchar.comps = x$nchar.comps,
+  digits = gs("digits"),
+  digits.stat = gs("digits.stat"),
+  digits.pval = gs("digits.pval"),
+  scientific.pval = gs("scientific.pval"),
+  zero.pval = gs("zero.pval"),
+  JAMA.pval = gs("JAMA.pval"),
+  big.mark = gs("big.mark"),
+  legend = TRUE,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netcomb</code> or <code>netcomplex</code>
+(print function).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>complex</code></td>
+<td>
+<p>A matrix, vector or single numeric defining the
+complex intervention(s) (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether results for common
+effects model should be conducted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether results for random
+effects model should be conducted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>The level used to calculate confidence intervals for
+combinations of components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.comps</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique names for components (see
+Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether printed results
+should be back transformed. If <code>backtransf=TRUE</code>, results
+for <code>sm="OR"</code> are printed as odds ratios rather than log
+odds ratios.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments (to catch deprecated arguments).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.stat</code></td>
+<td>
+<p>Minimal number of significant digits for z-value
+of test for overall effect, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.pval</code></td>
+<td>
+<p>Minimal number of significant digits for
+p-values, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scientific.pval</code></td>
+<td>
+<p>A logical specifying whether p-values should
+be printed in scientific notation, e.g., 1.2345e-01 instead of
+0.12345.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero.pval</code></td>
+<td>
+<p>A logical specifying whether p-values should be
+printed with a leading zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>JAMA.pval</code></td>
+<td>
+<p>A logical specifying whether p-values for test of
+combination effect should be printed according to JAMA reporting
+standards.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>big.mark</code></td>
+<td>
+<p>A character used as thousands separator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>A logical indicating whether a legend should be
+printed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>R functions <code>netcomb</code> and <code>discomb</code> only
+report results for complex interventions present in the
+network. This function can be used to calculate the effect for
+arbitrary complex interventions.
+</p>
+<p>Complex interventions can be specified using argument <code>complex</code>:
+</p>
+
+<ul>
+<li>
+<p> a character vector with definition of complex interventions,
+</p>
+</li>
+<li>
+<p> a single numeric defining the number of components to combine
+in a complex intervention,
+</p>
+</li>
+<li>
+<p> a dedicated C matrix.
+</p>
+</li>
+</ul>
+<p>In order to calculate effects of arbitrary complex interventions, a
+C matrix is needed which describes how the complex interventions
+are composed by the components (Rücker et al., 2020, Section
+3.2). The C matrix is constructed internally if not provided by
+argument <code>complex</code>. All complex interventions occuring in the
+network are considered if argument <code>complex</code> is missing.
+</p>
+<p>By default, component names are not abbreviated in
+printouts. However, in order to get more concise printouts,
+argument <code>nchar.comps</code> can be used to define the minimum
+number of characters for abbreviated component names (see
+<code>abbreviate</code>, argument <code>minlength</code>). R function
+<code>treats</code> is utilised internally to create abbreviated
+component names.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list is returned by the function <code>netcomplex</code> with the
+following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>complex</code></td>
+<td>
+<p>Complex intervention(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Comb.common, Comb.random</code></td>
+<td>
+<p>A vector of combination effects
+(common and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seComb.common, seComb.random</code></td>
+<td>
+<p>A vector with corresponding
+standard errors (common and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.Comb.common, lower.Comb.random</code></td>
+<td>
+<p>A vector with lower
+confidence limits for combinations (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.Comb.common, upper.Comb.random</code></td>
+<td>
+<p>A vector with upper
+confidence limits for combinations (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.Comb.common, statistic.Comb.random</code></td>
+<td>
+<p>A vector with
+z-values for the overall effect of combinations (common and random
+effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Comb.common, pval.Comb.random</code></td>
+<td>
+<p>A vector with p-values for
+the overall effect of combinations (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common, random</code></td>
+<td>
+<p>A defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level, nchar.comps, backtransf, x</code></td>
+<td>
+<p>A defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C.matrix</code></td>
+<td>
+<p>C matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>R function <code>netcomparison</code> can be used to calculate the
+effect for comparisons of two arbitrary complex intervention in a
+component network meta-analysis.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Rücker G, Petropoulou M, Schwarzer G (2020):
+Network meta-analysis of multicomponent interventions.
+<em>Biometrical Journal</em>,
+<b>62</b>, 808–21
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netcomb</code>, <code>discomb</code>,
+<code>netcomparison</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Linde2016)
+
+# Only consider studies including Face-to-face PST (to reduce
+# runtime of example)
+#
+face &lt;- subset(Linde2016, id %in% c(16, 24, 49, 118))
+
+# Conduct random effects network meta-analysis
+#
+net1 &lt;- netmeta(lnOR, selnOR, treat1, treat2, id,
+  data = face, ref = "placebo", sm = "OR", common = FALSE)
+
+# Additive model for treatment components (with placebo as inactive
+# treatment)
+#
+nc1 &lt;- netcomb(net1, inactive = "placebo")
+
+# Result for combination Face-to-face PST + SSRI
+netcomplex(nc1, "Face-to-face PST + SSRI", nchar.comps = 4)
+netcomplex(nc1, "F + S", nchar.comps = 4)
+
+# Result for combination Face-to-face PST + SSRI + Placebo
+netcomplex(nc1, "Face-to-face PST + SSRI + Plac", nchar.comps = 4)
+
+## Not run: 
+# Artificial example
+t1 &lt;- rep("A", 3)
+t2 &lt;- c("B+C", "A+C", "C+D")
+TE &lt;- c(0, 1, 0)
+seTE &lt;- rep(1, 3)
+# Conduct (C)NMA
+net2 &lt;- netmeta(TE, seTE, t1, t2, random = FALSE)
+nc2 &lt;- netcomb(net2)
+
+# Result for combination A + B + C
+netcomplex(nc2, "A + B + C")
+# Same results
+netcomplex(nc2, "A+B+C")
+netcomplex(nc2, "B+C+A")
+netcomplex(nc2, "C+B+A")
+netcomplex(nc2, "c+b+a")
+
+# Generated C matrix
+netcomplex(nc2, c(LETTERS[1:4], "A+B+C"))$C.matrix
+
+# Results for all possible combinations of two components
+netcomplex(nc2, 2)
+# Results for all possible combinations of three components
+netcomplex(nc2, 3)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sample_alpha</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sampler for the concentration parameter of a Dirichlet process</h2>
+
+<h3>Description</h3>
+
+<p>Sampler updating the concentration parameter of a Dirichlet process given
+the number of observations and a Gamma(<code>a</code>, <code>b</code>) prior, following the augmentation
+strategy of West, and of Escobar and West.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sample_alpha(alpha_old, n, K, a = 1e-04, b = 1e-04)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>alpha_old</code></td>
+<td>
+<p>the current value of alpha</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>the number of data points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>current number of cluster</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>shape hyperparameter of the Gamma prior
+on the concentration parameter of the Dirichlet Process.
+Default is <code>0.0001</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>scale hyperparameter of the Gamma prior
+on the concentration parameter of the Dirichlet Process.
+Default is <code>0.0001</code>. If <code>0</code> then the concentration is fixed and this function
+returns <code>a</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A Gamma prior is used.
+</p>
+
+
+<h3>References</h3>
+
+<p>M West, Hyperparameter estimation in Dirichlet process mixture models,
+Technical Report, Duke University, 1992.
+</p>
+<p>MD Escobar, M West, Bayesian Density Estimation and Inference Using Mixtures
+<em>Journal of the American Statistical Association</em>, 90(430):577-588, 1995.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Test with a fixed K
+####################
+
+alpha_init &lt;- 1000
+N &lt;- 10000
+#n=500
+n=10000
+K &lt;- 80
+a &lt;- 0.0001
+b &lt;- a
+alphas &lt;- numeric(N)
+alphas[1] &lt;- alpha_init
+for (i in 2:N){
+ alphas[i] &lt;- sample_alpha(alpha_old = alphas[i-1], n=n, K=K, a=a, b=b)
+}
+
+postalphas &lt;- alphas[floor(N/2):N]
+alphaMMSE &lt;- mean(postalphas)
+alphaMAP &lt;- density(postalphas)$x[which.max(density(postalphas)$y)]
+
+expK &lt;- sum(alphaMMSE/(alphaMMSE+0:(n-1)))
+round(expK)
+
+
+ prioralpha &lt;- data.frame("alpha"=rgamma(n=5000, a,1/b),
+                         "distribution" =factor(rep("prior",5000),
+                         levels=c("prior", "posterior")))
+
+ library(ggplot2)
+ p &lt;- (ggplot(prioralpha, aes(x=alpha))
+       + geom_histogram(aes(y=..density..),
+                        colour="black", fill="white")
+       + geom_density(alpha=.2, fill="red")
+       + ggtitle(paste("Prior distribution on alpha: Gamma(", a,
+                 ",", b, ")\n", sep=""))
+      )
+ p
+
+postalpha.df &lt;- data.frame("alpha"=postalphas,
+                         "distribution" = factor(rep("posterior",length(postalphas)),
+                         levels=c("prior", "posterior")))
+ p &lt;- (ggplot(postalpha.df, aes(x=alpha))
+       + geom_histogram(aes(y=..density..), binwidth=.1,
+                        colour="black", fill="white")
+       + geom_density(alpha=.2, fill="blue")
+       + ggtitle("Posterior distribution of alpha\n")
+       # Ignore NA values for mean
+       # Overlay with transparent density plot
+       + geom_vline(aes(xintercept=mean(alpha, na.rm=TRUE)),
+                    color="red", linetype="dashed", size=1)
+     )
+ p
+
+
+
+
+
+
+</code></pre>
+
+
+</div>

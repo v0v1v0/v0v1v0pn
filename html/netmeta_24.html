@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hasse</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hasse diagram</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a Hasse diagram for a partial order of
+treatment ranks in a network meta-analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hasse(x, pooled = ifelse(x$random, "random", "common"), newpage = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netposet</code> (mandatory).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pooled</code></td>
+<td>
+<p>A character string indicating whether Hasse diagram
+show be drawn for common (<code>"common"</code>) or random effects model
+(<code>"random"</code>). Can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newpage</code></td>
+<td>
+<p>A logical value indicating whether a new figure
+should be printed in an existing graphics window. Otherwise, the
+Hasse diagram is added to the existing figure.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Generate a Hasse diagram (Carlsen &amp; Bruggemann, 2014) for a partial
+order of treatment ranks in a network meta-analysis (Rücker &amp;
+Schwarzer, 2017).
+</p>
+<p>This R function is a wrapper function for R function
+<code>hasse</code> in R package <b>hasseDiagram</b>
+(Krzysztof Ciomek, <a href="https://github.com/kciomek/hasseDiagram">https://github.com/kciomek/hasseDiagram</a>),
+i.e., function <code>hasse</code> can only be used if R package
+<b>hasseDiagram</b> is installed.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gerta Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>, Guido
+Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Carlsen L, Bruggemann R (2014):
+Partial order methodology: a valuable tool in chemometrics.
+<em>Journal of Chemometrics</em>,
+<b>28</b>, 226–34
+</p>
+<p>Rücker G, Schwarzer G (2017):
+Resolve conflicting rankings of outcomes in network meta-analysis:
+Partial ordering of treatments.
+<em>Research Synthesis Methods</em>,
+<b>8</b>, 526–36
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>netposet</code>,
+<code>netrank</code>, <code>plot.netrank</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Use depression dataset
+#
+data(Linde2015)
+
+# Define order of treatments
+#
+trts &lt;- c("TCA", "SSRI", "SNRI", "NRI",
+  "Low-dose SARI", "NaSSa", "rMAO-A", "Hypericum", "Placebo")
+
+# Outcome labels
+#
+outcomes &lt;- c("Early response", "Early remission")
+
+# (1) Early response
+#
+p1 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(resp1, resp2, resp3),
+  n = list(n1, n2, n3),
+  studlab = id, data = Linde2015, sm = "OR")
+#
+net1 &lt;- netmeta(p1, common = FALSE,
+  seq = trts, ref = "Placebo", small.values = "undesirable")
+
+# (2) Early remission
+#
+p2 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(remi1, remi2, remi3),
+  n = list(n1, n2, n3),
+  studlab = id, data = Linde2015, sm = "OR")
+#
+net2 &lt;- netmeta(p2, common = FALSE,
+  seq = trts, ref = "Placebo", small.values = "undesirable")
+
+# Partial order of treatment rankings
+#
+po &lt;- netposet(netrank(net1), netrank(net2), outcomes = outcomes)
+
+# Hasse diagram
+#
+hasse(po)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

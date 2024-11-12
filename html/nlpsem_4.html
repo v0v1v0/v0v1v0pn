@@ -1,0 +1,219 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getFigure</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate Visualization for Fitted Model</h2>
+
+<h3>Description</h3>
+
+<p>This function generates visualizations for the output of a fitted model. When a Latent Growth Curve Model
+(LGCM) is fitted for the longitudinal process, it provides (class-specific) estimated growth status with 95
+intervals. When a Latent Change Score Model (LCSM) is fitted for the longitudinal process, it provides (class-specific)
+estimated growth rate with 95
+visualizations are particularly useful for understanding the results and trajectories of different classes or groups
+within the model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getFigure(
+  model,
+  nClass = NULL,
+  cluster_TIC = NULL,
+  grp_var = NULL,
+  sub_Model,
+  y_var,
+  curveFun,
+  y_model = NULL,
+  t_var,
+  records,
+  m_var = NULL,
+  x_type = NULL,
+  x_var = NULL,
+  xstarts,
+  xlab = "Time",
+  outcome = "Process"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A fitted mxModel object. Specifically, this should be the <code>mxOutput</code> slot from the result returned by
+one of the estimation functions provided by this package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nClass</code></td>
+<td>
+<p>An integer specifying the number of latent classes for the mixture model or manifested classes for multiple
+group model. Default is <code>NULL</code>, indicating a single-group model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_TIC</code></td>
+<td>
+<p>A string or character vector representing the column name(s) for time-invariant covariate(s)
+indicating cluster formations. Default is <code>NULL</code>, indicating no such time-invariant covariates are present
+in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grp_var</code></td>
+<td>
+<p>A string specifying the column that indicates manifested classes when applicable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sub_Model</code></td>
+<td>
+<p>A string that specifies the (class-specific) model. Supported sub-models include <code>"LGCM"</code> (for latent
+growth curve models), <code>"LCSM"</code> (for latent change score models), <code>"TVC"</code> (for latent growth curve models or latent
+change score models with a time-varying covariate), <code>"MGM"</code> (for multivariate latent growth curve models or latent change
+score models), and <code>"MED"</code> (for longitudinal mediation models).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_var</code></td>
+<td>
+<p>A string or character vector representing the prefix of the column names for the outcome variable(s)
+at each study wave.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>curveFun</code></td>
+<td>
+<p>A string specifying the functional forms of the growth curve(s). Supported options for <code>y_model = "LGCM"</code>
+include: <code>"linear"</code> (or <code>"LIN"</code>), <code>"quadratic"</code> (or <code>"QUAD"</code>), <code>"negative exponential"</code> (or <code>"EXP"</code>),
+<code>"Jenss-Bayley"</code> (or <code>"JB"</code>), and <code>"bilinear spline"</code> (or <code>"BLS"</code>). Supported options for <code>y_model =
+"LCSM"</code> include: <code>"nonparametric"</code> (or <code>"NonP"</code>), <code>"quadratic"</code> (or <code>"QUAD"</code>), <code>"negative exponential"</code>
+(or <code>"EXP"</code>), and <code>"Jenss-Bayley"</code> (or <code>"JB"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_model</code></td>
+<td>
+<p>A string that specifies how to fit longitudinal outcomes. Supported values are <code>"LGCM"</code> and <code>"LCSM"</code>.
+By default, this is <code>NULL</code> as this argument only requires when <code>sub_Model</code> is <code>"TVC"</code> or <code>"MGM"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t_var</code></td>
+<td>
+<p>A string representing the prefix of the column names corresponding to the time variable at each study
+wave.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>records</code></td>
+<td>
+<p>A numeric vector representing the indices of the study waves.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m_var</code></td>
+<td>
+<p>A string that specifies the prefix of the column names corresponding to the mediator variable at each time point.
+Default is <code>NULL</code> as this argument only requires when <code>sub_Model</code> is <code>"MED"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_type</code></td>
+<td>
+<p>A string indicating the type of predictor variable used in the model. Supported values are <code>"baseline"</code>
+and <code>"longitudinal"</code>. Default is <code>NULL</code> as this argument only requires when <code>sub_Model</code> is <code>"MED"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_var</code></td>
+<td>
+<p>A string specifying the baseline predictor if <code>x_type = "baseline"</code>, or the prefix of the column names
+corresponding to the predictor variable at each study wave if <code>x_type = "longitudinal"</code>. Default is <code>NULL</code> as this
+argument only requires when <code>sub_Model</code> is <code>"MED"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xstarts</code></td>
+<td>
+<p>A numeric value to indicate the starting time of the longitudinal process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>A string representing the time unit (e.g., "Week", "Month", or "Year") for the x-axis. Default is
+"Time".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcome</code></td>
+<td>
+<p>A string or character vector representing the name(s) of the longitudinal process(es) under examination.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>figOutput</code> containing a slot named <code>figures</code>. This slot holds a ggplot object or a list
+of ggplot objects, each representing a figure for the fitted model. If the <code>figures</code> slot contains a list of ggplot objects,
+individual figures can be visualized using the <code>show()</code> function.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Load ECLS-K (2011) data
+data("RMS_dat")
+RMS_dat0 &lt;- RMS_dat
+# Re-baseline the data so that the estimated initial status is for the starting point of the study
+baseT &lt;- RMS_dat0$T1
+RMS_dat0$T1 &lt;- RMS_dat0$T1 - baseT
+RMS_dat0$T2 &lt;- RMS_dat0$T2 - baseT
+RMS_dat0$T3 &lt;- RMS_dat0$T3 - baseT
+RMS_dat0$T4 &lt;- RMS_dat0$T4 - baseT
+RMS_dat0$T5 &lt;- RMS_dat0$T5 - baseT
+RMS_dat0$T6 &lt;- RMS_dat0$T6 - baseT
+RMS_dat0$T7 &lt;- RMS_dat0$T7 - baseT
+RMS_dat0$T8 &lt;- RMS_dat0$T8 - baseT
+RMS_dat0$T9 &lt;- RMS_dat0$T9 - baseT
+xstarts &lt;- mean(baseT)
+
+
+# Plot single group LGCM model
+set.seed(20191029)
+BLS_LGCM1 &lt;- getLGCM(dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "BLS",
+                     intrinsic = FALSE, records = 1:9, res_scale = 0.1)
+Figure1 &lt;- getFigure(
+  model = BLS_LGCM1@mxOutput, nClass = NULL, cluster_TIC = NULL, sub_Model = "LGCM",
+  y_var = "M", curveFun = "BLS", y_model = "LGCM", t_var = "T", records = 1:9,
+  m_var = NULL, x_var = NULL, x_type = NULL, xstarts = xstarts, xlab = "Month",
+  outcome = "Mathematics"
+)
+show(Figure1)
+# Plot mixture LGCM model
+BLS_LGCM2 &lt;-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.45, 0.55), sub_Model = "LGCM",
+  cluster_TIC = NULL, y_var = "M", t_var = "T", records = 1:9,
+  curveFun = "BLS", intrinsic = FALSE, res_scale = list(0.3, 0.3)
+)
+Figure2 &lt;- getFigure(
+  model = BLS_LGCM2@mxOutput, nClass = 2, cluster_TIC = NULL, sub_Model = "LGCM",
+  y_var = "M", curveFun = "BLS", y_model = "LGCM", t_var = "T", records = 1:9,
+  m_var = NULL, x_var = NULL, x_type = NULL, xstarts = xstarts, xlab = "Month",
+  outcome = "Mathematics"
+)
+show(Figure2)
+
+
+</code></pre>
+
+
+</div>

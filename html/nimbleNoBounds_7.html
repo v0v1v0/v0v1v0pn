@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dLogitUnif</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Logit transformed beta distribution.</h2>
+
+<h3>Description</h3>
+
+<p>Transformation of uniform distribution, via scaled-logit transform, to the real line.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dLogitUnif(x, min = 0, max = 1, log = 0)
+
+rLogitUnif(n = 1, min = 0, max = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A continuous random variable on the real line, where y=ilogit(x)*(max-min)+min and y ~ dunif(min, max).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min</code></td>
+<td>
+<p>lower limit of the distribution.  Must be finite.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max</code></td>
+<td>
+<p>upper limit of the distribution.  Must be finite.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>logical flag. Returns log-density if TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of random variables. Currently limited to 1, as is common in nimble. See ?replicate for an alternative.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>density, or log-density, of uniform distribution transformed to real line via scaling and logit function.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>David R.J. Pleydell
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Create a uniform random variable, and transform it to the log scale
+n      = 100000
+lower  = -5
+upper  = 11
+y      = runif(n=n, lower, upper)
+x      = logit((y-lower)/(upper-lower))
+
+## Plot histograms of the two random variables
+oldpar &lt;- par()
+par(mfrow=n2mfrow(2))
+## Plot 1
+hist(x, n=100, freq=FALSE)
+curve(dLogitUnif(x, lower, upper), -15, 15, n=1001, col="red", add=TRUE, lwd=3)
+## Plot 2: back-transformed
+xNew = replicate(n=n, rLogitUnif(n=1, lower, upper))
+yNew   = ilogit(xNew) * (upper-lower) + lower
+hist(yNew, n=100, freq=FALSE, xlab="exp(x)")
+curve(dunif(x, lower, upper), -15, 15, n=1001, col="red", lwd=3, add=TRUE)
+par(oldpar)
+
+## Create a NIMBLE model that uses this transformed distribution
+code = nimbleCode({
+  x ~ dLogitUnif(lower, upper)
+})
+
+
+## Build &amp; compile the model
+const = list(lower=lower, upper=upper)
+modelR = nimbleModel(code=code, const=const)
+modelC = compileNimble(modelR)
+
+## Configure, build and compile an MCMC
+conf  = configureMCMC(modelC)
+mcmc  = buildMCMC(conf=conf)
+cMcmc = compileNimble(mcmc)
+
+## Run the MCMC
+x = as.vector(runMCMC(mcmc=cMcmc, niter=50000))
+
+## Plot MCMC output
+oldpar &lt;- par()
+par(mfrow=n2mfrow(3))
+## Plot 1: MCMC trajectory
+plot(x, typ="l")
+## Plot 2: taget density on unbounded sampling scale
+hist(x, n=100, freq=FALSE, xlab="x = logit(y)")
+curve(dLogitUnif(x, lower, upper), -15, 15, n=1001, col="red", lwd=3, add=TRUE)
+## Plot 3: taget density on bounded scale
+hist(ilogit(x)*(upper-lower)+lower, n=100, freq=FALSE, xlab="y")
+curve(dunif(x, lower, upper), -15, 15, n=1001, col="red", lwd=3, add=TRUE)
+par(oldpar)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,825 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plotModule</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot the topology of a network module</h2>
+
+<h3>Description</h3>
+
+<p>Plot the correlation structure, network edges, scaled weighted degree, 
+node contribtuion, module data, and module summary vectors of one or
+more network modules.
+</p>
+<p>Individual components of the module plot can be plotted using 
+<code>plotCorrelation</code>, <code>plotNetwork</code>, 
+<code>plotDegree</code>, <code>plotContribution</code>, 
+<code>plotData</code>, and <code>plotSummary</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plotModule(
+  network,
+  data,
+  correlation,
+  moduleAssignments = NULL,
+  modules = NULL,
+  backgroundLabel = "0",
+  discovery = NULL,
+  test = NULL,
+  verbose = TRUE,
+  orderSamplesBy = NULL,
+  orderNodesBy = NULL,
+  orderModules = TRUE,
+  plotNodeNames = TRUE,
+  plotSampleNames = TRUE,
+  plotModuleNames = NULL,
+  main = "Module Topology",
+  main.line = 1,
+  drawBorders = FALSE,
+  lwd = 1,
+  naxt.line = -0.5,
+  saxt.line = -0.5,
+  maxt.line = NULL,
+  xaxt.line = -0.5,
+  xaxt.tck = -0.025,
+  xlab.line = 2.5,
+  yaxt.line = 0,
+  yaxt.tck = -0.15,
+  ylab.line = 2.5,
+  laxt.line = 2.5,
+  laxt.tck = 0.04,
+  cex.axis = 0.8,
+  legend.main.line = 1.5,
+  cex.lab = 1.2,
+  cex.main = 2,
+  dataCols = NULL,
+  dataRange = NULL,
+  corCols = correlation.palette(),
+  corRange = c(-1, 1),
+  netCols = network.palette(),
+  netRange = c(0, 1),
+  degreeCol = "#feb24c",
+  contribCols = c("#A50026", "#313695"),
+  summaryCols = c("#1B7837", "#762A83"),
+  naCol = "#bdbdbd",
+  dryRun = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p>a list of interaction networks, one for each dataset. Each 
+entry of the list should be a <code class="reqn">n * n</code> matrix or where each element 
+contains the edge weight between nodes <code class="reqn">i</code> and <code class="reqn">j</code> in the inferred 
+network for that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a list of matrices, one for each dataset. Each entry of the list 
+should be the data used to infer the interaction <code>network</code> for that 
+dataset. The columns should correspond to variables in the data
+(nodes in the network) and rows to samples in that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correlation</code></td>
+<td>
+<p>a list of matrices, one for each dataset. Each entry of
+the list should be a <code class="reqn">n * n</code> matrix where each element contains the 
+correlation coefficient between nodes <code class="reqn">i</code> and <code class="reqn">j</code> in the 
+<code>data</code> used to infer the interaction network for that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>moduleAssignments</code></td>
+<td>
+<p>a list of vectors, one for each <em>discovery</em> 
+dataset, containing the module assignments for each node in that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modules</code></td>
+<td>
+<p>a list of vectors, one for each <code>discovery</code> dataset, 
+of modules to perform the analysis on. If unspecified, all modules
+in each <code>discovery</code> dataset will be analysed, with the exception of 
+those specified in <code>backgroundLabel</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backgroundLabel</code></td>
+<td>
+<p>a single label given to nodes that do not belong to 
+any module in the <code>moduleAssignments</code> argument. Defaults to "0". Set 
+to <code>NULL</code> if you do not want to skip the network background module.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discovery</code></td>
+<td>
+<p>a vector of names or indices denoting the <em>discovery</em>
+dataset(s) in the <code>data</code>, <code>correlation</code>, <code>network</code>, 
+<code>moduleAssignments</code>, <code>modules</code>, and <code>test</code> lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>a list of vectors, one for each <code>discovery</code> dataset,
+of names or indices denoting the <em>test</em> dataset(s) in the <code>data</code>, 
+<code>correlation</code>, and <code>network</code> lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical; should progress be reported? Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orderSamplesBy</code></td>
+<td>
+<p><code>NULL</code> (default), <code>NA</code>, or a vector 
+containing a single dataset name or index. Controls how samples are ordered 
+on the plot (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orderNodesBy</code></td>
+<td>
+<p><code>NULL</code> (default), <code>NA</code>, or a vector of dataset
+names or indices. Controls how nodes are ordered on the plot (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orderModules</code></td>
+<td>
+<p>logical; if <code>TRUE</code> modules ordered by clustering 
+their summary vectors. If <code>FALSE</code> modules are returned in the order
+provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotNodeNames</code></td>
+<td>
+<p>logical; controls whether the node names are 
+drawed on the bottom axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotSampleNames</code></td>
+<td>
+<p>logical; controls whether the sample names are 
+drawed on the left axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotModuleNames</code></td>
+<td>
+<p>logical; controls whether module names are drawed.
+The default is for module names to be drawed when multiple <code>modules</code> 
+are drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main.line</code></td>
+<td>
+<p>the number of lines into the top margin at which the plot
+title will be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drawBorders</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, borders are drawn around the 
+<em>weighted degree</em>, <em>node conribution</em>, and <em>module summary</em>
+bar plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>line width for borders and axes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>naxt.line</code></td>
+<td>
+<p>the number of lines into the bottom margin at which the node
+names will be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>saxt.line</code></td>
+<td>
+<p>the number of lines into the left margin at which the sample
+names will be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxt.line</code></td>
+<td>
+<p>the number of lines into the bottom margin at which the 
+module names will be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xaxt.line</code></td>
+<td>
+<p>the number of lines into the bottom margin at which the 
+x-axis tick labels will be drawn on the module summary bar plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xaxt.tck</code></td>
+<td>
+<p>the size of the x-axis ticks for the module summary bar 
+plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab.line</code></td>
+<td>
+<p>the number of lines into the bottom margin at which the 
+x axis label on the <em>module summary</em> bar plot(s) will be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yaxt.line</code></td>
+<td>
+<p>the number of lines into the left margin at which the 
+y-axis tick labels will be drawn on the weighted degree and node 
+contribution bar plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yaxt.tck</code></td>
+<td>
+<p>the size of the y-axis ticks for the weighted degree and 
+node contribution bar plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab.line</code></td>
+<td>
+<p>the number of lines into the left margin at which the 
+y axis labels on the <em>weighted degree</em> and <em>node contribution</em> 
+bar plots will be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>laxt.line</code></td>
+<td>
+<p>the distance from the legend to draw the legend axis 
+labels, as multiple of <code>laxt.tck</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>laxt.tck</code></td>
+<td>
+<p>size of the ticks on each axis legend relative to the
+size of the correlation, edge weights, and data matrix heatmaps.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.axis</code></td>
+<td>
+<p>relative size of the node and sample names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend.main.line</code></td>
+<td>
+<p>the distance from the legend to draw the legend 
+title.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.lab</code></td>
+<td>
+<p>relative size of the module names and legend titles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.main</code></td>
+<td>
+<p>relative size of the plot titles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataCols</code></td>
+<td>
+<p>a character vector of colors to create a gradient from for
+the data heatmap (see details). Automatically determined if <code>NA</code> or 
+<code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataRange</code></td>
+<td>
+<p>the range of values to map to the <code>dataCols</code> gradient
+(see details). Automatically determined if <code>NA</code> or <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corCols</code></td>
+<td>
+<p>a character vector of colors to create a gradient from for
+the correlation structure heatmap (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corRange</code></td>
+<td>
+<p>the range of values to map to the <code>corCols</code> gradient
+(see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>netCols</code></td>
+<td>
+<p>a character vector of colors to create a gradient from for
+the network edge weight heatmap (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>netRange</code></td>
+<td>
+<p>the range of values to map to the <code>corCols</code> gradient
+(see details). Automatically determined if <code>NA</code> or <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>degreeCol</code></td>
+<td>
+<p>color to use for the weighted degree bar plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contribCols</code></td>
+<td>
+<p>color(s) to use for the node contribution bar plot 
+(see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summaryCols</code></td>
+<td>
+<p>color(s) to use for the node contribution bar plot 
+(see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>naCol</code></td>
+<td>
+<p>color to use for missing nodes and samples on the data, 
+correlation structure, and network edge weight heat maps.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dryRun</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, only the axes and labels will be 
+drawed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+
+<h4>Input data structures:</h4>
+
+<p>The preservation of network modules in a second
+dataset is quantified by measuring the preservation of topological
+properties between the <em>discovery</em> and <em>test</em> datasets. These 
+properties are calculated not only from the interaction networks inferred
+in each dataset, but also from the data used to infer those networks (e.g.
+gene expression data) as well as the correlation structure between 
+variables/nodes. Thus, all functions in the <code>NetRep</code> package have the 
+following arguments: 
+</p>
+
+<ul>
+<li>
+<p><code>network</code>: 
+a list of interaction networks, one for each dataset.
+
+</p>
+</li>
+<li>
+<p><code>data</code>: 
+a list of data matrices used to infer those networks, one for each 
+dataset.
+
+</p>
+</li>
+<li>
+<p><code>correlation</code>: 
+a list of matrices containing the pairwise correlation coefficients 
+between variables/nodes in each dataset.
+ 
+</p>
+</li>
+<li>
+<p><code>moduleAssignments</code>: 
+a list of vectors, one for each <em>discovery</em> dataset, containing 
+the module assignments for each node in that dataset.
+
+</p>
+</li>
+<li>
+<p><code>modules</code>: 
+a list of vectors, one for each <em>discovery</em> dataset, containing
+the names of the modules from that dataset to analyse.  
+
+</p>
+</li>
+<li>
+<p><code>discovery</code>: 
+a vector indicating the names or indices of the previous arguments' 
+lists to use as the <em>discovery</em> dataset(s) for the analyses.
+
+</p>
+</li>
+<li>
+<p><code>test</code>: 
+a list of vectors, one vector for each <em>discovery</em> dataset, 
+containing the names or indices of the <code>network</code>, <code>data</code>, and 
+<code>correlation</code> argument lists to use as the <em>test</em> dataset(s) 
+for the analysis of each <em>discovery</em> dataset.
+
+</p>
+</li>
+</ul>
+<p>The formatting of these arguments is not strict: each function will attempt
+to make sense of the user input. For example, if there is only one 
+<code>discovery</code> dataset, then input to the <code>moduleAssigments</code> and 
+<code>test</code> arguments may be vectors, rather than lists. If the node and
+sample ordering is being calculated within the same dataset being 
+visualised, then the <code>discovery</code> and <code>test</code> arguments do
+not need to be specified, and the input matrices for the <code>network</code>,
+<code>data</code>, and <code>correlation</code> arguments do not need to be wrapped in
+a list.
+</p>
+
+
+
+<h4>Analysing large datasets:</h4>
+
+<p>Matrices in the <code>network</code>, <code>data</code>, and <code>correlation</code> lists
+can be supplied as <code>disk.matrix</code> objects. This class allows 
+matrix data to be kept on disk and loaded as required by <span class="pkg">NetRep</span>. 
+This dramatically decreases memory usage: the matrices for only one 
+dataset will be kept in RAM at any point in time.
+</p>
+
+
+
+<h4>Node, sample, and module ordering:</h4>
+
+<p>By default, nodes are ordered in decreasing order of <em>weighted degree</em>
+in the <code>discovery</code> dataset (see <code>nodeOrder</code>). Missing 
+nodes are colored in grey. This facilitates the visual comparison of 
+modules across datasets, as the node ordering will be preserved. 
+</p>
+<p>Alternatively, a vector containing the names or indices of one or more
+datasets can be provided to the <code>orderNodesBy</code> argument. 
+</p>
+<p>If a single dataset is provided, then nodes will be ordered in decreasing 
+order of <em>weighted degree</em> in that dataset. Only nodes that are 
+present in this dataset will be drawn when ordering nodes by a dataset 
+that is not the <code>discovery</code> dataset for the requested modules(s).
+</p>
+<p>If multiple datasets are provided then the <em>weighted degree</em> will be
+averaged across these datasets (see nodeOrder for more details). 
+This is useful for obtaining a robust ordering of nodes by relative 
+importance, assuming the modules displayed are preserved in those 
+datasets.
+</p>
+<p>Ordering of nodes by <em>weighted degree</em> can be suppressed by setting
+<code>orderNodesBy</code> to <code>NA</code>, in which case nodes will be ordered as 
+in the matrices provided in the <code>network</code>, <code>data</code>, and
+<code>correlation</code> arguments.
+</p>
+<p>When multiple modules are drawn, modules are ordered by the similarity
+of their summary vectors in the dataset(s) specified in <code>orderNodesBy</code>
+argument. If multiple datasets are provided to the <code>orderNodesBy</code>
+argument then the module summary vectors are concatenated across datasets.
+</p>
+<p>By default, samples in the data heatmap and accompanying module summary bar
+plot are ordered in descending order of <em>module summary</em> in the drawn 
+dataset (specified by the <code>test</code> argument). If multiple modules are 
+drawn, samples are ordered as per the left-most module on the plot.
+</p>
+<p>Alternatively, a vector containing the name or index of another dataset 
+may be provided to the <code>orderSamplesBy</code> argument. In this case, 
+samples will be ordered in descending order of <em>module summary</em> in 
+the specified dataset. This is useful when comparing different 
+measurements across samples, for example, gene expression data obtained 
+from multiple tissues samples across the same individuals. If the dataset 
+specified is the <code>discovery</code> dataset, then missing samples will be 
+displayed as horizontal grey bars. If the dataset specified is one of the 
+other datasets, samples present in both the specified dataset and the 
+<code>test</code> dataset will be displayed first in order of the specified 
+dataset, then samples present in only the test dataset will be displayed
+underneath a horizontal black line ordered by their module summary vector 
+in the test dataset.
+</p>
+<p>Order of samples by <em>module summary</em> can be suppressed by setting 
+<code>orderSamplesBy</code> to <code>NA</code>, in which case samples will be order as
+in the matrix provided to the <code>data</code> argument for the drawn dataset.
+</p>
+
+
+
+<h4>Weighted degree scaling:</h4>
+
+<p>When drawn on a plot, the weighted degree of each node is scaled to the 
+maximum weighted degree within its module. The scaled weighted degree is 
+measure of relative importance for each node to its module. This makes 
+visualisation of multiple modules with different sizes and densities 
+possible. However, the scaled weighted degree should only be interpreted
+for groups of nodes that have an apparent module structure.
+</p>
+
+
+
+<h4>Plot layout and device size</h4>
+
+<p>For optimal results we recommend viewing single modules on a PNG device
+with a width of 1500, a height of 2700 and a nominal resolution of 300 
+(<code>png(filename, width=5*300, height=9*300, res=300))</code>).
+</p>
+<p><strong>Warning</strong>: PDF and other vectorized devices should not be used when
+plotting more than a hundred nodes. Large files will be generated which
+may cause image editing programs such as Inkscape or Illustrator to crash
+when polishing figures for publication.
+</p>
+<p>When <code>dryRun</code> is <code>TRUE</code> only the axes, legends, labels, and
+title will be drawn, allowing for quick iteration of customisable
+parameters to get the plot layout correct.
+</p>
+<p>If axis labels or legends are drawn off screen then the margins of the 
+plot should be adjusted prior to plotting using the 
+<code>par</code> command to increase the margin size 
+(see the "mar" option in the <code>par</code> help page).
+</p>
+<p>The size of text labels can be modified by increasing or decreasing the
+<code>cex.main</code>, <code>cex.lab</code>, and <code>cex.axis</code> arguments:
+</p>
+
+<ul>
+<li>
+<p><code>cex.main</code>: controls the size of the plot title (specified 
+in the <code>main</code> argument).
+</p>
+</li>
+<li>
+<p><code>cex.lab</code>: controls the size of the axis labels on the
+<em>weighted degree</em>, <em>node contribution</em>,
+and <em>module summary</em> bar plots as well as
+the size of the module labels and the heatmap 
+legend titles.
+</p>
+</li>
+<li>
+<p><code>cex.axis</code>: contols the size of the axis tick labels, 
+including the node and sample labels.
+</p>
+</li>
+</ul>
+<p>The position of these labels can be changed through the following 
+arguments:
+</p>
+
+<ul>
+<li>
+<p><code>xaxt.line</code>: controls the distance from the plot the x-axis
+tick labels are drawn on the <em>module summary</em> bar plot.
+</p>
+</li>
+<li>
+<p><code>xlab.line</code>: controls the distance from the plot the x-axis 
+label is drawn on the <em>module summary</em> bar plot.
+</p>
+</li>
+<li>
+<p><code>yaxt.line</code>: controls the distance from the plot the y-axis 
+tick labels are drawn on the <em>weighted degree</em> and  
+<em>node contribution</em> bar plots.
+</p>
+</li>
+<li>
+<p><code>ylab.line</code>: controls the distance from the plot the y-axis
+label is drawn on the <em>weighted degree</em> and 
+<em>node contribution</em> bar plots.
+</p>
+</li>
+<li>
+<p><code>main.line</code>: controls the distance from the plot the title is
+drawn.
+</p>
+</li>
+<li>
+<p><code>naxt.line</code>: controls the distance from the plot the node 
+labels are drawn.
+</p>
+</li>
+<li>
+<p><code>saxt.line</code>: controls the distance from the plot the sample 
+labels are drawn.
+</p>
+</li>
+<li>
+<p><code>maxt.line</code>: controls the distance from the plot the module
+labels are drawn.
+</p>
+</li>
+<li>
+<p><code>laxt.line</code>: controls the distance from the heatmap legends
+that the gradient legend labels are drawn.
+</p>
+</li>
+<li>
+<p><code>legend.main.line</code>: controls the distance from the heatmap
+legends that the legend title is drawn.
+</p>
+</li>
+</ul>
+<p>The rendering of node, sample, and module names can be disabled by setting
+<code>plotNodeNames</code>, <code>plotSampleNames</code>, and <code>plotModuleNames</code>
+to <code>FALSE</code>.
+</p>
+<p>The size of the axis ticks can be changed by increasing or decreasing the
+following arguments:
+</p>
+
+<ul>
+<li>
+<p><code>xaxt.tck</code>: size of the x-axis tick labels as a multiple of
+the height of the <em>module summary</em> bar plot
+</p>
+</li>
+<li>
+<p><code>yaxt.tck</code>: size of the y-axis tick labels as a multiple of 
+the width of the <em>weighted degree</em> or <em>node contribution</em>
+bar plots.
+</p>
+</li>
+<li>
+<p><code>laxt.tck</code>: size of the heatmap legend axis ticks as a 
+multiple of the width of the data, correlation structure, or 
+network edge weight heatmaps.
+</p>
+</li>
+</ul>
+<p>The <code>drawBorders</code> argument controls whether borders are drawn around 
+the weighted degree, node contribution, or module summary bar plots. The 
+<code>lwd</code> argument controls the thickness of these borders, as well as 
+the thickness of axes and axis ticks.
+</p>
+
+
+
+<h4>Modifying the color palettes:</h4>
+
+<p>The <code>dataCols</code> and <code>dataRange</code> arguments control the appearance 
+of the data heatmap (see <code>plotData</code>). The gradient of colors 
+used on the heatmap can be changed by specifying a vector of colors to 
+interpolate between in <code>dataCols</code> and <code>dataRange</code> specifies the 
+range of values that maps to this gradient. Values outside of the 
+specified <code>dataRange</code> will be rendered with the colors used at either
+extreme of the gradient. The default gradient is determined based on the 
+<code>data</code> shown on the plot. If all values in the <code>data</code> matrix are
+positive, then the gradient is interpolated between white and green, where
+white is used for the smallest value and green for the largest. If all
+values are negative, then the gradient is interpolated between purple and
+white, where purple is used for the smallest value and white for the value
+closest to zero. If the data contains both positive and negative values, 
+then the gradient is interpolated between purple, white, and green, where 
+white is used for values of zero. In this case the range shown is always 
+centered at zero, with the values at either extreme determined by the 
+value in the rendered <code>data</code> with the strongest magnitude (the 
+maximum of the absolute value).
+</p>
+<p>The <code>corCols</code> and <code>corRange</code> arguments control the appearance of
+the correlation structure heatmap (see <code>plotCorrelation</code>). The
+gradient of colors used on the heatmap can be changed by specifying a
+vector of colors to interpolate between in <code>corCols</code>. By default,
+strong negative correlations are shown in blue, and strong positive
+correlations in red, and weak correlations as white. <code>corRange</code> 
+controls the range of values that this gradient maps to, by default, -1 to
+1. Changing this may be useful for showing differences where range of 
+correlation coefficients is small.
+</p>
+<p>The <code>netCols</code> and <code>netRange</code> arguments control the appearance of
+the network edge weight heatmap (see <code>plotNetwork</code>). The
+gradient of colors used on the heatmap can be changed by specifying a
+vector of colors to interpolate between in <code>netCols</code>. By default,
+weak or non-edges are shown in white, while strong edges are shown in red.
+The <code>netRange</code> controls the range of values this gradient maps to, 
+by default, 0 to 1. If <code>netRange</code> is set to <code>NA</code>, then the 
+gradient will be mapped to values between 0 and the maximum edge weight of
+the shown network.
+</p>
+<p>The <code>degreeCol</code> argument controls the color of the weighted degree
+bar plot (see <code>plotDegree</code>).
+</p>
+<p>The <code>contribCols</code> argument controls the color of the node 
+contribution bar plot (see <code>plotContribution</code>. This can be 
+specified as single value to be used for all nodes, or as two colors: one
+to use for nodes with positive contributions and one to use for nodes with
+negative contributions.
+</p>
+<p>The <code>summaryCols</code> argument controls the color of the module summary 
+bar plot (see <code>plotSummary</code>. This can be specified as single
+value to be used for all samples, or as two colors: one to use for samples
+with a positive module summary value and one fpr samples with a negative
+module summary value.
+</p>
+<p>The <code>naCol</code> argument controls the color of missing nodes and samples
+on the data, correlaton structure, and network edge weight heatmaps.
+</p>
+
+
+
+<h4>Embedding in Rmarkdown documents</h4>
+
+<p>The chunk option <code>fig.keep="last"</code> should be set to avoid an empty 
+plot being embedded above the plot generated by <code>plotModule</code>. This
+empty plot is generated so that an error will be thrown as early as 
+possible if the margins are too small to be displayed. Normally, these
+are drawn over with the actual plot components when drawing the plot on
+other graphical devices.
+</p>
+
+
+
+<h3>See Also</h3>
+
+<p><code>plotCorrelation</code>, 
+<code>plotNetwork</code>,
+<code>plotDegree</code>,
+<code>plotContribution</code>,
+<code>plotData</code>, and
+<code>plotSummary</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load in example data, correlation, and network matrices for a discovery 
+# and test dataset:
+data("NetRep")
+
+# Set up input lists for each input matrix type across datasets. The list
+# elements can have any names, so long as they are consistent between the
+# inputs.
+network_list &lt;- list(discovery=discovery_network, test=test_network)
+data_list &lt;- list(discovery=discovery_data, test=test_data)
+correlation_list &lt;- list(discovery=discovery_correlation, test=test_correlation)
+labels_list &lt;- list(discovery=module_labels)
+
+# Plot module 1, 2 and 4 in the discovery dataset
+plotModule(
+  network=network_list, data=data_list, correlation=correlation_list, 
+  moduleAssignments=labels_list, modules=c(1, 2, 4)
+)
+
+# Now plot them in the test dataset (module 2 does not replicate)
+plotModule(
+  network=network_list,data=data_list, correlation=correlation_list,
+  moduleAssignments=labels_list, modules=c(1, 2, 4), discovery="discovery",
+  test="test"
+)
+
+# Plot modules 1 and 4, which replicate, in the test datset ordering nodes
+# by weighted degree averaged across the two datasets
+plotModule(
+  network=network_list, data=data_list, correlation=correlation_list, 
+  moduleAssignments=labels_list, modules=c(1, 4), discovery="discovery",
+  test="test", orderNodesBy=c("discovery", "test")
+)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IMVCFDR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Integrated Mean Variance Correlation Based FDR Control</h2>
+
+<h3>Description</h3>
+
+<p>This function is used for FDR control with integrated mean variance correlation
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IMVCFDR(y, x, K, NN = 3, numboot, timeboot, true_signal, null_method, alpha)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>is the response vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>is the covariate matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>is the number of quantile levels</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NN</code></td>
+<td>
+<p>is the number of B spline basis, default is 3</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numboot</code></td>
+<td>
+<p>is the size of bootstrap samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeboot</code></td>
+<td>
+<p>is the number of bootstrap times for computing standard deviation of the IMVC</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>true_signal</code></td>
+<td>
+<p>is the true active set</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null_method</code></td>
+<td>
+<p>is the estimation method for proportion of true null hypotheses. Choices are "lfdr", "mean", "hist" or "convest"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>is the nominal FDR level</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of FDP, power and selected variables
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require("mvtnorm")
+n=200
+p=20
+pho1=0.5
+mean_x=rep(0,p)
+sigma_x=matrix(NA,nrow = p,ncol = p)
+for (i in 1:p) {
+ for (j in 1:p) {
+   sigma_x[i,j]=pho1^(abs(i-j))
+ }
+}
+x=rmvnorm(n, mean = mean_x, sigma = sigma_x,method = "chol")
+x1=x[,1]
+x2=x[,2]
+x3=x[,3]
+y=2*x1+2*x2+2*x3+rnorm(n)
+
+IMVCFDR(y,x,K=5,numboot=100,timeboot=20,true_signal=c(1,2,3),null_method="hist",alpha=0.2)
+</code></pre>
+
+
+</div>

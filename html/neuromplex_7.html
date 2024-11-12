@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.dapp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predict Method for Dynamic Admixture of Poisson Process</h2>
+
+<h3>Description</h3>
+
+<p>Summarizes predictive draws of weight curves from a fitted DAPP model</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> 
+## S3 method for class 'dapp'
+predict(object, tilt.prior = FALSE,
+    mesh.tilt = 0.1, nprior = object$mcmc["nsamp"], ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a fitted model of the class 'dapp'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tilt.prior</code></td>
+<td>
+<p>logical giving whether the prior should be tilted to mimic an analysis done with a uniform prior on the range(alpha)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mesh.tilt</code></td>
+<td>
+<p>a tuning parameter that controls how exactly tilting is done. Shorter mesh value gives tighter match but will require more Monte Carlo simulations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nprior</code></td>
+<td>
+<p>number of prior draws to be used for display</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>no addiitonal parameters used at this point</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is intended to be mostly used through <code>predict.dapp</code>.</p>
+
+
+<h3>Value</h3>
+
+<p>Gives prior and posterior summaries of the range and average predicted alpha curves. Also gives the same for the posterior draws of alpha for each recorded AB trial.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dapp</code>, <code>plot.dapp</code> and <code>summary.dapp</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## generate 25 A and 30 B trials with rate functions
+##    lambda.A(t) = 160*exp(-2*t/1000) + 40*exp(-0.2*t/1000)
+##    lambda.B(t) = 40*exp(-2*t/1000)
+## where time t is measured in ms. Then, generate 40 AB trials,
+## roughly half with flat weight curves with a constant intensity
+## either close to A, or close to B or close to the 50-50 mark,
+## (equally likely). The remaining curves are sinusoidal
+## that snake between 0.01 and 0.99 with a period randomly
+## drawn between 400 and 1000
+
+ntrials &lt;- c(nA=25, nB=30, nAB=40)
+flat.range &lt;- list(A=c(0.85, 0.95),
+                   B=c(0.05, 0.15),
+                   mid=c(0.45,0.55))
+flat.mix &lt;- c(A=1/3, B=1/3, mid=1/3)
+wavy.span &lt;- c(0.01, 0.99)
+wavy.period &lt;- c(400, 1000)
+
+T.horiz &lt;- 1000
+rateB &lt;- 40 * exp(-2*(1:T.horiz)/T.horiz)
+rateA &lt;- 4*rateB + 40 * exp(-0.2*(1:T.horiz)/T.horiz)
+
+synth.data &lt;- synthesis.dapp(ntrials = ntrials, pr.flat = 0.5,
+                             intervals = flat.range, wts = flat.mix,
+                             span = wavy.span, period.range = wavy.period,
+                             lambda.A=rateA, lambda.B=rateB)
+
+## Visualize data and generated binned spike counts
+spike.counts &lt;- mplex.preprocess(synth.data$spiketimes, visualize=TRUE)
+
+## Fit the DAPP model to data
+fit.post &lt;- dapp(spike.counts, verbose=FALSE)
+
+## Prediction
+pp &lt;- predict(fit.post)
+
+## Visualizing (range, ave) of alpha(t) for each recorded AB trial
+te &lt;- pp$trial.est
+ggplot(te, aes(x=ave, y=range)) +
+    stat_density_2d(aes(fill = ..level..), h=0.2, geom = "polygon") +
+    scale_fill_viridis_c() +
+    theme_bw() +
+    facet_wrap(~as.factor(trial))
+
+## Post process results to assign second order stochasticity labels
+summary(fit.post)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

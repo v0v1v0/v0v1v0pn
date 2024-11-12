@@ -1,0 +1,446 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sparse.sglmm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a sparse SGLMM.</h2>
+
+<h3>Description</h3>
+
+<p>Fit a sparse SGLMM.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sparse.sglmm(formula, family = gaussian, data, offset, A, method = c("BSF",
+  "RSR"), attractive = 50, repulsive = 0, tol = 0.01, minit = 10000,
+  maxit = 1e+06, tune = list(), hyper = list(), model = TRUE,
+  x = FALSE, y = FALSE, verbose = FALSE, parallel = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>an object of class <code>formula</code>: a symbolic description of the model to be fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>a description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function, or the result of a call to a family function. (See <code>family</code> for details of family functions.) Supported families are <code>binomial</code>, <code>gaussian</code> (default), <code>negbinomial</code>, and <code>poisson</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an optional data frame, list, or environment (or object coercible by <code>as.data.frame</code> to a data frame) containing the variables in the model. If not found in <code>data</code>, the variables are taken from <code>environment(formula)</code>, typically the environment from which <code>sparse.sglmm</code> is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>this can be used to specify an <em>a priori</em> known component to be included in the linear predictor during fitting. This should be <code>NULL</code> or a numeric vector of length equal to the number of cases. One or more <code>offset</code> terms can be included in the formula instead or as well, and if more than one is specified their sum is used. See <code>model.offset</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>the adjacency matrix for the underlying graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the basis to use. The options are Bayesian spatial filtering (“<code>BSF</code>”) and restricted spatial regression (“<code>RSR</code>”).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>attractive</code></td>
+<td>
+<p>the number of attractive Moran eigenvectors to use. The default is 50. See ‘Details’ for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repulsive</code></td>
+<td>
+<p>the number of repulsive Moran eigenvectors to use. The default is 0. See ‘Details’ for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>a tolerance. If all Monte Carlo standard errors are smaller than <code>tol</code>, no more samples are drawn from the posterior. The default is 0.01.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minit</code></td>
+<td>
+<p>the minimum sample size. This should be large enough to permit accurate estimation of Monte Carlo standard errors. The default is 10,000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>the maximum sample size. Sampling from the posterior terminates when all Monte Carlo standard errors are smaller than <code>tol</code> or when <code>maxit</code> samples have been drawn, whichever happens first. The default is 1,000,000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tune</code></td>
+<td>
+<p>(where relevant) a list containing <code>sigma.s</code>, <code>sigma.h</code>, and <code>sigma.theta</code>. These are the standard deviations for the <code class="reqn">\gamma</code>, <code class="reqn">\delta</code>, and <code class="reqn">\theta</code> proposals, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyper</code></td>
+<td>
+<p>a list containing <code>sigma.b</code>, the prior standard deviation for <code class="reqn">\beta</code>, and (where relevant) <code>a.h</code> and <code>b.h</code>, the parameters of the gamma prior for <code class="reqn">\tau_h</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>a logical value indicating whether the model frame should be included as a component of the returned value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a logical value indicating whether the model matrix used in the fitting process should be returned as a component of the returned value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a logical value indicating whether the response vector used in the fitting process should be returned as a component of the returned value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>a logical value indicating whether to print MCMC progress to the screen. Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>(for parallelized computation of the Moran operator) a list containing <code>type</code> and <code>nodes</code>, the cluster type and number of slave nodes, respectively. The former must be one of “<code>FORK</code>”, “<code>MPI</code>”, “<code>NWS</code>”, “<code>PSOCK</code>”, or “<code>SOCK</code>” (default). The latter must be a whole number greater than 1. This argument defaults to <code>FALSE</code>, in which case the matrix multiplications are not parallelized.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function fits the sparse restricted spatial regression model of Hughes and Haran (2013), or the Bayesian spatial filtering model of Hughes (2017). The first stage of the model is </p>
+<p style="text-align: center;"><code class="reqn">g(\mu_i)=x_i^\prime\beta+m_i^\prime\gamma\hspace{1 cm}(i=1,\dots,n)</code>
+</p>
+<p> or, in vectorized form, </p>
+<p style="text-align: center;"><code class="reqn">g(\mu)=X\beta+M\gamma,</code>
+</p>
+<p> where <code class="reqn">X</code> is the design matrix, <code class="reqn">\beta</code> is a <code class="reqn">p</code>-vector of regression coefficients, the columns of <code class="reqn">M</code> are <code class="reqn">q</code> eigenvectors of the Moran operator, and <code class="reqn">\gamma</code> are spatial random effects. Arguments <code>attractive</code> and <code>repulsive</code> can be used to control the number of eigenvectors used. The default values are 50 and 0, respectively, which corresponds to pure spatial smoothing. Inclusion of some repulsive eigenvectors can be advantageous in certain applications.<br><br> The second stage, i.e., the prior for <code class="reqn">\gamma</code>, is </p>
+<p style="text-align: center;"><code class="reqn">p(\gamma\mid\tau_s)\propto\tau_s^{q/2}\exp\left(-\frac{\tau_s}{2}\gamma^\prime M^\prime QM\gamma\right),</code>
+</p>
+<p> where <code class="reqn">\tau_s</code> is a smoothing parameter and <code class="reqn">Q</code> is the graph Laplacian.<br><br> The prior for <code class="reqn">\beta</code> is spherical <code class="reqn">p</code>-variate normal with mean zero and common standard deviation <code>sigma.b</code>, which defaults to 1,000. The prior for <code class="reqn">\tau_s</code> is gamma with parameters 0.5 and 2,000. The same prior is used for <code class="reqn">\theta</code> (when family is <code>negbinomial</code>).<br><br> When the response is normally distributed, the identity link is assumed, in which case the first stage is </p>
+<p style="text-align: center;"><code class="reqn">\mu=X\beta+M\gamma+M\delta,</code>
+</p>
+<p> where <code class="reqn">\delta</code> are heterogeneity random effects. When the response is Poisson distributed, heterogeneity random effects are optional. In any case, the prior on <code class="reqn">\delta</code> is spherical <code class="reqn">q</code>-variate normal with mean zero and common variance <code class="reqn">1/\tau_h</code>. The prior for <code class="reqn">\tau_h</code> is gamma with parameters <code class="reqn">a_h</code> and <code class="reqn">b_h</code>, the values of which are controlled by the user through argument <code>hyper</code>.<br><br> If the response is Bernoulli, negative binomial, or Poisson, <code class="reqn">\beta</code> and <code class="reqn">\gamma</code> are updated using Metropolis-Hastings random walks with normal proposals. The proposal covariance matrix for <code class="reqn">\beta</code> is the estimated asymptotic covariance matrix from a <code>glm</code> fit to the data (see <code>vcov</code>). The proposal for <code class="reqn">\gamma</code> is spherical normal with common standard deviation <code>sigma.s</code>.<br><br> The updates for <code class="reqn">\tau_s</code> and <code class="reqn">\tau_h</code> are Gibbs updates irrespective of the response distribution.<br><br> If the response is Poisson distributed and heterogeneity random effects are included, those random effects are updated using a Metropolis-Hastings random walk with a spherical normal proposal. The common standard deviation is <code>sigma.h</code>.<br><br> If the response is normally distributed, all updates are Gibbs updates.<br><br> If the response is negative binomial, the dispersion parameter <code class="reqn">\theta</code> is updated using a Metropolis-Hastings random walk with a normal proposal. Said proposal has standard deviation <code>sigma.theta</code>, which can be provided by the user as an element of argument <code>tune</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>sparse.sglmm</code> returns an object of class “<code>sparse.sglmm</code>”, which is a list containing the following components.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>the estimated regression coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.values</code></td>
+<td>
+<p>the fitted mean values, obtained by transforming the linear predictors by the inverse of the link function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linear.predictors</code></td>
+<td>
+<p>the linear fit on link scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>the response residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>the size of the posterior sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta.sample</code></td>
+<td>
+<p>an <code>iter</code> by <code class="reqn">p</code> matrix containing the posterior samples for <code class="reqn">\beta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma.sample</code></td>
+<td>
+<p>an <code>iter</code> by <code class="reqn">q</code> matrix containing the posterior samples for <code class="reqn">\gamma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta.sample</code></td>
+<td>
+<p>(where relevant) an <code>iter</code> by <code class="reqn">q</code> matrix containing the posterior samples for <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta.sample</code></td>
+<td>
+<p>(where relevant) a vector containing the posterior samples for <code class="reqn">\theta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.s.sample</code></td>
+<td>
+<p>a vector containing the posterior samples for <code class="reqn">\tau_s</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.h.sample</code></td>
+<td>
+<p>(where relevant) a vector containing the posterior samples for <code class="reqn">\tau_h</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma.est</code></td>
+<td>
+<p>the estimate of <code class="reqn">\gamma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta.est</code></td>
+<td>
+<p>(where relevant) the estimate of <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.s.est</code></td>
+<td>
+<p>the estimate of <code class="reqn">\tau_s</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.h.est</code></td>
+<td>
+<p>(where relevant) the estimate of <code class="reqn">\tau_h</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta.est</code></td>
+<td>
+<p>(where relevant) the estimate of <code class="reqn">\theta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta.mcse</code></td>
+<td>
+<p>the Monte Carlo standard errors for <code class="reqn">\beta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma.mcse</code></td>
+<td>
+<p>the Monte Carlo standard errors for <code class="reqn">\gamma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta.mcse</code></td>
+<td>
+<p>(where relevant) the Monte Carlo standard errors for <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.s.mcse</code></td>
+<td>
+<p>the Monte Carlo standard error for <code class="reqn">\tau_s</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.h.mcse</code></td>
+<td>
+<p>(where relevant) the Monte Carlo standard error for <code class="reqn">\tau_h</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta.mcse</code></td>
+<td>
+<p>(where relevant) the Monte Carlo standard error for <code class="reqn">\theta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D.bar</code></td>
+<td>
+<p>the goodness of fit component of the DIC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pD</code></td>
+<td>
+<p>the penalty component of the DIC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dic</code></td>
+<td>
+<p>the deviance information criterion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta.accept</code></td>
+<td>
+<p>the acceptance rate for <code class="reqn">\beta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma.accept</code></td>
+<td>
+<p>the acceptance rate for <code class="reqn">\gamma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta.accept</code></td>
+<td>
+<p>(where relevant) the acceptance rate for <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta.accept</code></td>
+<td>
+<p>(where relevant) the acceptance rate for <code class="reqn">\theta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>if requested (the default), the <code>y</code> vector used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>if requested, the model matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>if requested, the matrix of Moran eigenvectors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eigen.values</code></td>
+<td>
+<p>if requested, the spectrum of the Moran operator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyper</code></td>
+<td>
+<p>a list containing the names and values of the hyperparameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tune</code></td>
+<td>
+<p>a list containing the names and values of the tuning parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>if requested (the default), the model frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the matched call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>the formula supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>the <code>terms</code> object used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the <code>data</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>the offset vector used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlevels</code></td>
+<td>
+<p>(where relevant) a record of the levels of the factors used in fitting.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Hughes, J. and Haran, M. (2013) Dimension reduction and alleviation of confounding for spatial generalized linear mixed models. <em>Journal of the Royal Statistical Society, Series B</em>, <b>75</b>(1), 139–159.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>residuals.sparse.sglmm</code>, <code>summary.sparse.sglmm</code>, <code>vcov.sparse.sglmm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+The following code duplicates the analysis described in (Hughes and Haran, 2013). The data are
+infant mortality data for 3,071 US counties. We do a spatial Poisson regression with offset.
+
+data(infant)
+infant$low_weight = infant$low_weight / infant$births
+attach(infant)
+Z = deaths
+X = cbind(1, low_weight, black, hispanic, gini, affluence, stability)
+data(A)
+set.seed(123456)
+fit = sparse.sglmm(Z ~ X - 1 + offset(log(births)), family = poisson, A = A, method = "RSR",
+                   tune = list(sigma.s = 0.02), verbose = TRUE)
+summary(fit)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

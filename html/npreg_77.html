@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>msqrt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Matrix (Inverse?) Square Root
+</h2>
+
+<h3>Description</h3>
+
+<p>Stable computation of the square root (or inverse square root) of a positive semi-definite matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">msqrt(x, inverse = FALSE, symmetric = FALSE, 
+      tol = .Machine$double.eps, checkx = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>positive semi-definite matrix
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inverse</code></td>
+<td>
+
+<p>compute inverse square root?
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>symmetric</code></td>
+<td>
+
+<p>does the square root need to be symmetric? See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+
+<p>tolerance for detecting linear dependencies in <code>x</code>  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>checkx</code></td>
+<td>
+
+<p>should <code>x</code> be checked for symmetry using <code>isSymmetric</code>?
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>symmetric = FALSE</code>, this function computes the matrix <code>z</code> such that <code>x = tcrossprod(z)</code>
+</p>
+<p>If <code>symmetric = TRUE</code>, this function computes the matrix <code>z</code> such that <code>x = crossprod(z) = tcrossprod(z)</code>
+</p>
+<p>If <code>inverse = TRUE</code>, the matrix <code>x</code> is replaced by the pseudo-inverse of <code>x</code> in these equations (see <code>psolve</code>)
+</p>
+
+
+<h3>Value</h3>
+
+<p>The matrix <code>z</code> that gives the (inverse?) square root of <code>x</code>. See Details.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The matrix (inverse?) square root is calculated by (inverting and) square rooting the eigenvalues that are greater than the first value multiplied by <code>tol * nrow(x)</code>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>psolve</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate x
+set.seed(0)
+x &lt;- crossprod(matrix(rnorm(100), 20, 5))
+
+# asymmetric square root (default)
+xsqrt &lt;- msqrt(x)
+mean(( x - crossprod(xsqrt) )^2)
+mean(( x - tcrossprod(xsqrt) )^2)
+
+# symmetric square root
+xsqrt &lt;- msqrt(x, symmetric = TRUE)
+mean(( x - crossprod(xsqrt) )^2)
+mean(( x - tcrossprod(xsqrt) )^2)
+
+# asymmetric inverse square root (default)
+xsqrt &lt;- msqrt(x, inverse = TRUE)
+mean(( solve(x) - crossprod(xsqrt) )^2)
+mean(( solve(x) - tcrossprod(xsqrt) )^2)
+
+# symmetric inverse square root
+xsqrt &lt;- msqrt(x, inverse = TRUE, symmetric = TRUE)
+mean(( solve(x) - crossprod(xsqrt) )^2)
+mean(( solve(x) - tcrossprod(xsqrt) )^2)
+
+</code></pre>
+
+
+</div>

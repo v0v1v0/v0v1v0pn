@@ -1,0 +1,270 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>llnorMix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Likelihood, Parametrization and EM-Steps For 1D Normal Mixtures</h2>
+
+<h3>Description</h3>
+
+<p>These functions work with an almost unconstrained parametrization of
+univariate normal mixtures.
+</p>
+
+<dl>
+<dt><code>llnorMix(p, *)</code></dt>
+<dd>
+<p>computes the log likelihood,</p>
+</dd>
+<dt><code>obj &lt;- par2norMix(p)</code></dt>
+<dd>
+<p>maps parameter vector <code>p</code> to
+a <code>norMix</code> object <code>obj</code>,</p>
+</dd>
+<dt><code>p &lt;- nM2par(obj)</code></dt>
+<dd>
+<p>maps from a <code>norMix</code>
+object <code>obj</code> to parameter vector <code>p</code>,</p>
+</dd>
+</dl>
+<p>where <code>p</code> is always a parameter vector in our parametrization.
+</p>
+<p>Partly for didactical reasons, the following functions provide the
+basic ingredients for the EM algorithm (see also
+<code>norMixEM</code>) to parameter estimation:
+</p>
+
+<dl>
+<dt><code>estep.nm(x, obj, p)</code></dt>
+<dd>
+<p>computes 1 E-step for the data
+<code>x</code>, given <em>either</em> a <code>"norMix"</code> object <code>obj</code>
+or parameter vector <code>p</code>.</p>
+</dd>
+<dt><code>mstep.nm(x, z)</code></dt>
+<dd>
+<p>computes 1 M-step for the data
+<code>x</code> and the probability matrix <code>z</code>.</p>
+</dd>
+<dt><code>emstep.nm(x, obj)</code></dt>
+<dd>
+<p>computes 1 E- and 1 M-step for the data
+<code>x</code> and the <code>"norMix"</code> object <code>obj</code>.</p>
+</dd>
+</dl>
+<p>where again, <code>p</code> is a parameter vector in our parametrization,
+<code>x</code> is the (univariate) data, and <code>z</code> is a <code class="reqn">n \times
+    m</code> <code>matrix</code> of (posterior) conditional
+probabilities, and <code class="reqn">\theta</code> is the full parameter vector of the
+mixture model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">llnorMix(p, x, m = (length(p) + 1)/3, trafo = c("clr1", "logit"))
+
+par2norMix(p, trafo = c("clr1", "logit"), name = )
+
+nM2par(obj, trafo = c("clr1", "logit"))
+
+ estep.nm(x, obj, par)
+ mstep.nm(x, z)
+emstep.nm(x, obj)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>p, par</code></td>
+<td>
+<p>numeric vector: our parametrization of a univariate normal
+mixture, see details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>numeric: the data for which the likelihood is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>integer number of mixture components; this is not to be
+changed for a given <code>p</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trafo</code></td>
+<td>
+<p><code>character</code> string specifying the transformation
+of the component weight <code>w</code> <code class="reqn">m</code>-vector (mathematical notation
+in <code>norMix</code>: <code class="reqn">\pi_j, j=1,\dots,m</code>) to an
+<code class="reqn">m-1</code>-dimensional unconstrained parameter vector in our
+parametrization.  <code>"logit"</code> has been hard-wired upto <span class="pkg">nor1mix</span>
+version 1.2-3, and has been replaced <em>as default</em> in 2019 for <span class="pkg">nor1mix</span>
+version 1.2-4 by <code>"clr1"</code> which is more symmetric and basically
+Aitchinson's <b>c</b>entered <b>l</b>og <b>r</b>atio, see also CRAN package
+<a href="https://CRAN.R-project.org/package=compositions"><span class="pkg">compositions</span></a>' <code>clr()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>(for <code>par2norMix()</code>:) a name for the <code>"norMix"</code>
+object that is returned, uses a smart default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>a <code>"norMix"</code> object, see <code>norMix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>a <code class="reqn">n \times m</code> <code>matrix</code> of (posterior)
+conditional probabilities,
+<code class="reqn">z_{ij}= P(x_i \in C_j | \theta)</code>,
+where <code class="reqn">C_j</code> denotes the <code class="reqn">j</code>-th group (“cluster”).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We use a parametrization of a (finite) <code class="reqn">m</code>-component univariate normal mixture which
+is particularly apt for likelihood maximization, namely, one whose
+parameter space is <em>almost</em> a full <code class="reqn">\mathbf{I\hskip-0.22em R}^M</code>,
+<code class="reqn">M = 3m-1</code>.
+</p>
+<p>For an <code class="reqn">m</code>-component mixture,
+we map to and from a parameter vector <code class="reqn">\theta</code> (<code>== p</code> as <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>-vector)
+of length <code class="reqn">3m-1</code>.  For mixture density
+</p>
+<p style="text-align: center;"><code class="reqn">\sum_{j=1}^m \pi_j \phi((t - \mu_j)/\sigma_j)/\sigma_j,</code>
+</p>
+
+<p>we transform the <code class="reqn">\pi_j</code> (for <code class="reqn">j \in 1,\dots,m</code>) via the transform specified by <code>trafo</code> (see below),
+and log-transform the <code class="reqn">\sigma_j</code>.  Consequently, <code class="reqn">\theta</code> is
+partitioned into
+</p>
+
+<dl>
+<dt>
+<code>p[ 1:(m-1)]</code>: </dt>
+<dd>
+<p>For
+</p>
+
+<dl>
+<dt>
+<code>trafo = "logit"</code>:</dt>
+<dd>
+<p><code>p[j]</code><code class="reqn">=
+	    \mbox{logit}(\pi_{j+1})</code> and
+<code class="reqn">\pi_1</code> is given implicitly as
+<code class="reqn">\pi_1 = 1-\sum_{j=2}^m \pi_j</code>.</p>
+</dd>
+<dt>
+<code>trafo = "clr1"</code>:</dt>
+<dd>
+<p>(<b>c</b>entered <b>l</b>og
+<b>r</b>atio, omitting 1st element):
+Set <code class="reqn">\ell_j := \ln(\pi_j)</code> for <code class="reqn">j = 1, \dots, m</code>, and
+<code>p[j]</code><code class="reqn">= \ell_{j+1} - 1/m\sum_{j'=1}^m \ell_{j'}</code>
+for <code class="reqn">j = 1, \dots, m-1</code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>
+<code>p[ m:(2m-1)]</code>: </dt>
+<dd>
+<p><code>p[m-1+ j]</code><code class="reqn">= \mu_j</code>, for j=1:m.</p>
+</dd>
+<dt>
+<code>p[2m:(3m-1)]</code>: </dt>
+<dd>
+<p><code>p[2*m-1+ j]</code>
+<code class="reqn">= \log(\sigma_j)</code>, i.e.,
+<code class="reqn">\sigma_j^2 = exp(2*p[.+j])</code>.</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p><code>llnorMix()</code> returns a number, namely the log-likelihood.
+</p>
+<p><code>par2norMix()</code> returns <code>"norMix"</code> object, see <code>norMix</code>.
+</p>
+<p><code>nM2par()</code> returns the parameter vector <code class="reqn">\theta</code> of length <code class="reqn">3m-1</code>.
+</p>
+<p><code>estep.nm()</code> returns <code>z</code>, the matrix of (conditional) probabilities.
+</p>
+<p><code>mstep.nm()</code> returns the model parameters as a
+<code>list</code> with components <code>w</code>, <code>mu</code>, and
+<code>sigma</code>, corresponding to the arguments of <code>norMix()</code>.
+(and see the 'Examples' on using <code>do.call(norMix, *)</code> with it.)
+</p>
+<p><code>emstep.nm()</code> returns an <em>updated</em> <code>"norMix"</code> object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martin Maechler</p>
+
+
+<h3>See Also</h3>
+
+<p><code>norMix</code>, <code>logLik</code>.
+Note that the log likelihood of a <code>"norMix"</code> object
+is directly given by <code>sum(dnorMix(x, obj, log=TRUE))</code>.
+</p>
+<p>To fit, using the EM algorithm, rather use <code>norMixEM()</code>
+than the <code>e.step</code>, <code>m.step</code>, or <code>em.step</code> functions.
+</p>
+<p>Note that direct likelihood maximization, i.e., MLE, is typically
+considerably more efficient than the EM, and typically converges well
+with our parametrization, see <code>norMixMLE</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">(obj &lt;- MW.nm10) # "the Claw" -- m = 6 components
+length(pp &lt;- nM2par(obj)) # 17 == (3*6) - 1
+par2norMix(pp)
+## really the same as the initial 'obj' above
+
+## Log likelihood (of very artificial data):
+llnorMix(pp, x = seq.int(-2, 2, length.out = 1000))
+set.seed(47)## of more realistic data:
+x &lt;- rnorMix(1000, obj)
+llnorMix(pp, x)
+
+## Consistency check :  nM2par()  and  par2norMix()  are inverses
+all.EQ &lt;- function(x,y, tol = 1e-15, ...) all.equal(x,y, tolerance=tol, ...)
+stopifnot(all.EQ(pp, nM2par(par2norMix(pp))),
+          all.EQ(obj, par2norMix(nM2par(obj)),
+                    check.attributes=FALSE),
+          ## Direct computation of log-likelihood:
+          all.EQ(sum(dnorMix(x, obj, log=TRUE)),
+                    llnorMix(pp, x))  )
+
+## E- and M- steps : ------------------------------
+rE1 &lt;- estep.nm(x, obj)
+rE2 &lt;- estep.nm(x, par=pp) # the same as rE1
+z &lt;- rE1
+str( rM &lt;-  mstep.nm(x, z))
+   (rEM &lt;- emstep.nm(x, obj))
+
+stopifnot(all.EQ(rE1, rE2),
+          all.EQ(rEM, do.call(norMix, c(rM, name=""))))
+</code></pre>
+
+
+</div>

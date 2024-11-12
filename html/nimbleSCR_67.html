@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sampler_categorical_general</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+<code>nimble</code> MCMC sampler function for general categorial distributions</h2>
+
+<h3>Description</h3>
+
+<p>The <code>categorical_general</code> sampler operates within <code>nimble</code>'s MCMC engine to perform Gibbs sampling for a single node, which must in essence follow a categorical distribution.  However, the prior distribution need not be <code>nimble</code>'s <code>dcat</code> distribution, but rather can be any (potentially user-defined) distribution which has the same support as a standard categorical (<code>dcat</code>) distribution.  Specifically: the distribution must define a discrete random variable, which can only attain values from the set 1, 2, 3, ..., <code>numCategories</code>.
+</p>
+<p>The <code>categorical_general</code> sampler requires one control list argument, named <code>numCategories</code>, which specifies the fixed upper-bound for the range of the random variable.
+</p>
+<p>The <code>categorical_general</code> sampler is designed to be used in <code>nimble</code>'s MCMC engine, and can be added to an MCMC configuration object using the <code>addSampler</code> method.  See <code>help(configureMCMC)</code> for more information about MCMC configuration objects and adding custom samplers.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sampler_categorical_general(model, mvSaved, target, control)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>(uncompiled) model on which the MCMC is to be run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mvSaved</code></td>
+<td>
+<p><code>modelValues</code> object to be used to store MCMC samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>node on which the sampler will operate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>named list containing an elemente named <code>numCategories</code>, which specifies the upper-bound for the range of the random variable.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Daniel Turek
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+## define custom dmy_categorical distribution as a nimbleFunction
+dmy_categorical &lt;- nimbleFunction(...)
+
+## nimble model code, using custom-written dmy_categorical distribution
+code &lt;- nimbleCode({
+  x ~ dmy_categorical(...)
+})
+
+## create NIMBLE model object
+Rmodel &lt;- nimbleModel(code)
+
+## create MCMC configuration object with no samplers
+conf &lt;- configureMCMC(Rmodel, nodes = NULL)
+
+## add categorical_general sampler to MCMC configuration
+conf$addSampler(target = 'x', type = 'categorical_general', control = list(numCategories = 10))
+
+## build MCMC algorithm
+Rmcmc &lt;- buildMCMC(conf)
+
+## compile model and MCMC, run MCMC algorithm
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

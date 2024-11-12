@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit_xy.nested_model</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a nested model to a dataset using an xy interface.</h2>
+
+<h3>Description</h3>
+
+<p><code>generics::fit_xy()</code> method for nested models. This should not be
+called directly and instead should be called by
+<code>workflows::fit.workflow()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nested_model'
+fit_xy(
+  object,
+  x,
+  y,
+  case_weights = NULL,
+  control = parsnip::control_parsnip(),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An <code>nested_model</code> object (see <code>nested()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame of predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A data frame of outcome data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>case_weights</code></td>
+<td>
+<p>An optional vector of case weights. Passed into
+<code>parsnip::fit.model_spec()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A <code>parsnip::control_parsnip()</code> object. Passed into
+<code>parsnip::fit.model_spec()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Passed into <code>parsnip::fit.model_spec()</code>. Currently unused.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>nested_model_fit</code> object with several elements:
+</p>
+
+<ul>
+<li> <p><code>spec</code>: The model specification object (the inner model of the
+nested model object)
+</p>
+</li>
+<li> <p><code>fit</code>: A tibble containing the model fits and the nests that they
+correspond to.
+</p>
+</li>
+<li> <p><code>inner_names</code>: A character vector of names, used to help with
+nesting the data during predictions.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>parsnip::fit.model_spec()</code> parsnip::model_fit
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+library(dplyr)
+library(parsnip)
+library(recipes)
+library(workflows)
+
+data &lt;- filter(example_nested_data, id %in% 11:20)
+
+model &lt;- linear_reg() %&gt;%
+  set_engine("lm") %&gt;%
+  nested()
+
+recipe &lt;- recipe(data, z ~ x + y + id) %&gt;%
+  step_nest(id)
+
+wf &lt;- workflow() %&gt;%
+  add_recipe(recipe) %&gt;%
+  add_model(model)
+
+fit(wf, data)
+
+</code></pre>
+
+
+</div>

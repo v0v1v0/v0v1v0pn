@@ -1,0 +1,288 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.nft2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Drawing Posterior Predictive Realizations for NFT BART models.</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>predict.nft2()/predict.nft()</code> is the main function for drawing posterior predictive realizations at new inputs using a fitted model stored in a <code>nft2/nft</code> object returned from <code>nft2()/nft()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nft2'
+predict(
+            ## data
+            object,
+            xftest=object$xftrain,
+            xstest=object$xstrain,
+            ## multi-threading
+            tc=getOption("mc.cores", 1), ##OpenMP thread count
+            ## current process fit vs. previous process fit
+            XPtr=TRUE,
+            ## predictions
+            K=0,
+            events=object$events,
+            FPD=FALSE,
+            probs=c(0.025, 0.975),
+            take.logs=TRUE,
+            na.rm=FALSE,
+            RMST.max=NULL,
+            ## default settings for NFT:BART/HBART/DPM
+            fmu=object$NFT$fmu,
+            soffset=object$soffset,
+            drawDPM=object$drawDPM,
+            ## etc.
+            ...)
+
+## S3 method for class 'nft'
+predict(
+            ## data
+            object,
+            x.test=object$x.train,
+            ## multi-threading
+            tc=getOption("mc.cores", 1), ##OpenMP thread count
+            ## current process fit vs. previous process fit
+            XPtr=TRUE,
+            ## predictions
+            K=0,
+            events=object$events,
+            FPD=FALSE,
+            probs=c(0.025, 0.975),
+            take.logs=TRUE,
+            na.rm=FALSE,
+            RMST.max=NULL,
+            ## default settings for NFT:BART/HBART/DPM
+            fmu=object$NFT$fmu,
+            soffset=object$soffset,
+            drawDPM=object$drawDPM,
+            ## etc.
+            ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Object of type <code>nft2/nft</code> from a previous call to
+<code>nft2()/nft()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xftest,xstest,x.test</code></td>
+<td>
+<p>New input settings in the form of a matrix at which to construct predictions.  Defaults to the training inputs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tc</code></td>
+<td>
+<p>Number of OpenMP threads to use for parallel computing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>XPtr</code></td>
+<td>
+<p>If <code>object</code> was created during the currently running
+R process, then (via an Rcpp <code>XPtr</code>) the BART/HBART tree
+ensemble objects can be accessed in RAM; otherwise, those objects
+will need to be loaded from their string encodings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>The length of the grid of time-points to be used
+for survival predictions.  Set to zero to avoid these calculations
+which can be time-consuming for large data sets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>events</code></td>
+<td>
+<p>You can specify the grid of time-points; otherwise,
+they are derived from quantiles of the augmented event times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FPD</code></td>
+<td>
+<p>Whether to yield the usual predictions or marginal predictions
+calculated by the partial dependence function.</p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>A vector of length two containing the
+lower and upper quantiles to be calculated for the predictions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>take.logs</code></td>
+<td>
+<p>Whether or not to take logarithms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>Whether <code>NA</code> values should be removed from the
+summaries.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RMST.max</code></td>
+<td>
+<p>To calculate Restricted Mean Survival Time (RMST),
+we need to set a reasonable time maxima. Typically, a clinically
+important time that a majority (or a large
+plurality) of censored subjects have been followed through that
+point or beyond.</p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fmu</code></td>
+<td>
+<p>BART centering parameter for the test data.  Defaults to
+the value used by <code>nft2()/nft()</code> when training the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>soffset</code></td>
+<td>
+<p>HBART centering parameter for the test data.  Defaults to the value used by <code>nft2()/nft()</code> when training the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drawDPM</code></td>
+<td>
+<p>Whether NFT BART was fit with, or without, DPM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>The et cetera objects passed to the <code>predict</code> method.
+Currently, it has no functionality.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>predict.nft2()/predict.nft()</code> is the main function for
+calculating posterior predictions and uncertainties once a model has
+been fit by <code>nft2()/nft()</code>.  
+</p>
+<p>Returns a list with the following entries.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>f.test</code></td>
+<td>
+<p>Posterior realizations of the mean function stored in a
+matrix. Omitted if partial dependence functions are performed since
+these will typically be large.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.test</code></td>
+<td>
+<p>Posterior realizations of the SD function stored in a matrix. Omitted if partial dependence functions are performed since
+these will typically be large.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f.test.mean</code></td>
+<td>
+<p>Posterior predictive mean of mean function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f.test.lower</code></td>
+<td>
+<p>Posterior predictive lower quantile of mean function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f.test.upper</code></td>
+<td>
+<p>Posterior predictive upper quantile of mean function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.test.mean</code></td>
+<td>
+<p>Posterior predictive mean of SD function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.test.lower</code></td>
+<td>
+<p>Posterior predictive lower quantile of SD function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.test.upper</code></td>
+<td>
+<p>Posterior predictive upper quantile of SD
+function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv.fpd</code></td>
+<td>
+<p>Survival function posterior draws on a grid of
+time-points by the partial dependence function when requested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv.fpd.mean</code></td>
+<td>
+<p>Survival function estimates on a grid of
+time-points by the partial dependence function when requested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv.fpd.lower</code></td>
+<td>
+<p>Survival function lower quantiles on a grid of
+time-points by the partial dependence function when requested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv.fpd.upper</code></td>
+<td>
+<p>Survival function upper quantiles on a grid of
+time-points by the partial dependence function when requested.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Rodney Sparapani: <a href="mailto:rsparapa@mcw.edu">rsparapa@mcw.edu</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nft2</code>, <code>nft</code>
+</p>
+
+
+</div>

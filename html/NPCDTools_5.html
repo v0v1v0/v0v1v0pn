@@ -1,0 +1,242 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NPC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimation of  examinees' attribute profiles using the NPC method</h2>
+
+<h3>Description</h3>
+
+<p>The function is used to estimate examinees' attribute profiles
+using the nonparametric classification (NPC) method (Chiu, &amp; Douglas, 2013).
+It uses a distance-based algorithm on the observed item responses for
+classifying examiness. This function estimates attribute profiles using
+nonparametric approaches for both the "AND gate" (conjunctive) and the
+"OR gate" (disjunctive) cognitive diagnostic models. These algorithms select
+the attribute profile with the smallest loss function value (plain,
+weighted, or penalized Hamming distance, see below for details) as the
+estimate. If more than one attribute profiles have the smallest loss
+function value, one of them is randomly chosen.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NPC(
+  Y,
+  Q,
+  gate = c("AND", "OR"),
+  method = c("Hamming", "Weighted", "Penalized"),
+  wg = 1,
+  ws = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>A matrix of binary responses. Rows represent persons and columns
+represent items. 1=correct, 0=incorrect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>The Q-matrix of the test. Rows represent items and columns represent
+attributes. 1=attribute required by the item, 0=attribute not required
+by the item.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gate</code></td>
+<td>
+<p>A character string specifying the type of gate. It can be one of
+the following:
+</p>
+
+<dl>
+<dt>"AND"</dt>
+<dd>
+<p>The examinee needs to possess all required attributes of an
+item in order to answer it correctly.</p>
+</dd>
+<dt>"OR"</dt>
+<dd>
+<p>The examinee needs to possess only one of the required
+attributes of an item in order to answer it correctly.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The method of nonparametric estimation.
+</p>
+
+<dl>
+<dt>"Hamming"</dt>
+<dd>
+<p>The plain Hamming distance method</p>
+</dd>
+<dt>"Weighted"</dt>
+<dd>
+<p>The Hamming distance weighted by inversed item variance</p>
+</dd>
+<dt>"Penalized"</dt>
+<dd>
+<p>The Hamming distance weighted by inversed item variance
+and specified penalizing weights for guess and slip.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wg</code></td>
+<td>
+<p>Additional argument for the "penalized" method.
+It is the weight assigned to guessing in the DINA or DINO models. A large
+value of weight results in a stronger impact on
+Hamming distance (larger loss function values) caused by guessing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ws</code></td>
+<td>
+<p>Additional input for the "penalized" method.
+It is the weight assigned to slipping in the DINA or DINO models.
+A large value of weight results in la stronger impact on Hamming
+distance (larger loss function values) caused by slipping.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function returns a series of outputs, including:
+</p>
+
+<dl>
+<dt>alpha.est</dt>
+<dd>
+<p>Estimated attribute profiles. Rows represent persons
+and columns represent attributes.
+1=examinee masters the attribute, 0=examinee does not master the attribute.</p>
+</dd>
+<dt>est.ideal</dt>
+<dd>
+<p>Estimated ideal response to all items by all examinees.
+Rows represent persons and columns represent items.
+1=correct, 0=incorrect.</p>
+</dd>
+<dt>est.class</dt>
+<dd>
+<p>The class number (row index in pattern) for each person's
+attribute profile.
+It can also be used for locating the loss function value in loss.matrix
+for the estimated attribute profile for each person.</p>
+</dd>
+<dt>n.tie</dt>
+<dd>
+<p>Number of ties in the Hamming distance among the candidate
+attribute profiles for each person. When we encounter ties, one of
+the tied attribute profiles is randomly chosen.</p>
+</dd>
+<dt>pattern</dt>
+<dd>
+<p>All possible attribute profiles in the search space.</p>
+</dd>
+<dt>loss.matrix</dt>
+<dd>
+<p>The matrix of the values for the loss function (the
+plain, weighted, or penalized Hamming distance).
+Rows represent candidate attribute profiles in the same order with
+the pattern matrix; columns represent different examinees.</p>
+</dd>
+</dl>
+<h3>NPC algorithm with three distacne methods</h3>
+
+<p>Proficiency class membership is determined by comparing an examinee's
+observed item response vector <code class="reqn">\boldsymbol{Y}</code> with each of the ideal
+item response vectors of the realizable <code class="reqn">2^K=M</code> proficiency classes.
+The ideal item responses are a function of the Q-matrix and the attribute
+vectors characteristic of the different proficiency classes. Hence, an
+examinee’s proficiency class is identified by the attribute vector
+<code class="reqn">\boldsymbol{\alpha}_{m}</code> underlying that ideal item response vector
+which is closest—or most similar—to an examinee’s observed item response
+vector. The ideal response to item j is the score that would be obtained
+by an examinee if no perturbation occurred.
+</p>
+<p>Let <code class="reqn">\boldsymbol{\eta}_{i}</code> denote the J-dimensional ideal item response
+vector of examinee i, and the <code class="reqn">\hat{\boldsymbol{\alpha}}</code> of an
+examinee’s attribute vector is defined as the attribute vector
+underlying the ideal item response vector that among all ideal item response
+vectors minimizes the distance to an examinee’s observed item response vector:
+<code class="reqn">\hat{\boldsymbol{\alpha}} = \arg\min_{m \in \{1,2,\ldots,M\}} d(\boldsymbol{y_i}, \boldsymbol{\eta}_{m})</code>
+</p>
+<p>A distance measure often used for clustering binary data is the Hamming
+distance that simply counts the number of disagreements between two vectors:
+<code class="reqn">d_H(\boldsymbol{y,\eta}) =  \sum_{j=1}^{J} | y_j - \eta_j |</code>
+</p>
+<p>If the different levels of variability in the item responses are to be
+incorporated, then the Hamming distances can be weighted, for example, by the
+inverse of the item sample variance, which allows for larger impact on the
+distance functions of items with smaller variance:
+<code class="reqn">d_{wH} (\boldsymbol{y,\eta}) = \sum_{j=1}^{J} \frac{1}{\overline{p_j}(1-\overline{p_j})} |y_j-\eta_j|</code>
+</p>
+<p>Weighting weighting differently for departures from the ideal response model
+that would result from slips versus guesses is also considered:
+<code class="reqn">d_{gs}(\boldsymbol{y,\eta})=\sum_{j=1}^{J} w_gI[y_j=1]|y_j-\eta_j|+\sum_{j=1}^{J}w_sI[y_j=0]|y_j-\eta_j|</code>
+</p>
+
+
+<h3>References</h3>
+
+<p>Chiu, C. (2011). Flexible approaches to cognitive diagnosis: nonparametric methods and small sample techniques.
+Invited session of cognitive diagnosis and item response theory at 2011 Joint Statistical Meeting.
+</p>
+<p>Chiu, C. Y., &amp; Douglas, J. A. (2013). A nonparametric approach to cognitive diagnosis by proximity to ideal response patterns.
+Journal of Classification 30(2), 225-250.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate item and examinee profiles
+
+natt &lt;- 3
+nitem &lt;- 4
+nperson &lt;- 5
+Q &lt;- rbind(c(1, 0, 0), c(0, 1, 0), c(0, 0, 1), c(1, 1, 1))
+alpha &lt;- rbind(c(0, 0, 0), c(1, 0, 0), c(0, 1, 0), c(0, 0, 1), c(1, 1, 1))
+
+# Generate DINA model-based response data
+slip &lt;- c(0.1, 0.15, 0.2, 0.25)
+guess &lt;- c(0.1, 0.15, 0.2, 0.25)
+my.par &lt;- list(slip=slip, guess=guess)
+data &lt;- matrix(NA, nperson, nitem)
+eta &lt;- matrix(NA, nperson, nitem)
+for (i in 1:nperson) {
+  for (j in 1:nitem) {
+    eta[i, j] &lt;- prod(alpha[i,] ^ Q[j, ])
+    P &lt;- (1 - slip[j]) ^ eta[i, j] * guess[j] ^ (1 - eta[i, j])
+    u &lt;- runif(1)
+    data[i, j] &lt;- as.numeric(u &lt; P)
+    }
+}
+
+# Using the function to estimate examinee attribute profile
+alpha.est.NP.H &lt;- NPC(data, Q, gate="AND", method="Hamming")
+alpha.est.NP.W &lt;- NPC(data, Q, gate="AND", method="Weighted")
+alpha.est.NP.P &lt;- NPC(data, Q, gate="AND", method="Penalized", wg=2, ws=1)
+
+nperson &lt;- 1   # Choose an examinee to investigate
+print(alpha.est.NP.H) # Print the estimated examinee attribute profiles
+</code></pre>
+
+
+</div>

@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>group</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Capture group</h2>
+
+<h3>Description</h3>
+
+<p>Create a capture group (named column in output). In the vast
+majority of patterns R arguments can/should be used to specify
+names, e.g. list(name=pattern). This is a helper function which is
+useful for programmatically creating group names (see example for
+a typical use case).</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">group(name, ...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Column <code>name</code> in output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Regex pattern(s).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Named list.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre]</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Three ways to create a group named data which matches zero or
+## more non-newline characters.
+str(list(data=".*"))
+str(nc::group("data", ".*"))
+g.name &lt;- "data"
+str(nc::group(g.name, ".*"))
+
+## Data downloaded from
+## https://en.wikipedia.org/wiki/Hindu%E2%80%93Arabic_numeral_system
+numerals &lt;- system.file(
+  "extdata", "Hindu-Arabic-numerals.txt.gz", package="nc")
+
+## Use engine="ICU" for unicode character classes
+## http://userguide.icu-project.org/strings/regexp e.g. match any
+## character with a numeric value of 2 (including japanese etc).
+if(requireNamespace("stringi"))
+  nc::capture_all_str(
+  numerals,
+  " ",
+  two="[\\p{numeric_value=2}]",
+  " ",
+  engine="ICU")
+
+## Create a table of numerals with script names.
+digits.pattern &lt;- list()
+for(digit in 0:9){
+  digits.pattern[[length(digits.pattern)+1]] &lt;- list(
+    "[|]",
+    nc::group(paste(digit), "[^{|]+"),
+    "[|]")
+}
+nc::capture_all_str(
+  numerals,
+  "\n",
+  digits.pattern,
+  "[|]",
+  " *",
+  "\\[\\[",
+  name="[^\\]|]+")
+
+</code></pre>
+
+
+</div>

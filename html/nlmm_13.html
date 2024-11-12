@@ -1,0 +1,230 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generate.data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Simulate Data from Mixed-Effects Models
+</h2>
+
+<h3>Description</h3>
+
+<p>This function generates data from a 2-level hierarchical design.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generate.data(R, n, M, sigma_1 = NULL, sigma_2 = NULL,
+	shape_1 = NULL, shape_2 = NULL, dist.u, dist.e,
+	beta, gamma, fixed = FALSE, seed = round(runif(1,1,1000)))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+
+<p>number of replications.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>number of observations within cluster.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+
+<p>number of clusters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma_1</code></td>
+<td>
+
+<p>scale parameter for the random effects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma_2</code></td>
+<td>
+
+<p>scale parameter for the errors.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape_1</code></td>
+<td>
+
+<p>shape parameter for the random effects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape_2</code></td>
+<td>
+
+<p>shape parameter for the errors.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist.u</code></td>
+<td>
+
+<p>distribution of the random effects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist.e</code></td>
+<td>
+
+<p>distribution of the errors.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+
+<p>vector of coefficients for fixed effects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+
+<p>vector of coefficients for heteroscedasticity.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+
+<p>logical flag. See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+
+<p>seed for random number generation.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function generates data as in the simulation study by Geraci and Farcomeni (2020). The data-generating model is
+</p>
+<p style="text-align: center;"><code class="reqn">
+y[ij] = \beta[0] + \beta[1]x[ij] + \beta[2]z[ij] + u[i] + v[i]x[ij] + (\gamma[0] + \gamma[1]x[ij])e[ij]
+</code>
+</p>
+
+<p>where <code class="reqn">(u[i],v[i])</code> follows a distribution with scale <code>sigma_1</code> and shape <code>shape_1</code>, and <code class="reqn">e</code> follows a distribution with scale <code>sigma_2</code> and shape <code>shape_2</code>.
+</p>
+<p>The scale parameter <code>sigma_1</code> must be a 1 by 1 or a 2 by 2 matrix. In the former case, the model will include only random intercepts. In the latter case, then both random intercepts and slopes will be included. Currently, no more than 2 random effects can be specified. The scale parameter <code>sigma_2</code> must be a matrix <code>n</code> by <code>n</code>.
+</p>
+<p>The options for <code>dist.u</code> and <code>dist.e</code> are: multivariate normal ("norm") (<code>rmvnorm</code>), multivariate symmetric Laplace ("laplace") (<code>rmal</code>), multivariate symmetric generalized Laplace ("genlaplace") <code>rmgl</code>, and multivariate Student's t ("t") (<code>rmvt</code>).
+</p>
+<p>The shape parameter specifies the degrees of freedom for Student's t and chi-squared, and the kurtosis of the generalized Laplace.
+</p>
+<p>The values <code class="reqn">x[ij]</code> are generated as <code class="reqn">x[ij] = \delta[i] + \zeta[ij]</code>, where <code class="reqn">\delta[i]</code> and <code class="reqn">\zeta[ij]</code> are independent standard normal. If the argument <code>fixed = TRUE</code>, then <code class="reqn">x[ij] = j</code>. The values <code class="reqn">z[ij]</code> are generated from Bernoullis with probability 0.5.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>nlmm</code> returns an object of <code>class</code> <code>nlmm</code>.
+</p>
+<p>The function <code>summary</code> is used to obtain and print a summary of the results.
+</p>
+<p>An object of class <code>nlmm</code> is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>a matrix <code class="reqn">R x N</code>, where <code class="reqn">N = n x M</code>, with responses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>an array <code class="reqn">N x 3 x R</code> with fixed design matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>vector of length <code class="reqn">N</code> with cluster labels</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p>an array <code class="reqn">M x 2 x R</code> with random effects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+<p>a matrix <code class="reqn">R x N</code> with errors</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Marco Geraci
+</p>
+
+
+<h3>References</h3>
+
+<p>Geraci, M. and Farcomeni A. (2020). A family of linear mixed-effects models using the generalized Laplace distribution. Statistical Methods in Medical Research, 29(9), 2665-2682.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nlmm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Simulate 10 replications from a homoscedastic normal mixed model.
+generate.data(R = 10, n = 3, M = 5, sigma_1 = diag(2), sigma_2 = diag(3),
+shape_1 = NULL, shape_2 = NULL, dist.u = "norm", dist.e = "norm",
+beta = c(1,2,1), gamma = c(1,0))
+
+# Simulate 10 replications from a generalized Laplace. Note: the shape
+# parameter that is passed to rmgl corresponds to the reciprocal of the
+# parameter alpha in Geraci and Farcomeni (2020)
+generate.data(R = 10, n = 3, M = 5, sigma_1 = diag(2), sigma_2 = diag(3),
+shape_1 = 1/0.5, shape_2 = 1/0.5, dist.u = "genlaplace", dist.e = "genlaplace",
+beta = c(1,2,1), gamma = c(1,0))
+ 
+</code></pre>
+
+
+</div>

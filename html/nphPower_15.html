@@ -1,0 +1,302 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simu.trial</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate Survival Trial Data</h2>
+
+<h3>Description</h3>
+
+<p><code>simu.trial</code> simulates survival data allowing flexible input
+of design parameters. It supports both event-driven design and fixed study duration
+design.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simu.trial(
+  type = c("event", "time"),
+  trial_param,
+  bsl_dist = c("weibull", "loglogistic", "mix-weibull"),
+  bsl_param,
+  drop_param0,
+  drop_param1 = drop_param0,
+  entry_pdf0 = function(x) {
+     (1/trial_param[2]) * (x &gt;= 0 &amp; x &lt;= trial_param[2])
+ },
+  entry_pdf1 = entry_pdf0,
+  enrollmentType = NULL,
+  entryP = list(10000, 1),
+  HR_fun,
+  ratio,
+  cureModel = NULL,
+  cureRate1 = NULL,
+  HR_data = NULL,
+  upInt = 100,
+  summary = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>indicates whether event-driven trial ("<code>event</code>) or fixed study duration
+trial ("<code>time</code>"), Option: c("<code>event</code>", "<code>time</code>")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial_param</code></td>
+<td>
+<p>a vector of length 3 with components for required subject size, enrollment
+time and required number of events ("<code>event</code>" type trial)/follow-up time
+("<code>time</code>" type trial)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bsl_dist</code></td>
+<td>
+<p>indicates the survival distribution for control group, option:
+c("<code>weibull</code>", "<code>loglogistic</code>",<code>mix-weibull</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bsl_param</code></td>
+<td>
+<p>a vector of length 2 with the shape and rate (scale) parameter for the
+weibull or loglogistic survival distribution of control group. A vector of length 3 with
+shape, rate and cure rate for the mix-weibull distribution. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_param0</code></td>
+<td>
+<p>a vector of length 2 with shape and scale parameter for the
+weibull distribution of drop-out time for control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_param1</code></td>
+<td>
+<p>a vector of length 2 with shape and scale parameter for the
+weibull distribution of drop-out time for treatment group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry_pdf0</code></td>
+<td>
+<p>a function describing the pdf of the entry time for control. Default: uniform enrollment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry_pdf1</code></td>
+<td>
+<p>a function describing the pdf of the entry time for treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>enrollmentType</code></td>
+<td>
+<p>default value is NULL, indicating a entry time follows specified
+distribution. Specify "<code>piecewise uniform</code>", indicating entry time follows piecewise uniform</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entryP</code></td>
+<td>
+<p>if <code>enrollmentType</code> is piecewise uniform. <code>entryP</code> should be provided with
+a list containing the enrollment rate at each interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HR_fun</code></td>
+<td>
+<p>a function describing the hazard ratio function between treatment
+and control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratio</code></td>
+<td>
+<p>allocation ratio between treatment and control group.
+For example, <code>ratio</code>=2 if 2:1 allocation is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cureModel</code></td>
+<td>
+<p>specifies the cure model. "<code>PHCM</code>" and "<code>PHCRM</code>".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cureRate1</code></td>
+<td>
+<p>specifies the cure rate for the susceptible population in the experimental group if the cure model is <code>PHCM</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HR_data</code></td>
+<td>
+<p>a matrix consisting of covariates values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upInt</code></td>
+<td>
+<p>a value indicating the upper bound used in the <code>uniroot</code> function.
+See details.  Default: 100</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary</code></td>
+<td>
+<p>a logical indicating whether basic information summary is printed
+to the console or not, Default: TRUE</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The loglogistic distribution for the event time has the
+survival function <code class="reqn">S(x)=b^a/(b^a+x^a)</code> and hazard function
+<code class="reqn">\lambda(x)=a/b(x/b)^{a-1}/(1+(t/b)^a)</code>, where <code class="reqn">a</code> is the shape parameter
+and <code class="reqn">b</code> is the scale parameter. The weibull distribution for event time and drop-out
+time has the survival function <code class="reqn">S(x)=exp(-(xb)^a)</code>
+and hazard function <code class="reqn">\lambda(x)=ab(xb)^{a-1}</code>, where <code class="reqn">a</code> is the shape parameter
+and <code class="reqn">b</code> is the rate parameter. The median of weibull
+distribution is <code class="reqn">(ln(2)^{1/a}/b)</code>. If drop out or loss to follow-up are
+do not need to be considered, a very small rate parameter <code class="reqn">b</code> can be chosen
+such that the median time is greatly larger than the study duration. The default
+entry time is uniformly distributed within the enrollment period by default.
+Other options are allowed through providing the density function.
+</p>
+<p>The <code>simu.trial</code> function simulates survival times for control and
+treatment groups separately. The control survival times are drawn from standard parametric
+distribution (Weibull, Loglogistic). Let <code class="reqn">\lambda_1(t)</code> and <code class="reqn">\lambda_0(t)</code>
+denote the hazard function for treatment and control. It is assumed that
+<code class="reqn">\lambda_1(t)/\lambda_0(t)=g(t)</code>, where <code class="reqn">g(t)</code> is the user-defined
+function, describing the change of hazard ratio over time. In case of proportional
+hazards, <code class="reqn">g(t)</code> is a constant. The survival function for treatment group
+is <code class="reqn">S_1(t)=exp(-\int_0^t g(s)\lambda_0(s)ds)</code>. The Survival time T is
+given by <code class="reqn">T=S_1^(-1)(U)</code>, where U is drawn from uniform (0,1). More details
+can be found in Bender, et al. (2005). Function <code>uniroot</code> from
+<code>stats</code> package is used to generate the random variable. The argument
+<code>upInt</code> in <code>simu.trial</code> function corresponds to the upper end point
+of the search interval and it can be adjusted by user if the default value 100
+is not appropriate. More details can be found in help file of <code>uniroot</code>
+function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the following components
+</p>
+<p><code>data</code>: a dataframe (simulated dataset) with columns:
+</p>
+
+<dl>
+<dt>id</dt>
+<dd>
+<p>identifier number from 1:n, n is the total sample size</p>
+</dd>
+<dt>group</dt>
+<dd>
+<p>group variable with 1 indicating treatment and 0 indicating control</p>
+</dd>
+<dt>aval</dt>
+<dd>
+<p>observed survival time, the earliest time among event time,
+drop-out time and end of study time</p>
+</dd>
+<dt>cnsr</dt>
+<dd>
+<p>censoring indicator with 1 indicating censor and 0 indicating event</p>
+</dd>
+<dt>cnsr.desc</dt>
+<dd>
+<p>description of the <code>cnsr</code> status, including three options-
+drop-out, event and end of study. Both drop-out and end of study are considered as
+censor.</p>
+</dd>
+<dt>event</dt>
+<dd>
+<p>event indicator with 1 indicating event and 0 indicating censor</p>
+</dd>
+<dt>entry.time</dt>
+<dd>
+<p>time when the patient is enrolled in the study</p>
+</dd>
+</dl>
+<p>a list of summary information of the trial including
+</p>
+
+<dl>
+<dt><code>type</code></dt>
+<dd>
+<p>a character indicating input design type - <code>event</code> or <code>time</code></p>
+</dd>
+<dt><code>entrytime</code></dt>
+<dd>
+<p>a number indicating input enrollment period</p>
+</dd>
+<dt><code>maxob</code></dt>
+<dd>
+<p>a number indicating the maximum study duration. For <code>time</code>
+type of design, the value is equal to the enrollment period plus the follow-up
+period. For <code>event</code> type of design, the value is the calendar time of the
+last event.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Bender, R., Augustin, T., &amp; Blettner, M. (2005). Generating survival times to simulate Cox proportional
+hazards models. Statistics in medicine, 24(11), 1713-1723.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Weibull</code>, <code>integrate</code>, <code>Logistic</code>, <code>Uniform</code>, <code>optimize</code>, <code>uniroot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># total sample size
+N &lt;- 300
+# target event
+E &lt;- 100
+# allocation ratio
+RR &lt;- 2
+# enrollment time
+entry &lt;- 12
+# follow-up time
+fup &lt;- 18
+# shape and scale parameter of weibull for entry time
+b_weibull &lt;- c(1,log(2)/18)
+# shape and scale parameter of weibull for drop-out time
+drop_weibull &lt;- c(1,log(2)/30)
+# hazard ratio function (constant)
+HRf &lt;- function(x){0.8*x^0}
+
+### event-driven trial
+set.seed(123445)
+data1 &lt;- simu.trial(type="event",trial_param=c(N,entry,E),bsl_dist="weibull",
+                    bsl_param=b_weibull,drop_param0=drop_weibull,HR_fun=HRf,
+                    ratio=RR)
+
+### fixed study duration
+set.seed(123445)
+data2 &lt;- simu.trial(type="time",trial_param=c(N,entry,fup),bsl_dist="weibull",
+                    bsl_param=b_weibull,drop_param0=drop_weibull,HR_fun=HRf,
+                    ratio=RR)
+</code></pre>
+
+
+</div>

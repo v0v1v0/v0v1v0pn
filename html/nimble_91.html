@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nimCopy</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Copying function for NIMBLE</h2>
+
+<h3>Description</h3>
+
+<p>Copies values from a NIMBLE model or modelValues object to another NIMBLE model or modelValues. Work in R and NIMBLE.  The NIMBLE keyword <code>copy</code> is identical to <code>nimCopy</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nimCopy(
+  from,
+  to,
+  nodes = NULL,
+  nodesTo = NULL,
+  row = NA,
+  rowTo = NA,
+  logProb = FALSE,
+  logProbOnly = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>from</code></td>
+<td>
+<p>Either a NIMBLE model or modelValues object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>to</code></td>
+<td>
+<p>Either a NIMBLE model or modelValues object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>Vector of one or more node names of object <code>from</code> that will be copied from</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodesTo</code></td>
+<td>
+<p>Vector of one or more node names of object <code>to</code> that will be copied to. If <code>nodesTo</code> is <code>NULL</code>, will automatically be set to <code>nodes</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>row</code></td>
+<td>
+<p>If <code>from</code> is a modelValues, the row that will be copied from</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowTo</code></td>
+<td>
+<p>If <code>to</code> is a modelValues, the row which will be copied to. If <code>rowTo</code> is <code>NA</code>, will automatically be set to <code>row</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logProb</code></td>
+<td>
+<p>A logical value indicating whether the log probabilities of the given nodes should also be copied (i.e. if <code>nodes = 'x'</code>
+and <code>logProb = TRUE</code>, then both <code>'x'</code> and <code>'logProb_x'</code> will be copied)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logProbOnly</code></td>
+<td>
+<p>A logical value indicating whether only the log probabilities of the given nodes should be copied (i.e. if <code>nodes = 'x'</code>
+and <code>logProbOnly = TRUE</code>, then only <code>'logProb_x'</code> will be copied)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function copies values from one or more nodes (possibly including log probabilities for nodes) between models and modelValues objects. For modelValues objects, the row must be specified. This function allows one to conveniently copy multiple nodes, avoiding having to write a loop.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Building model and modelValues object
+simpleModelCode &lt;- nimbleCode({
+for(i in 1:100)
+	x[i] ~ dnorm(0,1)
+})
+rModel &lt;- nimbleModel(simpleModelCode)
+rModelValues &lt;- modelValues(rModel)
+
+#Setting model nodes
+rModel$x &lt;- rnorm(100)
+#Using nimCopy in R.
+nimCopy(from = rModel, to = rModelValues, nodes = 'x', rowTo = 1)
+
+#Use of nimCopy in a simple nimbleFunction
+cCopyGen &lt;- nimbleFunction(
+	setup = function(model, modelValues, nodeNames){},
+	run = function(){
+		nimCopy(from = model, to = modelValues, nodes = nodeNames, rowTo = 1)
+	}
+)
+
+rCopy &lt;- cCopyGen(rModel, rModelValues, 'x')
+## Not run: 
+cModel &lt;- compileNimble(rModel)
+cCopy &lt;- compileNimble(rCopy, project = rModel)
+cModel[['x']] &lt;- rnorm(100)
+
+cCopy$run() ## execute the copy with the compiled function
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prunePed</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prunes a pedigree based on individuals with phenotypes</h2>
+
+<h3>Description</h3>
+
+<p>This function removes individuals who are either not themselves or not
+ancestors to phenotyped individuals
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prunePed(pedigree, phenotyped, ...)
+
+## Default S3 method:
+prunePed(pedigree, phenotyped, ...)
+
+## S3 method for class 'numPed'
+prunePed(pedigree, phenotyped, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pedigree</code></td>
+<td>
+<p>An object, where the first 3 columns correspond to: ID, Dam,
+&amp; Sire. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phenotyped</code></td>
+<td>
+<p>A vector indicating which individuals in the pedigree have
+phenotypic information available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments to be passed to methods</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Often mixed effect models run much faster when extraneous information is
+removed before running the model. This is particularly so when reducing the
+number of random effects associated with a relationship matrix constructed
+from a pedigree.
+</p>
+<p>NOTE: more columns than just a pedigree can be passed in the <code>pedigree</code>
+argument.
+</p>
+<p>Missing parents (e.g., base population) should be denoted by either 'NA',
+'0', or '*'.
+</p>
+<p>This function is very similar to (and the code is heavily borrowed from) a
+function of the same name in the <code>MCMCglmm</code> package by Jarrod Hadfield.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The pedigree object (can have more columns than just ID, Dam, and
+Sire), where the ID column contains an ID for all individuals who are
+actually phenotyped or are an ancestor to an individual with a phenotype
+(and are thus informative for estimating parameters in the base 
+population).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>prepPed</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+# Make a pedigree (with sex) from the warcolak dataset
+  warcolak_ped &lt;- warcolak[, 1:4]
+
+# Reduce the number of individuals that have a phenotype for "trait1" in
+  #the warcolak dataset
+  t1phenotyped &lt;- warcolak
+  t1phenotyped[sample(seq.int(nrow(warcolak)), 1500, replace = FALSE), "trait1"] &lt;- NA
+  t1phenotyped &lt;- t1phenotyped[which(!is.na(t1phenotyped$trait1)), ]
+
+# The following will give a pedigree with only individuals that have a 
+# phenotype for "trait1" OR are an ancestor to a phenotyped individual.
+  pruned_warcolak_ped &lt;- prunePed(warcolak_ped, phenotyped = t1phenotyped$ID)
+
+# Now compare the sizes (note, pruned_warcolak_ped retained its column indicating sex.
+  dim(warcolak_ped)
+  dim(pruned_warcolak_ped)
+# We could have kept all of the data associated with individuals who had phenotypic
+# information on "trait1" by instead specifying 
+  pruned_fullt1_warcolak_ped &lt;- prunePed(warcolak, phenotyped = t1phenotyped$ID) 
+  dim(pruned_fullt1_warcolak_ped)  #&lt;-- compare number of columns with above
+
+</code></pre>
+
+
+</div>

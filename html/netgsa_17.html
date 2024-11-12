@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prepareAdjMat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Construct adjacency matrices from graphite databases and/or user provided network information</h2>
+
+<h3>Description</h3>
+
+<p>Read the network information from any of the graphite databases specified by the user and construct the adjacency matrices needed for NetGSA. This function also allows for clustering. See details for more information</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prepareAdjMat(x, group, databases = NULL, cluster = TRUE,
+       file_e=NULL, file_ne=NULL, lambda_c=1, penalize_diag=TRUE, eta=0.5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The <code class="reqn">p \times n</code> data matrix with rows referring to genes and columns to samples. Row names should be unique and have gene ID types appended to them. The id and gene number must be separated by a colon. E.g. "ENTREZID:127550"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>Vector of class indicators of length <code class="reqn">n</code>. Identifies the condition for each of the <code class="reqn">n</code> samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>databases</code></td>
+<td>
+<p>(Optional) Either (1) the result of a call to <code>obtainEdgeList</code> or (2) a character vector of graphite databases you wish to search for edges. Since one can search in multiple databases with different identifiers, converts genes using <code>AnnotationDbi::select</code> and convert metabolites using <code>graphite:::metabolites()</code>. Databases are also used to specify non-edges. If <code>NULL</code> no external database information will be used. See Details for more information</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>(Optional) Logical indicating whether or not to cluster genes to estimate adjacency matrix. If not specified, set to TRUE if there are &gt; 2,500 genes (p &gt; 2,500). The main use of clustering is to speed up calculation time. If the dimension of the problem, or equivalently the total number of unique genes across all pathways, is large, <code>prepareAdjMat</code> may be slow.
+</p>
+<p>If clustering is set to TRUE, the 0-1 adjacency matrix is used to detect clusters of genes within the connected components. Once gene clusterings are chosen, the weighted adjacency matrices are estimated for each cluster separately using <code>netEst.undir</code> or <code>netEst.dir</code>. Thus, the adjacency matrix for the full network is block diagonal with the blocks being the adjacency matrices from the clusters. Any edges between clusters are set to 0, so this can be thought of as an approximate weighted adjacency matrix. Six clustering algorithms from the <code>igraph</code> package are considered: <code>cluster_walktrap</code>, <code>cluster_leading_eigen</code>, <code>cluster_fast_greedy</code>, <code>cluster_label_prop</code>, <code>cluster_infomap</code>, and <code>cluster_louvain</code>. Clustering is performed on each connected component of size &gt;1,000 genes. To ensure increases in speed, algorithms which produce a maximum cluster size of &lt; 1,000 genes are considered first. Among those, the algorithm with the smallest edge loss is chosen. If all algorithms have a maximum cluster size &gt; 1,000 genes the one with the smallest maximum cluster size is chosen. Edge loss is defined as the number of edges between genes of different clusters. These edges are "lost" since they are set to 0 in the block diagonal adjacency matrix.
+</p>
+<p>If clustering is set to FALSE, the 0-1 adjacency matrix is used to detect connected components and the weighted adjacency matrices are estimated for each connected component.
+</p>
+<p>Singleton clusters are combined into one cluster. This should not affect performance much since the gene in a singleton cluster should not have any edges to other genes.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file_e</code></td>
+<td>
+<p>(Optional) The name of the file which the list of edges is to read from. This file is read in with <code>data.table::fread</code>. Must have 4 columns in the following order. The columns do not necessarily need to be named, but they must be in this specific order:
+</p>
+
+<ul>
+<li>
+<p> 1st column - Source gene (base_gene_src), e.g. "7534""
+</p>
+</li>
+<li>
+<p> 2nd column - Gene identifier of the source gene (base_id_src), e.g. "ENTREZID"
+</p>
+</li>
+<li>
+<p> 3rd column - Destination gene (base_gene_dest), e.g. "8607"
+</p>
+</li>
+<li>
+<p> 4th column - Gene identifier of the destination gene (base_id_dest) e.g. "UNIPROT" 
+</p>
+</li>
+</ul>
+<p>This information cannot conflict with the user specified non-edges. That is, one cannot have the same edge in <code>file_e</code> and <code>file_ne</code>. In the case where the graph is undirected everything will be converted to an undirected edge or non-edge. Thus if the user specifies A-&gt;B as a directed non-edge it will be changed to an undirected non-edge if the graph is undirected. See Details for more information.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file_ne</code></td>
+<td>
+<p>(Optional) The name of the file which the list of non-edges is to read from. This file is read in with <code>data.table::fread</code>. The edges in this file are negative in the sense that the corresponding vertices are not connected. Format of the file must be the same as <code>file_e</code>. Again, each observation is assumed to be a directed edge. Thus for a negative undirected edge, input two separate negative edges.
+</p>
+<p>In the case of conflicting information between <code>file_ne</code> and edges identified in a database, user non-edges are used. That is if the user specifies A-&gt;B in <code>file_ne</code>, but there is an edge between A-&gt;B in KEGG, the information in KEGG will be ignored and A-&gt;B will be treated as a non-edge. In the case where the graph is undirected everything will be converted to an undirected edge or non-edge. Thus if the user specifies A-&gt;B as a directed non-edge it will be changed to an undirected non-edge if the graph is undirected. See Details for more information.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda_c</code></td>
+<td>
+<p>(Non-negative) a vector or constant. <code>lambda_c</code> is multiplied by a constant depending on the data to determine the actual tuning parameter, <code>lambda</code>, used in estimating the network. If <code>lambda_c</code> is a vector, the optimal <code>lambda</code> will be chosen from this vector using <code>bic.netEst.undir</code>. Note that <code>lambda</code> is only used if the network is undirected. If the network is directed, the default value in <code>netEst.dir</code> is used instead . By default, <code>lambda_c</code> is set to 1. See <code>netEst.undir</code> and <code>netEst.dir</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalize_diag</code></td>
+<td>
+<p>Logical. Whether or not to penalize diagonal entries when estimating weighted adjacency matrix. If TRUE a small penalty is used, otherwise no penalty is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>(Non-negative) a small constant needed for estimating the edge weights. By default, <code>eta</code> is set to 0.5. See <code>netEst.undir</code> for more details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>prepareAdjMat</code> accepts both network information from user specified sources as well as a list of graphite databases to search for edges in. <code>prepareAdjMat</code> calculates the 0-1 adjacency matrices and runs <code>netEst.undir</code> or <code>netEst.dir</code> if the graph is undirected or directed. 
+</p>
+<p>When searching for network information, <code>prepareAdjMat</code> makes some important assumptions about edges and non-edges. As already stated, the first is that in the case of conflicting information, user specified non-edges are given precedence. 
+</p>
+<p><code>prepareAdjMat</code> uses <code>obtainEdgeList</code> to standardize and search the <code>graphite</code> databases for edges. For more information see <code>?obtainEdgeList</code>. <code>prepareAdjMat</code> also uses database information to identify non-edges. If two genes are identified in the <code>databases</code> edges but there is no edge between them this will be coded as a non-edge. The rationale is that if there was an edge between these two genes it would be present.
+</p>
+<p><code>prepareAdjMat</code> assumes no information about genes not identified in <code>databases</code> edgelists. That is, if the user passes gene A, but gene A is not found in any of the edges in <code>databases</code> no information about Gene A is assumed. Gene A will have neither edges nor non-edges.
+</p>
+<p>Once all the network and clustering information has been compiled, <code>prepareAdjMat</code> estimates the network. <code>prepareAdjMat</code> will automatically detect directed graphs, rearrange them to the correct order and use <code>netEst.dir</code> to estimate the network. When the graph is undirected <code>netEst.undir</code> will be used. For more information on these methods see <code>?netEst.dir</code> and <code>?netEst.undir</code>.
+</p>
+<p>Importantly, <code>prepareAdjMat</code> returns the list of weighted adjacency matrices to be used as an input in <code>NetGSA</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Adj</code></td>
+<td>
+<p>A list of weighted adjacency matrices estimated from either <code>netEst.undir</code> or <code>netEst.dir</code>. That is <code>length(Adj) = length(unique(group))</code>. One list of weighted adjacency matrix will be returned for each condition in group. If cluster = TRUE is specified, the length of the list of adjacency matrices for each condition will be the same length as the number of clusters. The structure of Adj is Adj[[condition_number]][[cluster_adj_matrix]]. Note that even when <code>cluster = FALSE</code> the connected components are used as clusters. The last element which is needed for plotting and is passed through to the output of <code>NetGSA</code> is <code>edgelist</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>invcov</code></td>
+<td>
+<p>A list of inverse covariance matrices estimated from either <code>netEst.undir</code> or <code>netEst.dir</code>. That is <code>length(invcov) = length(unique(group))</code>. One list of inverse covariance matrix will be returned for each condition in group. If cluster = TRUE is specified, the length of the list of inverse covariance matrices for each condition will be the same length as the number of clusters. The structure of invcov is invcov[[condition_number]][[cluster_adj_matrix]]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>A list of values of tuning parameters used for each condition in <code>group</code>. If cluster = TRUE is specified, the length of the list of tuning parameters for each condition will be the same length as the number of clusters.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Michael Hellstern
+</p>
+
+
+<h3>References</h3>
+
+<p>Ma, J., Shojaie, A. &amp; Michailidis, G. (2016) Network-based pathway enrichment analysis with incomplete network information. Bioinformatics 32(20):165–3174. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NetGSA</code>, <code>netEst.dir</code>, <code>netEst.undir</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## load the data
+data("breastcancer2012_subset")
+
+## consider genes from just 2 pathways
+genenames    &lt;- unique(c(pathways[[1]], pathways[[2]]))
+sx           &lt;- x[match(rownames(x), genenames, nomatch = 0L) &gt; 0L,]
+
+adj_cluster    &lt;- prepareAdjMat(sx, group, 
+                                databases = c("kegg", "reactome"), 
+                                cluster = TRUE)
+adj_no_cluster &lt;- prepareAdjMat(sx, group, 
+                                databases = c("kegg", "reactome"), 
+                                cluster = FALSE)
+
+</code></pre>
+
+
+</div>

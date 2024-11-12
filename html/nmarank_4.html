@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>condition</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Define which hierarchies to select</h2>
+
+<h3>Description</h3>
+
+<p>Defines a condition that is of interest to be satisfied involving a
+set of treatments in the network.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">condition(fn, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fn</code></td>
+<td>
+<p>Character string specifiying type of condition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Function arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The following types of conditions are available.
+</p>
+<p>The condition <code>fn = "sameHierarchy"</code> checks whether a specific
+hierarchy occurs. One additional unnamed argument has to be
+provided in '...': a vector with a permutation of all treatment
+names in the network.
+</p>
+<p>The condition <code>fn = "specificPosition"</code> checks whether a
+treatment ranks in a specific position. Two additional unnamed
+arguments have to be provided in '...': (1) name of the treatment
+of interest and (2) a single numeric specifying the rank position.
+</p>
+<p>The condition <code>fn = "betterEqual"</code> checks whether a treatment
+has a position better or equal to a specific rank. Two additional
+unnamed arguments have to be provided in '...': (1) name of the
+treatment of interest and (2) a single numeric specifying the rank
+position.
+</p>
+<p>The condition <code>fn = "retainOrder"</code> checks whether a specific
+order of two or more treatments is retained anywhere in the
+hierarchy. One additional unnamed argument has to be provided in
+'...': a vector with two or more treatment names providing the
+order of treatments.
+</p>
+<p>The condition <code>fn = "biggerCIV"</code> checks whether the effect of
+a treatment is bigger than that of a second treatment by more than
+a given clinically important value (CIV) on an additive scale
+(e.g. log odds ratio, log risk ratio, mean difference). Three
+additional unnamed arguments have to be provided in '...': (1)
+name of the first treatment, (2) name of the second treatment and
+(3) a numerical value for the CIV. Note that the actual value of
+the relative effect is considered independently of whether
+<code>small.values</code> is <code>"desirable"</code> or <code>"undesirable"</code>.
+</p>
+<p><b>Composition of conditions for more complex queries:</b>
+</p>
+<p>Conditions can be combined to express more complex decision
+trees. This can be done by using the special operators %AND%,
+%OR%, %XOR% and the <code>opposite</code> function. The combination
+should be defined as a binary tree with the use of parentheses. If
+A, B, C and D are conditions, we can for example combine them into
+a complex condition E:
+</p>
+<p><code>E = A %AND% (B %OR% (opposite(C) %XOR% D))</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the defined function and its arguments.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nmarank</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("Woods2010", package = "netmeta")
+p1 &lt;- pairwise(treatment, event = r, n = N, studlab = author,
+  data = Woods2010, sm = "OR")
+net1 &lt;- netmeta(p1, small.values = "good")
+
+# criterionA if all treatments are in the exact defined order
+criterionA &lt;-
+condition("sameHierarchy",
+  c("SFC", "Salmeterol", "Fluticasone", "Placebo"))
+
+# criterionB respects the relative order of two or more treatments
+criterionB &lt;-
+  condition("retainOrder",
+    c("SFC", "Fluticasone", "Placebo"))
+
+# Below we define the condition that SFC and Salmeterol are in the
+# first two positions.
+
+# We first define conditions that each one of them is in position 1
+# or 2 
+criterionC1 &lt;- condition("betterEqual", "SFC", 2)
+criterionC2 &lt;- condition("betterEqual", "Salmeterol", 2)
+# We then combine them with operator %AND%
+criterionC &lt;- criterionC1 %AND% criterionC2
+
+# Next we can feed the condition into nmarank to get the
+# probability of the selection
+nmarank(net1, criterionC,
+  text.condition =
+    "SFC and Salmeterol are the two best options", nsim = 100)
+
+# We can further combine criteria
+criterionD &lt;- criterionA %AND% (criterionB %OR% opposite(criterionC))
+
+</code></pre>
+
+
+</div>

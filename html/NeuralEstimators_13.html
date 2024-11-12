@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plotdistribution</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot the empirical sampling distribution of an estimator.</h2>
+
+<h3>Description</h3>
+
+<p>Plot the empirical sampling distribution of an estimator.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plotdistribution(
+  df,
+  type = c("box", "density", "scatter"),
+  parameter_labels = NULL,
+  estimator_labels = ggplot2::waiver(),
+  truth_colour = "black",
+  truth_size = 8,
+  truth_line_size = NULL,
+  pairs = FALSE,
+  upper_triangle_plots = NULL,
+  legend = TRUE,
+  return_list = FALSE,
+  flip = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>a long form data frame containing fields <code>estimator</code>, <code>parameter</code>, <code>estimate</code>, <code>truth</code>, and a column (e.g., <code>replicate</code>) to uniquely identify each observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>string indicating whether to plot kernel density estimates for each individual parameter (<code>type = "density"</code>) or scatter plots for all parameter pairs (<code>type = "scatter"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter_labels</code></td>
+<td>
+<p>a named vector containing parameter labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimator_labels</code></td>
+<td>
+<p>a named vector containing estimator labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>truth_colour</code></td>
+<td>
+<p>the colour used to denote the true parameter value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>truth_size</code></td>
+<td>
+<p>the size of the point used to denote the true parameter value (applicable only for <code>type = "scatter"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>truth_line_size</code></td>
+<td>
+<p>the size of the cross-hairs used to denote the true parameter value. If <code>NULL</code> (default), the cross-hairs are not plotted. (applicable only for <code>type = "scatter"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pairs</code></td>
+<td>
+<p>logical; should we combine the scatter plots into a single pairs plot (applicable only for <code>type = "scatter"</code>)?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper_triangle_plots</code></td>
+<td>
+<p>an optional list of plots to include in the uppertriangle of the pairs plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>Flag; should we include the legend (only applies when constructing a pairs plot)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_list</code></td>
+<td>
+<p>Flag; should the parameters be split into a list?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flip</code></td>
+<td>
+<p>Flag; should the boxplots be "flipped" using <code>coord_flip()</code> (default <code>FALSE</code>)?</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list of <code>'ggplot'</code> objects or, if <code>pairs = TRUE</code>, a single <code>'ggplot'</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# In the following, we have two estimators and, for each parameter, 50 estimates
+# from each estimator.
+
+estimators &lt;- c("Estimator 1", "Estimator 2")
+estimator_labels &lt;- c("Estimator 1" = expression(hat(theta)[1]("·")),
+                      "Estimator 2" = expression(hat(theta)[2]("·")))
+
+# Single parameter:
+df &lt;- data.frame(
+  estimator = estimators, truth = 0, parameter = "mu",
+  estimate  = rnorm(2*50),
+  replicate = rep(1:50, each = 2)
+)
+parameter_labels &lt;- c("mu" = expression(mu))
+plotdistribution(df)
+plotdistribution(df, type = "density")
+plotdistribution(df, parameter_labels = parameter_labels, estimator_labels = estimator_labels)
+
+# Two parameters:
+df &lt;- rbind(df, data.frame(
+  estimator = estimators, truth = 1, parameter = "sigma",
+  estimate  = rgamma(2*50, shape = 1, rate = 1),
+  replicate = rep(1:50, each = 2)
+))
+parameter_labels &lt;- c(parameter_labels, "sigma" = expression(sigma))
+plotdistribution(df, parameter_labels = parameter_labels)
+plotdistribution(df, parameter_labels = parameter_labels, type = "density")
+plotdistribution(df, parameter_labels = parameter_labels, type = "scatter")
+
+# Three parameters:
+df &lt;- rbind(df, data.frame(
+  estimator = estimators, truth = 0.25, parameter = "alpha",
+  estimate  = 0.5 * runif(2*50),
+  replicate = rep(1:50, each = 2)
+))
+parameter_labels &lt;- c(parameter_labels, "alpha" = expression(alpha))
+plotdistribution(df, parameter_labels = parameter_labels)
+plotdistribution(df, parameter_labels = parameter_labels, type = "density")
+plotdistribution(df, parameter_labels = parameter_labels, type = "scatter")
+plotdistribution(df, parameter_labels = parameter_labels, type = "scatter", pairs = TRUE)
+
+# Pairs plot with user-specified plots in the upper triangle:
+upper_triangle_plots &lt;- lapply(1:3, function(i) {
+  x = rnorm(10)
+  y = rnorm(10)
+  shape = sample(c("Class 1", "Class 2"), 10, replace = TRUE)
+  ggplot() +
+    geom_point(aes(x = x, y = y, shape = shape)) + 
+    labs(shape = "") +
+    theme_bw()
+})
+plotdistribution(
+    df, 
+    parameter_labels = parameter_labels, estimator_labels = estimator_labels,
+    type = "scatter", pairs = TRUE, upper_triangle_plots = upper_triangle_plots
+    )
+## End(Not run)
+</code></pre>
+
+
+</div>

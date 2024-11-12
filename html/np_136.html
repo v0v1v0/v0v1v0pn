@@ -1,0 +1,299 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npunitest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Consistent Univariate Density Equality Test with Mixed Data Types</h2>
+
+<h3>Description</h3>
+
+<p><code>npunitest</code> implements the consistent metric entropy test of
+Maasoumi and Racine (2002) for two arbitrary, stationary
+univariate nonparametric densities on common support.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npunitest(data.x = NULL,
+          data.y = NULL,
+          method = c("integration","summation"),
+          bootstrap = TRUE,
+          boot.num = 399,
+          bw.x = NULL,
+          bw.y = NULL,
+          random.seed = 42,
+          ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data.x, data.y</code></td>
+<td>
+
+<p>common support univariate vectors containing the variables.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>a character string used to specify whether to compute
+the integral version or the summation version of the statistic. Can
+be set as <code>integration</code> or <code>summation</code>. Defaults to
+<code>integration</code>. See ‘Details’ below for important information
+regarding the use of <code>summation</code> when <code>data.x</code> and
+<code>data.y</code> lack common support and/or are sparse.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstrap</code></td>
+<td>
+
+<p>a logical value which specifies whether to conduct the bootstrap
+test or not. If set to <code>FALSE</code>, only the statistic will be
+computed. Defaults to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+
+<p>an integer value specifying the number of bootstrap
+replications to use. Defaults to <code>399</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw.x, bw.y</code></td>
+<td>
+
+<p>numeric (scalar) bandwidths. Defaults to plug-in (see details below).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+
+<p>an integer used to seed R's random number generator. This is to
+ensure replicability. Defaults to 42.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> additional arguments supplied to specify the bandwidth
+type, kernel types, and so on.  This is used since we specify bw as
+a numeric scalar and not a <code>bandwidth</code> object, and is of
+interest if you do not desire the default behaviours. To change the
+defaults, you may specify any of <code>bwscaling</code>, <code>bwtype</code>,
+<code>ckertype</code>, <code>ckerorder</code>, <code>ukertype</code>,
+<code>okertype</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npunitest</code> computes the nonparametric metric entropy (normalized
+Hellinger of Granger, Maasoumi and Racine (2004)) for testing
+equality of two univariate density/probability functions,
+<code class="reqn">D[f(x), f(y)]</code>. See Maasoumi and Racine (2002)
+for details. Default bandwidths are of the plug-in variety
+(<code>bw.SJ</code> for continuous variables and direct plug-in for
+discrete variables). The bootstrap is conducted via simple resampling
+with replacement from the pooled <code>data.x</code> and <code>data.y</code>
+(<code>data.x</code> only for <code>summation</code>).
+</p>
+<p>The summation version of this statistic can be numerically unstable
+when <code>data.x</code> and <code>data.y</code> lack common support or when the
+overlap is sparse (the summation version involves division of
+densities while the integration version involves differences, and the
+statistic in such cases can be reported as exactly 0.5 or 0). Warning
+messages are produced when this occurs (‘integration recommended’)
+and should be heeded.
+</p>
+<p>Numerical integration can occasionally fail when the <code>data.x</code>
+and <code>data.y</code> distributions lack common support and/or lie an
+extremely large distance from one another (the statistic in such
+cases will be reported as exactly 0.5 or 0). However, in these
+extreme cases, simple tests will reveal the obvious differences in
+the distributions and entropy-based tests for equality will be
+clearly unnecessary.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npunitest</code> returns an object of type <code>unitest</code> with the
+following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Srho</code></td>
+<td>
+<p> the statistic <code>Srho</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Srho.bootstrap</code></td>
+<td>
+<p> contains the bootstrap replications of <code>Srho</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p> the P-value of the statistic </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+<p> number of bootstrap replications </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw.x, bw.y</code></td>
+<td>
+<p> scalar bandwidths for <code>data.x, data.y</code> </p>
+</td>
+</tr>
+</table>
+<p><code>summary</code> supports object of type <code>unitest</code>.
+</p>
+
+
+<h3>Usage Issues</h3>
+
+<p>See the example below for proper usage.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Granger, C.W. and E. Maasoumi and J.S. Racine (2004), “A
+dependence metric for possibly nonlinear processes”, Journal of Time
+Series Analysis, 25, 649-669.
+</p>
+<p>Maasoumi, E. and J.S. Racine (2002), “Entropy and
+predictability of stock market returns,” Journal of Econometrics,
+107, 2, pp 291-312.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npdeneqtest,npdeptest,npsdeptest,npsymtest</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+set.seed(1234)
+n &lt;- 1000
+
+## Compute the statistic only for data drawn from same distribution
+
+x &lt;- rnorm(n)
+y &lt;- rnorm(n)
+
+npunitest(x,y,bootstrap=FALSE)
+
+Sys.sleep(5)
+
+## Conduct the test for this data
+
+npunitest(x,y,boot.num=99)
+
+Sys.sleep(5)
+
+## Conduct the test for data drawn from different distributions having
+## the same mean and variance
+
+x &lt;- rchisq(n,df=5)
+y &lt;- rnorm(n,mean=5,sd=sqrt(10))
+mean(x)
+mean(y)
+sd(x)
+sd(y)
+
+npunitest(x,y,boot.num=99)
+
+Sys.sleep(5)
+
+## Two sample t-test for equality of means
+t.test(x,y)
+## F test for equality of variances and asymptotic
+## critical values
+F &lt;- var(x)/var(y)
+qf(c(0.025,0.975),df1=n-1,df2=n-1)
+
+## Plot the nonparametric density estimates on the same axes
+
+fx &lt;- density(x)
+fy &lt;- density(y)
+xlim &lt;- c(min(fx$x,fy$x),max(fx$x,fy$x))
+ylim &lt;- c(min(fx$y,fy$y),max(fx$y,fy$y))
+plot(fx,xlim=xlim,ylim=ylim,xlab="Data",main="f(x), f(y)")
+lines(fy$x,fy$y,col="red")
+
+Sys.sleep(5)
+
+## Test for equality of log(wage) distributions
+
+data(wage1)
+attach(wage1)
+lwage.male &lt;- lwage[female=="Male"]
+lwage.female &lt;- lwage[female=="Female"]
+
+npunitest(lwage.male,lwage.female,boot.num=99)
+
+Sys.sleep(5)
+
+## Plot the nonparametric density estimates on the same axes
+
+f.m &lt;- density(lwage.male)
+f.f &lt;- density(lwage.female)
+xlim &lt;- c(min(f.m$x,f.f$x),max(f.m$x,f.f$x))
+ylim &lt;- c(min(f.m$y,f.f$y),max(f.m$y,f.f$y))
+plot(f.m,xlim=xlim,ylim=ylim,
+     xlab="log(wage)",
+     main="Male/Female log(wage) Distributions")
+lines(f.f$x,f.f$y,col="red",lty=2)
+rug(lwage.male)
+legend(-1,1.2,c("Male","Female"),lty=c(1,2),col=c("black","red"))
+
+detach(wage1)
+
+Sys.sleep(5)
+
+## Conduct the test for data drawn from different discrete probability
+## distributions
+
+x &lt;- factor(rbinom(n,2,.5))
+y &lt;- factor(rbinom(n,2,.1))
+
+npunitest(x,y,boot.num=99)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

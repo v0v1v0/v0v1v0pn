@@ -1,0 +1,284 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>seqOpenEndCpMean</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Open-end Nonparametric Sequential Change-Point Detection Test
+for Univariate Time Series Sensitive to Changes in the Mean</h2>
+
+<h3>Description</h3>
+
+<p>Open-end nonparametric sequential test for change-point detection
+based on the retrospective CUSUM statistic. The observations need to
+be univariate but can be serially dependent. To carry out the test,
+two steps are required. The first step consists of computing a
+detector function. The second step consists of comparing the detector
+function to a suitable constant threshold function. Each of these
+steps corresponds to one of the functions in the usage section
+below. The current implementation is preliminary and not optimized for
+real-time monitoring (but could still be used for that). Details can
+be found in the third reference.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">detOpenEndCpMean(x.learn, x, sigma = NULL, b = NULL,
+          weights = c("parzen", "bartlett"))
+
+monOpenEndCpMean(det, statistic = c("t", "s", "r", "e", "cs"), eta = 0.001,
+          gamma = 0.45, alpha = 0.05, sigma = NULL, plot = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x.learn</code></td>
+<td>
+<p>a numeric vector representing the learning sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector representing the observations collected after the
+beginning of the monitoring for a change in mean.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>an estimate of the long-run variance of the time series of
+which <code>x.learn</code> is a stretch. If set to <code>NULL</code>,
+<code>sigma</code> will be estimated using an approach similar to
+those described in the fourth reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>strictly positive integer specifying the value of the
+bandwidth for the estimation of the long-run variance if
+<code>sigma</code> is not provided. If set to <code>NULL</code>, <code>b</code> will
+be estimated from <code>x.learn</code> using the function
+<code>bOpt()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>a string specifying the kernel for creating the weights
+used for the estimation of the long-run variance if <code>sigma</code> is
+not provided; see Section 5 of the first reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>det</code></td>
+<td>
+<p>an object of class <code>det.cpMean</code> representing a detector
+function computed using <code>detOpenEndCpMean()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>a string specifying the statistic/detector to be used
+for the monitoring; can be either <code>"t"</code>, <code>"s"</code>,
+<code>"r"</code>, <code>"e"</code> or <code>"cs"</code>; <code>"t"</code> corresponds to the
+detector <code class="reqn">T_{m}</code> in the third reference, <code>"s"</code> to the
+detector <code class="reqn">S_{m}</code>, <code>"r"</code> to the detector <code class="reqn">R_{m}</code>,
+<code>"e"</code> to the detector <code class="reqn">E_m</code> and <code>"cs"</code> to
+so-called ordinary CUSUM detector denoted by <code class="reqn">Q_m</code> in the
+third reference. Note that the detector <code class="reqn">E_m</code>
+was proposed in the second reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>a real parameter whose role is described in detail in
+the third reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>a real parameter that can improve the power of the
+sequential test at the beginning of the monitoring; possible values
+are 0, 0.1, 0.25, 0.45, 0.65 and 0.85, but not for all statistics; see
+the third reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the value of the desired significance level for the
+sequential test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical indicating whether the monitoring should be
+plotted.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The testing procedure is described in detail in the third
+reference. An alternative way of estimating the long-run variance is
+to use the function <code>lrvar()</code> of the package
+<span class="pkg">sandwich</span> and to pass it through the argument <code>sigma</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Both functions return lists whose components have explicit names. The
+function <code>monOpenEndCpMean()</code> in particular returns a list whose
+components are
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>alarm</code></td>
+<td>
+<p>a logical indicating whether the detector function has
+exceeded the threshold function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.alarm</code></td>
+<td>
+<p>an integer corresponding to the time at
+which the detector function has exceeded the threshold function or
+<code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times.max</code></td>
+<td>
+<p>a vector of times at which the successive detectors
+<code>"r"</code> (if <code>statistic = "r"</code>, <code>statistic = "s"</code> or
+<code>statistic = "t"</code>) or <code>"e"</code> (if <code>statistic = "e"</code>)
+have reached their maximum; a vector of <code>NA</code>'s if
+<code>statistic = "cs"</code>; this sequence of times can be used to
+estimate the time of change from the time of alarm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.change</code></td>
+<td>
+<p>an integer giving the estimated time of change if
+<code>alarm</code> is <code>TRUE</code>; the latter is simply the value in
+<code>times.max</code> which corresponds to <code>time.alarm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>the value of <code>statistic</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>the value of <code>eta</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>the value of <code>gamma</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the value of <code>alpha</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>the value of <code>sigma</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detector</code></td>
+<td>
+<p>the successive values of the chosen detector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>the value of the constant threshold for the chosen detector.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>A. Bücher and I. Kojadinovic (2016), A dependent multiplier
+bootstrap for the sequential empirical copula process under strong
+mixing, <em>Bernoulli</em> <b>22:2</b>, pages 927-968,
+<a href="https://arxiv.org/abs/1306.3930">https://arxiv.org/abs/1306.3930</a>.
+</p>
+<p>J. Gösmann, T. Kley and H. Dette (2021), A new approach for
+open-end sequential change point monitoring, <em>Journal of Time
+Series Analysis</em> <b>42:1</b>, pages 63-84, 
+<a href="https://arxiv.org/abs/1906.03225">https://arxiv.org/abs/1906.03225</a>.
+</p>
+<p>M. Holmes and I. Kojadinovic (2021), Open-end nonparametric
+sequential change-point detection based on the retrospective CUSUM
+statistic, <em>Electronic Journal of Statistics</em> <b>15:1</b>, pages
+2288-2335, <a href="https://doi.org/10.1214/21-EJS1840">doi:10.1214/21-EJS1840</a>.
+</p>
+<p>D.N. Politis and H. White (2004), Automatic block-length selection for the
+dependent bootstrap, <em>Econometric Reviews</em> <b>23(1)</b>, pages 53-70.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>cpMean()</code> for the corresponding a posteriori
+(offline) test and <code>detOpenEndCpDist()</code> for the corresponding test for
+changes in the distribution function.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Example of open-end monitoring
+m &lt;- 100 # size of the learning sample
+
+## The learning sample
+set.seed(123)
+x.learn &lt;- rnorm(m)
+
+## New observations with a change in mean
+## to simulate monitoring for the period m+1, ..., n
+n &lt;- 5000
+k &lt;- 2500 ## the true change-point
+x &lt;- c(rnorm(k-m), rnorm(n-k, mean = 0.2))
+
+## Step 1: Compute the detector
+det &lt;- detOpenEndCpMean(x.learn = x.learn, x = x)
+
+## Step 2: Monitoring with the default detector
+m1 &lt;- monOpenEndCpMean(det)
+str(m1)
+
+## Monitoring with another detector
+m2 &lt;- monOpenEndCpMean(det, statistic = "s", gamma = 0.85)
+str(m2)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

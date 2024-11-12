@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroLabel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Label pruning
+</h2>
+
+<h3>Description</h3>
+
+<p>Optimize the look and selection of labels on map districts.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroLabel(topology, values, gap = 2.3)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>topology</code></td>
+<td>
+
+<p>A data frame with K rows and six columns, see details.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>values</code></td>
+<td>
+
+<p>A vector of K values or a K x N data frame, where K is the number of map
+districts and N is the number of variables.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gap</code></td>
+<td>
+
+<p>Minimum distance between map districts with non-empty labels.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function assigns visible labels for districts based on the absolute
+deviations from the average district value. The most extreme districts are
+picked first, and then the remaining districts are prioritized based on
+their value and distance to the other districts already labeled. Columns
+that are listed in the attribute "binary" in <code>values</code> are given
+percentage labels.
+</p>
+<p>Topology can be either the output from <code>nroKohonen()</code> or a
+data frame in the same format as the element <code>topology</code> within the
+aforementioned output list.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix with K rows and N columns that contains selected labels
+for the map districts for each of the columns in <code>values</code>. The output
+has the attribute 'visible' that contains binary flags to guide visibility.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Prepare training data.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- scale.default(dataset[,trvars]) 
+
+# K-means clustering.
+km &lt;- nroKmeans(data = trdata)
+
+# Self-organizing map.
+sm &lt;- nroKohonen(seeds = km)
+sm &lt;- nroTrain(map = sm, data = trdata)
+
+# Assign data points into districts.
+matches &lt;- nroMatch(centroids = sm, data = trdata)
+
+# District averages for all variables.
+planes &lt;- nroAggregate(topology = sm, districts = matches, data = dataset)
+
+# District labels for cholesterol.
+chol &lt;- nroLabel(topology = sm, values = planes[,"CHOL"])
+print(head(attr(chol, "visible")))
+print(head(chol))
+
+# District labels for all variables.
+colrs &lt;- nroLabel(topology = sm, values = planes)
+print(head(attr(colrs, "visible")))
+print(head(colrs))
+</code></pre>
+
+
+</div>

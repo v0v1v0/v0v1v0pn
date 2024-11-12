@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Tree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Tree objects</h2>
+
+<h3>Description</h3>
+
+<p>Creation and manipulation of tree objects.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Tree(value, children = list())
+## S3 method for class 'Tree'
+format(x, width = 0.9 * getOption("width"), indent = 0,
+       brackets = c("(", ")"), ...)
+Tree_parse(x, brackets = c("(", ")"))
+Tree_apply(x, f, recursive = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>a (non-tree) node value of the tree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>children</code></td>
+<td>
+<p>a list giving the children of the tree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a tree object for the <code>format()</code> method and
+<code>Tree_apply()</code>; a character string for <code>Tree_parse()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width</code></td>
+<td>
+<p>a positive integer giving the target column for a
+single-line nested bracketting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indent</code></td>
+<td>
+<p>a non-negative integer giving the indentation used for
+formatting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>brackets</code></td>
+<td>
+<p>a character vector of length two giving the pair of
+opening and closing brackets to be employed for formatting or
+parsing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>a function to be applied to the children nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recursive</code></td>
+<td>
+<p>a logical indicating whether to apply <code>f</code>
+recursively to the children of the children and so forth.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Trees give hierarchical groupings of leaves and subtrees, starting
+from the root node of the tree.  In natural language processing, the
+syntactic structure of sentences is typically represented by parse
+trees (e.g., <a href="https://en.wikipedia.org/wiki/Concrete_syntax_tree">https://en.wikipedia.org/wiki/Concrete_syntax_tree</a>)
+and displayed using nested brackettings.
+</p>
+<p>The tree objects in package <span class="pkg">NLP</span> are patterned after the ones in
+NLTK (<a href="https://www.nltk.org">https://www.nltk.org</a>), and primarily designed for representing
+parse trees.  A tree object consists of the value of the root node and
+its children as a list of leaves and subtrees, where the leaves are
+elements with arbitrary non-tree values (and not subtrees with no
+children).  The value and children can be extracted via <code>$</code>
+subscripting using names <code>value</code> and <code>children</code>,
+respectively.
+</p>
+<p>There is a <code>format()</code> method for tree objects: this first tries a
+nested bracketting in a single line of the given width, and if this is
+not possible, produces a nested indented bracketting.  The
+<code>print()</code> method uses the <code>format()</code> method, and hence its
+arguments to control the formatting.
+</p>
+<p><code>Tree_parse()</code> reads nested brackettings into a tree object.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- Tree(1, list(2, Tree(3, list(4)), 5))
+format(x)
+x$value
+x$children
+
+p &lt;- Tree("VP",
+          list(Tree("V",
+                    list("saw")),
+               Tree("NP",
+                    list("him"))))
+p &lt;- Tree("S",
+          list(Tree("NP",
+                    list("I")),
+               p))
+p
+## Force nested indented bracketting:
+print(p, width = 10)
+
+s &lt;- "(S (NP I) (VP (V saw) (NP him)))"
+p &lt;- Tree_parse(s)
+p
+
+## Extract the leaves by recursively traversing the children and
+## recording the non-tree ones:
+Tree_leaf_gatherer &lt;-
+function()
+{
+    v &lt;- list()
+    list(update =
+         function(e) if(!inherits(e, "Tree")) v &lt;&lt;- c(v, list(e)),
+         value = function() v,
+         reset = function() { v &lt;&lt;- list() })
+}
+g &lt;- Tree_leaf_gatherer()
+y &lt;- Tree_apply(p, g$update, recursive = TRUE)
+g$value()
+</code></pre>
+
+
+</div>

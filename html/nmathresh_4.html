@@ -1,0 +1,275 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nma_thresh</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate thresholds and invariant intervals</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates decision-invariant bias-adjustment thresholds and
+intervals for Bayesian network meta-analysis, as described by Phillippo
+<em>et al.</em> (2018). Thresholds are derived from the joint
+posterior, and reflect the amount of change to a data point before the
+treatment decision changes. Calculation is achieved using fast matrix
+operations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nma_thresh(
+  mean.dk,
+  lhood,
+  post,
+  nmatype = "fixed",
+  X = NULL,
+  mu.design = NULL,
+  delta.design = NULL,
+  opt.max = TRUE,
+  trt.rank = 1,
+  trt.code = NULL,
+  trt.sub = NULL,
+  mcid = 0,
+  mcid.type = "decision"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mean.dk</code></td>
+<td>
+<p>Posterior means of basic treatment parameters <code class="reqn">d_k</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lhood</code></td>
+<td>
+<p>Likelihood (data) covariance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>post</code></td>
+<td>
+<p>Posterior covariance matrix (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmatype</code></td>
+<td>
+<p>Character string, giving the type of NMA performed. One of
+"fixed" (fixed effects, the default) or "random" (random effects). May be
+abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>[FE models only] Design matrix for basic treatment parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu.design</code></td>
+<td>
+<p>[RE models only] Design matrix for any extra parameters.
+Defaults to <code>NULL</code> (no extra parameters).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta.design</code></td>
+<td>
+<p>[RE models only] Design matrix for delta, defaults to the
+<code class="reqn">N \times N</code> identity matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>opt.max</code></td>
+<td>
+<p>Should the optimal decision be the maximal treatment effect
+(<code>TRUE</code>, default) or the minimum (<code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trt.rank</code></td>
+<td>
+<p>Rank of the treatment to derive thresholds for. Defaults to
+1, thresholds for the optimum treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trt.code</code></td>
+<td>
+<p>Treatment codings of the reference treatment and in the
+parameter vector <code class="reqn">d_k</code>. Use if treatments re-labelled or re-ordered.
+Default is equivalent to <code>1:K</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trt.sub</code></td>
+<td>
+<p>Only look at thresholds in this subset of treatments in
+<code>trt.code</code>, e.g. if some are excluded from the ranking. Default is
+equivalent to <code>1:K</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mcid</code></td>
+<td>
+<p>Minimal clinically important difference for the decision (when
+<code>mcid.type = 'decision'</code>) or for changing the decision (when
+<code>mcid.type = 'change'</code>). Defaults to 0, use the maximal efficacy
+decision rule.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mcid.type</code></td>
+<td>
+<p>Default <code>'decision'</code>, the decision rule is based on
+MCID (see details). Otherwise <code>'change'</code>, use the maximum efficacy
+rule, but only consider changing the decision when the alternative
+treatment becomes more effective than the base case by <code>mcid</code> or more.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function provides bias-adjustment threshold analysis for both
+fixed and random effects NMA models, as described by Phillippo <em>et
+al.</em> (2018). Parameters <code>mean.dk</code>, <code>lhood</code>, and
+<code>post</code> are always required, however there are differences in the
+specification of <code>post</code> and other required parameters and between the
+fixed and random effects cases:
+</p>
+ <dl>
+<dt><strong>FE models</strong></dt>
+<dd>
+<p>The design matrix <code>X</code> for basic
+treatment parameters is required. The posterior covariance matrix specified
+in <code>post</code> should only refer to the basic treatment parameters.</p>
+</dd>
+<dt><strong>RE models</strong></dt>
+<dd>
+<p>The design matrix <code>mu.design</code> for additional
+parameters (e.g. covariates) is required, as is the design matrix
+<code>delta.design</code> for random effects terms. The posterior covariance
+matrix specified in <code>post</code> should refer to the basic treatment
+parameters, RE terms, and additional parameters <em>in that order</em>; i.e.
+<code>post</code> should be the posterior covariance matrix of the vector
+<code class="reqn">(d^T, \delta^T, \mu^T)^T</code>.</p>
+</dd> </dl>
+<h3>Value</h3>
+
+<p>An object of class <code>thresh</code>.
+</p>
+
+
+<h3>Model details</h3>
+
+<p><strong>The FE NMA model</strong>
+</p>
+<p>The fixed effects NMA model is assumed to be of the form </p>
+
+<dl>
+<dt>Prior:</dt>
+<dd>
+<p><code class="reqn">d \sim \mathrm{N} ( d_0, \Sigma_d )</code></p>
+</dd>
+<dt>Likelihood:</dt>
+<dd>
+<p><code class="reqn">y|d \sim \mathrm{N} ( \delta, V )</code></p>
+</dd> <dt>FE model:</dt>
+<dd>
+<p><code class="reqn">\delta = Xd + M\mu</code></p>
+</dd> </dl>
+<p>The additional parameters <code class="reqn">\mu</code> may be given any sensible prior; they
+do not affect the threshold analysis in any way.
+</p>
+<p><strong>The RE NMA model</strong>
+</p>
+<p>The random effects NMA model is assumed to be of the form </p>
+
+<dl>
+<dt>Priors:</dt>
+<dd>
+<p><code class="reqn"> d \sim \mathrm{N} ( d_0, \Sigma_d ), \quad \mu \sim
+  \mathrm{N} ( \mu_0, \Sigma_\mu )</code></p>
+</dd>
+<dt>Likelihood:</dt>
+<dd>
+<p><code class="reqn">y|d,\mu,\tau^2 \sim \mathrm{N} ( L\delta + M\mu, V
+  )</code></p>
+</dd>
+<dt>RE model:</dt>
+<dd>
+<p><code class="reqn">\delta \sim \mathrm{N} ( Xd, \tau^2 )</code></p>
+</dd> </dl>
+<p>The between-study heterogeneity parameter <code class="reqn">\tau^2</code> may be given any
+sensible prior. In the RE case, the threshold derivations make the
+approximation that <code class="reqn">\tau^2</code> is fixed and known.
+</p>
+
+
+<h3>Decision rules</h3>
+
+<p>The default decision rule is maximal efficacy; the optimal treatment is
+<code class="reqn"> k^* = \mathrm{argmax}_k \mathrm{E}(d_{k})</code>.
+</p>
+<p>When <code class="reqn">\epsilon</code> = <code>mcid</code> is greater than zero and
+<code>mcid.type = 'decision'</code>, the decision rule is no longer for a single
+best treatment, but is based on minimal clinically important difference. A
+treatment is in the optimal set if <code class="reqn">\mathrm{E}(d_k) \ge
+  \epsilon</code> and <code class="reqn">\max_a \mathrm{E}(d_a) -
+  \mathrm{E}(d_k) \le \epsilon</code>.
+</p>
+<p>When <code>mcid.type = 'change'</code>, the maximal efficacy rule is used, but
+thresholds are found for when a new treatment is better than the base-case
+optimal by at least <code>mcid</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>recon_vcov</code>, <code>thresh_forest</code>,
+<code>thresh-class</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Please see the vignette "Examples" for worked examples including use of
+# this function, including more information on the brief code below.
+
+vignette("Examples", package = "nmathresh")
+
+### Contrast level thresholds for Thrombolytic treatments NMA
+K &lt;- 6   # Number of treatments
+
+# Contrast design matrix is
+X &lt;- matrix(ncol = K-1, byrow = TRUE,
+            c(1, 0, 0, 0, 0,
+              0, 1, 0, 0, 0,
+              0, 0, 1, 0, 0,
+              0, 0, 0, 1, 0,
+              0, -1, 1, 0, 0,
+              0, -1, 0, 1, 0,
+              0, -1, 0, 0, 1))
+
+# Reconstruct hypothetical likelihood covariance matrix using NNLS
+lik.cov &lt;- recon_vcov(Thrombo.post.cov, prior.prec = .0001, X = X)
+
+# Thresholds are then
+thresh &lt;- nma_thresh(mean.dk = Thrombo.post.summary$statistics[1:(K-1), "Mean"],
+                     lhood = lik.cov,
+                     post = Thrombo.post.cov,
+                     nmatype = "fixed",
+                     X = X,
+                     opt.max = FALSE)
+
+</code></pre>
+
+
+</div>

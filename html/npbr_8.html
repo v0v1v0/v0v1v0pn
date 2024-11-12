@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dfs_pwm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Probability-weighted moment frontier estimator
+</h2>
+
+<h3>Description</h3>
+
+<p>This function is an implementation of the probability-weighted moment frontier estimator developed by Daouia, Florens and Simar (2012).    
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dfs_pwm(xtab, ytab, x, coefm, a=2, rho, ci=TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coefm</code></td>
+<td>
+<p>a tuning parameter (integer) larger than or equal to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>a smoothing parameter (integer) larger than or equal to 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>a numeric vector of the same length as <code>x</code> or a scalar, which determines the values of rho.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>a boolean, TRUE for computing the confidence interval.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The regularized frontier estimator introduced by Daouia et al. (2012) is based 
+on the unregularized probability-weighted moment estimator
+</p>
+<p style="text-align: center;"><code class="reqn">\hat{\varphi}_m(x) = \varphi_{fdh}(x) - \int_{0}^{\varphi_{fdh}(x)} \hat{F}^m(y|x)dy</code>
+</p>
+
+<p>where the trimming order <code class="reqn">m\geq 1</code> is an integer such that <code class="reqn">m=m_n\to\infty</code> as <code class="reqn">n\to\infty</code>, 
+and <code class="reqn">\hat{F}(y|x)=\sum_{i=1}^n1_{(x_i\leq x,y_i\leq y)}/\sum_{i=1}^n1_{(x_i\leq x)}</code>.
+The implemented estimator of <code class="reqn">\varphi(x)</code> is then defined as 
+</p>
+<p style="text-align: center;"><code class="reqn">\tilde{\varphi}_m(x) = \hat{\varphi}_m(x) + \Gamma\left(1 + 1/\bar\rho_x\right)\left( 1/m\,\hat\ell_x\right)^{1/\bar\rho_x}</code>
+</p>
+
+<p>where
+</p>
+<p style="text-align: center;"><code class="reqn">\bar{\rho}_x    =   \log (a)\left\{ \log\Big( \frac{\hat\varphi_{m}(x)-\hat\varphi_{am}(x)}{\hat\varphi_{am}(x)-\hat\varphi_{a^2m}(x)}
+\Big) \right\}^{-1} ,  \quad
+\hat{\ell}_x     =  \frac {1}{m}\left[\frac{\Gamma(1+ 1/\bar\rho_x)\big(1-a^{-1/\bar\rho_x}\big)}{\hat\varphi_{m}(x)-\hat\varphi_{am}(x)}\right]^{\bar\rho_x},</code>
+</p>
+
+<p>with <code class="reqn">a\geq 2</code> being a fixed integer. If the true tail-index <code class="reqn">\rho_x=\beta_x+2</code> is known, we set <code class="reqn">\bar{\rho}_x=\rho_x</code> in the expressions above.
+The two smoothing parameters <code class="reqn">m</code> and <code class="reqn">a</code> have to be fixed by the user in the 4th and 5th arguments of the function.
+</p>
+<p>The pointwise <code class="reqn">95\%</code> confidence interval of <code class="reqn">\varphi(x)</code> derived from the asymptotic normality of <code class="reqn">\tilde\varphi_{m}(x)</code> 
+is given by <code class="reqn">[\tilde{\varphi}_m(x)  \pm   1.96 \, \hat\sigma(m,x)/\sqrt{n}]</code>
+where 
+</p>
+<p style="text-align: center;"><code class="reqn"> 
+ \hat\sigma^2(m,x)= \frac{2m^2}{ \hat F_X(x)}\int_0^{\varphi_{fdh}(x)}  
+\int_0^{\varphi_{fdh}(x)}  \hat F^{m}(y|x)\hat F^{m-1}(u|x)(1-\hat F(u|x))
+1_{(y\le u)}\, dy\,du,</code>
+</p>
+
+<p>with <code class="reqn">\hat F_X(x) =(1/n)\sum_{i=1}^n1_{(x_i\leq x)}</code>. 
+Note that the standard deviation <code class="reqn">\sigma(m,x)/\sqrt{n}</code> of the bias-corrected estimator <code class="reqn">\tilde{\varphi}_m(x)</code> is adjusted by a bootstrap estimator 
+in the numerical illustrations of Daouia et al. (2012), whereas the exact estimate <code class="reqn">\hat\sigma(m,x)/\sqrt{n}</code> is utilized in the implemented function.
+A practical choice of <code class="reqn">m</code> that Daouia et al. (2012) have employed is the simple rule of thumb 
+<code class="reqn">m=coefm \times N^{1/3}_x</code>, where <code class="reqn">N_x=\sum_{i=1}^n1_{\{x_i\le x\}}</code>, 
+and the integer <code>coefm</code> as well as the second smoothing parameter <code>a</code> are to be tuned by the user to avoid numerical instabilities 
+in the pointwise estimates of the tail-index <code class="reqn">\rho_x</code> and the frontier function <code class="reqn">\varphi(x)</code>. 
+The user may start with the values <code>coefm=5</code> and <code>a=2</code> [respectively, <code>coefm=10</code> and <code>a=20</code>] 
+for computing the estimator <code class="reqn">\tilde{\varphi}_m(x)</code>  [respectively, <code class="reqn">\bar{\rho}_x</code>]. Note that tail-index estimation and frontier estimation are conducted separately. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The computational burden here is demanding, so be forewarned. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Abdelaati Daouia and Thibault Laurent (converted from Abdelaati Daouia's Matlab code). 
+</p>
+
+
+<h3>References</h3>
+
+<p>Daouia, A., Florens, J.-P. and Simar, L. (2012). Regularization of Nonparametric Frontier Estimators. <em>Journal of Econometrics</em>, 168, 285-299.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rho_pwm</code>, <code>mopt_pwm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("post")
+x.post&lt;- seq(post$xinput[100],max(post$xinput), 
+ length.out=100) 
+## Not run: 
+# 1. When rho[x] is known and equal to 2, we set:
+rho&lt;-2
+res.pwm.1&lt;- dfs_pwm(post$xinput, post$yprod, x.post, coefm=5,
+ a=2, rho, ci=TRUE)
+# 2. When rho[x] is unknown and dependent of x, 
+# its estimate hat(rho[x]) is obtained via:
+rho_pwm &lt;- rho_pwm(post$xinput, post$yprod, x.post, coefm=10, a=20)
+# and the corresponding frontier estimator via: 
+res.pwm.2&lt;- dfs_pwm(post$xinput, post$yprod, x.post, coefm=5,
+ a=2, rho_pwm, ci=TRUE)
+# 3. When rho[x] is unknown but independent of x, 
+# a robust estimation strategy is by using the (trimmed) mean 
+# over the estimates hat(rho[x]): 
+rho_trimmean&lt;-mean(rho_pwm, trim=0.00)
+res.pwm.3&lt;- dfs_pwm(post$xinput, post$yprod, x.post, coefm=5,
+ a=2, rho_trimmean, ci=TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

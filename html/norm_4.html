@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>em.norm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+EM algorithm for incomplete normal data
+</h2>
+
+<h3>Description</h3>
+
+<p>Performs maximum-likelihood estimation on the matrix of incomplete
+data using the EM algorithm. Can also be used to find a posterior mode
+under a normal-inverted Wishart prior supplied by the user.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">em.norm(s, start, showits=TRUE, maxits=1000, criterion=0.0001, prior)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+
+<p>summary list of an incomplete normal data matrix produced by the
+function <code>prelim.norm</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+
+<p>optional starting value of the parameter. This is a parameter vector
+in packed storage, such as one created by the function
+<code>makeparam.norm</code>. If no starting value is supplied, <code>em.norm</code> chooses
+its own starting value.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>showits</code></td>
+<td>
+
+<p>if <code>TRUE</code>, reports the iterations of EM so the user can monitor the
+progress of the algorithm.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxits</code></td>
+<td>
+
+<p>maximum number of iterations performed. The algorithm will stop if the
+parameter still has not converged after this many iterations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+
+<p>convergence criterion. The algorithm stops when
+the maximum relative difference in all of the estimated means,
+variances, or covariances from one iteration to the next
+is less than or equal to this value.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+
+<p>optional prior distribution. This is a list containing the
+hyperparameters of a normal-inverted Wishart distribution. In order,
+the elements of the list are: tau (a scalar), m (a scalar), mu0 (a
+vector of length ncol(x)), and lambdainv (a matrix of dimension
+c(ncol(x),ncol(x))). The elements of mu0 ans lambdainv apply to 
+the data after transformation, i.e. after the columns have been
+centered and scaled to have mean zero and variance one. If no prior is
+supplied, the default is a uniform prior, which results in 
+maximum-likelihood estimation.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The default starting value takes all means on the transformed scale to
+be equal to zero, and covariance matrix on the transformed scale equal
+to the identity. All important computations are carried out in double
+precision, using the sweep operator.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a vector representing the maximum-likelihood estimates of the normal
+parameters. This vector contains means, variances, and covariances on
+the transformed scale in packed storage.  The parameter can be
+transformed back to the original scale and put into a more
+understandable format by the function <code>getparam.norm</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>See Section 5.3 of Schafer (1994).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>prelim.norm</code>, <code>getparam.norm</code>, and <code>makeparam.norm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(mdata)
+s &lt;- prelim.norm(mdata)   #do preliminary manipulations
+thetahat &lt;- em.norm(s)   #compute mle
+getparam.norm(s,thetahat,corr=TRUE)$r #look at estimated correlations
+</code></pre>
+
+
+</div>

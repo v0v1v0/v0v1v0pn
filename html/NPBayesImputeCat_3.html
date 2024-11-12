@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CreateModel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Create and initialize the Lcm model object
+</h2>
+
+<h3>Description</h3>
+
+<p>CreateModel creates and initializes an Lcm Lcm object for non-parametric multiple imputation of discrete multivariate categorical data with or without structural zeros.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CreateModel(X, MCZ, K, Nmax, aalpha, balpha,seed)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a data frame with the dataset with missing values. All variables must be unordered factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MCZ</code></td>
+<td>
+<p>a dataframe with the definition of the structural zeros. Placeholder components are represented with NAs. Variables in MCZ must be factors with the same levels as X. Rows do not need to define disjoint regions of the contingency table. See Manrique-Vallier and Reiter (2014) for details of the definition of structural zeros.  MCZ should be set to NULL when there are no structure zeros.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>the maximum number of mixture components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Nmax</code></td>
+<td>
+<p>An upper truncation limit for the augmented sample size. This parameter will be ignored(set to 0) when there is no structural zeros.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aalpha</code></td>
+<td>
+<p>the hyper parameter 'a' for alpha in stick-breaking prior distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>balpha</code></td>
+<td>
+<p>the hyper parameter 'b' for alpha in stick-breaking prior distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>the random seed for sampling. When setting to NULL(default), the random seed will be set randomly.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function should be the first function one should call to use the 'NPBayesImputeCat'
+library. The returned model is a Lcm object. See ?Lcm
+for more details on the fields available and their arguments. </p>
+
+
+<h3>Value</h3>
+
+<p>CreateModel returns an Lcm object. The returned model object will be referenced in all subsequent calls.
+</p>
+
+
+<h3>References</h3>
+
+<p>Manrique-Vallier, D. and Reiter, J.P. (2013), "Bayesian Estimation of Discrete Multivariate Latent Structure Models with Structural Zeros", JCGS. 
+<br><br>
+Si, Y. and Reiter, J.P. (2013), "Nonparametric Bayesian multiple imputation for incomplete categorical variables in large-scale assessment surveys", Journal of Educational and Behavioral Statistics, 38, 499 - 521 
+<br><br>
+Manrique-Vallier, D. and Reiter, J.P. (2014), "Bayesian Multiple Imputation for Large-Scale Categorical Data with Structural Zeros", Survey Methodology.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(NPBayesImputeCat)
+#Please use NYexample data set for a more realistic example
+data('NYMockexample')
+
+#create the model
+model &lt;- CreateModel(X,MCZ,10,10000,0.25,0.25,8888)
+
+#run 1 burnins, 2 mcmc iterations and thin every 2 iterations
+model$Run(1,2,2,FALSE)
+
+#retrieve parameters from the final iteration
+result &lt;- model$snapshot
+
+#convert ImputedX matrix to dataframe, using proper factors/names etc.
+ImputedX &lt;- GetDataFrame(result$ImputedX,X)
+#View(ImputedX)
+</code></pre>
+
+
+</div>

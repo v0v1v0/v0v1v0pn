@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculate_expression_similarity_transcript</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calcualte the distance matrices using the BAM files</h2>
+
+<h3>Description</h3>
+
+<p>This function generates an average correlation/distance coefficient
+for every exon present in the BAM files. This is done by calculating
+the point-to-point correlation/distance of the distribution of reads
+across the transcript of each exon and comparing it across samples.
+The reason why exons are used instead of full length genes is that long
+intronic regions artificially increase the correlation since there is
+consistently no expression there, across samples. The user has the
+option to use genes instead, by running <code>cast_gtf_to_genes</code> separately,
+with non default parameters.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculate_expression_similarity_transcript(
+  bams = NULL,
+  path.bams = ".",
+  genes = NULL,
+  path.gtf = list.files(".", pattern = "\\.g[tf]f$"),
+  expression.matrix = NULL,
+  subsample.genes = FALSE,
+  make.index = FALSE,
+  unique.only = TRUE,
+  mapq.unique = 255,
+  slack = 200,
+  similarity.measure = "correlation_pearson",
+  save.image.every.1000 = FALSE,
+  ncores = 1,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bams, path.bams</code></td>
+<td>
+<p>either a path to the directory where the BAM files are
+or a vector of paths to each individual file; if a path is specified,
+it extracts all files that end in .bam; looks in the working directory by default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genes</code></td>
+<td>
+<p>a tibble of the exons extracted from the gtf file;
+this is meant for speed if the output of <code>cast_gtf_to_genes</code> is already generated,
+or if the user wants to only calculate similarity for a subset of exons</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path.gtf</code></td>
+<td>
+<p>the path to the gtf/gff annotation file (only used if genes is not
+provided); if unspecified, looks for one in the working directory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expression.matrix</code></td>
+<td>
+<p>expression matrix; not necessary but is used to filter the
+gtf to fewer entries and for subsampling if subsample.genes=TRUE;
+if not provided, raw read counts per exon are extracted from the BAM files</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsample.genes</code></td>
+<td>
+<p>logical, whether to subsample low abundance genes to decrease
+computational time; the first minimum of the distribution of abundances is calculated,
+and genes lower than it are subsampled to match the number of genes higher than it;
+the expression matrix needs to be provided for this calculation;
+a plot is generated to show that minimum</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>make.index</code></td>
+<td>
+<p>whether a BAM index should be generated; if this is FALSE (the default)
+and no index exists, the function will exit with an error; the index needs to have
+the same name as each BAM file, but ending with .bam.bai</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unique.only</code></td>
+<td>
+<p>whether only uniquely mapped reads should contribute to the expression
+of a gene/exon; default is TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapq.unique</code></td>
+<td>
+<p>The values of the mapping quality field in the BAM file that corresponds
+to uniquely mapped reads; by default, values of 255 are used as these correspond to
+the most popular aligners, but an adjustment might be needed;
+the mapq scores should be as follows: 255 for STAR, 60 for hisat2,
+255 for bowtie in -k mode, 40 for bowtie2 default, 50 for tophat</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slack</code></td>
+<td>
+<p>slack needs to be &gt;=readLength, adjust for efficiency; the default is 200,
+as it is higher than most modern sequencing experiments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>similarity.measure</code></td>
+<td>
+<p>one of the similarity metrics to be used, defaults to pearson correlation;
+currently, only correlation is supported</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save.image.every.1000</code></td>
+<td>
+<p>whether to save a workspace image after every 1000 exons
+are processed; default is FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Number of cores for parallel computation; defaults to sequential computation,
+but parallelisation is highly encouraged; it is set to detectCores() if higher</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments passed on to other methods</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with three elements: the first element is the expression matrix,
+as supplied or calculated; the other two are the expression levels matrix and
+expression levels similarity matrix;
+they have the same # of columns as the expression matrix,
+and as many rows as exons processed.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>calculate_expression_similarity_counts</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">bams &lt;- rep(system.file("extdata", "ex1.bam", package="Rsamtools", mustWork=TRUE), 2)
+genes &lt;- data.frame("id" = 1:2,
+                    "gene_id" = c("gene1", "gene2"),
+                    "seqid" = c("seq1", "seq2"),
+                    "start" = 1,
+                    "end" = 1600)
+expression.summary &lt;- calculate_expression_similarity_transcript(
+  bams = bams,
+  genes = genes,
+  mapq.unique = 99
+)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroColorize</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Assign colors based on value
+</h2>
+
+<h3>Description</h3>
+
+<p>Assign colors to map districts based on the respective district values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroColorize(values, ranges = NULL, amplitudes = 1, palette = "rhodo")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>values</code></td>
+<td>
+
+<p>A vector of K values or a K x N data frame, where K is the number of map
+districts and N is the number of variables.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ranges</code></td>
+<td>
+
+<p>A data frame with N rows and 2 columns, see details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>amplitudes</code></td>
+<td>
+
+<p>Single value or a vector of N elements or a data frame of N rows that
+contains the column AMPLITUDE.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>palette</code></td>
+<td>
+
+<p>One of pre-defined colormap names (see details). 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The argument <code>ranges</code> sets the minimum and maximum district values
+irrespective of the contents of <code>values</code>. It can be used as a fixed
+reference across different colorings to ensure that the same value produces
+the same color across function calls.
+</p>
+<p>The argument <code>amplitudes</code> controls the proportion of the color range
+that is available for the district value range. For proportions below 1,
+the minimum district value is assigned to a color that is between the
+first and middle element in the color palette, and the maximum is assigned
+to a color that is between the middle and the last element. If
+<code>amplitude</code> is greater than 1, extreme low and high values are
+clipped to the first and last color in the palette, respectively.
+</p>
+<p>Available color palettes include "grey", "fire", "jungle", "miami", "rhodo"
+or "tan". Any other word will revert to a rainbow colormap.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix of hexadecimal color codes as strings. The output also includes
+the attribute 'contrast' that indicates which colors have a good contrast with
+black as opposed to white, the attribute 'ranges' that contains a copy
+of the dynamic ranges across districts, and the attribute 'palette' that
+indicates the color scheme.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Prepare training data.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- scale.default(dataset[,trvars]) 
+
+# K-means clustering.
+km &lt;- nroKmeans(data = trdata)
+
+# Self-organizing map.
+sm &lt;- nroKohonen(seeds = km)
+sm &lt;- nroTrain(map = sm, data = trdata)
+
+# Assign data points into districts.
+matches &lt;- nroMatch(centroids = sm, data = trdata)
+
+# District averages for all variables.
+planes &lt;- nroAggregate(topology = sm, districts = matches, data = dataset)
+
+# District colors for cholesterol.
+chol &lt;- nroColorize(values = planes[,"CHOL"])
+print(head(chol))
+
+# District colors for all variables.
+colrs &lt;- nroColorize(values = planes)
+print(head(colrs))
+</code></pre>
+
+
+</div>

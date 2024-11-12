@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>niw.post</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Random draws from the posterior distribution with Normal-Inverse-Wishart (NIW) prior.</h2>
+
+<h3>Description</h3>
+
+<p>Given iid <code class="reqn">d</code>-dimensional niche indicators  <code class="reqn">X = (X_1,\ldots,X_N)</code> with <code class="reqn">X_i \sim N(\mu, \Sigma)</code>, this function generates random draws from <code class="reqn">p(\mu,\Sigma | X)</code> for the Normal-Inverse-Wishart (NIW) prior.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">niw.post(nsamples, X, lambda, kappa, Psi, nu)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nsamples</code></td>
+<td>
+<p>The number of posterior draws.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A data matrix with observations along the rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Location parameter. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>Scale parameter. Defaults to <code>kappa = 0</code>.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Psi</code></td>
+<td>
+<p>Scale matrix. Defaults to <code>Psi = 0</code>.  See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+<p>Degrees of freedom. Defaults to <code>nu = ncol(X)+1</code>.  See Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The NIW distribution <code class="reqn">p(\mu, \Sigma | \lambda, \kappa, \Psi, \nu)</code> is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">
+\Sigma \sim W^{-1}(\Psi, \nu), \quad \mu | \Sigma \sim N(\lambda, \Sigma/\kappa).
+</code>
+</p>
+
+<p>The default value <code>kappa = 0</code> uses the Lebesque prior on <code class="reqn">\mu</code>: <code class="reqn">p(\mu) \propto 1</code>.
+</p>
+<p>The default value <code>Psi = 0</code> uses the scale-invariant prior on <code class="reqn">\Sigma</code>: <code class="reqn">p(\Sigma) \propto |\Sigma|^{-(\nu+d+1)/2}</code>.
+</p>
+<p>The default value <code>nu = ncol(X)+1</code> for <code>kappa = 0</code> and <code>Psi = 0</code> makes <code class="reqn">E[\mu|X]=\code{colMeans(X)}</code> and <code class="reqn">E[\Sigma | X]=\code{var(X)}</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list with elements <code>mu</code> and <code>Sigma</code> of sizes <code>c(nsamples, length(lambda))</code> and <code>c(dim(Psi), nsamples)</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rniw()</code>, <code>niiw.post()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># compare the default non-informative prior to an arbitrary informative prior
+# for simulated data
+
+# simulate normal data with mean and variance (mu0, Sigma0)
+d &lt;- 4
+mu0 &lt;- rnorm(d)
+Sigma0 &lt;- matrix(rnorm(d^2), d, d)
+Sigma0 &lt;- Sigma0 %*% t(Sigma0)
+N &lt;- 1e2
+X &lt;- matrix(rnorm(N*d), N, d) # iid N(0,1)
+X &lt;- t(t(X %*% chol(Sigma0)) + mu0) # each row is N(mu0, Sigma)
+
+# informative prior parameters
+lambda &lt;- rnorm(d)
+kappa &lt;- 20
+Psi &lt;- crossprod(matrix(rnorm(d^2), d, d))
+nu &lt;- 5
+
+# iid draws from informative prior pi(mu, Sigma)
+nsamples &lt;- 2e3
+siw0 &lt;- rniw(nsamples, lambda, kappa, Psi, nu)
+
+# iid draws from posterior p(mu, Sigma | X) with informative prior
+siw1 &lt;- niw.post(nsamples, X, lambda, kappa, Psi, nu)
+
+# iid draws from posterior p(mu, Sigma | X) with default noninformative prior
+siw2 &lt;- niw.post(nsamples, X)
+
+# compare
+
+# prior and posterior densities of mu
+clrs &lt;- c("orange", "red", "blue", "black")
+ii &lt;- 1
+par(mar = c(4.2, 4.2, 2, 1)+.1)
+niche.par.plot(list(siw0, siw1, siw2), col = clrs[1:3],
+               plot.index = ii, ylab = "Density")
+abline(v = mu0[ii], col = clrs[4]) # true value of mu
+legend(x = "topright",
+       legend = c(parse(text = paste0("pi(mu[", ii, "])")),
+                  parse(text = paste0("p(mu[", ii, "]*\" | \"*X)*\", Informative Prior\"")),
+                  parse(text = paste0("p(mu[", ii, "]*\" | \"*X)*\", Noninformative Prior\"")),
+                  parse(text = paste0("\"True value of \"*mu[", ii, "]"))),
+       fill = clrs)
+
+# prior and posterior densities of Sigma
+ii &lt;- 1
+jj &lt;- 2
+par(mar = c(4.2, 4.2, 2, 1)+.1)
+niche.par.plot(list(siw0, siw1, siw2), col = clrs[1:3],
+               plot.index = c(ii,jj), ylab = "Density")
+abline(v = Sigma0[ii,jj], col = clrs[4])
+legend(x = "topright",
+       legend = c(parse(text = paste0("pi(Sigma[", ii, "*", jj, "])")),
+                  parse(text = paste0("p(Sigma[", ii, "*", jj,
+                                      "]*\" | \"*X)*\", Informative Prior\"")),
+                  parse(text = paste0("p(Sigma[", ii, "*", jj,
+                                      "]*\" | \"*X)*\", Noninformative Prior\"")),
+                  parse(text = paste0("\"True value of \"*Sigma[", ii, "*", jj, "]"))),
+       fill = clrs)
+
+</code></pre>
+
+
+</div>

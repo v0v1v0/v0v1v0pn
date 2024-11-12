@@ -1,0 +1,269 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.sm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Predict method for Smooth Model Fits
+</h2>
+
+<h3>Description</h3>
+
+<p><code>predict</code> method for class "sm". 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'sm'
+predict(object, newdata = NULL, se.fit = FALSE, 
+        interval = c("none", "confidence", "prediction"),
+        level = 0.95, type = c("response", "terms"), 
+        terms = NULL, na.action = na.pass,
+        intercept = NULL, combine = TRUE, design = FALSE, 
+        check.newdata = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>a fit from <code>sm</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>an optional list or data frame in which to look for variables with which to predict. If omitted, the original data are used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se.fit</code></td>
+<td>
+
+<p>a switch indicating if standard errors are required.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+
+<p>type of interval calculation. Can be abbreviated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+
+<p>tolerance/confidence level.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>type of prediction (response or model term). Can be abbreviated.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+
+<p>which terms to include in the fit. The default of <code>NULL</code> uses all terms. This input <b>is</b> used regardless of the <code>type</code> of prediction.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+
+<p>function determining what should be done with missing values in <code>newdata</code>. The default is to predict <code>NA</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+
+<p>a switch indicating if the intercept should be included in the prediction. If <code>NULL</code> (default), the intercept is included in the fit only when <code>type = "r"</code> and <code>terms</code> includes all model terms.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>combine</code></td>
+<td>
+
+<p>a switch indicating if the parametric and smooth components of the prediction should be combined (default) or returned separately.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>design</code></td>
+<td>
+
+<p>a switch indicating if the model (design) matrix for the prediction should be returned.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>check.newdata</code></td>
+<td>
+
+<p>a switch indicating if the <code>newdata</code> should be checked for consistency (e.g., class and range). Ignored if <code>newdata</code> is not provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments affecting the prediction produced (currently ignored).  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Inspired by the <code>predict.lm</code> function in R's <b>stats</b> package.
+</p>
+<p>Produces predicted values, obtained by evaluating the regression function in the frame <code>newdata</code> (which defaults to <code>model.frame(object)</code>). If the logical <code>se.fit</code> is <code>TRUE</code>, standard errors of the predictions are calculated. Setting <code>interval</code>s specifies computation of confidence or prediction (tolerance) intervals at the specified level, sometimes referred to as narrow vs. wide intervals. 
+</p>
+<p>If <code>newdata</code> is omitted the predictions are based on the data used for the fit. Regardless of the <code>newdata</code> argument, how cases with missing values are handled is determined by the <code>na.action</code> argument. If <code>na.action = na.omit</code> omitted cases will not appear in the predictions, whereas if <code>na.action = na.exclude</code> they will appear (in predictions, standard errors or interval limits), with value <code>NA</code>.
+</p>
+<p>Similar to the <code>lm</code> function, setting <code>type = "terms"</code> returns a matrix giving the predictions for each of the requested model <code>terms</code>. Unlike the <code>lm</code> function, this function allows for predictions using any subset of the model terms. Specifically, when <code>type = "response"</code> the predictions will only include the requested <code>terms</code>, which makes it possible to obtain estimates (and standard errors and intervals) for subsets of model terms. In this case, the <code>newdata</code> only needs to contain data for the subset of variables that are requested in <code>terms</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Default use returns a vector of predictions. Otherwise the form of the output will depend on the combination of argumments: <code>se.fit</code>, <code>interval</code>, <code>type</code>, <code>combine</code>, and <code>design</code>.
+</p>
+<p><code>type = "response"</code>: <br>
+When <code>se.fit = FALSE</code> and <code>design = FALSE</code>, the output will be the predictions (possibly with <code>lwr</code> and <code>upr</code> interval bounds). When <code>se.fit = TRUE</code> or <code>design = TRUE</code>, the output is a list with components <code>fit</code>, <code>se.fit</code> (if requested), and <code>X</code> (if requested). 
+</p>
+<p><code>type = "terms"</code>: <br>
+When <code>se.fit = FALSE</code> and <code>design = FALSE</code>, the output will be the predictions for each term (possibly with <code>lwr</code> and <code>upr</code> interval bounds). When <code>se.fit = TRUE</code> or <code>design = TRUE</code>, the output is a list with components <code>fit</code>, <code>se.fit</code> (if requested), and <code>X</code> (if requested). 
+</p>
+<p>Regardless of the <code>type</code>, setting <code>combine = FALSE</code> decomposes the requested result(s) into the <b>p</b>arametric and <b>s</b>mooth contributions. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>https://stat.ethz.ch/R-manual/R-devel/library/stats/html/predict.lm.html
+</p>
+<p>Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. <em>Numerische Mathematik, 31</em>, 377-403. <a href="https://doi.org/10.1007/BF01404567">doi:10.1007/BF01404567</a>
+</p>
+<p>Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), <em>SAGE Research Methods Foundations.</em> <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sm</code> 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+z &lt;- factor(sample(letters[1:3], size = n, replace = TRUE))
+fun &lt;- function(x, z){
+  mu &lt;- c(-2, 0, 2)
+  zi &lt;- as.integer(z)
+  fx &lt;- mu[zi] + 3 * x + sin(2 * pi * x + mu[zi]*pi/4)
+}
+fx &lt;- fun(x, z)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# define marginal knots
+probs &lt;- seq(0, 0.9, by = 0.1)
+knots &lt;- list(x = quantile(x, probs = probs),
+              z = letters[1:3])
+
+# fit sm with specified knots
+smod &lt;- sm(y ~ x * z, knots = knots)
+
+# get model "response" predictions
+fit &lt;- predict(smod)
+mean((smod$fitted.values - fit)^2)
+
+# get model "terms" predictions
+trm &lt;- predict(smod, type = "terms")
+attr(trm, "constant")
+head(trm)
+mean((smod$fitted.values - rowSums(trm) - attr(trm, "constant"))^2)
+
+# get predictions with "newdata" (= the original data)
+fit &lt;- predict(smod, newdata = data.frame(x = x, z = z))
+mean((fit - smod$fitted.values)^2)
+
+# get predictions and standard errors
+fit &lt;- predict(smod, se.fit = TRUE)
+mean((fit$fit - smod$fitted.values)^2)
+mean((fit$se.fit - smod$se.fit)^2)
+
+# get 99% confidence interval
+fit &lt;- predict(smod, interval = "c", level = 0.99)
+head(fit)
+
+# get 99% prediction interval
+fit &lt;- predict(smod, interval = "p", level = 0.99)
+head(fit)
+
+# get predictions only for x main effect
+fit &lt;- predict(smod, newdata = data.frame(x = x), 
+               se.fit = TRUE, terms = "x")
+plotci(x, fit$fit, fit$se.fit)
+
+# get predictions only for each group
+fit.a &lt;- predict(smod, newdata = data.frame(x = x, z = "a"), se.fit = TRUE)
+fit.b &lt;- predict(smod, newdata = data.frame(x = x, z = "b"), se.fit = TRUE)
+fit.c &lt;- predict(smod, newdata = data.frame(x = x, z = "c"), se.fit = TRUE)
+
+# plot results (truth as dashed line)
+plotci(x = x, y = fit.a$fit, se = fit.a$se.fit,
+       col = "red", col.ci = "pink", ylim = c(-6, 6))
+lines(x, fun(x, rep(1, n)), lty = 2, col = "red")
+plotci(x = x, y = fit.b$fit, se = fit.b$se.fit,
+       col = "blue", col.ci = "cyan", add = TRUE)
+lines(x, fun(x, rep(2, n)), lty = 2, col = "blue")
+plotci(x = x, y = fit.c$fit, se = fit.c$se.fit,
+       col = "darkgreen", col.ci = "lightgreen", add = TRUE)
+lines(x, fun(x, rep(3, n)), lty = 2, col = "darkgreen")
+
+# add legends
+legend("bottomleft", legend = c("Truth", "Estimate", "CI"), 
+       lty = c(2, 1, NA), lwd = c(1, 2, NA), 
+       col = c("black", "black","gray80"),
+       pch = c(NA, NA, 15), pt.cex = 2, bty = "n")
+legend("bottomright", legend = letters[1:3], 
+       lwd = 2, col = c("red", "blue", "darkgreen"), bty = "n")
+
+</code></pre>
+
+
+</div>

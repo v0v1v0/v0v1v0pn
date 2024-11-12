@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>when.vertex.attrs.match</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+return the times at which the TEA attributes of elements of a network match a value
+</h2>
+
+<h3>Description</h3>
+
+<p>The functions query the TEA attributes of network elements (vertices or edges) and return the time that each element matches the specified value.  The match operator defaults to '==', but other binary comparison operators that return logical, such as '&gt;' or even '%in%' can be used as well. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">when.vertex.attrs.match(nd, attrname, value, match.op = "==", rule = "earliest", 
+                        no.match = Inf, v = seq_len(network.size(nd)))
+                        
+when.edge.attrs.match(nd, attrname, value, match.op = "==", rule = "earliest", 
+                        no.match = Inf, e = seq_along(nd$mel))                        
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nd</code></td>
+<td>
+
+<p>a <code>networkDynamic</code> object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>attrname</code></td>
+<td>
+
+<p>character name of the TEA attribute to be queried
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+
+<p>the value to be passed to the comparison operator to be matched against the TEA values
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>match.op</code></td>
+<td>
+
+<p>the binary operator to be used in determining a match (defaults to '==')
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rule</code></td>
+<td>
+
+<p>character giving the name of the rule to determine what value should be returned from the spell of matching attributes. Options are <code>'earliest'</code> (the default) and <code>'latest'</code> which will return the onset and terminus of the spell respectively. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.match</code></td>
+<td>
+
+<p>The value to be returned when the TEA attribute never matches <code>value</code>.  Default is <code>Inf</code>, <code>NA</code> may be useful as well. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+
+<p>possible numeric vector of vertex ids indicating a subset of vertices to be queried
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+
+<p>possible numeric vector of edge ids indicating a subset of edges to be queried
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>no.match</code> argument is included to make it possible for user to distinguish cases where the attribute is missing from the network element (which will return <code>NA</code>) from cases where the value of the attribute never matches <code>value</code> according to the operation <code>match.op</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric vector of attribute onset times (if <code>rule='earliest'</code>) or termination times (if <code>rule='latest'</code>)
+</p>
+
+
+<h3>Note</h3>
+
+<p>this is a draft implementation, suggestions on function and argument names welcome. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>skyebend
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See also attribute.activity.functions
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# create a network with TEA attribute
+net&lt;-network.initialize(5)
+net&lt;-activate.vertex.attribute(net,'test','A',onset=0,terminus=2)
+net&lt;-activate.vertex.attribute(net,'test','B',onset=2,terminus=3)
+net&lt;-activate.vertex.attribute(net,'test','C',onset=4,terminus=5)
+
+net&lt;-activate.vertex.attribute(net,'weight',0,onset=-Inf,terminus=Inf)
+net&lt;-activate.vertex.attribute(net,'weight',-1,at=6,v=2)
+
+# when does 'test' take the value 'B' for each vertex?
+when.vertex.attrs.match(net,'test',value='B')
+
+# when is the terminus of when 'test' takes a value 'A' or 'C'?
+when.vertex.attrs.match(net,'test',value=c('A','C'),match.op='%in%',rule='latest')
+
+# when does 'weight' first take a value less than 0?
+when.vertex.attrs.match(net,'weight',value=0,match.op='&lt;')
+
+</code></pre>
+
+
+</div>

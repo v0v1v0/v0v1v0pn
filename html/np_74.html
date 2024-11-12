@@ -1,0 +1,352 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npqcmstest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Consistent Quantile Regression Model Specification Test
+with Mixed Data Types </h2>
+
+<h3>Description</h3>
+
+<p><code>npqcmstest</code> implements a consistent test for correct
+specification of parametric quantile regression models (linear or
+nonlinear) as described in Racine (2006) which extends the work of
+Zheng (1998).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npqcmstest(formula,
+           data = NULL,
+           subset,
+           xdat,
+           ydat,
+           model = stop(paste(sQuote("model")," has not been provided")),
+           tau = 0.5,
+           distribution = c("bootstrap", "asymptotic"),
+           bwydat = c("y","varepsilon"),
+           boot.method = c("iid","wild","wild-rademacher"),
+           boot.num = 399,
+           pivot = TRUE,
+           density.weighted = TRUE,
+           random.seed = 42,
+           ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>a symbolic description of variables on which the test is
+to be performed. The details of constructing a formula are
+described below.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(formula)</code>, typically the environment from which the
+function is called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>an optional vector specifying a subset of observations to be used. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>a model object obtained from a call to <code>rq</code>. Important: the
+call to <code>rq</code> must have the argument <code>model=TRUE</code> or
+<code>npqcmstest</code> will not work.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data (training data) used to
+calculate the quantile regression estimators.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>xdat</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+
+<p>a numeric value specifying the <code class="reqn">\tau</code>th quantile is desired
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+
+<p>a character string used to specify the method of estimating the
+distribution of the statistic to be calculated. <code>bootstrap</code>
+will conduct bootstrapping. <code>asymptotic</code> will use the normal
+distribution. Defaults to <code>bootstrap</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bwydat</code></td>
+<td>
+
+<p>a character string used to specify the left hand side variable used
+in bandwidth selection. <code>"varepsilon"</code> uses
+<code class="reqn">1-\tau,-\tau</code> for <code>ydat</code> while <code>"y"</code> will
+use <code class="reqn">y</code>. Defaults to <code>"y"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.method</code></td>
+<td>
+
+<p>a character string used to specify the bootstrap method.
+<code>iid</code> will generate independent identically distributed
+draws. <code>wild</code> will use a wild bootstrap. <code>wild-rademacher</code>
+will use a wild bootstrap with Rademacher variables. Defaults to
+<code>iid</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+
+<p>an integer value specifying the number of bootstrap replications to
+use. Defaults to <code>399</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pivot</code></td>
+<td>
+
+<p>a logical value specifying whether the statistic should be
+normalised such that it approaches <code class="reqn">N(0,1)</code> in
+distribution. Defaults to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>density.weighted</code></td>
+<td>
+
+<p>a logical value specifying whether the statistic should be
+weighted by the density of <code>xdat</code>. Defaults to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+
+<p>an integer used to seed R's random number generator. This is to
+ensure replicability. Defaults to 42.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to control bandwidth selection on the
+residuals. One can specify the bandwidth type,
+kernel types, and so on. To do this, you may specify any of <code>bwscaling</code>,
+<code>bwtype</code>, <code>ckertype</code>, <code>ckerorder</code>, <code>ukertype</code>,
+<code>okertype</code>, as described in <code>npregbw</code>.
+This is necessary if you specify <code>bws</code> as a <code class="reqn">p</code>-vector and not
+a <code>bandwidth</code> object, and you do not desire the default behaviours.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>npqcmstest</code> returns an object of type <code>cmstest</code> with the
+following components. Components will contain information
+related to <code>Jn</code> or <code>In</code> depending on the value of <code>pivot</code>:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Jn</code></td>
+<td>
+<p> the statistic <code>Jn</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>In</code></td>
+<td>
+<p> the statistic <code>In</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Omega.hat</code></td>
+<td>
+<p> as described in Racine, J.S. (2006). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.*</code></td>
+<td>
+<p> the various quantiles of the statistic <code>Jn</code> (or
+<code>In</code> if 
+<code>pivot=FALSE</code>)  are in
+components <code>q.90</code>,
+<code>q.95</code>, <code>q.99</code> (one-sided 1%, 5%, 10% critical values) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p> the P-value of the statistic </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Jn.bootstrap</code></td>
+<td>
+<p> if <code>pivot=TRUE</code> contains the bootstrap
+replications of <code>Jn</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>In.bootstrap</code></td>
+<td>
+<p> if <code>pivot=FALSE</code> contains the bootstrap
+replications of <code>In</code> </p>
+</td>
+</tr>
+</table>
+<p><code>summary</code> supports object of type <code>cmstest</code>.
+</p>
+
+
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Koenker, R.W. and G.W. Bassett (1978), “Regression quantiles,”
+Econometrica, 46, 33-50.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics: Theory
+and Practice,</em> Princeton University Press.
+</p>
+<p>Murphy, K. M. and F. Welch (1990), “Empirical age-earnings
+profiles,” Journal of Labor Economics, 8, 202-229.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em>
+Cambridge University Press.
+</p>
+<p>Racine, J.S. (2006), “Consistent specification testing of
+heteroskedastic parametric regression quantile models with mixed
+data,” manuscript.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth estimators
+for discrete distributions,”  Biometrika, 68, 301-309.
+</p>
+<p>Zheng, J. (1998), “A consistent nonparametric test of
+parametric regression models under conditional quantile
+restrictions,” Econometric Theory, 14, 123-138.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1: For this example, we conduct a consistent quantile regression
+# model specification test for a parametric wage quantile regression
+# model that is quadratic in age. The work of Murphy and Welch (1990)
+# would suggest that this parametric quantile regression model is
+# misspecified.
+
+library("quantreg")
+
+data("cps71")
+attach(cps71)
+
+model &lt;- rq(logwage~age+I(age^2), tau=0.5, model=TRUE)
+
+plot(age, logwage)
+lines(age, fitted(model))
+
+X &lt;- data.frame(age)
+
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+npqcmstest(model = model, xdat = X, ydat = logwage, tau=0.5)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Next try Murphy &amp; Welch's (1990) suggested quintic specification.
+
+model &lt;- rq(logwage~age+I(age^2)+I(age^3)+I(age^4)+I(age^5), model=TRUE)
+
+plot(age, logwage)
+lines(age, fitted(model))
+
+X &lt;- data.frame(age)
+
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+npqcmstest(model = model, xdat = X, ydat = logwage, tau=0.5)
+
+detach(cps71)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

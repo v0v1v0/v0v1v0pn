@@ -1,0 +1,401 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netleague</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create league table with network meta-analysis results</h2>
+
+<h3>Description</h3>
+
+<p>A league table is a square matrix showing all pairwise comparisons
+in a network meta-analysis. Typically, both treatment estimates and
+confidence intervals are shown.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netleague(
+  x,
+  y,
+  common = x$common,
+  random = x$random,
+  seq = x$seq,
+  ci = TRUE,
+  backtransf = TRUE,
+  direct = FALSE,
+  digits = gs("digits"),
+  big.mark = gs("big.mark"),
+  text.NA = ".",
+  bracket = gs("CIbracket"),
+  separator = gs("CIseparator"),
+  lower.blank = gs("CIlower.blank"),
+  upper.blank = gs("CIupper.blank"),
+  writexl = !missing(path),
+  path = "leaguetable.xlsx",
+  overwrite = FALSE,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+
+## S3 method for class 'netleague'
+print(
+  x,
+  common = x$x$common,
+  random = x$x$random,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netmeta</code> or <code>netleague</code>
+(mandatory).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>An object of class <code>netmeta</code> (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether a league table should be
+printed for the common effects network meta-analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether a league table should be
+printed for the random effects network meta-analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq</code></td>
+<td>
+<p>A character or numerical vector specifying the sequence
+of treatments in rows and columns of a league table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>A logical indicating whether confidence intervals should
+be shown.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether printed results
+should be back transformed. If <code>backtransf = TRUE</code>, results
+for <code>sm = "OR"</code> are printed as odds ratios rather than log
+odds ratios, for example.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direct</code></td>
+<td>
+<p>A logical indicating whether league table with
+network estimates (default) or estimates from direct comparisons
+should be generated if argument <code>y</code> is not missing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>big.mark</code></td>
+<td>
+<p>A character used as thousands separator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.NA</code></td>
+<td>
+<p>A character string to label missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bracket</code></td>
+<td>
+<p>A character with bracket symbol to print lower
+confidence interval: "[", "(", "{", "".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>separator</code></td>
+<td>
+<p>A character string with information on separator
+between lower and upper confidence interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.blank</code></td>
+<td>
+<p>A logical indicating whether blanks between left
+bracket and lower confidence limit should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.blank</code></td>
+<td>
+<p>A logical indicating whether blanks between
+separator and upper confidence limit should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>writexl</code></td>
+<td>
+<p>A logical indicating whether an Excel file should be
+created (R package <b>writexl</b> must be available).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+<p>A character string specifying the filename of the Excel
+file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>A logical indicating whether an existing Excel
+file should be overwritten.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments (passed on to <code>write_xlsx</code>
+to create Excel file).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A league table is a square matrix showing all pairwise comparisons
+in a network meta-analysis (Hutton et al., 2015). Typically, both
+treatment estimates and confidence intervals are shown.
+</p>
+<p>If argument <code>y</code> is not provided, the league table contains the
+network estimates from network meta-analysis object <code>x</code> in the
+lower triangle and the direct treatment estimates from pairwise
+comparisons in the upper triangle. Note, for the random-effects
+model, the direct treatment estimates are based on the common
+between-study variance <code class="reqn">\tau^2</code> from the network meta-analysis,
+i.e. the square of list element <code>x$tau</code>.
+</p>
+<p>If argument <code>y</code> is provided, the league table contains
+information on treatment comparisons from network meta-analysis
+object <code>x</code> in the lower triangle and from network
+meta-analysis object <code>y</code> in the upper triangle. This is, for
+example, useful to print information on efficacy and safety in the
+same league table.
+</p>
+<p>By default, an R object with the league tables is
+generated. Alternatively, an Excel file is created if argument
+<code>writexl = TRUE</code>.
+</p>
+<p>This implementation reports pairwise comparisons of the treatment
+in the column versus the treatment in the row in the lower triangle
+and row versus column in the upper triangle. This is a common
+presentation for network meta-analyses which allows to easily
+compare direction and magnitude of treatment effects. For example,
+given treatments A, B, and C, the results reported in the first row
+and second column as well as second row and first column are from
+the pairwise comparison A versus B. Note, this presentation is
+different from the printout of a network meta-analysis object which
+reports opposite pairwise comparisons in the lower and upper
+triangle, e.g., A versus B in the first row and second column and B
+versus A in the second row and first column.
+</p>
+<p>If the same network meta-analysis object is used for arguments
+<code>x</code> and <code>y</code>, reciprocal treatment estimates will be shown
+in the upper triangle (see examples), e.g., the comparison B versus
+A.
+</p>
+<p>R function <code>netrank</code> can be used to change the order of
+rows and columns in the league table (see examples).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>netleague</code> with corresponding <code>print</code>
+function if <code>writexl = FALSE</code>. The object is a list containing
+the league tables in list elements 'common' and 'random'. An Excel
+file is created if <code>writexl = TRUE</code>. In this case, <code>NULL</code>
+is returned in R.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>, Gerta
+Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Hutton B, Salanti G, Caldwell DM, et al. (2015):
+The PRISMA Extension Statement for Reporting of Systematic Reviews
+Incorporating Network Meta-analyses of Health Care Interventions:
+Checklist and Explanations.
+<em>Annals of Internal Medicine</em>,
+<b>162</b>, 777
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>netposet</code>,
+<code>netrank</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Network meta-analysis of count mortality statistics
+#
+data(Woods2010)
+
+p0 &lt;- pairwise(treatment, event = r, n = N,
+  studlab = author, data = Woods2010, sm = "OR")
+net0 &lt;- netmeta(p0)
+
+oldopts &lt;- options(width = 100)
+
+# League table for common and random effects model with
+# - network estimates in lower triangle
+# - direct estimates in upper triangle
+#
+netleague(net0, digits = 2, bracket = "(", separator = " - ")
+
+# League table for common effects model
+#
+netleague(net0, random = FALSE, digits = 2)
+
+# Change order of treatments according to treatment ranking (random
+# effects model)
+#
+netleague(net0, common = FALSE, digits = 2, seq = netrank(net0))
+#
+print(netrank(net0), common = FALSE)
+
+## Not run: 
+# Create a CSV file with league table for random effects model
+#
+league0 &lt;- netleague(net0, digits = 2, bracket = "(", separator = " to ")
+#
+write.table(league0$random, file = "league0-random.csv",
+  row.names = FALSE, col.names = FALSE, sep = ",")
+#
+# Create Excel files with league tables
+# (if R package writexl is available)
+#
+netleague(net0, digits = 2, bracket = "(", separator = " to ",
+          path = tempfile(fileext = ".xlsx"))
+
+## End(Not run)
+
+
+# Use depression dataset
+#
+data(Linde2015)
+
+# Define order of treatments
+#
+trts &lt;- c("TCA", "SSRI", "SNRI", "NRI",
+  "Low-dose SARI", "NaSSa", "rMAO-A", "Hypericum", "Placebo")
+
+# Outcome labels
+#
+outcomes &lt;- c("Early response", "Early remission")
+
+# (1) Early response
+#
+p1 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(resp1, resp2, resp3), n = list(n1, n2, n3),
+  studlab = id, data = Linde2015, sm = "OR")
+#
+net1 &lt;- netmeta(p1, common = FALSE,
+                seq = trts, ref = "Placebo", small = "undesirable")
+
+# (2) Early remission
+#
+p2 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(remi1, remi2, remi3), n = list(n1, n2, n3),
+  studlab = id, data = Linde2015, sm = "OR")
+#
+net2 &lt;- netmeta(p2, common = FALSE,
+                seq = trts, ref = "Placebo", small = "undesirable")
+
+options(width = 200)
+netleague(net1, digits = 2)
+
+netleague(net1, digits = 2, ci = FALSE)
+netleague(net2, digits = 2, ci = FALSE)
+
+# League table for two outcomes with
+# - network estimates of first outcome in lower triangle
+# - network estimates of second outcome in upper triangle
+#
+netleague(net1, net2, digits = 2, ci = FALSE)
+
+netleague(net1, net2, seq = netrank(net1), ci = FALSE)
+netleague(net1, net2, seq = netrank(net2), ci = FALSE)
+
+print(netrank(net1))
+print(netrank(net2))
+
+
+# Report results for network meta-analysis twice
+#
+netleague(net1, net1, seq = netrank(net1), ci = FALSE,
+  backtransf = FALSE)
+netleague(net1, net1, seq = netrank(net1), ci = FALSE,
+  backtransf = FALSE, direct = TRUE)
+
+
+options(oldopts)
+
+## Not run: 
+# Generate a partial order of treatment rankings 
+#
+np &lt;- netposet(net1, net2, outcomes = outcomes)
+
+# Requires R package 'hasse'
+#
+hasse(np)
+plot(np)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

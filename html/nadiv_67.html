@@ -1,0 +1,222 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>warcolak</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Pedigree and phenotypic values for a mythical population of Warcolaks</h2>
+
+<h3>Description</h3>
+
+<p>A two trait example pedigree from the three generation breeding design of
+Fairbairn &amp; Roff (2006) with two uncorrelated traits.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">warcolak
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A <code>data.frame</code> with 5400 observations on the following 13 variables:
+</p>
+
+<dl>
+<dt>ID </dt>
+<dd>
+<p>a factor specifying 5400 unique individual identities</p>
+</dd>
+<dt>Dam </dt>
+<dd>
+<p>a factor specifying the unique Dam for each individual</p>
+</dd>
+<dt>Sire </dt>
+<dd>
+<p>a factor specifying the unique Sire for each individual</p>
+</dd>
+<dt>sex </dt>
+<dd>
+<p>a factor specifying “M” if the individual is a male 
+and “F” if it is a female</p>
+</dd>
+<dt>trait1 </dt>
+<dd>
+<p>a numeric vector of phenotypic values: see 
+‘Details’</p>
+</dd>
+<dt>trait2 </dt>
+<dd>
+<p>a numeric vector of phenotypic values: see 
+‘Details’</p>
+</dd>
+<dt>t1_a </dt>
+<dd>
+<p>a numeric vector of the autosomal additive genetic effects 
+underlying ‘trait1’</p>
+</dd>
+<dt>t2_a </dt>
+<dd>
+<p>a numeric vector of the autosomal additive genetic effects 
+underlying ‘trait2’</p>
+</dd>
+<dt>t2_s </dt>
+<dd>
+<p>a numeric vector of the sex-chromosomal additive genetic 
+effects underlying ‘trait2’</p>
+</dd>
+<dt>t1_d </dt>
+<dd>
+<p>a numeric vector of the autosomal dominance genetic effects 
+underlying ‘trait1’</p>
+</dd>
+<dt>t2_d </dt>
+<dd>
+<p>a numeric vector of the autosomal dominance genetic effects 
+underlying ‘trait2’</p>
+</dd>
+<dt>t2_r </dt>
+<dd>
+<p>a numeric vector of the residual (environmental) effects 
+underlying ‘trait1’</p>
+</dd>
+<dt>t2_r </dt>
+<dd>
+<p>a numeric vector of the residual (environmental) effects 
+underlying ‘trait2’</p>
+</dd>
+</dl>
+<h3>Details</h3>
+
+<p>Unique sets of relatives are specified for a three generation breeding
+design (Fairbairn &amp; Roff, 2006).  Each set contains 72 individuals. This
+pedigree reflects an experiment which produces 75 of these basic sets from
+Fairbairn &amp; Roff's design. The pedigree was created using
+<code>simPedDFC()</code>.
+</p>
+<p>The dataset was simulated to have two uncorrelated traits with different
+genetic architectures (see <code>examples</code> below). The trait means are both
+equal to 1 for males and 2 for females. The additive genetic, dominance
+genetic, and environmental (or residual) variances for both <code>trait1</code>
+and <code>trait2</code> are 0.4, 0.3, &amp; 0.3, respectively. However, the additive
+genetic variance for <code>trait2</code> can be further decomposed to autosomal
+additive genetic variance (0.3) and X-linked additive genetic variance (0.1;
+assuming the ‘no global dosage compensation’ mechanism).
+</p>
+<p>Females and males have equal variances (except for sex-chromosomal additive
+genetic variance, where by definition, males have half of the additive
+genetic variance as females; Wolak 2013) and a between-sex correlation of
+one for all genetic and residual effects (except the cross-sex residual
+covariance=0). All random effects were drawn from multivariate random normal
+distributions [e.g., autosomal additive genetic effects: N ~ (0,
+kronecker(A, G))] with means of zero and (co)variances equal to the product
+of the expected sex-specific (co)variances (e.g., G) and the relatedness (or
+incidence) matrix (e.g., A).
+</p>
+<p>The actual variance in random effects will vary slightly from the amount
+specified in the simulation, because of Monte Carlo error. Thus, the random
+effects have been included as separate columns in the dataset. See
+<code>examples</code> below for the code that generated the dataset.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Before nadiv version 2.14.0, the <code>warcolak</code> dataset used a 0/1
+coding for ‘sex’ and did not contain the random effects.
+</p>
+
+
+<h3>References</h3>
+
+<p>Fairbairn, D.J. &amp; Roff, D.A. 2006. The quantitative genetics of
+sexual dimorphism: assessing the importance of sex-linkage. Heredity 97,
+319-328.
+</p>
+<p>Wolak, M.E. 2013. The Quantitative Genetics of Sexual Differences: New
+Methodologies and an Empirical Investigation of Sex-Linked, Sex-Specific,
+Non-Additive, and Epigenetic Effects. Ph.D. Dissertation. University of
+California Riverside.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+ 
+  set.seed(101)
+  library(nadiv)
+  # create pedigree
+  warcolak &lt;- simPedDFC(U = 75, gpn = 4, fsn = 4, s = 2)
+  names(warcolak)[1:3] &lt;- c("ID", "Dam", "Sire")
+  warcolak$trait2 &lt;- warcolak$trait1 &lt;- NA
+
+  # Define covariance matrices for random effects:
+  ## Autosomal additive genetic (trait1)
+  Ga_t1 &lt;- matrix(c(0.4, rep(0.399999, 2), 0.4), 2, 2)
+  ## Autosomal additive genetic (trait2)
+  Ga_t2 &lt;- matrix(c(0.3, rep(0.299999, 2), 0.3), 2, 2)
+  ## Sex-chromosomal additive genetic (trait2)
+  Gs_t2 &lt;- matrix(c(0.1, rep(0.099999, 2), 0.1), 2, 2)
+  ## Autosomal dominance genetic
+  Gd &lt;- matrix(c(0.3, rep(0.299999, 2), 0.3), 2, 2)
+  ## Environmental (or residual)
+  ### Assumes no correlated environmental effects between sexes
+  R &lt;- diag(c(0.3, 0.3))
+
+  ## define variables to be re-used
+  pedn &lt;- nrow(warcolak)
+  # Female (homogametic sex chromosomes) in first column
+  # Male (heterogametic sex chromosomes) in second column
+  sexcol &lt;- as.integer(warcolak$sex)
+
+  # Create random effects
+  ## Additive genetic
+  ### trait1 autosomal
+  tmp_a &lt;- grfx(pedn, G = Ga_t1, incidence = makeA(warcolak[, 1:3]))
+    var(tmp_a)
+  warcolak$t1_a &lt;- tmp_a[cbind(seq(pedn), sexcol)]
+  ### trait2 autosomal
+  tmp_a &lt;- grfx(pedn, G = Ga_t2, incidence = makeA(warcolak[, 1:3]))
+    var(tmp_a)
+  warcolak$t2_a &lt;- tmp_a[cbind(seq(pedn), sexcol)]
+  ### trait2 sex-chromosomal
+  tmp_s &lt;- grfx(pedn, G = Gs_t2, incidence = makeS(warcolak[, 1:4],
+	heterogametic = "M", DosageComp = "ngdc", returnS = TRUE)$S)
+    matrix(c(var(tmp_s[which(sexcol == 1), 1]),
+	rep(cov(tmp_s)[2, 1], 2), var(tmp_s[which(sexcol == 2), 2])), 2, 2)
+    # NOTE above should be: covar = male var = 0.5* female var 
+  warcolak$t2_s &lt;- tmp_s[cbind(seq(pedn), sexcol)]
+
+  ## Dominance genetic
+  ### trait1 
+  tmp_d &lt;- grfx(pedn, G = Gd, incidence = makeD(warcolak[, 1:3], invertD = FALSE)$D)
+    var(tmp_d)
+  warcolak$t1_d &lt;- tmp_d[cbind(seq(pedn), sexcol)]
+  ### trait2
+  tmp_d &lt;- grfx(pedn, G = Gd, incidence = makeD(warcolak[, 1:3], invertD = FALSE)$D)
+    var(tmp_d)
+  warcolak$t2_d &lt;- tmp_d[cbind(seq(pedn), sexcol)]
+
+  ## Residual
+  ### trait1
+  tmp_r &lt;- grfx(pedn, G = R, incidence = NULL) # warning of identity matrix
+    var(tmp_r)
+  warcolak$t1_r &lt;- tmp_r[cbind(seq(pedn), sexcol)]
+  ### trait2
+  tmp_r &lt;- grfx(pedn, G = R, incidence = NULL) # warning of identity matrix
+    var(tmp_r)
+  warcolak$t2_r &lt;- tmp_r[cbind(seq(pedn), sexcol)]
+
+  # Sum random effects and add sex-specific means to get phenotypes
+  ## females have slightly greater mean trait values
+  warcolak$trait1 &lt;- 1 + (-1*sexcol + 2) + rowSums(warcolak[, c("t1_a", "t1_d", "t1_r")])
+  warcolak$trait2 &lt;- 1 + (-1*sexcol + 2) + rowSums(warcolak[, c("t2_a", "t2_s", "t2_d", "t2_r")])
+ 
+
+</code></pre>
+
+
+</div>

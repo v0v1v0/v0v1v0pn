@@ -1,0 +1,281 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>qqplot_maha</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>QQ Plot for Multivariate Normal Variance Mixtures</h2>
+
+<h3>Description</h3>
+
+<p>Visual goodness-of-fit test for multivariate normal variance mixtures:
+Plotting squared Mahalanobis distances against their theoretical quantiles.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">qqplot_maha(x, qmix, loc, scale, fitnvmix_object,
+            trafo.to.normal = FALSE, test = c("KS.AD", "KS", "AD", "none"),
+            boot.pars = list(B = 500, level = 0.95),
+            plot = TRUE, verbose = TRUE, control = list(),
+            digits = max(3, getOption("digits") - 4), plot.pars = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code class="reqn">(n, d)</code>-data <code>matrix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmix</code></td>
+<td>
+<p>see <code>pnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc</code></td>
+<td>
+<p>see <code>pnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>see <code>pnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitnvmix_object</code></td>
+<td>
+<p>Optional. Object of class <code>"fitnvmix"</code> typically
+returned by <code>fitnvmix()</code>; if provided, <code>x</code>, <code>qmix</code>,
+<code>loc</code> and <code>scale</code> are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trafo.to.normal</code></td>
+<td>
+<p><code>logical</code>. If <code>TRUE</code>, the
+underlying Mahalanobis distances are mapped to normals by a probability-
+quantile-transform so that the resulting QQ plot is essentially a normal
+QQ plot. Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p><code>character</code> specifying if (and which) GoF test
+shall be performed. <code>"KS"</code> performs a Kolmogorov-Smirnoff (see
+<code>ks.test()</code>), <code>"AD"</code> an Anderson-Darling test (see
+<code>ad.test()</code> from the package <code>ADGofTest</code> and <code>"none"</code>
+performs no test. By default, <code>test = "KS.AD"</code> in which case both tests
+are performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.pars</code></td>
+<td>
+<p><code>list</code> with elements <code>B</code>
+(Bootstrap sample size for computing CIs; if <code>B &lt;= 1</code>,
+no Bootstrap is performed) and
+<code>level</code> specifying the confidence level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p><code>logical</code> specifying if the results should be
+plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>see <code>pnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>see <code>get_set_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>integer specifying the number of digits of the test
+statistic and the p-value to be displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.pars</code></td>
+<td>
+<p><code>list</code> specifying plotting parameters such
+as logarithmic axes; see <code>get_set_qqplot_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (for example, parameters) passed to the
+underlying mixing distribution when <code>qmix</code> is a
+<code>character</code> string or <code>function</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code class="reqn">X</code> follows a multivariate normal variance mixture, the distribution of
+the Mahalanobis distance <code class="reqn">D^2 = (X-\mu)^T \Sigma^{-1} (X-\mu)</code>
+is a gamma mixture whose distribution function can be approximated.
+</p>
+<p>The function <code>qqplot_maha()</code> first estimates the theoretical quantiles
+by calling <code>qgammamix()</code> and then plots those against
+the empirical squared Mahalanobis distances
+from the data in <code>x</code> (with <code class="reqn">\mu=</code><code>loc</code> and
+<code class="reqn">\Sigma=</code><code>scale</code>). Furthermore, the function computes
+asymptotic standard errors of the sample quantiles by using an asymptotic
+normality result for the order statistics which
+are used to plot the asymptotic CI; see Fox (2008, p. 35 – 36).+
+</p>
+<p>If <code>boot.pars$B &gt; 1</code> (which is the default), the function additionally
+performs Bootstrap to construct a CI. Note that by default, the plot contains
+both the asymptotic and the Bootstrap CI.
+</p>
+<p>Finally, depending on the parameter <code>test</code>, the function performs a
+univariate GoF test of the observed Mahalanobis distances as described above.
+The test result (i.e., the value of the statistic along with a p-value) are
+typically plotted on the second y-axis.
+</p>
+<p>The return object of class <code>"qqplot_maha"</code> contains all computed values
+(such as p-value, test-statistics, Bootstrap CIs and more). We highlight that
+storing this return object makes the QQ plot
+quickly reproducible, as in this case, the theoretical quantiles do not need
+to be recomputed.
+</p>
+<p>For changing plotting parameters (such as logarithmic axes or colors)
+via the argument <code>plot.pars</code>, see <code>get_set_qqplot_param()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>qqplot_maha()</code> (invisibly) returns an object of the class
+<code>"qqplot_maha"</code> for which the methods <code>plot()</code> and <code>print()</code>
+are defined. The return object contains, among others, the components
+</p>
+
+<dl>
+<dt><code>maha2</code></dt>
+<dd>
+<p>Sorted, squared Mahalanobis distances of the data
+from <code>loc</code> wrt to <code>scale</code>.</p>
+</dd>
+<dt><code>theo_quant</code></dt>
+<dd>
+<p>The theoretical quantile function
+evaluated at <code>ppoints(length(maha2))</code>.</p>
+</dd>
+<dt><code>boot_CI</code></dt>
+<dd>
+<p><code class="reqn">(2,length(maha2))</code> matrix containing the
+Bootstrap CIs for the empirical quantiles.</p>
+</dd>
+<dt><code>asymptSE</code></dt>
+<dd>
+<p><code>vector</code> of length <code>length(maha2)</code>
+with estimated, asympotic standard errors for the empirical quantiles.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+<p>McNeil, A. J., Frey, R. and Embrechts, P. (2015).
+<em>Quantitative Risk Management: Concepts, Techniques, Tools</em>.
+Princeton University Press.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fitnvmix()</code>, <code>get_set_qqplot_param()</code>,
+<code>rnvmix()</code>, <code>pnvmix()</code>, <code>dnvmix()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Sample from a heavy tailed multivariate t and construct QQ plot
+set.seed(1)
+d &lt;- 2
+n &lt;- 1000
+df &lt;- 3.1
+rho &lt;- 0.5
+loc &lt;- rep(0, d)
+scale &lt;- matrix(c(1, rho, rho, 1), ncol = 2)
+qmix &lt;- "inverse.gamma"
+## Sample data
+x &lt;- rnvmix(n, qmix = qmix, loc = loc, scale = scale, df = df)
+# Construct QQ Plot with 'true' parameters and store result object
+qq1 &lt;- qqplot_maha(x, qmix = qmix, df = df, loc = loc, scale = scale)
+## ... which is an object of class "qqplot_maha" with two methods
+stopifnot(class(qq1) == "qqplot_maha", "plot.qqplot_maha" %in% methods(plot),
+          "print.qqplot_maha" %in% methods(print))
+plot(qq1) # reproduce the plot
+plot(qq1, plotpars = list(log = "xy")) # we can also plot on log-log scale
+
+## In fact, with the 'plotpars' argument, we can change a lot of things
+plot(qq1, plotpars = list(col = rep("black", 4), lty = 4:6, pch = "*",
+                          plot_test = FALSE, main = "Same with smaller y limits",
+                          sub = "MySub", xlab = "MyXlab", ylim = c(0, 1.5e3)))
+
+## What about estimated parameters?
+myfit &lt;- fitStudent(x)
+## We can conveniently pass 'myfit', rather than specifying 'x', 'loc', ...
+set.seed(1)
+qq2.1 &lt;- qqplot_maha(fitnvmix_object = myfit, test = "AD", trafo_to_normal = TRUE)
+set.seed(1)
+qq2.2 &lt;- qqplot_maha(x, qmix = "inverse.gamma", loc = myfit$loc,
+                     scale = myfit$scale, df = myfit$df,
+                     test = "AD", trafo_to_normal = TRUE)
+stopifnot(all.equal(qq2.1$boot_CI, qq2.2$boot_CI)) # check
+qq2.2 # it mentions here that the Maha distances were transformed to normal
+
+
+## Another example where 'qmix' is a function, so quantiles are internally
+## estimated via 'qgammamix()'
+n &lt;- 15 # small sample size to have examples run fast
+## Define the quantile function of an IG(nu/2, nu/2) distribution
+qmix &lt;- function(u, df) 1 / qgamma(1 - u, shape = df/2, rate = df/2)
+## Sample data
+x &lt;- rnvmix(n, qmix = qmix, df = df, loc = loc, scale = scale)
+## QQ Plot of empirical quantiles vs true quantiles, all values estimated
+## via RQMC:
+set.seed(1)
+qq3.1 &lt;- qqplot_maha(x, qmix = qmix, loc = loc, scale = scale, df = df)
+## Same could be obtained by specifying 'qmix' as string in which case
+## qqplot_maha() calls qf()
+set.seed(1)
+qq3.2 &lt;- qqplot_maha(x, qmix = "inverse.gamma", loc = loc, scale = scale, df = df)
+</code></pre>
+
+
+</div>

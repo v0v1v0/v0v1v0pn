@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute_mean</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Impute the mean value into a vector with missing values</h2>
+
+<h3>Description</h3>
+
+<p>This can be useful if you are imputing specific values, however we would
+generally recommend to impute using other model based approaches. See
+the <code>simputation</code> package, for example <code>simputation::impute_lm()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute_mean(x)
+
+## Default S3 method:
+impute_mean(x)
+
+## S3 method for class 'factor'
+impute_mean(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>vector with mean values replaced
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(dplyr)
+vec &lt;- rnorm(10)
+
+vec[sample(1:10, 3)] &lt;- NA
+
+impute_mean(vec)
+
+dat &lt;- tibble(
+  num = rnorm(10),
+  int = as.integer(rpois(10, 5)),
+  fct = factor(LETTERS[1:10])
+) %&gt;%
+  mutate(
+    across(
+      everything(),
+      \(x) set_prop_miss(x, prop = 0.25)
+    )
+  )
+
+dat
+
+dat %&gt;%
+  nabular() %&gt;%
+  mutate(
+    num = impute_mean(num),
+    int = impute_mean(int),
+    fct = impute_mean(fct),
+  )
+
+dat %&gt;%
+  nabular() %&gt;%
+  mutate(
+    across(
+      where(is.numeric),
+      impute_mean
+    )
+  )
+
+dat %&gt;%
+  nabular() %&gt;%
+  mutate(
+    across(
+      c("num", "int"),
+      impute_mean
+    )
+  )
+
+</code></pre>
+
+
+</div>

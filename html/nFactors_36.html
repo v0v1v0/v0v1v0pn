@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rRecovery</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test of Recovery of a Correlation or a Covariance matrix from a Factor
+Analysis Solution</h2>
+
+<h3>Description</h3>
+
+<p>The <code>rRecovery</code> function returns a verification of the quality of the
+recovery of the initial correlation or covariance matrix by the factor
+solution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rRecovery(R, loadings, diagCommunalities = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>numeric: initial correlation or covariance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loadings</code></td>
+<td>
+<p>numeric: loadings from a factor analysis solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diagCommunalities</code></td>
+<td>
+<p>logical: if <code>TRUE</code>, the correlation between
+the initial solution and the estimated one will use a correlation of one in
+the diagonal. If <code>FALSE</code> (default) the diagonal is not used in the
+computation of this correlation.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p> numeric: initial correlation or covariance matrix </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recoveredR</code></td>
+<td>
+<p> numeric: recovered estimated correlation or covariance
+matrix </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>difference</code></td>
+<td>
+<p> numeric: difference between initial and
+recovered estimated correlation or covariance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cor</code></td>
+<td>
+<p> numeric:
+Pearson correlation between initial and recovered estimated correlation or
+covariance matrix. Computations depend on the logical value of the
+<code>communalities</code> argument. </p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Gilles Raiche <br> Centre sur les Applications des Modeles de
+Reponses aux Items (CAMRI) <br> Universite du Quebec a Montreal<br><a href="mailto:raiche.gilles@uqam.ca">raiche.gilles@uqam.ca</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>componentAxis</code>, <code>iterativePrincipalAxis</code>,
+<code>principalAxis</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# .......................................................
+# Example from Kim and Mueller (1978, p. 10)
+# Population: upper diagonal
+# Simulated sample: lower diagnonal
+ R &lt;- matrix(c( 1.000, .6008, .4984, .1920, .1959, .3466,
+                .5600, 1.000, .4749, .2196, .1912, .2979,
+                .4800, .4200, 1.000, .2079, .2010, .2445,
+                .2240, .1960, .1680, 1.000, .4334, .3197,
+                .1920, .1680, .1440, .4200, 1.000, .4207,
+                .1600, .1400, .1200, .3500, .3000, 1.000),
+                nrow=6, byrow=TRUE)
+
+
+# Replace upper diagonal with lower diagonal
+ RU         &lt;- diagReplace(R, upper=TRUE)
+ nFactors   &lt;- 2
+ loadings   &lt;- principalAxis(RU, nFactors=nFactors,
+                             communalities="component")$loadings
+ rComponent &lt;- rRecovery(RU,loadings, diagCommunalities=FALSE)$cor
+
+ loadings   &lt;- principalAxis(RU, nFactors=nFactors,
+                             communalities="maxr")$loadings
+ rMaxr      &lt;- rRecovery(RU,loadings, diagCommunalities=FALSE)$cor
+
+ loadings   &lt;- principalAxis(RU, nFactors=nFactors,
+                             communalities="multiple")$loadings
+ rMultiple  &lt;- rRecovery(RU,loadings, diagCommunalities=FALSE)$cor
+
+ round(c(rComponent = rComponent,
+         rmaxr      = rMaxr,
+         rMultiple  = rMultiple), 3)
+# .......................................................
+
+
+</code></pre>
+
+
+</div>

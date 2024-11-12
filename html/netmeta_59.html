@@ -1,0 +1,477 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netposet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Partial order of treatments in network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>Partial order of treatments in network meta-analysis. The set of
+treatments in a network is called a partially ordered set (in
+short, a <em>poset</em>), if different outcomes provide different
+treatment ranking lists.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netposet(
+  ...,
+  outcomes,
+  treatments,
+  small.values,
+  common,
+  random,
+  fixed,
+  comb.fixed,
+  comb.random
+)
+
+## S3 method for class 'netposet'
+print(x, pooled = ifelse(x$random, "random", "common"), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcomes</code></td>
+<td>
+<p>A character vector with outcome names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treatments</code></td>
+<td>
+<p>A character vector with treatment names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>small.values</code></td>
+<td>
+<p>See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether to show results for the
+common effects model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether to show results for the
+random effects model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p>Ignored deprecated argument (replaced by
+<code>common</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb.fixed</code></td>
+<td>
+<p>Ignored deprecated argument (replaced by
+<code>common</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb.random</code></td>
+<td>
+<p>Ignored deprecated argument (replaced by
+<code>random</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netposet</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pooled</code></td>
+<td>
+<p>A character string indicating whether Hasse diagram
+should be drawn for common (<code>"common"</code>) or random effects
+model (<code>"random"</code>). Can be abbreviated.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In network meta-analysis, frequently different outcomes are
+considered which may each provide a different ordering of
+treatments. The concept of a partially ordered set (in short, a
+<em>poset</em>, Carlsen &amp; Bruggemann, 2014) of treatments can be used
+to gain further insights in situations with apparently conflicting
+orderings. This implementation for rankings in network meta-analyis
+is described in Rücker &amp; Schwarzer (2017).
+</p>
+<p>In function <code>netposet</code>, argument <code>...{}</code> can be any of the
+following:
+</p>
+
+<ul>
+<li>
+<p> arbitrary number of <code>netrank</code> objects providing
+P-scores;
+</p>
+</li>
+<li>
+<p> arbitrary number of <code>netmeta</code> objects;
+</p>
+</li>
+<li>
+<p> single ranking matrix with each column providing P-scores
+(Rücker &amp; Schwarzer 2015) or SUCRA values (Salanti et al. 2011)
+for an outcome and rows corresponding to treatments.
+</p>
+</li>
+</ul>
+<p>Note, albeit in general a ranking matrix is not constrained to have
+values between 0 and 1, <code>netposet</code> stops with an error in this
+case as this function expects a matrix with P-scores or SUCRA
+values.
+</p>
+<p>Argument <code>outcomes</code> can be used to label outcomes. If argument
+<code>outcomes</code> is missing,
+</p>
+
+<ul>
+<li>
+<p> column names of the ranking matrix are used as outcome labels
+(if first argument is a ranking matrix and column names are
+available);
+</p>
+</li>
+<li>
+<p> capital letters 'A', 'B', ... are used as outcome labels
+and a corresponding warning is printed.
+</p>
+</li>
+</ul>
+<p>Argument <code>treatments</code> can be used to provide treatment labels
+if the first argument is a ranking matrix. If argument
+<code>treatment</code> is missing,
+</p>
+
+<ul>
+<li>
+<p> row names of the ranking matrix are used as treatment labels
+(if available);
+</p>
+</li>
+<li>
+<p> letters 'a', 'b', ... are used as treatment labels and a
+corresponding warning is printed.
+</p>
+</li>
+</ul>
+<p>If argument <code>...{}</code> consists of <code>netmeta</code> objects,
+<code>netrank</code> is called internally to calculate P-scores. In this
+case, argument <code>small.values</code> can be used to specify for each
+outcome whether small values are beneficial (<code>"desirable"</code>) or
+harmfull (<code>"undesirable"</code>); see <code>netrank</code>. This
+argument is ignored for a ranking matrix and <code>netrank</code>
+objects.
+</p>
+<p>Arguments <code>common</code> and <code>random</code> can be used to define
+whether results should be printed and plotted for common and random
+effects model. If netmeta and netrank objects are provided in
+argument <code>...{}</code>, values for <code>common</code> and <code>random</code>
+within these objects are considered; if these values are not
+unique, argument <code>common</code> or <code>random</code> are set to
+<code>TRUE</code>.
+</p>
+<p>In function <code>print.netposet</code>, argument <code>...{}</code> is
+passed on to the printing function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>netposet</code> with corresponding <code>print</code>,
+<code>plot</code>, and <code>hasse</code> functions. The object is a list
+containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>P.common</code></td>
+<td>
+<p>Ranking matrix with rows corresponding to treatments
+and columns corresponding to outcomes (common effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M0.common</code></td>
+<td>
+<p>Hasse matrix skipping unnecessary paths (common
+effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M.common</code></td>
+<td>
+<p>"Full" Hasse matrix (common effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>O.common</code></td>
+<td>
+<p>Matrix with information about partial ordering
+(common effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P.random</code></td>
+<td>
+<p>Ranking matrix with rows corresponding to
+treatments and columns corresponding to outcomes (random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M0.random</code></td>
+<td>
+<p>Hasse matrix skipping unnecessary paths (random
+effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M.random</code></td>
+<td>
+<p>"Full" Hasse matrix (random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>O.random</code></td>
+<td>
+<p>Matrix with information about partial ordering
+(random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>small.values, common, random</code></td>
+<td>
+<p>As.defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+<p>Version of R package netmeta used to create object.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Gerta Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>, Guido
+Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Carlsen L, Bruggemann R (2014):
+Partial order methodology: a valuable tool in chemometrics.
+<em>Journal of Chemometrics</em>,
+<b>28</b>, 226–34
+</p>
+<p>Rücker G, Schwarzer G (2015):
+Ranking treatments in frequentist network meta-analysis works
+without resampling methods.
+<em>BMC Medical Research Methodology</em>,
+<b>15</b>, 58
+</p>
+<p>Rücker G, Schwarzer G (2017):
+Resolve conflicting rankings of outcomes in network meta-analysis:
+Partial ordering of treatments.
+<em>Research Synthesis Methods</em>,
+<b>8</b>, 526–36
+</p>
+<p>Salanti G, Ades AE, Ioannidis JP (2011):
+Graphical methods and numerical summaries for presenting results
+from multiple-treatment meta-analysis: an overview and tutorial.
+<em>Journal of Clinical Epidemiology</em>,
+<b>64</b>, 163–71
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>netrank</code>,
+<code>plot.netrank</code>, <code>hasse</code>,
+<code>plot.netposet</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Use depression dataset
+#
+data(Linde2015)
+
+# Define order of treatments
+#
+trts &lt;- c("TCA", "SSRI", "SNRI", "NRI",
+  "Low-dose SARI", "NaSSa", "rMAO-A", "Hypericum", "Placebo")
+
+# Outcome labels
+#
+outcomes &lt;- c("Early response", "Early remission")
+
+# (1) Early response
+#
+p1 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(resp1, resp2, resp3), n = list(n1, n2, n3),
+  studlab = id, data = Linde2015, sm = "OR")
+#
+net1 &lt;- netmeta(p1, common = FALSE,
+  seq = trts, ref = "Placebo", small.values = "undesirable")
+
+# (2) Early remission
+#
+p2 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(remi1, remi2, remi3), n = list(n1, n2, n3),
+  studlab = id, data = Linde2015, sm = "OR")
+#
+net2 &lt;- netmeta(p2, common = FALSE,
+  seq = trts, ref = "Placebo", small.values = "undesirable")
+
+# Partial order of treatment rankings (two outcomes)
+#
+po &lt;- netposet(netrank(net1), netrank(net2), outcomes = outcomes)
+
+# Hasse diagram
+#
+hasse(po)
+
+
+#
+# Outcome labels
+#
+outcomes &lt;- c("Early response", "Early remission",
+  "Lost to follow-up", "Lost to follow-up due to AEs",
+  "Adverse events (AEs)")
+
+# (3) Loss to follow-up
+#
+p3 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(loss1, loss2, loss3), n = list(n1, n2, n3),
+  studlab = id, data = Linde2015, sm = "OR")
+#
+net3 &lt;- netmeta(p3, common = FALSE,
+  seq = trts, ref = "Placebo", small.values = "desirable")
+
+# (4) Loss to follow-up due to adverse events
+#
+p4 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(loss.ae1, loss.ae2, loss.ae3), n = list(n1, n2, n3),
+  studlab = id, data = subset(Linde2015, id != 55), sm = "OR")
+#
+net4 &lt;- netmeta(p4, common = FALSE,
+  seq = trts, ref = "Placebo", small.values = "desirable")
+
+# (5) Adverse events
+#
+p5 &lt;- pairwise(treat = list(treatment1, treatment2, treatment3),
+  event = list(ae1, ae2, ae3), n = list(n1, n2, n3),
+  studlab = id, data = Linde2015, sm = "OR")
+#
+net5 &lt;- netmeta(p5, common = FALSE,
+  seq = trts, ref = "Placebo", small.values = "desirable")
+
+# Partial order of treatment rankings (all five outcomes)
+#
+po.ranks &lt;- netposet(netrank(net1), netrank(net2),
+  netrank(net3), netrank(net4), netrank(net5), outcomes = outcomes)
+
+# Same result
+#
+po.nets &lt;- netposet(net1, net2, net3, net4, net5,
+  outcomes = outcomes)
+#
+all.equal(po.ranks, po.nets)
+
+# Print matrix with P-scores (random effects model)
+#
+po.nets$P.random
+
+# Hasse diagram for all outcomes (random effects model)
+#
+hasse(po.ranks)
+
+# Hasse diagram for outcomes early response and early remission
+#
+po12 &lt;- netposet(netrank(net1), netrank(net2),
+  outcomes = outcomes[1:2])
+hasse(po12)
+
+# Scatter plot
+#
+oldpar &lt;- par(pty = "s")
+plot(po12)
+par(oldpar)
+
+## End(Not run)
+
+# Example using ranking matrix with P-scores
+#
+# Ribassin-Majed L, Marguet S, Lee A.W., et al. (2017):
+# What is the best treatment of locally advanced nasopharyngeal
+# carcinoma? An individual patient data network meta-analysis.
+# Journal of Clinical Oncology, 35, 498-505
+#
+outcomes &lt;- c("OS", "PFS", "LC", "DC")
+treatments &lt;- c("RT", "IC-RT", "IC-CRT", "CRT",
+  "CRT-AC", "RT-AC", "IC-RT-AC")
+#
+# P-scores (from Table 1)
+#
+pscore.os  &lt;- c(15, 33, 63, 70, 96, 28, 45) / 100
+pscore.pfs &lt;- c( 4, 46, 79, 52, 94, 36, 39) / 100
+pscore.lc  &lt;- c( 9, 27, 47, 37, 82, 58, 90) / 100
+pscore.dc  &lt;- c(16, 76, 95, 48, 72, 32, 10) / 100
+#
+pscore.matrix &lt;- data.frame(pscore.os, pscore.pfs, pscore.lc, pscore.dc)
+rownames(pscore.matrix) &lt;- treatments
+colnames(pscore.matrix) &lt;- outcomes
+pscore.matrix
+#
+po &lt;- netposet(pscore.matrix)
+po12 &lt;- netposet(pscore.matrix[, 1:2])
+po
+po12
+#
+hasse(po)
+hasse(po12)
+#
+oldpar &lt;- par(pty = "s")
+plot(po12)
+par(oldpar)
+
+</code></pre>
+
+
+</div>

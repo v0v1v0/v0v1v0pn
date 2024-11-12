@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calcFactorWeighted</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>calcFactorWeighted</h2>
+
+<h3>Description</h3>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calcFactorWeighted(obs, ref, libsize.obs, libsize.ref, logratioTrim,
+sumTrim, doWeighting, Acutoff)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>libsize.obs</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>libsize.ref</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logratioTrim</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sumTrim</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doWeighting</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Acutoff</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (obs, ref, libsize.obs = NULL, libsize.ref = NULL, logratioTrim = 0.3,
+    sumTrim = 0.05, doWeighting = TRUE, Acutoff = -1e+10)
+{
+    if (all(obs == ref))
+        return(1)
+    obs &lt;- as.numeric(obs)
+    ref &lt;- as.numeric(ref)
+    if (is.null(libsize.obs))
+        nO &lt;- sum(obs)
+    else nO &lt;- libsize.obs
+    if (is.null(libsize.ref))
+        nR &lt;- sum(ref)
+    else nR &lt;- libsize.ref
+    logR &lt;- log2((obs/nO)/(ref/nR))
+    absE &lt;- (log2(obs/nO) + log2(ref/nR))/2
+    v &lt;- (nO - obs)/nO/obs + (nR - ref)/nR/ref
+    fin &lt;- is.finite(logR) &amp; is.finite(absE) &amp; (absE &gt; Acutoff)
+    logR &lt;- logR[fin]
+    absE &lt;- absE[fin]
+    v &lt;- v[fin]
+    n &lt;- length(logR)
+    loL &lt;- floor(n * logratioTrim) + 1
+    hiL &lt;- n + 1 - loL
+    loS &lt;- floor(n * sumTrim) + 1
+    hiS &lt;- n + 1 - loS
+    keep &lt;- (rank(logR) &gt;= loL &amp; rank(logR) &lt;= hiL) &amp; (rank(absE) &gt;=
+        loS &amp; rank(absE) &lt;= hiS)
+    if (doWeighting) {
+        2^(sum(logR[keep]/v[keep], na.rm = TRUE)/sum(1/v[keep],
+            na.rm = TRUE))
+    }
+    else {
+        2^(mean(logR[keep], na.rm = TRUE))
+    }
+  }
+</code></pre>
+
+
+</div>

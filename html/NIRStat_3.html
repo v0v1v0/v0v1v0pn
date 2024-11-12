@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Slopetest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Slope statistics based Analysis for NIRS data.  
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimate the slope statistics and conduct a nonparametric based test on the slope difference before transfuion and after trasfusion.  If detection limit occurs at 15
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Slopetest(Yvec,timevec,transfusionvec,SD_est=F,num.permu=1000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Yvec</code></td>
+<td>
+<p>The outcome of NIRS time series <code class="reqn">Y(t_{i})</code> of length N ranging from 15 to 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timevec</code></td>
+<td>
+<p>The time index of NIRS time series <code class="reqn">t_{i}</code> of length N.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transfusionvec</code></td>
+<td>
+<p>The 0/1 indicator of the transfusion status <code class="reqn">X(t_{i})</code>. <code class="reqn">X(t_{i})=0</code> means the current time point is before transfusion and <code class="reqn">X(t_{i})=1</code> means the current time point is after transfusion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SD_est</code></td>
+<td>
+<p>Whether to estimate the SD of the SLOPE statistic for pre-transfusion and post-transfuion. Default value is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.permu</code></td>
+<td>
+<p>Number of permutation for permutation test. Default value is 1000.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function estimates the slope statistics before transfusion and after transfusion based on penalized regression spline method and tests the difference based on a within-band permutation approach. If there is detection limit occurs (15), it will impute the missed data based on a uniform distribution and estimate the slope statistics through a standard imputation approach. The statistical testing is conducted through a nested within-band permutation approach across all imputated datasets. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>An R vector from Slopetest containing Slope statistics and Pvalue in the following order:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Slope.before</code></td>
+<td>
+<p>The estimated Slope statistic before transfusion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Slope.after</code></td>
+<td>
+<p>The estimated Slope statistic after transfusion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Slope.diff</code></td>
+<td>
+<p>The estimated Slope statistic difference between before transfusion and after transfusion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pvalue</code></td>
+<td>
+<p>The pvalue of testing the Slope difference to be zero or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SD_pre</code></td>
+<td>
+<p>SD of the Slope statistic for pre-transfusion. Optional, only when <code>SD_est</code> = TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SD_post</code></td>
+<td>
+<p>SD of the Slope statistic for post-transfusion. Optional, only when <code>SD_est</code> = TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Yikai Wang [Emory], Xiao Wang [ICF] <br>
+Maintainer: Yikai Wang <a href="mailto:johnzon.wyk@gmail.com">johnzon.wyk@gmail.com</a> </p>
+
+
+<h3>References</h3>
+
+<p>Guo, Y., Wang, Y., Marin, T., Kirk, E., Patel, R., Josephson, C.   <em>
+Statistical methods for characterizing transfusion-related changes in regional oxygenation using Near-infrared spectroscopy in preterm infants. 
+</em> Statistical methods in medical research 28.9 (2019): 2710-2723.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Data Simulation
+dat = data.frame(Y= rep(0,100),t=1:100,trans = c(rep(0,50),rep(1,50)))
+dat$Y = apply(dat,1,function(x){rnorm(1,5*rnorm(1),6*exp(rnorm(1)))})
+dat$Y = dat$Y + 15 - quantile(dat$Y,0.3) 
+dat$Y[dat$Y&lt;=15] = 15
+
+
+# Estimate the Slope statistics of the NIRS data and test on the difference. 
+Slopetest(dat$Y,dat$t,dat$trans,FALSE,100)
+</code></pre>
+
+
+</div>

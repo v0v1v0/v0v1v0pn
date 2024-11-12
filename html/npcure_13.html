@@ -1,0 +1,238 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>testcov</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Covariate Significance Test of the Cure Probability</h2>
+
+<h3>Description</h3>
+
+<p>This function carries out a significance test of covariate
+effect on the probability of cure.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">testcov(x, t, d, dataset, bootpars = controlpars())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>If <code>dataset</code> is missing, an object giving the covariate
+values, whose type can be numeric, integer, factor or character.
+If<code>dataset</code> is a data frame, it is interpreted as the name of
+the variable corresponding to the covariate in the data frame.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>If <code>dataset</code> is missing, a numeric object giving the
+observed times. If <code>dataset</code> is a data frame, it is
+interpreted as the name of the variable corresponding to the
+observed times in the data frame.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>If <code>dataset</code> is missing, an integer object giving the
+values of the uncensoring indicator. Censored observations must be
+coded as 0, uncensored ones as 1. If <code>dataset</code> is a data frame,
+it is interpreted as the name of the variable corresponding to the
+uncensoring indicator.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>An optional data frame in which the variables named in
+<code>x</code>, <code>t</code> and <code>d</code> are interpreted. If it is missing,
+<code>x</code>, <code>t</code> and <code>d</code> must be objects of the workspace.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootpars</code></td>
+<td>
+<p>A list of parameters controlling the test. Currently,
+the only accepted component is <code>B</code>, the number of bootstrap
+resamples. The default is the value returned by the
+<code>controlpars</code> function called without arguments.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function computes a statistic, based on the method by
+Delgado and González-Manteiga (2004), to test whether a covariate X
+has an effect on the cure probability (<code class="reqn">H_1</code>: cure probability =
+q(x)) or not (<code class="reqn">H_0</code>: cure probability = q). Since the cure rate
+can be written as the regression function <code class="reqn">E(\nu | X = x) =
+  q(x)</code>, where <code class="reqn">\nu</code> is the cure
+indicator, the procedure is carried out as a significance test in
+nonparametric regression. The challenge of the test is that the cure
+indicator <code class="reqn">\nu</code> is only partially observed due to censoring:
+for the uncensored observations <code class="reqn">\nu = 0</code>, but it is
+unknown if a censored individual will be eventually cured or not
+(<code class="reqn">\nu</code> unknown). The approach consists in expressing the cure
+rate as a regression function with another response, not observable
+but estimable, say <code class="reqn">\eta</code>. The estimated values of
+<code class="reqn">\eta</code> depend on suitable estimates of the conditional 
+distribution of the censoring variable and <code class="reqn">\tau(x)</code>, an
+unknown time beyond which a subject could be considered as cured; see
+López-Cheda (2018). For the computation of the values of
+<code class="reqn">\eta</code>, the censoring distribution is estimated
+unconditionally using the Kaplan-Meier product-limit estimator. The
+time <code class="reqn">\tau</code> is estimated by the largest uncensored time.
+</p>
+<p>The test statistic is a weighted mean of the difference between the
+observations of <code class="reqn">\eta_i</code> and the values of the conditional
+mean of <code class="reqn">\eta</code> under the null hypothesis:
+</p>
+<p style="text-align: center;"><code class="reqn">T_{n(x)} = 1/n \sum (\eta_i - \bar{\eta}) I(x_i \leq x)</code>
+</p>
+<p>.
+</p>
+<p>For a qualitative covariate there is no natural way to order the values
+<code class="reqn">x_i</code>. In principle, this makes impossible to compute the indicator
+function in the test statistic. The problem is solved by considering all
+the possible combinations of the covariate values, and by computing the
+test statistic for each 'ordered' combination. <code class="reqn">T_{n(x)}</code> is taken
+as the largest value of these test statistics.
+</p>
+<p>The distribution of the test statistic under the null hypothesis is
+approximated by bootstrap, using independent naive resampling.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of S3 class 'npcure'. Formally, a list of components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>The constant character string c("test", "Covariate").
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The name of the covariate.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CM</code></td>
+<td>
+<p>The result of the Cramer-von Mises test: a list with
+components <code>statistic</code>, the test statistic, and <code>pvalue</code>,
+the  p-value.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>KS</code></td>
+<td>
+<p>The result of the Kolmogorov-Smirnov test: a list with
+components <code>statistic</code>, the test statistic, and <code>pvalue</code>,
+the p-value.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ignacio López-de-Ullibarri [aut, cre],
+Ana López-Cheda [aut],
+Maria Amalia Jácome [aut]
+</p>
+
+
+<h3>References</h3>
+
+<p>Delgado M. A., González-Manteiga W. (2001). Significance
+testing in nonparametric regression based on the bootstrap. Annals of
+Statistics, 29: 1469-1507.
+</p>
+<p>López-Cheda A. (2018). <em>Nonparametric Inference in Mixture Cure
+Models</em>. PhD dissertation, Universidade da Coruña. Spain.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>controlpars</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Some artificial data
+set.seed(123)
+n &lt;- 50
+x &lt;- runif(n, -2, 2) ## Covariate values
+y &lt;- rweibull(n, shape = .5*(x + 4)) ## True lifetimes
+c &lt;- rexp(n) ## Censoring values
+p &lt;- exp(2*x)/(1 + exp(2*x)) ## Probability of being susceptible
+u &lt;- runif(n)
+t &lt;- ifelse(u &lt; p, pmin(y, c), c) ## Observed times
+d &lt;- ifelse(u &lt; p, ifelse(y &lt; c, 1, 0), 0) ## Uncensoring indicator
+data &lt;- data.frame(x = x, t = t, d = d)
+
+## Test of the significance of the covariate 'x'
+testcov(x, t, d, data)
+
+## Test carried out with 1999 bootstrap resamples (the default is 999)
+testcov(x, t, d, data, bootpars = controlpars(B = 1999))
+
+
+## How to apply the test repeatedly when there is more than one
+## covariate... 
+## ... 'y' is another continuous covariate of the data frame 'data'
+data$y &lt;- runif(n, -1, 1)
+namecovar &lt;- c("x", "y")
+## ... testcov is called from a 'for' loop
+for (i in 1:length(namecovar)) {
+   result &lt;- testcov(data[, namecovar[i]], data$t, data$d)
+   print(result)
+}
+
+## In the previous example, testcov() was called without using the
+## argument 'dataset'. To use it, the 'for' must be avoided
+testcov(x, t, d, data)
+testcov(y, t, d, data)
+
+## Non-numeric covariates can also be tested...
+## ... 'z' is a nominal covariate of the data frame 'data'
+data$z &lt;- rep(factor(letters[1:5]), each = n/5)
+testcov(z, t, d, data)
+
+## Example with the dataset 'bmt' in the 'KMsurv' package
+## to study the effect on the probability of cure of...
+## ... (a) a continuous covariate (z1 = age of the patient)
+data("bmt", package = "KMsurv")
+set.seed(1) ## Not needed, just for reproducibility.
+testcov(z1, t2, d3, bmt, bootpars = controlpars(B = 4999))
+
+## ... (b) a qualitative covariate (z3 = patient gender)
+set.seed(1) ## Not needed, just for reproducibility.
+testcov(z3, t2, d3, bmt, bootpars = controlpars(B = 4999))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,185 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>newLayer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates a new layer.</h2>
+
+<h3>Description</h3>
+
+<p>This function creates a new annotation layer. The layer may be configured with a layer
+manager ID and task parameters, for automatic annotation. If so, this function will
+create the layer and the automation task, but automatic annotation will not be run by
+this function. To generate the automatic annotations, use generateLayer.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">newLayer(
+  labbcat.url,
+  layer.id,
+  description,
+  type = "string",
+  alignment = 0,
+  category = "General",
+  parent.id = "word",
+  annotator.id = NULL,
+  annotator.task.parameters = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>labbcat.url</code></td>
+<td>
+<p>URL to the LaBB-CAT instance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layer.id</code></td>
+<td>
+<p>The ID of the layer to create, which must be unique to the LaBB-CAT instance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>description</code></td>
+<td>
+<p>A description of the annotations the layer will contain.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>The type of data the labels will represent. Valid values are "string",
+"number", "ipa" (for phoneme representations), or "boolean" (labels "0" or "1").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alignment</code></td>
+<td>
+<p>How annotations on the layer will relate to time alignment; valid
+values are 0 (no alignment; annototations are just tags on the parent annotation),
+1 (instants; annotations mark a single point in time), or 2 (intervals; annotations
+have a start and end time).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>category</code></td>
+<td>
+<p>The project/category the layer belongs to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parent.id</code></td>
+<td>
+<p>The parent layer; valid values are "word" (for word layers), "segment"
+(for segment layers) "turn" (for phrase layers), or "transcript" (for span layers).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>annotator.id</code></td>
+<td>
+<p>The ID of the layer manager that automatically fills in
+annotations on the layer, if any</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>annotator.task.parameters</code></td>
+<td>
+<p>The configuration the layer manager should use when
+filling the layer with annotations. This is a string whose format is specific to
+each layer manager.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>You must have administration privileges in LaBB-CAT in order to be able to use this function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The resulting layer definition, with members:
+</p>
+
+<ul>
+<li>
+<p><em>id</em> The layer's unique ID
+</p>
+</li>
+<li>
+<p><em>parentId</em> The layer's parent layer ID
+</p>
+</li>
+<li>
+<p><em>description</em> The description of the layer
+</p>
+</li>
+<li>
+<p><em>alignment</em> The layer's alignment - 0 for none, 1 for point alignment, 2 for interval alignment
+</p>
+</li>
+<li>
+<p><em>peers</em> Whether children have peers or not
+</p>
+</li>
+<li>
+<p><em>peersOverlap</em> Whether child peers can overlap or not
+</p>
+</li>
+<li>
+<p><em>parentIncludes</em> Whether the parent t-includes the child
+</p>
+</li>
+<li>
+<p><em>saturated</em> Whether children must temporally fill the entire parent duration (true) or not (false)
+</p>
+</li>
+<li>
+<p><em>parentIncludes</em> Whether the parent t-includes the child
+</p>
+</li>
+<li>
+<p><em>type</em> The type for labels on this layer
+</p>
+</li>
+<li>
+<p><em>validLabels</em> List of valid label values for this layer
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>generateLayer</code>
+<code>saveLayer</code>
+<code>deleteLayer</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Upload the CMU Pronouncing Dictionary 
+loadLexicon(labbcat.url, "cmudict", " - ", "", ";", "Word - Pron", FALSE, "cmudict.txt")
+
+## Create a layer that tags each token with its CMU Pronouncing Dictionary pronunciation
+newLayer(labbcat.url, "pronunciation", "CMU Dict pronunciations encoded in ARPAbet",
+         annotator.id="FlatFileDictionary",
+         annotator.task.parameters=
+             "tokenLayerId=orthography&amp;tagLayerId=phonemes&amp;dictionary=cmudict:Word-&gt;Pron")
+
+## Generate the pronunciation tags
+generateLayer(labbcat.url, "pronunciation")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

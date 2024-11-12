@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>negint2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A utility functon to calculate the mean exposure under different scenarios</h2>
+
+<h3>Description</h3>
+
+<p>This will calculate the mean exposure under different scenarios: 
+2: fixed follow-up with drop-out, 3: variable follow-up with a maximum (maxfu), 4: variable follow-up with a maximum and drop-out
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">negint2(ux=0.5,fixedfu=1,type=2,u=c(0.5,0.5,1),ut=c(0.5,1.0,1.5),
+  tfix=ut[length(ut)]+0.5,maxfu=10.0,tchange=c(0,0.5,1),
+  ratec=c(0.15,0.15,0.15),eps=1.0e-03)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ux</code></td>
+<td>
+<p>the parameter a in (a*t)/(1+a*t)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixedfu</code></td>
+<td>
+<p>the minimum follow-up time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>follow-up type, type=2: fixed fu with fu time <code>fixedfu</code> but subject to censoring; type=3: depending on entry time, minimum fu is <code>fixedfu</code> and maximum fu is <code>maxfu</code>; type=4: same as 3 but subject to censoring</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p>recruitment rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ut</code></td>
+<td>
+<p>recruitment interval, must have the same length as <code>u</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tfix</code></td>
+<td>
+<p>fixed study duration, often equals to recruitment time plus minimum follow-up</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxfu</code></td>
+<td>
+<p>maximum follow-up time, should not be greater than <code>tfix</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tchange</code></td>
+<td>
+<p>a strictly increasing sequence of time points starting from zero at which the drop-out rate changes. The first element of tchange must be zero. The above rates and <code>tchange</code> must have the same length.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratec</code></td>
+<td>
+<p>piecewise constant drop-out rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>error tolerance for the numerical intergration</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">\tau_{min}</code> and <code class="reqn">\tau_{max}</code> correspond to the minimum follow-up time <code>taumin</code> and the maximum follow-up time <code>taumax</code>. Let <code class="reqn">T_f</code>, <code class="reqn">C</code>, <code class="reqn">E</code> and <code class="reqn">R</code> be the follow-up time, the drop-out time, the study entry time and the total recruitment period(<code class="reqn">R</code> is the last element of <code>ut</code>). For type 2 follow-up <code class="reqn">T_f=min(C,\tau_{min})</code>. For type 3 follow-up, <code class="reqn">T_f=min(R+\tau_{min}-E,\tau_{max})</code>. For type 4 follow-up, <code class="reqn">T_f=min(R+\tau_{min}-E,\tau_{max},C)</code>. Let <code class="reqn">f</code> be the density of <code class="reqn">T_f</code>. We calculate
+</p>
+<p style="text-align: center;"><code class="reqn">\int_0^{\infty} t f(t)dt</code>
+</p>
+
+<p>and
+</p>
+<p style="text-align: center;"><code class="reqn">\int_0^{\infty} \frac{a t}{1+a t} f(t)dt</code>
+</p>
+
+<p>where <code class="reqn">a</code> is the <code>ux</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mt</code></td>
+<td>
+<p>mean of (a*t)/(1+a*t)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tt</code></td>
+<td>
+<p>mean of t</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vt</code></td>
+<td>
+<p>variance of t</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Xiaodong Luo</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##calculating the exposure for type 4 follow-up
+exp4=negint2(ux=0.5,fixedfu=1,type=2,u=c(0.5,0.5,1),ut=c(0.5,1.0,1.5),
+  tfix=2.0,maxfu=1.0,tchange=c(0,0.5,1),
+  ratec=c(0.15,0.15,0.15),eps=1.0e-03)
+#mean exposure            
+meanexp=exp4$tt
+#var exposure
+varexp=exp4$vt
+c(meanexp,sqrt(varexp))
+#mean of (ux*t)/(1+ux*t)
+meanuxt=exp4$mt
+</code></pre>
+
+
+</div>

@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>annotators</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simple annotator generators</h2>
+
+<h3>Description</h3>
+
+<p>Create annotator objects for composite basic NLP tasks based on
+functions performing simple basic tasks.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Simple_Para_Token_Annotator(f, meta = list(), classes = NULL)
+Simple_Sent_Token_Annotator(f, meta = list(), classes = NULL)
+Simple_Word_Token_Annotator(f, meta = list(), classes = NULL)
+Simple_POS_Tag_Annotator(f, meta = list(), classes = NULL)
+Simple_Entity_Annotator(f, meta = list(), classes = NULL)
+Simple_Chunk_Annotator(f, meta = list(), classes = NULL)
+Simple_Stem_Annotator(f, meta = list(), classes = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>a function performing a “simple” basic NLP task (see
+<b>Details</b>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta</code></td>
+<td>
+<p>an empty or named list of annotator (pipeline) metadata
+tag-value pairs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classes</code></td>
+<td>
+<p>a character vector or <code>NULL</code> (default) giving
+classes to be used for the created annotator object in addition to
+the default ones (see <b>Details</b>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The purpose of these functions is to facilitate the creation of
+annotators for basic NLP tasks as described below.
+</p>
+<p><code>Simple_Para_Token_Annotator()</code> creates “simple” paragraph
+token annotators.  Argument <code>f</code> should be a paragraph tokenizer,
+which takes a string <code>s</code> with the whole text to be processed, and
+returns the spans of the paragraphs in <code>s</code>, or an annotation
+object with these spans and (possibly) additional features.  The
+generated annotator inherits from the default classes
+<code>"Simple_Para_Token_Annotator"</code> and <code>"Annotator"</code>.  It uses
+the results of the simple paragraph tokenizer to create and return
+annotations with unique ids and type ‘paragraph’.
+</p>
+<p><code>Simple_Sent_Token_Annotator()</code> creates “simple” sentence
+token annotators.  Argument <code>f</code> should be a sentence tokenizer,
+which takes a string <code>s</code> with the whole text to be processed, and
+returns the spans of the sentences in <code>s</code>, or an annotation
+object with these spans and (possibly) additional features.  The
+generated annotator inherits from the default classes
+<code>"Simple_Sent_Token_Annotator"</code> and <code>"Annotator"</code>.  It uses
+the results of the simple sentence tokenizer to create and return
+annotations with unique ids and type ‘sentence’, possibly
+combined with sentence constituent features for already available
+paragraph annotations.
+</p>
+<p><code>Simple_Word_Token_Annotator()</code> creates “simple” word
+token annotators.  Argument <code>f</code> should be a simple word
+tokenizer, which takes a string <code>s</code> giving a sentence to be
+processed, and returns the spans of the word tokens in <code>s</code>, or an 
+annotation object with these spans and (possibly) additional features.
+The generated annotator inherits from the default classes
+<code>"Simple_Word_Token_Annotator"</code> and <code>"Annotator"</code>.
+It uses already available sentence token annotations to extract the
+sentences and obtains the results of the word tokenizer for these.  It
+then adds the sentence character offsets and unique word token ids,
+and word token constituents features for the sentences, and returns
+the word token annotations combined with the augmented sentence token
+annotations.
+</p>
+<p><code>Simple_POS_Tag_Annotator()</code> creates “simple” POS tag
+annotators.  Argument <code>f</code> should be a simple POS tagger, which
+takes a character vector giving the word tokens in a sentence, and
+returns either a character vector with the tags, or a list of feature
+maps with the tags as ‘POS’ feature and possibly other
+features.  The generated annotator inherits from the default classes
+<code>"Simple_POS_Tag_Annotator"</code> and <code>"Annotator"</code>.  It uses
+already available sentence and word token annotations to extract the
+word tokens for each sentence and obtains the results of the simple
+POS tagger for these, and returns annotations for the word tokens with
+the features obtained from the POS tagger.
+</p>
+<p><code>Simple_Entity_Annotator()</code> creates “simple” entity
+annotators.  Argument <code>f</code> should be a simple entity detector
+(“named entity recognizer”) which takes a character vector
+giving the word tokens in a sentence, and return an annotation object
+with the <em>word</em> token spans, a ‘kind’ feature giving the
+kind of the entity detected, and possibly other features.  The
+generated annotator inherits from the default classes
+<code>"Simple_Entity_Annotator"</code> and <code>"Annotator"</code>.  It uses
+already available sentence and word token annotations to extract the
+word tokens for each sentence and obtains the results of the simple
+entity detector for these, transforms word token spans to character
+spans and adds unique ids, and returns the combined entity
+annotations.
+</p>
+<p><code>Simple_Chunk_Annotator()</code> creates “simple” chunk
+annotators.  Argument <code>f</code> should be a simple chunker, which takes
+as arguments character vectors giving the word tokens and the
+corresponding POS tags, and returns either a character vector with the
+chunk tags, or a list of feature lists with the tags as
+‘chunk_tag’ feature and possibly other features.  The generated
+annotator inherits from the default classes
+<code>"Simple_Chunk_Annotator"</code> and <code>"Annotator"</code>.  It uses
+already available annotations to extract the word tokens and POS tags
+for each sentence and obtains the results of the simple chunker for
+these, and returns word token annotations with the chunk features
+(only).
+</p>
+<p><code>Simple_Stem_Annotator()</code> creates “simple” stem
+annotators.  Argument <code>f</code> should be a simple stemmer, which takes
+as arguments a character vector giving the word tokens, and returns a
+character vector with the corresponding word stems.  The generated
+annotator inherits from the default classes
+<code>"Simple_Stem_Annotator"</code> and <code>"Annotator"</code>.  It uses
+already available annotations to extract the word tokens, and returns
+word token annotations with the corresponding stem features (only).
+</p>
+<p>In all cases, if the underlying simple processing function returns
+annotation objects these should not provide their own ids (or use such
+in the features), as the generated annotators will necessarily provide
+these (the already available annotations are only available at the
+annotator level, but not at the simple processing level).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An annotator object inheriting from the given classes and the default
+ones.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Package <span class="pkg">openNLP</span> which provides annotator generators for sentence
+and word tokens, POS tags, entities and chunks, using processing
+functions based on the respective Apache OpenNLP MaxEnt processing
+resources.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## A simple text.
+s &lt;- String("  First sentence.  Second sentence.  ")
+##           ****5****0****5****0****5****0****5**
+
+## A very trivial sentence tokenizer.
+sent_tokenizer &lt;-
+function(s) {
+    s &lt;- as.String(s)
+    m &lt;- gregexpr("[^[:space:]][^.]*\\.", s)[[1L]]
+    Span(m, m + attr(m, "match.length") - 1L)
+}
+## (Could also use Regexp_Tokenizer() with the above regexp pattern.)
+sent_tokenizer(s)
+## A simple sentence token annotator based on the sentence tokenizer.
+sent_token_annotator &lt;- Simple_Sent_Token_Annotator(sent_tokenizer)
+sent_token_annotator
+a1 &lt;- annotate(s, sent_token_annotator)
+a1
+## Extract the sentence tokens.
+s[a1]
+
+## A very trivial word tokenizer.
+word_tokenizer &lt;-
+function(s) {
+    s &lt;- as.String(s)
+    ## Remove the last character (should be a period when using
+    ## sentences determined with the trivial sentence tokenizer).
+    s &lt;- substring(s, 1L, nchar(s) - 1L)
+    ## Split on whitespace separators.
+    m &lt;- gregexpr("[^[:space:]]+", s)[[1L]]
+    Span(m, m + attr(m, "match.length") - 1L)
+}
+lapply(s[a1], word_tokenizer)
+## A simple word token annotator based on the word tokenizer.
+word_token_annotator &lt;- Simple_Word_Token_Annotator(word_tokenizer)
+word_token_annotator
+a2 &lt;- annotate(s, word_token_annotator, a1)
+a2
+## Extract the word tokens.
+s[subset(a2, type == "word")]
+
+## A simple word token annotator based on wordpunct_tokenizer():
+word_token_annotator &lt;-
+    Simple_Word_Token_Annotator(wordpunct_tokenizer,
+                                list(description =
+                                     "Based on wordpunct_tokenizer()."))
+word_token_annotator
+a2 &lt;- annotate(s, word_token_annotator, a1)
+a2
+## Extract the word tokens.
+s[subset(a2, type == "word")]
+</code></pre>
+
+
+</div>

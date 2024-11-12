@@ -1,0 +1,236 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>geo_lite_struct_sf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Address search API in <a href="https://CRAN.R-project.org/package=sf"><span class="pkg">sf</span></a> format (structured query)</h2>
+
+<h3>Description</h3>
+
+<p>Geocodes addresses already split into components and return the corresponding
+spatial object. This function returns the spatial object associated with the
+query using <a href="https://CRAN.R-project.org/package=sf"><span class="pkg">sf</span></a>, see <code>geo_lite_struct()</code> for retrieving the data in
+<code>tibble</code> format.
+</p>
+<p>This function correspond to the <strong>structured query</strong> search described in the
+<a href="https://nominatim.org/release-docs/develop/api/Search/">API endpoint</a>. For
+performing a free-form search use <code>geo_lite_sf()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">geo_lite_struct_sf(
+  amenity = NULL,
+  street = NULL,
+  city = NULL,
+  county = NULL,
+  state = NULL,
+  country = NULL,
+  postalcode = NULL,
+  limit = 1,
+  full_results = FALSE,
+  return_addresses = TRUE,
+  verbose = FALSE,
+  nominatim_server = "https://nominatim.openstreetmap.org/",
+  custom_query = list(),
+  points_only = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>amenity</code></td>
+<td>
+<p>Name and/or type of POI, see also geo_amenity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>street</code></td>
+<td>
+<p>House number and street name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>city</code></td>
+<td>
+<p>City.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>county</code></td>
+<td>
+<p>County.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>state</code></td>
+<td>
+<p>State.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>country</code></td>
+<td>
+<p>Country.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>postalcode</code></td>
+<td>
+<p>Postal Code.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limit</code></td>
+<td>
+<p>Maximum number of results to return per input address. Note
+that each query returns a maximum of 50 results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full_results</code></td>
+<td>
+<p>Returns all available data from the API service.
+If <code>FALSE</code> (default) only latitude, longitude and address columns are
+returned. See also <code>return_addresses</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_addresses</code></td>
+<td>
+<p>Return input addresses with results if <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If <code>TRUE</code> then detailed logs are output to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nominatim_server</code></td>
+<td>
+<p>The URL of the Nominatim server to use.
+Defaults to <code>"https://nominatim.openstreetmap.org/"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>custom_query</code></td>
+<td>
+<p>A named list with API-specific parameters to be used
+(i.e. <code>list(countrycodes = "US")</code>). See <strong>Details</strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points_only</code></td>
+<td>
+<p>Logical <code>TRUE/FALSE</code>. Whether to return only spatial
+points (<code>TRUE</code>, which is the default) or potentially other shapes as
+provided by the Nominatim API (<code>FALSE</code>). See <strong>About Geometry Types</strong>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The structured form of the search query allows to look up up an address that
+is already split into its components. Each parameter represents a field of
+the address. All parameters are optional. You should only use the ones that
+are relevant for the address you want to geocode.
+</p>
+<p>See <a href="https://nominatim.org/release-docs/latest/api/Search/">https://nominatim.org/release-docs/latest/api/Search/</a> for additional
+parameters to be passed to <code>custom_query</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>sf</code> object with the results.
+</p>
+
+
+<h3>About Geometry Types</h3>
+
+<p>The parameter <code>points_only</code> specifies whether the function results will be
+points (all Nominatim results are guaranteed to have at least point
+geometry) or possibly other spatial objects.
+</p>
+<p>Note that the type of geometry returned in case of <code>points_only = FALSE</code>
+will depend on the object being geocoded:
+</p>
+
+<ul>
+<li>
+<p> Administrative areas, major buildings and the like will be
+returned as polygons.
+</p>
+</li>
+<li>
+<p> Rivers, roads and their like as lines.
+</p>
+</li>
+<li>
+<p> Amenities may be points even in case of a <code>points_only = FALSE</code> call.
+</p>
+</li>
+</ul>
+<p>The function is vectorized, allowing for multiple addresses to be geocoded;
+in case of <code>points_only = FALSE</code>  multiple geometry types may be returned.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>geo_lite_struct()</code>.
+</p>
+<p>Geocoding: 
+<code>geo_address_lookup()</code>,
+<code>geo_address_lookup_sf()</code>,
+<code>geo_amenity()</code>,
+<code>geo_amenity_sf()</code>,
+<code>geo_lite()</code>,
+<code>geo_lite_sf()</code>,
+<code>geo_lite_struct()</code>
+</p>
+<p>Get <code>sf</code> objects: 
+<code>bbox_to_poly()</code>,
+<code>geo_address_lookup_sf()</code>,
+<code>geo_amenity_sf()</code>,
+<code>geo_lite_sf()</code>,
+<code>reverse_geo_lite_sf()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+# Map
+
+pl_mayor &lt;- geo_lite_struct_sf(
+  street = "Plaza Mayor",
+  county = "Comunidad de Madrid",
+  country = "Spain", limit = 50,
+  full_results = TRUE, verbose = TRUE
+)
+
+# Outline
+ccaa &lt;- geo_lite_sf("Comunidad de Madrid, Spain", points_only = FALSE)
+
+library(ggplot2)
+
+if (any(!sf::st_is_empty(pl_mayor), !sf::st_is_empty(ccaa))) {
+  ggplot(ccaa) +
+    geom_sf() +
+    geom_sf(data = pl_mayor, aes(shape = addresstype, color = addresstype))
+}
+
+
+</code></pre>
+
+
+</div>

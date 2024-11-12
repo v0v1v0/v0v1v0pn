@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute an ECDF and Distribution Parameters for Censored Data</h2>
+
+<h3>Description</h3>
+
+<p>Computes the empirical cumulative distribution function (ECDF) for censored data. Estimates parameters of the distribution, including the mean and quantiles.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cfit(
+  y,
+  cens,
+  conf = 0.95,
+  qtls = c(0.1, 0.25, 0.5, 0.75, 0.9),
+  q.type = 6,
+  Cdf = TRUE,
+  ecdf.col = 1,
+  km.orig = TRUE,
+  printstat = TRUE,
+  Ylab = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Concentrations plus detection limits for indicator formatted data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cens</code></td>
+<td>
+<p>Censoring indicators (logical. 1 or <code>TRUE</code> = censored, 0 or FALSE = detected) for indicator formatted data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>The confidence coefficient for confidence intervals around the Kaplan-Meier mean and median. Default = 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qtls</code></td>
+<td>
+<p>Probabilities for the quantiles to be estimated.  Defaults are (0.10, 0.25, 0.50, 0.75, 0.90).  You may add and/or substitute probabilities – all must be between and not including 0 to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.type</code></td>
+<td>
+<p>an integer between 1 and 9 selecting one of the nine quantile algorithms used only when km.orig = FALSE. See <code>stats::quantile</code> and Details below for more detail, default when km.orig = FLASE is set to 6.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Cdf</code></td>
+<td>
+<p>Logical <code>TRUE</code>/<code>FALSE</code> indicator of whether to plot the empirical cumulative distribution function (cdf).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ecdf.col</code></td>
+<td>
+<p>Color for the ecdf plotted step function line.  Default is black.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>km.orig</code></td>
+<td>
+<p>If <code>TRUE</code> (default), Kaplan-Meier results in the realm below detection limits reported as "NA".  If <code>FALSE</code>, information in the detection limits is used and results in the realm of detection limits reported as "&lt; DL", where DL is the appropriate detection limit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>printstat</code></td>
+<td>
+<p>Logical <code>TRUE</code>/<code>FALSE</code> option of whether to print the resulting statistics in the console window, or not.  Default is <code>TRUE.</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ylab</code></td>
+<td>
+<p>Optional input text in quotes to be used as the variable name on the ecdf plot.  The default is the name of the <code>y1</code> input variable.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Moment statistics are estimated using the enparCensored function of the EnvStats package. This avoids a small bias in the mean produced by the NADA package's cenfit function, which uses the reverse Kaplan-Meier procedure, converting left-censored to right-censored data prior to computing the ecdf and mean. See Gillespie et al.(2010) for more discussion on the bias of the estimate of the mean.
+</p>
+<p>Quantiles and their two-sided confidence limits are estimated using the quantile function of the survfit command. See ?quantiles or Helsel et al. (2020) for choosing the q.type; default q.type = 4 (Kaplan-Meier; prob = i/n) when km.orig = TRUE. This is standard procedure in the survival analysis discipline and in the survival package of R, and is also used by the cenfit function in the NADA package. While this is 'industry standard' in medical applications it is a poor choice for observed sample (rather than census) data because it means that the largest observation is assigned a probability equal to 1, the 100th percentile. This implies that this value is never expected to be exceeded when more sample data are collected. It also means the largest observation is not plotted on the ecdf in most software because it is "off the chart". For small datasets in particular it is unlikely that the current largest observation is the largest value in the population and so the resulting ecdf quantiles are likely not opotimal. The default q.type = 6 (Weibull; prob = i/(n+1)) when km.orig = FALSE, though that may be changed by the user. the largest observation plots at a probability less than 1 on the ecdf.  Differences in results when differing q.types are used will decrease as sample size increases.
+</p>
+<p>All printed values will also be output to an object if saved. Confidence intervals on the quantiles are also output when data include nondetects. Values are character because of the possibility of a <code style="white-space: pre;">⁠&lt;1⁠</code>, but if no <code>&lt;</code> symbol can be converted to numeric using the <code>as.numeric(...)</code> command.  For data without censoring cfit will return numeric values. In that case it returns standard arithmetic mean, standard deviation and quantiles instead of K-M versions.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>printstat=TRUE</code>: Based on the provided <code>conf</code> value, Kaplan-Meier summary statistics (<code>mean</code>,<code>sd</code>,<code>median</code>), lower and upper confidence intervals around the mean and median value, sample size and percent of censored samples are returned. The specified quantile values are also printed and returned.
+</p>
+<p>If <code>Cdf=TRUE</code>: The ecdf of censored data is plotted.
+</p>
+
+
+<h3>References</h3>
+
+<p>Helsel, D.R., 2011. Statistics for Censored Environmental Data using Minitab and R, 2nd ed. John Wiley &amp; Sons, USA, N.J.
+</p>
+<p>Gillespie, B.W., et al., 2010.  Estimating Population Distributions When Some Data Are Below a Limit of Detection by Using a Reverse Kaplan-Meier Estimator. Epidemiology 21, 564-570.
+</p>
+<p>Helsel, D.R., Hirsch, R.M., Ryberg, K.R., Archfield, S.A., and Gilroy, E.J., 2020, Statistical Methods in Water Resources: U.S. Geological Survey Techniques and Methods, book 4, chapter A3, 458 p., https://doi.org/10.3133/tm4a3.
+</p>
+<p>Millard, S.P, 2013. EnvStats: An R Package for Environmental Statistics, 2nd ed. Springer Science+Business Media, USA, N.Y.  DOI 10.1007/978-1-4614-8456-1© Springer Science+Business Media New York 2013”
+</p>
+<p>Excerpt From: Steven P. Millard. “EnvStats.” Apple Books.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>survival::survfit
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(Brumbaugh)
+
+cfit(Brumbaugh$Hg,Brumbaugh$HgCen)
+
+</code></pre>
+
+
+</div>

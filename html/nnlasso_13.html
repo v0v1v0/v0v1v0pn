@@ -1,0 +1,239 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nnlasso</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Entire regularization path of non-negative penalized generalized linear model for normal/binomial/poisson family using multiplicative iterative algorithm</h2>
+
+<h3>Description</h3>
+
+<p>The function computes coefficients of a penalized generalized linear model subject to non-negativity constraints for normal/binomial/poisson family using multiplicative iterative algorithm for a sequence of lambda values. Currently lasso and elastic net penalty are supported.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nnlasso(x,y,family=c("normal","binomial","poisson"),lambda=NULL,
+intercept=TRUE,normalize=TRUE,tau=1,tol=1e-6,maxiter=1e5,nstep=100,min.lambda=1e-4,
+eps=1e-6,path=TRUE,SE=FALSE)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>x is matrix of order n x p where n is number of observations and p is number of predictor variables. Rows should represent observations and columns should represent predictor variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>y is a vector of response variable of order n x 1. y should follow either normal/binomial/poisson distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>family should be one of these: "normal","binomial","poisson"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>The value of lambda for which coefficients are desired. The value of path must be FALSE in this case.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>If TRUE, model includes intercept, else the model does not have intercept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalize</code></td>
+<td>
+<p>If TRUE, columns of x matrix are normalized with mean 0 and norm 1 prior to fitting the model. The coefficients at end are returned on the original scale. Default is normalize = TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>Elastic net parameter, <code class="reqn">0 \le \tau \le 1</code> in elastic net penalty <code class="reqn">\lambda{\tau||\beta||_1+(1-\tau)||\beta||_2^2}</code>. Default tau = 1 corresponds to LASSO penalty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Tolerance criteria for convergence of solutions. Default is tol = 1e-6.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>Maximum number of iterations permissible for solving optimization problem for a particular lambda. Default is 10000. Rarely you need to change this to higher value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nstep</code></td>
+<td>
+<p>Number of steps from maximum value of lambda to minimum value of lambda. Default is nstep = 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.lambda</code></td>
+<td>
+<p>Minimum value of lambda. Default is min.lambda=1e-4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>A small value below which a coefficient would be considered as zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+<p>Logical. If path=TRUE, entire regularization path will be obtained for a sequence of lambda values which are calculated automatically. To get coefficient estimates for a single lambda value, set path=FALSE with lambda=value. Default is path=TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SE</code></td>
+<td>
+<p>logical. If SE=TRUE, standard errors are produced for estimated coefficient at a given lambda. Standard errors are not produced if path=TRUE. Default is SE=FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class ‘nnlasso’ with following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>beta0</code></td>
+<td>
+<p>A vector of order nstep of intercept estimates. Each value denote an estimate for a particular lambda. Corresponding lambda values are available in ‘lambdas’ element of the ‘nnlasso’ object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coef</code></td>
+<td>
+<p>A matrix of order nstep x p of slope estimates. Each row denotes solution for a particular lambda. Corresponding lambda values are available in ‘lambdas’ element of the ‘nnlasso’ object. Here p is number of predictor variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdas</code></td>
+<td>
+<p>Sequence of lambda values for which coefficients are obtained</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L1norm</code></td>
+<td>
+<p>L1norm of the coefficients</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.frac</code></td>
+<td>
+<p>Fractions of norm computed as L1 norm at current lambda divided by maximum L1 norm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.iter</code></td>
+<td>
+<p>Number of iterations used for different lambdas</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>of.value</code></td>
+<td>
+<p>Objective function values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normx</code></td>
+<td>
+<p>Norm of x variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>The standard errors of coefficient estimates</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Baidya Nath Mandal and Jun Ma</p>
+
+
+<h3>References</h3>
+
+<p>Mandal, B.N. and Ma, J. (2016). L1 regularized multiplicative iterative path algorithm for non-negative generalized linear models.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Non-negative LASSO
+data(car)
+attach(car)
+x=as.matrix(car[,1:10])
+g1=nnlasso(x,y,family="normal")
+plot(g1)
+plot(g1,xvar="lambda")
+
+
+#Non-negative Elastic net with same data
+## Not run: 
+g2=nnlasso(x,y,family="normal",tau=0.6)
+plot(g2)
+plot(g2,xvar="lambda")
+
+## End(Not run)
+
+#Non-negative Ridge regression with same data
+## Not run: 
+g3=nnlasso(x,y,family="normal",tau=0)
+plot(g3)
+plot(g3,xvar="lambda")
+
+## End(Not run)
+
+#Non-negative L1 penalized GLM for binomial family
+## Not run: 
+g1=nnlasso(x,y1,family="binomial")
+plot(g1)
+plot(g1,xvar="lambda")
+
+## End(Not run)
+
+#Non-negative Elastic net with GLM with binomial family
+## Not run: 
+g2=nnlasso(x,y1,family="binomial",tau=0.8)
+plot(g2)
+plot(g2,xvar="lambda")
+
+## End(Not run)
+
+#coefficient estimates for a particular lambda for normal family
+g1=nnlasso(x,y,lambda=0.01,family="normal",path=FALSE,SE=TRUE)
+coef(g1)
+round(g1$se,3)
+
+
+#coefficient estimates for a particular lambda for binomial family
+## Not run: 
+g2=nnlasso(x,y1,lambda=0.01,family="binomial",path=FALSE,SE=TRUE)
+coef(g2)
+round(g2$se,3)
+detach(car)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

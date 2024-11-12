@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Ace</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimates the heritability of additive traits using a single variable.</h2>
+
+<h3>Description</h3>
+
+<p>An ACE model is the foundation of most behavior genetic research.  It
+estimates the additive heritability (with <em>a</em>), common environment
+(with <em>c</em>) and unshared heritability/environment (with <em>e</em>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">AceUnivariate(
+  method         = c("DeFriesFulkerMethod1","DeFriesFulkerMethod3"),
+  dataSet,
+  oName_S1,
+  oName_S2,
+  rName          = "R",
+  manifestScale  = "Continuous"
+)
+
+DeFriesFulkerMethod1(dataSet, oName_S1, oName_S2, rName="R")
+
+DeFriesFulkerMethod3(dataSet, oName_S1, oName_S2, rName="R")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The specific estimation technique.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataSet</code></td>
+<td>
+<p>The base::data.frame that contains the two outcome
+variables and the relatedness coefficient (corresponding to <code>oName_S1</code>,
+<code>oName_S2</code>, and <code>rName</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oName_S1</code></td>
+<td>
+<p>The name of the outcome variable corresponding to the first
+subject in the pair. This should be a <code>character</code> value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oName_S2</code></td>
+<td>
+<p>The name of the outcome variable corresponding to the second
+subject in the pair. This should be a <code>character</code> value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rName</code></td>
+<td>
+<p>The name of the relatedness coefficient for the pair (this is
+typically abbreviated as <code>R</code>). This should be a <code>character</code> value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>manifestScale</code></td>
+<td>
+<p>Currently, only <em>continuous</em> manifest/outcome variables are supported.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>AceUnivariate()</code> function is a wrapper that calls
+<code>DeFriesFulkerMethod1()</code> or <code>DeFriesFulkerMethod3()</code>.  Future
+versions will incorporate methods that use latent variable models.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Currently, a list is returned with the arguments <code>ASquared</code>, <code>CSquared</code>, <code>ESquared</code>, and <code>RowCount</code>.
+In the future, this may be changed to an <code>S4</code> class.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Will Beasley
+</p>
+
+
+<h3>References</h3>
+
+<p>Rodgers, Joseph Lee, &amp; Kohler, Hans-Peter (2005).
+<a href="https://pubmed.ncbi.nlm.nih.gov/15685433/">Reformulating and simplifying the DF analysis model.</a>
+<em>Behavior Genetics, 35</em> (2), 211-217.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NlsyLinks) # Load the package into the current R session.
+dsOutcomes &lt;- ExtraOutcomes79
+dsOutcomes$SubjectTag &lt;- CreateSubjectTag(
+  subjectID    = dsOutcomes$SubjectID,
+  generation   = dsOutcomes$Generation
+)
+dsLinks &lt;- Links79Pair
+dsLinks &lt;- dsLinks[dsLinks$RelationshipPath == "Gen2Siblings", ] # Only Gen2 Sibs (ie, NLSY79C)
+dsDF &lt;- CreatePairLinksDoubleEntered(
+  outcomeDataset     = dsOutcomes,
+  linksPairDataset   = dsLinks,
+  outcomeNames       = c("MathStandardized", "HeightZGenderAge", "WeightZGenderAge")
+)
+
+estimatedAdultHeight &lt;- DeFriesFulkerMethod3(
+  dataSet    = dsDF,
+  oName_S1   = "HeightZGenderAge_S1",
+  oName_S2   = "HeightZGenderAge_S2"
+)
+estimatedAdultHeight # ASquared and CSquared should be 0.60 and 0.10 for this rough analysis.
+
+estimatedMath &lt;- DeFriesFulkerMethod3(
+  dataSet    = dsDF,
+  oName_S1   = "MathStandardized_S1",
+  oName_S2   = "MathStandardized_S2"
+)
+estimatedMath # ASquared and CSquared should be 0.85 and 0.045.
+
+class(GetDetails(estimatedMath))
+summary(GetDetails(estimatedMath))
+</code></pre>
+
+
+</div>

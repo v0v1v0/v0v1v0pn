@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CDL</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Log-likelihood for cognitive diagnostic models</h2>
+
+<h3>Description</h3>
+
+<p>This function returns the log-likelihood of a particular examinee's responses to a set of cognitive diagnostic items. Currently supported cognitive diagnostic models include the DINA model, DINO model, NIDA model, G-NIDA model, and R-RUM model. This function is called by the <code>AlphaMLE</code> function and the <code>JMLE</code> function in the package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CDL(Y, Q, par, alpha, model = c("DINA", "DINO", "NIDA", "GNIDA", "RRUM"), 
+undefined.flag)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>A vector of binary examinee responses. 1=correct, 0=incorrect.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>The Q-matrix of the test. Rows represent items and columns represent attributes. 1=attribute required by the item, 0=attribute not required by the item. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par</code></td>
+<td>
+<p>A list of parameters.                                            
+DINA &amp; DINO — <code>par$slip</code>: a vector of slipping parameters for each item;       
+<code>par$guess</code>: a vector of guessing parameters for each item.  
+NIDA — <code>par$slip</code>: a vector of slipping parameters for each attribute; 
+<code>par$guess</code>: a vector of guessing parameters for each attribute.
+GNIDA — <code>par$slip</code>: a matrix (items by attributes) of slipping parameters; 
+<code>par$guess</code>: a matrix (items by attributes) of guessing parameters.
+RRUM — <code>par$pi</code>: a vector of pi parameters for each item;
+<code>par$r</code>: a matrix (items by attributes) of r parameters.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A vector of examinee ability profile. 1=examinee masters the attribute, 0=examinee does not master the attribute.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Currently supports five models: <code>"DINA"</code>, <code>"DINO"</code>, <code>"NIDA"</code>, <code>"GNIDA"</code>, and <code>"RRUM"</code>. The default is <code>"DINA"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>undefined.flag</code></td>
+<td>
+<p>A binary vector indicating whether the parameters of each item are undefined. 1=undefined, 0=defined.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>loglike</code></td>
+<td>
+<p>The log likelihood function value for the given data.</p>
+</td>
+</tr></table>
+<h3>See Also</h3>
+
+<p><code>AlphaMLE</code>, <code>JMLE</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate item and examinee profiles
+
+nitem &lt;- 4
+Q &lt;- rbind(c(1, 0, 0), c(0, 1, 0), c(0, 0, 1), c(1, 1, 1))
+alpha &lt;- c(1, 0, 0)
+
+# Generate DINA model-based response data
+
+slip &lt;- rep(0.1, nitem)
+guess &lt;- rep(0.1, nitem)
+my.par &lt;- list(slip=slip, guess=guess)
+
+data &lt;- NA
+eta &lt;- NA
+
+for (i in 1:nitem) {
+  eta[i] &lt;- prod(alpha ^ Q[i, ])
+  P &lt;- (1 - slip[i]) ^ eta[i] * guess[i] ^ (1 - eta[i])
+  u &lt;- runif(1)
+  data[i] &lt;- as.numeric(u &lt; P)
+}
+
+# Using the function to compute the log-likelihood of the given data
+
+CDL(data, Q, my.par, alpha, model="DINA", undefined.flag=rep(0, nitem))
+</code></pre>
+
+
+</div>

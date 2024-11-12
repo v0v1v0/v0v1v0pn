@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compute_coverage</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute Coverage</h2>
+
+<h3>Description</h3>
+
+<p>Compute Empirical Coverage
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compute_coverage(
+  sols,
+  alpha = 0.95,
+  step = 100,
+  idx = 1:6,
+  progressbar = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sols</code></td>
+<td>
+<p>The set of solutions returned by the <code>navigation</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>size of the confidence interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step</code></td>
+<td>
+<p>Step</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idx</code></td>
+<td>
+<p>Components of the states to be considered (default: position and orientation)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progressbar</code></td>
+<td>
+<p>A <code>boolean</code> specifying whether or not to show a progress bar. Default is FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return a <code>coverage.stat</code> object which contains the empirical coverage of the navigation solutions.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Davide Cucci, Lionel Voirol, Mehran Khaghani, Stéphane Guerrier
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load data
+data("lemniscate_traj_ned")
+head(lemniscate_traj_ned)
+traj &lt;- make_trajectory(data = lemniscate_traj_ned, system = "ned")
+timing &lt;- make_timing(
+  nav.start = 0, # time at which to begin filtering
+  nav.end = 20,
+  freq.imu = 100,
+  # frequency of the IMU, can be slower wrt trajectory frequency
+  freq.gps = 1, # GNSS frequency
+  freq.baro = 1,
+  # barometer frequency (to disable, put it very low, e.g. 1e-5)
+  gps.out.start = 10,
+  # to simulate a GNSS outage, set a time before nav.end
+  gps.out.end = 15
+)
+# create sensor for noise data generation
+snsr.mdl &lt;- list()
+# this uses a model for noise data generation
+acc.mdl &lt;- WN(sigma2 = 5.989778e-05) + 
+AR1(phi = 9.982454e-01, sigma2 = 1.848297e-10) +
+  AR1(phi = 9.999121e-01, sigma2 = 2.435414e-11) +
+  AR1(phi = 9.999998e-01, sigma2 = 1.026718e-12)
+gyr.mdl &lt;- WN(sigma2 = 1.503793e-06) + 
+AR1(phi = 9.968999e-01, sigma2 = 2.428980e-11) +
+  AR1(phi = 9.999001e-01, sigma2 = 1.238142e-12)
+snsr.mdl$imu &lt;- make_sensor(
+  name = "imu",
+  frequency = timing$freq.imu,
+  error_model1 = acc.mdl,
+  error_model2 = gyr.mdl
+)
+# RTK-like GNSS
+gps.mdl.pos.hor &lt;- WN(sigma2 = 0.025^2)
+gps.mdl.pos.ver &lt;- WN(sigma2 = 0.05^2)
+gps.mdl.vel.hor &lt;- WN(sigma2 = 0.01^2)
+gps.mdl.vel.ver &lt;- WN(sigma2 = 0.02^2)
+snsr.mdl$gps &lt;- make_sensor(
+  name = "gps",
+  frequency = timing$freq.gps,
+  error_model1 = gps.mdl.pos.hor,
+  error_model2 = gps.mdl.pos.ver,
+  error_model3 = gps.mdl.vel.hor,
+  error_model4 = gps.mdl.vel.ver
+)
+# Barometer
+baro.mdl &lt;- WN(sigma2 = 0.5^2)
+snsr.mdl$baro &lt;- make_sensor(
+  name = "baro",
+  frequency = timing$freq.baro,
+  error_model1 = baro.mdl
+)
+# define sensor for Kalmna filter
+KF.mdl &lt;- list()
+# make IMU sensor
+KF.mdl$imu &lt;- make_sensor(
+  name = "imu",
+  frequency = timing$freq.imu,
+  error_model1 = acc.mdl,
+  error_model2 = gyr.mdl
+)
+KF.mdl$gps &lt;- snsr.mdl$gps
+KF.mdl$baro &lt;- snsr.mdl$baro
+# perform navigation simulation
+num.runs &lt;- 5 # number of Monte-Carlo simulations
+res &lt;- navigation(
+  traj.ref = traj,
+  timing = timing,
+  snsr.mdl = snsr.mdl,
+  KF.mdl = KF.mdl,
+  num.runs = num.runs,
+  noProgressBar = TRUE,
+  PhiQ_method = "1",
+  # order of the Taylor expansion of the matrix exponential
+  # used to compute Phi and Q matrices
+  compute_PhiQ_each_n = 20,
+  # compute new Phi and Q matrices
+  # every n IMU steps (execution time optimization)
+  parallel.ncores = 1,
+  P_subsampling = timing$freq.imu
+) # keep one covariance every second
+coverage &lt;- compute_coverage(res, alpha = 0.7, step = 100, idx = 1:6)
+plot(coverage)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,295 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mle_parameters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MLE Parameters</h2>
+
+<h3>Description</h3>
+
+<p><code>mle_parameters</code> computes the optimal parameters via MLE of
+a given distribution.
+</p>
+<p><code>zero_laplace_mle</code> computes the optimal parameters via MLE
+assuming a zero-mean Laplace as noise distribution.
+</p>
+<p><code>general_laplace_mle</code> computes the optimal parameters via MLE 
+assuming a general Laplace as noise distribution.
+</p>
+<p><code>zero_gaussian_mle</code> computes the optimal parameters via MLE 
+assuming a zero-mean Gaussian as noise distribution.
+</p>
+<p><code>general_gaussian_mle</code> computes the optimal parameters via MLE 
+assuming a general Gaussian as noise distribution.
+</p>
+<p><code>beta_mle</code> computes the optimal parameters via MLE 
+assuming a Beta as noise distribution.
+</p>
+<p><code>weibull_mle</code> computes the optimal parameters via MLE 
+assuming a Weibull as noise distribution.
+</p>
+<p><code>moge_mle</code> computes the optimal parameters via MLE 
+assuming a MOGE as noise distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mle_parameters(phi, dist = "nm", ...)
+
+zero_laplace_mle(phi)
+
+general_laplace_mle(phi)
+
+zero_gaussian_mle(phi)
+
+general_gaussian_mle(phi)
+
+beta_mle(phi, m1 = mean(phi, na.rm = T), m2 = mean(phi^2, na.rm = T),
+  alpha_0 = (m1 * (m1 - m2))/(m2 - m1^2), beta_0 = (alpha_0 * (1 - m1)/m1))
+
+weibull_mle(phi, k_0 = 1)
+
+moge_mle(phi, lambda_0 = 1, alpha_0 = 1, theta_0 = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>phi</code></td>
+<td>
+<p>a vector with residual values used to estimate the parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>assumed distribution for the noise in the data. Possible values to take:
+</p>
+
+<ul>
+<li>
+<p>l: Zero-mean Laplace distribution.
+</p>
+</li>
+<li>
+<p>lm: General Laplace distribution.
+</p>
+</li>
+<li>
+<p>n: Zero-mean Gaussian distribution.
+</p>
+</li>
+<li>
+<p>nm: General Gaussian distribution.
+</p>
+</li>
+<li>
+<p>b: Beta distribution.
+</p>
+</li>
+<li>
+<p>w: Weibull distribution.
+</p>
+</li>
+<li>
+<p>moge: MOGE distribution.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to be passed to the low level
+functions (see below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1</code></td>
+<td>
+<p>first moment of the residuals. Used to compute <code>alpha_0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m2</code></td>
+<td>
+<p>second moment of the residuals. Used to compute <code>beta_0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha_0</code></td>
+<td>
+<p>initial value for Newton-Raphson method for the parameter <code class="reqn">\alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta_0</code></td>
+<td>
+<p>initial value for Newton-Raphson method for the parameter <code class="reqn">\beta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k_0</code></td>
+<td>
+<p>initial value for Newton-Raphson method for the parameter <code class="reqn">\kappa</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda_0</code></td>
+<td>
+<p>initial value for Newton-Raphson method for the parameter <code class="reqn">\lambda</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_0</code></td>
+<td>
+<p>initial value for Newton-Raphson method for the parameter <code class="reqn">\theta</code>.
+</p>
+<p>See also 'Details' and multiroot.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For the zero-<code class="reqn">\mu</code> Laplace distribution the optimal MLE parameters are
+</p>
+<p style="text-align: center;"><code class="reqn">\sigma=mean(|\phi_i|)</code>
+</p>
+<p>, where <code class="reqn">{\phi_i}</code> are the residuals passed as argument.
+</p>
+<p>For the general Laplace distribution the optimal MLE parameters are
+</p>
+<p style="text-align: center;"><code class="reqn">\mu=median(\phi_i)</code>
+</p>
+<p style="text-align: center;"><code class="reqn">\sigma=mean(|\phi_i - \mu|)</code>
+</p>
+<p>, where <code class="reqn">{\phi_i}</code> are the residuals passed as argument.
+</p>
+<p>For the zero-<code class="reqn">\mu</code> Gaussian distribution the optimal MLE parameters are
+</p>
+<p style="text-align: center;"><code class="reqn">\sigma^2=mean(\phi_i^2)</code>
+</p>
+<p>, where <code class="reqn">{\phi_i}</code> are the residuals passed as argument.
+</p>
+<p>For the general Gaussian distribution the optimal MLE parameters are
+</p>
+<p style="text-align: center;"><code class="reqn">\mu=mean(\phi_i)</code>
+</p>
+<p style="text-align: center;"><code class="reqn">\sigma^2=mean((\phi_i-\mu)^2)</code>
+</p>
+<p>, where <code class="reqn">{\phi_i}</code> are the residuals passed as argument.
+</p>
+<p>For the Beta distribution values of parameters <code class="reqn">\alpha</code> and
+<code class="reqn">\beta</code> are estimated using Newton-Raphson method.
+</p>
+<p>For the Weibull distribution value of parameter <code class="reqn">\kappa</code> is estimated using Newton-Raphson method
+and then estimated value of <code class="reqn">\lambda</code> is computed using the following closed form that depends on <code class="reqn">\kappa</code>:
+</p>
+<p style="text-align: center;"><code class="reqn">\lambda=mean(\phi_i^kappa)^(1/\kappa)</code>
+</p>
+
+<p>For the MOGE distribution values of parameters <code class="reqn">\lambda</code>, <code class="reqn">\alpha</code> and
+<code class="reqn">\theta</code> are estimated using Newton-Raphson method.
+</p>
+<p>See also 'References'.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>mle_parameters</code> returns a list with the estimated parameters. Depending on the distribution
+these parameters will be one or more of the following ones:
+</p>
+
+<dl>
+<dt>sigma</dt>
+<dd>
+<p>scale parameter of the Laplace distribution.</p>
+</dd>
+<dt>mu</dt>
+<dd>
+<p>location or mean parameter of the Laplace or Gaussian distribution,
+respectively.</p>
+</dd>
+<dt>sigma_cuad</dt>
+<dd>
+<p>variance parameter of the Gaussian distribution.</p>
+</dd>
+<dt>alpha</dt>
+<dd>
+<p>shape1 parameter of the Beta distribution or second parameter of the MOGE distribution.</p>
+</dd>
+<dt>beta</dt>
+<dd>
+<p>shape2 parameter of the Beta distribution.</p>
+</dd>
+<dt>k</dt>
+<dd>
+<p>shape parameter of the Weibull distribution.</p>
+</dd>
+<dt>lambda</dt>
+<dd>
+<p>lambda scale parameter of the Weibull distribution or first parameter of the MOGE distribution.</p>
+</dd>
+<dt>theta</dt>
+<dd>
+<p>third parameter of the MOGE distribution.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Jesus Prada, <a href="mailto:jesus.prada@estudiante.uam.es">jesus.prada@estudiante.uam.es</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Link to the scientific paper
+</p>
+<p>Prada, Jesus, and Jose Ramon Dorronsoro. "SVRs and Uncertainty Estimates in Wind 
+Energy Prediction." Advances in Computational Intelligence. Springer International 
+Publishing, 2015. 564-577,
+</p>
+<p>with theoretical background for this package is provided below.
+</p>
+<p><a href="http://link.springer.com/chapter/10.1007/978-3-319-19222-2_47">http://link.springer.com/chapter/10.1007/978-3-319-19222-2_47</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Estimate optimal parameters using default distribution ("nm").
+mle_parameters(rnorm(100))
+
+# Estimate optimal parameters using "lm" distribution.
+mle_parameters(rnorm(100),dist="lm")
+
+# Equivalent to mle_parameters(rnorm(100),dist="l")
+zero_laplace_mle(rnorm(100))
+
+# Equivalent to mle_parameters(rnorm(100),dist="lm")
+general_laplace_mle(rnorm(100))
+
+# Equivalent to mle_parameters(rnorm(100),dist="n")
+zero_gaussian_mle(rnorm(100))
+
+# Equivalent to mle_parameters(rnorm(100),dist="nm")
+general_gaussian_mle(rnorm(100))
+
+# Equivalent to mle_parameters(rnorm(100),dist="b")
+beta_mle(rnorm(100))
+
+# Equivalent to mle_parameters(rnorm(100),dist="w")
+weibull_mle(rnorm(100))
+
+# Equivalent to mle_parameters(rnorm(100),dist="moge")
+moge_mle(rnorm(100))
+</code></pre>
+
+
+</div>

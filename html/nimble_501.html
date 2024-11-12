@@ -1,0 +1,47 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>modelValuesBaseClass-class</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Class <code>modelValuesBaseClass</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>modelValues are NIMBLE containers built to store values from models. They can either be built directly from 
+a model or be custom built via the <code>modelValuesConf</code> function. They consist of rows, where each
+row can be thought of as a set of values from a model. Like most nimble objects, and unlike most
+R objects, they are passed by reference instead of by value. 
+</p>
+<p>See the <a href="https://r-nimble.org/html_manual/cha-welcome-nimble.html">User Manual</a> for more details.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">mvConf &lt;- modelValuesConf(vars = c('a', 'b'), 
+	types = c('double', 'double'), 
+	sizes = list(a = 1, b = c(2,2) ) )
+mv &lt;- modelValues(mvConf)
+as.matrix(mv)
+resize(mv, 2)
+as.matrix(mv)
+mv['a',1] &lt;- 1
+mv['a',2] &lt;- 2
+mv['b',1] &lt;- matrix(0, nrow = 2, ncol = 2)
+mv['b',2] &lt;- matrix(1, nrow = 2, ncol = 2)
+mv['a',]
+as.matrix(mv)
+basicModelCode &lt;- nimbleCode({
+a ~ dnorm(0,1)
+for(i in 1:4)
+	b[i] ~ dnorm(0,1)
+})
+basicModel &lt;- nimbleModel(basicModelCode)
+basicMV &lt;- modelValues(basicModel, m = 2)	# m sets the number of rows
+basicMV['b',]
+</code></pre>
+
+
+</div>

@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>setup</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transforming arm-level data to contrast-based summary statistics and making objects for network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>A setup function to generate R objects that can be used for network meta-analysis. 
+Users should prepare arm-level datasets, and the <code>setup</code> function transforms the arm-level data to the contrast-based summary statistics. 
+Both of dichotomous and continuous outcomes can be treated. The type of outcome variable can be specified by the <code>measure</code>. If the <code>measure</code> is specified as <code>OR</code>, <code>RR</code> or <code>RD</code>, the outcome should be dichotomous, and <code>d</code> and <code>n</code> are needed to compute the summary statistics.
+Besides, if the <code>measure</code> is specified as <code>MD</code> or <code>SMD</code>, the outcome should be continuous, and <code>m</code>, <code>s</code> and <code>n</code> are needed to compute the summary statistics. 
+Also, if the <code>measure</code> is specified as <code>HR</code>, the outcome should be survival (time-to-event), and <code>d</code> and <code>n</code> are needed to compute the summary statistics. Note <code>HR</code> corresponds to rate-ratio in ordinary sense and this option corresponds to the person-time analysis; hazard ratio accords to rate-ratio if the survival time distribution is exponential distribution.
+Several covariates can be involved as <code>z</code> for network meta-regression analysis (<code>nmareg</code>) and transitivity analysis (<code>transitivity</code>). 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">setup(study,trt,d,n,m,s,z,measure,ref,data)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>study</code></td>
+<td>
+<p>Study ID</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trt</code></td>
+<td>
+<p>Treatment variable. It can be formed as both of numbered treatment (=1,2,...) and characters (e.g., "Placebo", "ARB", "Beta blocker").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Number of events (for dichotomous outcome and survival outcome).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Sample size (for dichotomous and continuous outcome) or total person-time at risk (for survival outcome).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>Mean of the outcome variable (for continuous outcome).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>Standard deviation of the outcome variable (for continuous outcome).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>Covariate name vector to be used for network meta-regression analysis or transitivity analysis (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>measure</code></td>
+<td>
+<p>Outcome measure (can be <code>OR</code> (odds ratio), <code>RR</code> (risk ratio), and <code>RD</code> (risk difference) for dichotomous outcome, <code>MD</code> (mean difference) and <code>SMD</code> (standardized mean difference) for continuous outcome, and <code>HR</code> (hazard ratio) for survival outcome.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref</code></td>
+<td>
+<p>Reference treatment category that should be involved in <code>trt</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame that involves the arm-based data.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Contrast-based summary statistics are generated.
+</p>
+
+<ul>
+<li> <p><code>coding</code>: A table that presents the correspondence between the numerical code and treatment categories (the reference category is coded as 1).
+</p>
+</li>
+<li> <p><code>reference</code>: Reference treatment category.
+</p>
+</li>
+<li> <p><code>measure</code>: Outcome measure.
+</p>
+</li>
+<li> <p><code>covariate</code>: Covariate name(s).
+</p>
+</li>
+<li> <p><code>N</code>: The number of study.
+</p>
+</li>
+<li> <p><code>p</code>: The dimension of the contrast-based statistics.
+</p>
+</li>
+<li> <p><code>df</code>: The degree of freedom.
+</p>
+</li>
+<li> <p><code>study</code>: The ID variable that specifies studies.
+</p>
+</li>
+<li> <p><code>trt</code>: The original vector that specifies treatment categories.
+</p>
+</li>
+<li> <p><code>treat</code>: A numerical vector that specifies treatment categories based on the <code>coding</code> table.
+</p>
+</li>
+<li> <p><code>d</code>: The original vector that specifies number of events.
+</p>
+</li>
+<li> <p><code>n</code>: The original vector that specifies sample sizes.
+</p>
+</li>
+<li> <p><code>m</code>: The original vector that specifies means.
+</p>
+</li>
+<li> <p><code>s</code>: The original vector that specifies standard deviations.
+</p>
+</li>
+<li> <p><code>Z</code>: The data frame that specifies covariates matrix (design matrix).
+</p>
+</li>
+<li> <p><code>y</code>: Contrast-based summary estimates.
+</p>
+</li>
+<li> <p><code>S</code>: Vectored within-study covariance matrix.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Noma, H. (2023). Within-study covariance estimators for network meta-analysis with contrast-based approach. Jxiv, 490. <a href="https://doi.org/10.51094/jxiv.490">doi:10.51094/jxiv.490</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(heartfailure)
+
+hf2 &lt;- setup(study=study,trt=trt,d=d,n=n,measure="OR",ref="Placebo",data=heartfailure)
+hf3 &lt;- setup(study=study,trt=trt,d=d,n=n,measure="RR",ref="Placebo",data=heartfailure)
+hf4 &lt;- setup(study=study,trt=trt,d=d,n=n,measure="RD",ref="Placebo",data=heartfailure)
+
+hf5 &lt;- setup(study=study,trt=trt,d=d,n=n,z=c(SBP,DBP,pubyear),measure="OR",
+ref="Placebo",data=heartfailure)
+
+data(antidiabetic)
+
+ad2 &lt;- setup(study=id,trt=t,m=y,s=sd,n=n,measure="MD",ref="Placebo",data=antidiabetic)
+ad3 &lt;- setup(study=id,trt=t,m=y,s=sd,n=n,measure="SMD",ref="Placebo",data=antidiabetic)
+</code></pre>
+
+
+</div>

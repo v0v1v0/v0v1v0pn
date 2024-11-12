@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>autoplot.nested_model_fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a set of ggplots for a nested model object</h2>
+
+<h3>Description</h3>
+
+<p>This method calls <code>parsnip::autoplot.model_fit()</code> on each model fitted on
+each nested data frame, returning a list of plots.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nested_model_fit'
+autoplot(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A <code>nested_model_fit</code> object produced by
+<code>fit.nested_model()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Passed into <code>parsnip::autoplot.model_fit()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Printing the list of plots will print every plot in turn, so remember to
+store the result of this function in a variable to look at each plot
+individually.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of <code>ggplot2::ggplot()</code> objects.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ggplot2::autoplot()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(parsnip)
+library(glmnet)
+library(ggplot2)
+
+data &lt;- filter(example_nested_data, id %in% 16:20)
+
+nested_data &lt;- nest(data, data = -id2)
+
+model &lt;- linear_reg(penalty = 1) %&gt;%
+  set_engine("glmnet") %&gt;%
+  nested()
+
+fit &lt;- fit(model, z ~ x + y + a + b, nested_data)
+
+plots &lt;- autoplot(fit)
+
+# View the first plot
+plots[[1]]
+
+# Use the patchwork package (or others) to combine the plots
+library(patchwork)
+
+reduce(plots, `+`)
+
+</code></pre>
+
+
+</div>

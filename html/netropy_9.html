@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prediction_power</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prediction Power</h2>
+
+<h3>Description</h3>
+
+<p>Computes prediction power when pairs of variables in a given dataframe are used
+to predict a third variable from the same dataframe. The prediction strength is measured by
+expected conditional entropies.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prediction_power(var, dat)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>character string representing the variable in
+dataframe <code>dat</code> to be predicted by pairs of other variables in the dataframe <code>dat</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>dataframe with rows as observations and columns as variables.
+Variables must all be observed or transformed categorical with finite range spaces.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The expected conditional entropy given by<br></p>
+<p><em>EH(Z|X,Y) = H(X,Y,Z) - H(X, Y)</em> <br></p>
+<p>measures the prediction uncertainty when pairs of variables <em>X</em> and <em>Y</em>
+are used to predict variable <em>Z</em>.
+The lower the value of <em>EH</em> given different pairs of variables <em>X</em> and <em>Y</em>,
+the stronger is the prediction of <em>Z</em>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Upper triangular matrix giving the expected conditional entropies of pairs of variables
+given as rows and columns of the matrix. The diagonal gives <em>EH(Z|X) = H(X,Z) - H(X)</em>, that is
+when only one variable is used to predict <code>var</code>. Note that <code>NA</code>'s are in the entire
+row and column representing the variable being predicted.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Termeh Shafie
+</p>
+
+
+<h3>References</h3>
+
+<p>Frank, O., &amp; Shafie, T. (2016). Multivariate entropy analysis of network data.
+<em>Bulletin of Sociological Methodology/Bulletin de Méthodologie Sociologique</em>, 129(1), 45-63.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>entropy_trivar</code>, <code>entropy_bivar</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># use internal data set
+data(lawdata)
+df.att &lt;- lawdata[[4]]
+
+# three steps of data editing:
+# 1. categorize variables 'years' and 'age' based on
+# approximately three equally size groups (values based on cdf)
+# 2. make sure all outcomes start from the value 0 (optional)
+# 3. remove variable 'senior' as it consists of only unique values (thus redundant)
+df.att.ed &lt;- data.frame(
+    status = df.att$status,
+    gender = df.att$gender,
+    office = df.att$office - 1,
+    years = ifelse(df.att$years &lt;= 3, 0,
+        ifelse(df.att$years &lt;= 13, 1, 2)
+    ),
+    age = ifelse(df.att$age &lt;= 35, 0,
+        ifelse(df.att$age &lt;= 45, 1, 2)
+    ),
+    practice = df.att$practice,
+    lawschool = df.att$lawschool - 1
+)
+
+# power of predicting 'status' using pairs of other variables
+prediction_power("status", df.att.ed)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Dvar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Differentiate the Variance Function of a Nonlinear Model
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the gradient and Hessian of the variance function of a
+nonlinear heteroscedastic model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Dvar(nlregObj, hessian = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nlregObj</code></td>
+<td>
+
+<p>a nonlinear heteroscedastic model fit as obtained from a call to
+<code>nlreg</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hessian</code></td>
+<td>
+
+<p>logical value indicating whether the Hessian should be computed.  
+The default is <code>TRUE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The variance function is differentiated with respect to the variance
+parameters specified in the <code>varPar</code> component of the 
+<code>nlregObj</code> object and, if the variance function depends on 
+them, with respect to the regression coefficients specified in the
+<code>coef</code> component.  The  returned function definition includes 
+all parameters.  When evaluated, it implicitly refers to the data to
+whom the <code>nlreg</code> object was fitted and which must be on the 
+search list.  The gradient and Hessian are calculated for each data
+point: the <code>gradient</code> attribute is a 
+<code class="reqn">n\times p</code> matrix, and the <code>hessian</code> 
+attribute is a <code class="reqn">n\times p\times p</code> array, 
+where <code class="reqn">n</code> and <code class="reqn">p</code> are respectively the 
+number of data points and the number of regression coefficients.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a function whose arguments are named according to the parameters of
+the nonlinear model <code>nlregObj</code>.  When evaluated, it returns the
+value of the variance function along with attributes called 
+<code>gradient</code> and <code>hessian</code>, the latter if requested.  These 
+are the gradient and Hessian of the variance function with respect 
+to the model parameters.
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>Dmean</code> and <code>Dvar</code> are the two workhorse functions of the
+<code>nlreg</code> library.  The details are given in <cite>Brazzale 
+(2000, Section 6.1.2)</cite>.
+</p>
+<p>The symbolic differentiation algorithm is based upon the
+<code>D</code> function.  As this algorithm is highly 
+recursive, the <code>hessian = TRUE</code> argument should only be used if
+the Hessian matrix is needed.  Whenever possible, derivatives 
+should be stored so as to be re-used in further calculations.  This
+is, for instance, achieved for the nonlinear heteroscedastic model 
+fitting routine <code>nlreg</code> through the argument 
+<code>hoa = TRUE</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Becker, R. A., Chambers, J. M. and Wilks, A. R. (1988) <em>The New
+S Language: A Programming Environment for Data Analysis and 
+Graphics</em>.  London: Chapman \&amp; Hall.  Section 9.6.
+</p>
+<p>Brazzale, A. R. (2000) <em>Practical Small-Sample Parametric 
+Inference</em>.  Ph.D. Thesis N. 2230, Department of Mathematics, Swiss
+Federal Institute of Technology Lausanne.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Dmean</code>, <code>nlreg.object</code>,
+<code>deriv3</code>, <code>D</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(boot)
+data(calcium)
+calcium.nl &lt;- nlreg( cal ~ b0*(1-exp(-b1*time)), 
+                     start = c(b0 = 4, b1 = 0.1), data = calcium )
+Dvar( calcium.nl )
+##function (b0, b1, logs)
+##{
+##    .expr1 &lt;- exp(logs)
+##    .value &lt;- .expr1
+##    .grad &lt;- array(0, c(length(.value), 1), list(NULL, c("logs")))
+##    .hessian &lt;- array(0, c(length(.value), 1, 1), list(NULL,
+##        c("logs"), c("logs")))
+##    .grad[, "logs"] &lt;- .expr1
+##    .hessian[, "logs", "logs"] &lt;- .expr1
+##    attr(.value, "gradient") &lt;- .grad
+##    attr(.value, "hessian") &lt;- .hessian
+##    .value
+##}
+##
+attach( calcium )
+calcium.vd &lt;- Dvar( calcium.nl )
+param( calcium.nl )
+##        b0         b1       logs
+## 4.3093653  0.2084780 -1.2856765
+##
+attr( calcium.vd( 4.31, 0.208, -1.29 ), "gradient" )
+##          logs
+##[1,] 0.2752708
+##
+calcium.nl &lt;- update( calcium.nl, weights = ~ ( 1+time^g )^2, 
+                      start = c(b0 = 4, b1 = 0.1, g = 1))
+Dvar( calcium.nl )
+##function (b0, b1, g, logs) 
+##{
+##    .expr1 &lt;- time^g
+##    .expr2 &lt;- 1 + .expr1
+##    .expr4 &lt;- exp(logs)
+##    .expr5 &lt;- .expr2^2 * .expr4
+##    .expr6 &lt;- log(time)
+##    .expr7 &lt;- .expr1 * .expr6
+##    .expr10 &lt;- 2 * (.expr7 * .expr2) * .expr4
+##    .value &lt;- .expr5
+##    .grad &lt;- array(0, c(length(.value), 2), list(NULL, c("g",
+##        "logs")))
+##    .hessian &lt;- array(0, c(length(.value), 2, 2), list(NULL,
+##        c("g", "logs"), c("g", "logs")))
+##    .grad[, "g"] &lt;- .expr10
+##    .hessian[, "g", "g"] &lt;- 2 * (.expr7 * .expr6 * .expr2 + .expr7 *
+##        .expr7) * .expr4
+##    .hessian[, "g", "logs"] &lt;- .hessian[, "logs", "g"] &lt;- .expr10
+##    .grad[, "logs"] &lt;- .expr5
+##    .hessian[, "logs", "logs"] &lt;- .expr5
+##    attr(.value, "gradient") &lt;- .grad
+##    attr(.value, "hessian") &lt;- .hessian
+##    .value
+##}
+##
+calcium.vd &lt;- Dvar( calcium.nl )
+param( calcium.nl )
+##        b0         b1          g       logs 
+## 4.3160408  0.2075937  0.3300134 -3.3447585
+##
+attr( calcium.vd(4.32, 0.208, 0.600, -2.66 ), "gradient" )
+##                g      logs
+## [1,] -0.11203422 0.1834220
+## [2,] -0.11203422 0.1834220
+## [3,] -0.11203422 0.1834220
+## [4,]  0.09324687 0.3295266
+## \dots
+##
+detach()
+</code></pre>
+
+
+</div>

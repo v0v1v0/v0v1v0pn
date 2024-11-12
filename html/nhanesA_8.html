@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nhanesManifest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Download and parse NHANES manifests</h2>
+
+<h3>Description</h3>
+
+<p>Downloads and parses NHANES manifests for public data
+(available at
+<a href="https://wwwn.cdc.gov/Nchs/Nhanes/search/DataPage.aspx">https://wwwn.cdc.gov/Nchs/Nhanes/search/DataPage.aspx</a>),
+limited access data
+(<a href="https://wwwn.cdc.gov/Nchs/Nhanes/search/DataPage.aspx?Component=LimitedAccess">https://wwwn.cdc.gov/Nchs/Nhanes/search/DataPage.aspx?Component=LimitedAccess</a>),
+and variables
+(<a href="https://wwwn.cdc.gov/nchs/nhanes/search/variablelist.aspx?Component=Demographics">https://wwwn.cdc.gov/nchs/nhanes/search/variablelist.aspx?Component=Demographics</a>, etc.),
+and returns them as data frames.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nhanesManifest(
+  which = c("public", "limitedaccess", "variables"),
+  sizes = FALSE,
+  dxa = FALSE,
+  verbose = getOption("verbose"),
+  use_cache = TRUE,
+  max_age = 24 * 60 * 60
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+<p>Either "public" or "limitedaccess" to get a manifest
+of available tables, or "variables" to get a manifest of
+available variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sizes</code></td>
+<td>
+<p>Logical, whether to compute data file sizes (as
+reported by the server) and include them in the result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dxa</code></td>
+<td>
+<p>Logical, whether to include information on DXA tables.
+These tables contain imputed imputed Dual Energy X-ray Absorptiometry
+measurements, and are listed separately, not in the main listing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical flag indicating whether information on
+progress should be reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use_cache</code></td>
+<td>
+<p>Logical flag indicating whether a cached version
+(from a previous download in the same session) should be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_age</code></td>
+<td>
+<p>Maximum allowed age of the cache in seconds
+(defaults to 24 hours). Cached versions that are older are
+ignored, even if available.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame, with columns that depend on
+<code>which</code>. For a manifest of tables, columns are "Table",
+"DocURL", "DataURL", "Years", "Date.Published". If <code>sizes =
+  TRUE</code>, an additional column "DataSize" giving the data file
+sizes in bytes (as reported by the server) is included. For
+limited access tables, the "DataURL" and "DataSize" columns are
+omitted. For a manifest of variables, columns are "VarName",
+"VarDesc", "Table", "TableDesc", "BeginYear", "EndYear",
+"Component", and "UseConstraints".
+</p>
+
+
+<h3>Note</h3>
+
+<p>Duplicate rows are removed from the result. Most of these
+duplicates arise from duplications in the source tables for
+multi-cycle tables (which are repeated once for each cycle). One
+special case is the WHQ table which has two variables, WHD120
+and WHQ030, duplicated with differing variable
+descriptions. These are removed explicitly, keeping only the
+first occurrence.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">manifest &lt;- nhanesManifest(sizes = FALSE)
+dim(manifest)
+
+</code></pre>
+
+
+</div>

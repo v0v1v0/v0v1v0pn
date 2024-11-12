@@ -1,0 +1,139 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlsJack</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Jackknife resampling</h2>
+
+<h3>Description</h3>
+
+<p>Jackknife resampling</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  nlsJack (nls)
+  ## S3 method for class 'nlsJack'
+ plot(x, mfr = c(nrow(x$reldif),1), ask = FALSE, ...)
+  ## S3 method for class 'nlsJack'
+ print(x, ...)
+  ## S3 method for class 'nlsJack'
+ summary(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nls</code></td>
+<td>
+<p>an object of class 'nls'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x, object</code></td>
+<td>
+<p>an object of class 'nlsJack'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mfr</code></td>
+<td>
+<p>layout definition, default is k rows (k: number of parameters) and 1 column</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ask</code></td>
+<td>
+<p>if TRUE, draw plot interactively</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A jackknife resampling procedure is performed. Each observation is sequentially removed from the initial data set using a leave-one-out strategy. A data set with <em>n</em> observations provides thus <em>n</em> resampled data sets of <em>n-1</em> observations. The jackknife estimates with confidence intervals are calculated as described by Seber and Wild (1989) from the results of <em>n</em> new fits of the model on the <em>n</em> jackknife resampled data sets. The leave-one-out procedure is also employed to assess the influence of each observation on each parameter estimate. An observation is empirically defined as influential for one parameter if the difference between the estimate of this parameter with and without the observation exceeds twice the standard error of the estimate divided by <em>sqrt(n)</em>. This empirical method assumes a small curvature of the nonlinear model. For each parameter, the absolute relative difference (in percent of the estimate) of the estimates with and without each observation is plotted. An asterisk is plotted for each influential observation.
+</p>
+
+
+<h3>Value</h3>
+
+ 
+<p><code>nlsJack</code> returns a list with 7 objects:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>estijack</code></td>
+<td>
+<p>a data frame with jackknife estimates and bias</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coefjack</code></td>
+<td>
+<p>a data frame with the parameter estimates for each jackknife sample</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reldif</code></td>
+<td>
+<p>a data frame with the absolute relative difference (in percent of the estimate) of the estimates with and without each observation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dfb</code></td>
+<td>
+<p>a data frame with dfbetas for each parameter and each observation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jackCI</code></td>
+<td>
+<p>a data frame with jackknife confidence intervals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rse</code></td>
+<td>
+<p>a vector with residual standard error for each jackknife sample</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rss</code></td>
+<td>
+<p>residual a vector with residual sum of squares for each jackknife sample</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Florent Baty, Marie-Laure Delignette-Muller</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Seber GAF, Wild CJ (1989) Nonlinear regression. Wiley, New York.<br><br></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">formulaExp &lt;- as.formula(VO2 ~ (t &lt;= 5.883) * VO2rest + (t &gt; 5.883) * 
+                        (VO2rest + (VO2peak - VO2rest) * 
+                        (1 - exp(-(t - 5.883) / mu))))
+O2K.nls1 &lt;- nls(formulaExp, start = list(VO2rest = 400, VO2peak = 1600, mu = 1), 
+               data = O2K)
+O2K.jack1 &lt;- nlsJack(O2K.nls1)
+plot(O2K.jack1)
+summary(O2K.jack1)
+</code></pre>
+
+
+</div>

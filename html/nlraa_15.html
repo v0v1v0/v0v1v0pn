@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>boot_nlme</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bootstraping for generalized nonlinear models and nonlinear mixed models</h2>
+
+<h3>Description</h3>
+
+<p>Bootstraping tools for nonlinear models using a consistent interface
+</p>
+<p>bootstrap function for objects of class <code>gnls</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">boot_nlme(
+  object,
+  f = NULL,
+  R = 999,
+  psim = 1,
+  cores = 1L,
+  data = NULL,
+  verbose = TRUE,
+  ...
+)
+
+boot_gnls(
+  object,
+  f = NULL,
+  R = 999,
+  psim = 1,
+  cores = 1L,
+  data = NULL,
+  verbose = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>nlme</code> or <code>gnls</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>function to be applied (and bootstrapped), default coef (gnls) or fixef (nlme)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>number of bootstrap samples, default 999</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psim</code></td>
+<td>
+<p>simulation level for vector of fixed parameters either for <code>simulate_gnls</code> or <code>simulate_nlme_one</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>number of cores to use for parallel computation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>optional data argument (useful/needed when data are not in an available environment).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical (default TRUE) whether to print a message if model does not converge.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to be passed to function <code>boot</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is inspired by <code>Boot</code>, which does not
+seem to work with 'gnls' or 'nlme' objects. This function makes multiple copies 
+of the original data, so it can be very hungry in terms of memory use, but
+I do not believe this to be a big problem given the models we typically fit.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(car)
+require(nlme)
+data(barley, package = "nlraa")
+barley2 &lt;- subset(barley, year &lt; 1974)
+fit.lp.gnls2 &lt;- gnls(yield ~ SSlinp(NF, a, b, xs), data = barley2)
+barley2$year.f &lt;- as.factor(barley2$year)
+cfs &lt;- coef(fit.lp.gnls2)
+fit.lp.gnls3 &lt;- update(fit.lp.gnls2, 
+                      params = list(a + b + xs ~ year.f),
+                      start = c(cfs[1], 0, 0, 0, 
+                                cfs[2], 0, 0, 0,
+                                cfs[3], 0, 0, 0))
+## This will take a few seconds                               
+fit.lp.gnls.Bt3 &lt;- boot_nlme(fit.lp.gnls3, R = 300) 
+confint(fit.lp.gnls.Bt3, type = "perc")
+
+
+</code></pre>
+
+
+</div>

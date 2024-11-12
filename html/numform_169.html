@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>f_text_bar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Format Text Based Bar Plots</h2>
+
+<h3>Description</h3>
+
+<p>Use a text symbol to create scaled horizontal bar plots of numeric vectors.
+Note that you will have to coerce the table to a <code>data.frame</code> in order
+for the output to look pretty.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">f_text_bar(x, symbol = "_", width = 9, ...)
+
+ff_text_bar(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>symbol</code></td>
+<td>
+<p>A sumbol to use for the bars.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width</code></td>
+<td>
+<p>The max width of the bar.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a vector of concatenated symbols as a string that represent x
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(dplyr)
+
+mtcars %&gt;%
+    count(cyl, gear) %&gt;%
+    group_by(cyl) %&gt;%
+    mutate(
+        p = numform::f_pp(n/sum(n))
+    ) %&gt;%
+    ungroup() %&gt;%
+    mutate(
+        cyl = numform::fv_runs(cyl),
+        ` ` = f_text_bar(n)  ## Overall
+    ) %&gt;%
+    as.data.frame()
+
+mtcars %&gt;%
+    count(cyl, gear) %&gt;%
+    group_by(cyl) %&gt;%
+    mutate(
+        p = numform::f_pp(n/sum(n)),
+        ` ` = f_text_bar(n) ## within groups
+    ) %&gt;%
+    ungroup() %&gt;%
+    mutate(
+        cyl = numform::fv_runs(cyl),
+        ` ` = f_text_bar(n)
+    ) %&gt;%
+    as.data.frame()
+
+mtcars %&gt;%
+    count(cyl, gear) %&gt;%
+    group_by(cyl) %&gt;%
+    mutate(
+        p = numform::f_pp(n/sum(n)),
+        `within` = f_text_bar(n, width = 3, symbol = '#')
+    ) %&gt;%
+    ungroup() %&gt;%
+    mutate(
+        cyl = numform::fv_runs(cyl),
+        `overall` = f_text_bar(n, width = 30, symbol = '*')
+    ) %&gt;%
+    as.data.frame() %&gt;%
+    pander::pander(split.tables = Inf, justify = alignment(.), style = 'simple')
+
+## Drop the headers
+mtcars %&gt;%
+    count(cyl, gear) %&gt;%
+    group_by(cyl) %&gt;%
+    mutate(
+        p = numform::f_pp(n/sum(n)),
+        `   ` = f_text_bar(n, symbol = '=')
+    ) %&gt;%
+    ungroup() %&gt;%
+    mutate(
+        cyl = numform::fv_runs(cyl),
+        ` ` = f_text_bar(n, symbol = '#')
+    ) %&gt;%
+    as.data.frame()
+
+## End(Not run)
+</code></pre>
+
+
+</div>

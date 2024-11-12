@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>locate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find the environment which defines a name.</h2>
+
+<h3>Description</h3>
+
+<p><code>locate</code> starts at a given environment, and searches enclosing
+environments for a name. It returns the first enclosing environment
+which defines <code>sym</code>.
+</p>
+<p><code>locate_</code> is the normally evaluating method; <code>locate(x)</code> is
+equivalent to <code>locate_(quo(x))</code> or <code>locate_(quote(x), environment())</code>.
+</p>
+<p>When <code>sym</code> is a quotation or dots, any <code>env</code> argument is ignored.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">locate(sym, env = arg_env_(quote(sym), environment()), mode = "any", ...)
+
+locate_(sym, env = arg_env_(quote(sym), environment()), mode = "any", ...)
+
+locate_.list(sym, env = arg_env_(quote(sym), environment()), mode = "any", ...)
+
+locate_.quotation(sym, env = "ignored", mode = "any", ...)
+
+locate_.character(
+  sym,
+  env = arg_env_(quote(sym), environment()),
+  mode = "any",
+  ...
+)
+
+`locate_.(`(sym, env = arg_env_(quote(sym), environment()), mode = "any", ...)
+
+locate_.dots(sym, env = "ignored", mode = "any", ...)
+
+locate_.name(
+  sym,
+  env = arg_env_(quote(sym), environment()),
+  mode = "any",
+  ifnotfound = stop("Binding ", deparse(sym), " not found")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sym</code></td>
+<td>
+<p>A name. For <code>locate</code> the argument is used literally. For
+<code>locate_</code> it should be a name or list of names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>Which environment to begin searching from.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>Either <code>"any"</code> or <code>"function"</code>. <code>"any"</code> finds the
+lowest enclosing environment which gives any definiton for <code>sym</code>.
+<code>"function"</code> searches for an environment which defines <code>sym</code> as a
+function. This may force lazy arguments in the process, in the
+same way as get.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ifnotfound</code></td>
+<td>
+<p>What is returned if the symbol is not found. By
+default an exception is raised.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An environment object which defines <code>sym</code>, if one is found.
+</p>
+<p>If <code>sym</code> is a list (of names) or a dots object, <code>locate_(sym)</code>
+returns a list.
+</p>
+
+
+<h3>Note</h3>
+
+<p>To locate where <code>...</code> is bound, you can wrap it in parens, as
+<code>locate( (...) )</code>.
+</p>
+<p>If you use a literal character argument, as in <code>locate("x", environment())</code>, you must also provide the environment argument
+explicitly; <code>locate("x")</code> won't work in compiled
+functions. However using a literal name like <code>locate(x)</code> will
+work OK. See note under arg.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Here is how to implement R's `&lt;&lt;-` operator, using `locate_`:
+`%&lt;&lt;-%` &lt;- function(lval, rval) {
+  lval_ &lt;- arg(lval)
+  name &lt;- expr(lval_)
+  target.env &lt;- locate_(name, parent.env(env(lval_)))
+  assign(as.character(name), rval, envir=target.env)
+}
+
+x &lt;- "not this one"
+local({
+  x &lt;- "this one"
+  local({
+    x &lt;- "not this one either"
+    x %&lt;&lt;-% "this works like builtin &lt;&lt;-"
+  })
+  print(x)
+})
+print(x)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>WAP.int</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Weighted Average Per-class (WAP) network integration</h2>
+
+<h3>Description</h3>
+
+<p>It performs the WAP integration between networks:
+<script id="MathJax-script" async src="../../mathjaxr/doc/mathjax/es5/tex-chtml-full.js"></script>
+\[\bar{w}_{ij}(k) = \sum_{d = 1}^n \alpha^d(k) w_{ij}^d\]
+where
+\[\alpha^d(k) = \frac{1}{\sum_{j=1}^n M^j(k)} M^d(k)\]
+and \(M^d(k)\) is a suitable accuracy metrics for class k on network d.
+The metrics could be, e.g. the AUC or the precision at a given recall.
+Note that this function puts more weight (alpha parameter) for networks with
+associated larger M.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">WAP.int(m, align = FALSE, logint = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>a numeric vector with the values of the metric used to compute the alpha
+coefficients. It could be e.g. AUC values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>align</code></td>
+<td>
+<p>logic. If TRUE the numeric matrices passed as arguments are aligned
+according to the function align.networks (def: FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logint</code></td>
+<td>
+<p>logic. If TRUE m is log transformed: -log(1-m), otherwise a linear
+integration is performed (def: FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>a list of numeric matrices. These must be named matrices representing
+adjacency matrices of the networks. Matrices may have different dimensions,
+but corresponding elements in different matrices must have the same name.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with two elements:
+</p>
+
+<ul>
+<li>
+<p> WAP : the matrix resulting from WAP
+</p>
+</li>
+<li>
+<p> alpha : a numeric vector with the weight coefficients of the networks
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create three example networks of different size
+set.seed(123);
+A1 &lt;- matrix(runif(100, min = 0, max = 1), nrow = 10);
+A1[lower.tri(A1)] = t(A1)[lower.tri(A1)];
+diag(A1) &lt;- 0;
+rownames(A1) &lt;- colnames(A1) &lt;- sample(LETTERS, 10);
+
+A2 &lt;- matrix(runif(49, min = 0, max = 1), nrow = 7);
+A2[lower.tri(A2)] = t(A2)[lower.tri(A2)];
+diag(A2) &lt;- 0;
+rownames(A2) &lt;- colnames(A2) &lt;- rownames(A1)[1:7];
+
+A3 &lt;- matrix(runif(100, min = 0, max = 1), nrow = 10);
+A3[lower.tri(A3)] = t(A3)[lower.tri(A3)];
+diag(A3) &lt;- 0;
+rownames(A3) &lt;- colnames(A3) &lt;- c(rownames(A1)[1:5], c("A", "B", "Z", "K", "Q"));
+
+# Create random vector of accuracy metrics
+m &lt;- runif(3, min = 0, max = 1);
+
+# Integrate networks using Weighted Average Per-class (WAP) method
+A_int &lt;- WAP.int(m, align=TRUE, logint=FALSE, A1, A2, A3);
+</code></pre>
+
+
+</div>

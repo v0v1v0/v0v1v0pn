@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>snapShot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Snapshot</h2>
+
+<h3>Description</h3>
+
+<p>Make a snapshot of a NGLVieweR object in Shinymode.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">snapShot(NGLVieweR_proxy, fileName = "Snapshot", param = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>NGLVieweR_proxy</code></td>
+<td>
+<p>A NGLVieweR object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileName</code></td>
+<td>
+<p>Optional name for Snapshot (default = "Snapshot").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>Of type list, can be; antialias <code>TRUE/FALSE</code>, trim <code>TRUE/FALSE</code>, transparent <code>TRUE/FALSE</code> or scale <code>numeric</code>.
+For a full list of options, see "makeImage" and "ImageParameters" in the official <a href="http://nglviewer.org/ngl/api/">NGL.js</a> manual.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>API call containing <code>NGLVieweR</code> <code>id</code> and list of message parameters.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NGLVieweR_example()</code> See example "snapshot".
+</p>
+<p>Other options: 
+<code>setFocus()</code>,
+<code>setQuality()</code>,
+<code>updateFocus()</code>,
+<code>updateFullscreen()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+NGLVieweR_proxy("structure") %&gt;%
+snapShot("Snapshot", param = list(
+                               antialias = TRUE,
+                               trim = TRUE,
+                               transparent = TRUE,
+                               scale = 1))
+
+## End(Not run)
+
+if (interactive()) {
+  library(shiny)
+
+  ui &lt;- fluidPage(
+    titlePanel("Viewer with API inputs"),
+    sidebarLayout(
+      sidebarPanel(
+        actionButton("snapshot", "Snapshot"),
+      ),
+      mainPanel(
+        NGLVieweROutput("structure")
+      )
+    )
+  )
+  server &lt;- function(input, output) {
+    output$structure &lt;- renderNGLVieweR({
+      NGLVieweR("7CID") %&gt;%
+        addRepresentation("cartoon",
+          param = list(
+            name = "cartoon",
+            color = "residueindex"
+          )
+        )
+    })
+    observeEvent(input$snapshot, {
+      NGLVieweR_proxy("structure") %&gt;%
+        snapShot("Snapshot",
+          param = list(
+            antialias = TRUE,
+            trim = TRUE,
+            transparent = TRUE,
+            scale = 1
+          )
+        )
+    })
+  }
+  shinyApp(ui, server)
+}
+</code></pre>
+
+
+</div>

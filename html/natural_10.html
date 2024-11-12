@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>olasso_path</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a linear model with organic lasso</h2>
+
+<h3>Description</h3>
+
+<p>Calculate a solution path of the organic lasso estimate (of error standard deviation) with a list of tuning parameter values. In particular, this function solves the squared-lasso problems and returns the objective function values as estimates of the error variance:
+<code class="reqn">\tilde{\sigma}^2_{\lambda} = \min_{\beta} ||y - X \beta||_2^2 / n + 2 \lambda ||\beta||_1^2.</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">olasso_path(x, y, lambda = NULL, nlam = 100, flmin = 0.01,
+  thresh = 1e-08, intercept = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An <code>n</code> by <code>p</code> design matrix. Each row is an observation of <code>p</code> features.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A response vector of size <code>n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>A user specified list of tuning parameter. Default to be NULL, and the program will compute its own <code>lambda</code> path based on <code>nlam</code> and <code>flmin</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlam</code></td>
+<td>
+<p>The number of <code>lambda</code> values. Default value is <code>100</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flmin</code></td>
+<td>
+<p>The ratio of the smallest and the largest values in <code>lambda</code>. The largest value in <code>lambda</code> is usually the smallest value for which all coefficients are set to zero. Default to be <code>1e-2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>Threshold value for underlying optimization algorithm to claim convergence. Default to be <code>1e-8</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>Indicator of whether intercept should be fitted. Default to be <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This package also includes the outputs of the naive and the degree-of-freedom adjusted estimates, in analogy to <code>nlasso_path</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list object containing: </p>
+
+<dl>
+<dt>
+<code>n</code> and <code>p</code>: </dt>
+<dd>
+<p>The dimension of the problem.</p>
+</dd>
+<dt>
+<code>lambda</code>: </dt>
+<dd>
+<p>The path of tuning parameter used.</p>
+</dd>
+<dt>
+<code>a0</code>: </dt>
+<dd>
+<p>Estimate of intercept. A vector of length <code>nlam</code>.</p>
+</dd>
+<dt>
+<code>beta</code>: </dt>
+<dd>
+<p>Matrix of estimates of the regression coefficients, in the original scale. The matrix is of size <code>p</code> by <code>nlam</code>. The <code>j</code>-th column represents the estimate of coefficient corresponding to the <code>j</code>-th tuning parameter in <code>lambda</code>.</p>
+</dd>
+<dt>
+<code>sig_obj_path</code>: </dt>
+<dd>
+<p>Organic lasso estimates of the error standard deviation. A vector of length <code>nlam</code>.</p>
+</dd>
+<dt>
+<code>sig_naive</code>: </dt>
+<dd>
+<p>Naive estimate of the error standard deviation based on the squared-lasso regression. A vector of length <code>nlam</code>.</p>
+</dd>
+<dt>
+<code>sig_df</code>: </dt>
+<dd>
+<p>Degree-of-freedom adjusted estimate of the error standard deviation, based on the squared-lasso regression. A vector of length <code>nlam</code>. </p>
+</dd>
+<dt>
+<code>type</code>: </dt>
+<dd>
+<p>whether the output is of a natural or an organic lasso.</p>
+</dd>
+</dl>
+<h3>See Also</h3>
+
+<p><code>olasso, olasso_cv</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123)
+sim &lt;- make_sparse_model(n = 50, p = 200, alpha = 0.6, rho = 0.6, snr = 2, nsim = 1)
+ol_path &lt;- olasso_path(x = sim$x, y = sim$y[, 1])
+
+</code></pre>
+
+
+</div>

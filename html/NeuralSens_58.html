@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SensitivityPlots</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot sensitivities of a neural network model</h2>
+
+<h3>Description</h3>
+
+<p>Function to plot the sensitivities created by <code>SensAnalysisMLP</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SensitivityPlots(
+  sens = NULL,
+  der = TRUE,
+  zoom = TRUE,
+  quit.legend = FALSE,
+  output = 1,
+  plot_type = NULL,
+  inp_var = NULL,
+  title = "Sensitivity Plots",
+  dodge_var = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sens</code></td>
+<td>
+<p><code>SensAnalysisMLP</code> object created by <code>SensAnalysisMLP</code> or <code>HessMLP</code> object
+created by <code>HessianMLP</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>der</code></td>
+<td>
+<p><code>logical</code> indicating if density plots should be created. By default is <code>TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zoom</code></td>
+<td>
+<p><code>logical</code> indicating if the distributions should be zoomed when there is any of them which is too tiny to be appreciated in the third plot.
+<code>facet_zoom</code> function from <code>ggforce</code> package is required.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quit.legend</code></td>
+<td>
+<p><code>logical</code> indicating if legend of the third plot should be removed. By default is <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p><code>numeric</code> or <code>character</code> specifying the output neuron or output name to be plotted.
+By default is the first output (<code>output = 1</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_type</code></td>
+<td>
+<p><code>character</code> indicating which of the 3 plots to show. Useful when several variables are analyzed.
+Acceptable values are 'mean_sd', 'square', 'raw' corresponding to first, second and third plot respectively. If <code>NULL</code>,
+all plots are shown at the same time. By default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inp_var</code></td>
+<td>
+<p><code>character</code> indicating which input variable to show in density plot. Only useful when
+choosing plot_type='raw' to show the density plot of one input variable. If <code>NULL</code>, all variables
+are plotted in density plot. By default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p><code>character</code> title of the sensitivity plots</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dodge_var</code></td>
+<td>
+<p><code>bool</code> Flag to indicate that x ticks in meanSensSQ plot must dodge between them. Useful with
+too long input names.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List with the following plot for each output: </p>
+ <ul>
+<li>
+<p> Plot 1: colorful plot with the
+classification of the classes in a 2D map </p>
+</li>
+<li>
+<p> Plot 2: b/w plot with
+probability of the chosen class in a 2D map </p>
+</li>
+<li>
+<p> Plot 3: plot with the
+stats::predictions of the data provided if param <code>der</code> is <code>FALSE</code></p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Pizarroso J, Portela J, Muñoz A (2022). NeuralSens: Sensitivity Analysis of
+Neural Networks. Journal of Statistical Software, 102(7), 1-36.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load data -------------------------------------------------------------------
+data("DAILY_DEMAND_TR")
+fdata &lt;- DAILY_DEMAND_TR
+
+## Parameters of the NNET ------------------------------------------------------
+hidden_neurons &lt;- 5
+iters &lt;- 250
+decay &lt;- 0.1
+
+################################################################################
+#########################  REGRESSION NNET #####################################
+################################################################################
+## Regression dataframe --------------------------------------------------------
+# Scale the data
+fdata.Reg.tr &lt;- fdata[,2:ncol(fdata)]
+fdata.Reg.tr[,3] &lt;- fdata.Reg.tr[,3]/10
+fdata.Reg.tr[,1] &lt;- fdata.Reg.tr[,1]/1000
+
+# Normalize the data for some models
+preProc &lt;- caret::preProcess(fdata.Reg.tr, method = c("center","scale"))
+nntrData &lt;- predict(preProc, fdata.Reg.tr)
+
+#' ## TRAIN nnet NNET --------------------------------------------------------
+# Create a formula to train NNET
+form &lt;- paste(names(fdata.Reg.tr)[2:ncol(fdata.Reg.tr)], collapse = " + ")
+form &lt;- formula(paste(names(fdata.Reg.tr)[1], form, sep = " ~ "))
+
+set.seed(150)
+nnetmod &lt;- nnet::nnet(form,
+                           data = nntrData,
+                           linear.output = TRUE,
+                           size = hidden_neurons,
+                           decay = decay,
+                           maxit = iters)
+# Try SensAnalysisMLP
+sens &lt;- NeuralSens::SensAnalysisMLP(nnetmod, trData = nntrData, plot = FALSE)
+NeuralSens::SensitivityPlots(sens)
+</code></pre>
+
+
+</div>

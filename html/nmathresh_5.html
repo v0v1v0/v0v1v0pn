@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>recon_vcov</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reconstruct likelihood covariance matrix</h2>
+
+<h3>Description</h3>
+
+<p>Reconstruct the contrast-level likelihood covariance matrix from prior and
+posterior covariance matrices. The resulting likelihood covariance matrix can
+then be used to perform a contrast-level threshold analysis with the function
+<code>nma_thresh</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">recon_vcov(
+  post,
+  prior.prec = 1e-04,
+  prior.vcov = diag(1/prior.prec, dim(post)[1]),
+  X = NULL,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>post</code></td>
+<td>
+<p>Posterior covariance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.prec</code></td>
+<td>
+<p>Prior precision. Defaults to .0001 which is a common flat
+prior for NMA. Not used if <code>prior.vcov</code> is specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.vcov</code></td>
+<td>
+<p>Prior covariance matrix. Defaults to a diagonal matrix of
+the same size as post, with elements <code>1/prior.prec</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Contrast design matrix. If omitted a complete network is assumed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Print intermediate matrices? Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Full details of the calculation are given by Phillippo <em>et al.</em>
+(2018). Briefly, the aim is to recover the contrast-level likelihood
+covariance matrix <code class="reqn">V</code> that would have led to the posterior covariance
+matrix <code class="reqn">\Sigma</code> being obtained from a fixed effects NMA, with design
+matrix <code class="reqn">X</code> and prior covariance matrix <code class="reqn">\Sigma_d</code> for a normal
+prior on the basic treatment parameters. This is possible in this case via
+the equation (resulting from conjugacy):
+</p>
+<p style="text-align: center;"><code class="reqn">\Sigma^{-1} = X^TV^{-1}X + \Sigma_d^{-1}.</code>
+</p>
+
+<p>When the treatment network is complete (i.e. fully connected), this
+equation may be rearranged exactly.
+</p>
+<p>When the treatment network is incomplete (i.e. not all treatments are
+directly compared), this equation may be solved through the use of
+non-negative least squares (NNLS).
+</p>
+<p>When NNLS is used, some additional diagnostics are printed (and returned as
+attributes). Firstly, the residual sum-of-squares (RSS) from the NNLS fit.
+The RSS is further split into <em>fixed</em> RSS, from structural zeros in
+the reconstructed posterior according to the design matrix (and hence not
+fitted) that are non-zero in the true posterior, and <em>fitted</em> RSS,
+from the other fitted elements. Secondly, the Kullback-Leibler divergence
+of the reconstructed posterior from the true posterior. Interpreting the KL
+divergence as a log Bayes factor, values less than 1 indicate negligible
+differences between the reconstructed posterior from the true posterior,
+whilst values greater than 3 indicate considerable differences.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix; the reconstructed likelihood covariance matrix. If NNLS is
+used, the residual sum-of-squares and Kullback-Leibler divergence
+diagnostics (as printed to the console) are returned as additional
+attributes <code>rss.total</code>, <code>rss.fixed</code>, <code>rss.free</code>,
+<code>kl.divergence</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nma_thresh</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Please see the vignette "Examples" for worked examples including use of
+# this function, including more information on the brief code below.
+
+vignette("Examples", package = "nmathresh")
+
+### Contrast level thresholds for Thrombolytic treatments NMA
+K &lt;- 6   # Number of treatments
+
+# Contrast design matrix is
+X &lt;- matrix(ncol = K-1, byrow = TRUE,
+            c(1, 0, 0, 0, 0,
+              0, 1, 0, 0, 0,
+              0, 0, 1, 0, 0,
+              0, 0, 0, 1, 0,
+              0, -1, 1, 0, 0,
+              0, -1, 0, 1, 0,
+              0, -1, 0, 0, 1))
+
+# Reconstruct hypothetical likelihood covariance matrix using NNLS
+lik.cov &lt;- recon_vcov(Thrombo.post.cov, prior.prec = .0001, X = X)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compare</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compare Networks Many-to-Many</h2>
+
+<h3>Description</h3>
+
+<p>Compares one network to a list of many networks.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compare(
+  networks,
+  net_kind = "matrix",
+  method = "DD",
+  cause_orientation = "row",
+  DD_kind = "all",
+  DD_weight = 1,
+  max_norm = FALSE,
+  size_different = FALSE,
+  cores = 1,
+  diffusion_sampling = 2,
+  diffusion_limit = 10,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>networks</code></td>
+<td>
+<p>The networks being compared to the target network</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_kind</code></td>
+<td>
+<p>If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cause_orientation</code></td>
+<td>
+<p>= The orientation of directed adjacency matrices. Defaults to "row".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DD_kind</code></td>
+<td>
+<p>= A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DD_weight</code></td>
+<td>
+<p>= Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_norm</code></td>
+<td>
+<p>Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size_different</code></td>
+<td>
+<p>Defaults to FALSE. If TRUE, will ensure the node-level properties being compared are vectors of the same length, which is accomplished using splines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffusion_sampling</code></td>
+<td>
+<p>Base of the power to use to nonlinearly sample the diffusion kernels if method = "align". Defaults to 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffusion_limit</code></td>
+<td>
+<p>Number of markov steps in the diffusion kernels if method = "align". Defaults to 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Defaults to TRUE. Whether to print all messages.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note: Currently each process is assumed to have a single governing parameter.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A square matrix with dimensions equal to the number of networks being compared, where the ij element is the comparison of networks i and j.
+</p>
+
+
+<h3>References</h3>
+
+<p>Langendorf, R. E., &amp; Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import netcom
+library(netcom)
+
+# Adjacency matrix
+size &lt;- 10
+comparisons &lt;- 50
+networks &lt;- list()
+for (net in 1:comparisons) {
+     networks[[net]] = matrix(
+         sample(
+             c(0,1),
+             size = size^2,
+             replace = TRUE),
+         nrow = size,
+         ncol = size)
+}
+compare(networks = networks)
+
+</code></pre>
+
+
+</div>

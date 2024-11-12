@@ -1,0 +1,265 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nltm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fit Non-Linear Transformation Model for analyzing survival data 
+</h2>
+
+<h3>Description</h3>
+
+<p>Fits a non-linear transformation model (nltm) for analyzing survival
+data, see Tsodikov (2003). The class of nltm includes the following
+currently supported models: Cox proportional hazard, proportional
+hazard cure, proportional odds, proportional hazard - proportional
+hazard cure, proportional hazard - proportional odds cure, Gamma
+frailty, and proportional hazard - proportional odds. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nltm(formula1=formula(data), formula2=formula(data),
+     data=parent.frame(), subset, na.action, init=NULL, control,
+     nlt.model=c("PH","PHC","PO","PHPHC","PHPOC","GFM","PHPO"),
+     model=FALSE, x=FALSE, y=FALSE, verbose=FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula1</code></td>
+<td>
+
+<p>A formula object with the response on the left of a <code>~</code>
+operator, and the terms on the right. The response must be a
+survival object as returned by the <code>Surv</code> function. In models
+with two predictors, this corresponds to the long term effect.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula2</code></td>
+<td>
+
+<p>A formula corresponding to the short term effect. Will be ignored in
+models with only one predictor. If not present in models with two
+predictors, then formula1 will be used both for the long and short
+term effect.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A data.frame in which to interpret the variables named in
+<code>formula1</code> and <code>formula2</code>, or in the <code>subset</code>
+argument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>Expression saying that only a subset of the rows of the data should
+be used in the fit.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+
+<p>A missing-data filter function, applied to the model.frame, after
+any subset argument has been used. Default is
+<code>options()$na.action</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+
+<p>Vector of initial values for the calculation of the maximum
+likelihood estimator of the regression parameters. Default is zero.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>Object specifying iteration limit and other control options. Default
+is <code>nltm.control(...)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlt.model</code></td>
+<td>
+
+<p>A character string specifying a non-linear transformation
+model. Default is Proportional Hazards Model.
+</p>
+<p>The conditional survival function <code class="reqn">S(t|z)</code> given the covariates
+<code class="reqn">z</code> of each of the models currently supported are given
+below. Let <code class="reqn">S_0(t)</code> be the non-parametric baseline survival
+function, and <code class="reqn">\theta(z)</code> and <code class="reqn">\eta(z)</code> predictors. We take
+<code class="reqn">\theta(z)=\exp(\beta_\theta z)</code> and
+<code class="reqn">\eta(z)=\exp(\beta_\eta z)</code>, where <code class="reqn">\beta_\theta</code> and
+<code class="reqn">\beta_\eta</code> are the regresssion coefficients. In cure models,
+there is an additional regression parameter <code class="reqn">\beta_c</code> and
+<code class="reqn">\theta(z)=\exp(\beta_\theta z+\beta_c)</code>.
+</p>
+
+<ul>
+<li>
+<p> Proportional hazard model (PH):
+</p>
+<p style="text-align: center;"><code class="reqn">S(t|z)=S_0(t)^{\theta(z)}.</code>
+</p>
+ 
+</li>
+<li>
+<p> Proportional hazard cure model (PHC):
+</p>
+<p style="text-align: center;"><code class="reqn">S(t|z)=\exp\bigl(-\theta(z)(1-S_0(t))\bigr).</code>
+</p>
+ 
+</li>
+<li>
+<p> Proportional odds model (PO):
+</p>
+<p style="text-align: center;"><code class="reqn">S(t|z)=\frac{\theta(z)}{\theta(z)-\ln(S_0(t))}.</code>
+</p>
+ 
+</li>
+<li>
+<p> Proportional hazard - proportional hazard cure model (PHPHC):
+</p>
+<p style="text-align: center;"><code class="reqn">S(t|z)=\exp\bigl(-\theta(z)(1-S_0^{\eta(z)}(t))\bigr).</code>
+</p>
+ 
+</li>
+<li>
+<p> Proportional hazard - proportional odds cure model (PHPOC):
+</p>
+<p style="text-align: center;"><code class="reqn">S(t|z)=\exp\biggl(-\frac{\theta(z)(1-S_0(t))}
+	{1-(1-\eta(z))S_0(t)}\biggr).</code>
+</p>
+  
+</li>
+<li>
+<p> Gamma frailty model (GFM):
+</p>
+<p style="text-align: center;"><code class="reqn">S(t|z)=\biggl(\frac{\theta(z)^{\eta(z)}}
+	{\theta(z)-\ln(S_0(t))}\biggr)^{\eta(z)}.</code>
+</p>
+ 
+</li>
+<li>
+<p> Proportional hazard - proportional odds model (PHPO):
+</p>
+<p style="text-align: center;"><code class="reqn">S(t|z)=\frac {\theta(z) S_0^{\eta(z)}(t)}
+	{1-(1-\theta(z))S_0^{\eta(z)}(t)}.</code>
+</p>
+
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>If TRUE the model frame is stored. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>If TRUE the model matrix is stored. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>If TRUE the response matrix is stored. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If a file name is given, it stores information from
+maximization of likelihood and calculation of information matrix in
+a file. Otherwise, verbose=FALSE. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>"nltm"</code>. See <code>nltm.object</code> for
+details.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gilda Garibotti (garibotti@crub.uncoma.edu.ar) and Alexander Tsodikov.
+</p>
+
+
+<h3>References</h3>
+
+  
+<p>Tsodikov A. (2003) "Semiparametric models: a generalized
+self-consistency approach". Journal of the Royal Statistical Society
+B, 65, Part 3, 759-774.
+</p>
+<p>Tsodikov A. (2002) "Semi-parametric models of long- and short-term
+survival: an application to the analysis of breast cancer survival in
+Utah by age and stage". Statistics in Medicine, 21, 895-920.
+</p>
+<p>Tsodikov A., Garibotti G. (2006) "Profile information matrix for
+nonlinear transformation models". to appear in Journal of Lifetime
+Data Analysis. 
+</p>
+<p>Tsodikov A., Ibrahim J., Yakovlev A. (2003) "Estimating cure rates
+from survival data: an alternative to two-component mixture
+models". Journal of the American Statistical Association, Vol. 98,
+No. 464, 1063-1078.
+</p>
+<p>Wendland M., Tsodikov A., Glenn M., Gaffney D. (2004) "Time interval
+to the development of breast carcinoma after treatment
+for Hodgkin disease". Cancer Vol. 101, No. 6, 1275-1282.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nltm.object</code>, <code>summary.nltm</code>,
+<code>nltm.control</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># fit a Proportional Odds Model 
+data(melanoma, package="nltm")
+fit &lt;- nltm(Surv(time,status) ~ size + age, data=melanoma, nlt.model="PO")
+summary(fit)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,202 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nimOptim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>General-purpose Optimization</h2>
+
+<h3>Description</h3>
+
+<p>NIMBLE wrapper around R's builtin <code>optim</code>, with flexibility for
+additional methods.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nimOptim(
+  par,
+  fn,
+  gr = "NULL",
+  he = "NULL",
+  ...,
+  method = "Nelder-Mead",
+  lower = -Inf,
+  upper = Inf,
+  control = nimOptimDefaultControl(),
+  hessian = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>par</code></td>
+<td>
+<p>Initial values for the parameters to be optimized over.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn</code></td>
+<td>
+<p>A function to be minimized (or maximized), with first argument the
+vector of parameters over which minimization is to take place. It should
+return a scalar result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gr</code></td>
+<td>
+<p>A function to return the gradient for the "BFGS", "CG" and
+"L-BFGS-B" methods. If not provided, a finite-difference approximation to
+derivatives will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>he</code></td>
+<td>
+<p>A function to return the Hessian matrix of second derivatives. Used
+(but not required) in "nlminb" or (optionally) user-provided methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>IGNORED</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The method to be used. See 'Details' section of
+<code>optim</code>. One of: "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", or
+"nlminb". Note that the R methods "SANN", "Brent" are not supported. It is
+also possible to provide a new method; see details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+<p>Vector or scalar of lower bounds for parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+<p>Vector or scalar of upper bounds for parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list of control parameters. See <code>Details</code> section of
+<code>optim</code>. For code in a nimbleFunction to be compiled, this must
+be an <code>optimControlNimbleList</code>, which has fields for most elements in
+the control list for R's <code>optim</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hessian</code></td>
+<td>
+<p>Logical. Should a Hessian matrix be returned?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function for use in nimbleFunctions for compilation by
+<code>compileNimble</code> provides capabilities similar to R's <code>optim</code> and
+<code>nlminb</code>. For the supported methods provided by <code>optim</code>, a
+compiled nimbleFunction will directly call the C code used by R for these
+methods.
+</p>
+<p>If <code>optim</code> appears in a nimbleFunction, it will be converted to
+<code>nimOptim</code>.
+</p>
+<p>Note that if a gradient function (<code>gr</code>) is not provided, <code>optim</code>
+provides a finite difference approximation for use by optimization methods
+that need gradients. nimble's compiled version of <code>nimOptim</code> does the
+same thing, although results might not be completely identical.
+</p>
+<p>For <code>method="nlminb"</code>, a compiled nimbleFunction will run R's
+<code>nlminb</code> directly in R, with <code>fn</code>, <code>gr</code> (if provided) and
+<code>he</code> (if provided) that call back into compiled code.
+</p>
+<p>An experimental feature is the capability to provide one's own optimization
+method in R and register it for use by <code>nimOptim</code>. One must write a
+function that takes arguments <code>par</code>, <code>fn</code>, <code>gr</code>, <code>he</code>,
+<code>lower</code>, <code>upper</code>, <code>control</code>, and <code>hessian</code>. The function
+must return a list with elements <code>par</code>, <code>value</code>,
+<code>convergence</code>, <code>counts</code>, <code>evaluations</code>, <code>message</code>, and
+<code>hessian</code> (which may be NULL). If <code>hessian=TRUE</code> but the function
+does not return a matrix in the <code>hessian</code> element of its return list,
+<code>nimOptim</code> will fill in that element using finite differences of the
+gradient.
+</p>
+<p>The <code>control</code> list passed from a nimbleFunction to the
+optimization function will include a minimum of options, including
+<code>abstol</code>, <code>reltol</code>, <code>maxit</code>, and <code>trace</code>. Other options
+for a specific method may be set within the custom optimization function but
+cannot be passed from <code>nimOptim</code>.
+</p>
+<p>The elements <code>parscale</code> and <code>fnscale</code> in <code>control</code> are used in
+a special way. They are implemented by <code>nimOptim</code> such that for *any*
+the method is expected to do minimization and <code>nimOptim</code> will arrange
+for it to minimize <code>fn(par)/fnscale</code> in the parameter space
+<code>par/parscale</code>.
+</p>
+<p>An optimizer <code>fun</code> may be registered by
+<code>nimOptimMethod("method_name", fun)</code>, and then "<code>method_name</code>" can
+be used as the <code>method</code> argument to <code>nimOptim</code> to use <code>fun</code>.
+An optimizer may be found by <code>nimOptimMethod("method_name")</code> and may be
+removed by <code>nimOptimMethod("method_name", NULL)</code>.
+</p>
+<p>Support for <code>method="nlminb"</code> is provided in this way, and can be
+studied as an example via <code>nimOptimMethod("nlminb")</code>.
+</p>
+<p>The system for providing one's own optimizer is not considered stable and is
+subject to change in future versions.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>optimResultNimbleList</code>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>optim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+objectiveFunction &lt;- nimbleFunction(
+    run = function(par = double(1)) {
+        return(sum(par) * exp(-sum(par ^ 2) / 2))
+        returnType(double(0))
+    }
+)
+optimizer &lt;- nimbleFunction(
+    run = function(method = character(0), fnscale = double(0)) {
+        control &lt;- optimDefaultControl()
+        control$fnscale &lt;- fnscale
+        par &lt;- c(0.1, -0.1)
+        return(optim(par, objectiveFunction, method = method, control = control))
+        returnType(optimResultNimbleList())
+    }
+)
+cOptimizer &lt;- compileNimble(optimizer)
+cOptimizer(method = 'BFGS', fnscale = -1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

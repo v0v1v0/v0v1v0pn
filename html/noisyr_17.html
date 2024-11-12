@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>remove_noise_from_bams</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function to remove the noisy reads from the BAM files</h2>
+
+<h3>Description</h3>
+
+<p>This function is used to remove the noisy reads from the BAM files.
+It uses as input the BAM file names, a gene table (usually containing individual exons,
+made using <code>cast_gtf_to_genes</code>), an expression matrix for each of these genes and
+a vector of abundance thresholds.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">remove_noise_from_bams(
+  bams,
+  genes,
+  expression,
+  noise.thresholds,
+  destination.files = base::paste0(base::basename(bams), ".noisefiltered.bam"),
+  filter.by = c("gene", "exon"),
+  make.index = FALSE,
+  unique.only = TRUE,
+  mapq.unique = 255,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bams</code></td>
+<td>
+<p>a character vector of the BAM file names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genes</code></td>
+<td>
+<p>a tibble of the exons extracted from the gtf file;
+(usually the the output of <code>cast_gtf_to_genes</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expression</code></td>
+<td>
+<p>the expression matrix or expression summary list,
+as calculated by <code>calculate_expression_similarity_transcript</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noise.thresholds</code></td>
+<td>
+<p>a vector of expression thresholds by sample;
+must be the same length as the number of BAM files,
+or a singular value to be used as a fixed noise threshold</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>destination.files</code></td>
+<td>
+<p>names for the output denoised BAM files; by default the same as
+the original files, appended with ".noisefiltered.bam", but created in the working directory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter.by</code></td>
+<td>
+<p>Either "gene" (default) or "exon"; if filter.by="gene", a gene is removed from all BAM files
+if and only if all of its exons are below the corresponding noise thresholds;
+if filter.by="exon", then each exon is individually removed (from all samples)
+if it is below the corresponding noise thresholds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>make.index</code></td>
+<td>
+<p>whether a BAM index should be generated; if this is FALSE (the default)
+and no index exists, the function will exit with an error; the index needs to have
+the same name as each BAM file, but ending with .bam.bai</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unique.only</code></td>
+<td>
+<p>whether only uniquely mapped reads should contribute to the expression
+of a gene/exon; default is TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapq.unique</code></td>
+<td>
+<p>The values of the mapping quality field in the BAM file that corresponds
+to uniquely mapped reads; by default, values of 255 are used as these correspond to
+the most popular aligners, but an adjustment might be needed;
+the mapq scores should be as follows: 255 for STAR, 60 for hisat2,
+255 for bowtie in -k mode, 40 for bowtie2 default, 50 for tophat</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments passed on to other methods</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a matrix of the same dims as the expression matrix, with the noise removed.
+This matrix has no entries remaining below the noise threshold.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>remove_noise_from_matrix</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">bams &lt;- rep(system.file("extdata", "ex1.bam", package="Rsamtools", mustWork=TRUE), 2)
+genes &lt;- data.frame("id" = 1:2,
+                    "gene_id" = c("gene1", "gene2"),
+                    "seqid" = c("seq1", "seq2"),
+                    "start" = 1,
+                    "end" = 1600)
+noise.thresholds &lt;- c(0, 1)
+expression.summary = calculate_expression_similarity_transcript(
+  bams = bams,
+  genes = genes,
+  mapq.unique = 99
+)
+remove_noise_from_bams(
+    bams = bams,
+    genes = genes,
+    expression = expression.summary,
+    noise.thresholds = noise.thresholds,
+    destination.files = paste0(tempdir(), "/", basename(bams), ".noisefiltered.bam"),
+    mapq.unique = 99
+)
+
+</code></pre>
+
+
+</div>

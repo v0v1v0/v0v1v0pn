@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ynegbinompowersim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Two-sample sample size calculation for negative binomial distribution with variable follow-up</h2>
+
+<h3>Description</h3>
+
+<p>This will calculate the power for the negative binomial distribution for the 2-sample case under different follow-up scenarios: 1: fixed follow-up, 2: fixed follow-up with drop-out, 3: variable follow-up with a minimum fu and a maximum fu, 4: variable follow-up with a minimum fu and a maximum fu and drop-out.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ynegbinompowersim(nsize=200,r0=1.0,r1=0.5,shape0=1,shape1=shape0,pi1=0.5,
+   alpha=0.05,twosided=1,fixedfu=1,type=1,u=c(0.5,0.5,1),ut=c(0.5,1.0,1.5),
+   tfix=ut[length(ut)]+0.5,maxfu=10.0,tchange=c(0,0.5,1),
+   ratec1=c(0.15,0.15,0.15),ratec0=ratec1,rn=10000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nsize</code></td>
+<td>
+<p>total number of subjects in two groups</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r0</code></td>
+<td>
+<p>event rate for the control</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r1</code></td>
+<td>
+<p>event rate for the treatment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape0</code></td>
+<td>
+<p>dispersion parameter for the control</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape1</code></td>
+<td>
+<p>dispersion parameter for the treatment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi1</code></td>
+<td>
+<p>allocation prob for the treatment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>type-1 error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>twosided</code></td>
+<td>
+<p>1: two-side, others: one-sided</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixedfu</code></td>
+<td>
+<p>fixed follow-up time for each patient</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>follow-up time type, type=1: fixed fu with fu time <code>fixedfu</code>;  type=2: same as 1 but subject to censoring; type=3: depending on entry time, minimum fu is <code>fixedfu</code> and maximum fu is <code>maxfu</code>; type=4: same as 3 but subject to censoring</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p>recruitment rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ut</code></td>
+<td>
+<p>recruitment interval, must have the same length as <code>u</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tfix</code></td>
+<td>
+<p>fixed study duration, often equals to recruitment time plus minimum follow-up</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxfu</code></td>
+<td>
+<p>maximum follow-up time, should not be greater than <code>tfix</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tchange</code></td>
+<td>
+<p>a strictly increasing sequence of time points starting from zero at which the drop-out rate changes. The first element of tchange must be zero. The above rates and <code>tchange</code> must have the same length.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratec1</code></td>
+<td>
+<p>piecewise constant drop-out rate for the treatment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratec0</code></td>
+<td>
+<p>piecewise constant drop-out rate for the control</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rn</code></td>
+<td>
+<p>Number of repetitions</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">\tau_{min}</code> and <code class="reqn">\tau_{max}</code> correspond to the minimum follow-up time <code>fixedfu</code> and the maximum follow-up time <code>maxfu</code>. Let <code class="reqn">T_f</code>, <code class="reqn">C</code>, <code class="reqn">E</code> and <code class="reqn">R</code> be the follow-up time, the drop-out time, the study entry time and the total recruitment period(<code class="reqn">R</code> is the last element of <code>ut</code>). For type 1 follow-up, <code class="reqn">T_f=\tau_{min}</code>. For type 2 follow-up <code class="reqn">T_f=min(C,\tau_{min})</code>. For type 3 follow-up, <code class="reqn">T_f=min(R+\tau_{min}-E,\tau_{max})</code>. For type 4 follow-up, <code class="reqn">T_f=min(R+\tau_{min}-E,\tau_{max},C)</code>. Let <code class="reqn">f</code> be the density of <code class="reqn">T_f</code>. 
+Suppose that <code class="reqn">Y_i</code> is the number of event obsevred in follow-up time <code class="reqn">t_i</code> for patient <code class="reqn">i</code> with treatment assignment <code class="reqn">Z_i</code>, <code class="reqn">i=1,\ldots,n</code>. Suppose that <code class="reqn">Y_i</code> follows a negative binomial distribution such that 
+</p>
+<p style="text-align: center;"><code class="reqn">P(Y_i=y\mid Z_i=j)=\frac{\Gamma(y+1/k_j)}{\Gamma(y+1)\Gamma(1/k_j)}\Bigg(\frac{k_ju_i}{1+k_ju_i}\Bigg)^y\Bigg(\frac{1}{1+k_ju_i}\Bigg)^{1/k_j},</code>
+</p>
+
+<p>where <code class="reqn">k_j, j=0,1</code> are the dispersion parameters for control <code class="reqn">j=0</code> and treatment <code class="reqn">j=1</code> and
+</p>
+<p style="text-align: center;"><code class="reqn">\log(u_i)=\log(t_i)+\beta_0+\beta_1 Z_i.</code>
+</p>
+
+<p>The data will be gnerated according to the above model. Note that the piecewise exponential distribution and the piecewise uniform distribution are genrated using R package PWEALL functions "rpwe" and "rpwu", respectively. 
+</p>
+<p>The parameters in the model are estimated by MLE using the R package MASS function "glm.nb". 
+</p>
+
+
+<h3>Value</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>power</code></td>
+<td>
+<p>simulation power (in percentage)</p>
+</td>
+</tr></table>
+<h3>Author(s)</h3>
+
+<p>Xiaodong Luo</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##calculating the sample sizes
+abc=ynegbinompowersim(nsize=200,r0=1.0,r1=0.5,shape0=1,
+        pi1=0.5,alpha=0.05,twosided=1,fixedfu=1,
+        type=4,u=c(0.5,0.5,1),ut=c(0.5,1.0,1.5),
+        tchange=c(0,0.5,1),
+        ratec1=c(0.15,0.15,0.15),rn=10)
+###Power
+abc$power
+</code></pre>
+
+
+</div>

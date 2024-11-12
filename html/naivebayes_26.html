@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.naive_bayes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predict Method for naive_bayes Objects</h2>
+
+<h3>Description</h3>
+
+<p>Classification based on Naive Bayes models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'naive_bayes'
+predict(object, newdata = NULL, type = c("class","prob"),
+  threshold = 0.001, eps = 0, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class inheriting from <code>"naive_bayes"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>matrix or dataframe with categorical (character/factor/logical) or metric (numeric) predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>if "class", new data points are classified according to the highest posterior probabilities. If "prob", the posterior probabilities for each class are returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>value by which zero probabilities or probabilities within the epsilon-range corresponding to metric variables are replaced (zero probabilities corresponding to categorical variables can be handled with Laplace (additive) smoothing).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>value that specifies an epsilon-range to replace zero or close to zero probabilities by <code>threshold</code>. It applies to metric variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Computes conditional posterior probabilities for each class label using the Bayes' rule under the assumption of independence of predictors. If no new data is provided, the data from the object is used. Logical variables are treated as categorical (binary) variables. Predictors with missing values are not included into the computation of posterior probabilities.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>predict.naive_bayes</code> returns either a factor with class labels corresponding to the maximal conditional posterior probabilities or a matrix with class label specific conditional posterior probabilities.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michal Majka, <a href="mailto:michalmajka@hotmail.com">michalmajka@hotmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>naive_bayes</code>, <code>plot.naive_bayes</code>, <code>tables</code>, <code>get_cond_dist</code>, <code>%class%</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Simulate example data
+n &lt;- 100
+set.seed(1)
+data &lt;- data.frame(class = sample(c("classA", "classB"), n, TRUE),
+                   bern = sample(LETTERS[1:2], n, TRUE),
+                   cat  = sample(letters[1:3], n, TRUE),
+                   logical = sample(c(TRUE,FALSE), n, TRUE),
+                   norm = rnorm(n),
+                   count = rpois(n, lambda = c(5,15)))
+train &lt;- data[1:95, ]
+test &lt;- data[96:100, -1]
+
+### Fit the model with default settings
+nb &lt;- naive_bayes(class ~ ., train)
+
+# Classification
+predict(nb, test, type = "class")
+nb %class% test
+
+# Posterior probabilities
+predict(nb, test, type = "prob")
+nb %prob% test
+
+
+## Not run: 
+vars &lt;- 10
+rows &lt;- 1000000
+y &lt;- sample(c("a", "b"), rows, TRUE)
+
+# Only categorical variables
+X1 &lt;- as.data.frame(matrix(sample(letters[5:9], vars * rows, TRUE),
+                           ncol = vars))
+nb_cat &lt;- naive_bayes(x = X1, y = y)
+nb_cat
+system.time(pred2 &lt;- predict(nb_cat, X1))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

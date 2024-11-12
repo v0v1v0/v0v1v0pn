@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>parquet_pages</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Metadata of all pages of a Parquet file</h2>
+
+<h3>Description</h3>
+
+<p>Metadata of all pages of a Parquet file
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">parquet_pages(file)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>Path to a Parquet file.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>Reading all the page headers might be slow for large files, especially
+if the file has many small pages.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Data frame with columns:
+</p>
+
+<ul>
+<li> <p><code>file_name</code>: file name.
+</p>
+</li>
+<li> <p><code>row_group</code>: id of the row group the page belongs to,
+an integer between 0 and the number of row groups
+minus one.
+</p>
+</li>
+<li> <p><code>column</code>: id of the column. An integer between the
+number of leaf columns minus one. Note that only leaf
+columns are considered, as non-leaf columns do not
+have any pages.
+</p>
+</li>
+<li> <p><code>page_type</code>: <code>DATA_PAGE</code>, <code>INDEX_PAGE</code>, <code>DICTIONARY_PAGE</code> or
+<code>DATA_PAGE_V2</code>.
+</p>
+</li>
+<li> <p><code>page_header_offset</code>: offset of the data page (its header) in the
+file.
+</p>
+</li>
+<li> <p><code>uncompressed_page_size</code>: does not include the page header, as per
+Parquet spec.
+</p>
+</li>
+<li> <p><code>compressed_page_size</code>: without the page header.
+</p>
+</li>
+<li> <p><code>crc</code>: integer, checksum, if present in the file, can be <code>NA</code>.
+</p>
+</li>
+<li> <p><code>num_values</code>: number of data values in this page, include
+<code>NULL</code> (<code>NA</code> in R) values.
+</p>
+</li>
+<li> <p><code>encoding</code>: encoding of the page, current possible encodings:
+"PLAIN", "GROUP_VAR_INT", "PLAIN_DICTIONARY", "RLE", "BIT_PACKED", "DELTA_BINARY_PACKED", "DELTA_LENGTH_BYTE_ARRAY", "DELTA_BYTE_ARRAY", "RLE_DICTIONARY", "BYTE_STREAM_SPLIT".
+</p>
+</li>
+<li> <p><code>definition_level_encoding</code>: encoding of the definition levels,
+see <code>encoding</code> for possible values. This can be missing in V2 data
+pages, where they are always RLE encoded.
+</p>
+</li>
+<li> <p><code>repetition_level_encoding</code>: encoding of the repetition levels,
+see <code>encoding</code> for possible values. This can be missing in V2 data
+pages, where they are always RLE encoded.
+</p>
+</li>
+<li> <p><code>data_offset</code>: offset of the actual data in the file.
+</p>
+</li>
+<li> <p><code>page_header_length</code>: size of the page header, in bytes.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>read_parquet_page()</code> to read a page.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">file_name &lt;- system.file("extdata/userdata1.parquet", package = "nanoparquet")
+nanoparquet:::parquet_pages(file_name)
+</code></pre>
+
+
+</div>

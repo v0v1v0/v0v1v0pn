@@ -1,0 +1,257 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>diffnet_index</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Indexing diffnet objects (on development)</h2>
+
+<h3>Description</h3>
+
+<p>Access and assign (replace) elements from the adjacency matrices or the vertex
+attributes data frames.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'diffnet'
+x[[name, as.df = FALSE]]
+
+## S3 replacement method for class 'diffnet'
+x[[i, j]] &lt;- value
+
+## S3 method for class 'diffnet'
+x[i, j, k, drop = FALSE]
+
+## S3 replacement method for class 'diffnet'
+x[i, j, k] &lt;- value
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A diffnet class object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>String vector. Names of the vertices attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.df</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> returns a data frame, otherwise
+a list of length <code class="reqn">T</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i</code></td>
+<td>
+<p>Index of the i-th row of the adjacency matrix (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>j</code></td>
+<td>
+<p>Index of the j-th column of the adjacency matrix (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>Value to assign (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Index of the k-th slice of the adjacency matrix (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> returns an adjacency matrix, otherwise
+a filtered diffnet object.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>[[.diffnet</code> methods provides access to the diffnet attributes
+data frames, static and dynamic. By providing the <code>name</code> of the corresponding
+attribute, depending on whether it is static or dynamic the function will return
+either a data frame–static attributes–or a list of these–dynamic attributes.
+For the assigning method, <code style="white-space: pre;">⁠[[&lt;-.diffnet⁠</code>, the function will infer what
+kind of attribute is by analyzing the dimensions of <code>value</code>, in particular
+we have the following possible cases:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<strong>Class</strong>    </td>
+<td style="text-align: left;"> <strong>Dimension</strong>   </td>
+<td style="text-align: right;"> <strong>Inferred</strong> </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>matrix</code>     </td>
+<td style="text-align: left;"> <code class="reqn">n\times T</code> </td>
+<td style="text-align: right;"> Dynamic           </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>matrix</code>     </td>
+<td style="text-align: left;"> <code class="reqn">n\times 1</code> </td>
+<td style="text-align: right;"> Static            </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>matrix</code>     </td>
+<td style="text-align: left;"> <code class="reqn">(n\times T)\times 1</code> </td>
+<td style="text-align: right;"> Dynamic            </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>data.frame</code> </td>
+<td style="text-align: left;"> <code class="reqn">n\times T</code> </td>
+<td style="text-align: right;"> Dynamic           </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>data.frame</code> </td>
+<td style="text-align: left;"> <code class="reqn">n\times 1</code> </td>
+<td style="text-align: right;"> Static            </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>data.frame</code> </td>
+<td style="text-align: left;"> <code class="reqn">(n\times T)\times 1</code> </td>
+<td style="text-align: right;"> Dynamic            </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>vector</code>     </td>
+<td style="text-align: left;"> <code class="reqn">n</code>              </td>
+<td style="text-align: right;"> Static            </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>vector</code>     </td>
+<td style="text-align: left;"> <code class="reqn">n\times T</code> </td>
+<td style="text-align: right;"> Dynamic           </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>list</code>*      </td>
+<td style="text-align: left;"> <code class="reqn">T</code> data.frames/matrices/vectors</td>
+<td style="text-align: right;"> Dynamic    </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<p>*: With <code class="reqn">n\times 1</code> <code>data.frame</code>/<code>matrix</code> or <code class="reqn">n</code> length vector.
+</p>
+<p>Other cases will return with error.
+</p>
+<p>In the case of the slices index <code>k</code>, either an
+integer vector with the positions, a character vector with the labels of the
+time periods or a logical vector of length <code>T</code> can be used to specify
+which slices to retrieve. Likewise, indexing vertices works in the same way
+with the only difference that, instead of time period labels and a logical vector
+of length <code>T</code>, vertices ids labels and a logical vector of length <code>n</code>
+should be provided.
+</p>
+<p>When subsetting slices, the function modifies the <code>toa</code> vector as well as the
+<code>adopt</code> and <code>cumadopt</code> matrices collapsing network tinmming. For example,
+if a network goes from time 1 to 20 and we set <code>k=3:10</code>, all individuals
+who adopted prior to time 3 will be set as adopters at time 3, and all individuals
+who adopted after time 10 will be set as adopters at time 10, changing the
+adoption and cumulative adoption matrices. Importantly, <code>k</code> have no
+gaps, and it should be within the graph time period range.
+</p>
+
+
+<h3>Value</h3>
+
+<p>In the case of the assigning methods, a diffnet object. Otherwise,
+for <code>[[.diffnet</code> a vector extracted from one of the attributes data frames,
+and for <code>[.diffnet</code> a list of length <code>length(k)</code> with the corresponding
+<code>[i,j]</code> elements from the adjacency matrix.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other diffnet methods: 
+<code>%*%()</code>,
+<code>as.array.diffnet()</code>,
+<code>c.diffnet()</code>,
+<code>diffnet-arithmetic</code>,
+<code>diffnet-class</code>,
+<code>plot.diffnet()</code>,
+<code>summary.diffnet()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Creating a random diffusion network ---------------------------------------
+set.seed(111)
+graph &lt;- rdiffnet(50,4)
+
+# Accessing to a static attribute
+graph[["real_threshold"]]
+
+# Accessing to subsets of the adjacency matrix
+graph[1,,1:3, drop=TRUE]
+graph[,,1:3, drop=TRUE][[1]]
+
+# ... Now, as diffnet objects (the default)
+graph[1,,1:3, drop=FALSE]
+graph[,,1:3, drop=FALSE]
+
+# Changing values in the adjacency matrix
+graph[1, , , drop=TRUE]
+graph[1,,] &lt;- -5
+graph[1, , , drop=TRUE]
+
+# Adding attributes (dynamic) -----------------------------------------------
+# Preparing the data
+set.seed(1122)
+x &lt;- rdiffnet(30, 4, seed.p.adopt=.15)
+
+# Calculating exposure, and storing it diffe
+expoM &lt;- exposure(x)
+expoL &lt;- lapply(seq_len(x$meta$nper), function(x) expoM[,x,drop=FALSE])
+expoD &lt;- do.call(rbind, expoL)
+
+# Adding data (all these are equivalent)
+x[["expoM"]] &lt;- expoM
+x[["expoL"]] &lt;- expoL
+x[["expoD"]] &lt;- expoD
+
+# Lets compare
+identical(x[["expoM"]], x[["expoL"]]) # TRUE
+identical(x[["expoM"]], x[["expoD"]]) # TRUE
+</code></pre>
+
+
+</div>

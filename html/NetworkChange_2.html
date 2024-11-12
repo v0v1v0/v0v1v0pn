@@ -1,0 +1,90 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>BreakPointLoss</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute the Average Loss of Hidden State Changes from Expected Break Points</h2>
+
+<h3>Description</h3>
+
+<p>Compute the Average Loss of Hidden State Changes from Expected Break Points
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">BreakPointLoss(model.list, waic = FALSE, display = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model.list</code></td>
+<td>
+<p>MCMC output objects. These have to be of class
+<code>mcmc</code> and have a <code>logmarglike</code> attribute. In what
+follows, we let <code>M</code> denote the total number of models to be
+compared.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>waic</code></td>
+<td>
+<p>If <code>waic</code> is TRUE, <code>waic</code>(Watanabe information criterion) will be reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display</code></td>
+<td>
+<p>If <code>display</code> is TRUE, a plot of <code>ave.loss</code> will be produced.
+</p>
+<p><code>BreakPointLoss</code>. ave.loss, logmarglike, State, Tau, Tau.samp</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>BreakPointLoss</code> returns five objects. They are: <code>ave.loss</code> the expected loss for each model
+computed by the mean sqaured distance of hidden state changes from the expected break points.
+<code>logmarglike</code> the natural log of the marginal likelihood for each model; <code>State</code> sampled state vectors;
+<code>Tau</code> expected break points for each model; and <code>Tau.samp</code> sampled break points from hidden state draws.
+</p>
+
+
+<h3>References</h3>
+
+<p>Jong Hee Park and Yunkyun Sohn. 2020. "Detecting Structural Change
+in Longitudinal Network Data." <em>Bayesian Analysis</em>. Vol.15, No.1, pp.133-157.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">   ## Not run: 
+   set.seed(1973)
+   ## Generate an array (30 by 30 by 40) with block transitions
+   from 2 blocks to 3 blocks
+   Y &lt;- MakeBlockNetworkChange(n=10, T=40, type ="split")
+   G &lt;- 100 ## Small mcmc scans to save time
+
+   ## Fit multiple models for break number detection using Bayesian model comparison
+   out0 &lt;- NetworkStatic(Y, R=2, mcmc=G, burnin=G, verbose=G, Waic=TRUE)
+   out1 &lt;- NetworkChange(Y, R=2, m=1, mcmc=G, burnin=G, verbose=G, Waic=TRUE)
+   out2 &lt;- NetworkChange(Y, R=2, m=2, mcmc=G, burnin=G, verbose=G, Waic=TRUE)
+   out3 &lt;- NetworkChange(Y, R=2, m=3, mcmc=G, burnin=G, verbose=G, Waic=TRUE)
+
+   ## The most probable model given break number 0 to 3 and data is out1 according to WAIC 
+   out &lt;- BreakPointLoss(out0, out1, out2, out3, waic=TRUE)
+
+   print(out[["ave.loss"]])
+
+## End(Not run)
+
+
+</code></pre>
+
+
+</div>

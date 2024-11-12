@@ -1,0 +1,175 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ExploreData</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Explore data</h2>
+
+<h3>Description</h3>
+
+<p>This function provides summary statistics of a test score (i.e., the mean, SD, N, standard error of the mean, and CI of the mean), stratified by the independent variable(s) of interest. The independent variables should be factors (i.e., binary or non-binary qualitiative variables).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ExploreData(Dataset, Model, CI=.99, Digits=6)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Dataset</code></td>
+<td>
+<p>A dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Model</code></td>
+<td>
+<p>A formula in the form of <code>Test.Score~IV.1+IV.2+...</code>. Summary statistics (i.e., the mean, SD, N, standard error of the mean, and CI of the mean) are provided for all combinations of the levels of the IVs (independent variables). Note that all IVs should be factors (i.e., binary or non-binary qualitative variables).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>The CI for the mean. Default <code>CI=.99</code>, i.e. the 99 CI.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Digits</code></td>
+<td>
+<p>The number of digits used when showing the results. Default <code>Digits=6</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details, see Van der Elst (2023).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>ExploreData</code> with component,
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Results</code></td>
+<td>
+<p>A table with the summary statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Miss</code></td>
+<td>
+<p>The number of missing observations in the dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Dataset</code></td>
+<td>
+<p>The dataset used in the analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Model</code></td>
+<td>
+<p>The specified model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>The requested CI around the mean.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The sample size of the specified dataset.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Wim Van der Elst
+</p>
+
+
+<h3>References</h3>
+
+<p>Van der Elst, W. (2024). <em>Regression-based normative data for psychological assessment: A hands-on approach using R.</em> Springer Nature. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Replicate the exploratory analyses that were conducted  
+# in Case study 1 of Chapter 5 in Van der Elst (2023)
+# ------------------------------------------------------
+library(NormData) # load the NormData package
+
+data(Personality) # load the Personality dataset
+Explore_Openness &lt;- ExploreData(Dataset=Personality, 
+  Model=Openness~LE)
+summary(Explore_Openness)
+plot(Explore_Openness, 
+  main="Mean Openness scale scores and 99pc CIs")
+
+
+# Replicate the exploratory analyses that were conducted  
+# in Case study 1 of Chapter 7 in Van der Elst (2023)
+# ------------------------------------------------------
+library(NormData)   # load the NormData package
+data(Substitution)  # load the Substitution dataset
+head(Substitution)  # have a look at the first datalines in
+                    # the Substitution dataset
+
+# First make a new variable Age_Group, that discretizes the
+# quantitative variable Age into 6 groups with a span of 10 years
+Substitution$Age_Group &lt;- cut(Substitution$Age, 
+   breaks=seq(from=20, to=80, by=10)) 
+
+# Compute descriptives of the LDST score for different Age Group
+# by LE combinations
+Explore.LDST.Age.LE &lt;- ExploreData(Dataset=Substitution,
+   Model=LDST~Age_Group+LE) 
+summary(Explore.LDST.Age.LE)
+
+# Make a plot of the results. 
+plot(Explore.LDST.Age.LE, 
+   main="Mean (99pc CI) LDST scores by Age group and LE")
+
+# Compute descriptives of the LDST score for different
+# Age Group by Gender combinations
+Explore.LDST.Age.Gender &lt;- ExploreData(Dataset=Substitution, 
+  Model=LDST~Age_Group+Gender)
+
+# Plot the results
+plot(Explore.LDST.Age.Gender, 
+  main="Mean (99pc CI) LDST scores by Age group and Gender")
+
+# Compute descriptives of the LDST score for different
+# LE by Gender combinations
+Explore.LDST.LE.Gender &lt;-
+  ExploreData(Dataset=Substitution, Model=LDST~LE+Gender)
+
+# Plot the results
+plot(Explore.LDST.LE.Gender,
+  main="Mean (99pc CI) LDST scores by LE and Gender")
+
+# Compute summary statistics of the LDST score in the
+# Age Group by LE by Gender combinations
+Explore.LDST &lt;- ExploreData(Dataset=Substitution,
+   Model=LDST~Age_Group+LE+Gender)
+
+# Plot the results
+plot(Explore.LDST)
+</code></pre>
+
+
+</div>

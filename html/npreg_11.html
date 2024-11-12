@@ -1,0 +1,284 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>polynomial</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Polynomial Smoothing Spline Basis and Penalty
+</h2>
+
+<h3>Description</h3>
+
+<p>Generate the smoothing spline basis and penalty matrix for a polynomial spline. Derivatives of the smoothing spline basis matrix are supported.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">basis.poly(x, knots, m = 2, d = 0, xmin = min(x), xmax = max(x), 
+           periodic = FALSE, rescale = FALSE, intercept = FALSE, 
+           bernoulli = TRUE, ridge = FALSE)
+
+penalty.poly(x, m = 2, xmin = min(x), xmax = max(x), 
+             periodic = FALSE, rescale = FALSE, bernoulli = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Predictor variable (basis) or spline knots (penalty). Numeric or integer vector of length <code class="reqn">n</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knots</code></td>
+<td>
+
+<p>Spline knots. Numeric or integer vector of length <code class="reqn">r</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+
+<p>Penalty order. "m=1" for linear smoothing spline, "m=2" for cubic, and "m=3" for quintic.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+
+<p>Derivative order. "d=0" for smoothing spline basis, "d=1" for 1st derivative of basis, and "d=2" for 2nd derivative of basis.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xmin</code></td>
+<td>
+
+<p>Minimum value of "x".  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xmax</code></td>
+<td>
+
+<p>Maximum value of "x".  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>periodic</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the smoothing spline basis is periodic w.r.t. the interval [<code>xmin</code>, <code>xmax</code>].
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the nonparametric part of the basis is divided by the average of the reproducing kernel function evaluated at the <code>knots</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the first column of the basis will be a column of ones. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bernoulli</code></td>
+<td>
+
+<p>If <code>TRUE</code>, scaled Bernoulli polynomials are used for the basis and penalty functions.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ridge</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the basis matrix is post-multiplied by the inverse square root of the penalty matrix. See Note and Examples.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Generates a basis function or penalty matrix used to fit linear, cubic, and quintic smoothing splines (or evaluate their derivatives). 
+</p>
+<p>For non-periodic smoothing splines, the basis function matrix has the form 
+</p>
+<p style="text-align: center;"><code class="reqn">X = [X_0,  X_1]</code>
+</p>
+
+<p>where the matrix <code>X_0</code> is of dimension <code class="reqn">n</code> by <code class="reqn">m-1</code> (plus 1 if an intercept is included), and <code>X_1</code> is a matrix of dimension <code class="reqn">n</code> by <code class="reqn">r</code>. 
+</p>
+<p>The <code>X_0</code> matrix contains the "parametric part" of the basis, which includes polynomial functions of <code>x</code> up to degree <code class="reqn">m-1</code>.
+</p>
+<p>The matrix <code>X_1</code> contains the "nonparametric part" of the basis, which consists of the <em>reproducing kernel</em> function
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = \kappa_m(x) \kappa_m(y) + (-1)^{m-1} \kappa_{2m}(|x-y|)</code>
+</p>
+
+<p>evaluated at all combinations of <code>x</code> and <code>knots</code>. The <code class="reqn">\kappa_v</code> functions are scaled Bernoulli polynomials.
+</p>
+<p>For periodic smoothing splines, the <code class="reqn">X_0</code> matrix only contains the intercept column and the modified reproducing kernel function 
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = (-1)^{m-1} \kappa_{2m}(|x-y|)</code>
+</p>
+
+<p>is evaluated for all combinations of <code>x</code> and <code>knots</code>.
+</p>
+<p>For non-periodic smoothing splines, the penalty matrix consists of the <em>reproducing kernel</em> function
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = \kappa_m(x) \kappa_m(y) + (-1)^{m-1} \kappa_{2m}(|x-y|)</code>
+</p>
+
+<p>evaluated at all combinations of <code>x</code>. For periodic smoothing splines, the modified reproducing kernel function
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = (-1)^{m-1} \kappa_{2m}(|x-y|)</code>
+</p>
+
+<p>is evaluated for all combinations of <code>x</code>.
+</p>
+<p>If <code>bernoulli = FALSE</code>, the reproducing kernel function is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = (1/(m-1)!)^2 \int_0^1 (x - u)_+^{m-1} (y - u)_+^{m-1} du </code>
+</p>
+
+<p>where <code class="reqn">(.)_+ = \max(., 0)</code>. This produces the "classic" definition of a smoothing spline, where the function estimate is a piecewise polynomial function with pieces of degree <code class="reqn">2m - 1</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Basis: Matrix of dimension <code>c(length(x), df)</code> where <code>df &gt;= length(knots)</code>. If the smoothing spline basis is not periodic (default), then the number of columns is <code>df = length(knots) + m - !intercept</code>. For periodic smoothing splines, the basis has <code>m</code> fewer columns.
+</p>
+<p>Penalty: Matrix of dimension <code>c(r, r)</code> where <code>r = length(x)</code> is the number of knots.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Inputs <code>x</code> and <code>knots</code> should be within the interval [<code>xmin</code>, <code>xmax</code>].
+</p>
+<p>If <code>ridge = TRUE</code>, the penalty matrix is the identity matrix.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag.  <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. <em>Frontiers in Applied Mathematics and Statistics, 3</em>(15), 1-13. <a href="https://doi.org/10.3389/fams.2017.00015">doi:10.3389/fams.2017.00015</a>
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), <em>SAGE Research Methods Foundations.</em> <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+<p>Helwig, N. E., &amp; Ma, P. (2015). Fast and stable multiple smoothing parameter selection in smoothing spline analysis of variance models with large samples. <em>Journal of Computational and Graphical Statistics, 24</em>(3), 715-732. <a href="https://doi.org/10.1080/10618600.2014.926819">doi:10.1080/10618600.2014.926819</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>thinplate</code> for a thin plate spline basis and penalty.
+</p>
+<p>See <code>ordinal</code> for a basis and penalty for ordered factors.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">######***######   standard parameterization   ######***######
+
+# generate data
+set.seed(0)
+n &lt;- 101
+x &lt;- seq(0, 1, length.out = n)
+knots &lt;- seq(0, 0.95, by = 0.05)
+eta &lt;- 1 + 2 * x + sin(2 * pi * x)
+y &lt;- eta + rnorm(n, sd = 0.5)
+
+# cubic smoothing spline basis
+X &lt;- basis.poly(x, knots, intercept = TRUE)
+
+# cubic smoothing spline penalty
+Q &lt;- penalty.poly(knots, xmin = min(x), xmax = max(x))
+
+# pad Q with zeros (for intercept and linear effect)
+Q &lt;- rbind(0, 0, cbind(0, 0, Q))
+
+# define smoothing parameter
+lambda &lt;- 1e-5
+
+# estimate coefficients
+coefs &lt;- solve(crossprod(X) + n * lambda * Q) %*% crossprod(X, y)
+
+# estimate eta
+yhat &lt;- X %*% coefs
+
+# check rmse
+sqrt(mean((eta - yhat)^2))
+
+# plot results
+plot(x, y)
+lines(x, yhat)
+
+
+
+######***######   ridge parameterization   ######***######
+
+# generate data
+set.seed(0)
+n &lt;- 101
+x &lt;- seq(0, 1, length.out = n)
+knots &lt;- seq(0, 0.95, by = 0.05)
+eta &lt;- 1 + 2 * x + sin(2 * pi * x)
+y &lt;- eta + rnorm(n, sd = 0.5)
+
+# cubic smoothing spline basis
+X &lt;- basis.poly(x, knots, intercept = TRUE, ridge = TRUE)
+
+# cubic smoothing spline penalty (ridge)
+Q &lt;- diag(rep(c(0, 1), times = c(2, ncol(X) - 2)))
+
+# define smoothing parameter
+lambda &lt;- 1e-5
+
+# estimate coefficients
+coefs &lt;- solve(crossprod(X) + n * lambda * Q) %*% crossprod(X, y)
+
+# estimate eta
+yhat &lt;- X %*% coefs
+
+# check rmse
+sqrt(mean((eta - yhat)^2))
+
+# plot results
+plot(x, y)
+lines(x, yhat)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_levelpaths</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Level Paths (DEPRECATED)</h2>
+
+<h3>Description</h3>
+
+<p>Calculates level paths using the stream-leveling approach of
+NHD and NHDPlus. In addition to a levelpath identifier, a topological sort and
+levelpath outlet identifier is provided in output. If arbolate sum is provided in
+the weight column, this will match the behavior of NHDPlus. Any numeric value can be
+included in this column and the largest value will be followed when no nameID is available.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_levelpaths(x, override_factor = NULL, status = FALSE, cores = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>data.frame with ID, toID, nameID, and weight columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>override_factor</code></td>
+<td>
+<p>numeric factor to use to override nameID.
+If 'weight' is 'numeric_factor' times larger on a path, it will be followed
+regardless of the nameID indication.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>status</code></td>
+<td>
+<p>boolean if status updates should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>numeric number of cores to use in initial path ranking calculations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ol>
+<li>
+<p> levelpath provides an identifier for the collection of flowlines
+that make up the single mainstem flowpath of a total upstream aggregate catchment.
+</p>
+</li>
+<li>
+<p> outletID is the catchment ID (COMID in the case of NHDPlus) for the catchment
+at the outlet of the levelpath the catchment is part of.
+</p>
+</li>
+<li>
+<p> topo_sort is similar to Hydroseq in NHDPlus in that large topo_sort values
+are upstream of small topo_sort values. Note that there are many valid topological
+sort orders of a directed graph.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>data.frame with ID, outletID, topo_sort, and levelpath columns.
+See details for more info.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">source(system.file("extdata", "walker_data.R", package = "nhdplusTools"))
+
+test_flowline &lt;- prepare_nhdplus(walker_flowline, 0, 0, FALSE)
+
+test_flowline &lt;- data.frame(
+  ID = test_flowline$COMID,
+  toID = test_flowline$toCOMID,
+  nameID = walker_flowline$GNIS_ID,
+  weight = walker_flowline$ArbolateSu,
+  stringsAsFactors = FALSE)
+
+get_levelpaths(test_flowline)
+
+
+</code></pre>
+
+
+</div>

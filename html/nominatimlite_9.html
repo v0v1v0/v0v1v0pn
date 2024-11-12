@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>geo_lite_sf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Address search API in <a href="https://CRAN.R-project.org/package=sf"><span class="pkg">sf</span></a> format (free-form query)</h2>
+
+<h3>Description</h3>
+
+<p>This function allows you to geocode addresses and returns the corresponding
+spatial object. This function returns the spatial object associated with the
+query using <a href="https://CRAN.R-project.org/package=sf"><span class="pkg">sf</span></a>, see <code>geo_lite()</code> for retrieving the data in
+<code>tibble</code> format.
+</p>
+<p>This function correspond to the <strong>free-form query</strong> search described in the
+<a href="https://nominatim.org/release-docs/develop/api/Search/">API endpoint</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">geo_lite_sf(
+  address,
+  limit = 1,
+  return_addresses = TRUE,
+  full_results = FALSE,
+  verbose = FALSE,
+  progressbar = TRUE,
+  nominatim_server = "https://nominatim.openstreetmap.org/",
+  custom_query = list(),
+  points_only = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>address</code></td>
+<td>
+<p><code>character</code> with single line address, e.g.
+(<code>"1600 Pennsylvania Ave NW, Washington"</code>) or a vector of addresses
+(<code>c("Madrid", "Barcelona")</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limit</code></td>
+<td>
+<p>Maximum number of results to return per input address. Note
+that each query returns a maximum of 50 results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_addresses</code></td>
+<td>
+<p>Return input addresses with results if <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full_results</code></td>
+<td>
+<p>Returns all available data from the API service.
+If <code>FALSE</code> (default) only address columns are returned. See also
+<code>return_addresses</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If <code>TRUE</code> then detailed logs are output to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progressbar</code></td>
+<td>
+<p>Logical. If <code>TRUE</code> displays a progress bar to indicate
+the progress of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nominatim_server</code></td>
+<td>
+<p>The URL of the Nominatim server to use.
+Defaults to <code>"https://nominatim.openstreetmap.org/"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>custom_query</code></td>
+<td>
+<p>A named list with API-specific parameters to be used
+(i.e. <code>list(countrycodes = "US")</code>). See <strong>Details</strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points_only</code></td>
+<td>
+<p>Logical <code>TRUE/FALSE</code>. Whether to return only spatial
+points (<code>TRUE</code>, which is the default) or potentially other shapes as
+provided by the Nominatim API (<code>FALSE</code>). See <strong>About Geometry Types</strong>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See <a href="https://nominatim.org/release-docs/latest/api/Search/">https://nominatim.org/release-docs/latest/api/Search/</a> for additional
+parameters to be passed to <code>custom_query</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>sf</code> object with the results.
+</p>
+
+
+<h3>About Geometry Types</h3>
+
+<p>The parameter <code>points_only</code> specifies whether the function results will be
+points (all Nominatim results are guaranteed to have at least point
+geometry) or possibly other spatial objects.
+</p>
+<p>Note that the type of geometry returned in case of <code>points_only = FALSE</code>
+will depend on the object being geocoded:
+</p>
+
+<ul>
+<li>
+<p> Administrative areas, major buildings and the like will be
+returned as polygons.
+</p>
+</li>
+<li>
+<p> Rivers, roads and their like as lines.
+</p>
+</li>
+<li>
+<p> Amenities may be points even in case of a <code>points_only = FALSE</code> call.
+</p>
+</li>
+</ul>
+<p>The function is vectorized, allowing for multiple addresses to be geocoded;
+in case of <code>points_only = FALSE</code>  multiple geometry types may be returned.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>geo_lite()</code>.
+</p>
+<p>Geocoding: 
+<code>geo_address_lookup()</code>,
+<code>geo_address_lookup_sf()</code>,
+<code>geo_amenity()</code>,
+<code>geo_amenity_sf()</code>,
+<code>geo_lite()</code>,
+<code>geo_lite_struct()</code>,
+<code>geo_lite_struct_sf()</code>
+</p>
+<p>Get <code>sf</code> objects: 
+<code>bbox_to_poly()</code>,
+<code>geo_address_lookup_sf()</code>,
+<code>geo_amenity_sf()</code>,
+<code>geo_lite_struct_sf()</code>,
+<code>reverse_geo_lite_sf()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+# Map - Points
+library(ggplot2)
+
+string &lt;- "Statue of Liberty, NY, USA"
+sol &lt;- geo_lite_sf(string)
+
+if (any(!sf::st_is_empty(sol))) {
+  ggplot(sol) +
+    geom_sf()
+}
+
+sol_poly &lt;- geo_lite_sf(string, points_only = FALSE)
+
+if (any(!sf::st_is_empty(sol_poly))) {
+  ggplot(sol_poly) +
+    geom_sf() +
+    geom_sf(data = sol, color = "red")
+}
+# Several results
+
+madrid &lt;- geo_lite_sf("Comunidad de Madrid, Spain",
+  limit = 2,
+  points_only = FALSE, full_results = TRUE
+)
+
+if (any(!sf::st_is_empty(madrid))) {
+  ggplot(madrid) +
+    geom_sf(fill = NA)
+}
+
+
+</code></pre>
+
+
+</div>

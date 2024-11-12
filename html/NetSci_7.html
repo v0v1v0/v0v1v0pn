@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LCC_Significance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>LCC Significance</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the Largest Connected Component (LCC) from a given graph, and calculates its significance using a degree preserving approach.
+Menche, J., et al (2015) &lt;doi.org:10.1126/science.1065103&gt;
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LCC_Significance(
+  N = N,
+  Targets = Targets,
+  G,
+  bins = 100,
+  hypothesis = "greater",
+  min_per_bin = 20
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>Number of randomizations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Targets</code></td>
+<td>
+<p>Name of the nodes that the subgraph will focus on - Those are the nodes you want to know whether if forms an LCC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>G</code></td>
+<td>
+<p>The  graph of interest (often, in NetMed it is an interactome - PPI).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bins</code></td>
+<td>
+<p>the number os bins for the degree preserving randomization. When bins = 1, assumes a uniform distribution for nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hypothesis</code></td>
+<td>
+<p>are you expecting an LCC greater or smaller than the average?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_per_bin</code></td>
+<td>
+<p>the minimum size of each bin.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list with the LCC
+- $LCCZ all values from the randomizations
+- $mean the average LCC of the randomizations
+- $sd the sd LCC of the randomizations
+- $Z The score
+- $LCC the LCC of the given targets
+- $emp_p the empirical p-value for the LCC
+- $rLCC the relative LCC
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(666)
+net  = data.frame(
+Node.1 = sample(LETTERS[1:15], 15, replace = TRUE),
+Node.2 = sample(LETTERS[1:10], 15, replace = TRUE))
+net$value = 1
+net =  CoDiNA::OrderNames(net)
+net = unique(net)
+
+g &lt;- igraph::graph_from_data_frame(net, directed = FALSE )
+plot(g)
+targets = c("I", "H", "F", "E")
+ LCC_Significance(N = 100,
+                   Targets = targets,
+                                    G = g,
+                                  bins = 1,
+                                  min_per_bin = 2)
+
+
+</code></pre>
+
+
+</div>

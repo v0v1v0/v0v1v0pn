@@ -1,0 +1,227 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getHomeRangeArea</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Computation of home range radius and area</h2>
+
+<h3>Description</h3>
+
+<p><code>getHomeRangeArea</code> returns approximates estimates of home range radius and area for a given set of parameters with respect to a specified detection function using bisection algorithm. The following circular detection functions are available to use in nimbleSCR: half-normal (detFun = 0), half-normal plateau (detFun = 1), exponential (detFun = 2), asymmetric logistic (detFun = 3), bimodal (detFun = 4) and donut (detFun = 5).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getHomeRangeArea(
+  x = 2,
+  detFun = 0,
+  prob = 0.95,
+  d = 6,
+  xlim = c(0, 30),
+  ylim = c(0, 30),
+  nBreaks = 800,
+  tol = 0.00001,
+  nIter = 2000
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>Vector</code> or <code>matrix</code> (parameters in columns) of values for different parameters corresponding to the specified detection function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detFun</code></td>
+<td>
+<p><code>Numeric</code> vNumeric variable denoting the type of detection function. 0 = Half-normal, 1 = Half-normal plateau, 2 = Exponential, 3 = Asymmetric logistic, 4 = Bimodal, 5 = Donut.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p><code>Numeric</code>  variable denoting the quantile probability to compute the home range radius.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p><code>Numeric</code> variable giving an initial value of the radius.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p><code>Vector</code> of length 2 giving the range along x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p><code>Vector</code> of length 2 giving the range along y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nBreaks</code></td>
+<td>
+<p><code>Numeric</code> variable denoting the number of breaks along an axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p><code>Numeric</code> variable denoting the allowed tolerance in the radius estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nIter</code></td>
+<td>
+<p><code>Numeric</code> variable giving the maximum number of iterations in bisection algorithm.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Soumen Dey
+</p>
+
+
+<h3>References</h3>
+
+<p>Dey, S., Bischof, R., Dupont, P. P. A., &amp; Milleret, C. (2022). Does the punishment fit the crime? Consequences and diagnosis of misspecified detection functions in Bayesian spatial capture–recapture modeling. Ecology and Evolution, 12, e8600. https://doi.org/10.1002/ece3.8600
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+
+# A user friendly vignette is also available on github: 
+# https://github.com/nimble-dev/nimbleSCR/blob/master/nimbleSCR/vignettes/
+# Vignette name: Fit_with_dbinomLocal_normalPlateau_and_HomeRangeAreaComputation.rmd
+
+# HALF-NORMAL PLATEAU FUNCTION (detFun = 1) 
+habitatMask &lt;- matrix(1, nrow = 30, ncol= 30, byrow = TRUE)
+
+prob &lt;- 0.95
+paramnames.hr &lt;- c("HRradius", "HRarea")
+sigma &lt;- 1
+w &lt;- 1.5
+params &lt;- c(sigma, w)
+names(params) &lt;- c("sigma", "w")
+HRAnim &lt;- getHomeRangeArea( x = params, detFun = 1, prob = prob, d = 6,
+                      xlim = c(0, dim(habitatMask)[2]), ylim = c(0, dim(habitatMask)[1]),
+                      nBreaks = 800, tol = 1E-5, nIter = 2000)
+
+# Different values of argument "detFun"
+# 0 = Half-normal, 1 = Half-normal plateau, 2 = Exponential,
+# 3 = Aysmmetric logistic, 4 = Bimodal, 5 = Donut.
+HR.hnp &lt;- c(HRAnim$run())
+names(HR.hnp) &lt;- paramnames.hr
+print(HR.hnp)
+# FASTER HRA COMPUTATION USING NIMBLE
+samples &lt;- cbind(rgamma(n = 500, shape = 1, rate = 1), rgamma(n = 500, shape = 1.5, rate = 1))
+colnames(samples) &lt;- c("sigma", "w")
+HRAnim.mat &lt;- getHomeRangeArea(x = samples, detFun = 1, prob = prob, d = 6, 
+                         xlim = c(0, dim(habitatMask)[2]), ylim = c(0, dim(habitatMask)[1]),
+                         nBreaks = 800, tol = 1E-5, nIter = 2000)
+
+cHRAnim.arr &lt;- compileNimble(HRAnim.mat, resetFunctions = TRUE)
+
+HRA.Runtime &lt;- system.time(
+  HR.chain &lt;- cHRAnim.arr$run()
+)
+print(HRA.Runtime)
+dimnames(HR.chain)[[2]] &lt;- paramnames.hr
+HRest &lt;- do.call(rbind, lapply(c(1:2), function(j){
+  c(mean(HR.chain[,j], na.rm = TRUE), sd(HR.chain[,j], na.rm = TRUE))
+}))
+dimnames(HRest) &lt;- list(paramnames.hr, c("MEAN", "SD"))
+
+cat("Numerical estimates using MCMC samples: \n", sep = "")
+print(HRest)
+
+# HALF-NORMAL FUNCTION (detFun = 0) 
+sigma = 2
+params &lt;- c(sigma)
+names(params) &lt;- c("sigma")
+
+HRAnim &lt;- getHomeRangeArea(x = params, detFun = 0, prob = prob, d = 6, 
+                     xlim = c(0, dim(habitatMask)[2]), ylim = c(0, dim(habitatMask)[1]),
+                     nBreaks = 800, tol = 1E-5, nIter = 2000)
+
+HR.hn &lt;- c(HRAnim$run())
+names(HR.hn) &lt;- paramnames.hr
+print(HR.hn)
+
+# Exponential (detFun = 2) 
+
+rate = 1/2
+params &lt;- c(rate)
+names(params) &lt;- c("rate")
+HRAnim &lt;- getHomeRangeArea(x = params, detFun = 2, prob = prob, d = 6, 
+                     xlim = c(0, dim(habitatMask)[2]), ylim = c(0, dim(habitatMask)[1]),
+                     nBreaks = 800, tol = 1E-5, nIter = 2000)
+HR.exp &lt;- c(HRAnim$run())
+names(HR.exp) &lt;- paramnames.hr
+print(HR.exp)
+
+# Asymmetric logistic (detFun = 3) 
+
+sigma = 2
+alpha.a = 5 
+alpha.b = 1
+params &lt;- c(sigma, alpha.a, alpha.b)
+names(params) &lt;- c("sigma", "alpha.a", "alpha.b")
+HRAnim &lt;- getHomeRangeArea(x = params, detFun = 3, prob = prob, d = 6, 
+                     xlim = c(0, dim(habitatMask)[2]), ylim = c(0, dim(habitatMask)[1]),
+                     nBreaks = 800, tol = 1E-5, nIter = 2000)
+HR.al &lt;- c(HRAnim$run())
+names(HR.al) &lt;- paramnames.hr
+print(HR.al)
+
+
+# Bimodal (detFun = 4) 
+
+p0.a = 0.25
+sigma.a = 0.5
+p0.b = 0.15 
+sigma.b = 1
+w = 2
+params &lt;- c(sigma.a, sigma.b, p0.a, p0.b, w)
+names(params) &lt;- c("sigma.a", "sigma.b", "p0.a", "p0.b", "w")
+HRAnim &lt;- getHomeRangeArea(x = params, detFun = 4, prob = prob, d = 6, 
+                     xlim = c(0, dim(habitatMask)[2]), ylim = c(0, dim(habitatMask)[1]),
+                     nBreaks = 800, tol = 1E-5, nIter = 2000)
+HR.bi &lt;- c(HRAnim$run())
+names(HR.bi) &lt;- paramnames.hr
+print(HR.bi)
+
+# Donut (detFun = 5) 
+
+sigma.a = 1.5 
+sigma.b = 1 
+w = 1 
+params &lt;- c(sigma.a, sigma.b, w)
+names(params) &lt;- c("sigma.a", "sigma.b", "w")
+HRAnim &lt;- getHomeRangeArea(x = params, detFun = 5, prob = prob, d = 6, 
+                     xlim = c(0, dim(habitatMask)[2]), ylim = c(0, dim(habitatMask)[1]),
+                     nBreaks = 800, tol = 1E-5, nIter = 2000)
+HR.dn &lt;- c(HRAnim$run())
+names(HR.dn) &lt;- paramnames.hr
+print(HR.dn)
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_rigid_regression</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulates a Rigid 3D Spherical Regression.</h2>
+
+<h3>Description</h3>
+
+<p>Returns the response points corresponding to the specified explanatory
+points, given a rigid rotation model
+and an error term sampler.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_rigid_regression(
+  explanatory_points,
+  rotation_matrix,
+  local_error_sampler
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>explanatory_points</code></td>
+<td>
+<p>An <em>m</em>-by-3 matrix whose rows contain
+the Cartesian coordinates of the points at which the regression
+will be simulated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rotation_matrix</code></td>
+<td>
+<p>A 3-by-3 rotation matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>local_error_sampler</code></td>
+<td>
+<p>A function that returns a 3-length numeric vector
+representing a sampled error term local to an explanatory point,
+given its Cartesian coordinates.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">E</code> be
+the <em>m</em>-by-3 matrix of explanatory points.
+This function will return
+an <em>m</em>-by-<em>3</em> matrix whose <code class="reqn">i</code>-th row is obtained by
+transposition of the following expression:
+</p>
+<p style="text-align: center;"><code class="reqn">exp(\Phi(\epsilon(x))) R x</code>
+</p>
+
+<p>where <code class="reqn">x</code> is the transpose of the <code class="reqn">i</code>-th row of
+<code class="reqn">E</code> and <code class="reqn">R</code> is <code>rotation_matrix</code>.
+Term <code class="reqn">\epsilon(x)</code> is obtained by
+evaluating at <code class="reqn">x</code> function <code>local_error_sampler</code>, while
+matrix <code class="reqn">\Phi(c)</code>, for a 3-length numeric vector <code class="reqn">c</code>, is
+the skew symmetric matrix having its independent components
+represented by the entries of <code class="reqn">c</code> (for a thorough discussion,
+see function
+<code>get_skew_symmetric_matrix</code>).
+</p>
+<p>Function <code>local_error_sampler</code>
+must be prototyped as having one argument, <code>point</code>,
+representing the Cartesian coordinates of a point on a 3D sphere,
+and returning a non <code>NULL</code> numerical object having length
+equal to <code>3</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <em>m</em>-by-<em>3</em> matrix whose rows contain
+the Cartesian coordinates of the response points corresponding
+to the explanatory points.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Regression functions: 
+<code>cross_validate_concentration()</code>,
+<code>fit_regression()</code>,
+<code>get_equally_spaced_points()</code>,
+<code>get_skew_symmetric_matrix()</code>,
+<code>simulate_regression()</code>,
+<code>weight_explanatory_points()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nprotreg)
+
+# Define a matrix of explanatory points.
+
+explanatory_points &lt;- rbind(
+  cbind(.5, 0, .8660254),
+  cbind(-.5, 0, .8660254),
+  cbind(1, 0, 0),
+  cbind(0, 1, 0),
+  cbind(-1, 0, 0),
+  cbind(0, -1, 0),
+  cbind(.5, 0, -.8660254),
+  cbind(-.5, 0, -.8660254)
+)
+
+# Define a rotation matrix.
+
+rotation_matrix &lt;- rbind(
+    cbind(-0.69492055764131177575, 0.71352099052778772403, 0.08929285886191218324),
+    cbind(-0.19200697279199935297, -0.30378504433947051133, 0.93319235382364695841),
+    cbind(0.69297816774177023458, 0.63134969938371787723, 0.34810747783026463331)
+)
+
+# Define a local error sampler.
+
+local_error_sampler &lt;- function(point) {
+  rnorm(3)
+}
+
+# Get the corresponding 8-by-3 matrix of response points.
+# Rows corresponds to explanatory points,
+# columns to Cartesian coordinates.
+
+response_points &lt;- simulate_rigid_regression(explanatory_points,
+                                             rotation_matrix,
+                                             local_error_sampler)
+
+# Get the response point corresponding to the second
+# explanatory point.
+
+cat("Response point corresponding to the second explanatory point: \n")
+cat(response_points[2, ], "\n")
+</code></pre>
+
+
+</div>

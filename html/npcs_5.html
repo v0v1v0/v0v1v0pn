@@ -1,0 +1,238 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npcs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a multi-class Neyman-Pearson classifier with error controls via cost-sensitive learning.</h2>
+
+<h3>Description</h3>
+
+<p>Fit a multi-class Neyman-Pearson classifier with error controls via cost-sensitive learning. This function implements two algorithms proposed in Tian, Y. &amp; Feng, Y. (2021). The problem is minimize a linear combination of P(hat(Y)(X) != k| Y=k) for some classes k while controlling P(hat(Y)(X) != k| Y=k) for some classes k. See Tian, Y. &amp; Feng, Y. (2021) for more details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npcs(
+  x,
+  y,
+  algorithm = c("CX", "ER"),
+  classifier,
+  seed = 1,
+  w,
+  alpha,
+  trControl = list(),
+  tuneGrid = list(),
+  split.ratio = 0.5,
+  split.mode = c("by-class", "merged"),
+  tol = 1e-06,
+  refit = TRUE,
+  protect = TRUE,
+  opt.alg = c("Hooke-Jeeves", "Nelder-Mead")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>the predictor matrix of training data, where each row and column represents an observation and predictor, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>the response vector of training data. Must be integers from 1 to K for some K &gt;= 2. Can be either a numerical or factor vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>the NPMC algorithm to use. String only. Can be either "CX" or "ER", which implements NPMC-CX or NPMC-ER in Tian, Y. &amp; Feng, Y. (2021).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classifier</code></td>
+<td>
+<p>which model to use for estimating the posterior distribution P(Y|X = x). String only.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>random seed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>the weights in objective function. Should be a vector of length K, where K is the number of classes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the levels we want to control for error rates of each class. Should be a vector of length K, where K is the number of classes. Use NA if if no error control is imposed for specific classes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trControl</code></td>
+<td>
+<p>list; resampling method</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tuneGrid</code></td>
+<td>
+<p>list; for hyperparameters tuning or setting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split.ratio</code></td>
+<td>
+<p>the proportion of data to be used in searching lambda (cost parameters). Should be between 0 and 1. Default = 0.5. Only useful when <code>algorithm</code> = "ER".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split.mode</code></td>
+<td>
+<p>two different modes to split the data for NPMC-ER. String only. Can be either "per-class" or "merged". Default = "per-class". Only useful when <code>algorithm</code> = "ER".
+</p>
+
+<ul>
+<li>
+<p> per-class: split the data by class.
+</p>
+</li>
+<li>
+<p> merged: split the data as a whole.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>the convergence tolerance. Default = 1e-06. Used in the lambda-searching step. The optimization is terminated when the step length of the main loop becomes smaller than <code>tol</code>. See pages of <code>hjkb</code> and <code>nmkb</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>refit</code></td>
+<td>
+<p>whether to refit the classifier using all data after finding lambda or not. Boolean value. Default = TRUE. Only useful when <code>algorithm</code> = "ER".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>protect</code></td>
+<td>
+<p>whether to threshold the close-zero lambda or not. Boolean value. Default = TRUE. This parameter is set to avoid extreme cases that some lambdas are set equal to zero due to computation accuracy limit. When <code>protect</code> = TRUE, all lambdas smaller than 1e-03 will be set equal to 1e-03.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>opt.alg</code></td>
+<td>
+<p>optimization method to use when searching lambdas. String only. Can be either "Hooke-Jeeves" or "Nelder-Mead". Default = "Hooke-Jeeves".</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object with S3 class <code>"npcs"</code>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>the estimated lambda vector, which consists of Lagrangian multipliers. It is related to the cost. See Section 2 of Tian, Y. &amp; Feng, Y. (2021) for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>the fitted classifier.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classifier</code></td>
+<td>
+<p>which classifier to use for estimating the posterior distribution P(Y|X = x).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>the NPMC algorithm to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the levels we want to control for error rates of each class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>the weights in objective function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pik</code></td>
+<td>
+<p>the estimated marginal probability for each class.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Tian, Y., &amp; Feng, Y. (2021). Neyman-Pearson Multi-class Classification via Cost-sensitive Learning. Submitted. Available soon on arXiv.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.npcs</code>, <code>error_rate</code>, <code>generate_data</code>, <code>gamma_smote</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># data generation: case 1 in Tian, Y., &amp; Feng, Y. (2021) with n = 1000
+set.seed(123, kind = "L'Ecuyer-CMRG")
+train.set &lt;- generate_data(n = 1000, model.no = 1)
+x &lt;- train.set$x
+y &lt;- train.set$y
+
+test.set &lt;- generate_data(n = 1000, model.no = 1)
+x.test &lt;- test.set$x
+y.test &lt;- test.set$y
+
+# contruct the multi-class NP problem: case 1 in Tian, Y., &amp; Feng, Y. (2021)
+alpha &lt;- c(0.05, NA, 0.01)
+w &lt;- c(0, 1, 0)
+
+# try NPMC-CX, NPMC-ER, and vanilla multinomial logistic regression
+fit.vanilla &lt;- nnet::multinom(y~., data = data.frame(x = x, y = factor(y)), trace = FALSE)
+fit.npmc.CX &lt;- try(npcs(x, y, algorithm = "CX", classifier = "multinom", 
+w = w, alpha = alpha))
+fit.npmc.ER &lt;- try(npcs(x, y, algorithm = "ER", classifier = "multinom", 
+w = w, alpha = alpha, refit = TRUE))
+# test error of vanilla multinomial logistic regression
+y.pred.vanilla &lt;- predict(fit.vanilla, newdata = data.frame(x = x.test))
+error_rate(y.pred.vanilla, y.test)
+# test error of NPMC-CX
+y.pred.CX &lt;- predict(fit.npmc.CX, x.test)
+error_rate(y.pred.CX, y.test)
+# test error of NPMC-ER
+y.pred.ER &lt;- predict(fit.npmc.ER, x.test)
+error_rate(y.pred.ER, y.test)
+
+</code></pre>
+
+
+</div>

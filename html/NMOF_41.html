@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>maxSharpe</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Maximum-Sharpe-Ratio/Tangency Portfolio
+</h2>
+
+<h3>Description</h3>
+
+<p>Compute maximum Sharpe-ratio portfolios, subject to lower and upper bounds
+on weights.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">maxSharpe(m, var, min.return,
+          wmin = -Inf, wmax = Inf, method = "qp",
+          groups = NULL, groups.wmin = NULL, groups.wmax = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>vector of expected (excess) returns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+
+<p>the covariance matrix: a numeric (real), symmetric matrix
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.return</code></td>
+<td>
+<p>minimumm required return. This is a technical
+parameter, used only for QP.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wmin</code></td>
+<td>
+
+<p>numeric: a lower bound on weights. May also be a vector that holds
+specific bounds for each asset.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wmax</code></td>
+<td>
+
+<p>numeric: an upper bound on weights. May also be a vector that holds
+specific bounds for each asset.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>character. Currently, only <code>"qp"</code> is supported.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+
+<p>a list of group definitions
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups.wmin</code></td>
+<td>
+
+<p>a numeric vector
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups.wmax</code></td>
+<td>
+
+<p>a numeric vector
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function uses <code>solve.QP</code> from package
+<span class="pkg">quadprog</span>. Because of the algorithm that
+<code>solve.QP</code> uses, <code>var</code> has to be positive
+definit (i.e. must be of full rank).
+</p>
+
+
+<h3>Value</h3>
+
+<p>a numeric vector (the portfolio weights) with an attribute
+<code>variance</code> (the portfolio's variance)
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+<p>Schumann, E. (2012) Computing the global minimum-variance
+portfolio. <a href="http://enricoschumann.net/R/minvar.htm">http://enricoschumann.net/R/minvar.htm</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>minvar</code>,
+<code>mvPortfolio</code>,
+<code>mvFrontier</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">S &lt;- var(R &lt;- NMOF::randomReturns(3, 10, 0.03))
+x &lt;- solve(S, colMeans(R))
+x/sum(x)
+x &lt;- coef(lm(rep(1, 10) ~ -1 + R))
+unname(x/sum(x))
+
+maxSharpe(m = colMeans(R), var = S)
+maxSharpe(m = colMeans(R), var = S, wmin = 0, wmax = 1)
+</code></pre>
+
+
+</div>

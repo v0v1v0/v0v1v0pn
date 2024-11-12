@@ -1,0 +1,276 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>n2pwr.NPH</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Power Calculation with Combination Test</h2>
+
+<h3>Description</h3>
+
+<p><code>n2pwr.NPH</code> calculates the power given either the
+number of events or number of subjects using combination test
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">n2pwr.NPH(
+  method = "MaxLR",
+  entry = 1,
+  fup = 1,
+  maxfup = entry + fup,
+  CtrlHaz,
+  hazR,
+  transP1,
+  transP0,
+  Wlist,
+  entry_pdf0 = function(x) {
+     (1/entry) * (x &gt;= 0 &amp; x &lt;= entry)
+ },
+  entry_pdf1 = entry_pdf0,
+  eventN = NULL,
+  totalN = NULL,
+  ratio = 1,
+  alpha = 0.05,
+  alternative = c("two.sided"),
+  k = 100,
+  nreps = 10
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a text specifying the calculation method, either
+<code>"MaxLR"</code> or <code>"Projection"</code>. Maximum weighted
+logrank test is used if <code>"MaxLR"</code> is specified; otherwise,
+projection test is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry</code></td>
+<td>
+<p>a numeric value indicating the enrollment time, Default: 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fup</code></td>
+<td>
+<p>a numeric value indicating the minimum follow-up time for subjects.
+, Default: 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxfup</code></td>
+<td>
+<p>maximum follow-up time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CtrlHaz</code></td>
+<td>
+<p>a function,  specifying the hazard function for control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hazR</code></td>
+<td>
+<p>a function, specifying the hazard ratio function between
+treatment and control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transP1</code></td>
+<td>
+<p>a numeric vector of length 2, consisting of the transition
+probability from
+receiving treatment to drop-out (drop-out rate) and
+from receiving treatment to receiving control (drop-in rate) per time unit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transP0</code></td>
+<td>
+<p>a numeric vector of length 2, consisting of the transition
+probability from
+receiving control to drop-out (drop-out rate) and
+from receiving control to receiving treatment (drop-in rate) per time unit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Wlist</code></td>
+<td>
+<p>a list, consisting of weight functions applied to the test.
+The element of the list must be functions. Default is a list of one constant
+function, corresponding to the logrank test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry_pdf0</code></td>
+<td>
+<p>a function, indicating the probability density function (pdf)
+of enrollment/entry time for control group. The default assumes a uniform distribution
+corresponding to the constant enrollment rate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry_pdf1</code></td>
+<td>
+<p>a pdf function of enrollment/entry time for treatment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eventN</code></td>
+<td>
+<p>the number of events</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>totalN</code></td>
+<td>
+<p>the number of subjects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratio</code></td>
+<td>
+<p>allocation ratio, Default: 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>type i error, Default: 0.05</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>alternative hypothesis - one of c(<code>"two.sided", "less", "greater"</code>),
+Default: <code>"two.sided"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>an integer, indicating number of sub-intervals per time unit, Default: 100</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nreps</code></td>
+<td>
+<p>number of replicates used for calculating quantitle
+using multivariate normal</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function <code>npwr.NPH</code> calculates the asymptotic power given number
+of events or number of subjects using maximum weighted logrank test or
+projection type test. If only <code>eventN</code> is provided, the
+asymptotic power is based on provided number of events. If
+only <code>totalN</code> is given, the pooled event probability (<code class="reqn">eprob</code>) is calculated
+according input design parameters including entry time, follow-up time
+and hazard functions, etc. The number of events is calculated as
+<code>totalN</code>*<code class="reqn">eprob</code>, which is given in returned vector <code>outN</code>.
+Similarly, if only <code>eventN</code> is given, the total sample
+size is given as <code>eventN</code>/<code class="reqn">eprob</code>. However, if both
+<code>eventN</code> and <code>totalN</code> are provided, we only use
+<code>eventN</code> for calculation.
+Check function <code>pwr2n.NPH</code> for more calculation details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>power</code></td>
+<td>
+<p>asymptotic power </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inN</code></td>
+<td>
+<p>a vector consisting of the input of <code>eventN</code> and <code>totalN</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outN</code></td>
+<td>
+<p>a vector including the output of number of events
+and total sample. See details. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob_event</code></td>
+<td>
+<p>event probability at the end of trial</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L_trans</code></td>
+<td>
+<p>a list, consisting of transition matrix at each interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdat</code></td>
+<td>
+<p> a data frame including all the intermediate variables in the calculation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studytime</code></td>
+<td>
+<p>a vector of length 2, including the entry and follow-up time as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RandomizationRatio</code></td>
+<td>
+<p>as input</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>pwr2n.NPH</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># entry time
+t_enrl &lt;- 12
+# follow-up time
+t_fup &lt;- 18
+# baseline hazard
+lmd0 &lt;- -log(0.2)/10
+# delayed treatment effects
+f_hr_delay &lt;- function(x){(x&lt;=6)+(x&gt;6)*0.75}
+# maxcombo test
+maxc &lt;- gen.wgt(method="Maxcombo")
+pwr1 &lt;- n2pwr.NPH(entry   = t_enrl
+                 ,fup      = t_fup
+                 ,CtrlHaz = function(x){x^0*lmd0}
+                 ,hazR = f_hr_delay
+                 ,transP1 = c(0,0)
+                 ,transP0 = c(0,0)
+                 ,Wlist = maxc
+                 ,eventN = 50 # targeted number of events
+)
+</code></pre>
+
+
+</div>

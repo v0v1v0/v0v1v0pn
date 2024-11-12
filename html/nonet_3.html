@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nonet_plot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot the predictions or results of nonet_ensemble</h2>
+
+<h3>Description</h3>
+
+<p>Plot the predictions or results of nonet_ensemble
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nonet_plot(x, y, dataframe, plot_type = NULL, nonet_size = 20,
+  nonet_alpha = 0.3, nonet_bins = 25)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>x axis variable name or histogram entity name</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>y axis variable name</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataframe</code></td>
+<td>
+<p>dataframe which is used for plotting purpose.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_type</code></td>
+<td>
+<p>type of plot, if not provided it takes "NULL"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonet_size</code></td>
+<td>
+<p>size of plot need to feed in ggplot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonet_alpha</code></td>
+<td>
+<p>value of alpha for ggplot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonet_bins</code></td>
+<td>
+<p>number of bins for histogram</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>plotted for the plot results provided as input.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># nonet_plot functionality can be explained via below example
+# Setup
+library(caret)
+library(nonet)
+library(ggplot2)
+
+# Load Data
+dataframe &lt;- data.frame(banknote_authentication[600:900, ])
+dataframe$class &lt;- as.factor(ifelse(dataframe$class &gt;= 1, 'Yes', 'No'))
+
+# Spliting into train and test
+index &lt;- createDataPartition(dataframe$class, p=0.75, list=FALSE)
+trainSet &lt;- dataframe[ index,]
+testSet &lt;- dataframe[-index,]
+
+# Feature selection 
+ control &lt;- rfeControl(functions = rfFuncs,
+  method = "repeatedcv",
+  repeats = 2,
+  verbose = FALSE)
+
+outcomeName &lt;- 'class'
+predictors &lt;- c("curtosis", "entropy")
+
+# Model Training &amp; predictions
+banknote_rf &lt;- train(trainSet[,predictors],trainSet[,outcomeName],method='rf')
+predictions_rf_raw &lt;- predict.train(object=banknote_rf,testSet[,predictors],type="raw")
+
+# Results
+nonet_eval_rf &lt;- confusionMatrix(predictions_rf_raw,testSet[,outcomeName])
+eval_rf_df &lt;- data.frame(nonet_eval_rf$table)
+nonet_plot(eval_rf_df$Prediction, eval_rf_df$Reference, eval_rf_df, plot_type = "point")
+</code></pre>
+
+
+</div>

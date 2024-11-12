@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>runLaplace</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Combine steps of running Laplace or adaptive Gauss-Hermite quadrature approximation</h2>
+
+<h3>Description</h3>
+
+<p>Use an approximation (compiled or uncompiled) returned from
+'buildLaplace' or 'buildAGHQ' to find the maximum likelihood estimate and return it
+with random effects estimates and/or standard errors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">runLaplace(
+  laplace,
+  pStart,
+  method = "BFGS",
+  originalScale = TRUE,
+  randomEffectsStdError = TRUE,
+  jointCovariance = FALSE
+)
+
+runAGHQ(
+  AGHQ,
+  pStart,
+  method = "BFGS",
+  originalScale = TRUE,
+  randomEffectsStdError = TRUE,
+  jointCovariance = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>laplace</code></td>
+<td>
+<p>A (compiled or uncompiled) nimble laplace approximation object
+returned from 'buildLaplace' or 'buildAGHQ'. These return the same type of
+approximation algorithm object. 'buildLaplace' is simply 'buildAGHQ'
+with 'nQuad=1'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pStart</code></td>
+<td>
+<p>Initial values for parameters to begin optimization search for
+the maximum likelihood estimates. If omitted, the values currently in the
+(compiled or uncompiled) model object will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Optimization method for outer optimization. See <code>method</code>
+argument to <code>findMLE</code> method in <code>buildLaplace</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>originalScale</code></td>
+<td>
+<p>If <code>TRUE</code>, return all results on the original scale
+of the parameters and/or random effects as written in the model. Otherwise,
+return all results on potentially unconstrained transformed scales that are
+used in the actual computations. Transformed scales (parameterizations) are
+used if any parameter or random effect has contraint(s) on its support
+(range of allowed values). Default = <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>randomEffectsStdError</code></td>
+<td>
+<p>If <code>TRUE</code>, include standard errors for the
+random effects estimates. Default = <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jointCovariance</code></td>
+<td>
+<p>If <code>TRUE</code>, return the full joint covariance
+matrix (inverse of the Hessian) of parameters and random effects. Default =
+<code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AGHQ</code></td>
+<td>
+<p>Same as <code>laplace</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Adaptive Gauss-Hermite quadrature is a generalization of Laplace
+approximation. <code>runLaplace</code> simply calles <code>runAGHQ</code> and provides a
+convenient name.
+</p>
+<p>These functions manage the steps of calling the 'findMLE' method to obtain
+the maximum likelihood estimate of the parameters and then the
+'summaryLaplace' function to obtain standard errors, (optionally) random
+effects estimates (conditional modes), their standard errors, and the full
+parameter-random effects covariance matrix.
+</p>
+<p>Note that for 'nQuad &gt; 1' (see <code>buildAGHQ</code>), i.e., AGHQ with
+higher order than Laplace approximation, maximum likelihood estimation is
+available only if all random effects integrations are univariate. With
+multivariate random effects integrations, one can use 'nQuad &gt; 1' only to
+calculate marginal log likelihoods at given parameter values. This is useful
+for checking the accuracy of the log likelihood at the MLE obtained for
+Laplace approximation ('nQuad == 1'). 'nQuad' can be changed using the
+'updateSettings' method of the approximation object.
+</p>
+<p>See <code>summaryLaplace</code>, which is called for the summary components.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements <code>MLE</code> and <code>summary</code>.
+</p>
+<p><code>MLE</code> is the result of the <code>findMLE</code> method, which contains the
+parameter estimates and Hessian matrix. This is considered raw output, and
+one should normally use instead the contents of <code>summary</code>. (For example
+not that the Hessian matrix in <code>MLE</code> may not correspond to the same
+scale as the parameter estimates if a transformation was used to operate in
+an unconstrained parameter space.)
+</p>
+<p><code>summary</code> is the result of <code>summaryLaplace</code> (or equivalently
+<code>summaryAGHQ</code>), which contains parameter estimates and standard errors,
+and optionally other requested components. All results in this object will be
+on the same scale (parameterization), either original or transformed, as
+requested.
+</p>
+
+
+</div>

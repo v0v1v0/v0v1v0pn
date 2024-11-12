@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SensFeaturePlot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Feature sensitivity plot</h2>
+
+<h3>Description</h3>
+
+<p>Show the distribution of the sensitivities of the output
+in <code>geom_sina()</code> plot which color depends on the input values
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SensFeaturePlot(object, fdata = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>fitted neural network model or <code>array</code> containing the raw
+sensitivities from the function <code>SensAnalysisMLP</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fdata</code></td>
+<td>
+<p><code>data.frame</code> containing the data to evaluate the sensitivity of the model.
+Not needed if the raw sensitivities has been passed as <code>object</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments that should be passed to  <code>SensAnalysisMLP</code> function</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>list of Feature sensitivity plot as described in
+<a href="https://www.r-bloggers.com/2019/03/a-gentle-introduction-to-shap-values-in-r/">https://www.r-bloggers.com/2019/03/a-gentle-introduction-to-shap-values-in-r/</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Pizarroso J, Portela J, Muñoz A (2022). NeuralSens: Sensitivity Analysis of
+Neural Networks. Journal of Statistical Software, 102(7), 1-36.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load data -------------------------------------------------------------------
+data("DAILY_DEMAND_TR")
+fdata &lt;- DAILY_DEMAND_TR
+
+## Parameters of the NNET ------------------------------------------------------
+hidden_neurons &lt;- 5
+iters &lt;- 250
+decay &lt;- 0.1
+
+################################################################################
+#########################  REGRESSION NNET #####################################
+################################################################################
+## Regression dataframe --------------------------------------------------------
+# Scale the data
+fdata.Reg.tr &lt;- fdata[,2:ncol(fdata)]
+fdata.Reg.tr[,3] &lt;- fdata.Reg.tr[,3]/10
+fdata.Reg.tr[,1] &lt;- fdata.Reg.tr[,1]/1000
+
+# Normalize the data for some models
+preProc &lt;- caret::preProcess(fdata.Reg.tr, method = c("center","scale"))
+nntrData &lt;- predict(preProc, fdata.Reg.tr)
+
+#' ## TRAIN nnet NNET --------------------------------------------------------
+# Create a formula to train NNET
+form &lt;- paste(names(fdata.Reg.tr)[2:ncol(fdata.Reg.tr)], collapse = " + ")
+form &lt;- formula(paste(names(fdata.Reg.tr)[1], form, sep = " ~ "))
+
+set.seed(150)
+nnetmod &lt;- nnet::nnet(form,
+                           data = nntrData,
+                           linear.output = TRUE,
+                           size = hidden_neurons,
+                           decay = decay,
+                           maxit = iters)
+# Try SensAnalysisMLP
+sens &lt;- NeuralSens::SensAnalysisMLP(nnetmod, trData = nntrData, plot = FALSE)
+NeuralSens::SensFeaturePlot(sens)
+</code></pre>
+
+
+</div>

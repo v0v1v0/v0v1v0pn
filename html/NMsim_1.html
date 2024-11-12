@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>addEVID2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add simulation records to dosing records</h2>
+
+<h3>Description</h3>
+
+<p>Performs the simple job of adding simulation events to all
+subjects in a data set. Copies over columns that are not varying
+at subject level (i.e. non-variying covariates).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">addEVID2(doses, time.sim, CMT, EVID = 2, as.fun)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>doses</code></td>
+<td>
+<p>dosing records Nonmem style (EVID==1 records from a
+data set)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.sim</code></td>
+<td>
+<p>A numerical vector with simulation times. Can also
+be a data.frame in which case it must contain a 'TIME' column
+and is merged with subjects found in 'doses'. The latter
+feature is experimental.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CMT</code></td>
+<td>
+<p>The compartment in which to insert the EVID=2
+records. If longer than one, the records will be repeated in
+all the specified compartments. If a data.frame, covariates
+can be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EVID</code></td>
+<td>
+<p>The value to put in the EVID column for the created
+rows. Default is 2 but 0 may be prefered even for simulation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>The default is to return data as a data.frame. Pass
+a function (say 'tibble::as_tibble') in as.fun to convert to
+something else. If data.tables are wanted, use
+as.fun="data.table". The default can be configured using
+NMdataConf.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The resulting data set is ordered by ID, TIME, and
+EVID. You may have to reorder for your specific needs.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data.frame with dosing records
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">(doses1 &lt;- NMcreateDoses(TIME=c(0,12,24,36),AMT=c(2,1)))
+addEVID2(doses1,time.sim=seq(0,28,by=4),CMT=2)
+
+## two named compartments
+dt.doses &lt;- NMcreateDoses(TIME=c(0,12),AMT=10,CMT=1)
+seq.time &lt;- c(0,4,12,24)
+dt.cmt &lt;- data.frame(CMT=c(2,3),analyte=c("parent","metabolite"))
+res &lt;- addEVID2(dt.doses,time.sim=seq.time,CMT=dt.cmt)
+
+## Separate sampling schemes depending on covariate values
+dt.doses &lt;- NMcreateDoses(TIME=data.frame(regimen=c("SD","MD","MD"),TIME=c(0,0,12)),AMT=10,CMT=1)
+
+seq.time.sd &lt;- data.frame(regimen="SD",TIME=seq(0,6))
+seq.time.md &lt;- data.frame(regimen="MD",TIME=c(0,4,12,24))
+seq.time &lt;- rbind(seq.time.sd,seq.time.md)
+addEVID2(dt.doses,time.sim=seq.time,CMT=2)
+
+## an observed sample scheme and additional simulation times
+df.doses &lt;- NMcreateDoses(TIME=0,AMT=50,addl=list(ADDL=2,II=24))
+dense &lt;- c(seq(1,3,by=.1),4:6,seq(8,12,by=4),18,24)
+trough &lt;- seq(0,3*24,by=24)
+sim.extra &lt;- seq(0,(24*3),by=2)
+time.all &lt;- c(dense,dense+24*3,trough,sim.extra)
+time.all &lt;- sort(unique(time.all))
+dt.sample &lt;- data.frame(TIME=time.all)
+dt.sample$isobs &lt;- as.numeric(dt.sample$TIME%in%c(dense,trough))
+dat.sim &lt;- addEVID2(dt.doses,time.sim=dt.sample,CMT=2)
+
+</code></pre>
+
+
+</div>

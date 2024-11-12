@@ -1,0 +1,946 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netgraph.netmeta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Network graph</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a graph of the evidence network.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'netmeta'
+netgraph(
+  x,
+  seq = x$seq,
+  labels = x$trts,
+  cex = 1,
+  adj = NULL,
+  srt.labels = 0,
+  offset = if (!is.null(adj) &amp;&amp; all(unique(adj) == 0.5)) 0 else 0.0175,
+  scale = 1.1,
+  col = if (iterate) "slateblue" else "black",
+  plastic = !(iterate &amp; allfigures),
+  thickness = "number.of.studies",
+  lwd = 5,
+  lwd.min = lwd/2.5,
+  lwd.max,
+  rescale.thickness,
+  dim = "2d",
+  rotate = 0,
+  highlight = NULL,
+  col.highlight = "red2",
+  scale.highlight = 1,
+  multiarm = FALSE,
+  col.multiarm = NULL,
+  alpha.transparency = 0.5,
+  points = !missing(cex.points),
+  cex.points = 1,
+  pch.points = 20,
+  col.points = if (length(pch.points) == 1 &amp;&amp; pch.points == 21) "black" else "red",
+  bg.points = "red",
+  points.min,
+  points.max,
+  rescale.pointsize,
+  number.of.studies = FALSE,
+  cex.number.of.studies = cex,
+  col.number.of.studies = "white",
+  bg.number.of.studies = "black",
+  pos.number.of.studies = 0.5,
+  start.layout = ifelse(dim == "2d", "circle", "eigen"),
+  eig1 = 2,
+  eig2 = 3,
+  eig3 = 4,
+  iterate = FALSE,
+  tol = 1e-04,
+  maxit = 500,
+  allfigures = FALSE,
+  A.matrix = x$A.matrix,
+  N.matrix = sign(A.matrix),
+  D.matrix = netdistance(N.matrix),
+  xpos = NULL,
+  ypos = NULL,
+  zpos = NULL,
+  figure = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netmeta</code> (mandatory).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq</code></td>
+<td>
+<p>A character or numerical vector specifying the sequence
+of treatments arrangement (anticlockwise if <code>start.layout =
+"circle"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+<p>An optional vector with treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex</code></td>
+<td>
+<p>The magnification to be used for treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adj</code></td>
+<td>
+<p>One, two, or three values in [0, 1] (or a vector /
+matrix with length / number of rows equal to the number of
+treatments) specifying the x (and optionally y and z) adjustment
+for treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>srt.labels</code></td>
+<td>
+<p>The character string <code>"orthogonal"</code> (can be
+abbreviated), a single numeric or numerical vector with value(s)
+between -180 and 180 specifying the angle to rotate treatment
+labels (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>Distance between edges (i.e. treatments) in graph and
+treatment labels for 2-D plots (value of 0.0175 corresponds to a
+difference of 1.75% of the range on x- and y-axis).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>Additional space added outside of edges
+(i.e. treatments).  Increase this value for larger treatment
+labels (value of 1.10 corresponds to an additional space of 10%
+around the network graph).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>A single color (or vector of colors) for lines
+connecting treatments (edges) if argument <code>plastic =
+FALSE</code>. Length of the vector must be equal to the number of edges
+(see list element 'comparisons' in <code>netmeta</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plastic</code></td>
+<td>
+<p>A logical indicating whether the appearance of the
+comparisons should be in '3D look' (not to be confused with
+argument <code>dim</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thickness</code></td>
+<td>
+<p>Either a character variable to determine the
+method to plot line widths (see Details) or a matrix of the same
+dimension and row and column names as argument <code>A.matrix</code>
+with information on line width.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>A numeric for scaling the line width of comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd.min</code></td>
+<td>
+<p>Minimum line width in network graph. All connections
+with line widths below this values will be set to <code>lwd.min</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd.max</code></td>
+<td>
+<p>Maximum line width in network graph. The connection
+with the largest value according to argument <code>thickness</code>
+will be set to this value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale.thickness</code></td>
+<td>
+<p>A logical value or R function to scale the
+thickness of lines (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dim</code></td>
+<td>
+<p>A character string indicating whether a 2- or
+3-dimensional plot should be produced, either <code>"2d"</code> or
+<code>"3d"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rotate</code></td>
+<td>
+<p>A single numeric with value between -180 and 180
+specifying the angle to rotate nodes in a circular network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>highlight</code></td>
+<td>
+<p>A character vector identifying comparisons that
+should be marked in the network graph, e.g. <code>highlight =
+"treat1:treat2"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.highlight</code></td>
+<td>
+<p>Color(s) to highlight the comparisons given by
+<code>highlight</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.highlight</code></td>
+<td>
+<p>Scaling factor(s) for the line width(s) to
+highlight the comparisons given by <code>highlight</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiarm</code></td>
+<td>
+<p>A logical indicating whether multi-arm studies
+should be marked in plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.multiarm</code></td>
+<td>
+<p>Either a function from R package colorspace or
+grDevice to define colors for multi-arm studies or a character
+vector with colors to highlight multi-arm studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.transparency</code></td>
+<td>
+<p>The alpha transparency of colors used to
+highlight multi-arm studies (0 means transparent and 1 means
+opaque).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points</code></td>
+<td>
+<p>A logical indicating whether points should be printed
+at nodes (i.e. treatments) of the network graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.points, pch.points, col.points, bg.points</code></td>
+<td>
+<p>Corresponding
+size, type, color, and background color for points. Can be a
+vector with length equal to the number of treatments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points.min</code></td>
+<td>
+<p>Minimum point size. All points with size below
+this values will be set to <code>points.min</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points.max</code></td>
+<td>
+<p>Maximum point size in network graph. The node
+with the largest value according to argument <code>cex.points</code>
+will be set to this value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale.pointsize</code></td>
+<td>
+<p>A logical value or R function to scale the
+point size (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number.of.studies</code></td>
+<td>
+<p>A logical indicating whether number of
+studies should be added to network graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.number.of.studies</code></td>
+<td>
+<p>The magnification to be used for
+number of studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.number.of.studies</code></td>
+<td>
+<p>Color for number of studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bg.number.of.studies</code></td>
+<td>
+<p>Color for shadow around number of
+studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pos.number.of.studies</code></td>
+<td>
+<p>A single value (or vector of values)
+in [0, 1] specifying the position of the number of studies on the
+lines connecting treatments (edges). Length of the vector must be
+equal to the number of edges.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.layout</code></td>
+<td>
+<p>A character string indicating which starting
+layout is used if <code>iterate = TRUE</code>. If "circle" (default),
+the iteration starts with a circular ordering of the vertices; if
+"eigen", eigenvectors of the Laplacian matrix are used,
+calculated via generic function <code>eigen</code> (spectral
+decomposition); if "prcomp", eigenvectors of the Laplacian matrix
+are calculated via generic function <code>prcomp</code>
+(principal component analysis); if "random", a random layout is
+used, drawn from a bivariate normal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eig1</code></td>
+<td>
+<p>A numeric indicating which eigenvector is used as x
+coordinate if <code>start = "eigen"</code> or <code>"prcomp"</code> and
+<code>iterate = TRUE</code>.  Default is 2, the eigenvector to the
+second-smallest eigenvalue of the Laplacian matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eig2</code></td>
+<td>
+<p>A numeric indicating which eigenvector is used as
+y-coordinate if <code>start = "eigen"</code> or <code>"prcomp"</code> and
+<code>iterate = TRUE</code>.  Default is 3, the eigenvector to the
+third-smallest eigenvalue of the Laplacian matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eig3</code></td>
+<td>
+<p>A numeric indicating which eigenvector is used as
+z-coordinate if <code>start = "eigen"</code> or <code>"prcomp"</code> and
+<code>iterate = TRUE</code>.  Default is 4, the eigenvector to the
+fourth-smallest eigenvalue of the Laplacian matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterate</code></td>
+<td>
+<p>A logical indicating whether the stress majorization
+algorithm is carried out for optimization of the layout.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>A numeric for the tolerance for convergence if
+<code>iterate = TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>An integer defining the maximum number of iteration
+steps if <code>iterate = TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allfigures</code></td>
+<td>
+<p>A logical indicating whether all iteration steps
+are shown if <code>iterate = TRUE</code>. May slow down computations if
+set to <code>TRUE</code> (especially if <code>plastic = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A.matrix</code></td>
+<td>
+<p>Adjacency matrix (<em>n</em>x<em>n</em>) characterizing
+the structure of the network graph. Row and column names must be
+the same set of values as provided by argument <code>seq</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N.matrix</code></td>
+<td>
+<p>Neighborhood matrix (<em>n</em>x<em>n</em>) replacing
+A.matrix if neighborhood is to be specified differently from node
+adjacency in the network graph, for example content-based. Row
+and column names must be the same set of values as provided by
+argument <code>seq</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D.matrix</code></td>
+<td>
+<p>Distance matrix (<em>n</em>x<em>n</em>) replacing
+A.matrix and N.matrix if distances should be provided
+directly. Row and column names must be the same set of values as
+provided by argument <code>seq</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xpos</code></td>
+<td>
+<p>Vector (<em>n</em>) of x coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ypos</code></td>
+<td>
+<p>Vector (<em>n</em>) of y coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zpos</code></td>
+<td>
+<p>Vector (<em>n</em>) of z coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>figure</code></td>
+<td>
+<p>A logical indicating whether network graph should be
+shown.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional graphical arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function generates a network graph for an R object created
+with <code>netmeta</code>.
+</p>
+
+
+<h4>Layout of network graph</h4>
+
+<p>The network is laid out in the plane, where the nodes in the graph
+layout correspond to the treatments and edges display the observed
+treatment comparisons. For the default setting, nodes are placed on
+a circle.  Other starting layouts are "eigen", "prcomp", and
+"random" (Rücker &amp; Schwarzer 2015). If <code>iterate = TRUE</code>, the
+layout is further optimized using the stress majorization
+algorithm. This algorithm specifies an 'ideal' distance (e.g., the
+graph distance) between two nodes in the plane. In the optimal
+layout, these distances are best approximated in the sense of least
+squares. Starting from an initial layout, the optimum is
+approximated in an iterative process called stress majorization
+(Kamada and Kawai 1989, Michailidis and de Leeuw 2001, Hu
+2012). The starting layout can be chosen as a circle or coming from
+eigenvectors of the Laplacian matrix (corresponding to Hall's
+algorithm, Hall 1970), calculated in different ways, or
+random. Moreover, it can be chosen whether the iteration steps are
+shown (argument <code>allfigures = TRUE</code>).
+</p>
+<p>An optimized circular presentation which typically has a reduced
+(sometimes minimal) number of crossings can be achieved by using
+argument <code>seq = "optimal"</code> in combination with argument
+<code>start.layout</code>. Note, is is not possible of prespecify the
+best value for argument <code>start.layout</code> for any situation as
+the result depends on the network structure.
+</p>
+
+
+
+<h4>Definition of line widths</h4>
+
+<p>Argument <code>thickness</code> providing the line width of edges
+(comparisons) can be a matrix of the same dimension as argument
+<code>A.matrix</code> or any of the following character strings (which
+can be abbreviated):
+</p>
+
+<ul>
+<li>
+<p> Proportional to number of studies comparing two treatments
+(<code>thickness = "number.of.studies"</code>, default)
+</p>
+</li>
+<li>
+<p> Proportional to inverse standard error of common effects model
+comparing two treatments (<code>thickness = "se.common"</code>)
+</p>
+</li>
+<li>
+<p> Proportional to inverse standard error of random effects
+model comparing two treatments (<code>thickness = "se.random"</code>)
+</p>
+</li>
+<li>
+<p> Weight from common effects model comparing two treatments
+(<code>thickness = "w.common"</code>)
+</p>
+</li>
+<li>
+<p> Weight from random effects model comparing two treatments
+(<code>thickness = "w.random"</code>)
+</p>
+</li>
+<li>
+<p> Same line width for all comparisons (<code>thickness =
+  "equal"</code>)
+</p>
+</li>
+</ul>
+<p>Only evidence from direct treatment comparisons is considered to
+determine the line width if argument <code>thickness</code> is equal to
+any but the last method.
+</p>
+<p>Line widths are determined by argument <code>lwd</code> if all lines have
+the same width. This is possible if either argument <code>thickness
+= "equal"</code>, all pairwise comparisons have the same number of
+studies for <code>thickness = "number.of.studies"</code> or all direct
+comparisons are equally precise.
+</p>
+<p>Otherwise, the line width of the thickest line is equal to the
+value of argument <code>lwd.max</code> and all lines with a thickness
+below the value of argument <code>lwd.min</code> are set to this
+value. Default for argument <code>lwd.max</code> is <code>4 * lwd</code>.
+</p>
+<p>Argument <code>rescale.thickness</code> can be used to provide a function
+to specify the relative line width of edges (comparisons). By
+default, the square root function <code>sqrt</code> is used
+in order to lessen differences in line widths. Argument
+<code>rescale.thickness = FALSE</code> or <code>rescale.thickness = I</code>,
+i.e., the identity function <code>I</code>, can be used to
+not rescale line widths.
+</p>
+
+
+
+<h4>Definition of point sizes</h4>
+
+<p>Points are printed at nodes (treatments) if argument <code>points =
+TRUE</code> or argument <code>cex.points</code> is provided.
+</p>
+<p>Point sizes are equal to the value of argument <code>cex.points</code> if
+all points are of equal size. 
+</p>
+<p>Otherwise, the point size of the largest point is equal to the
+value of argument <code>points.max</code> and all points smaller than the
+value of argument <code>points.min</code> are set to this value. The
+default for argument <code>points.max</code> is equal to the largest
+value provided in argument <code>cex.points</code> if this largest value
+is below or equal to 25. Otherwise the default is <code>points.max
+= 8</code>.
+</p>
+<p>Argument <code>rescale.pointsize</code> can be used to provide a function
+to specify relative point sizes. Point sizes are not rescaled at
+all if they are all equal or the largest <code>cex.points</code> value is
+below or equal to 25. Otherwise, the square root function
+<code>sqrt</code> is used in order to lessen the differences
+in point sizes. Argument <code>rescale.pointsize = FALSE</code> or
+<code>rescale.pointsize = I</code>, i.e., the identity function
+<code>I</code>, can be used to not rescale point sizes.
+</p>
+
+
+
+<h4>Other settings</h4>
+
+<p>Argument <code>srt.labels</code> can be used to specific the rotation (in
+degrees) of the treatment labels. If <code>srt.labels</code> is equal to
+<code>"orthogonal"</code>, treatment labels are orthogonal to the
+circle. If <code>srt.labels</code> is a single numeric, all labels are
+rotated by this degree. If <code>srt.labels</code> is a numeric vector,
+it must be of the same length as the number of treatments and
+labels are rotated counter-clockwise starting on the right
+side. Finally, if <code>srt.labels</code> is a named numeric vector, it
+must be of the same length as the number of treatments and the
+names must be equal to the treatment names (and treatment labels
+are rotated according to the specified values).
+</p>
+<p>Further, a couple of graphical parameters can be specified, such as
+color and appearance of the edges (treatments) and the nodes
+(comparisons), whether special comparisons should be highlighted
+and whether multi-arm studies should be indicated as colored
+polygons. By default, if R package colorspace is available the
+<code>sequential_hcl</code> function is used to
+highlight multi-arm studies; otherwise the <code>rainbow</code> is
+used.
+</p>
+<p>In order to generate 3-D plots (argument <code>dim = "3d"</code>), R
+package <b>rgl</b> is necessary. Note, under macOS the X.Org X
+Window System must be available (see
+<a href="https://www.xquartz.org">https://www.xquartz.org</a>).
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>A list containing two data frames with information on nodes and
+edges.
+</p>
+<p><b>List element 'nodes'</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>trts</code></td>
+<td>
+<p>Treatment names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+<p>Treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq</code></td>
+<td>
+<p>Sequence of treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>srt</code></td>
+<td>
+<p>String rotation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xpos</code></td>
+<td>
+<p>Position of treatment / edge on x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ypos</code></td>
+<td>
+<p>Position of treatment / edge on y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zpos</code></td>
+<td>
+<p>Position of treatment / edge on z-axis (for 3-D
+plots).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xpos.labels</code></td>
+<td>
+<p>Position of treatment labels on x-axis (for 2-D
+plots).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ypos.labels</code></td>
+<td>
+<p>Position of treatment labels on y-axis (for 2-D
+plots).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset.x</code></td>
+<td>
+<p>Offset of treatment labels on x-axis (for 2-D
+plots).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset.y</code></td>
+<td>
+<p>Offset of treatment labels on y-axis (for 2-D
+plots).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex</code></td>
+<td>
+<p>Point size of treatments / edges.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Color for points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch</code></td>
+<td>
+<p>Point type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bg</code></td>
+<td>
+<p>Background color for points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adj.x</code></td>
+<td>
+<p>Adjustment for treatment label on x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adj.y</code></td>
+<td>
+<p>Adjustment for treatment label on y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adj.z</code></td>
+<td>
+<p>Adjustment for treatment label on z-axis (for 3-D
+plots).</p>
+</td>
+</tr>
+</table>
+<p><b>List element 'edges'</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>treat1</code></td>
+<td>
+<p>Name of first treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat2</code></td>
+<td>
+<p>Name of second treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.stud</code></td>
+<td>
+<p>Number of studies directly comparing treatments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xpos</code></td>
+<td>
+<p>Position of number of studies on x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ypos</code></td>
+<td>
+<p>Position of number of studies on y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adj</code></td>
+<td>
+<p>Adjustment of number of studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pos.number.of.studies</code></td>
+<td>
+<p>Position of number of studies on
+edge.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Color for edges.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Gerta Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>, Ulrike
+Krahn <a href="mailto:ulrike.krahn@bayer.com">ulrike.krahn@bayer.com</a>, Jochem König
+<a href="mailto:koenigjo@uni-mainz.de">koenigjo@uni-mainz.de</a>, Guido Schwarzer
+<a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Hall KM (1970):
+An r-dimensional quadratic placement algorithm.
+<em>Management Science</em>,
+<b>17</b>, 219–29
+</p>
+<p>Hu Y (2012):
+<em>Combinatorial Scientific Computing</em>, Chapter Algorithms for
+Visualizing Large Networks, pages 525–49.
+Chapman and Hall / CRC,  Computational Science.
+</p>
+<p>Kamada T, Kawai S (1989):
+An algorithm for drawing general undirected graphs.
+<em>Information Processing Letters</em>,
+<b>31</b>, 7–15
+</p>
+<p>Krahn U, Binder H, König J (2013):
+A graphical tool for locating inconsistency in network meta-analyses.
+<em>BMC Medical Research Methodology</em>,
+<b>13</b>, 35
+</p>
+<p>Michailidis G, de Leeuw J (2001):
+Data visualization through graph drawing.
+<em>Computational Statistics</em>,
+<b>16</b>, 435–50
+</p>
+<p>Rücker G, Schwarzer G (2016):
+Automated drawing of network plots in network meta-analysis.
+<em>Research Synthesis Methods</em>,
+<b>7</b>, 94–107
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(smokingcessation)
+
+# Transform data from arm-based format to contrast-based format
+#
+p1 &lt;- pairwise(list(treat1, treat2, treat3),
+  event = list(event1, event2, event3), n = list(n1, n2, n3),
+  data = smokingcessation, sm = "OR")
+
+# Conduct random effects network meta-analysis
+#
+net1 &lt;- netmeta(p1, common = FALSE)
+
+# Network graph with default settings
+#
+netgraph(net1)
+
+## Not run: 
+data(Senn2013)
+
+# Generation of an object of class 'netmeta' with reference
+# treatment 'plac'
+#
+net2 &lt;- netmeta(TE, seTE, treat1, treat2, studlab,
+  data = Senn2013, sm = "MD", reference = "plac")
+
+# Network graph with default settings
+#
+netgraph(net2)
+
+# Network graph with specified order of the treatments and one
+# highlighted comparison
+#
+trts &lt;- c("plac", "benf", "migl", "acar", "sulf",
+  "metf", "rosi", "piog", "sita", "vild")
+netgraph(net2, highlight = "rosi:plac", seq = trts)
+
+# Same network graph using argument 'seq' in netmeta function
+#
+net3 &lt;- netmeta(TE, seTE, treat1, treat2, studlab,
+  data = Senn2013, sm = "MD", reference = "plac", seq = trts)
+netgraph(net3, highlight = "rosi:plac")
+
+# Network graph optimized, starting from a circle, with multi-arm
+# study colored
+#
+netgraph(net2, start = "circle", iterate = TRUE,
+  multiarm = TRUE, col.multiarm = "purple")
+
+# Network graph optimized, starting from a circle, with multi-arm
+# study colored and all intermediate iteration steps visible
+#
+netgraph(net2, start = "circle", iterate = TRUE,
+  multiarm = TRUE, col.multiarm = "purple",
+  allfigures = TRUE)
+
+# Network graph optimized, starting from Laplacian eigenvectors,
+# with multi-arm study colored
+#
+netgraph(net2, start = "eigen",
+  multiarm = TRUE, col.multiarm = "purple")
+
+# Network graph optimized, starting from different Laplacian
+# eigenvectors, with multi-arm study colored
+#
+netgraph(net2, start = "prcomp",
+  multiarm = TRUE, col.multiarm = "purple")
+
+# Network graph optimized, starting from random initial layout,
+# with multi-arm study colored
+#
+netgraph(net2, start = "random",
+  multiarm = TRUE, col.multiarm = "purple")
+
+# Network graph without plastic look and one highlighted comparison
+#
+netgraph(net2, plastic = FALSE, highlight = "rosi:plac")
+
+# Network graph with same thickness for all comparisons
+#
+netgraph(net2, thickness = "equal")
+
+# Network graph with changed labels and specified order of the
+# treatments
+#
+netgraph(net2, seq = c(1, 3, 5, 2, 9, 4, 7, 6, 8, 10),
+  labels = LETTERS[1:10])
+
+# Rotate treatment labels (orthogonal to circle)
+#
+netgraph(net2, srt.labels = "o")
+
+# Network graph in 3-D (opens a new device, where you may rotate and
+# zoom the plot using the mouse / the mouse wheel).
+# The rgl package must be installed for 3-D plots.
+#
+netgraph(net2, dim = "3d")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

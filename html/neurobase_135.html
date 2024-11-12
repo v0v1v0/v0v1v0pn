@@ -1,0 +1,82 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>orient_rpi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reorient an Image to RPI orientation</h2>
+
+<h3>Description</h3>
+
+<p>Reorient an Image to RPI orientation
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">orient_rpi(file, verbose = TRUE)
+
+orient_rpi_file(file, verbose = TRUE)
+
+is_rpi_oriented(file, verbose = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>Object of class <code>nifti</code> or character path</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>print diagnostic messages</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of 3 elements
+</p>
+
+<ul>
+<li> <p><code>img</code>: Reoriented image of class <code>nifti</code>
+</p>
+</li>
+<li> <p><code>convention</code>: Convention (Neurological/Radiological) of original image
+</p>
+</li>
+<li> <p><code>orientation</code>: Original image orientations
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>'orient_rpi' and 'orient_rpi_file' uses 'RNifti' to ensure the 
+reading orientation
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">lr_fname = system.file( "nifti", "mniLR.nii.gz", package = "oro.nifti")
+img = readnii(lr_fname)
+
+rl_fname = system.file( "nifti", "mniRL.nii.gz", package = "oro.nifti")
+rl_img = readnii(rl_fname)
+stopifnot(all(rl_img[nrow(rl_img):1,,] == img))
+
+reor = orient_rpi(rl_fname)
+stopifnot(all(img == reor$img))
+
+rev = reverse_orient_rpi(reor$img, convention = reor$convention,
+orientation = reor$orientation)
+stopifnot(all(rev == rl_img))
+</code></pre>
+
+
+</div>

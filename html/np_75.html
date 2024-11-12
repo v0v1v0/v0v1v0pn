@@ -1,0 +1,423 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npqreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kernel Quantile Regression with Mixed Data Types</h2>
+
+<h3>Description</h3>
+
+<p><code>npqreg</code> computes a kernel quantile regression estimate of a one
+(1) dimensional dependent variable on <code class="reqn">p</code>-variate explanatory
+data, given a set of evaluation points, training points (consisting of
+explanatory data and dependent data), and a bandwidth specification
+using the methods of Li and Racine (2008) and Li, Lin and Racine
+(2013). A bandwidth specification can be a <code>condbandwidth</code> object,
+or a bandwidth vector, bandwidth type and kernel type.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npqreg(bws, ...)
+
+## S3 method for class 'formula'
+npqreg(bws, data = NULL, newdata = NULL, ...)
+
+## S3 method for class 'call'
+npqreg(bws, ...)
+
+## S3 method for class 'condbandwidth'
+npqreg(bws,
+       txdat = stop("training data 'txdat' missing"),
+       tydat = stop("training data 'tydat' missing"),
+       exdat,
+       tau = 0.5,
+       gradients = FALSE,
+       ftol = 1.490116e-07,
+       tol = 1.490116e-04,
+       small = 1.490116e-05,
+       itmax = 10000,
+       lbc.dir = 0.5,
+       dfc.dir = 3,
+       cfac.dir = 2.5*(3.0-sqrt(5)),
+       initc.dir = 1.0,
+       lbd.dir = 0.1,
+       hbd.dir = 1,
+       dfac.dir = 0.25*(3.0-sqrt(5)),
+       initd.dir = 1.0,
+       ...)
+
+## Default S3 method:
+npqreg(bws, txdat, tydat, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as a <code>condbandwidth</code>
+object returned from an invocation of <code>npcdistbw</code>, or
+as a vector of bandwidths, with each element <code class="reqn">i</code> corresponding
+to the bandwidth for column <code class="reqn">i</code> in <code>txdat</code>. If specified as
+a vector, then additional arguments will need to be supplied as
+necessary to specify the bandwidth type, kernel types, and so on.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+
+<p>a numeric value specifying the <code class="reqn">\tau</code>th quantile is
+desired. Defaults to <code>0.5</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the regression type,
+bandwidth type, kernel types, training data, and so on.
+To do this,
+you may specify any of <code>bwmethod</code>, <code>bwscaling</code>,
+<code>bwtype</code>, <code>cxkertype</code>, <code>cxkerorder</code>,
+<code>cykertype</code>, <code>cykerorder</code>, <code>uxkertype</code>,
+<code>uykertype</code>, <code>oxkertype</code>, <code>oykertype</code>, as described
+in <code>npcdistbw</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(bws)</code>, typically the environment from which
+<code>npcdistbw</code> was called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, the training data are used.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>txdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data (training data) used to
+calculate the regression estimators. Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>txdat</code>. Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of points on which the regression will be
+estimated (evaluation data). By default,
+evaluation takes place on the data provided by <code>txdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradients</code></td>
+<td>
+
+<p>[currently not supported] a logical value indicating that you want
+gradients computed and returned in the resulting <code>npregression</code>
+object. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>itmax</code></td>
+<td>
+
+<p>integer number of iterations before failure in the numerical
+optimization routine. Defaults to <code>10000</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ftol</code></td>
+<td>
+
+<p>fractional tolerance on the value of the cross-validation function
+evaluated at located minima (of order the machine precision or
+perhaps slightly larger so as not to be diddled by
+roundoff). Defaults to <code>1.490116e-07</code>
+(1.0e+01*sqrt(.Machine$double.eps)).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+
+<p>tolerance on the position of located minima of the cross-validation
+function (tol should generally be no smaller than the square root of
+your machine's floating point precision). Defaults to <code>
+      1.490116e-04 (1.0e+04*sqrt(.Machine$double.eps))</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>small</code></td>
+<td>
+
+<p>a small number used to bracket a minimum (it is hopeless to ask for
+a bracketing interval of width less than sqrt(epsilon) times its
+central value, a fractional width of only about 10-04 (single
+precision) or 3x10-8 (double precision)). Defaults to <code>small
+      = 1.490116e-05 (1.0e+03*sqrt(.Machine$double.eps))</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lbc.dir,dfc.dir,cfac.dir,initc.dir</code></td>
+<td>
+<p> lower bound, chi-square
+degrees of freedom, stretch factor, and initial non-random values
+for direction set search for Powell's algorithm for <code>numeric</code>
+variables. See Details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lbd.dir,hbd.dir,dfac.dir,initd.dir</code></td>
+<td>
+<p> lower bound, upper bound,
+stretch factor, and initial non-random values for direction set
+search for Powell's algorithm for categorical variables. See
+Details</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The optimizer invoked for search is Powell's conjugate direction
+method which requires the setting of (non-random) initial values and
+search directions for bandwidths, and, when restarting, random values
+for successive invocations. Bandwidths for <code>numeric</code> variables
+are scaled by robust measures of spread, the sample size, and the
+number of <code>numeric</code> variables where appropriate. Two sets of
+parameters for bandwidths for <code>numeric</code> can be modified, those
+for initial values for the parameters themselves, and those for the
+directions taken (Powell's algorithm does not involve explicit
+computation of the function's gradient). The default values are set by
+considering search performance for a variety of difficult test cases
+and simulated cases. We highly recommend restarting search a large
+number of times to avoid the presence of local minima (achieved by
+modifying <code>nmulti</code>). Further refinement for difficult cases can
+be achieved by modifying these sets of parameters. However, these
+parameters are intended more for the authors of the package to enable
+‘tuning’ for various methods rather than for the user themselves.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npqreg</code> returns a <code>npqregression</code> object.  The generic
+functions <code>fitted</code> (or <code>quantile</code>),
+<code>se</code>, <code>predict</code> (when using
+<code>predict</code> you must add the argument <code>tau=</code> to
+generate predictions other than the median), and
+<code>gradients</code>, extract (or generate) estimated values,
+asymptotic standard errors on estimates, predictions, and gradients,
+respectively, from the returned object. Furthermore, the functions
+<code>summary</code> and <code>plot</code> support objects of this
+type. The returned object has the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p> evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quantile</code></td>
+<td>
+<p> estimation of the quantile regression function
+(conditional quantile) at the  evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quanterr</code></td>
+<td>
+<p> standard errors of the quantile regression estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quantgrad</code></td>
+<td>
+<p> gradients at each evaluation point </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p> the <code class="reqn">\tau</code>th quantile computed </p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Hall, P. and J.S. Racine and Q. Li (2004), “Cross-validation
+and the estimation of conditional probability densities,” Journal of
+the American Statistical Association, 99, 1015-1026.
+</p>
+<p>Koenker, R. W. and G.W. Bassett (1978), “Regression
+quantiles,” Econometrica, 46, 33-50.
+</p>
+<p>Koenker, R. (2005), <em>Quantile Regression,</em> Econometric Society
+Monograph Series, Cambridge University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics:
+Theory and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2008), “Nonparametric estimation of
+conditional CDF and quantile functions with mixed categorical and
+continuous data,” Journal of Business and Economic Statistics, 26,
+423-434.
+</p>
+<p>Li, Q. and J. Lin and J.S. Racine (2013), “Optimal Bandwidth
+Selection for Nonparametric Conditional Distribution and Quantile
+Functions”, Journal of Business and Economic Statistics, 31, 57-65.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth
+estimators for discrete distributions,” Biometrika, 68, 301-309.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><span class="pkg">quantreg</span> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA): For this example, we compute a
+# bivariate nonparametric quantile regression estimate for Giovanni
+# Baiocchi's Italian income panel (see Italy for details)
+
+data("Italy")
+attach(Italy)
+
+# First, compute the cross-validated bandwidths.  Note - this may take a
+# few minutes depending on the speed of your computer...
+
+bw &lt;- npcdistbw(formula=gdp~ordered(year))
+
+# Note - numerical search for computing the quantiles may take a minute
+# or so...
+
+model.q0.25 &lt;- npqreg(bws=bw, tau=0.25)
+model.q0.50 &lt;- npqreg(bws=bw, tau=0.50)
+model.q0.75 &lt;- npqreg(bws=bw, tau=0.75)
+
+# Plot the resulting quantiles manually...
+
+plot(ordered(year), gdp, 
+     main="CDF Quantile Estimates for the Italian Income Panel", 
+     xlab="Year", 
+     ylab="GDP Quantiles")
+
+lines(ordered(year), model.q0.25$quantile, col="red", lty=2)
+lines(ordered(year), model.q0.50$quantile, col="blue", lty=3)
+lines(ordered(year), model.q0.75$quantile, col="red", lty=2)
+
+legend(ordered(1951), 32, c("tau = 0.25", "tau = 0.50", "tau = 0.75"), 
+       lty=c(2, 3, 2), col=c("red", "blue", "red"))
+
+detach(Italy)
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): For this example, we compute a
+# bivariate nonparametric quantile regression estimate for Giovanni
+# Baiocchi's Italian income panel (see Italy for details)
+
+data("Italy")
+attach(Italy)
+data &lt;- data.frame(ordered(year), gdp)
+
+# First, compute the likelihood cross-validation bandwidths (default).
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+bw &lt;- npcdistbw(xdat=ordered(year), ydat=gdp)
+
+# Note - numerical search for computing the quantiles will take a
+# minute or so...
+
+model.q0.25 &lt;- npqreg(bws=bw, tau=0.25)
+model.q0.50 &lt;- npqreg(bws=bw, tau=0.50)
+model.q0.75 &lt;- npqreg(bws=bw, tau=0.75)
+
+# Plot the resulting quantiles manually...
+
+plot(ordered(year), gdp, 
+     main="CDF Quantile Estimates for the Italian Income Panel", 
+     xlab="Year", 
+     ylab="GDP Quantiles")
+
+lines(ordered(year), model.q0.25$quantile, col="red", lty=2)
+lines(ordered(year), model.q0.50$quantile, col="blue", lty=3)
+lines(ordered(year), model.q0.75$quantile, col="red", lty=2)
+
+legend(ordered(1951), 32, c("tau = 0.25", "tau = 0.50", "tau = 0.75"), 
+       lty=c(2, 3, 2), col=c("red", "blue", "red"))
+
+detach(Italy)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

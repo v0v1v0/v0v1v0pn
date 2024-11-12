@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.nn2poly</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predict method for <code>nn2poly</code> objects.</h2>
+
+<h3>Description</h3>
+
+<p>Predicted values obtained with a <code>nn2poly</code> object on given data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nn2poly'
+predict(object, newdata, layers = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Object of class inheriting from 'nn2poly'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>Input data as matrix, vector or dataframe.
+Number of columns (or elements in vector) should be the number of variables
+in the polynomial (dimension p). Response variable to be predicted should
+not be included.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layers</code></td>
+<td>
+<p>Vector containing the chosen layers from <code>object</code> to be
+evaluated. If set to <code>NULL</code>, all layers are computed. Default is set
+to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to or from other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Internally uses <code>eval_poly()</code> to obtain the predictions. However, this only
+works with a objects of class <code>nn2poly</code> while <code>eval_poly()</code> can be used
+with a manually created polynomial in list form.
+</p>
+<p>When <code>object</code> contains all the internal polynomials also, as given by
+<code>nn2poly(object, keep_layers = TRUE)</code>, it is important to note that there
+are two polynomial items per layer (input/output). These polynomial items will
+also contain several polynomials of the same structure, one per neuron in the
+layer, stored as matrix rows in <code>$values</code>. Please see the NN2Poly
+original paper for more details.
+</p>
+<p>Note also that "linear" layers will contain the same input and output results
+as Taylor expansion is not used and thus the polynomials are also the same.
+Because of this, in the situation of evaluating multiple layers we provide
+the final layer with "input" and "output" even if they are the same, for
+consistency.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a matrix or list of matrices with the evaluation of each
+polynomial at each layer as given by the provided <code>object</code> of class
+<code>nn2poly</code>.
+</p>
+<p>If <code>object</code> contains the polynomials of the last layer, as given by
+<code>nn2poly(object, keep_layers = FALSE)</code>, then the output is a matrix with
+the evaluation of each data point on each polynomial. In this matrix, each
+column represents the evaluation of a polynomial and each column corresponds
+to each point in the new data to be evaluated.
+</p>
+<p>If <code>object</code> contains all the internal polynomials also, as given by
+<code>nn2poly(object, keep_layers = TRUE)</code>, then the output is a list of
+layers (represented by <code>layer_i</code>), where each one is another list with
+<code>input</code> and <code>output</code> elements, where each one contains a matrix
+with the evaluation of the "input" or "output" polynomial at the given layer,
+as explained in the case without internal polynomials.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nn2poly()</code>: function that obtains the <code>nn2poly</code> polynomial
+object, <code>eval_poly()</code>: function that can evaluate polynomials in general,
+<code>stats::predict()</code>: generic predict function.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Build a NN structure with random weights, with 2 (+ bias) inputs,
+# 4 (+bias) neurons in the first hidden layer with "tanh" activation
+# function, 4 (+bias) neurons in the second hidden layer with "softplus",
+# and 1 "linear" output unit
+
+weights_layer_1 &lt;- matrix(rnorm(12), nrow = 3, ncol = 4)
+weights_layer_2 &lt;- matrix(rnorm(20), nrow = 5, ncol = 4)
+weights_layer_3 &lt;- matrix(rnorm(5), nrow = 5, ncol = 1)
+
+# Set it as a list with activation functions as names
+nn_object = list("tanh" = weights_layer_1,
+                 "softplus" = weights_layer_2,
+                 "linear" = weights_layer_3)
+
+# Obtain the polynomial representation (order = 3) of that neural network
+final_poly &lt;- nn2poly(nn_object, max_order = 3)
+
+# Define some new data, it can be vector, matrix or dataframe
+newdata &lt;- matrix(rnorm(10), ncol = 2, nrow = 5)
+
+# Predict using the obtained polynomial
+predict(object = final_poly, newdata = newdata)
+
+# Change the last layer to have 3 outputs (as in a multiclass classification)
+# problem
+weights_layer_4 &lt;- matrix(rnorm(20), nrow = 5, ncol = 4)
+
+# Set it as a list with activation functions as names
+nn_object = list("tanh" = weights_layer_1,
+                 "softplus" = weights_layer_2,
+                 "linear" = weights_layer_4)
+
+# Obtain the polynomial representation of that neural network
+# Polynomial representation of each hidden neuron is given by
+final_poly &lt;- nn2poly(nn_object, max_order = 3, keep_layers = TRUE)
+
+# Define some new data, it can be vector, matrix or dataframe
+newdata &lt;- matrix(rnorm(10), ncol = 2, nrow = 5)
+
+# Predict using the obtained polynomials (for all layers)
+predict(object = final_poly, newdata = newdata)
+
+# Predict using the obtained polynomials (for chosen layers)
+predict(object = final_poly, newdata = newdata, layers = c(2,3))
+
+</code></pre>
+
+
+</div>

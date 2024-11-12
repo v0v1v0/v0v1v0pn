@@ -1,0 +1,344 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compareROCindep</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Comparison of k independent ROC curves
+</h2>
+
+<h3>Description</h3>
+
+<p>This function compares k ROC curves from independent data. Different statistics can be considered in order to perform the comparison: those ones included in <em>Martinez-Camblor et al. (2011)</em> based on distances, the <em>Venkatraman (2000)</em> methodology for comparing curves for continuous unpaired data and one based in AUC (area under the curve) comparison. See <em>References</em> below.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compareROCindep(X, G, D, ...)
+## Default S3 method:
+compareROCindep(X, G, D, statistic=c("L1","L2","CR","other","VK","AUC"),
+                FUN.stat.int=function(roc.i, roc){mean(abs(roc.i - roc))},
+                FUN.stat.cons=function(n.cases, n.controls){sqrt(n.cases)},
+                side=c("right","left"), Ni=1000, raw=FALSE, perm=500,
+                seed=123, plot.roc=TRUE, type='s', lwd=3,
+                lwd.curves=rep(2,length(table(G))), lty=1,
+                lty.curves=rep(1,length(table(G))), col='black',
+                col.curves=rainbow(length(table(G))), cex.lab=1.2,
+                legend=c(sapply(1:length(table(G)),function(i){
+                eval(bquote(expression(hat(R)[.(i)](t))))}),
+                expression(hat(R)(t))), legend.position='bottomright',
+                legend.inset=0.03, cex.legend=1, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X </code></td>
+<td>
+
+<p>vector of (bio)marker values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>G </code></td>
+<td>
+
+<p>vector of group identifier values (it should have as levels as independent samples to compare).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D </code></td>
+<td>
+
+<p>the vector of response values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic </code></td>
+<td>
+
+<p>the statistic used in order to compare the curves. One of "L1" (<code class="reqn">L_1</code>-measure), "L2" (<code class="reqn">L_2</code>-measure), "CR" (Cramer-von Mises), "other" (another statistic defined by <code class="reqn">\sum_{i=1}^k</code> <code>FUN.stat.cons</code> <code class="reqn">\cdot</code> <code>FUN.stat.int</code>), "VK" (Venkatraman) or "AUC" (area under the curve).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN.stat.int </code></td>
+<td>
+
+<p>a function of two variables, <code>roc.i</code> and <code>roc</code> standing for ROC curve estimate for the <code class="reqn">i-th</code> sample and mean ROC curve estimate along the k samples, respectively. This function represents the integral to consider in case of <code>statistic="other"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN.stat.cons </code></td>
+<td>
+
+<p>a function of two variables, <code>n.cases</code> and <code>n.controls</code> standing for the cases and controls sample size, respectively. This function represents the constant to multiply <code>FUN.stat.int</code> above in case of <code>statistic="other"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>side </code></td>
+<td>
+
+<p>type of ROC curve. One of "right" or "left". If <code>method="VK"</code> only right-sided could be considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ni </code></td>
+<td>
+
+<p>number of subintervals of the unit interval (FPR values) considered to calculate the curve. Default: 1000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>raw </code></td>
+<td>
+
+<p>if TRUE, raw data is considered; if FALSE, data is ranked and a method to break ties in the permutations is considered (see <em>Venkatraman (2000)</em> in <em>References</em>). Default: FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>perm </code></td>
+<td>
+
+<p>number of permutations. Default: 500.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed </code></td>
+<td>
+
+<p>seed considered to generate the permutations (for reproducibility). Default: 123.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.roc </code></td>
+<td>
+
+<p>if TRUE, a plot including ROC curve estimates for the k samples and the mean of all of them is displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type </code></td>
+<td>
+
+<p>what type of plot should be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd </code></td>
+<td>
+
+<p>the line width to be used for mean ROC curve estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd.curves </code></td>
+<td>
+
+<p>a vector with the line widths to be used for ROC curve estimates of each sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty </code></td>
+<td>
+
+<p>the line type to be used for mean ROC curve estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty.curves </code></td>
+<td>
+
+<p>a vector with the line types to be used for ROC curve estimates of each sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col </code></td>
+<td>
+
+<p>the color to be used for mean ROC curve estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.curves </code></td>
+<td>
+
+<p>a vector with the colors to be used for ROC curve estimates of each sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.lab </code></td>
+<td>
+
+<p>the magnification to be used for x and y labels relative to the current setting of <code>cex</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend </code></td>
+<td>
+
+<p>a character or expression vector to appear in the legend.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend.position, legend.inset, cex.legend </code></td>
+<td>
+
+<p>the position of the legend, the inset distance from the margins as a fraction of the plot region when legend is placed, and the character expansion factor relative to current <code>par("cex")</code>, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>another graphical parameters to be passed.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If the Venkatraman statistic is chosen in order to compare left-sided ROC curves, an error will be displayed and it will not work. The Venkatraman methodology is just implemented for right-sided ROC curves.
+</p>
+<p>If <code>raw=FALSE</code> the data will be ranked in each sample using the <code>rank</code> function with <code>ties.method='first'</code> option. Furthermore, the permutation samples possible ties will be broken using <code>ties.method='random'</code> option.
+</p>
+<p>The statistic is defined by <code class="reqn">\sum_{i=1}^k</code> <code>statistic.cons</code> <code class="reqn">\cdot</code> <code>statistic.int</code> where <code>statistic.cons</code> = <code>FUN.stat.cons</code>('number of cases in the i-th sample', 'number of controls in the i-th sample') and <code>statistic.int</code> = <code>FUN.stat.int</code>('ROC curve estimate from the i-th sample', 'mean ROC curve estimate along the k samples'). It is usual to consider the function <code>FUN.stat.int</code> as an integral of a distance between <code class="reqn">\hat{R}_i(t)</code> and <code class="reqn">\hat{R}(t)</code> where <code class="reqn">\hat{R}(t) := k^{-1} \sum_{i=1}^k \hat{R}_i(t)</code>.
+</p>
+<p>The statistics implemented are defined by the following <code>FUN.stat.cons</code> and <code>FUN.stat.int</code> functions:
+</p>
+
+<ul>
+<li>
+<p><code>statistic="L1"</code>:
+</p>
+<p><code>FUN.stat.int(roc.i, roc) = mean(abs(roc.i - roc))</code>
+</p>
+<p><code>FUN.stat.cons(n.cases, n.controls) = sqrt(n.cases)</code>
+</p>
+</li>
+<li>
+<p><code>statistic="L2"</code>:
+</p>
+<p><code>FUN.stat.int(roc.i, roc) = mean((roc.i - roc)^2)</code>
+</p>
+<p><code>FUN.stat.cons(n.cases, n.controls) = n.cases</code>
+</p>
+</li>
+<li>
+<p><code>statistic="CR"</code>:
+</p>
+<p><code>FUN.stat.int(roc.i, roc) = mean((roc.i[seq(2,2*Ni+1,2)] -</code>
+</p>
+<p><code>      roc[seq(2,2*Ni+1,2)])^2 * (roc[seq(3,2*Ni+1,2)] - roc[seq(1,2*Ni-1,2)]))</code>.
+</p>
+<p><code>FUN.stat.cons(n.cases, n.controls) = n.cases</code>
+</p>
+<p>In order to use this statistic, the ROC curves have been estimated in a grid with <code>2*Ni</code> subintervals of the unit interval.
+</p>
+</li>
+</ul>
+<p>The permutation method proposed in <em>Venkatraman (2000)</em> is used in order to generate the <code>perm</code> samples in all methodologies (i.e., any <code>statistic</code>).
+</p>
+<p>In case of <code>statistic="VK"</code> the Venkatraman methodology (see <em>References</em> below) is computed to calculate the statistic. If <code class="reqn">k&gt;2</code> the statistic value is the sum of the statistic values of each pair such that <code class="reqn">i &lt; j</code>.
+</p>
+<p>In case of <code>statistic="AUC"</code>, the statistic considered is <code class="reqn">k^{-1} \sum_{i=1}^k | \widehat{AUC}_i - \widehat{AUC} |</code> where <code class="reqn">\hat{AUC}</code> is the mean of <code class="reqn">\hat{AUC}_i</code> along the k samples.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n.controls </code></td>
+<td>
+
+<p>vector of number of controls in each sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.cases </code></td>
+<td>
+
+<p>vector of number of cases in each sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>controls.k </code></td>
+<td>
+
+<p>a vector of all controls along the k samples, ordered by sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cases.k </code></td>
+<td>
+
+<p>a vector of all cases along the k samples, ordered by sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic </code></td>
+<td>
+
+<p>the value of the test statistic.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat.perm </code></td>
+<td>
+
+<p>a vector of statistic values for permutations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value </code></td>
+<td>
+
+<p>the p-value for the test.
+</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Venkatraman E.S., 2000, A permutation test to compare receiver operating characteristic curves, <em>Biometrics</em>, <b>56</b>, 1134-1138.
+</p>
+<p>Martinez-Camblor P., Carleos C., Corral N., 2011, Powerful nonparametric statistics to compare k independent ROC curves, <em>Journal of Applied Statistics</em>, <b>38</b>(7), 1317-1332.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123)
+X1 &lt;- c(rnorm(45), rnorm(30,2,1.5))
+D1 &lt;- c(rep(0,45), rep(1,30))
+X2 &lt;- c(rnorm(45), rnorm(38,3,1.5))
+D2 &lt;- c(rep(0,45), rep(1,38))
+X3 &lt;- c(rnorm(30), rnorm(42,3,1))
+D3 &lt;- c(rep(0,30), rep(1,42))
+X &lt;- c(X1, X2, X3)
+D &lt;- c(D1, D2, D3)
+G &lt;- c(rep(1,75), rep(2,83), rep(3,72))
+
+# Default method: L1 statistic proposed in Martinez-Camblor
+output &lt;- compareROCindep(X, G, D)
+
+# Venkatraman statistic
+output1 &lt;- compareROCindep(X, G, D, statistic="VK")
+
+# DeLong AUC comparison methodology
+output2 &lt;- compareROCindep(X, G, D, statistic="AUC")
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>perform_regression</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Regression based Z score</h2>
+
+<h3>Description</h3>
+
+<p>Make multiple models using linear regression and calculate Z-score
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">perform_regression(nipt_sample, nipt_control_group, chromo_focus,
+  n_models = 4, n_predictors = 4, exclude_chromosomes = NULL,
+  include_chromosomes = NULL, use_test_train_set = T,
+  size_of_train_set = 0.6, overdispersion_rate = 1.15,
+  force_practical_cv = F)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nipt_sample</code></td>
+<td>
+<p>The NIPTSample object that is the focus of the analysis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nipt_control_group</code></td>
+<td>
+<p>The NIPTControlGroup object used in the analysis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chromo_focus</code></td>
+<td>
+<p>The chromosome of interest. Most commonly chromosome 13, 18 or 21.
+However, every autosomal chromosome can be predicted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_models</code></td>
+<td>
+<p>Integer Number of linear models to be made. Default setting is 4 models</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_predictors</code></td>
+<td>
+<p>Integer The number of predictors each model contains. Default is 4</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude_chromosomes</code></td>
+<td>
+<p>integer. Exclude which autosomal chromosomes as potential predictors? 
+Default potential trisomic chromosomes 13, 18 and 21 are exluded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_chromosomes</code></td>
+<td>
+<p>integer. Include potential trisomic chromosomes? 
+Options are: chromosomes 13, 18 and 21</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use_test_train_set</code></td>
+<td>
+<p>Use a test and train set to build the models? Default is TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size_of_train_set</code></td>
+<td>
+<p>The size of the train set expressed in a decimal. 
+Default is 0.6 (60 of the control samples)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overdispersion_rate</code></td>
+<td>
+<p>The standard error of the mean is multiplied by this factor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_practical_cv</code></td>
+<td>
+<p>Boolean, Ignore the theoretical CV and always use the practical CV?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The regression based Z-score builds <em>n</em> models with <em>m</em> predictors using stepwise regression 
+with forward selection. The models are used to predict the chromosomal fraction of interest, for the 
+sample and for the control group. The observed fractions are then divided by the expected fraction, 
+and Z-scores are calculated over these ratios. The Z-score is calculated by subtracting one from the 
+ratio of the sample and dividing this result by the coefficient of variation. 
+The coefficient of variation (CV) can either be the Practical or Theoretical CV. 
+The Theoretical CV is the standard error multiplied by the overdispersion. 
+Theoretically, the CV cannot be lower than the standard error of the mean. 
+If it is case the CV is lower than Theoretical CV, then the Theoretical CV is used.  
+</p>
+<p>The output of this function is an object of type RegressionResult, a named list containing: 
+</p>
+
+<ul>
+<li> <p><strong>prediction_statistics</strong> A dataframe with 7 rows and a column for every model. The rows are: 
+</p>
+
+<ul>
+<li> <p><strong>Z_score_sample</strong> The regression based Z score for the model
+</p>
+</li>
+<li> <p><strong>CV</strong> The coefficient of varation for the model
+</p>
+</li>
+<li> <p><strong>cv_types</strong> The CV type used to calculate the regression based Z score for the model. Either 
+<em>Practical_CV</em> or <em>Theoretical_CV</em>
+</p>
+</li>
+<li> <p><strong>P_value_shapiro</strong> The P value of the Shaipro-Wilk test for normality of the control group
+regression based Z scores for the model
+</p>
+</li>
+<li> <p><strong>Predictor_chromosomes</strong> The predictor chromosomes used in the model
+</p>
+</li>
+<li> <p><strong>Mean_test_set</strong> The mean of the test set. Note that for calculating the regression based
+Z scores the mean is replaced by one. The mean, however, can be seen as a quality metric for the model 
+</p>
+</li>
+<li> <p><strong>CV_train_set</strong> The CV of the train set. The difference between this CV and the CV of 
+the test can be used as a measure to quantify overfit
+</p>
+</li>
+</ul>
+</li>
+<li> <p><strong>control_group_Zscores</strong>  A matrix containing the regression based Z-scores for the control sample
+</p>
+</li>
+<li> <p><strong>focus_chromosome</strong> he chromosome of interest. Most commonly chromosome 13, 18 or 21. 
+However, every autosomal chromosome can be predicted
+</p>
+</li>
+<li> <p><strong>correction_status</strong> The correction status of the control group autosomes
+</p>
+</li>
+<li> <p><strong>control_group_sample_names</strong> The sample names of the test set group
+</p>
+</li>
+<li> <p><strong>models</strong> List of the summary.lm output for every model
+</p>
+</li>
+<li> <p><strong>potential_predictors</strong> The total pool of chromosomes where the predictors are selected from
+</p>
+</li>
+<li> <p><strong>all_control_group_Z_scores</strong> Z-scores for every sample using theoretical and practical VCs
+</p>
+</li>
+<li> <p><strong>additional_statistics</strong> Statistics for both the practical and theoretical CVs for every prediction set
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>RegressionResult object
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+regression_score_21 &lt;- perform_regression(nipt_sample = sample_of_interest, 
+                       nipt_control_group = control_group, chromo_focus = 21)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

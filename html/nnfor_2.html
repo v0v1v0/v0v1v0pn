@@ -1,0 +1,293 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>elm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extreme learning machines for time series forecasting</h2>
+
+<h3>Description</h3>
+
+<p>This function fits ELM neural networks for time series forecasting.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">elm(
+  y,
+  m = frequency(y),
+  hd = NULL,
+  type = c("lasso", "ridge", "step", "lm"),
+  reps = 20,
+  comb = c("median", "mean", "mode"),
+  lags = NULL,
+  keep = NULL,
+  difforder = NULL,
+  outplot = c(FALSE, TRUE),
+  sel.lag = c(TRUE, FALSE),
+  direct = c(FALSE, TRUE),
+  allow.det.season = c(TRUE, FALSE),
+  det.type = c("auto", "bin", "trg"),
+  xreg = NULL,
+  xreg.lags = NULL,
+  xreg.keep = NULL,
+  barebone = c(FALSE, TRUE),
+  model = NULL,
+  retrain = c(FALSE, TRUE)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Input time series. Can be ts or msts object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>Frequency of the time series. By default it is picked up from y.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hd</code></td>
+<td>
+<p>Number of hidden nodes. This can be a vector, where each number represents the number of hidden nodes of a different hidden layer. Use NULL to automatically specify.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Estimation type for output layer weights. Can be "lasso" (lasso with CV), "ridge" (ridge regression with CV), "step" (stepwise regression with AIC) or "lm" (linear regression).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+<p>Number of networks to train, the result is the ensemble forecast.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb</code></td>
+<td>
+<p>Combination operator for forecasts when reps &gt; 1. Can be "median", "mode" (based on KDE estimation) and "mean".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lags</code></td>
+<td>
+<p>Lags of y to use as inputs. If none provided then 1:frequency(y) is used. Use 0 for no univariate lags.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep</code></td>
+<td>
+<p>Logical vector to force lags to stay in the model if sel.lag == TRUE. If NULL then it keep = rep(FALSE,length(lags)).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>difforder</code></td>
+<td>
+<p>Vector including the differencing lags. For example c(1,12) will apply first and seasonal (12) differences. For no differencing use 0. For automatic selection use NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outplot</code></td>
+<td>
+<p>Provide plot of model fit. Can be TRUE or FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sel.lag</code></td>
+<td>
+<p>Automatically select lags. Can be TRUE or FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direct</code></td>
+<td>
+<p>Use direct input-output connections to model strictly linear effects. Can be TRUE or FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow.det.season</code></td>
+<td>
+<p>Permit modelling seasonality with deterministic dummies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>det.type</code></td>
+<td>
+<p>Type of deterministic seasonality dummies to use. This can be "bin" for binary or "trg" for a sine-cosine pair. With "auto" if ony a single seasonality is used and periodicity is up to 12 then "bin" is used, otherwise "trg".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xreg</code></td>
+<td>
+<p>Exogenous regressors. Each column is a different regressor and the sample size must be at least as long as the target in-sample set, but can be longer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xreg.lags</code></td>
+<td>
+<p>This is a list containing the lags for each exogenous variable. Each list is a numeric vector containing lags. If xreg has 3 columns then the xreg.lags list must contain three elements. If NULL then it is automatically specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xreg.keep</code></td>
+<td>
+<p>List of logical vectors to force lags of xreg to stay in the model if sel.lag == TRUE. If NULL then all exogenous lags can be removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>barebone</code></td>
+<td>
+<p>Use an alternative elm implementation (written in R) that is faster when the number of inputs is very high. Typically not needed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A previously trained mlp object. If this is provided then the same model is fitted to y, without re-estimating any model parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>retrain</code></td>
+<td>
+<p>If a previous model is provided, retrain the network or not. If the network is retrained the size of the hidden layer is reset.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return object of class <code>elm</code>. If barebone == TRUE then the object inherits a second class "<code>elm.fast</code>".
+The function <code>plot</code> produces a plot the network architecture.
+<code>elm</code> contains:
+</p>
+
+<ul>
+<li> <p><code>net</code> - ELM networks. If it is of class "<code>elm.fast</code>" then this is NULL.
+</p>
+</li>
+<li> <p><code>hd</code> - Number of hidden nodes. If it is of class "<code>elm.fast</code>" this is a vector with a different number for each repetition.
+</p>
+</li>
+<li> <p><code>W.in</code> - NULL unless it is of class "<code>elm.fast</code>". Contains the input weights.
+</p>
+</li>
+<li> <p><code>W</code> - Output layer weights for each repetition.
+</p>
+</li>
+<li> <p><code>b</code> - Contains the output node bias for each training repetition.
+</p>
+</li>
+<li> <p><code>W.dct</code> - Contains the direct connection weights if argument direct == TRUE. Otherwise is NULL.
+</p>
+</li>
+<li> <p><code>lags</code> - Input lags used.
+</p>
+</li>
+<li> <p><code>xreg.lags</code> - <code>xreg</code> lags used.
+</p>
+</li>
+<li> <p><code>difforder</code> - Differencing used.
+</p>
+</li>
+<li> <p><code>sdummy</code> - Use of deterministic seasonality.
+</p>
+</li>
+<li> <p><code>ff</code> - Seasonal frequencies detected in data (taken from ts or msts object).
+</p>
+</li>
+<li> <p><code>ff.det</code> - Seasonal frequencies coded using deterministic dummies.
+</p>
+</li>
+<li> <p><code>det.type</code> - Type of determistic seasonality.
+</p>
+</li>
+<li> <p><code>y</code> - Input time series.
+</p>
+</li>
+<li> <p><code>minmax</code> - Scaling structure.
+</p>
+</li>
+<li> <p><code>xreg.minmax</code> - Scaling structure for xreg variables.
+</p>
+</li>
+<li> <p><code>comb</code> - Combination operator used.
+</p>
+</li>
+<li> <p><code>type</code> - Estimation used for output layer weights.
+</p>
+</li>
+<li> <p><code>direct</code> - Presence of direct input-output connections.
+</p>
+</li>
+<li> <p><code>fitted</code> - Fitted values.
+</p>
+</li>
+<li> <p><code>MSE</code> - In-sample Mean Squared Error.
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>To use elm with Temporal Hierarchies (<a href="https://cran.r-project.org/package=thief">thief</a> package) see <code>elm.thief</code>.
+The elm function by default calls the <code>neuralnet</code> function. If barebone == TRUE then it uses an alternative implementation (<code>TStools:::elm.fast</code>) which is more appropriate when the number of inputs is several hundreds.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nikolaos Kourentzes, <a href="mailto:nikolaos@kourentzes.com">nikolaos@kourentzes.com</a>
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> For an introduction to neural networks see: Ord K., Fildes R., Kourentzes N. (2017) <a href="https://kourentzes.com/forecasting/2017/10/16/new-forecasting-book-principles-of-business-forecasting-2e/">Principles of Business Forecasting 2e</a>. <em>Wessex Press Publishing Co.</em>, Chapter 10.
+</p>
+</li>
+<li>
+<p> For combination operators see: Kourentzes N., Barrow B.K., Crone S.F. (2014) <a href="https://kourentzes.com/forecasting/2014/04/19/neural-network-ensemble-operators-for-time-series-forecasting/">Neural network ensemble operators for time series forecasting</a>. <em>Expert Systems with Applications</em>, <b>41</b>(<b>9</b>), 4235-4244.
+</p>
+</li>
+<li>
+<p> For variable selection see: Crone S.F., Kourentzes N. (2010) <a href="https://kourentzes.com/forecasting/2010/04/19/feature-selection-for-time-series-prediction-a-combined-filter-and-wrapper-approach-for-neural-networks/">Feature selection for time series prediction – A combined filter and wrapper approach for neural networks</a>. <em>Neurocomputing</em>, <b>73</b>(<b>10</b>), 1923-1936.
+</p>
+</li>
+<li>
+<p> For ELMs see: Huang G.B., Zhou H., Ding X. (2006) Extreme learning machine: theory and applications. <em>Neurocomputing</em>, <b>70</b>(<b>1</b>), 489-501.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>forecast.elm</code>, <code>elm.thief</code>, <code>mlp</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+ fit &lt;- elm(AirPassengers)
+ print(fit)
+ plot(fit)
+ frc &lt;- forecast(fit,h=36)
+ plot(frc)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

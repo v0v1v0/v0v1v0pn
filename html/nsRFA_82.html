@@ -1,0 +1,188 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>GENPAR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Three parameter generalized Pareto distribution and L-moments</h2>
+
+<h3>Description</h3>
+
+<p><code>GENPAR</code> provides the link between L-moments of a sample and the three parameter
+generalized Pareto distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">f.genpar (x, xi, alfa, k)
+F.genpar (x, xi, alfa, k)
+invF.genpar (F, xi, alfa, k)
+Lmom.genpar (xi, alfa, k)
+par.genpar (lambda1, lambda2, tau3)
+rand.genpar (numerosita, xi, alfa, k)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of quantiles</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xi</code></td>
+<td>
+<p>vector of genpar location parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alfa</code></td>
+<td>
+<p>vector of genpar scale parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>vector of genpar shape parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F</code></td>
+<td>
+<p>vector of probabilities</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda1</code></td>
+<td>
+<p>vector of sample means</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda2</code></td>
+<td>
+<p>vector of L-variances</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau3</code></td>
+<td>
+<p>vector of L-CA (or L-skewness)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numerosita</code></td>
+<td>
+<p>numeric value indicating the length of the vector to be generated</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See <a href="https://en.wikipedia.org/wiki/Pareto_distribution">https://en.wikipedia.org/wiki/Pareto_distribution</a> for an introduction to the Pareto distribution.
+</p>
+<p><b>Definition</b>
+</p>
+<p>Parameters (3): <code class="reqn">\xi</code> (location), <code class="reqn">\alpha</code> (scale), <code class="reqn">k</code> (shape).
+</p>
+<p>Range of <code class="reqn">x</code>: <code class="reqn">\xi &lt; x \le \xi + \alpha / k</code> if <code class="reqn">k&gt;0</code>;
+<code class="reqn">\xi \le x &lt; \infty</code> if <code class="reqn">k \le 0</code>.
+</p>
+<p>Probability density function:
+</p>
+<p style="text-align: center;"><code class="reqn">f(x) = \alpha^{-1} e^{-(1-k)y}</code>
+</p>
+
+<p>where <code class="reqn">y = -k^{-1}\log\{1 - k(x - \xi)/\alpha\}</code> if <code class="reqn">k \ne 0</code>,
+<code class="reqn">y = (x-\xi)/\alpha</code> if <code class="reqn">k=0</code>.
+</p>
+<p>Cumulative distribution function:
+</p>
+<p style="text-align: center;"><code class="reqn">F(x) = 1-e^{-y}</code>
+</p>
+
+<p>Quantile function:
+<code class="reqn">x(F) = \xi + \alpha[1-(1-F)^k]/k</code> if <code class="reqn">k \ne 0</code>,
+<code class="reqn">x(F) = \xi - \alpha \log(1-F)</code> if <code class="reqn">k=0</code>.
+</p>
+<p><code class="reqn">k=0</code> is the exponential distribution; <code class="reqn">k=1</code> is the uniform distribution on the interval <code class="reqn">\xi &lt; x \le \xi + \alpha</code>.
+</p>
+<p><b>L-moments</b>
+</p>
+<p>L-moments are defined for <code class="reqn">k&gt;-1</code>.
+</p>
+<p style="text-align: center;"><code class="reqn">\lambda_1 = \xi + \alpha/(1+k)]</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\lambda_2 = \alpha/[(1+k)(2+k)]</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\tau_3 = (1-k)/(3+k)</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\tau_4 = (1-k)(2-k)/[(3+k)(4+k)]</code>
+</p>
+
+<p>The relation between <code class="reqn">\tau_3</code> and <code class="reqn">\tau_4</code> is given by
+</p>
+<p style="text-align: center;"><code class="reqn">\tau_4 = \frac{\tau_3 (1 + 5 \tau_3)}{5+\tau_3}</code>
+</p>
+
+<p><b>Parameters</b>
+</p>
+<p>If <code class="reqn">\xi</code> is known, <code class="reqn">k=(\lambda_1 - \xi)/\lambda_2 - 2</code> and <code class="reqn">\alpha=(1+k)(\lambda_1 - \xi)</code>;
+if <code class="reqn">\xi</code> is unknown, <code class="reqn">k=(1 - 3 \tau_3)/(1 + \tau_3)</code>, <code class="reqn">\alpha=(1+k)(2+k)\lambda_2</code> and
+<code class="reqn">\xi=\lambda_1 - (2+k)\lambda_2</code>.
+</p>
+<p><code>Lmom.genpar</code> and <code>par.genpar</code> accept input as vectors of equal length. In <code>f.genpar</code>, <code>F.genpar</code>, <code>invF.genpar</code> and <code>rand.genpar</code> parameters (<code>xi</code>, <code>alfa</code>, <code>k</code>) must be atomic.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>f.genpar</code> gives the density <code class="reqn">f</code>, <code>F.genpar</code> gives the distribution function <code class="reqn">F</code>, <code>invF.genpar</code> gives
+the quantile function <code class="reqn">x</code>, <code>Lmom.genpar</code> gives the L-moments (<code class="reqn">\lambda_1</code>, <code class="reqn">\lambda_2</code>, <code class="reqn">\tau_3</code>, <code class="reqn">\tau_4</code>), <code>par.genpar</code>
+gives the parameters (<code>xi</code>, <code>alfa</code>, <code>k</code>), and <code>rand.genpar</code> generates random deviates.
+</p>
+
+
+<h3>Note</h3>
+
+<p>For information on the package and the Author, and for all the references, see <code>nsRFA</code>.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rnorm</code>, <code>runif</code>, <code>EXP</code>, <code>GENLOGIS</code>, <code>GEV</code>, <code>GUMBEL</code>, <code>KAPPA</code>, <code>LOGNORM</code>, <code>P3</code>; <code>DISTPLOTS</code>, <code>GOFmontecarlo</code>, <code>Lmoments</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(hydroSIMN)
+annualflows
+summary(annualflows)
+x &lt;- annualflows["dato"][,]
+fac &lt;- factor(annualflows["cod"][,])
+split(x,fac)
+
+camp &lt;- split(x,fac)$"45"
+ll &lt;- Lmoments(camp)
+parameters &lt;- par.genpar(ll[1],ll[2],ll[4])
+f.genpar(1800,parameters$xi,parameters$alfa,parameters$k)
+F.genpar(1800,parameters$xi,parameters$alfa,parameters$k)
+invF.genpar(0.7161775,parameters$xi,parameters$alfa,parameters$k)
+Lmom.genpar(parameters$xi,parameters$alfa,parameters$k)
+rand.genpar(100,parameters$xi,parameters$alfa,parameters$k)
+
+Rll &lt;- regionalLmoments(x,fac); Rll
+parameters &lt;- par.genpar(Rll[1],Rll[2],Rll[4])
+Lmom.genpar(parameters$xi,parameters$alfa,parameters$k)
+</code></pre>
+
+
+</div>

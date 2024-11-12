@@ -1,0 +1,225 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dependencemeasures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Dependence Measures for grouped normal variance mixture copulas</h2>
+
+<h3>Description</h3>
+
+<p>Computation of rank correlation coefficients Spearman's rho and Kendall's tau
+for grouped normal variance mixture copulas as well as computation of the
+(lower and upper) tail dependence coefficient of a grouped <em>t</em> copula.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">corgnvmix(scale, qmix, method = c("kendall", "spearman"), groupings = 1:2,
+          ellip.kendall = FALSE, control = list(), verbose = TRUE, ...)
+
+lambda_gStudent(df, scale, control = list(), verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p><code class="reqn">n</code>-<code>vector</code> giving the <code class="reqn">\rho</code> parameters of
+the copula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmix</code></td>
+<td>
+<p>specification of the mixing variables; see <code>pgnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p><code>character</code> indicating if Spearman's rho or
+Kendall's tau is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groupings</code></td>
+<td>
+<p><code>vector</code> specifying the grouping structure; either
+<code>rep(1, 2)</code> (ungrouped) or <code>1:2</code> (grouped case).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ellip.kendall</code></td>
+<td>
+<p><code>logical</code> if the formula for Kendalll's tau
+for elliptical copulas shall be used; see details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>either scalar or <code class="reqn">2</code>-<code>vector</code> giving the degrees-of-
+freedoms for the t copula; if provided as scalar, the copula is an (ungrouped)
+t copula and <code>lambda_gStudent()</code> uses a closed formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p><code>list</code> specifying algorithm specific
+parameters; see <code>get_set_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p><code>logical</code>
+indicating whether a warning is given if the required precision
+has not been reached.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (for example, parameters) passed
+to the underlying mixing distribution when <code>qmix</code> is a
+<code>character</code> string or <code>function</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For grouped normal variance mixture copulas, including the grouped <em>t</em>,
+there is no closed formula for Kendall's tau and Spearman's rho. The function
+<code>corgnvmix()</code> approximates these dependence measures by numerically
+approximating an integral representation for these measures.
+</p>
+<p>If no grouping is present (i.e., when <code>groupings = rep(1, 2)</code>), the
+copula is an elliptical copula for which the formula <code class="reqn">\tau = 2asin(\rho)/pi</code>
+holds. This formula holds only approximately in the grouped case; the quality
+of the approximation depends on how different the mixing variables for the
+two components are. When the mixing distributions are not too far apart and
+when the copula parameter is not close to 1, this approximation is “very
+accurate“, as demonstrated in Daul et al (2003).
+</p>
+<p>In the ungrouped case, <code>lambda_gStudent()</code> computes the tail dependence
+coefficient <code class="reqn">lambda</code> based on the known formula
+<code>2 * pt( -sqrt( (df + 1)*(1 - rho) / (1 + rho)), df = df + 1)</code> for
+the tail dependence coefficient of a <em>t</em> copula.
+</p>
+<p>In the grouped case, RQMC methods are used to efficiently approximate the
+integral given in Eq. (26) of Luo and Shevchenko (2010).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>lambda_gStudent()</code> and <code>corgnvmix()</code> return
+a <code>numeric</code> <code class="reqn">n</code>-vector with the computed
+dependence measure with corresponding attributes
+<code>"abs. error"</code> and <code>"rel. error"</code>(error estimates of the RQMC estimator)
+and <code>"numiter"</code> (number of iterations).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2020),
+Grouped Normal Variance Mixtures.
+<em>Risks</em> 8(4), 103.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+<p>Luo, X. and Shevchenko, P. (2010).
+The <em>t</em> copula with multiple parameters of degrees of freedom: bivariate
+characteristics and application to risk management.
+<em>Quantitative Finance</em> 10(9),
+1039-1054.
+</p>
+<p>Daul, S., De Giorgi, E. G., Lindskog, F. and McNeil, A (2003).
+The grouped <em>t</em> copula with an application to credit risk.
+<em>Available at SSRN 1358956</em>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dgStudentcopula()</code>, <code>pgStudentcopula()</code>,
+<code>rgStudentcopula()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Examples for corgnvmix() ###################################################
+
+## Create a plot displaying Spearman's rho for a grouped t copula as a function
+## of the copula parameter for various choices of the degrees-of-freedom
+qmix &lt;- "inverse.gamma"
+df &lt;- matrix( c(1, 2, 1, 5, 1, Inf), ncol = 2, byrow = TRUE)
+l.df &lt;- nrow(df)
+scale &lt;- seq(from = 0, to = 1, length.out = 99)
+set.seed(1) # for reproducibility
+kendalls &lt;- sapply(seq_len(l.df), function(i)
+   corgnvmix(scale, qmix = qmix, method = "kendall", df = df[i, ]))
+## Include the elliptical approximation (exact when df1 = df2)
+kendall_ell &lt;- corgnvmix(scale, method = "kendall", ellip.kendall = TRUE)
+## Plot
+lgnd &lt;- character(l.df + 1)
+lgnd[1] &lt;- "elliptical (equal df)"
+plot(NA, xlim = c(0, 1), ylim = c(0, 1), xlab = expression(rho),
+     ylab = "Kendall's tau")
+lines(scale, kendall_ell, lty = 1)
+for(i in 1:l.df){
+   lines(scale, kendalls[, i], col = i + 1, lty = i + 1)
+   lgnd[i+1] &lt;- paste0("df1 = ", df[i, 1], ", df2 = ", df[i, 2])
+}
+legend("topleft", lgnd, col = 1:(l.df + 1), lty = 1:(l.df + 1), bty = 'n')
+
+
+### Examples for lambda_gStudent() #############################################
+
+## Create a plot displaying 'lambda' as a function of the copula parameter
+## for various choices of the degrees-of-freedom
+df &lt;- c(3, 6, 9)
+df_ &lt;- list( rep(df[1], 2), rep(df[2], 2), rep(df[3], 2), # ungrouped
+             c(df[1], df[2]), c(df[1], df[3]), c(df[2], df[3])) # grouped
+l.df_ &lt;- length(df_)
+scale &lt;- seq(from = -0.99, to = 0.99, length.out = 112) # scale parameters
+set.seed(1) # for reproducibilty
+lambdas &lt;-
+   sapply(seq_len(l.df_), function(i) lambda_gStudent(df_[[i]], scale = scale))
+lgnd &lt;- character(length(df_))
+plot(NA, xlim = range(scale), ylim = range(lambdas), xlab = expression(rho),
+     ylab = expression(lambda))
+for(i in seq_len(l.df_)){
+   lines(scale, lambdas[, i], col = i, lty = i)
+   lgnd[i] &lt;- if(df_[[i]][1] == df_[[i]][2]) paste0("df = ", df_[[i]][1]) else
+      paste0("df1 = ", df_[[i]][1], ", df2 = ", df_[[i]][2])
+}
+legend("topleft", lgnd, col = seq_len(l.df_), lty = seq_len(l.df_),
+       bty = 'n')
+## If called with 'df' a 1-vector, closed formula for lambda is used =&gt; check
+lambda.true &lt;- sapply(1:3, function(i) lambda_gStudent(df_[[i]][1], scale = scale))
+stopifnot(max(abs( lambda.true - lambdas[, 1:3])) &lt; 4e-4)
+</code></pre>
+
+
+</div>

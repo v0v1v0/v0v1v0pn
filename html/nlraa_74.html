@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_gam</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate responses from a generalized additive linear model <code>gam</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>By sampling from the vector of coefficients it is possible to simulate
+data from a ‘gam’ model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_gam(
+  object,
+  nsim = 1,
+  psim = 1,
+  resid.type = c("none", "resample", "normal", "wild"),
+  value = c("matrix", "data.frame"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>gam</code> or <code>glm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of simulations to perform</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psim</code></td>
+<td>
+<p>parameter simulation level (an integer, 0, 1, 2 or 3).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid.type</code></td>
+<td>
+<p>type of residual to use. ‘none’, ‘resample’, ‘normal’ or ‘wild’.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>either ‘matrix’ or ‘data.frame’</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (none used at the moment)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is probably redundant. Simply using <code>simulate</code>
+generates data from the correct distribution for objects which inherit 
+class <code>lm</code>. The difference is that I'm trying to add the 
+uncertainty in the parameter estimates.
+</p>
+<p>These are the options that control the parameter simulation level
+</p>
+
+<dl>
+<dt>psim = 0</dt>
+<dd>
+<p>returns the fitted values</p>
+</dd>
+<dt>psim = 1</dt>
+<dd>
+<p>simulates from a beta vector (mean response)</p>
+</dd>
+<dt>psim = 2</dt>
+<dd>
+<p>simulates observations according to the residual type (similar to observed data)</p>
+</dd>
+<dt>psim = 3</dt>
+<dd>
+<p>simulates a beta vector, considers uncertainty in the variance covariance matrix of beta and adds residuals (prediction)</p>
+</dd>
+</dl>
+<p>The residual type (resid.type) controls how the residuals are generated. 
+They are either resampled, simulated from a normal distribution or ‘wild’ where the
+Rademacher distribution is used (<a href="https://en.wikipedia.org/wiki/Rademacher_distribution">https://en.wikipedia.org/wiki/Rademacher_distribution</a>).
+Resampled and normal both assume iid, but ‘normal’ makes the stronger assumption of normality.
+‘wild’ does not assume constant variance, but it assumes symmetry.
+</p>
+
+
+<h3>Value</h3>
+
+<p>matrix or data.frame with responses
+</p>
+
+
+<h3>Note</h3>
+
+<p>psim = 3 is not implemented at the moment.
+</p>
+<p>The purpose of this function is to make it compatible with other functions in this
+package. It has some limitations compared to the functions in the ‘see also’ section.
+</p>
+
+
+<h3>References</h3>
+
+<p>Generalized Additive Models. An Introduction with R. Second Edition. (2017) Simon N. Wood. CRC Press.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict</code>, <code>predict.gam</code>, <code>simulate</code> and <code>simulate_lm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(ggplot2)
+require(mgcv)
+## These count data are from GAM book by Simon Wood (pg. 132) - see reference
+y &lt;- c(12, 14, 33, 50, 67, 74, 123, 141, 165, 204, 253, 246, 240)
+t &lt;- 1:13
+dat &lt;- data.frame(y = y, t = t)
+fit &lt;- gam(y ~ t + I(t^2), family = poisson, data = dat)
+sims &lt;- simulate_gam(fit, nsim = 100, value = "data.frame")
+
+ggplot(data = sims) + 
+  geom_line(aes(x = t, y = sim.y, group = ii), 
+            color = "gray", alpha = 0.5) + 
+  geom_point(aes(x = t, y = y)) 
+
+
+</code></pre>
+
+
+</div>

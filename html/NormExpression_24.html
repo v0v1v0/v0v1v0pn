@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gridAUCVC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>gridAUCVC</h2>
+
+<h3>Description</h3>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gridAUCVC(data, dataType = c("bk", "sc"), HG7 = NULL, ERCC = NULL, TN = NULL,
+TC = NULL, CR = NULL, NR = NULL, DESeq = NULL, UQ = NULL, TMM = NULL, TU = 0,
+GAPDH = NULL, nonzeroRatios = c(0.7, 0.8, 0.9, 1), cvNorm = TRUE, cvResolution = 0.005)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataType</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HG7</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ERCC</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TN</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TC</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CR</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NR</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DESeq</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>UQ</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TMM</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TU</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>GAPDH</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonzeroRatios</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvNorm</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvResolution</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (data, dataType = c("bk", "sc"), HG7 = NULL, ERCC = NULL,
+    TN = NULL, TC = NULL, CR = NULL, NR = NULL, DESeq = NULL,
+    UQ = NULL, TMM = NULL, TU = 0, GAPDH = NULL, nonzeroRatios = c(0.7,
+        0.8, 0.9, 1), cvNorm = TRUE, cvResolution = 0.005)
+{
+    grid_result &lt;- NULL
+    if (length(TU) == 1 &amp;&amp; TU == 1) {
+        colnames_paraMatrix &lt;- c("nonzeroRatio", "pre_ratio",
+            "lower_trim", "upper_trim")
+        write.table(t(as.matrix(colnames_paraMatrix)), file = "bestPara.txt",
+            sep = "\t", row.names = FALSE, col.names = FALSE)
+    }
+    for (i in nonzeroRatios) {
+        if (dataType == "sc") {
+            if ((ncol(data) * i) &lt;= 100) {
+                cat("nonzeroRatio:", i, " is too small!\n")
+                stop("We suggest that the minimal counts of
+                nonzero samples should be greater than 100!")
+            }
+        }
+        result &lt;- nonzeroRatio2AUCVC(data = data, dataType = dataType,
+            HG7 = HG7, ERCC = ERCC, TN = TN, TC = TC, CR = CR,
+            NR = NR, DESeq = DESeq, UQ = UQ, TMM = TMM, TU = TU,
+            GAPDH = GAPDH, nonzeroRatio = i, cvNorm = cvNorm,
+            cvResolution = cvResolution)
+        nonzeroM &lt;- matrix(i, 1, 1, TRUE)
+        colnames(nonzeroM) &lt;- "NonzeroRatio"
+        grid_record &lt;- cbind(nonzeroM, result)
+        grid_result &lt;- rbind(grid_result, grid_record)
+    }
+    return(grid_result)
+  }
+</code></pre>
+
+
+</div>

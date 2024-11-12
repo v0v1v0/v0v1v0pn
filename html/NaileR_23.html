@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rorschach</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Rorschach inkblots</h2>
+
+<h3>Description</h3>
+
+<p>This dataset was initially collected to understand the perception of the Rorschach test.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rorschach
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 600 rows and 5 columns:
+</p>
+
+<ul>
+<li>
+<p> The Panel effect (3 panels)
+</p>
+</li>
+<li>
+<p> The Inkblot effect (10 inkblots)
+</p>
+</li>
+<li>
+<p> The Panelist effect (20 panelists par panel)
+</p>
+</li>
+<li>
+<p> The interaction Panel and Panelist
+</p>
+</li>
+<li>
+<p> The perception of the inkblot
+</p>
+</li>
+</ul>
+<h3>Source</h3>
+
+<p>Applied mathematics department, Institut Agro Rennes-Angers
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+library(NaileR)
+data(rorschach)
+
+### Example 1: perception of the inkblots for one panel ###
+intro_rorschach &lt;- "For this study,
+we asked 20 people to briefly describe
+the 10 inkblots of the Rorschach test."
+intro_rorschach &lt;- gsub('\n', ' ', intro_rorschach) |&gt;
+stringr::str_squish()
+
+request_rorschach &lt;- "Based on the comments of the 20 people,
+please give me a description of each inkblot
+in terms of how it was perceived. Tell me if it was
+a rather positive or negative perception."
+request_rorschach &lt;- gsub('\n', ' ', request_rorschach) |&gt;
+stringr::str_squish()
+
+rorschach_A &lt;- droplevels(rorschach[rorschach$Panel=="A",])
+
+res_nail_textual_rorschach &lt;- nail_textual(rorschach_A, num.var = 2,
+                                           num.text = 5,
+                                           introduction = intro_rorschach,
+                                           request = request_rorschach,
+                                           model = 'llama3',
+                                           isolate.groups = FALSE,
+                                           generate = FALSE)
+
+cat(res_nail_textual_rorschach$prompt)
+
+ppt &lt;- gsub("## Group", "## Inkblot", res_nail_textual_rorschach$prompt)
+cat(ppt)
+
+res_inkblot &lt;- ollamar::generate(model = 'llama3', prompt = ppt,
+                                 output = "df")
+
+cat(res_inkblot$response)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

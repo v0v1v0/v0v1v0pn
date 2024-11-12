@@ -1,0 +1,195 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>qnvmix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Quantile Function of a univariate Normal Variance Mixture Distribution</h2>
+
+<h3>Description</h3>
+
+<p>Evaluating multivariate normal variance mixture distribution functions
+(including normal and Student <em>t</em> for non-integer degrees of freedom).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">qnvmix(u, qmix, control = list(),
+       verbose = TRUE, q.only = TRUE, stored.values = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p>vector of probabilities .</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmix</code></td>
+<td>
+<p>specification of the mixing variable <code class="reqn">W</code>; see
+<code>pnvmix()</code> for details and examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p><code>list</code> specifying algorithm specific
+parameters; see <code>get_set_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p><code>logical</code>, if <code>TRUE</code> a warning is printed if
+one of the error tolerances is not met.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.only</code></td>
+<td>
+<p><code>logical</code>. If <code>TRUE</code>, only the quantiles are
+returned; if <code>FALSE</code>, see Section 'value' below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stored.values</code></td>
+<td>
+<p><code>matrix</code> with 3 columns of the form
+<code class="reqn">[x, F(x), logf(x)]</code> where <code class="reqn">F()</code> and <code class="reqn">logf()</code> are the distribution-
+and log-density function of the distribution specified in <code>qmix</code>.
+If provided it is used to determine starting values for internal newton proceudures.
+Only very basic checking is done.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments containing parameters of
+mixing distributions when <code>qmix</code> is a <code>character</code>
+string.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function uses a Newton procedure to estimate the quantile of the
+specified univariate normal variance mixture distribution. Internally,
+a randomized quasi-Monte Carlo (RQMC) approach is used to estimate the
+distribution and (log)density function; the method is similar to the
+one in <code>pnvmix()</code> and <code>dnvmix()</code>. The result depends
+slightly on <code>.random.seed</code>.
+</p>
+<p>Internally, symmetry is used for <code class="reqn">u \le 0.5</code>. Function values
+(i.e., df and log-density values) are stored and reused to get good
+starting values. These values are returned if <code>q.only = FALSE</code>
+and can be re-used by passing it to <code>qnvmix()</code> via the argument
+<code>stored.values</code>; this can significantly reduce run-time.
+</p>
+<p>Accuracy and run-time depend on both the magnitude of <code class="reqn">u</code> and on
+how heavy the tail of the underlying distributions is.  Numerical
+instabilities can occur for values of <code class="reqn">u</code> close to 0 or 1,
+especially when the tail of the distribution is heavy.
+</p>
+<p>If <code>q.only = FALSE</code> the log-density values of the underlying
+distribution evaluated at the estimated quantiles are returned as
+well: This can be useful for copula density evaluations where both
+quantities are needed.
+</p>
+<p>Underlying algorithm specific parameters can be changed via the <code>control</code>
+argument, see <code>get_set_param()</code> for details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>q.only = TRUE</code> a vector of the same length as <code>u</code> with
+entries <code class="reqn">q_i</code> where <code class="reqn">q_i</code> satisfies <code class="reqn">q_i = inf_x { F(x)
+  \ge u_i}</code> where <code class="reqn">F(x)</code> the univariate df of the normal variance
+mixture specified via <code>qmix</code>;
+</p>
+<p>if <code>q.only = FALSE</code> a list of four:
+</p>
+
+<dl>
+<dt>
+<code>$q</code>:</dt>
+<dd>
+<p>Vector of quantiles,</p>
+</dd>
+<dt>
+<code>$log.density</code>:</dt>
+<dd>
+<p>vector log-density values at <code>q</code>,</p>
+</dd>
+<dt>
+<code>$computed.values</code>:</dt>
+<dd>
+<p>matrix with 3 columns [x, F(x), logf(x)];
+see details above,</p>
+</dd>
+<dt>
+<code>$newton.iterations</code>:</dt>
+<dd>
+<p>vector giving the number of Newton
+iterations needed for <code>u[i]</code>.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+<p>McNeil, A. J., Frey, R., and Embrechts, P. (2015).
+<em>Quantitative Risk Management: Concepts, Techniques, Tools</em>.
+Princeton University Press.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dnvmix()</code>, <code>rnvmix()</code>, <code>pnvmix()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Evaluation points
+u &lt;- seq(from = 0.05, to = 0.95, by = 0.025)
+set.seed(271) # for reproducibility
+
+## Evaluate the t_{1.4} quantile function
+df &lt;- 1.4
+qmix. &lt;- function(u) 1/qgamma(1-u, shape = df/2, rate = df/2)
+## If qmix = "inverse.gamma", qt() is being called
+qt1 &lt;- qnvmix(u, qmix = "inverse.gamma", df = df)
+## Estimate quantiles (without using qt())
+qt1. &lt;- qnvmix(u, qmix = qmix., q.only = FALSE)
+stopifnot(all.equal(qt1, qt1.$q, tolerance = 2.5e-3))
+## Look at absolute error:
+abs.error &lt;- abs(qt1 - qt1.$q)
+plot(u, abs.error, type = "l", xlab = "u", ylab = "Absolute error")
+## Now do this again but provide qt1.$stored.values, in which case at most
+## one Newton iteration will be needed:
+qt2 &lt;- qnvmix(u, qmix = qmix., stored.values = qt1.$computed.values, q.only = FALSE)
+stopifnot(max(qt2$newton.iterations) &lt;= 1)
+
+</code></pre>
+
+
+</div>

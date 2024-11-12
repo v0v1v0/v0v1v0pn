@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ll.order</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Consistent nonlinear estimate of the order using local polynomial
+regression.</h2>
+
+<h3>Description</h3>
+
+<p>A function to estimate the order of a time series using the nonparametric
+order selection method of Cheng and Tong (1992, 1994) as modified by Yao &amp;
+Tong (1994; see also Fan, Yao &amp; Tong 1996).  The method uses leave-one-out
+cross-validation of the locally linear regression against lagged-abundances.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ll.order(x, order = 1:5, step = 1, deg = 2, bandwidth = c(seq(0.3, 1.5,
+  by = 0.1), 2:10), cv = TRUE, echo = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A time series without missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>The candidate orders. The default is 1:5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step</code></td>
+<td>
+<p>The time step for prediction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deg</code></td>
+<td>
+<p>The degree of the local polynomial.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bandwidth</code></td>
+<td>
+<p>The candidate bandwidths to be considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv</code></td>
+<td>
+<p>if TRUE leave-one-out cross-validation will be performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>echo</code></td>
+<td>
+<p>if TRUE a counter shows the progress</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The time series is normalized prior to cross-validation.
+</p>
+<p>A Gaussian kernel is used for the locally linear regression.
+</p>
+<p>The bandwidth is optimized using cross-validation. If a single bandwidth is
+provided, no cross validation of bandwidth will be carried out. Highly
+nonlinear data will require more narrow bandwidths. If NA is returned it may
+be because the min bandwidth considered is too small relative to the density
+of data.
+</p>
+<p>Missing values are NOT permitted.
+</p>
+<p>If <code>deg</code> is set to 0, the order is estimated on the basis of the
+Nadaraya-Watson (locally constant) estimator of the conditional expectation
+against lagged-abundances (Cheng and Tong 1992, 1994).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "ll.order" is returned consisting of the
+following components: </p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>grid</code></td>
+<td>
+<p>the grid of orders, bandwidths, and CV's.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid$order</code></td>
+<td>
+<p>the orders.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid$CV</code></td>
+<td>
+<p>the cross-validation score
+across the grid of orders and bandwidths. (If <code>cv = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid$GCV</code></td>
+<td>
+<p>the generalized cross-validation score.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid$bandwidth</code></td>
+<td>
+<p>the bandwidths.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid$df</code></td>
+<td>
+<p>the degrees of freedom
+of the fitted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>the vector of orders considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deg</code></td>
+<td>
+<p>The degree of the
+local polynomial.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Cheng, B. &amp; Tong, H. (1992) On consistent nonparametric order
+determination and chaos. Journal of Royal Statistical Society B, 54,
+427-449.
+</p>
+<p>Cheng, B. &amp; Tong, H. (1994) Orthogonal projection, embedding dimension and
+sample size in chaotic time series from a statistical perspective.
+Philosophical Transactions of the Royal Society London, A. , 348, 325-341. https://doi.org/10.1098/rsta.1994.0094
+</p>
+<p>Fan, J., Yao, Q., &amp; Tong, H. (1996) Estimation of conditional densities and
+sensitivity measures in nonlinear dynamical systems. Biometrika, 83,
+189-206. ttps://doi.org/10.1093/biomet/83.1.189
+</p>
+<p>Yao, Q. &amp; Tong, H. (1994) Quantifying the influence of initial values on
+non-linear prediction.  Journal of Royal Statistical Society B, 56, 701-725.
+</p>
+<p>Bjornstad, O.N., Sait, S.M., Stenseth, N.C., Thompson, D.J., &amp; Begon, M.
+(2001) Coupling and the impact of specialised enemies on the dimensionality
+of prey dynamics. Nature, 409, 1001-1006. https://doi.org/10.1038/35059003
+</p>
+<p>Loader, C. (1999) Local Regression and Likelihood.  Springer, New York. https://doi.org/10.1007/b98858
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+   data(plodia)
+
+   fit &lt;- ll.order(sqrt(plodia), order=1:3, bandwidth
+               = seq(0.5, 1.5, by = 0.5)) 
+
+    ## Not run: plot(fit)
+
+    summary(fit)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>show_deprecated_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>show deprecated data</h2>
+
+<h3>Description</h3>
+
+<p>Show the file information for any raw data files which have been deprecated by
+the release of modified historical data to the NEON API.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">show_deprecated_data(
+  product = NA,
+  table = NA,
+  site = NA,
+  start_date = NA,
+  end_date = NA,
+  type = NA,
+  ext = NA,
+  timestamp = NA,
+  release = NA,
+  dir = neon_dir()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>product</code></td>
+<td>
+<p>A NEON <code>productCode</code> or list of product codes, see examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>table</code></td>
+<td>
+<p>Include only files matching this table name (or regex pattern).
+(optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>site</code></td>
+<td>
+<p>4-letter site code(s) to filter on. Leave as <code>NA</code> to search all.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start_date</code></td>
+<td>
+<p>Download only files as recent as (<code>YYYY-MM-DD</code>). Leave
+as <code>NA</code> to download up to the most recent available data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end_date</code></td>
+<td>
+<p>Download only files up to end_date (<code>YYYY-MM-DD</code>). Leave as
+<code>NA</code> to download all prior data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Should we prefer the basic or expanded version of this product?
+Note that not all products have expanded formats.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ext</code></td>
+<td>
+<p>only match files with this file extension(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timestamp</code></td>
+<td>
+<p>only match timestamps prior this. See details in <code>neon_index()</code>.
+Should be a datetime POSIXct object (or coerce-able string)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>release</code></td>
+<td>
+<p>Select only data files associated with a particular release tag,
+see <a href="https://www.neonscience.org/data-samples/data-management/data-revisions-releases">https://www.neonscience.org/data-samples/data-management/data-revisions-releases</a>,
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dir</code></td>
+<td>
+<p>Location where files should be downloaded. By default will
+use the appropriate applications directory for your system
+(see <code>tools::R_user_dir()</code>).  This default also be configured by
+setting the environmental variable <code>NEONSTORE_HOME</code>, see Sys.setenv or
+Renviron.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>NEON data files are sometimes updated to correct errors.  Old files are
+removed from access from the API, but may be present in your local store
+from an earlier download.  <code>neonstore</code> stacking functions (<code style="white-space: pre;">⁠[neon_read()]⁠</code>
+and <code>neon_store()</code>) automatically exclude these deprecated files, though
+<code>neon_read()</code> can be instructed to use older files by passing a file list.
+</p>
+<p>A data file is identified as deprecated whenever the local file store contains
+a second data file with the same product, table, site, month, and position
+(sensor products only) information, but having an updated timestamp.  If such
+a change occurs in a file with a non-missing "month" code, it may indicate a
+data file has been updated.  This could result in changes to the results of
+any previous analyses.
+</p>
+<p>Note that metadata files, (readme, variables, positions) are 'pre-stacked':
+the metadata file in a given product-site-month set contains metadata going back
+to the start and not just for that month.  As a result, each new version deprecates
+the old metadata file, but the old files are always available from the NEON API
+and always present in the store.  Users will only need to care about the most recent
+ones, and the presence of old files is no cause for concern. This function will
+only show data files that have changed, and not metadata files.  This can
+help pinpoint specific altered data.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>neon_index, neon_read
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+show_deprecated_data()
+
+
+
+
+</code></pre>
+
+
+</div>

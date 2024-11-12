@@ -1,0 +1,74 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summarize_sim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarize Simulations Results</h2>
+
+<h3>Description</h3>
+
+<p>Summarize Simulations Results
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">summarize_sim(simulation_results, truth, ci_level = 0.95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>simulation_results</code></td>
+<td>
+<p>A <code>data.frame</code>, <code>tibble</code> or similar with
+exactly two columns named <code>"param_est"</code> and <code>"param_var"</code> giving
+the estimate of a parameter of interest and estimate of its variance (based
+on a valid variance estimator specific to that parameter).Each row of this
+data structure corresponds to the parameter estimate and variance for a
+single iteration of several simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>truth</code></td>
+<td>
+<p>A <code>numeric</code> value giving the true value of the parameter
+of interest in the simulation setting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci_level</code></td>
+<td>
+<p>A <code>numeric</code> value giving the level of the confidence
+intervals to be generated around the parameter estimates and statistics
+computed to summarize the simulation.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">n_sim &lt;- 1000
+n_obs &lt;- c(100, 10000)
+mu &lt;- 2
+sim_results &lt;- lapply(n_obs, function(sample_size) {
+  estimator_sim &lt;- lapply(seq_len(n_sim), function(iter) {
+    y_obs &lt;- rnorm(sample_size, mu)
+    est_param &lt;- mean(y_obs)
+    est_var &lt;- var(y_obs) / sample_size
+    estimate &lt;- tibble::as_tibble(list(
+      param_est = est_param,
+      param_var = est_var
+    ))
+    return(estimate)
+  })
+  estimates &lt;- do.call(rbind, estimator_sim)
+  return(estimates)
+})
+sim_summary &lt;- lapply(sim_results, summarize_sim, truth = mu)
+</code></pre>
+
+
+</div>

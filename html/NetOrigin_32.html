@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>robustness</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>run robustness analysis for a source estimate by subsampling individual events.</h2>
+
+<h3>Description</h3>
+
+<p>run robustness analysis for a source estimate by subsampling individual events.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">robustness(
+  x,
+  type = c("edm", "backtracking", "centrality"),
+  prop,
+  n = 100,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>data.frame</code>, dataset with individual events and their magnitude, to be passed to <code>aggr_data</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character, specifying the method, <code>'edm'</code>, <code>'backtracking'</code> and <code>'centrality'</code> are available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop</code></td>
+<td>
+<p>numeric, value between zero and one, proportion of events to be sampled</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>numeric, number of resamplings</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>parameters to be passed to origin methods <code>origin_edm</code>, <code>origin_backtracking</code> or <code>origin_centrality</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We create subsamples of individual events and their magnitude using a sampling proportion p in [0, 1]. After aggregating the data, we apply the source estimation approach. Using this result, we deduce the relative frequency of how often the source estimate obtained with the complete data set can be recovered by source estimation based on the subsample. Thus, the estimate robustness is assessed by the proportion of estimate recovery.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>data.frame</code> with columns
+</p>
+
+<ul>
+<li> <p><code>est</code> origin estimated when all data is evaluated
+</p>
+</li>
+<li> <p><code>rob</code> estimate uncertainty, computed as the proportion of resamplings when origin estimate was recovered
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>robustness-methods</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate random delay data
+data(ptnAth)
+require(igraph)
+dat &lt;- data.frame(node  = sample(size = 500, make.names(V(ptnAth)$name), replace = TRUE),
+                  time  = sample(size = 500, 1:10, replace = TRUE),
+                  delay = rexp(500, rate=10))
+# compute effective distance 
+net &lt;- igraph::as_adjacency_matrix(ptnAth, sparse=FALSE)
+p &lt;- net/rowSums(net)
+eff &lt;- eff_dist(p)
+colnames(eff) &lt;- paste('x.',colnames(eff),sep='')
+
+# run robustness analysis
+r5 &lt;- robustness(x=dat, type='edm', prop=0.5, n=10, distance=eff)
+summary(r5)
+plot(r5)
+
+# compare results
+r9 &lt;- robustness(x=dat, type='edm', prop=0.9, n=10, distance=eff)
+plot(r9, add=TRUE, col='gray')
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>varinf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Variance Inflation Factors
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes variance inflation factors for terms of a smooth model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">varinf(object, newdata = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class "sm" output by the <code>sm</code> function or an object of class "gsm" output by the <code>gsm</code> function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>the data used for variance inflation calculation (if <code>NULL</code> training data are used).  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">\kappa_j^2</code> denote the VIF for the <code class="reqn">j</code>-th model term. 
+</p>
+<p>Values of <code class="reqn">\kappa_j^2</code> close to 1 indicate no multicollinearity issues for the <code class="reqn">j</code>-th term. Larger values of <code class="reqn">\kappa_j^2</code> indicate that <code class="reqn">\eta_j</code> has more collinearity with other terms. 
+</p>
+<p>Thresholds of <code class="reqn">\kappa_j^2 &gt; 5</code> or <code class="reqn">\kappa_j^2 &gt; 10</code> are typically recommended for determining if multicollinearity is too much of an issue.
+</p>
+<p>To understand these thresholds, note that
+</p>
+<p style="text-align: center;"><code class="reqn">\kappa_j^2 = \frac{1}{1 - R_j^2}</code>
+</p>
+
+<p>where <code class="reqn">R_j^2</code> is the R-squared for the linear model predicting <code class="reqn">\eta_j</code> from the remaining model terms.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a named vector containing the variance inflation factors for each effect function (in <code>object$terms</code>).
+</p>
+
+
+<h3>Note</h3>
+
+<p>Suppose that the function can be written as
+</p>
+<p style="text-align: center;"><code class="reqn">\eta = \eta_0 + \eta_1 + \eta_2 + ... + \eta_p</code>
+</p>
+
+<p>where <code class="reqn">\eta_0</code> is a constant (intercept) term, and <code class="reqn">\eta_j</code> denotes the <code class="reqn">j</code>-th effect function, which is assumed to have mean zero. Note that <code class="reqn">\eta_j</code> could be a main or interaction effect function for all <code class="reqn">j = 1, ..., p</code>.
+</p>
+<p>Defining the <code class="reqn">p \times p</code> matrix <code class="reqn">C</code> with entries
+</p>
+<p style="text-align: center;"><code class="reqn">C_{jk} = \cos(\eta_j, \eta_k)</code>
+</p>
+
+<p>where the cosine is defined with respect to the training data, i.e.,
+</p>
+<p style="text-align: center;"><code class="reqn">\cos(\eta_j, \eta_k) = \frac{\sum_{i=1}^n \eta_j(x_i) \eta_k(x_i)}{\sqrt{\sum_{i=1}^n \eta_j^2(x_i)} \sqrt{\sum_{i=1}^n \eta_k^2(x_i)}}</code>
+</p>
+
+<p>The variane inflation factors are the diagonal elements of <code class="reqn">C^{-1}</code>, i.e.,
+</p>
+<p style="text-align: center;"><code class="reqn">\kappa_j^2 = C^{jj}</code>
+</p>
+
+<p>where <code class="reqn">\kappa_j^2</code> is the VIF for the <code class="reqn">j</code>-th term, and <code class="reqn">C^{jj}</code> denotes the <code class="reqn">j</code>-th diagonal element of the matrix <code class="reqn">C^{-1}</code>. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), SAGE Research Methods Foundations. <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>summary.sm</code> for more thorough summaries of smooth models.
+</p>
+<p>See <code>summary.gsm</code> for more thorough summaries of generalized smooth models.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##########   EXAMPLE 1   ##########
+### 4 continuous predictors
+### no multicollinearity
+
+# generate data
+set.seed(1)
+n &lt;- 100
+fun &lt;- function(x){
+  sin(pi*x[,1]) + sin(2*pi*x[,2]) + sin(3*pi*x[,3]) + sin(4*pi*x[,4])
+}
+data &lt;- as.data.frame(replicate(4, runif(n)))
+colnames(data) &lt;- c("x1v", "x2v", "x3v", "x4v")
+fx &lt;- fun(data)
+y &lt;- fx + rnorm(n)
+
+# fit model
+mod &lt;- sm(y ~ x1v + x2v + x3v + x4v, data = data, tprk = FALSE)
+
+# check vif
+varinf(mod)
+
+
+##########   EXAMPLE 2   ##########
+### 4 continuous predictors
+### multicollinearity
+
+# generate data
+set.seed(1)
+n &lt;- 100
+fun &lt;- function(x){
+  sin(pi*x[,1]) + sin(2*pi*x[,2]) + sin(3*pi*x[,3]) + sin(3*pi*x[,4])
+}
+data &lt;- as.data.frame(replicate(3, runif(n)))
+data &lt;- cbind(data, c(data[1,2], data[2:n,3]))
+colnames(data) &lt;- c("x1v", "x2v", "x3v", "x4v")
+fx &lt;- fun(data)
+y &lt;- fx + rnorm(n)
+
+# check collinearity
+cor(data)
+cor(sin(3*pi*data[,3]), sin(3*pi*data[,4]))
+
+# fit model
+mod &lt;- sm(y ~ x1v + x2v + x3v + x4v, data = data, tprk = FALSE)
+
+# check vif
+varinf(mod)
+
+</code></pre>
+
+
+</div>

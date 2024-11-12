@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fitMix3</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute FDR from Three-Component Beta Mixture</h2>
+
+<h3>Description</h3>
+
+<p>Provides functions to fit a beta-mixture model to a set of p-values
+that has peaks at both zero and one, and to estimate false discovery
+rates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fitMix3(datavec, forever=100, epsilon=0.001, relative = 0.001, print.level=0)
+computeFDR(object, alpha)
+computeCutoff(object, fdr)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>datavec</code></td>
+<td>
+<p>A numeric vector containing p-values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>forever</code></td>
+<td>
+<p>An integer; maximum number of iterations while fitting
+the mixture model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>A real number; change in the log likelihood that should
+be used to terminate the model-fitting loop.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>relative</code></td>
+<td>
+<p>A real number; change in the relative log likelihood
+that should be used to terminate the model-fitting loop.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.level</code></td>
+<td>
+<p>An integer; how much detail should <code>nlm</code>
+print while fitting the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of the <code>MixOf3Beta</code> class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A real number between 0 and 1; the cutoff on the nominal
+p-value where the FDR should be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fdr</code></td>
+<td>
+<p>A real number beteen 0 and 1; the targeted FDR value.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We have observed empirically that the set of p-values obtained when
+computing the Newman paired test statistic often has peaks both at zero
+(representing genes of interest) and at one (representing "boring"
+genes that change much less than expected). We attribute the latter
+phenomenon to the fact that we use locally smoothed instead of
+gene-by-gene estimates of the standard deviation; genes whose SD is
+increased by the smoothing process contribute to the boring peak near
+one.
+</p>
+<p>To estimate p-values in this context, we fit a three-component beta
+mixture model, combining (1) a right-peaked distribution Beta(L,1),
+(2) a left-peaked dfistribution Beta(1,M), and (3) a uniform
+distribution. Specfically, we look for models of the form
+</p>
+<p style="text-align: center;"><code class="reqn">alpha*Beta(L,1) + beta*Beta(1, M) + gamma*Beta(1,1)</code>
+</p>
+<p>.
+</p>
+<p>Model-fitting uses an expectation-maximization (EM) algorithm. In
+addition to the parameters <code>mle=c(L,M)</code> and <code>psi=c(alpha,
+  beta, gamma)</code>, we introduce a matrix <code>Z</code> of latent variables that
+indicate which distribution each point is likely to arise
+form. <code>Z</code> has three columns (one for each mixture component) and
+one row for each p-value; the entries in each row are nonegative and
+sum to one. The M-step of the algorithm uses the <code>nlm</code>
+optimization function to compute the maximum-likelihood <code>mle</code>
+values given <code>psi</code> and <code>Z</code>. The E-step first updates
+<code>psi</code> from the <code>Z</code>-matrix, and then updates the values of
+<code>Z</code> based on the current <code>mle</code>. 
+</p>
+<p>We are able to use the mixture distribution to compute the
+relationship between a cutoff on the nominal p-values and the false
+discovery rate (FDR). 
+</p>
+
+
+<h3>Value</h3>
+
+<p>The model-fitting function, <code>fitMix3</code>, returns an object of the
+<code>MixOf3Beta</code> class.
+</p>
+<p>The <code>computeFDR</code> function returns a real number in [0,1], the
+false discovery rate assiociated with the nominal cutoff.
+</p>
+<p>The <code>computeCutoff</code> function returns a real number in [0,1], the
+cutoff required to achieve the desired FDR.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(98765)
+ds &lt;- c(rbeta(3000, 20, 1),
+        rbeta(1000, 1, 40),
+        runif(6000))
+fit &lt;- fitMix3(ds)
+computeFDR(fit, 0.01)
+computeCutoff(fit, 0.01)
+computeFDR(fit, 0.0016438)
+computeCutoff(fit, 0.05)
+computeFDR(fit, 0.00702114)
+</code></pre>
+
+
+</div>

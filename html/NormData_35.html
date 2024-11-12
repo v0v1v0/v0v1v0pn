@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Stage.2.NormTable</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Derive a normative table</h2>
+
+<h3>Description</h3>
+
+<p>This function allows for deriving a normative table that shows percentile ranks <code class="reqn">\hat{\pi}_0</code> that correspond to a wide range of raw test scores <code class="reqn">Y_0</code> (stratified by the relevant independent variables). 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Stage.2.NormTable(Stage.1.Model, Assume.Homoscedasticity, 
+Assume.Normality, Grid.Norm.Table, Test.Scores, Digits=6, 
+Rounded=TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Stage.1.Model</code></td>
+<td>
+<p>A fitted object of class <code>Stage.1</code> that should be used to derive the normative table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Homoscedasticity</code></td>
+<td>
+<p>Logical. Should homoscedasticity be assumed when deriving the normative table? By default, homoscedasticity is assumed when the <code class="reqn">p</code>-value of the Levene or Breusch-Pagan test for the fitted Stage 1 model is above the specified <code class="reqn">\alpha</code>-level in the <code>Stage.1()</code> function call. When homoscedasticity is assumed, an overall residual standard error is used in the derivation of the normative table. When homoscedasticity is not assumed, prediction-specific residual standard errors used. The default decision procedure can be overruled by means of the arguments argument <code>Assume.Homoscedasticity=TRUE</code> or <code>Assume.Homoscedasticity=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Normality</code></td>
+<td>
+<p>Logical. Should normality of the standardized errors be assumed when deriving the normative table? By default, normality is assumed when the <code class="reqn">p</code>-value of the Shapiro-Wilk test for the fitted Stage 1 model is above the specified <code class="reqn">\alpha</code>-level in the <code>Stage.1()</code> function call. When normality is assumed, the <code class="reqn">Y_0</code> to  <code class="reqn">\hat{\pi}_0</code> conversions in the normative table are based on the CDF of the standard normal distribution. When normality is not assumed, these conversions are based on the CDF of the standardized residuals in the normative sample. The default decision procedure can be overruled by means of the arguments argument <code>Assume.Normality=TRUE</code> or <code>Assume.Normality=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Grid.Norm.Table</code></td>
+<td>
+<p>A <code>data.frame</code> that specifies the name of the independent variable(s) (e.g., <code>Gender</code>) and the levels (e.g., <code>"F"</code> and <code>"M"</code>) or values (e.g., <code>Age.C=seq(from=20, to=80, by=1)-50)</code>) for which the estimated percentile ranks should be tabulated. Both the name of the independent variable and the coding scheme that is specified in the <code>Grid.Norm.Table=...</code> argument should exactly match the name of the independent variable and the original coding scheme that was used in the <code>Stage.1()</code> function call. For example, if the variable name <code>Gender</code> with original coding scheme <code>F</code> and <code>M</code> was used in the <code>Stage.1()</code> function call, the same should be done in the <code>Stage.2.NormTable()</code> function call. So <code>Grid.Norm.Table= data.frame(Gender=c("F", "M")</code>) should be used, and not e.g., <code>Grid.Norm.Table= data.frame(GenderM=c(0,1))</code>. Observe that quotes are used to refer to a female student (i.e., "F"). This is done because the string <code>F</code> (without quotes) is shorthand notation for the logical indicator <code>FALSE</code> in R. If no quotes are used, an error will be generated that a logical indicator was provided where a factor level was expected.
+</p>
+<p>When multiple independent variables are considered, the <code>data.frame</code> can be constructed using the <code>expand.grid()</code> function. For example, <code>Grid.Norm.Table= expand.grid(Age.C=seq(from=-30, to=30, by=1), LE=c("Low", "Average", "High"))</code> specifies that the normative table should be stratified for both Age centered (with score range -30 to 30) and LE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Test.Scores</code></td>
+<td>
+<p>A vector that specifies the raw test scores that should be shown in the normative table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Rounded</code></td>
+<td>
+<p>Logical. Should the percentile ranks that are shown in the normative table be rounded to a whole number? Default <code>Rounded=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Digits</code></td>
+<td>
+<p>The number of digits that need to be shown in the normative table for the predicted means and residual standard errors. Default <code>Digits=6</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details, see Van der Elst (2023).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>Stage.2.NormTable</code> with components,
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Norm.Table</code></td>
+<td>
+<p>The normative table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Group.Specific.SD.Resid</code></td>
+<td>
+<p>Logical. Where prediction-specific SDs of the residuals used?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Empirical.Dist.Delta</code></td>
+<td>
+<p>Logical. Was the CDF of the standardized residuals used to convert the raw test scores into percentile ranks?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N.Analysis</code></td>
+<td>
+<p>The sample size of the analyzed dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Test.Scores</code></td>
+<td>
+<p>A vector of raw test scores for which percentile ranks were requested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Homoscedasticity</code></td>
+<td>
+<p>Is homoscedasticity assumed in the computation of the normative data?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Normality</code></td>
+<td>
+<p>Is normality assumed in the computation of the normative data?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Stage.1.Model</code></td>
+<td>
+<p>The <code>Stage.1.Model</code> model that was used to do the computations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Grid.Norm.Table</code></td>
+<td>
+<p>The specified <code>Grid.Norm.Table</code> in the function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Digits.Percentile</code></td>
+<td>
+<p>The number of digits after the decimal point that were requested for the percentile ranks.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Wim Van der Elst
+</p>
+
+
+<h3>References</h3>
+
+<p>Van der Elst, W. (2024). <em>Regression-based normative data for psychological assessment: A hands-on approach using R.</em> Springer Nature. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Stage.2.NormScore</code>, <code>Stage.2.AutoScore</code>, <code>Bootstrap.Stage.2.NormScore</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Replicate the normative table that was obtained in 
+# Case study 1 of Chapter 3 in Van der Elst (2023)
+# -----------------------------------------------------
+library(NormData) # load the NormData package
+data(GCSE)        # load the GCSE dataset
+
+# Fit the Stage 1 model
+Model.1.GCSE &lt;- Stage.1(Dataset=GCSE, 
+    Model=Science.Exam~Gender)
+
+# Make a normative table for raw Science Exam scores = 10, 
+# 11, ... 85, stratified by Gender
+NormTable.GCSE &lt;- Stage.2.NormTable(Stage.1.Model=Model.1.GCSE,
+  Test.Scores=c(10:85), 
+  Grid.Norm.Table=data.frame(Gender=c("F", "M")))
+
+summary(NormTable.GCSE)
+
+
+# Replicate the normative table that was obtained in 
+# Case study 1 of Chapter 7 in Van der Elst (2023)
+# ------------------------------------------------
+library(NormData)   # load the NormData package
+data(Substitution)  # load the Substitution dataset
+
+# Make the new variable Age.C (= Age centered) that is 
+# needed to fit the final Stage 1 model, 
+# and add it to the Substitution dataset
+Substitution$Age.C &lt;- Substitution$Age - 50
+
+# Fit the final Stage 1 model
+Substitution.Model.9 &lt;- Stage.1(Dataset=Substitution, 
+    Alpha=0.005, Model=LDST~Age.C+LE, Order.Poly.Var=1) 
+
+# Make a normative table for LDST scores = 10, 12, ... 56,
+# stratified by Age and LE
+NormTable.LDST &lt;- Stage.2.NormTable(
+  Stage.1.Model=Substitution.Model.9,
+  Test.Scores=seq(from=10, to=56, by=2),
+  Grid.Norm.Table=expand.grid(Age.C=seq(from=-30, to=30, by=1),
+  LE=c("Low", "Average", "High")))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ancut</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cluster the Columns of Y into K Groups with the Help of External Features X.</h2>
+
+<h3>Description</h3>
+
+<p>This function will output K clusters of the columns of Y using the help of
+X.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ancut(Y, X, K = 2, B = 3000, L = 1000, alpha = 0.5, nlambdas = 100,
+  sampling = "equal", ncv = 5, dist = "correlation", sigma = 0.1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>is a n x p matrix of p variables and n observations. The columns of
+Y will be clustered into K groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>is a n x q matrix of q variables and n observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>is the number of clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>is the number of iterations in the simulated annealing algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>is the temperature coefficient in the simulated annealing algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>is the coefficient of the elastic net penalty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlambdas</code></td>
+<td>
+<p>is the number of tuning parameters in the elastic net.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampling</code></td>
+<td>
+<p>if 'equal' then the sampling probabilities is the same during
+the simulated annealing algorithm, if 'size' the probabilites are proportional
+the the sizes of the clusters in the current iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncv</code></td>
+<td>
+<p>is the number of cross-validations in the elastic net.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>is the type of distance metric for the construction of the similarity matrix.
+Options are 'gaussian', 'euclidean' and 'correlation', the latter being the default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>is the parameter for the gaussian kernel distance which is ignored if 'gaussian' is
+not chosen as distance measure.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The algorithm minimizes a modified version of NCut through simulated annealing.
+The modified NCut uses in the numerator the similarity matrix of the original data <code>Y</code>
+and the denominator uses the similarity matrix of the prediction of <code>Y</code> using <code>X</code>.
+The clusters correspond to partitions that minimize this objective function.
+The external information of <code>X</code> is incorporated by using elastic net to predict <code>Y</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the final value of the objective function,
+the clusters and the lambda penalty chosen through cross-validation.
+</p>
+<p>A list with the following components:
+</p>
+
+<dl>
+<dt>loss</dt>
+<dd>
+<p>a vector of length <code>N</code> which contains the loss
+at each iteration of the simulated annealing algorithm.</p>
+</dd>
+<dt>cluster</dt>
+<dd>
+<p>a matrix representing the clustering result of dimension <code>p</code> times
+<code>K</code>, where <code>p</code> is the number of columns of <code>Y</code>.</p>
+</dd>
+<dt>lambda.min</dt>
+<dd>
+<p>is the optimal lambda chosen through cross-validation for the elastic net for
+predicting <code>Y</code> with <code>Y</code>.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Sebastian Jose Teran Hidalgo and Shuangge Ma. Maintainer: Sebastian Jose Teran Hidalgo.
+<a href="sebastianteranhidalgo@gmail.com">sebastianteranhidalgo@gmail.com</a>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Hidalgo, Sebastian J. Teran, Mengyun Wu, and Shuangge Ma.
+Assisted clustering of gene expression data using ANCut. BMC genomics 18.1 (2017): 623.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#This sets up the initial parameters for the simulation.
+library(MASS)#for mvrnorm
+library(fields)
+n=30 #Sample size
+B=50 #Number of iterations in the simulated annealing algorithm.
+L=10000 #Temperature coefficient.
+p=50 #Number of columns of Y.
+q=p #Number of columns of X.
+h1=0.15
+h2=0.25
+
+S=matrix(0.2,q,q)
+S[1:(q/2),(q/2+1):q]=0
+S[(q/2+1):q,1:(q/2)]=0
+S=S-diag(diag(S))+diag(q)
+
+mu=rep(0,q)
+
+W0=matrix(1,p,p)
+W0[1:(p/2),1:(p/2)]=0
+W0[(p/2+1):p,(p/2+1):p]=0
+Denum=sum(W0)
+
+B2=matrix(0,q,p)
+for (i in 1:(p/2)){
+   B2[1:(q/2),i]=runif(q/2,h1,h2)
+   in1=sample.int(q/2,6)
+   B2[-in1,i]=0
+}
+
+for (i in (p/2+1):p){
+   B2[(q/2+1):q,i]=runif(q/2,h1,h2)
+   in2=sample(seq(q/2+1,q),6)
+   B2[-in2,i]=0
+}
+
+X=mvrnorm(n, mu, S)
+Z=X%*%B2
+Y=Z+matrix(rnorm(n*p,0,1),n,p)
+#Our method
+Res=ancut(Y=Y,X=X,B=B,L=L,alpha=0,ncv=3)
+Cx=Res[[2]]
+f11=matrix(Cx[,1],p,1)
+f12=matrix(Cx[,2],p,1)
+
+errorL=sum((f11%*%t(f11))*W0)/Denum+sum((f12%*%t(f12))*W0)/Denum
+#This is the true error of the clustering solution.
+errorL
+
+par(mfrow=c(1,2))
+#Below is a plot of the simulated annealing path.
+plot(Res[[1]],type='l',ylab='')
+#Cluster found by ANCut
+image.plot(Cx)
+</code></pre>
+
+
+</div>

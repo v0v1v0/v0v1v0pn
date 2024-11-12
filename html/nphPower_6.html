@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MaxLRtest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum Weighted Logrank Test</h2>
+
+<h3>Description</h3>
+
+<p><code>MaxLRtest</code> performs the maximum weighted logrank test if
+multiple weight functions are provided. It is the regular weighted logrank test,
+if a single weight function is specified,
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MaxLRtest(
+  dat,
+  Wlist,
+  base = c("KM"),
+  alpha = 0.05,
+  alternative = c("two.sided")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>a dataframe or matrix. The first three columns of the data
+set are survival
+time, event status indicator  and group label. The status indicator, normally
+0=alive, 1=dead/event. Other choices are TRUE/FALSE (TRUE=death) or 1/2 (2=death).
+The group label can be either numeric values like 0=control, 1=treatment or text
+like C=control, T=treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Wlist</code></td>
+<td>
+<p>a list with components of weight functions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base</code></td>
+<td>
+<p>a text must be one of c("<code>KM</code>", "<code>Combined</code>", "<code>N</code>"),
+Default: c("KM")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a number indicating type I error rate, Default: 0.05</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>a text must be one of c("<code>two.sided</code>", "<code>less</code>",
+<code>"greater"</code>), indicating the alternative hypothesis, Default: c("two.sided")</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>MaxLRtest</code> function performs logrank, weighted logrank test such as
+Fleming-Harrington test and maximum weighted logrank test depending on
+the type and number of weight functions. Let <code class="reqn">w(x_t)</code> denote the weight applied
+at event time point <code class="reqn">t</code>, where <code class="reqn">x_t</code> is the base function. There are three options
+for <code>base</code>. If <code>KM</code> is used, <code class="reqn">x_t=1-S_t</code>, where <code class="reqn">S_t</code>
+is pooled Kaplan-Meier estimate of survival rate at time point t. A FH(1,0) test
+needs a weight function <code class="reqn">1-x_t</code>. If <code>Combined</code> base is selected,
+<code class="reqn">x_t=1-S^*_t</code>, where <code class="reqn">S^*_t=w_1S^1_t+w_0S^0_t</code>, the weighted average
+of KM estimate of survival rate for treatment (<code class="reqn">S^1_t</code>) and control group
+(<code class="reqn">S^0_t</code>). It is considered more robust in case of unbalanced data.
+For option <code>N</code>, <code class="reqn">x_t=1-\frac{Y_t}{N}</code>, where <code class="reqn">Y_t</code> is the subjects
+at risk at time t and <code class="reqn">N</code> is the total number of subjects.The Wilcoxon and
+tarone test should use this base. The base <code class="reqn">x_t</code> in all three cases is an
+increasing function of time t. Function <code>gen.wgt</code> helps to generate the commonly
+used weight functions.
+</p>
+<p>Let <code class="reqn">\Lambda_1</code> and <code class="reqn">\Lambda_0</code> denote the cumulative hazard for
+treatment and control group. The alternative of a two-sided test is
+<code class="reqn">H_a: \Lambda_1 \neq \Lambda_0</code>. The <code>"less"</code> alternative
+corresponds to <code class="reqn">H_a: \Lambda_1 &lt; \Lambda_0</code> and the <code>"greater"</code>
+alternative is <code class="reqn">H_a: \Lambda_1 &gt; \Lambda_0</code>.
+</p>
+<p>A p-value is obtained from a multivariate normal distribution if multiple weights
+are provided. The function <code>pmvnorm</code> from R package <span class="pkg">mvtnorm</span> is used.
+Because the algorithm is slightly seed-dependent,the p-value and critical value
+is the average of 10 runs.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of components including
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>stat</code></td>
+<td>
+<p>a numeric value indicating the test statistic. It is logrank or weighted logrank test
+statistic if one weight function is specified. Otherwise, it gives
+the maximum weighted logrank test statistic, which takes the maximum
+of absolute values of all the statistics. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat.mat</code></td>
+<td>
+<p>a matrix with the first column showing weighted
+logrank test statistics and other columns displaying the variance and
+covariance between statistics</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>critV</code></td>
+<td>
+<p>a numeric value indicating the critical value corresponding to the nominal
+level - <code>alpha</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>a dataframe showing the intermediate variables used in the
+calculation. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>a numeric value indicating the p-value of the test</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>pwr2n.NPH</code>, <code>gen.wgt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(lung)
+#Only keep variables for analysis
+tmpd &lt;- with(lung, data.frame(time=SurvTime,stat=1-censor,grp=Treatment))
+#logrank test
+wlr &lt;- gen.wgt(method = "LR")
+t1 &lt;- MaxLRtest(tmpd, Wlist = wlr, base = c("KM") )
+t1$stat ;t1$p.value
+
+
+# maxcombo test
+wmax &lt;- gen.wgt(method="Maxcombo")
+t2 &lt;- MaxLRtest(tmpd, Wlist = wmax, base = c("KM") )
+t2$stat ;t2$p.value
+#visualize the weight functions
+plot(t2)
+</code></pre>
+
+
+</div>

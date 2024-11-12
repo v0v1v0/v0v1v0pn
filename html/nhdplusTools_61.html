@@ -1,0 +1,77 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>make_node_topology</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>get node topology from edge topology (DEPRECATED)</h2>
+
+<h3>Description</h3>
+
+<p>creates a node topology table from an edge topology
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">make_node_topology(x, add_div = NULL, add = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>data.frame with an identifier and to identifier in the
+first and second columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add_div</code></td>
+<td>
+<p>data.frame containing id and toid diverted paths to add.
+Should have id and toid fields in the first and second columns. Names
+are not used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>logical if TRUE, a tocomid column will be added, otherwise
+a data.frame with two columns will be returned.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data.frame containing id, fromnode, and tonode attributes or all
+attributes provided with id, fromnode and tonode in the first three columns.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">source(system.file("extdata/new_hope_data.R", package = "nhdplusTools"))
+
+x &lt;- dplyr::select(get_tocomid(
+  dplyr::select(new_hope_flowline, COMID, FromNode, ToNode, Divergence, FTYPE,
+                AreaSqKM, LENGTHKM, GNIS_ID)
+), -tonode, -fromnode)
+
+head(y &lt;- make_node_topology(x))
+
+# just the divergences which have unique fromids in x but don't in new hope.
+div &lt;- get_tocomid(dplyr::select(new_hope_flowline, COMID, FromNode, ToNode),
+                   return_dendritic = FALSE,
+                   remove_coastal = FALSE)
+div &lt;- div[div$tocomid %in%
+             new_hope_flowline$COMID[new_hope_flowline$Divergence == 2],]
+
+y &lt;- make_node_topology(x, div)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_nhdplushr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get NHDPlus HiRes</h2>
+
+<h3>Description</h3>
+
+<p>Get NHDPlus HiRes
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_nhdplushr(
+  hr_dir,
+  out_gpkg = NULL,
+  layers = c("NHDFlowline", "NHDPlusCatchment"),
+  pattern = ".*GDB.gdb$",
+  check_terminals = TRUE,
+  overwrite = FALSE,
+  keep_cols = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>hr_dir</code></td>
+<td>
+<p>character directory with geodatabases (gdb search is recursive)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out_gpkg</code></td>
+<td>
+<p>character path to write output geopackage</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layers</code></td>
+<td>
+<p>character vector with desired layers to return.
+c("NHDFlowline", "NHDPlusCatchment") is default.
+Choose from:
+c("NHDFlowline", "NHDPlusCatchment", "NHDWaterbody", "NHDArea", "NHDLine",
+"NHDPlusSink", "NHDPlusWall", "NHDPoint", "NHDPlusBurnWaterbody",
+"NHDPlusBurnLineEvent", "HYDRO_NET_Junctions",
+"WBDHU2", "WBDHU4","WBDHU6", "WBDHU8" "WBDHU10", "WBDHU12", "WBDLine")
+Set to NULL to get all available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pattern</code></td>
+<td>
+<p>character optional regex to select certain files in hr_dir</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>check_terminals</code></td>
+<td>
+<p>boolean if TRUE, run make_standalone on output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>boolean should the output overwrite? If false and the output layer
+exists, it will be read and returned so this function will always return data even
+if called a second time for the same output. This is useful for workflows. Note that
+this will NOT delete the entire Geopackage. It will overwrite on a per layer basis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_cols</code></td>
+<td>
+<p>character vector of column names to keep in the output. If NULL,
+all will be kept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>parameters passed along to get_hr_data
+for "NHDFlowline" layers.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>NHDFlowline is joined to value added attributes prior to being
+returned.
+Names are not modified from the NHDPlusHR geodatabase.
+Set layers to "NULL" to get all layers.
+</p>
+
+
+<h3>Value</h3>
+
+<p>sf data.frames containing output that may also be written
+to a geopackage for later use.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Note this will download a lot of data to a temp directory.
+# Change 'temp_dir' to your directory of choice.
+temp_dir &lt;- file.path(nhdplusTools_data_dir(), "temp_hr_cache")
+
+download_dir &lt;- download_nhdplushr(temp_dir, c("0302", "0303"))
+
+get_nhdplushr(download_dir, file.path(download_dir, "nhdplus_0302-03.gpkg"))
+
+get_nhdplushr(download_dir,
+              file.path(download_dir, "nhdplus_0302-03.gpkg"),
+              layers = NULL, overwrite = TRUE)
+
+get_nhdplushr(download_dir,
+              file.path(download_dir, "nhdplus_0302-03.gpkg"),
+              layers = "NHDFlowline", overwrite = TRUE,
+              min_size_sqkm = 10, simp = 10, proj = "+init=epsg:5070")
+
+# Cleanup
+unlink(temp_dir, recursive = TRUE)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

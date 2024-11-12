@@ -1,0 +1,241 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nonlinearICP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nonlinear Invariant Causal Prediction</h2>
+
+<h3>Description</h3>
+
+<p>Nonlinear Invariant Causal Prediction
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nonlinearICP(X, Y, environment,
+  condIndTest = InvariantResidualDistributionTest, argsCondIndTest = NULL,
+  alpha = 0.05, varPreSelectionFunc = NULL,
+  argsVarPreSelectionFunc = NULL, maxSizeSets = ncol(X),
+  condIndTestNames = NULL, speedUp = FALSE, subsampleSize = c(0.1, 0.25,
+  0.5, 0.75, 1), retrieveDefiningsSets = TRUE, seed = 1,
+  stopIfEmpty = TRUE, testAdditionalSet = NULL, verbose = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A (nxp)-dimensional matrix (or data frame) with n observations of p variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>A (nx1)-dimensional response vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>environment</code></td>
+<td>
+<p>Environment variable(s) in an (n x k)-dimensional
+matrix or dataframe. Note that not all nonlinear conditional
+independence tests may support more than one environmental variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>condIndTest</code></td>
+<td>
+<p>Function implementing a conditional independence test (see below
+for the required interface). Defaults to <code>InvariantResidualDistributionTest</code> from
+the package <code>CondIndTests</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>argsCondIndTest</code></td>
+<td>
+<p>Arguments of <code>condIndTest</code>. Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Significance level to be used. Defaults to <code>0.05</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varPreSelectionFunc</code></td>
+<td>
+<p>Variable selection function that is applied
+to pre-select a set of variables before running the ICP procedure on the resulting
+subset. Should be used with care as causal parents might be excluded in this step.
+Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>argsVarPreSelectionFunc</code></td>
+<td>
+<p>Arguments of <code>varPreSelectionFunc</code>.
+Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxSizeSets</code></td>
+<td>
+<p>Maximal size of sets considered as causal parents.
+Defaults to <code>ncol(X)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>condIndTestNames</code></td>
+<td>
+<p>Name of conditional independence test, used for printing.
+Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>speedUp</code></td>
+<td>
+<p>Use subsamples of sizes specified in <code>subsampleSize</code> to speed
+up the test for sets where the null hypothesis can already be rejected based on
+a small number of samples (a larger sample size would potentially further
+decrease the p-value but would not change the decision, i.e. the set is rejected
+in any case). Applies Bonferroni multiple testing correction.
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsampleSize</code></td>
+<td>
+<p>Size of subsamples used in <code>speedUp</code> procedure
+as fraction of total sample size. Defaults to <code>c(0.1, 0.25, 0.5, 0.75, 1)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>retrieveDefiningsSets</code></td>
+<td>
+<p>Boolean variable to indicate whether defining sets
+should be retrieved. Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Random seed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stopIfEmpty</code></td>
+<td>
+<p>Stop ICP procedure if retrieved set is empty. If
+<code>retrieveDefiningsSets</code> is <code>TRUE</code>, setting <code>stopIfEmpty</code> to
+<code>TRUE</code> results in testing further sets to retrieve the defining sets. However,
+setting <code>stopIfEmpty</code> to <code>TRUE</code> in this case will still speedup the procedure as
+some sets will not be tested (namely those where accepting/rejecting
+would not affect the defining sets). Setting <code>stopIfEmpty</code> to
+<code>FALSE</code> means that all possible subsets of the predictors are tested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>testAdditionalSet</code></td>
+<td>
+<p>If a particular set should be tested, the corresponding
+indices can be provided via this argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Boolean variable to indicate whether messages should be printed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function provided as <code>condIndTest</code> needs to take the following
+arguments in the given order: <code>Y, environment, X, alpha, verbose</code>. Additional
+arguments can then be provided via <code>argsCondIndTest</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following elements:
+</p>
+
+<ul>
+<li> <p><code>retrievedCausalVars</code> Indices of variables in <code class="reqn">\hat{S}</code>
+</p>
+</li>
+<li> <p><code>acceptedSets</code> List of accepted sets.
+</p>
+</li>
+<li> <p><code>definingSets</code>  List of defining sets.
+</p>
+</li>
+<li> <p><code>acceptedModels</code> List of accepted models if specified in <code>argsCondIndTest</code>.
+</p>
+</li>
+<li> <p><code>pvalues.accepted</code> P-values of accepted sets.
+</p>
+</li>
+<li> <p><code>rejectedSets</code> List of rejected sets.
+</p>
+</li>
+<li> <p><code>pvalues.rejected</code> P-values of rejected sets.
+</p>
+</li>
+<li> <p><code>settings</code> Settings provided to <code>nonlinearICP</code>.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Please cite
+C. Heinze-Deml, J. Peters and N. Meinshausen: "Invariant Causal Prediction for Nonlinear Models",
+<a href="https://arxiv.org/abs/1706.08576">arXiv:1706.08576</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The function <code>CondIndTest</code> from the package
+<code>CondIndTests</code> is a wrapper for a variety of nonlinear conditional independence
+tests that can be used in <code>condIndTest</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1
+require(CondIndTests)
+data("simData")
+targetVar &lt;- 2
+# choose environments where we did not intervene on var
+useEnvs &lt;- which(simData$interventionVar[,targetVar] == 0)
+ind &lt;- is.element(simData$environment, useEnvs)
+X &lt;- simData$X[ind,-targetVar]
+Y &lt;- simData$X[ind,targetVar]
+E &lt;- as.factor(simData$environment[ind])
+result &lt;- nonlinearICP(X = X, Y = Y, environment = E)
+cat(paste("Variable",result$retrievedCausalVars, "was retrieved as the causal
+parent of target variable", targetVar))
+
+###################################################
+
+# Example 2
+E &lt;- rep(c(1,2), each = 500)
+X1 &lt;- E + 0.1*rnorm(1000)
+X1 &lt;- rnorm(1000)
+X2 &lt;- X1 + E^2 + 0.1*rnorm(1000)
+Y &lt;- X1 + X2 + 0.1*rnorm(1000)
+resultnonlinICP &lt;- nonlinearICP(cbind(X1,X2), Y, as.factor(E))
+summary(resultnonlinICP)
+</code></pre>
+
+
+</div>

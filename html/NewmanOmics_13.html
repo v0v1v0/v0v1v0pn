@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MixOf3Beta-class</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Class "MixOf3Beta"</h2>
+
+<h3>Description</h3>
+
+<p>Represents the results of fitting a beta-mixture model to a set of
+p-values that has peaks at both zero and one.
+</p>
+
+
+<h3>Details</h3>
+
+<p>Given a set of p-values (or any data on the interval [0,1]) that has
+peaks at both ends of the interval, we fit a three-componet mixture
+model. One component is uniform, and represents the expected
+distribution under the null hypothesis that nothing interesting is
+happening anywhere. The second component has the distribution
+Beta(1,M); this has a peak at zero and represents the features of
+interest. The final component has the distribution Beta(L,1). In the
+context of the Newman paired statistic, this represents genes or
+features whose variabilirt is smaller than the locally smoothed
+estimate of the standard deviation; we can think of these as
+"extra boring".
+</p>
+
+
+<h3>Creating Objects</h3>
+
+<p>In practice, users will use the <code>fitMix3</code> function to
+construct an object of the <code>MixOf3Beta</code> class. Hand
+construction is strongly discouraged.
+</p>
+
+
+<h3>Slots</h3>
+
+
+<dl>
+<dt>
+<code>input</code>:</dt>
+<dd>
+<p>A numeric vector containing the input p-values.</p>
+</dd>
+<dt>
+<code>mle</code>:</dt>
+<dd>
+<p> A numeric vactor of length 2 containing the beta
+parameters <code>L</code> and <code>M</code> (in that order).</p>
+</dd>
+<dt>
+<code>psi</code>:</dt>
+<dd>
+<p>A numeric vector of length three containing the
+mixing parameters, in the order (right-peak component, left-peak
+component, and uniform-component).</p>
+</dd>
+<dt>
+<code>Z</code>:</dt>
+<dd>
+<p>A matrix of size N (number of features) by 3. This
+contains the latent indicator matrix. Each row corresponds to a
+gene or feature, and the entries show the proabbiltiy that the
+feature arose from the right, left, or uniform comnponent.</p>
+</dd>
+</dl>
+<h3>Methods</h3>
+
+
+<dl>
+<dt>plot(x, y, ...)</dt>
+<dd>
+<p>Plot the decompositon of the data into thre pieces.</p>
+</dd>
+<dt>hist(x, lcol = "red", breaks=101, ...)</dt>
+<dd>
+<p>Plot a histogram of
+the p-values along with the fitted model of the distribution.</p>
+</dd>
+<dt>image(x)</dt>
+<dd>
+<p>Plot a (sorted) image of the latent variable Z-matrix.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Kevin R. Coombes <a href="mailto:krc@silicovore.com">krc@silicovore.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Abrams ZB, Joglekar A, Gershkowitz GR, Sinicropi-yao S, Asiaee A,
+Carbone DP, Coombes KR. Personalized Transcriptomics: Selecting Drugs
+Based on Gene Expression Profiles. Preprint.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pairedStat</code>, <code>NewmanPaired-class</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(98765)
+ds &lt;- c(rbeta(3000, 20, 1),
+        rbeta(1000, 1, 40),
+        runif(6000))
+fit &lt;- fitMix3(ds)
+image(fit, col=topo.colors(64))
+hist(fit, col="skyblue", lcol="blue")
+plot(fit)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,193 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nail_descfreq</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Interpret the rows of a contingency table</h2>
+
+<h3>Description</h3>
+
+<p>Describes the rows of a contingency table. For each row, this description is based on the columns of the contingency table that are significantly related to it.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nail_descfreq(
+  dataset,
+  introduction = "",
+  request = NULL,
+  model = "llama3",
+  isolate.groups = FALSE,
+  by.quali = NULL,
+  proba = 0.05,
+  generate = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>a data frame corresponding to a contingency table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>introduction</code></td>
+<td>
+<p>the introduction for the LLM prompt.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>request</code></td>
+<td>
+<p>the request made to the LLM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the model name ('llama3' by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isolate.groups</code></td>
+<td>
+<p>a boolean that indicates whether to give the LLM a single prompt, or one prompt per row. Recommended if the contingency table has a great number of rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by.quali</code></td>
+<td>
+<p>a factor used to merge the data from different rows of the contingency table; by default NULL and each row is characterized.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proba</code></td>
+<td>
+<p>the significance threshold considered to characterize the category (by default 0.05).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>generate</code></td>
+<td>
+<p>a boolean that indicates whether to generate the LLM response. If FALSE, the function only returns the prompt.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function directly sends a prompt to an LLM. Therefore, to get a consistent answer, we highly recommend to customize the parameters introduction and request and add all relevant information on your data for the LLM.
+</p>
+<p>Additionally, if isolate.groups = TRUE, you will need an introduction and a request that take into account the fact that only one group is analyzed at a time.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame, or a list of data frames, containing the LLM's prompt and response (if generate = TRUE).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+### Example 1: beard dataset ###
+
+data(beard_cont)
+
+intro_beard_iso &lt;- 'A survey was conducted about beards
+and 8 types of beards were described.
+I will give you the results for one type of beard.'
+intro_beard_iso &lt;- gsub('\n', ' ', intro_beard_iso) |&gt;
+stringr::str_squish()
+
+req_beard_iso &lt;- 'Please give a name to this beard
+and summarize what makes this beard unique.'
+req_beard_iso &lt;- gsub('\n', ' ', req_beard_iso) |&gt;
+stringr::str_squish()
+
+res_beard &lt;- nail_descfreq(beard_cont,
+introduction = intro_beard_iso,
+request = req_beard_iso,
+isolate.groups = TRUE, generate = FALSE)
+
+res_beard$prompt[1]
+res_beard$prompt[2]
+
+intro_beard &lt;- 'A survey was conducted about beards
+and 8 types of beards were described.
+In the data that follow, beards are named B1 to B8.'
+intro_beard &lt;- gsub('\n', ' ', intro_beard) |&gt;
+stringr::str_squish()
+
+req_beard &lt;- 'Please give a name to each beard
+and summarize what makes this beard unique.'
+req_beard &lt;- gsub('\n', ' ', req_beard) |&gt;
+stringr::str_squish()
+
+res_beard &lt;- nail_descfreq(beard_cont,
+introduction = intro_beard,
+request = req_beard)
+cat(res_beard$response)
+
+text &lt;- res_beard$response
+titles &lt;- stringr::str_extract_all(text, "\\*\\*B[0-9]+: [^\\*\\*]+\\*\\*")[[1]]
+
+titles
+
+# for the following code to work, the response must have the beards'
+# new names with this format: **B1: The Nice beard**, etc.
+
+titles &lt;- stringr::str_replace_all(titles, "\\*\\*", "")  # remove asterisks
+names &lt;- stringr::str_extract(titles, ": .+")
+names &lt;- stringr::str_replace_all(names, ": ", "")  # remove the colon and space
+
+rownames(beard_cont) &lt;- names
+
+library(FactoMineR)
+
+res_ca_beard &lt;- CA(beard_cont, graph = F)
+plot.CA(res_ca_beard, invisible = "col")
+
+
+### Example 2: children dataset ###
+
+data(children)
+
+children &lt;- children[1:14, 1:5] |&gt; t() |&gt; as.data.frame()
+rownames(children) &lt;- c('No education', 'Elementary school',
+'Middle school', 'High school', 'University')
+
+intro_children &lt;- 'The data used here is a contingency table
+that summarizes the answers
+given by different categories of people to the following question:
+"according to you, what are the reasons that can make
+a woman of a couple hesitate to have children?".
+Each row corresponds to a level of education, and columns are reasons.'
+intro_children &lt;- gsub('\n', ' ', intro_children) |&gt;
+stringr::str_squish()
+
+req_children &lt;- "Please explain the main differences
+between more educated and less educated couples,
+when it comes to hesitating to have children."
+req_children &lt;- gsub('\n', ' ', req_children) |&gt;
+stringr::str_squish()
+
+res_children &lt;- nail_descfreq(children,
+introduction = intro_children, request = req_children)
+
+cat(res_children$response)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

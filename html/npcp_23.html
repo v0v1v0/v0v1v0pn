@@ -1,0 +1,278 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>seqOpenEndCpDist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Open-end Nonparametric Sequential Change-Point Detection Test
+for (Possibly) Multivariate Time Series Sensitive to
+Changes in the Distribution Function
+</h2>
+
+<h3>Description</h3>
+
+<p>Open-end nonparametric sequential test for change-point detection based
+on a retrospective CUSUM statistic constructed from differences of
+empirical distribution functions. The observations can be univariate
+or multivariate (low-dimensional), and serially dependent.  To carry
+out the test, two steps are required. The first step consists of
+computing a detector function. The second step consists of comparing
+the detector function to a suitable constant threshold function. Each
+of these steps corresponds to one of the functions in the usage
+section below. The current implementation is preliminary and not
+optimized for real-time monitoring (but could still be used for
+that). Details can be found in the first reference.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">detOpenEndCpDist(x.learn, x, pts = NULL, r = NULL, sigma = NULL, kappa = 1.5, ...)
+
+monOpenEndCpDist(det, alpha = 0.05, plot = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x.learn</code></td>
+<td>
+<p>a numeric matrix representing the learning sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric matrix representing the observations collected
+after the beginning of the monitoring.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pts</code></td>
+<td>
+<p>a numeric matrix whose rows represent the evaluation
+points; if not provided by user, chosen automatically from
+the learning sample using parameter <code>r</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>integer greater or equal than 2 representing the number of
+evaluation points per dimension to be chosen from the learning
+sample; used only if <code>pts = NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>a numeric matrix representing the covariance matrix to be
+used; if <code>NULL</code>, estimated by <code>sandwich::lrvar()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>constant involved in the point selection procedure; used
+only if the multivariate case; should be larger than 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments passed to <code>sandwich::lrvar()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>det</code></td>
+<td>
+<p>an object of class <code>det.OpenEndCpDist</code> representing a
+detector function computed using <code>detOpenEndCpDist()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the value of the desired significance level for the
+sequential test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical indicating whether the monitoring should be
+plotted.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The testing procedure is described in detail in the first reference.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Both functions return lists whose components have explicit names. The
+function <code>monOpenEndCpDist()</code> in particular returns a list whose
+components are
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>alarm</code></td>
+<td>
+<p>a logical indicating whether the detector function has
+exceeded the threshold function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.alarm</code></td>
+<td>
+<p>an integer corresponding to the time at
+which the detector function has exceeded the threshold function or
+<code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times.max</code></td>
+<td>
+<p>a vector of times at which the successive detectors
+have reached their maximum; this sequence of times can be used to
+estimate the time of change from the time of alarm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.change</code></td>
+<td>
+<p>an integer giving the estimated time of change if
+<code>alarm</code> is <code>TRUE</code>; the latter is simply the value in
+<code>times.max</code> which corresponds to <code>time.alarm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>the value of <code>statistic</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>the value of <code>eta</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>number of evaluations points of the empirical distribution functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pts</code></td>
+<td>
+<p>evaluation points of the empirical distribution functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the value of <code>alpha</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>the value of <code>sigma</code> in the call of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detector</code></td>
+<td>
+<p>the successive values of the detector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>the value of the constant threshold for the detector.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>M. Holmes, I. Kojadinovic and A. Verhoijsen (2022), Multi-purpose
+open-end monitoring procedures for multivariate observations based on
+the empirical distribution function, 45 pages,
+<a href="https://arxiv.org/abs/2201.10311">https://arxiv.org/abs/2201.10311</a>.
+</p>
+<p>M. Holmes and I. Kojadinovic (2021), Open-end nonparametric sequential
+change-point detection based on the retrospective CUSUM statistic,
+<em>Electronic Journal of Statistics</em> <b>15:1</b>, pages 2288-2335,
+<a href="https://doi.org/10.1214/21-EJS1840">doi:10.1214/21-EJS1840</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>detOpenEndCpMean()</code> for the corresponding test
+sensitive to changes in the mean, <code>selectPoints()</code> for the
+underlying point selection procedure used in the multivariate case
+and <code>lrvar()</code> for information on the estimation
+of the underlying long-run covariance matrix.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Example of open-end monitoring
+m &lt;- 800 # size of the learning sample
+nm &lt;- 5000 # number of collected observations after the start
+n &lt;- nm + m # total number of observations
+
+set.seed(456)
+
+## Univariate, no change in distribution
+r &lt;- 5 # number of evaluation points
+x &lt;- rnorm(n)
+## Step 1: Compute the detector
+det &lt;- detOpenEndCpDist(x.learn = matrix(x[1:m]),
+                        x = matrix(x[(m + 1):n]), r = r)
+## Step 2: Monitoring
+mon &lt;- monOpenEndCpDist(det = det, alpha = 0.05, plot = TRUE)
+
+## Univariate, change in distribution
+k &lt;- 2000 # m + k + 1 is the time of change
+x[(m + k + 1):n] &lt;- rt(nm - k, df = 3)
+det &lt;- detOpenEndCpDist(x.learn = matrix(x[1:m]),
+                        x = matrix(x[(m + 1):n]), r = r)
+mon &lt;- monOpenEndCpDist(det = det, alpha = 0.05, plot = TRUE)
+
+## Bivariate, no change
+d &lt;- 2
+r &lt;- 4 # number of evaluation points per dimension
+x &lt;- matrix(rnorm(n * d), nrow = n, ncol = d)
+det &lt;- detOpenEndCpDist(x.learn = x[1:m, ], x = x[(m + 1):n, ], r = r)
+mon &lt;- monOpenEndCpDist(det = det, alpha = 0.05, plot = TRUE)
+
+## Bivariate, change in the mean of the first margin
+x[(m + k + 1):n, 1] &lt;- x[(m + k + 1):n, 1] + 0.3
+det &lt;- detOpenEndCpDist(x.learn = x[1:m, ], x = x[(m + 1):n, ], r = r)
+mon &lt;- monOpenEndCpDist(det = det, alpha = 0.05, plot = TRUE)
+
+## Bivariate, change in the dependence structure
+x1 &lt;- rnorm(n)
+x2 &lt;- c(rnorm(m + k, 0.2 * x1[1:(m + k)], sqrt((1 - 0.2^2))),
+        rnorm(nm - k, 0.7 * x1[(m + k + 1):n], sqrt((1 - 0.7^2))))
+x &lt;- cbind(x1, x2)
+det &lt;- detOpenEndCpDist(x.learn = x[1:m, ], x = x[(m + 1):n, ], r = r)
+mon &lt;- monOpenEndCpDist(det = det, alpha = 0.05, plot = TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,188 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>logrank.maxtest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum combination (MaxCombo) log-rank test</h2>
+
+<h3>Description</h3>
+
+<p>Calculates a MaxCombo test for the comparison of two groups based on the maximum of test statistics of a set of weighted log-rank tests
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">logrank.maxtest(
+  time,
+  event,
+  group,
+  alternative = c("two.sided", "less", "greater"),
+  rho = c(0, 0, 1),
+  gamma = c(0, 1, 0),
+  event_time_weights = NULL,
+  algorithm = mvtnorm::GenzBretz(maxpts = 50000, abseps = 1e-05, releps = 0)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>Vector of observed event/censored times</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>logical vector or numeric vector with entries 0 or 1, indicating if an event was observed (TRUE or 1) or the time is censored (FALSE or 0)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>Vector of group allocations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>Either of <code>"two.sided"</code>,<code>"less"</code> or <code>"greater"</code>, specifies if two-sided or respective
+one-sided p-values are calculated. In any case the z test statistic of each included weighted log-rank test
+is based on the (weighted) sum of expected minus observed
+events in the group corresponding to the first factor level of <code>group</code>. Hence a small value of the test statistic corresponds to a
+lower (weighted average) hazard rate in the first group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>Vector of parameter values rho for a set of weighting functions in the rho-gamma family</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>Vector of parameter values gamma for a set of weighting functions in the rho-gamma family</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event_time_weights</code></td>
+<td>
+<p>Optional matrix, each column containing a different weighting vector for the event times.
+These weight vectors need to have one entry per event time (not per event, as multiple events may
+occur at the same time) and must be sorted by increasing event time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>algorithm for the multivariate normal integration to be used in <code>pmvnorm</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To perform a maximum-type combination test, a set of <code class="reqn">m</code> different weight
+functions <code class="reqn">w_1(t), \dots, w_m(t)</code> is specified and the correspondingly
+weighted logrank statistics <code class="reqn">z_1,\dots,z_m</code> are calculated. The maximum
+test statistic is <code class="reqn">z_{max}=\max_{i=1,\dots,m} z_i</code>. If at least one of
+the selected weight functions results in high power, we may expect a large
+value of <code class="reqn">z_{max}</code>.
+Under the least favorable configuration in <code class="reqn">H_0</code>, approximately
+<code class="reqn">(Z_1,\dots,Z_m)\sim N_m({0},{\Sigma})</code>. The p-value of the maximum
+test, <code class="reqn">P_{H_0}(Z_{max}&gt;z_{max})=1-P(Z_1 \leq z_{max},\dots,Z_m \leq z_{max})</code>,
+is calculated based on this multivariate normal approximation via numeric integration.
+The integration is done using <code>pmvnorm</code>. The default settings in
+<code>logrank.maxtest</code> correspond to greater precision than the original default of
+<code>pmvnorm</code>. Precision can be set via the argument <code>algorithm</code>.
+Lower precision settings may speed up caclulation.
+</p>
+<p>The multivariate normal approach automatically corrects for multiple testing with
+different weights and does so efficiently since the correlation between the different
+tests is incorporated in <code class="reqn">{\Sigma}</code>. For actual calculations, <code class="reqn">{\Sigma}</code> is
+replaced by an estimate.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements:
+</p>
+
+<dl>
+<dt><code>pmult</code></dt>
+<dd>
+<p>The two sided p-value for the null hypothesis of equal hazard functions in both groups, based on the multivariate
+normal approximation for the z-statistics of differently weighted log-rank tests.</p>
+</dd>
+<dt><code>p.Bonf</code></dt>
+<dd>
+<p>The two sided p-value for the null hypothesis of equal hazard functions in both groups, based on a
+Bonferroni multiplicity adjustment for differently weighted log-rank tests.</p>
+</dd>
+<dt><code>tests</code></dt>
+<dd>
+<p>Data frame with z-statistics and two-sided unadjusted p-values of the individual weighted log-rank tests</p>
+</dd>
+<dt><code>korr</code></dt>
+<dd>
+<p>Estimated correlation matrix for the z-statistics of the differently weighted log-rank tests.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Robin Ristl, <a href="mailto:robin.ristl@meduniwien.ac.at">robin.ristl@meduniwien.ac.at</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Robin Ristl, Nicolas Ballarini, Heiko Götte, Armin Schüler, Martin Posch, Franz König. Delayed treatment effects, treatment switching and
+heterogeneous patient populations: How to design and analyze RCTs in oncology. Pharmaceutical statistics. 2021; 20(1):129-145.
+</p>
+<p>Pranab Ghosh, Robin Ristl, Franz König, Martin Posch, Christopher Jennison, Heiko Götte, Armin Schüler, Cyrus Mehta. Robust group sequential
+designs for trials with survival endpoints and delayed response. Biometrical Journal. First published online: 21 December 2021
+</p>
+<p>Tarone RE. On the distribution of the maximum of the logrank statistic and the modified wilcoxon statistic. Biometrics. 1981; 37:79-85.
+</p>
+<p>Lee S-H. On the versatility of the combination of the weighted log-rank statistics. Comput Stat Data Anal. 2007; 51(12):6557-6564.
+</p>
+<p>Karrison TG et al. Versatile tests for comparing survival curves based on weighted log-rank statistics. Stata J. 2016; 16(3):678-690.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>logrank.test</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">A &lt;- pop_pchaz(Tint = c(0, 90, 1500),
+  lambdaMat1 = matrix(c(0.2, 0.1, 0.4, 0.1), 2, 2) / 365,
+ lambdaMat2 = matrix(c(0.5, 0.2, 0.6, 0.2), 2, 2) / 365,
+ lambdaProg = matrix(c(0.5, 0.5, 0.4, 0.4), 2, 2) / 365,
+ p = c(0.8, 0.2), 
+ timezero = FALSE, discrete_approximation = TRUE)
+B &lt;- pop_pchaz(Tint = c(0, 90, 1500),
+  lambdaMat1 = matrix(c(0.2, 0.1, 0.4, 0.1), 2, 2) / 365,
+ lambdaMat2 = matrix(c(0.5, 0.1, 0.6, 0.1), 2, 2) / 365,
+ lambdaProg = matrix(c(0.5, 0.5, 0.04, 0.04), 2, 2) / 365,
+ p = c(0.8, 0.2), 
+ timezero = FALSE, discrete_approximation = TRUE)
+dat &lt;- sample_fun(A, B, r0 = 0.5, eventEnd = 30,
+  lambdaRecr = 0.5, lambdaCens = 0.25 / 365,
+ maxRecrCalendarTime = 2 * 365,
+ maxCalendar = 4 * 365)
+logrank.maxtest(dat$y, dat$event, dat$group)
+
+</code></pre>
+
+
+</div>

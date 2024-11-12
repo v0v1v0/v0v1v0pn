@@ -1,0 +1,1087 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NN-class</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Class <code>"NN"</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>NN module, for defining and manipulating custom neural networks.
+</p>
+
+
+<h3>Extends</h3>
+
+<p>Class <code>"RcppClass"</code>, directly.
+</p>
+<p>All reference classes extend and inherit methods from <code>"envRefClass"</code>.
+</p>
+
+
+<h3>Fields</h3>
+
+
+<dl>
+<dt>
+<code>.CppObject</code>:</dt>
+<dd>
+<p>Object of class <code>C++Object</code> ~~ </p>
+</dd>
+<dt>
+<code>.CppClassDef</code>:</dt>
+<dd>
+<p>Object of class <code>activeBindingFunction</code> ~~ </p>
+</dd>
+<dt>
+<code>.CppGenerator</code>:</dt>
+<dd>
+<p>Object of class <code>activeBindingFunction</code> ~~ </p>
+</dd>
+</dl>
+<h3>Methods</h3>
+
+
+<dl>
+<dt>
+<code>add_layer( name, size, optional_parameter )</code>:</dt>
+<dd></dd>
+<dt>
+<code>add_layer( parameters )</code>:</dt>
+<dd>
+<p>Setup a new <code>layer</code> component (a layer of processing nodes) and append it to the NN topology. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>name</code>: string, containing name (that also Specifies type) of new layer. Names of predefined layers currently include <code>'pe'</code>(same as <code>'generic'</code>), <code>'pass-through'</code>, <code>'which-max'</code>, <code>'MAM'</code>, <code>'LVQ-input'</code>, <code>'LVQ-output'</code>, <code>'BP-hidden'</code>, <code>'BP-output'</code>, <code>'perceptron'</code> (Some of the available names are listed in NN_component_names, additional names for user-defined components may be added, see note.)
+</p>
+</li>
+<li>
+<p><code>size</code>: integer, layer size i.e. number of <code>pe</code> (Processing Elements or nodes) to create in the layer.
+</p>
+</li>
+<li>
+<p><code>optional_parameter</code>: (optional) double, parameter to be used by specific layer implementations (for example, BP layer implementations <code>'BP-hidden'</code> and <code>'BP-output'</code> interpret it is as the layer's learning rate). Note: for more optional parameters use <code>parameters</code> below.
+</p>
+</li>
+<li>
+<p><code>parameters</code>: list, containing named parameters to be used in creating the layer. Must include an element named <code>name</code> and an element called <code>size</code> (similar to the corresponding standalone parameters described above).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>add_connection_set( name, optional_parameter )</code>:</dt>
+<dd></dd>
+<dt>
+<code>add_connection_set( parameters )</code>:</dt>
+<dd>
+<p>Create a new empty <code>connection_set</code> component (a set of connections between two layers). It does not connect any layers nor contain any connections between specific layer nodes. The set is appended to the NN topology. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>name</code>: string, containing name (that also specifies type) of new empty connection set. Names of predefined connection sets currently include <code>'generic', 'pass-through'</code>(which does not multiply weights), <code>'wpass-through'</code>(which does multiply weights), <code>'MAM'</code>, <code>'LVQ'</code>, <code>'BP'</code>, <code>'perceptron'</code> (Some of the available names are listed in NN_component_names, additional names for user-defined components may be added, see note.).
+</p>
+</li>
+<li>
+<p><code>optional_parameter</code>: (optional) double, parameter to be used by specific connection set implementations (for example, <code>'BP'</code> connection sets interpret it is as the learning rate to be used when adjusting weights, <code>'LVQ'</code> connection sets use it to count iterations for decreasing weight adjustments, etc). Note: for more optional parameters use <code>parameters</code> below.
+</p>
+</li>
+<li>
+<p><code>parameters</code>: list, containing named parameters to be used in creating the connection set. Must include an element named <code>name</code> which contains the name (that also specifies type) of new empty connection set (similar to the corresponding standalone parameter described above).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>create_connections_in_sets( min_random_weight, max_random_weight )</code>:</dt>
+<dd>
+<p>Find empty, unconnected <code>connection_set</code> components that are between two  <code>layer</code>s in the topology, and set them up to connect the adjacent layers, adding connections to fully connect their nodes (n x m connections created, n and m the number of nodes at each layer respectively). Assumes top layer is source and bottom layer is destination. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>min_random_weight</code>: double, minimum value for random initial connection weights.
+</p>
+</li>
+<li>
+<p><code>max_random_weight</code>: double, maximum value for random initial connection weights.
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>connect_layers_at( source_pos, destin_pos, name, optional_parameter )</code>:</dt>
+<dd></dd>
+<dt>
+<code>connect_layers_at( source_pos, destin_pos, parameters )</code>:</dt>
+<dd>
+<p>Insert a new empty <code>connection_set</code> component (a set of connections between two layers) between the layers at specified topology positions, and prepare it to be filled with connections between them. No actual connections between any layer nodes are created. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>source_pos</code>: integer, position in topology of source layer.
+</p>
+</li>
+<li>
+<p><code>destin_pos</code>: integer, position in topology of destination layer.
+</p>
+</li>
+<li>
+<p><code>name</code>: string, containing name (that also specifies type) of new connection set (see above).
+</p>
+</li>
+<li>
+<p><code>optional_parameter</code>: (optional) double, parameter to be used by specific connection set implementations (for example, <code>'BP'</code> connection sets interpret it is as the learning rate to be used when adjusting weights, <code>'LVQ'</code> connection sets use it to count iterations for decreasing weight adjustments, etc). Note: for more optional parameters use <code>parameters</code> below.
+</p>
+</li>
+<li>
+<p><code>parameters</code>: list, containing named parameters to be used in creating the connection set. Must include an element named <code>name</code> which contains the name (that also specifies type) of new empty connection set (similar to the corresponding standalone parameter described above).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>fully_connect_layers_at( source_pos, destin_pos, name, min_random_weight, max_random_weight, optional_parameter )</code>:</dt>
+<dd></dd>
+<dt>
+<code>fully_connect_layers_at( source_pos, destin_pos, parameters, min_random_weight, max_random_weight )</code>:</dt>
+<dd>
+<p>Same as <code>connect_layers_at</code> but also fills the new <code>connection_set</code> with connections between the nodes of the two layers, fully connecting the layers (n x m connections are created, with n and m the number of nodes at each layer respectively). Returns TRUE if successful. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>source_pos</code>: integer, position in topology of source layer.
+</p>
+</li>
+<li>
+<p><code>destin_pos</code>: integer, position in topology of destination layer.
+</p>
+</li>
+<li>
+<p><code>name</code>: string, containing name (that also specifies type) of new connection set (see above).
+</p>
+</li>
+<li>
+<p><code>min_random_weight</code>: double, minimum value for random initial connection weights.
+</p>
+</li>
+<li>
+<p><code>max_random_weight</code>: double, maximum value for random initial connection weights.
+</p>
+</li>
+<li>
+<p><code>optional_parameter</code>: (optional) double, parameter to be used by specific connection set implementations (for example, <code>'BP'</code> connection sets interpret it is as the learning rate to be used when adjusting weights, <code>'LVQ'</code> connection sets use it to count iterations for decreasing weight adjustments, etc). Note: for more optional parameters use <code>parameters</code> below.
+</p>
+</li>
+<li>
+<p><code>parameters</code>: list, containing named parameters to be used in creating the connection set. Must include an element named <code>name</code> which contains the name (that also specifies type) of new empty connection set (similar to the corresponding standalone parameter described above).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>add_single_connection( pos, source_pe, destin_pe, weight )</code>:</dt>
+<dd>
+<p>Add a connection to a <code>connection_set</code> that already connects two layers. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position in topology of <code>connection_set</code> to which the new connection will be added.
+</p>
+</li>
+<li>
+<p><code>source_pe</code>: integer, <code>pe</code> in source layer to connect.
+</p>
+</li>
+<li>
+<p><code>destin_pe</code>: integer, <code>pe</code> in destination layer to connect.
+</p>
+</li>
+<li>
+<p><code>weight</code>: double, value for initial connection weight.
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>remove_single_connection( pos, con )</code>:</dt>
+<dd>
+<p>Remove a connection from a <code>connection_set</code>. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position in topology of <code>connection_set</code>.
+</p>
+</li>
+<li>
+<p><code>con</code>: integer, connection to remove (note: numbering starts from 0).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>size()</code>:</dt>
+<dd>
+<p>Returns neural network size, i.e. the number of components its topology.</p>
+</dd>
+<dt>
+<code>sizes()</code>:</dt>
+<dd>
+<p>Returns sizes of components in topology.</p>
+</dd>
+<dt>
+<code>component_ids()</code>:</dt>
+<dd>
+<p>Returns an integer vector containing the ids of the components in topology (these ids are created at run-time and identify each NN component).</p>
+</dd>
+<dt>
+<code>encode_at( pos )</code>:</dt>
+<dd>
+<p>Trigger the encoding operation of the component at specified topology index (note: depending on implementation, an 'encode' operation usually collects inputs, processes the data, adjusts internal state variables and/or weights, and possibly produces output). Returns TRUE if successful. Parameters are:
+</p>
+
+<ul><li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to perform encoding.
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>encode_all( fwd )</code>:</dt>
+<dd>
+<p>Trigger the encoding operation of all the components in the NN topology. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul><li>
+<p><code>fwd</code>: logical, set to TRUE to trigger encoding forwards (first-to-last component), FALSE to trigger encoding backwards (last-to-first component).
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>encode_all_fwd( )</code>:</dt>
+<dd>
+<p>Trigger the encoding operation of all the components in the NN topology following a forward (top-to-bottom) direction. Returns TRUE if successful.     </p>
+</dd>
+<dt>
+<code>encode_all_bwd( )</code>:</dt>
+<dd>
+<p>Trigger the encoding operation of all the components in the NN topology following a backward (bottom-to-top) direction. Returns TRUE if successful.     </p>
+</dd>
+<dt>
+<code>encode_dataset_unsupervised( data, pos, epochs, fwd )</code>:</dt>
+<dd>
+<p>Encode a dataset using unsupervised training. A faster method to encode a data set. All the components in the NN topology will perform 'encode' in specified direction. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>data</code>: numeric matrix, containing input vectors as rows.
+</p>
+</li>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to receive input vectors.
+</p>
+</li>
+<li>
+<p><code>epochs</code>: integer, number of training epochs (encoding repetitions of the entire dataset).
+</p>
+</li>
+<li>
+<p><code>fwd</code>: logical, indicates direction, TRUE to trigger encoding forwards (first-to-last component), FALSE to encode backwards (last-to-first component).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>encode_datasets_supervised( i_data, i_pos, j_data, j_pos, j_destination_register, epochs, fwd )</code>:</dt>
+<dd>
+<p>Encode multiple (i,j) vector pairs stored in two corresponding data sets, using supervised training. A faster method to encode the data. All the components in the NN topology will perform 'encode' in specified direction. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>i_data</code>: numeric matrix, data set, each row is a vector i of vector-pair (i,j).
+</p>
+</li>
+<li>
+<p><code>i_pos</code>: integer, position (in NN's topology) of component to receive i vectors.
+</p>
+</li>
+<li>
+<p><code>j_data</code>: numeric matrix, data set, each row is a corresponding vector j of vector-pair (i,j).
+</p>
+</li>
+<li>
+<p><code>j_pos</code>: integer, position (in NN's topology) of component to receive j vectors.
+</p>
+</li>
+<li>
+<p><code>j_destination_selector</code>: integer, selects which internal node (pe) registers will receive vector j, i.e. if 0 internal node register '<code>input</code>' will be used (j will become the layer's input), if 1 register '<code>output</code>' will be used (j will become the layer's output), if 2 register '<code>misc</code>' will be used (implementations may use this as an alternative way to transfer data to nodes without altering current input or output).
+</p>
+</li>
+<li>
+<p><code>epochs</code>: integer, number of training epochs (encoding repetitions of the entire data).
+</p>
+</li>
+<li>
+<p><code>fwd</code>: logical, indicates direction, TRUE to trigger encoding forwards (first-to-last component), FALSE to encode backwards (last-to-first component).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>recall_at( pos )</code>:</dt>
+<dd>
+<p>Trigger the recall (mapping, data retrieval) operation of the component at specified topology index (note: depending on implementation, a 'recall' operation usually collects input(s), processes the data, produces output and resets input to 0). Returns TRUE if successful. Parameters are:
+</p>
+
+<ul><li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to perform recall.
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>recall_all( fwd )</code>:</dt>
+<dd>
+<p>Trigger the recall (mapping, data retrieval) operation of all the components in the NN topology. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul><li>
+<p><code>fwd</code>: logical, set to TRUE to trigger recall forwards (first-to-last component), FALSE to trigger recall backwards (last-to-first component).
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>recall_all_fwd( )</code>:</dt>
+<dd>
+<p>Trigger the recall (mapping, data retrieval) operation of all the components in the NN topology following a forward (top-to-bottom) direction. Returns TRUE if successful.     </p>
+</dd>
+<dt>
+<code>recall_all_bwd( )</code>:</dt>
+<dd>
+<p>Trigger the recall (mapping, data retrieval) operation of all the components in the NN topology following a backward (bottom-to-top) direction. Returns TRUE if successful.     </p>
+</dd>
+<dt>
+<code>recall_dataset( data_in, input_pos, output_pos, fwd )</code>:</dt>
+<dd>
+<p>Recall (map, retrieve output for) a dataset. A faster method to recall an entire data set. All the components in the NN topology will perform 'recall' in specified direction. Returns numeric matrix containing corresponding output. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>data_in</code>: numeric matrix, containing input vectors as rows.
+</p>
+</li>
+<li>
+<p><code>input_pos</code>: integer, position (in NN's topology) of component to receive input vectors.
+</p>
+</li>
+<li>
+<p><code>output_pos</code>: integer, position (in NN's topology) of component to produce output.
+</p>
+</li>
+<li>
+<p><code>fwd</code>: logical, indicates direction, TRUE to trigger 'recall' (mapping) forwards (first-to-last component), FALSE to recall backwards (last-to-first component).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>input_at( pos, data_in )</code>:</dt>
+<dd>
+<p>Input a data vector to the component (<code>layer</code>) at specified topology index. Returns TRUE if successful. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to receive input.
+</p>
+</li>
+<li>
+<p><code>data_in</code>: NumericVector, data to be sent as input to component (sizes must match).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>set_input_at( pos, data_in )</code>:</dt>
+<dd>
+<p>Same as <code>input_at</code> (see above)</p>
+</dd>
+<dt>
+<code>get_input_at( pos )</code>:</dt>
+<dd>
+<p>Get the current input for the component at specified topology index. Currently applicable to <code>connection_set</code> (returning for each connection the output of corresponding source PE), or <code>layer</code> (returning a preview of current PE inputs; note: many PE implementations clear their inputs once they have processed them and produced the corresponding output). If successful, returns NumericVector, otherwise vector of zero length. Parameters are:
+</p>
+
+<ul><li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>get_output_from( pos )</code>:</dt>
+<dd>
+<p>Get the current output of the component at specified topology index. If successful, returns NumericVector of output values (otherwise vector of zero length). Parameters are:
+</p>
+
+<ul><li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>get_output_at( pos )</code>:</dt>
+<dd>
+<p>Same as <code>get_output_from</code>, see above.</p>
+</dd>
+<dt>
+<code>set_output_at( pos, data_in )</code>:</dt>
+<dd>
+<p>Set the values in the <code>output</code> data register that <code>pe</code> objects maintain, for <code>layer</code> at specified topology index (currently only <code>layer</code> components are supported). If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li>
+<li>
+<p><code>data_in</code>: NumericVector, data to be used for new values in <code>misc</code> registers (sizes must match).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>get_weights_at( pos )</code>:</dt>
+<dd>
+<p>Get the current weights of the component (<code>connection_set</code>) at specified topology index. If successful, returns NumericVector of connection weights (otherwise vector of zero length). Parameters are:
+</p>
+
+<ul><li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>set_weights_at( pos )</code>:</dt>
+<dd>
+<p>Set the weights of the component (<code>connection_set</code>) at specified topology index. If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li>
+<li>
+<p><code>data_in</code>: NumericVector, data to be used for new values in <code>weight</code> registers of connections (sizes must match).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>get_weight_at( pos, connection )</code>:</dt>
+<dd>
+<p>Get the current weight of a connection in component (<code>connection_set</code>) at specified topology index. If successful, returns weight, otherwise 0 (note: this might change in future versions). Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li>
+<li>
+<p><code>connection</code>: integer, connection to use (note: numbering starts from 0).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>set_weight_at( pos, connection, value )</code>:</dt>
+<dd>
+<p>Set the weight of a connection in component (<code>connection_set</code>) at specified topology index. If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li>
+<li>
+<p><code>connection</code>: integer, connection to use (note: numbering starts from 0).
+</p>
+</li>
+<li>
+<p><code>value</code>: new weight for connection.
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>get_misc_values_at( pos )</code>:</dt>
+<dd>
+<p>Get the values in the <code>misc</code> data register that <code>pe</code> and <code>connection</code> objects maintain, for objects at specified topology index. If successful, returns NumericVector of the values (otherwise vector of zero length). Parameters are:
+</p>
+
+<ul><li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>set_misc_values_at( pos, data_in )</code>:</dt>
+<dd>
+<p>Set the values in the <code>misc</code> data register that <code>pe</code> and <code>connection</code> objects maintain, for objects at specified topology index. If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li>
+<li>
+<p><code>data_in</code>: NumericVector, data to be used for new values in <code>misc</code> registers (sizes must match).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>get_biases_at( pos )</code>:</dt>
+<dd>
+<p>Get the values in the <code>bias</code> register that <code>pe</code> (Processing Elements or nodes) maintain, for <code>layer</code> at specified topology index (only <code>layer</code> components are supported). If successful, returns NumericVector of bias values (otherwise vector of zero length). Parameters are:
+</p>
+
+<ul><li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li></ul>
+</dd>
+<dt>
+<code>set_biases_at( pos, data_in )</code>:</dt>
+<dd>
+<p>Set the values in the <code>bias</code> register that <code>pe</code> (Processing Elements or nodes) maintain, for <code>layer</code> at specified topology index (only <code>layer</code> components are supported). If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li>
+<li>
+<p><code>data_in</code>: NumericVector, data to be used for new values in <code>bias</code> registers (sizes must match).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>get_bias_at( pos, pe )</code>:</dt>
+<dd>
+<p>Get the bias of a <code>pe</code> (Processing Element or node) in component (<code>layer</code>) at specified topology index. If successful, returns bias otherwise 0 (note: this might change in future versions). Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li>
+<li>
+<p><code>pe</code>: integer, Processing Element (node) in <code>layer</code> to use (note: numbering starts from 0).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>set_bias_at( pos, pe, value )</code>:</dt>
+<dd>
+<p>Set the bias of a <code>pe</code> (Processing Element or node) in component (<code>layer</code>) at specified topology index. If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>pos</code>: integer, position (in NN's topology) of component to use.
+</p>
+</li>
+<li>
+<p><code>pe</code>: integer, Processing Element (node) in <code>layer</code> to use (note: numbering starts from 0).
+</p>
+</li>
+<li>
+<p><code>value</code>: new value for bias at the specified <code>pe</code>.
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>add_R_forwarding( trigger, FUN )</code>:</dt>
+<dd>
+<p>Adds a control component which will invoke an R function. The R function will receive (as its first argument) a vector of values containing the output of the previous component in the topology. The object returned by the function will be fed as input to the next (in forward direction) component in the topology. Notes: (a) once the R function is invoked, its result will be maintained as this component's output; (b) the component will fail to perform processing if the R function's result cannot be converted to a numeric vector. If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>trigger</code>: string, specifies when to invoke the R function. Valid options are <code>"on encode"</code>, <code>"on recall"</code>, <code>"always"</code> or <code>"never"</code>.
+</p>
+</li>
+<li>
+<p><code>FUN</code>: string, the R function to be invoked. If <code>""</code>, no R function is invoked and data is transferred unmodified.
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>add_R_pipelining( trigger, FUN, fwd )</code>:</dt>
+<dd>
+<p>Adds a control component which will invoke an R function. The R function will process  (as its first argument)  a vector of values which are the output of a neighboring component in the topology; The result of invoking the function will be fed as input to the other neighboring component in the topology. The components are selected according to the value of parameter <code>fwd</code> (see below). Notes: (a) once the R function is invoked, its result will be maintained as this component's output; (b) the component will fail to perform processing if the R function's result cannot be converted to a numeric vector. If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>trigger</code>: string, specifies when to invoke the R function. Valid options are <code>"on encode"</code>, <code>"on recall"</code>, <code>"always"</code> or <code>"never"</code>.
+</p>
+</li>
+<li>
+<p><code>FUN</code>: string, the R function to be invoked. If <code>""</code>, no R function is invoked and data is transferred unmodified.
+</p>
+</li>
+<li>
+<p><code>fwd</code>: logical, set to TRUE if encoding or recalling in forward, top-to-bottom, direction and need to read from previous component in the topology feeding the result as input to the next (same as <code>add_R_forwarding</code>). If FALSE, reads from next component in the topology and feeds the result as input to the previous (useful when encoding/recalling in backward, bottom-to-top, direction).
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>add_R_ignoring( trigger, FUN, i_mode, input_from )</code>:</dt>
+<dd>
+<p>Adds a control component which will invoke an R function ignoring its result. The R function will process (as its first argument)  a vector of values taken from a specified component in the topology, but the function's result will be ignored. This is suitable for invoking functions such as <code>print</code>, <code>plot</code> etc. Note: the component maintains the original values as its output values but does not send to any other component neither these original values nor the result of the R function. If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>trigger</code>: string, specifies when to invoke the R function. Valid options are <code>"on encode"</code>, <code>"on recall"</code>, <code>"always"</code> or <code>"never"</code>.
+</p>
+</li>
+<li>
+<p><code>FUN</code>: string, the R function to be invoked. If <code>""</code>, no R function is invoked and data is transferred unmodified.
+</p>
+</li>
+<li>
+<p><code>i_mode</code>: string, specifies the source of data to be retrieved and processed by the R function. Valid options are <code>"none"</code>, <code>"input of"</code>, <code>"output of"</code>, <code>"weights at"</code>, <code>"biases at"</code> and <code>"misc at"</code>.
+</p>
+</li>
+<li>
+<p><code>input_from</code>: integer, position (in NN's topology) of component to retrieve data from.
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>add_R_function( trigger, FUN, i_mode, input_from, o_mode, output_to, ignore_result )</code>:</dt>
+<dd>
+<p>Adds a control component which will invoke an R function. The R function will process process (as its first argument) a vector of values taken from a specified component and feed the results to another component. Notes: (a) once the R function is invoked, its result will be maintained as this component's output (unless <code>ignore_result</code> is set to TRUE, in which case the original values will be maintained); (b) the component will fail to perform processing if the R function's result cannot be converted to a numeric vector and <code>ignore_result</code> is FALSE. If successful, returns TRUE. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>trigger</code>: string, specifies when to invoke the R function. Valid options are <code>"on encode"</code>, <code>"on recall"</code>, <code>"always"</code> or <code>"never"</code>.
+</p>
+</li>
+<li>
+<p><code>FUN</code>: string, the R function to be invoked. If <code>""</code>, no R function is invoked and data is transferred unmodified.
+</p>
+</li>
+<li>
+<p><code>i_mode</code>: string, specifies the source of data to be retrieved and processed by the R function. Valid options are <code>"none"</code>, <code>"input of"</code>, <code>"output of"</code>, <code>"weights at"</code>, <code>"biases at"</code> and <code>"misc at"</code>.
+</p>
+</li>
+<li>
+<p><code>input_from</code>: integer, position (in NN's topology) of component to retrieve data from.
+</p>
+</li>
+<li>
+<p><code>o_mode</code>: string, specifies the destination for the result returned by the R function. Valid options are <code>"none"</code>, <code>"to input"</code>, <code>"to output"</code>, <code>"to weights"</code>, <code>"to biases"</code> and <code>"to misc"</code>.
+</p>
+</li>
+<li>
+<p><code>output_to</code>: integer, position (in NN's topology) of component to receive the resulting data.
+</p>
+</li>
+<li>
+<p><code>ignore_result</code>: logical, if TRUE, the R function's results are ignored and original (incoming) values are maintained and (possibly) sent to the <code>output_to</code> component. If FALSE, the values used are those returned by the R function.
+</p>
+</li>
+</ul>
+</dd>
+<dt>
+<code>outline()</code>:</dt>
+<dd>
+<p>Print a summary description of all components in topology.</p>
+</dd>
+<dt>
+<code>print()</code>:</dt>
+<dd>
+<p>Print internal NN state, including all components in topology.</p>
+</dd>
+<dt>
+<code>show()</code>:</dt>
+<dd>
+<p>Print summary description and  internal NN state.</p>
+</dd>
+<dt>
+<code>get_topology_info()</code>:</dt>
+<dd>
+<p>Returns <code>data.frame</code> with topology information.</p>
+</dd>
+</dl>
+<p>The following methods are inherited (from the corresponding class):
+objectPointer ("RcppClass"), initialize ("RcppClass"), show ("RcppClass").
+</p>
+
+
+<h3>Note</h3>
+
+<p>This R module maintains a generic neural network that can be manipulated using the provided methods. In addition to predefined components already existing in the package, new neural network components can be defined and then employed by the <code>"NN"</code> module. In doing so, it is recommended to use the provided C++ base classes and class-templates. This requires the package source code (which includes the <span class="pkg">nnlib2</span> C++ library of neural network base classes) and the ability to compile the package. The steps for defining new types of components using C++ are outlined below:
+</p>
+
+<ul>
+<li>
+<p> Any new component type or class definition should be added to the header file called "<code>additional_parts.h</code>" which is included in the package source (src) directory, or in files accessible by the functions in "<code>additional_parts.h</code>". Therefore, all new components to be employed by the <code>NN</code> module must be defined in "<code>additional_parts.h</code>" or in files that this file includes via <code>#include</code>.
+</p>
+</li>
+<li>
+<p> New <code>layer</code>, <code>connection_set</code>, <code>pe</code> or <code>connection</code> definitions must comply (at least loosely) to the <span class="pkg">nnlib2</span> base class hierarchy and structure and follow the related guidelines. Note: some minimal examples of class and type definitions can be found in the "<code>additional_parts.h</code>" file itself.
+</p>
+</li>
+<li>
+<p> A textual name must be assigned to any new <code>layer</code> or <code>connection_set</code>, to be used as parameter in <code>NN</code> module methods that require a name to create a component. This can be as simple as a single line of code where given the textual name the corresponding component object is created and returned. This code must be added (as appropriate) to either <code>generate_custom_layer()</code> or <code>generate_custom_connection_set()</code> functions found in the same "<code>additional_parts.h</code>" header file. Note: example entries can be found in these functions at the "<code>additional_parts.h</code>" file. Some of the available names are listed in NN_component_names.
+</p>
+</li>
+</ul>
+<p>Alternatively, NN components can also be defined using only R code (see NN_R_components). More information on expanding the library with new types of NN components (nodes, layers, connections etc) and models, can be found in the package's  vignette as well as the related <a href="https://github.com/VNNikolaidis/nnlib2Rcpp">repository on Github</a>). Please consider submitting any useful components you create, to enrich  future versions of the package.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vasilis N. Nikolaidis &lt;vnnikolaidis@gmail.com&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>BP</code>, <code>LVQs</code>, <code>MAM</code>, NN_component_names, NN_R_components.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1:
+
+# (1.A) create new 'NN' object:
+
+n &lt;- new("NN")
+
+# (1.B) Add topology components:
+
+# 1. add a layer of 4 generic nodes:
+n$add_layer("generic",4)
+# 2. add a set for connections that pass data unmodified:
+n$add_connection_set("pass-through")
+# 3. add another layer of 2 generic nodes:
+n$add_layer("generic",2)
+# 4. add a set for connections that pass data x weight:
+n$add_connection_set("wpass-through")
+# 5. add a layer of 1 generic node:
+n$add_layer("generic",1)
+# Create actual full connections in sets, random initial weights in [0,1]:
+n$create_connections_in_sets(0,1)
+# Optionaly, show an outline of the topology:
+n$outline()
+
+# (1.C) use the network.
+
+# input some data, and create output for it:
+n$input_at(1,c(10,20,30,40))
+n$recall_all(TRUE)
+# the final output:
+n$get_output_from(5)
+
+# (1.D) optionally, examine the network:
+
+# the input for set of connections at position 2:
+n$get_input_at(2)
+# Data is passed unmodified through connections at position 2,
+# and (by default) summed together at each node of layer at position 3.
+# Final output from layer in position 3:
+n$get_output_from(3)
+# Data is then passed multiplied by the random weights through
+# connections at position 4. The weights of these connections:
+n$get_weights_at(4)
+# Data is finally summed together at the node of layer at position 5,
+# producing the final output, which (again) is:
+n$get_output_from(5)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Example 2: A simple MAM NN
+
+# (2.A) Preparation:
+
+# Create data pairs
+
+iris_data    &lt;- as.matrix( scale( iris[1:4] ) )
+iris_species &lt;- matrix(data=-1, nrow=nrow(iris_data), ncol=3)
+for(r in 1:nrow(iris_data))
+ iris_species[r ,as.integer( iris$Species )[r]]=1
+
+# Create the NN and its components:
+
+m &lt;- new( "NN" )
+m$add_layer( "generic" , 4 )
+m$add_layer( "generic" , 3 )
+m$fully_connect_layers_at(1, 2, "MAM", 0, 0)
+
+# (2.B) Use the NN to store iris (data,species) pair:
+
+# encode pairs in NN:
+
+m$encode_datasets_supervised(
+	iris_data,1,
+	iris_species,3,0,
+	1,TRUE)
+
+# (2.C) Recall iris species from NN:
+
+recalled_data &lt;- m$recall_dataset(iris_data,1,3,TRUE)
+
+# (2.D) Convert recalled data to ids and plot results:
+
+recalled_ids &lt;- apply(recalled_data, 1, which.max)
+plot(iris_data, pch=recalled_ids)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Example 3: Using add_R_... methods in a NN:
+
+# (3.A) add_R_ignoring, for functions whose result will be ignored by the NN:
+
+a&lt;-new("NN")
+a$add_layer("pass-through",4)
+a$add_R_ignoring("on recall","print","output of",1)
+a$add_connection_set("pass-through")
+a$add_R_ignoring("on recall","print","input of",3)
+a$add_layer("pass-through",2)
+a$add_R_ignoring("on recall","print","output of",5)
+a$create_connections_in_sets(0,0)
+
+# below a fwd recall. During it, the NN will print the output
+# of layer @1, then print the input of connections @3, and
+# finally print the output of layer @5:
+
+a$set_input_at(1,1:4)
+a$recall_all(TRUE)
+
+# (3.B) add_R_forwarding is used to read output of component above,
+# apply an R function and send result as input to component below.
+# (Due to current limitations of various component types, place the
+# add_R_forwarding between two layers and connect other components
+# two those layers)
+
+a&lt;-new("NN")
+a$add_layer("pass-through",4)
+a$add_R_forwarding("on recall","sin")
+a$add_layer("pass-through",4)
+
+# during a fwd recall, the R component @2 will get the output
+# of layer @1, apply an R function (here function sin) and send
+# the result as input to layer @3.
+
+a$set_input_at(1,1:4)
+a$recall_all(TRUE)
+a$get_output_from(3)
+
+# (3.C) add_R_pipelining is similar to add_R_forwarding but allows reading
+# the output of component below, and feed result to component above
+# (for encode/recalls in backwards direction)
+
+a&lt;-new("NN")
+a$add_layer("pass-through",4)
+a$add_R_pipelining("on recall","sin",FALSE)
+a$add_layer("pass-through",4)
+
+# below is a recall backwards, the R component @2 will get the output
+# of layer @3, apply R function and send the its as input to layer @1.
+
+a$set_input_at(3,1:4)
+a$recall_all(FALSE)
+a$get_output_from(1)
+
+# (3.D) add_R_function allows us to define the destination for the function's
+# results. This may include destinations such as PE biases, connection
+# weights etc.
+
+a&lt;-new("NN")
+a$add_layer("pass-through",4)
+a$add_R_function("on recall","sum","output of",1,"to input",3, FALSE)
+a$add_layer("pass-through",1)
+
+# below, in a typical forward recall, the R component @2 will get the output
+# of layer @1, apply an R function (here function sum) and send it as
+# input of layer @3.
+
+a$set_input_at(1,1:4)
+a$recall_all(TRUE)
+a$get_output_from(3)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Example 4: A more complete example where a NN similar to that of help(LVQs)
+# is implemented via 'NN'. It is a (supervised) LVQ. This version
+# also allows using multiple output nodes per class.
+# Note: while this is similar to LVQs, learning rate is NOT affected by epoch.
+# Obviously (as goes for most NN, especially simple ones like this), one could
+# easily create the model using just a matrix and some R code processing it;
+# more elaborately, it could be implemented via R components (see help(NN_R_components));
+# but how could one then be able to use all that fancy NN terminology? :)
+
+# some options:
+
+# define how many output nodes will be implicitly assigned for each class,
+# i.e. groups of connections / prototype vectors / codebook vectors per class:
+
+number_of_output_pes_per_class &lt;- 3
+
+# plot results?
+
+plot_result = FALSE
+
+# also use a mechanism to store weights (so we can plot them later)?
+
+record_weights_at_each_iteration &lt;- FALSE
+
+# Next, prepare some data (based on iris).
+# LVQ expects data in 0 to 1 range, so scale some numeric data...
+
+DATA &lt;- as.matrix(iris[1:4])
+c_min &lt;- apply(DATA, 2, FUN = "min")
+c_max &lt;- apply(DATA, 2, FUN = "max")
+c_rng &lt;- c_max - c_min
+DATA &lt;- sweep(DATA, 2, FUN = "-", c_min)
+DATA &lt;- sweep(DATA, 2, FUN = "/", c_rng)
+
+# create a vector of desired class ids:
+
+desired_class_ids &lt;- as.integer(iris$Species)
+
+# defined just to make names more general (independent from iris):
+
+input_length      &lt;- ncol(DATA)
+number_of_classes &lt;- length(unique(desired_class_ids))
+
+# Next, setup the LVQ NN.
+# output layer may be expanded to accommodate multiple PEs per class:
+
+output_layer_size &lt;-
+	number_of_classes * number_of_output_pes_per_class
+
+# next, implement a supervised LVQ using NN module:
+
+LVQ_PUNISH_PE &lt;- 10   # as defined in the C++ LVQ code.
+LVQ_DEACTI_PE &lt;- 20   # as defined in the C++ LVQ code.
+LVQ_REWARD_PE &lt;- 30   # as defined in the C++ LVQ code.
+LVQ_RND_MIN &lt;-    0   # as defined in the C++ LVQ code.
+LVQ_RND_MAX &lt;-   +1   # as defined in the C++ LVQ code.
+
+# create a typical LVQ topology for this problem:
+
+n &lt;- new('NN')
+n$add_layer('pass-through', input_length)
+n$add_connection_set('LVQ', 0)
+n$add_layer('LVQ-output', output_layer_size)
+n$create_connections_in_sets(LVQ_RND_MIN, LVQ_RND_MAX)
+
+# optional, store current weights (so we can plot them later):
+
+if (record_weights_at_each_iteration)
+	cvs &lt;- n$get_weights_at(2)
+
+# an ugly (nested loop) encoding code:
+
+for (epoch in 1:5)
+	for (i in 1:nrow(DATA))
+	{
+		# recall a data vector:
+
+		n$input_at(1, DATA[i, ])
+		n$recall_all_fwd()
+
+		# find which output node is best for input vector (has smallest distance)
+		current_winner_pe &lt;- which.min(n$get_output_at(3))
+
+		# translate winning node to class id:
+		returned_class &lt;-
+			ceiling(current_winner_pe / number_of_output_pes_per_class)
+
+		# now check if the correct class was recalled (and reward)
+		# or an incorrect (and punish):
+
+		# in LVQ layers, the 'bias' node (PE) register is used to indicate if
+		# positive (reward) or negative (punishment) should be applied.
+
+		new_output_flags &lt;- rep(LVQ_DEACTI_PE, output_layer_size)
+		new_output_flags[current_winner_pe] &lt;- LVQ_PUNISH_PE
+		if (returned_class == desired_class_ids[i])
+			new_output_flags[current_winner_pe] &lt;- LVQ_REWARD_PE
+		n$set_biases_at(3, new_output_flags)
+
+		# note: for this example (and unlike LVQs) learning rate is constant,
+		# NOT dicreasing as epochs increase.
+
+		n$encode_at(2)
+
+		# optional, store current weights (so we can plot them later):
+
+		if (record_weights_at_each_iteration)
+			cvs &lt;- rbind(cvs, n$get_weights_at(2))
+	}
+
+# done encoding.
+
+# recall all data:
+
+lvq_recalled_winning_nodes &lt;-
+	apply(n$recall_dataset(DATA, 1, 3, TRUE), 1, which.min)
+
+# translate winning node to class id:
+lvq_recalled_class_ids &lt;-
+	ceiling(lvq_recalled_winning_nodes / number_of_output_pes_per_class)
+
+correct &lt;- lvq_recalled_class_ids == desired_class_ids
+cat("Correct:", sum(correct), "\n")
+cat("Number of produced classes:", length(unique(lvq_recalled_class_ids)), "\n")
+
+# plot results if requested (here only columns 1 and 2 are displayed):
+
+if (plot_result)
+{
+	plot(data, pch = lvq_recalled_class_ids,
+		 main = "LVQ recalled clusters (module)")
+
+	# optional, if weights were stored, plot them later:
+
+	if (record_weights_at_each_iteration)
+	{
+		for (cv in 0:(output_layer_size - 1))
+			lines(cvs[, (cv * input_length + 1):(cv * input_length + 2)],
+				  lwd = 2, col = cv + 1)
+	}
+}
+
+</code></pre>
+
+
+</div>

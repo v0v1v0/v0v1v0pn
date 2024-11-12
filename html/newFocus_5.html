@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>newFocus</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+The new focus level procedure
+</h2>
+
+<h3>Description</h3>
+
+<p>The new focus level procedure for calculating true discoveries for focus level nodes
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">newFocus(response, fsets, null, data, maxit = 0, alpha = 0.05, adj = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+
+<p>The response variable
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fsets</code></td>
+<td>
+
+<p>A list of focus level sets
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null</code></td>
+<td>
+
+<p>The null hypothesis
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>The data frame with response and all covariates included
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+
+<p>The maximal number of repetitions prespecified by user
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+
+<p>The significance level
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adj</code></td>
+<td>
+
+<p>The number of focus sets that are fully rejected by partial closed testing, which is used to adjust the number of focus sets, The dafault value is 0. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function will return a focus subject with the lower bound for each focus level node.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ningning Xu
+</p>
+
+
+<h3>References</h3>
+
+<p>Goeman, J. J., &amp; Mansmann, U. (2008). Multiple testing on the directed acyclic graph of gene ontology. Bioinformatics, 24(4), 537-544.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## example data set
+n= 100
+m = 5
+X = matrix(0, n, m,byrow = TRUE )
+for ( i in 1:n){
+  set.seed(1234+i)
+  X[i,] =  as.vector(arima.sim(model = list(order = c(1, 0, 0), ar = 0.2), n = m) )
+}
+y = rbinom(n,1,0.6)
+X[which(y==1),1:3] = X[which(y==1),1:3] + 0.8
+xs = paste("x",seq(1,m,1),sep="") 
+colnames(X) = xs
+
+mydata = as.data.frame(cbind(X,y))
+
+## focus level sets
+fl = list(c("x1", "x2"), c("x3", "x4"), "x5")
+names(fl) = c("12", "34", "5")
+
+## get td for focus level sets
+focus_subject = newFocus(response = y, fsets = fl, data = mydata)
+
+## get td for any set of interest given the focus subject
+setofinterest = c("x1", "x2","x3", "x4")
+pick(focus_subject, setofinterest)
+
+</code></pre>
+
+
+</div>

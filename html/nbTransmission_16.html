@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plotRt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates a plot of the effective reproductive number</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>plotRt</code> creates a plot of the effective reproductive number (Rt) over
+the course of the outbreak. Using various options, the plot can include the overall average
+Rt value for the outbreak and the confidence intervals.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plotRt(
+  rData,
+  includeRtAvg = FALSE,
+  includeRtCI = FALSE,
+  includeRtAvgCI = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>rData</code></td>
+<td>
+<p>A list that is the output of <code>estimateR</code>. It should contain
+the dataframes <code>RtDf</code>, <code>RtAvgDf</code>, and vectors <code>timeFrame</code> and <code>rangeForAvg</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>includeRtAvg</code></td>
+<td>
+<p>A logical. If TRUE, a horizontal line will be drawn for the average
+Rt value over <code>rangeForAvg</code> and verticle lines will be drawn at the 
+<code>rangeForAvg</code> values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>includeRtCI</code></td>
+<td>
+<p>A logical. If TRUE, error bars will be added to the Rt values
+representing the bootstrap confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>includeRtAvgCI</code></td>
+<td>
+<p>A logical. If TRUE, horizontal lines will be drawn around the Rt average
+line representing the bootstrap confidence interval.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The main input <code>rData</code> should be the output of <code>estimateRt</code> with the
+time-level reproductive numbers, overall average, range used to calculate that average,
+and time frame.
+</p>
+<p>The options <code>includeRtCI</code> and <code>includeRtAvgCI</code> add confidence interval bounds
+to the plot. If set to true, <code>rData</code> should be from a call of <code>estimateRt</code>
+with <code>bootSamples &gt; 0</code> so that confidence intervals are available.
+If <code>includeRtAvgCI</code> is set to <code>TRUE</code>, a line for the point estimate of the average
+Rt value will be drawn even if <code>includeRtAvg</code> is set to <code>FALSE</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nbProbabilities</code> <code>estimateR</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Use the nbResults data frame included in the package which has the results
+# of the nbProbabilities() function on a TB-like outbreak.
+
+## Getting initial estimates of the reproductive number
+# (without specifying nbResults and without confidence intervals)
+rInitial &lt;- estimateR(nbResults, dateVar = "infectionDate",
+               indIDVar = "individualID", pVar = "pScaled",
+               timeFrame = "months")
+               
+## Finding the stable portion of the outbreak for rangeForAvg using the plot
+plotRt(rInitial)
+cut1 &lt;- 25
+cut2 &lt;- 125
+
+## Finding the final reproductive number estimates with confidence intervals
+# NOTE should run with bootSamples &gt; 10.
+rFinal &lt;- estimateR(nbResults, dateVar = "infectionDate",
+             indIDVar = "individualID", pVar = "pScaled",
+             timeFrame = "months", rangeForAvg = c(cut1, cut2),
+             bootSamples = 10, alpha = 0.05)
+
+## Ploting the final result              
+plotRt(rFinal, includeRtAvg = TRUE, includeRtCI = TRUE, includeRtAvgCI = TRUE)
+
+</code></pre>
+
+
+</div>

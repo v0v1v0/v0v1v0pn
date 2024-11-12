@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nfVar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Access or set a member variable of a nimbleFunction</h2>
+
+<h3>Description</h3>
+
+<p>Access or set a member variable of a specialized nimbleFunction, i.e. a variable passed to or created during the <code>setup</code> function that is used in run code or preserved by <code>setupOutputs</code>.  Works in R for any variable and in NIMBLE for numeric variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nfVar(nf, varName)
+
+nfVar(nf, varName) &lt;- value
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nf</code></td>
+<td>
+<p>a specialized nimbleFunction, i.e. a function returned by executing a function returned from <code>nimbleFunction</code> with <code>setup</code> arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varName</code></td>
+<td>
+<p>a character string naming a variable in the <code>setup</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>value to set the variable to.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Internal way to access or set a member variable of a nimbleFunction created during <code>setup</code>.  Normally in NIMBLE code you would use <code>nf$var</code> instead of <code>nfVar(nf, var)</code>.
+</p>
+<p>When <code>nimbleFunction</code> is called and a <code>setup</code> function is provided, then <code>nimbleFunction</code> returns a function.  That function is a generator that should be called with arguments to the <code>setup</code> function and returns another function with <code>run</code> and possibly other member functions.  The member functions can use objects created or passed to <code>setup</code>.  During internal processing, the NIMBLE compiler turns some cases of <code>nf$var</code> into <code>nfVar(nf, var)</code>. These provide direct access to setup variables (member data).  <code>nfVar</code> is not typically called by a NIMBLE user or programmer.
+</p>
+<p>For internal access to methods of <code>nf</code>, see <code>nfMethod</code>.
+</p>
+<p>For more information, see <code>?nimbleFunction</code> and the NIMBLE <a href="https://r-nimble.org/html_manual/cha-welcome-nimble.html">User Manual</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>whatever varName is in the nimbleFunction nf.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>NIMBLE development team
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">nfGen1 &lt;- nimbleFunction(
+    setup = function(A) {
+    B &lt;- matrix(rnorm(4), nrow = 2)
+    setupOutputs(B) ## preserves B even though it is not used in run-code
+   },
+   run = function() {
+      print('This is A', A, '\n')
+})
+
+nfGen2 &lt;- nimbleFunction(
+  setup = function() {
+    nf1 &lt;- nfGen1(1000)
+  },
+  run = function() {
+      print('accessing A:', nfVar(nf1, 'A'))
+      nfVar(nf1, 'B')[2,2] &lt;&lt;- -1000
+      print('accessing B:', nfVar(nf1, 'B'))
+   })
+       
+nf2 &lt;- nfGen2()
+nf2$run()
+</code></pre>
+
+
+</div>

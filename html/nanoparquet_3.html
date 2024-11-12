@@ -1,0 +1,250 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nanoparquet-types</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>nanoparquet's type maps</h2>
+
+<h3>Description</h3>
+
+<p>How nanoparquet maps R types to Parquet types.
+</p>
+
+
+<h3>R's data types</h3>
+
+<p>When writing out a data frame, nanoparquet maps R's data types to Parquet
+logical types. This is how the mapping is performed.
+</p>
+<p>These rules will likely change until nanoparquet reaches version 1.0.0.
+</p>
+
+<ol>
+<li>
+<p> Factors (i.e. vectors that inherit the <em>factor</em> class) are converted
+to character vectors using <code>as.character()</code>, then written as a
+<code>STRSXP</code> (character vector) type. The fact that a column is a factor
+is stored in the Arrow metadata (see below), unless the
+<code>nanoparquet.write_arrow_metadata</code> option is set to <code>FALSE</code>.
+</p>
+</li>
+<li>
+<p> Dates (i.e. the <code>Date</code> class) is written as <code>DATE</code> logical type, which
+is an <code>INT32</code> type internally.
+</p>
+</li>
+<li> <p><code>hms</code> objects (from the hms package) are written as <code>TIME(true, MILLIS)</code>.
+logical type, which is internally the <code>INT32</code> Parquet type.
+Sub-milliseconds precision is lost.
+</p>
+</li>
+<li> <p><code>POSIXct</code> objects are written as <code>TIMESTAMP(true, MICROS)</code> logical type,
+which is internally the <code>INT64</code> Parquet type.
+Sub-microsecond precision is lost.
+</p>
+</li>
+<li> <p><code>difftime</code> objects (that are not <code>hms</code> objects, see above), are
+written as an <code>INT64</code> Parquet type, and noting in the Arrow metadata
+(see below) that this column has type <code>Duration</code> with <code>NANOSECONDS</code>
+unit.
+</p>
+</li>
+<li>
+<p> Integer vectors (<code>INTSXP</code>) are written as <code>INT(32, true)</code> logical type,
+which corresponds to the <code>INT32</code> type.
+</p>
+</li>
+<li>
+<p> Real vectors (<code>REALSXP</code>) are written as the <code>DOUBLE</code> type.
+</p>
+</li>
+<li>
+<p> Character vectors (<code>STRSXP</code>) are written as the <code>STRING</code> logical type,
+which has the <code>BYTE_ARRAY</code> type. They are always converted to UTF-8
+before writing.
+</p>
+</li>
+<li>
+<p> Logical vectors (<code>LGLSXP</code>) are written as the <code>BOOLEAN</code> type.
+</p>
+</li>
+<li>
+<p> Other vectors error currently.
+</p>
+</li>
+</ol>
+<p>You can use <code>parquet_column_types()</code> on a data frame to map R data types
+to Parquet data types.
+</p>
+
+
+<h3>Parquet's data types</h3>
+
+<p>When reading a Parquet file nanoparquet also relies on logical types and
+the Arrow metadata (if present, see below) in addition to the low level
+data types. The exact rules are below.
+</p>
+<p>These rules will likely change until nanoparquet reaches version 1.0.0.
+</p>
+
+<ol>
+<li>
+<p> The <code>BOOLEAN</code> type is read as a logical vector (<code>LGLSXP</code>).
+</p>
+</li>
+<li>
+<p> The <code>STRING</code> logical type and the <code>UTF8</code> converted type is read as
+a character vector with UTF-8 encoding.
+</p>
+</li>
+<li>
+<p> The <code>DATE</code> logical type and the <code>DATE</code> converted type are read as a
+<code>Date</code> R object.
+</p>
+</li>
+<li>
+<p> The <code>TIME</code> logical type and the <code>TIME_MILLIS</code> and <code>TIME_MICROS</code>
+converted types are read as an <code>hms</code> object, see the hms package.
+</p>
+</li>
+<li>
+<p> The <code>TIMESTAMP</code> logical type and the <code>TIMESTAMP_MILLIS</code> and
+<code>TIMESTAMP_MICROS</code> converted types are read as <code>POSIXct</code> objects.
+If the logical type has the <code>UTC</code> flag set, then the time zone of the
+<code>POSIXct</code> object is set to <code>UTC</code>.
+</p>
+</li>
+<li> <p><code>INT32</code> is read as an integer vector (<code>INTSXP</code>).
+</p>
+</li>
+<li> <p><code>INT64</code>, <code>DOUBLE</code> and <code>FLOAT</code> are read as real vectors (<code>REALSXP</code>).
+</p>
+</li>
+<li> <p><code>INT96</code> is read as a <code>POSIXct</code> read vector with the <code>tzone</code> attribute
+set to <code>"UTC"</code>. It was an old convention to store time stamps as
+<code>INT96</code> objects.
+</p>
+</li>
+<li>
+<p> The <code>DECIMAL</code> converted type (<code>FIXED_LEN_BYTE_ARRAY</code> or <code>BYTE_ARRAY</code>
+type) is read as a real vector (<code>REALSXP</code>), potentially losing
+precision.
+</p>
+</li>
+<li>
+<p> The <code>ENUM</code> logical type is read as a character vector.
+</p>
+</li>
+<li>
+<p> The <code>UUID</code> logical type is read as a character vector that uses the
+<code>00112233-4455-6677-8899-aabbccddeeff</code> form.
+</p>
+</li>
+<li> <p><code>BYTE_ARRAY</code> is read as a <em>factor</em> object if the file was written
+by Arrow and the original data type of the column was a factor.
+(See 'The Arrow metadata below.)
+</p>
+</li>
+<li>
+<p> Otherwise <code>BYTE_ARRAY</code> is read a list of raw vectors, with missing
+values denoted by <code>NULL</code>.
+</p>
+</li>
+</ol>
+<p>Other logical and converted types are read as their annotated low level
+types:
+</p>
+
+<ol>
+<li> <p><code>INT(8, true)</code>, <code>INT(16, true)</code> and <code>INT(32, true)</code> are read as
+integer vectors because they are <code>INT32</code> internally in Parquet.
+</p>
+</li>
+<li> <p><code>INT(64, true)</code> is read as a real vector (<code>REALSXP</code>).
+</p>
+</li>
+<li>
+<p> Unsigned integer types <code>INT(8, false)</code>, <code>INT(16, false)</code> and
+<code>INT(32, false)</code> are read as integer vectors (<code>INTSXP</code>). Large
+positive values may overflow into negative values, this is a known
+issue that we will fix.
+</p>
+</li>
+<li> <p><code>INT(64, false)</code> is read as a real vector (<code>REALSXP</code>). Large
+positive values may overflow into negative values, this is a known
+issue that we will fix.
+</p>
+</li>
+<li> <p><code>FLOAT16</code> is a fixed length byte array, and nanoparquet reads it as
+a list of raw vectors. Missing values are denoted by <code>NULL</code>.
+</p>
+</li>
+<li> <p><code>INTERVAL</code> is a fixed length byte array, and nanoparquet reads it as
+a list of raw vectors. Missing values are denoted by <code>NULL</code>.
+</p>
+</li>
+<li> <p><code>JSON</code> and <code>BSON</code> are read as character vectors (<code>STRSXP</code>).
+</p>
+</li>
+</ol>
+<p>These types are not yet supported:
+</p>
+
+<ol>
+<li>
+<p> Nested types (<code>LIST</code>, <code>MAP</code>) are not supported.
+</p>
+</li>
+<li>
+<p> The <code>UNKNOWN</code> logical type is not supported.
+</p>
+</li>
+</ol>
+<p>You can use the <code>parquet_column_types()</code> function to see how R would read
+the columns of a Parquet file. Look at the <code>r_type</code> column.
+</p>
+
+
+<h3>The Arrow metadata</h3>
+
+<p>Apache Arrow (i.e. the arrow R package) adds additional metadata to
+Parquet files when writing them in <code>arrow::write_parquet()</code>. Then,
+when reading the file in <code>arrow::read_parquet()</code>, it uses this metadata
+to recreate the same Arrow and R data types as before writing.
+</p>
+<p><code>nanoparquet::write_parquet()</code> also adds the Arrow metadata to Parquet
+files, unless the <code>nanoparquet.write_arrow_metadata</code> option is set to
+<code>FALSE</code>.
+</p>
+<p>Similarly, <code>nanoparquet::read_parquet()</code> uses the Arrow metadata in the
+Parquet file (if present), unless the <code>nanoparquet.use_arrow_metadata</code>
+option is set to FALSE.
+</p>
+<p>The Arrow metadata is stored in the file level key-value metadata, with
+key <code>ARROW:schema</code>.
+</p>
+<p>Currently nanoparquet uses the Arrow metadata for two things:
+</p>
+
+<ul>
+<li>
+<p> It uses it to detect factors. Without the Arrow metadata factors are
+read as string vectors.
+</p>
+</li>
+<li>
+<p> It uses it to detect <code>difftime</code> objects. Without the arrow metadata
+these are read as <code>INT64</code> columns, containing the time difference in
+nanoseconds.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>nanoparquet-package for options that modify the type
+mappings.
+</p>
+
+
+</div>

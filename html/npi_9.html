@@ -1,0 +1,228 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npi_search</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Search the NPI Registry</h2>
+
+<h3>Description</h3>
+
+<p>Search the U.S. National Provider Identifier (NPI)
+Registry using parameters exposed by the registry's API (Version 2.1).
+Results are combined and returned
+as a tibble with an S3 class of <code>npi_results</code>. See <code>Value</code> below
+for a description of the returned object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npi_search(
+  number = NULL,
+  enumeration_type = NULL,
+  taxonomy_description = NULL,
+  first_name = NULL,
+  last_name = NULL,
+  use_first_name_alias = NULL,
+  organization_name = NULL,
+  address_purpose = NULL,
+  city = NULL,
+  state = NULL,
+  postal_code = NULL,
+  country_code = NULL,
+  limit = 10L
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>number</code></td>
+<td>
+<p>(Optional) 10-digit NPI number assigned to the provider.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>enumeration_type</code></td>
+<td>
+<p>(Optional) Type of provider associated with the NPI,
+one of: </p>
+ <dl>
+<dt>"ind"</dt>
+<dd>
+<p>Individual provider (NPI-1)</p>
+</dd>
+<dt>"org"</dt>
+<dd>
+<p>Organizational provider (NPI-2)</p>
+</dd> </dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>taxonomy_description</code></td>
+<td>
+<p>(Optional) Scalar character vector with a
+taxonomy description or code from the
+<a href="https://taxonomy.nucc.org">NUCC
+Healthcare Provider Taxonomy</a>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>first_name</code></td>
+<td>
+<p>(Optional) This field only applies to Individual Providers.
+Trailing wildcard entries are permitted requiring at least two characters
+to be entered (e.g. "jo*" ). This field allows the following special
+characters: ampersand, apostrophe, colon, comma, forward slash, hyphen,
+left and right parentheses, period, pound sign, quotation mark, and
+semi-colon.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>last_name</code></td>
+<td>
+<p>(Optional) This field only applies to Individual Providers.
+Trailing wildcard entries are permitted requiring at least two characters
+to be entered. This field allows the following special characters:
+ampersand, apostrophe, colon, comma, forward slash, hyphen, left and right
+parentheses, period, pound sign, quotation mark, and semi-colon.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use_first_name_alias</code></td>
+<td>
+<p>(Optional) This field only applies to Individual
+Providers when not doing a wildcard search. When set to "True", the search
+results will include Providers with similar First Names. E.g.,
+first_name=Robert, will also return Providers with the first name of Rob,
+Bob, Robbie, Bobby, etc. Valid Values are: TRUE: Will include alias/similar
+names; FALSE: Will only look for exact matches.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>organization_name</code></td>
+<td>
+<p>(Optional) This field only applies to Organizational
+Providers. Trailing wildcard entries are permitted requiring at least two
+characters to be entered. This field allows the following special
+characters: ampersand, apostrophe, "at" sign, colon, comma, forward slash,
+hyphen, left and right parentheses, period, pound sign, quotation mark, and
+semi-colon. Both the Organization Name and Other Organization Name fields
+associated with an NPI are examined for matching contents, therefore, the
+results might contain an organization name different from the one entered
+in the Organization Name criterion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>address_purpose</code></td>
+<td>
+<p>Refers to whether the address information entered
+pertains to the provider's Mailing Address or the provider's Practice
+Location Address. When not specified, the results will contain the
+providers where either the Mailing Address or any of Practice Location
+Addresses match the entered address information. Primary will only search
+against Primary Location Address. While Secondary will only search against
+Secondary Location Addresses. Valid values are: "location", "mailing",
+"primary", "secondary".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>city</code></td>
+<td>
+<p>The City associated with the provider's address identified in
+Address Purpose. To search for a Military Address enter either APO or FPO
+into the City field. This field allows the following special characters:
+ampersand, apostrophe, colon, comma, forward slash, hyphen, left and right
+parentheses, period, pound sign, quotation mark, and semi-colon.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>state</code></td>
+<td>
+<p>The State abbreviation associated with the provider's address
+identified in Address Purpose. This field cannot be used as the only input
+criterion. If this field is used, at least one other field, besides the
+Enumeration Type and Country, must be populated. Valid values for states:
+<a href="https://npiregistry.cms.hhs.gov/registry/API-State-Abbr">https://npiregistry.cms.hhs.gov/registry/API-State-Abbr</a></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>postal_code</code></td>
+<td>
+<p>The Postal Code associated with the provider's address
+identified in Address Purpose. If you enter a 5 digit postal code, it will
+match any appropriate 9 digit (zip+4) codes in the data. Trailing wildcard
+entries are permitted requiring at least two characters to be entered
+(e.g., "21*").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>country_code</code></td>
+<td>
+<p>The Country associated with the provider's address
+identified in Address Purpose. This field can be used as the only input
+criterion as long as the value selected is not US (United States). Valid
+values for country codes:
+<a href="https://npiregistry.cms.hhs.gov/registry/API-Country-Abbr">https://npiregistry.cms.hhs.gov/registry/API-Country-Abbr</a></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limit</code></td>
+<td>
+<p>Maximum number of records to return, from 1 to 1200 inclusive.
+The default is 10. Because the API returns up to 200 records per request,
+values of <code>limit</code> greater than 200 will result in multiple API calls.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By default, the function requests up to 10 records, but the
+<code>limit</code> argument accepts values from 1 to the API's limit of 1200.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Data frame (tibble) containing the results of the search.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://npiregistry.cms.hhs.gov/registry/help-api">https://npiregistry.cms.hhs.gov/registry/help-api</a>
+<a href="https://npiregistry.cms.hhs.gov/help-api/json-conversion">Data dictionary for fields returned</a>
+</p>
+<p><a href="https://taxonomy.nucc.org">NUCC Healthcare Provider Taxonomy</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# 10 NPI records for New York City
+npi_search(city = "New York City")
+
+# 1O NPI records for New York City, organizations only
+npi_search(city = "New York City", enumeration_type = "org")
+
+# 1O NPI records for New York City, individuals only
+npi_search(city = "New York City", enumeration_type = "ind")
+
+# 1200 NPI records for New York City
+npi_search(city = "New York City", limit = 1200)
+
+# Nutritionists in Maine
+npi_search(state = "ME", taxonomy_description = "Nutritionist")
+
+# Record associated with NPI 1245251222
+npi_search(number = 1245251222)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

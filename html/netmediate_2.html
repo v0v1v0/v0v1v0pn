@@ -1,0 +1,292 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compare_MEMS</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Function to compare micro effect on macro structure (MEMS) estimates between models.</h2>
+
+<h3>Description</h3>
+
+<p><code>compare_MEMS</code> implements parametric and nonparametric routines to compare <code>MEMS</code> estimate between models. When compared between nested models, <code>compare_MEMS</code> results can be interpreted as the portion of a MEMS explained by a mediating or confounding variable. When compared between models with distinct functional forms and the same specification, <code>compare_MEMS</code> results can be interpreted as the sensitivity of <code>MEMS</code> results to decision about model functional form.
+</p>
+<p>The difference in MEMS is the change in MEMS after one or more micro-processes are included into a model or, in the case of sensitivity tests, when the functional form is changed. Let <code class="reqn">MEMS_p</code> represent the MEMS obtained from a model that omits one or more intervening variables and <code class="reqn">MEMS_f</code> be the MMES obtained from a model that includes the intervening variable(s). The change in MEMS is given </p>
+<p style="text-align: center;"><code class="reqn">\Delta MEMS=MEMS_p-MEMS_f</code>
+</p>
+<p>. <code class="reqn">MEMS_p</code> and <code class="reqn">MEMS_f</code> may also be have the same specification but use distinct functional forms or other modeling decisions in the case of sensitivity tests. Tuning parameters can be assigned to toggle the strength of <code class="reqn">\theta</code> in model-implied estimates of <code class="reqn">MEMS</code>. <code>MEMS</code> currently accepts <code>glm</code>, <code>glmer</code>, <code>ergm</code>, <code>btergm</code>, <code>sienaFit</code>, <code>rem.dyad</code>, and <code>netlogit</code> objects and implements both parametric and nonparametric estimation. Pooled estimation for multiple network models is also implemented for <code>ergm</code> and <code>sienaFit</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compare_MEMS(partial_model,
+      full_model,
+      micro_process,
+      macro_function,
+      object_type=NULL,
+      interval=c(0,1),
+      nsim=500,
+      algorithm="parametric",
+      silent=FALSE,
+      full_output=FALSE,
+      SAOM_data=NULL,
+      SAOM_var=NULL,
+      time_interval=NULL,
+      covar_list=NULL,
+      edgelist=NULL,
+      net_logit_y=NULL,
+      net_logit_x=NULL,
+      group_id=NULL,
+      node_numbers=NULL,
+      mediator=NULL,
+      link_id=NULL,
+      controls=NULL,
+      control_functions=NULL)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>partial_model</code></td>
+<td>
+<p>the micro-model excluding one or more intervening or confounding variables of interest. May also be a fully specified model with a distinct functional form in the case of sensitivity tests. Currently accepts <code>glm</code>, <code>glmer</code>, <code>ergm</code>, <code>btergm</code>, <code>sienaFit</code>, <code>rem.dyad</code>, and <code>netlogit</code> objects. Pooled estimation for multiple network models is also implemented for <code>ergm</code> and <code>sienaFit</code> objects. To implement pooled estimation, <code>model</code> should be provided as a list of <code>ergm</code> or <code>sienaFit</code> objects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full_model</code></td>
+<td>
+<p>the micro-model including one or more intervening or confounding variables of interest. May also be a fully specified model with a distinct functional form in the case of sensitivity tests. Currently accepts <code>glm</code>, <code>glmer</code>, <code>ergm</code>, <code>btergm</code>, <code>sienaFit</code>, <code>rem.dyad</code>, and <code>netlogit</code> objects. Pooled estimation for multiple network models is also implemented for <code>ergm</code> and <code>sienaFit</code> objects. To implement pooled estimation, <code>model</code> should be provided as a list of <code>ergm</code> or <code>sienaFit</code> objects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>micro_process</code></td>
+<td>
+<p>a character string containing the name of the micro process of interest. The character string should exactly match coefficient names in <code>model</code> output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>macro_function</code></td>
+<td>
+<p>a <code>function</code> that calculates the macro statistic of interest. Currently accepts user defined functions as well as functions inherent in the <code>igraph</code> and <code>statnet</code> packages for <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object_type</code></td>
+<td>
+<p>A character string that tells netmediate the type of object to apply the
+<code>macro_function</code> to. Currently accepts <code>igraph</code> and <code>network</code> objects. If left <code>NULL</code>, <code>network</code> objects are assumed. Can be over-ridden to use other object types with a user-function by defining a function that accepts either a <code>network</code> or <code>igraph</code> object and returns a numeric value or vector of numeric values (see examples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>The value of tuning parameters to assign to <code class="reqn">\theta</code>. Should be provided as a vector of numeric values with 2 entries.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>The number of simulations or bootstrap samples to use during estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>The estimation algorithm to be used. Currently accepts <code>"parametric"</code> and <code>"nonparametric"</code>. If <code>"parametric"</code>, estimation is obtained with Monte Carlo sampling. If <code>"nonparametric"</code>, estimation uses bootstrap resampling.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>logical parameter. Whether to provide updates on the progress of the simulation or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full_output</code></td>
+<td>
+<p>logical parameter. If set to <code>TRUE</code>, <code>compare_MEMS</code> will return all sampled statistics and complete results for <code class="reqn">MEMS_p</code> and <code class="reqn">MEMS_f</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SAOM_data</code></td>
+<td>
+<p>required when the model is a <code>sienaFit</code> object; ignored otherwise. If a <code>sienaFit</code> object is provided, <code>SAOM_data</code> should be the <code>siena</code> object that contains the data for SAOM estimation. If using pooled estimation on multiple <code>sienaFit</code> objects (i.e., providing a list of <code>sienaFit</code> objects), then <code>SAOM_data</code> should be provided as an ordered list with each entry containing the <code>siena</code> object corresponding to list of <code>sienaFit</code> objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SAOM_var</code></td>
+<td>
+<p>optional parameter when the model is a <code>sienaFit</code> object. <code>SAOM_var</code> is a list of of the <code>varCovar</code> and <code>varDyadCovar</code> objects used to assign time varying node and dyad covariates when calling <code>sienaDataCreate</code>. If provided, <code>netmediate</code> assigns the varying node covariates and dyad covariates to each simulated network. This parameter is required when <code>macro_function</code> computes a statistic that varies as a function of time varying node or dyad covariates (i.e., network segregation, assorativity). Time invariant characteristics (<code>coCovar</code> and <code>coDyadCovar</code>) are handled internally by <code>MEMS</code> and should not be provided. When providing a list of <code>sienaFit</code> objects for pooled estimation, <code>SAOM_var</code> should be provided as a list of lists, where each entry in the list contains a list of <code>varCovar</code> and <code>varDyadCovar</code> objects associated with corresponding <code>sienaFit</code> object. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_interval</code></td>
+<td>
+<p>an optional parameter to be used with <code>rem.dyad</code> objects. May be provided as a numeric vector or the character string <code>"aggregate"</code>. If a numeric vector is provided unique network snapshots at each interval. For example, <code>time_interval=c(0,2,3)</code> would induce two networks, one for the 0 - 2 time period and one for the 2 - 3 time period. If specified as <code>"aggregate"</code>, the MEMS is calculated by creating an aggregated cross-sectional representation of the entire event sequence. If left <code>NULL</code>, defaults to |<code>"aggregate"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covar_list</code></td>
+<td>
+<p>an optional list of sender/receiver covariates used in <code>rem.dyad</code> estimation. Only required for <code>rem.dyad</code> objects when covariates are included. The list format should correspond to the format required by <code>rem.dyad</code></p>
+</td>
+</tr>
+</table>
+<p>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>edgelist</code></td>
+<td>
+<p>an optional three column edgelist providing the sender, receiver, and time of event occurrence when using rem.<code>rem.dyad</code>. Only required when <code>time_interval</code> is set to <code>NULL</code> or <code>"aggregate"</code>. Ignored for other types of models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_logit_y</code></td>
+<td>
+<p>the dependent variable for <code>netlogit</code> objects. Should be provided as a vector. Only required when model is a <code>netlogit</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_logit_x</code></td>
+<td>
+<p>the matrix of independent variables for <code>netlogit</code> type objects. Only required when model is a <code>netlogit</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_id</code></td>
+<td>
+<p>optional vector of group identifiers to use when estimating a <code>glm</code> or <code>glmer</code> on grouped data (i.e., multiple time periods, multiple networks). When specified,  <code>MEMS</code> will induce unique networks for each grouping factor. If left unspecified, all groups/time periods are pooled. If using <code>glmer</code>, the grouping factor does not have to be provided as part of the model or used as a random effect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>node_numbers</code></td>
+<td>
+<p>a numeric vector containing the number of nodes in each group_id when using <code>glm</code> or <code>glmer</code>. If estimating MEMS aggregated over all networks (i.e., <code>group_id=NULL</code>), this shoud be the total number of nodes in all networks. Required when using <code>glm</code> or <code>glmer</code>, ignored otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mediator</code></td>
+<td>
+<p>a character string detailing the mediator of interest. Intended for internal use with the <code>AMME</code> function; not intended for end users.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link_id</code></td>
+<td>
+<p>a vector or list of vectors corresponding to unique identifiers. Intended for internal use with the <code>AMME</code> function; not intended for end users. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>controls</code></td>
+<td>
+<p>a vector of character strings listing the controls to be calculated when using <code>AMME</code>. Intended for internal use with the <code>AMME</code> function; not intended for end users. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control_functions</code></td>
+<td>
+<p>a list of functions to calculate the macro control variables provided in controls. Intended for internal use with the <code>AMME</code> function; not intended for end users. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Compares MEMS estimates between two models. If one or more confounding or intervening variables are excluded or included between models, the change in MEMS can be interpreted as the portion of the MEMS explained by one or more confounding or intervening variable. If two models are provided with the same specification but a distinct functional form, the change in MEMS is a sensitivty test of how much the MEMS estimate changes because of a model decision. This can be useful, for example, when comparing TERGM and SAOM estimates as each models make distinct assumptions about sources of network change and the temporal ordering of tie changes.
+</p>
+<p><code>compare_MEMS</code> functionality inherits directly from the <code>MEMS</code> command. See the <code>MEMS</code> page for more details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>full_output=FALSE</code>, then a table is returned with the change MEMS, its standard error, confidence interval, and p-value, and the same results for the partial and complete MEMS.
+</p>
+<p>If <code>full_output=TRUE</code>, then a list is returned with the following three elements.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>diff_MEMS_results</code></td>
+<td>
+<p>is the table of summary output containing the MEMS, its standard error, confidence interval, and p-value, and a list of the simulated values of the change in MEMS.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_MEMS_results</code></td>
+<td>
+<p>contains the summary statistics for the partial MEMS along with all simulated statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f_MEMS_results</code></td>
+<td>
+<p>contains the summary statistics for the full MEMS along with all simulated statistics.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Duxbury, Scott W. Associate Professor, University of North Carolina–Chapel Hill, Department of Sociology.
+</p>
+
+
+<h3>References</h3>
+
+<p>Duxbury, Scott W. 2024. "Micro Effects on Macro Structure in Social Networks." Sociological Methodology.
+</p>
+<p>Wertsching, Jenna, and Scott W. Duxbury. Working paper. "Comparing Micro Effects on Macro Structure between Nested Models."
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>AMME</code>
+<code>MEMS</code>
+<code>ergm.mma</code>
+<code>mediate</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+
+
+##############
+# Not run
+###############
+library(statnet)
+library(igraph)
+data("faux.mesa.high")
+
+  #how much of the effect of racial homophily on transitivity
+    #is explained by triadic closure effects?
+
+model&lt;-ergm(faux.mesa.high~edges+nodecov("Grade")+nodefactor("Race")+
+               nodefactor("Sex")+nodematch("Race")+nodematch("Sex")+absdiff("Grade"))
+
+model2&lt;-ergm(faux.mesa.high~edges+nodecov("Grade")+nodefactor("Race")+
+               nodefactor("Sex")+nodematch("Race")+nodematch("Sex")+absdiff("Grade")+
+               gwesp(.5,fixed=TRUE))
+
+
+compare_MEMS(partial_model=model,
+              full_model=model2,
+              micro_process="nodematch.Race",
+             macro_function=transitivity,
+             object_type = "igraph",
+             silent=FALSE,
+             algorithm="parametric")
+
+
+
+
+</code></pre>
+
+
+</div>

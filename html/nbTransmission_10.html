@@ -1,0 +1,139 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nbNetwork</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plots a network of the relative transmission probabilities</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>nNetwork</code> plots a network of the transmission probabilities.
+The nodes are the individuals and the edges represent possible transmission pairs.
+The darker the edge, the higher the probability that the pair is a transmission link.
+If a cluster method is specified using <code>clustMethod</code> and <code>cutoff</code>, only edges
+that are in the high probability cluster of infectors will be drawn.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nbNetwork(
+  df,
+  indIDVar,
+  dateVar,
+  pVar,
+  clustMethod = c("none", "n", "kd", "hc_absolute", "hc_relative"),
+  cutoff = NA,
+  blackAndWhite = FALSE,
+  probBreaks = c(-0.01, 0.001, 0.005, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>The name of the dateset with transmission probabilities (column <code>pVar</code>),
+individual IDs (columns <code>&lt;indIDVar&gt;.1</code> and <code>&lt;indIDVar&gt;.2</code>), and the dates of
+observation (columns <code>&lt;dateVar&gt;.1</code> and <code>&lt;dateVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indIDVar</code></td>
+<td>
+<p>The name (in quotes) of the individual ID columns
+(data frame <code>df</code> must have variables called <code>&lt;indIDVar&gt;.1</code>
+and <code>&lt;indIDVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dateVar</code></td>
+<td>
+<p>The name (in quotes) of the columns with the dates that the individuals are
+observed (data frame <code>df</code> must have variables called <code>&lt;dateVar&gt;.1</code> and
+<code>&lt;dateVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pVar</code></td>
+<td>
+<p>The name (in quotes) of the column with transmission probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clustMethod</code></td>
+<td>
+<p>The method used to cluster the infectors; one of 
+<code>"none", "n", "kd", "hc_absolute", "hc_relative"</code> where <code>"none"</code> or
+not specifying a value means use all pairs with no clustering
+(see <code>clusterInfectors</code> for detials on clustering methods).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff</code></td>
+<td>
+<p>The cutoff for clustering (see <code>clusterInfectors</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blackAndWhite</code></td>
+<td>
+<p>A logical. If <code>TRUE</code>, then the edges are colored in greyscale,
+if <code>FALSE</code>, then the edges are colored with shades of blue.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probBreaks</code></td>
+<td>
+<p>A numeric vector containing between 3 and 10 elements specifying the
+boundaries used to classify the probabilities and color the edges.
+The first element should be less than 0 and the last should be 1.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Users have the option of specifying how the probabilities should be grouped into different
+color shades through the argument <code>probBreaks</code>. The probabilities are split into groups by
+using <code>probBreaks</code> as the <code>breaks</code> argument in <code>cut</code> with the default options.
+The length of the vector should be between 3 and 10 and the first element should be less than 0 and 
+the last 1 so that all probabilities are guarenteed to be classified.
+The colors are defined with the code <code>brewer.pal(length(probBreaks) - 1, "Blues")</code>
+(where "Blues" is replaced by "Greys" if <code>blackAndWhite</code> is set to <code>TRUE</code>).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nbProbabilities</code> <code>clusterInfectors</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+## Network of all pairs in color with the default probability breaks
+par(mar = c(0, 0, 0.2, 0))
+nbNetwork(nbResults, indIDVar = "individualID", dateVar = "infectionDate",
+pVar = "pScaled", clustMethod = "none")
+dev.off()
+
+
+## Network of just the top cluster of infectors, black and white, changing the probability breaks
+par(mar = c(0, 0, 0.2, 0))
+nbNetwork(nbResults, indIDVar = "individualID", dateVar = "infectionDate",
+          pVar = "pScaled", clustMethod = "hc_absolute", cutoff = 0.05,
+          blackAndWhite = TRUE, probBreaks = c(-0.01, 0.01, 0.1, 0.25, 0.5, 1))
+dev.off()         
+
+
+
+</code></pre>
+
+
+</div>

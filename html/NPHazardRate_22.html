@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>HazardRateEst</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kernel Hazard Rate Estimation</h2>
+
+<h3>Description</h3>
+
+<p>Implements the (classical) kernel hazard rate estimator for right censored data defined in <a href="https://projecteuclid.org/download/pdf_1/euclid.aos/1176346265">Tanner and Wong (1983)</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">HazardRateEst(xin, xout, kfun, h, ci)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p>A vector of data points.  Missing values not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xout</code></td>
+<td>
+<p>A vector of grid points at which the estimate will be calculated. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kfun</code></td>
+<td>
+<p>Kernel function to use. Supported kernels: Epanechnikov, Biweight, Gaussian, Rectangular, Triangular, HigherOrder. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>A scalar, the bandwidth to use in the estimate. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>A vector of censoring indicators: 1's indicate uncensored observations, 0's correspond to censored obs.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The kernel hazard rate estimator of <a href="https://projecteuclid.org/download/pdf_1/euclid.aos/1176346265">Tanner and Wong (1983)</a> is given by
+</p>
+<p style="text-align: center;"><code class="reqn">\hat \lambda(x;h) = \sum_{i=1}^n \frac{K_h(x-X_{(i)})\delta_{(i)}}{n-i+1}</code>
+</p>
+
+<p><code class="reqn">h</code> is determined by  a bandwidth rule such as <code>PlugInBand</code>. <code>HazardRateEst</code> is also used as a pilot estimate in the implementation of both the variable bandwidth estimate <code>VarBandHazEst</code> and the transformed hazard rate estimate  <code>TransHazRateEst</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector with the hazard rate estimates at the designated points xout.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://projecteuclid.org/download/pdf_1/euclid.aos/1176346265">Tanner and Wong (1983), The Estimation Of The Hazard Function From Randomly Censored Data By The Kernel Method, Annals of Statistics,  3, pp. 989-993.</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>VarBandHazEst, TransHazRateEst, PlugInBand</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+plot(x, HazardRate(x, "weibull", .6, 1),  type="l", xlab = "x",
+                   ylab="Hazard rate") #plot true hazard rate function
+SampleSize &lt;- 100
+ti&lt;- rweibull(SampleSize, .6, 1)  #draw a random sample from the actual distribution
+ui&lt;-rexp(SampleSize, .2)  #draw a random sample from the censoring distribution
+cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+x1&lt;-pmin(ti,ui)             #this is the observed sample
+cen&lt;-rep.int(1, SampleSize) #censoring indicators
+cen[which(ti&gt;ui)]&lt;-0        #censored values correspond to zero
+huse&lt;-PlugInBand(x1, x,   cen, Biweight)
+arg2&lt;-HazardRateEst(x1, x, Epanechnikov, huse, cen) #Calculate the estimate
+lines(x, arg2, lty=2)       #draw the result on the graphics device.
+</code></pre>
+
+
+</div>

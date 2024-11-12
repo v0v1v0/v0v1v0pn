@@ -1,0 +1,218 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Node_analysis</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calculate GND and SOS scores for a phylogeny and community data set
+</h2>
+
+<h3>Description</h3>
+
+<p>Goes through each node in the phylogeny, and compares the distribution overlap of sister clades to that expected from a null mode that considers node size, species richness and range size.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Node_analysis(nodiv_data, repeats = 100, method = c("rdtable", "quasiswap"), 
+                cores = 1, log_parallel_progress = FALSE)
+## S3 method for class 'nodiv_result'
+summary(object, ...)
+## S3 method for class 'nodiv_result'
+print(x, printlen = 4, ...)
+## S3 method for class 'nodiv_result'
+plot(x, label = nodenumbers(x), zlim = 0:1, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nodiv_data</code></td>
+<td>
+
+<p>An object created by the <code>nodiv_data</code> function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repeats</code></td>
+<td>
+
+<p>Number of null communities to create at each node
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>The null model algorithm used to simulate random communities
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+
+<p>The number of cores to use in the computation. Note that multi-core processing is yet unimplemented.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log_parallel_progress</code></td>
+<td>
+
+<p>If this is TRUE, the results from each node will be saved as an '.rda' file in the working directory. Useful for large parallel computations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>The <code>nodiv_result</code> object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>The <code>nodiv_result</code> object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>printlen</code></td>
+<td>
+
+<p>The number of species to print to screen
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+
+<p>The text to use for labelling nodes in the plot
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zlim</code></td>
+<td>
+
+<p>The values of GND to use for the extremes of the color scale on the plot
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Further arguments to be passed to the function
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The "rdtable" algorithm is efficient, but may underestimate the deviation between nodes. It should primarily be used for exploratory data analysis. Note that the more robust "quasiswap" algorithm may take days to run on larger data sets.
+</p>
+<p>The <code>plot</code> function for <code>nodiv_result</code> plots the phylogenetic tree with colored symbols at the nodes. The color and size the nodes are proportional with the GND value of the node.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The result is an object of type <code>nodiv_result</code>, which has the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>GND</code></td>
+<td>
+<p>A numeric vector between 0 and 1 describing the distributional divergence associated with a node</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SOS</code></td>
+<td>
+<p>A numeric matrix given the SOS of values, which expresses the difference between empirical and expected species richness of each clade at each site</p>
+</td>
+</tr>
+</table>
+<p>It also includes all the elements of the <code>nodiv_data</code> object:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coords</code></td>
+<td>
+<p>A <code>SpatialPointsDataFrame</code> or <code>SpatialPixelsDataFrame</code> (from <code>sp</code>) with spatial coordinates, and one column named <code>sites</code> containing the site names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comm</code></td>
+<td>
+<p>The community matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A character vector describing the type of data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>species</code></td>
+<td>
+<p>A list of species names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>An optional slot detailing a shapefile object for plotting the data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phylo</code></td>
+<td>
+<p>A phylogeny of type <code>phylo</code> from package <code>ape</code></p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Michael Krabbe Borregaard
+</p>
+
+
+<h3>References</h3>
+
+<p>Borregaard, M.K., Rahbek, C., Fjeldsaa, J., Parra, J.L., Whittaker, R.J. &amp; Graham, C.H. 2014. Node-based analysis of species distributions. Methods in Ecology and Evolution 5(11): 1225-1235. DOI: 10.1111/2041-210X.12283
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plotSOS</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(coquettes)
+res &lt;- Node_analysis(coquettes, 50, "rdtable")
+opar &lt;- par(mfrow = c(1,2))
+plot(res)
+plotSOS(res, 28, shapefill = terrain.colors(64))
+summary(res)
+par(opar)
+</code></pre>
+
+
+</div>

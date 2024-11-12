@@ -1,0 +1,292 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculate_player_stats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Official Game Stats</h2>
+
+<h3>Description</h3>
+
+<p>Build columns that aggregate official passing, rushing, and receiving stats
+either at the game level or at the level of the entire data frame passed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculate_player_stats(pbp, weekly = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pbp</code></td>
+<td>
+<p>A Data frame of NFL play-by-play data typically loaded with
+<code>load_pbp()</code> or <code>build_nflfastR_pbp()</code>. If the data doesn't include the variable
+<code>qb_epa</code>, the function <code>add_qb_epa()</code> will be called to add it.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weekly</code></td>
+<td>
+<p>If <code>TRUE</code>, returns week-by-week stats, otherwise, stats
+for the entire Data frame.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame including the following columns (all ID columns are
+decoded to the gsis ID format):
+</p>
+
+<dl>
+<dt>player_id</dt>
+<dd>
+<p>ID of the player. Use this to join to other sources.</p>
+</dd>
+<dt>player_name</dt>
+<dd>
+<p>Name of the player</p>
+</dd>
+<dt>player_display_name</dt>
+<dd>
+<p>Full name of the player</p>
+</dd>
+<dt>position</dt>
+<dd>
+<p>Position of the player</p>
+</dd>
+<dt>position_group</dt>
+<dd>
+<p>Position group of the player</p>
+</dd>
+<dt>headshot_url</dt>
+<dd>
+<p>URL to a player headshot image</p>
+</dd>
+<dt>games</dt>
+<dd>
+<p>The number of games where the player recorded passing, rushing or receiving stats.</p>
+</dd>
+<dt>recent_team</dt>
+<dd>
+<p>Most recent team player appears in <code>pbp</code> with.</p>
+</dd>
+<dt>season</dt>
+<dd>
+<p>Season if <code>weekly</code> is <code>TRUE</code></p>
+</dd>
+<dt>week</dt>
+<dd>
+<p>Week if <code>weekly</code> is <code>TRUE</code></p>
+</dd>
+<dt>season_type</dt>
+<dd>
+<p><code>REG</code> or <code>POST</code> if <code>weekly</code> is <code>TRUE</code></p>
+</dd>
+<dt>opponent_team</dt>
+<dd>
+<p>The player's opponent team if <code>weekly</code> is <code>TRUE</code></p>
+</dd>
+<dt>completions</dt>
+<dd>
+<p>The number of completed passes.</p>
+</dd>
+<dt>attempts</dt>
+<dd>
+<p>The number of pass attempts as defined by the NFL.</p>
+</dd>
+<dt>passing_yards</dt>
+<dd>
+<p>Yards gained on pass plays.</p>
+</dd>
+<dt>passing_tds</dt>
+<dd>
+<p>The number of passing touchdowns.</p>
+</dd>
+<dt>interceptions</dt>
+<dd>
+<p>The number of interceptions thrown.</p>
+</dd>
+<dt>sacks</dt>
+<dd>
+<p>The Number of times sacked.</p>
+</dd>
+<dt>sack_yards</dt>
+<dd>
+<p>Yards lost on sack plays.</p>
+</dd>
+<dt>sack_fumbles</dt>
+<dd>
+<p>The number of sacks with a fumble.</p>
+</dd>
+<dt>sack_fumbles_lost</dt>
+<dd>
+<p>The number of sacks with a lost fumble.</p>
+</dd>
+<dt>passing_air_yards</dt>
+<dd>
+<p>Passing air yards (includes incomplete passes).</p>
+</dd>
+<dt>passing_yards_after_catch</dt>
+<dd>
+<p>Yards after the catch gained on plays in
+which player was the passer (this is an unofficial stat and may differ slightly
+between different sources).</p>
+</dd>
+<dt>passing_first_downs</dt>
+<dd>
+<p>First downs on pass attempts.</p>
+</dd>
+<dt>passing_epa</dt>
+<dd>
+<p>Total expected points added on pass attempts and sacks.
+NOTE: this uses the variable <code>qb_epa</code>, which gives QB credit for EPA for up
+to the point where a receiver lost a fumble after a completed catch and makes
+EPA work more like passing yards on plays with fumbles.</p>
+</dd>
+<dt>passing_2pt_conversions</dt>
+<dd>
+<p>Two-point conversion passes.</p>
+</dd>
+<dt>pacr</dt>
+<dd>
+<p>Passing Air Conversion Ratio. PACR = <code>passing_yards</code> / <code>passing_air_yards</code></p>
+</dd>
+<dt>dakota</dt>
+<dd>
+<p>Adjusted EPA + CPOE composite based on coefficients which best predict adjusted EPA/play in the following year.</p>
+</dd>
+<dt>carries</dt>
+<dd>
+<p>The number of official rush attempts (incl. scrambles and kneel downs).
+Rushes after a lateral reception don't count as carry.</p>
+</dd>
+<dt>rushing_yards</dt>
+<dd>
+<p>Yards gained when rushing with the ball (incl. scrambles and kneel downs).
+Also includes yards gained after obtaining a lateral on a play that started
+with a rushing attempt.</p>
+</dd>
+<dt>rushing_tds</dt>
+<dd>
+<p>The number of rushing touchdowns (incl. scrambles).
+Also includes touchdowns after obtaining a lateral on a play that started
+with a rushing attempt.</p>
+</dd>
+<dt>rushing_fumbles</dt>
+<dd>
+<p>The number of rushes with a fumble.</p>
+</dd>
+<dt>rushing_fumbles_lost</dt>
+<dd>
+<p>The number of rushes with a lost fumble.</p>
+</dd>
+<dt>rushing_first_downs</dt>
+<dd>
+<p>First downs on rush attempts (incl. scrambles).</p>
+</dd>
+<dt>rushing_epa</dt>
+<dd>
+<p>Expected points added on rush attempts (incl. scrambles and kneel downs).</p>
+</dd>
+<dt>rushing_2pt_conversions</dt>
+<dd>
+<p>Two-point conversion rushes</p>
+</dd>
+<dt>receptions</dt>
+<dd>
+<p>The number of pass receptions. Lateral receptions officially
+don't count as reception.</p>
+</dd>
+<dt>targets</dt>
+<dd>
+<p>The number of pass plays where the player was the targeted receiver.</p>
+</dd>
+<dt>receiving_yards</dt>
+<dd>
+<p>Yards gained after a pass reception. Includes yards
+gained after receiving a lateral on a play that started as a pass play.</p>
+</dd>
+<dt>receiving_tds</dt>
+<dd>
+<p>The number of touchdowns following a pass reception.
+Also includes touchdowns after receiving a lateral on a play that started
+as a pass play.</p>
+</dd>
+<dt>receiving_air_yards</dt>
+<dd>
+<p>Receiving air yards (incl. incomplete passes).</p>
+</dd>
+<dt>receiving_yards_after_catch</dt>
+<dd>
+<p>Yards after the catch gained on plays in
+which player was receiver (this is an unofficial stat and may differ slightly
+between different sources).</p>
+</dd>
+<dt>receiving_fumbles</dt>
+<dd>
+<p>The number of fumbles after a pass reception.</p>
+</dd>
+<dt>receiving_fumbles_lost</dt>
+<dd>
+<p>The number of fumbles lost after a pass reception.</p>
+</dd>
+<dt>receiving_2pt_conversions</dt>
+<dd>
+<p>Two-point conversion receptions</p>
+</dd>
+<dt>racr</dt>
+<dd>
+<p>Receiver Air Conversion Ratio. RACR = <code>receiving_yards</code> / <code>receiving_air_yards</code></p>
+</dd>
+<dt>target_share</dt>
+<dd>
+<p>The share of targets of the player in all targets of his team</p>
+</dd>
+<dt>air_yards_share</dt>
+<dd>
+<p>The share of receiving_air_yards of the player in all air_yards of his team</p>
+</dd>
+<dt>wopr</dt>
+<dd>
+<p>Weighted Opportunity Rating. WOPR = 1.5 × <code>target_share</code> + 0.7 × <code>air_yards_share</code></p>
+</dd>
+<dt>fantasy_points</dt>
+<dd>
+<p>Standard fantasy points.</p>
+</dd>
+<dt>fantasy_points_ppr</dt>
+<dd>
+<p>PPR fantasy points.</p>
+</dd>
+</dl>
+<h3>See Also</h3>
+
+<p>The function <code>load_player_stats()</code> and the corresponding examples
+on <a href="https://www.nflfastr.com/articles/nflfastR.html#example-11-replicating-official-stats">the nflfastR website</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+try({# to avoid CRAN test problems
+pbp &lt;- nflfastR::load_pbp(2020)
+
+weekly &lt;- calculate_player_stats(pbp, weekly = TRUE)
+dplyr::glimpse(weekly)
+
+overall &lt;- calculate_player_stats(pbp, weekly = FALSE)
+dplyr::glimpse(overall)
+})
+
+</code></pre>
+
+
+</div>

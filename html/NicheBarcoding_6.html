@@ -1,0 +1,167 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NBSI</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Niche-model-Based Species Identification (NBSI)</h2>
+
+<h3>Description</h3>
+
+<p>Species identification using DNA barcoding integrated with
+niche model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NBSI(
+  ref.seq,
+  que.seq,
+  model = "RF",
+  independence = TRUE,
+  ref.add = NULL,
+  variables = "ALL",
+  en.vir = NULL,
+  bak.vir = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ref.seq</code></td>
+<td>
+<p>DNAbin, the reference dataset containing sample IDs,
+taxon information,longitude and latitude, and barcode sequences of samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>que.seq</code></td>
+<td>
+<p>DNAbin, the query dataset containing sample IDs, longitude
+and latitude, and barcode sequences of samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Character, string indicating which niche model will be used.
+Must be one of "RF" (default) or "MAXENT". "MAXENT" can only be applied when
+the java program paste(system.file(package="dismo"), "/java/maxent.jar",
+sep=”) exists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>independence</code></td>
+<td>
+<p>Logical. Whether the barcode sequences are related to
+the ecological variables?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref.add</code></td>
+<td>
+<p>Data.frame, the additional coordinates collected from GBIF
+or literatures.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>Character, the identifier of selected bioclimate variables.
+Default of "ALL" represents to use all the layers in en.vir; the alternative
+option of "SELECT" represents to randomly remove the highly-correlated
+variables (|r| larger than 0.9) with the exception of one layer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>en.vir</code></td>
+<td>
+<p>RasterBrick, the global bioclimate data output from
+"raster::getData" function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bak.vir</code></td>
+<td>
+<p>Matrix, bioclimate variables of random background points.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A dataframe of barcoding identification result for each query sample
+and corresponding niche model-based probability.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Cai-qing YANG (Email: yangcq_ivy(at)163.com) and Ai-bing ZHANG
+(Email:zhangab2008(at)cnu.edu.cn), Capital Normal University (CNU), Beijing,
+CHINA.
+</p>
+
+
+<h3>References</h3>
+
+<p>Breiman, L. 2001. Random forests. Machine Learning 45(1):5-32.
+</p>
+<p>Liaw, A. and M. Wiener. 2002. Clasification and regression by
+randomForest. R News, 2/3:18-22.
+</p>
+<p>Phillips, S.J., R.P. Anderson and R.E. Schapire. 2006. Maximum
+entropy modeling of species geographic distributions. Ecological Modelling,
+190:231-259.
+</p>
+<p>Zhang, A.B., M.D. Hao, C.Q. Yang and Z.Y. Shi. (2017). BarcodingR:
+an integrated R package for species identification using DNA barcodes.
+Methods in Ecology and Evolution, 8:627-634.
+</p>
+<p>Jin, Q., H.L. Han, X.M. Hu, X.H. Li, C.D. Zhu, S.Y.W. Ho, R.D. Ward
+and A.B. Zhang. 2013. Quantifying species diversity with a DNA barcoding-based
+method: Tibetan moth species (Noctuidae) on the Qinghai-Tibetan Plateau.
+PloS One, 8:e644.
+</p>
+<p>Hijmans, R.J., S.E. Cameron, J.L. Parra, P.G. Jones and A. Jarvis.
+2005. Very high resolution interpolated climate surfaces for global land areas.
+International Journal of Climatology, 25(15):1965-1978.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(en.vir)
+data(bak.vir)
+#envir&lt;-raster::getData("worldclim",download=FALSE,var="bio",res=2.5)
+#en.vir&lt;-raster::brick(envir)
+#back&lt;-dismo::randomPoints(mask=en.vir,n=5000,ext=NULL,extf=1.1,
+#                          excludep=TRUE,prob=FALSE,
+#                          cellnumbers=FALSE,tryf=3,warn=2,
+#                          lonlatCorrection=TRUE)
+#bak.vir&lt;-raster::extract(en.vir,back)
+
+library(ape)
+data(LappetMoths)
+ref.seq&lt;-LappetMoths$ref.seq[1:50,]
+que.seq&lt;-LappetMoths$que.seq[1:5,]
+NBSI.out&lt;-NBSI(ref.seq,que.seq,ref.add=NULL,
+               independence=TRUE,
+               model="RF",variables="SELECT",
+               en.vir=en.vir,bak.vir=bak.vir)
+NBSI.out
+
+### Add a parameter when additional reference coordinates are available ###
+#ref.add&lt;-LappetMoths$ref.add
+#NBSI.out2&lt;-NBSI(ref.seq,que.seq,ref.add=ref.add,
+#                independence=TRUE,
+#                model="RF",variables="SELECT",
+#                en.vir=en.vir,bak.vir=bak.vir)
+#NBSI.out2
+</code></pre>
+
+
+</div>

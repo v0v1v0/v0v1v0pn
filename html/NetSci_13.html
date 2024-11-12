@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>separation_Significance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Separation Significance</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the separation of two set of targets on a network and assigns a p-value to it.
+Often used to measure separation of disease modules in a interactome.
+Separation is calculated as in Menche, J. et al (2015) &lt;doi:10.1126/science.1257601&gt;.
+p-values are calculates based on the permutation of nodes, you can set the full network to be
+in the set for permutation or can select the ones you include as input.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">separation_Significance(G, ST, Threads = 2, N = 1000, correct_by_target = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>G</code></td>
+<td>
+<p>The original graph (often an interactome / PPI).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ST</code></td>
+<td>
+<p>Set-Target data. It is a data.frame with two columns. ID and Target.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Threads</code></td>
+<td>
+<p>How many threads you'd like to use (for parallel computation).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>default to 1000. The number of permutations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct_by_target</code></td>
+<td>
+<p>TRUE by default. If you want to use the set of targets for the permutation or the full network.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>the separation and distance of modules and its p-value.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(12)
+require(magrittr)
+x = data.frame(n1 = sample(LETTERS[1:5]),
+               n2 =  sample(LETTERS[1:20]))
+
+D1 = data.frame(gene = c("H", "I", "S", "N", "A"), disease = "D1")
+D2 = data.frame(gene = c("E", "C",  "R" , "J", "Q", "O"), disease = "D2")
+D3 = data.frame(gene = c("E", "G", "T", "P"), disease = "D3")
+D4 = data.frame(gene = c("A", "B", "E"), disease = "D4")
+D5 = data.frame(gene = c("D", "F", "L"), disease = "D5")
+D6 = data.frame(gene = c("D", "F", "K"), disease = "D6")
+D7 = data.frame(gene = c("A", "B" ,"F", "K"), disease = "D7")
+
+Diseases = rbind(D1, D2, D3, D4, D5, D6, D7)
+Diseases %&lt;&gt;% dplyr::select(disease, gene)
+g = igraph::graph_from_data_frame(x, directed = FALSE)
+g = igraph::simplify(g)
+
+separation_Significance(G = g,
+ST = Diseases,
+correct_by_target = FALSE,
+Threads = 2)
+</code></pre>
+
+
+</div>

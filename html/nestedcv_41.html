@@ -1,0 +1,497 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nestcv.train</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nested cross-validation for caret</h2>
+
+<h3>Description</h3>
+
+<p>This function applies nested cross-validation (CV) to training of models
+using the <code>caret</code> package. The function also allows the option of embedded
+filtering of predictors for feature selection nested within the outer loop of
+CV. Predictions on the outer test folds are brought back together and error
+estimation/ accuracy determined. The default is 10x10 nested CV.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nestcv.train(
+  y,
+  x,
+  method = "rf",
+  filterFUN = NULL,
+  filter_options = NULL,
+  weights = NULL,
+  balance = NULL,
+  balance_options = NULL,
+  modifyX = NULL,
+  modifyX_useY = FALSE,
+  modifyX_options = NULL,
+  outer_method = c("cv", "LOOCV"),
+  n_outer_folds = 10,
+  n_inner_folds = 10,
+  outer_folds = NULL,
+  inner_folds = NULL,
+  pass_outer_folds = FALSE,
+  cv.cores = 1,
+  multicore_fork = (Sys.info()["sysname"] != "Windows"),
+  metric = ifelse(is.factor(y), "logLoss", "RMSE"),
+  trControl = NULL,
+  tuneGrid = NULL,
+  savePredictions = "final",
+  outer_train_predict = FALSE,
+  finalCV = TRUE,
+  na.option = "pass",
+  verbose = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Response vector. For classification this should be a factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Matrix or dataframe of predictors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>String specifying which model to use. See <code>caret::train()</code> for
+details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filterFUN</code></td>
+<td>
+<p>Filter function, e.g. <code>ttest_filter()</code> or <code>relieff_filter()</code>.
+Any function can be provided and is passed <code>y</code> and <code>x</code>. Ideally returns a
+numeric vector with indices of filtered predictors. The custom function can
+return a character vector of names of the filtered predictors, but this
+will not work with the <code>penalty.factor</code> argument in <code>nestcv.glmnet()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter_options</code></td>
+<td>
+<p>List of additional arguments passed to the filter
+function specified by <code>filterFUN</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Weights applied to each sample for models which can use
+weights. Note <code>weights</code> and <code>balance</code> cannot be used at the same time.
+Weights are not applied in filters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>balance</code></td>
+<td>
+<p>Specifies method for dealing with imbalanced class data.
+Current options are <code>"randomsample"</code> or <code>"smote"</code>. See <code>randomsample()</code> and
+<code>smote()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>balance_options</code></td>
+<td>
+<p>List of additional arguments passed to the balancing
+function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modifyX</code></td>
+<td>
+<p>Character string specifying the name of a function to modify
+<code>x</code>. This can be an imputation function for replacing missing values, or a
+more complex function which alters or even adds columns to <code>x</code>. The
+required return value of this function depends on the <code>modifyX_useY</code>
+setting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modifyX_useY</code></td>
+<td>
+<p>Logical value whether the <code>x</code> modifying function makes
+use of response training data from <code>y</code>. If <code>FALSE</code> then the <code>modifyX</code>
+function simply needs to return a modified <code>x</code> object. If <code>TRUE</code> then the
+<code>modifyX</code> function must return a model type object on which <code>predict()</code> can
+be called, so that train and test partitions of <code>x</code> can be modified
+independently.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modifyX_options</code></td>
+<td>
+<p>List of additional arguments passed to the <code>x</code>
+modifying function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outer_method</code></td>
+<td>
+<p>String of either <code>"cv"</code> or <code>"LOOCV"</code> specifying whether
+to do k-fold CV or leave one out CV (LOOCV) for the outer folds</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_outer_folds</code></td>
+<td>
+<p>Number of outer CV folds</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_inner_folds</code></td>
+<td>
+<p>Sets number of inner CV folds. Note if <code>trControl</code> or
+<code>inner_folds</code> is specified then these supersede <code>n_inner_folds</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outer_folds</code></td>
+<td>
+<p>Optional list containing indices of test folds for outer
+CV. If supplied, <code>n_outer_folds</code> is ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inner_folds</code></td>
+<td>
+<p>Optional list of test fold indices for inner CV. This must
+be structured as a list of the outer folds each containing a list of inner
+folds. Can only be supplied if balancing is not applied. If supplied,
+<code>n_inner_folds</code> is ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pass_outer_folds</code></td>
+<td>
+<p>Logical indicating whether the same outer folds are
+used for fitting of the final model when final CV is applied. Note this can
+only be applied when <code>n_outer_folds</code> and the number of inner CV folds
+specified in <code>n_inner_folds</code> or <code>trControl</code> are the same and that no
+balancing is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv.cores</code></td>
+<td>
+<p>Number of cores for parallel processing of the outer loops.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multicore_fork</code></td>
+<td>
+<p>Logical whether to use forked multicore parallel
+processing. Forked multicore processing uses <code>parallel::mclapply</code>. It is
+only available on unix/mac as windows does not allow forking. It is set to
+<code>FALSE</code> by default in windows and <code>TRUE</code> in unix/mac. Non-forked parallel
+processing is executed using <code>parallel::parLapply</code> or <code>pbapply::pblapply</code>
+if <code>verbose</code> is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metric</code></td>
+<td>
+<p>A string that specifies what summary metric will be used to
+select the optimal model. By default, "logLoss" is used for classification
+and "RMSE" is used for regression. Note this differs from the default
+setting in caret which uses "Accuracy" for classification. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trControl</code></td>
+<td>
+<p>A list of values generated by the <code>caret</code> function
+<code>caret::trainControl()</code>. This defines how inner CV training through <code>caret</code>
+is performed. Default for the inner loop is 10-fold CV. Setting this
+argument overrules <code>n_inner_folds</code>. See
+http://topepo.github.io/caret/using-your-own-model-in-train.html.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tuneGrid</code></td>
+<td>
+<p>Data frame of tuning values, see <code>caret::train()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>savePredictions</code></td>
+<td>
+<p>Indicates whether hold-out predictions for each inner
+CV fold should be saved for ROC curves, accuracy etc see
+caret::trainControl. Default is <code>"final"</code> to capture predictions for
+inner CV ROC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outer_train_predict</code></td>
+<td>
+<p>Logical whether to save predictions on outer
+training folds to calculate performance on outer training folds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>finalCV</code></td>
+<td>
+<p>Logical whether to perform one last round of CV on the whole
+dataset to determine the final model parameters. If set to <code>FALSE</code>, the
+median of the best hyperparameters from outer CV folds for continuous/
+ordinal hyperparameters, or highest voted for categorical hyperparameters,
+are used to fit the final model. Performance metrics are independent of
+this last step. If set to <code>NA</code>, final model fitting is skipped altogether,
+which gives a useful speed boost if performance metrics are all that is
+needed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.option</code></td>
+<td>
+<p>Character value specifying how <code>NA</code>s are dealt with.
+<code>"omit"</code> is equivalent to <code>na.action = na.omit</code>. <code>"omitcol"</code> removes cases
+if there are <code>NA</code> in 'y', but columns (predictors) containing <code>NA</code> are
+removed from 'x' to preserve cases. Any other value means that <code>NA</code> are
+ignored (a message is given).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical whether to print messages and show progress</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to <code>caret::train()</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When <code>finalCV = TRUE</code>, the final fit on the whole data using is performed
+first. This helps flag errors generated by <code>caret</code> such as missing packages.
+Parallelisation of the final fit when <code>finalCV = TRUE</code> is performed in
+<code>caret</code> using <code>registerDoParallel</code>. <code>caret</code> itself uses <code>foreach</code>.
+</p>
+<p>Parallelisation is performed on the outer CV folds using <code>parallel::mclapply</code>
+by default on unix/mac and <code>parallel::parLapply</code> on windows. <code>mclapply</code> uses
+forking which is faster. But some models use multi-threading which may cause
+issues in some circumstances with forked multicore processing. Setting
+<code>multicore_fork</code> to <code>FALSE</code> is slower but can alleviate some caret errors.
+</p>
+<p>If the outer folds are run using parallelisation, then parallelisation in
+caret must be off, otherwise an error will be generated. Alternatively if you
+wish to use parallelisation in caret, then parallelisation in <code>nestcv.train</code>
+can be fully disabled by leaving <code>cv.cores = 1</code>.
+</p>
+<p>xgboost models fitted via caret using <code>method = "xgbTree"</code> or <code>"xgbLinear"</code>
+invoke openMP multithreading on linux/windows by default which causes
+<code>nestcv.train</code> to fail when <code>cv.cores</code> &gt;1 (nested parallelisation). Mac OS is
+unaffected. In order to prevent this, <code>nestcv.train()</code> sets openMP threads to
+1 if <code>cv.cores</code> &gt;1.
+</p>
+<p>For classification, <code>metric</code> defaults to using 'logLoss' with the <code>trControl</code>
+arguments <code style="white-space: pre;">⁠classProbs = TRUE, summaryFunction = mnLogLoss⁠</code>, rather than
+'Accuracy' which is the default classification metric in <code>caret</code>. See
+<code>caret::trainControl()</code>. LogLoss is arguably more consistent than Accuracy
+for tuning parameters in datasets with small sample size.
+</p>
+<p>Models can be fitted with a single set of fixed parameters, in which case
+<code>trControl</code> defaults to <code>trainControl(method = "none")</code> which disables inner
+CV as it is unnecessary. See
+https://topepo.github.io/caret/model-training-and-tuning.html#fitting-models-without-parameter-tuning
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object with S3 class "nestcv.train"
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the matched call</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>Predictions on the left-out outer folds</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outer_result</code></td>
+<td>
+<p>List object of results from each outer fold containing
+predictions on left-out outer folds, caret result and number of filtered
+predictors at each fold.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outer_folds</code></td>
+<td>
+<p>List of indices of outer test folds</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dimx</code></td>
+<td>
+<p>dimensions of <code>x</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xsub</code></td>
+<td>
+<p>subset of <code>x</code> containing all predictors used in both outer CV
+folds and the final model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>original response vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yfinal</code></td>
+<td>
+<p>final response vector (post-balancing)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>final_fit</code></td>
+<td>
+<p>Final fitted caret model using best tune parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>final_vars</code></td>
+<td>
+<p>Column names of filtered predictors entering final model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary_vars</code></td>
+<td>
+<p>Summary statistics of filtered predictors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>roc</code></td>
+<td>
+<p>ROC AUC for binary classification where available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trControl</code></td>
+<td>
+<p><code>caret::trainControl</code> object used for inner CV</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bestTunes</code></td>
+<td>
+<p>best tuned parameters from each outer fold</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>finalTune</code></td>
+<td>
+<p>final parameters used for final model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary</code></td>
+<td>
+<p>Overall performance summary. Accuracy and balanced accuracy
+for classification. ROC AUC for binary classification. RMSE for
+regression.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Myles Lewis
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## sigmoid function
+sigmoid &lt;- function(x) {1 / (1 + exp(-x))}
+
+## load iris dataset and simulate a binary outcome
+data(iris)
+x &lt;- iris[, 1:4]
+colnames(x) &lt;- c("marker1", "marker2", "marker3", "marker4")
+x &lt;- as.data.frame(apply(x, 2, scale))
+y2 &lt;- sigmoid(0.5 * x$marker1 + 2 * x$marker2) &gt; runif(nrow(x))
+y2 &lt;- factor(y2, labels = c("class1", "class2"))
+
+## Example using random forest with caret
+cvrf &lt;- nestcv.train(y2, x, method = "rf",
+                     n_outer_folds = 3,
+                     cv.cores = 2)
+summary(cvrf)
+
+## Example of glmnet tuned using caret
+## set up small tuning grid for quick execution
+## length.out of 20-100 is usually recommended for lambda
+## and more alpha values ranging from 0-1
+tg &lt;- expand.grid(lambda = exp(seq(log(2e-3), log(1e0), length.out = 5)),
+                  alpha = 1)
+
+ncv &lt;- nestcv.train(y = y2, x = x,
+                    method = "glmnet",
+                    n_outer_folds = 3,
+                    tuneGrid = tg, cv.cores = 2)
+summary(ncv)
+
+## plot tuning for outer fold #1
+plot(ncv$outer_result[[1]]$fit, xTrans = log)
+
+## plot final ROC curve
+plot(ncv$roc)
+
+## plot ROC for left-out inner folds
+inroc &lt;- innercv_roc(ncv)
+plot(inroc)
+
+## example to show use of custom fold indices for 5 x 5-fold nested CV
+library(caret)
+y &lt;- iris$Species
+out_folds &lt;- createFolds(y, k = 5)
+in_folds &lt;- lapply(out_folds, function(i) {
+  ytrain &lt;- y[-i]
+  createFolds(ytrain, k = 5)
+})
+
+res &lt;- nestcv.train(y, x, method="rf", cv.cores = 2,
+                    pass_outer_folds = TRUE,
+                    inner_folds = in_folds,
+                    outer_folds = out_folds)
+summary(res)
+res$outer_folds
+res$final_fit$control$indexOut  # same as outer_folds
+
+</code></pre>
+
+
+</div>

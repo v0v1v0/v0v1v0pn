@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>matching</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predicts unknown responses by matching</h2>
+
+<h3>Description</h3>
+
+<p>It uses the matching method introduced by Rivers (2007). The idea is to model the relationship between y_k and x_k using the convenience sample in order to predict y_k for the reference sample. You can then predict the total using the 'total_estimation' method.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">matching(
+  convenience_sample,
+  reference_sample,
+  covariates,
+  estimated_var,
+  positive_label = NULL,
+  algorithm = "glm",
+  proc = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>convenience_sample</code></td>
+<td>
+<p>Data frame containing the non-probabilistic sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference_sample</code></td>
+<td>
+<p>Data frame containing the probabilistic sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariates</code></td>
+<td>
+<p>String vector specifying the common variables to use for training.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimated_var</code></td>
+<td>
+<p>String specifying the variable to estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>positive_label</code></td>
+<td>
+<p>String specifying the label to be considered positive if the estimated variable is categorical. Leave it as the default NULL otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>A string specifying which classification or regression model to use (same as caret's method).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proc</code></td>
+<td>
+<p>A string or vector of strings specifying if any of the data preprocessing techniques available in train function from 'caret' package should be applied to data prior to the propensity estimation. By default, its value is NULL and no preprocessing is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further parameters to be passed to the train function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Training of the models is done via the 'caret' package. The algorithm specified in <code>algorithm</code> must match one of the names in the list of algorithms supported by 'caret'. If the estimated variable is categorical, probabilities are returned.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector containing the estimated responses for the reference sample.
+</p>
+
+
+<h3>References</h3>
+
+<p>Rivers, D. (2007). <em>Sampling for Web Surveys</em>. Presented in Joint Statistical Meetings, Salt Lake City, UT.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Simple example with default parameters
+N = 50000
+covariates = c("education_primaria", "education_secundaria")
+if (is.numeric(sampleNP$vote_gen))
+   sampleNP$vote_gen = factor(sampleNP$vote_gen, c(0, 1), c('F', 'T'))
+estimated_votes = data.frame(
+   vote_gen = matching(sampleNP, sampleP, covariates, "vote_gen", 'T')
+)
+total_estimation(estimated_votes, N / nrow(estimated_votes), c("vote_gen"), N)
+</code></pre>
+
+
+</div>

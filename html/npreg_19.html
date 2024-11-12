@@ -1,0 +1,192 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bin.sample</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bin Sample a Vector, Matrix, or Data Frame
+</h2>
+
+<h3>Description</h3>
+
+<p>Bin elements of a vector (or rows of a matrix/data frame) and randomly sample a specified number of elements from each bin. Returns sampled data and (optionally) indices of sampled data and/or breaks for defining bins.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bin.sample(x, nbin = 5, size = 1, equidistant = FALSE, 
+           index.return = FALSE, breaks.return = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Vector, matrix, or data frame to bin sample. Factors are allowed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbin</code></td>
+<td>
+
+<p>Number of bins for each variable (defaults to 5 bins for each dimension of <code>x</code>). If <code>length(bins) != ncol(x)</code>, then <code>nbin[1]</code> is used for each variable. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+
+<p>Size of sample to randomly draw from each bin (defaults to 1).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equidistant</code></td>
+<td>
+
+<p>Should bins be defined equidistantly for each predictor? If <code>FALSE</code> (default), sample quantiles define bins for each predictor. If <code>length(equidistant) != ncol(x)</code>, then <code>equidistant[1]</code> is used for each variable.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index.return</code></td>
+<td>
+
+<p>If <code>TRUE</code>, returns the (row) indices of the bin sampled observations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breaks.return</code></td>
+<td>
+
+<p>If <code>TRUE</code>, returns the (lower bounds of the) breaks for the binning.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For a single variable, the unidimensional bins are defined using the <code>.bincode</code> function. For multiple variables, the multidimensional bins are defined using the algorithm described in the appendix of Helwig et al. (2015), which combines the unidimensional bins (calculated via <code>.bincode</code>) into a multidimensional bin code.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>index.return = FALSE</code> and <code>breaks.return = FALSE</code>, returns the bin sampled <code>x</code> observations.
+</p>
+<p>If <code>index.return = TRUE</code> and/or <code>breaks.return = TRUE</code>, returns a list with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x </code></td>
+<td>
+<p>bin sampled <code>x</code> observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ix </code></td>
+<td>
+<p>row indices of bin sampled observations (if <code>index.return = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bx </code></td>
+<td>
+<p>lower bounds of breaks defining bins (if <code>breaks.return = TRUE</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>For factors, the number of bins is automatically defined to be the number of levels.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Helwig, N. E., Gao, Y., Wang, S., &amp; Ma, P. (2015). Analyzing spatiotemporal trends in social media data via smoothing spline analysis of variance. <em>Spatial Statistics, 14</em>(C), 491-504. <a href="https://doi.org/10.1016/j.spasta.2015.09.002">doi:10.1016/j.spasta.2015.09.002</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>.bincode</code> for binning a numeric vector
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##########   EXAMPLE 1   ##########
+### unidimensional binning
+
+# generate data
+x &lt;- seq(0, 1, length.out = 101)
+
+# bin sample (default)
+set.seed(1)
+bin.sample(x)
+
+# bin sample (return indices)
+set.seed(1)
+xs &lt;- bin.sample(x, index.return = TRUE)
+xs$x             # sampled data
+x[xs$ix]         # indexing sampled data
+
+# bin sample (return indices and breaks)
+set.seed(1)
+xs &lt;- bin.sample(x, index.return = TRUE, breaks.return = TRUE)
+xs$x             # sampled data
+x[xs$ix]         # indexing sampled data
+xs$bx            # breaks
+
+
+
+##########   EXAMPLE 2   ##########
+### bidimensional binning
+
+# generate data
+x &lt;- expand.grid(x1 = seq(0, 1, length.out = 101),
+                 x2 = seq(0, 1, length.out = 101))
+
+# bin sample (default)
+set.seed(1)
+bin.sample(x)
+
+# bin sample (return indices)
+set.seed(1)
+xs &lt;- bin.sample(x, index.return = TRUE)
+xs$x             # sampled data
+x[xs$ix,]        # indexing sampled data
+
+# bin sample (return indices and breaks)
+set.seed(1)
+xs &lt;- bin.sample(x, index.return = TRUE, breaks.return = TRUE)
+xs$x             # sampled data
+x[xs$ix,]        # indexing sampled data
+xs$bx            # breaks
+
+# plot breaks and 25 bins
+plot(xs$bx, xlim = c(0, 1), ylim = c(0, 1),
+     xlab = "x1", ylab = "x2", main = "25 bidimensional bins")
+grid()
+text(xs$bx + 0.1, labels = 1:25)
+
+</code></pre>
+
+
+</div>

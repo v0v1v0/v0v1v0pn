@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>acor</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Additional Explained Correlation</h2>
+
+<h3>Description</h3>
+
+<p><code>acor</code> computes the additional standard correlation explained by each
+canonical variable, taking into account the possible non-conjugacy of the
+canonical vectors. The result of the analysis is returned as a list of class
+<code>nscancor</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">acor(
+  x,
+  xcoef,
+  y,
+  ycoef,
+  xcenter = TRUE,
+  ycenter = TRUE,
+  xscale = FALSE,
+  yscale = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric matrix which provides the data from the first domain</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xcoef</code></td>
+<td>
+<p>a numeric data matrix with the canonical vectors related to
+<code>x</code> as its columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a numeric matrix which provides the data from the second domain</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ycoef</code></td>
+<td>
+<p>a numeric data matrix with the canonical vectors related to
+<code>y</code> as its columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xcenter</code></td>
+<td>
+<p>a logical value indicating whether the empirical mean of (each
+column of) <code>x</code> should be subtracted. Alternatively, a vector of length
+equal to the number of columns of <code>x</code> can be supplied. The value is
+passed to <code>scale</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ycenter</code></td>
+<td>
+<p>analogous to <code>xcenter</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xscale</code></td>
+<td>
+<p>a logical value indicating whether the columns of <code>x</code>
+should be scaled to have unit variance before the analysis takes place. The
+default is <code>FALSE</code> for consistency with <code>cancor</code>. Alternatively,
+a vector of length equal to the number of columns of <code>x</code> can be
+supplied. The value is passed to <code>scale</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yscale</code></td>
+<td>
+<p>analogous to <code>xscale</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The additional correlation is measured after projecting the corresponding
+canonical vectors to the ortho-complement space spanned by the previous
+canonical variables. This procedure ensures that the correlation explained by
+non-conjugate canonical vectors is not counted multiple times. See Mackey
+(2009) for a presentation of generalized deflation in the context of
+principal component analysis (PCA), which was adapted here to CCA.
+</p>
+<p><code>acor</code> is also useful to build a partial CCA model, to be completed with
+additional canonical variables computed using <code>nscancor</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class <code>nscancor</code> containing the
+following elements: </p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>cor</code></td>
+<td>
+<p>the additional correlation explained by each
+pair of canonical variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xcoef</code></td>
+<td>
+<p>copied from the
+input arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ycoef, ycenter, yscale</code></td>
+<td>
+<p>copied from the input
+arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xp</code></td>
+<td>
+<p>the deflated data matrix corresponding to <code>x</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yp</code></td>
+<td>
+<p>analogous to <code>xp</code></p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Mackey, L. (2009) Deflation Methods for Sparse PCA. In
+<em>Advances in Neural Information Processing Systems</em> (pp. 1017–1024).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(nutrimouse, package = "CCA")
+
+x &lt;- nutrimouse$gene[ , 1:5]
+y &lt;- nutrimouse$lipid
+cc &lt;- cancor(x, y)
+
+# Re-compute explained correlation
+ac &lt;- acor(x, cc$xcoef, y, cc$ycoef)
+
+# Results should agree
+print(cc$cor)
+print(ac$cor)
+
+</code></pre>
+
+
+</div>

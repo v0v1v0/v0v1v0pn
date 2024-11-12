@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PipeOpSoftImpute</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>PipeOpSoftImpute</h2>
+
+<h3>Description</h3>
+
+<p>Implements SoftImpute methods as mlr3 pipeline, more about SoftImpute <code>autotune_softImpute</code>.
+</p>
+
+
+<h3>Input and Output Channels</h3>
+
+<p>Input and output channels are inherited from <code>PipeOpImpute</code>.
+</p>
+
+
+<h3>Parameters</h3>
+
+<p>The parameters include inherited from ['PipeOpImpute'], as well as: <br></p>
+
+<ul>
+<li> <p><code>id</code> :: <code>character(1)</code><br>
+Identifier of resulting object, default <code>"imput_softImpute"</code>.
+</p>
+</li>
+<li> <p><code>lambda</code> :: <code>integer(1)</code><br>
+Nuclear-norm regularization parameter. If lambda=0, the algorithm reverts to "hardImpute", for which convergence is typically slower. If NULL lambda is set automatically at the highest possible value, default <code>0</code>.
+</p>
+</li>
+<li> <p><code>rank.max</code> :: <code>integer(1)</code><br>
+This param restricts the rank of the solution. If set as NULL: rank.max=min(dim(X))-1, default <code>2</code>.
+</p>
+</li>
+<li> <p><code>type</code> :: <code>character(1)</code><br>
+Two algorithms are implemented: type="svd" or the default type="als". The "svd" algorithm repeatedly computes the svd of the completed matrix, and soft thresholds its singular values. Each new soft-thresholded svd is used to re-impute the missing entries. For large matrices of class "Incomplete", the svd is achieved by an efficient form of alternating orthogonal ridge regression. The "als" algorithm uses the same alternating ridge regression, but updates the imputation at each step, leading to quite substantial speedups in some cases. The "als" approach does not currently have the same theoretical convergence guarantees as the "svd" approach, default <code>'als'</code>.
+</p>
+</li>
+<li> <p><code>thresh</code> :: <code>double(1)</code><br>
+Threshold for convergence, default <code>1e-5</code>
+</p>
+</li>
+<li> <p><code>maxit</code> :: <code>integer(1)</code><br>
+Maximum number of iterations, default <code>100</code>.
+</p>
+</li>
+<li> <p><code>cat_Fun</code> :: <code>function(){}</code><br>
+Function for aggregating the k Nearest Neighbors in case of categorical variables. It can be any function with input=not_numeric_vector and output=atomic_object, default <code>VIM::maxCat</code>.
+</p>
+</li>
+<li> <p><code>out_fill</code> :: <code>character(1)</code><br>
+Output log file location. If file already exists log message will be added. If NULL no log will be produced, default <code>NULL</code>.
+</p>
+</li>
+</ul>
+<h3>Super classes</h3>
+
+<p><code>mlr3pipelines::PipeOp</code> -&gt; <code>mlr3pipelines::PipeOpImpute</code> -&gt; <code>softImpute_imputation</code>
+</p>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-softImpute_imputation-new"><code>PipeOpSoftImpute$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-softImpute_imputation-clone"><code>PipeOpSoftImpute$clone()</code></a>
+</p>
+</li>
+</ul>
+<details open><summary>Inherited methods</summary><ul>
+<li><span class="pkg-link" data-pkg="mlr3pipelines" data-topic="PipeOp" data-id="help"><a href="../../mlr3pipelines/html/PipeOp.html#method-PipeOp-help"><code>mlr3pipelines::PipeOp$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3pipelines" data-topic="PipeOp" data-id="predict"><a href="../../mlr3pipelines/html/PipeOp.html#method-PipeOp-predict"><code>mlr3pipelines::PipeOp$predict()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3pipelines" data-topic="PipeOp" data-id="print"><a href="../../mlr3pipelines/html/PipeOp.html#method-PipeOp-print"><code>mlr3pipelines::PipeOp$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3pipelines" data-topic="PipeOp" data-id="train"><a href="../../mlr3pipelines/html/PipeOp.html#method-PipeOp-train"><code>mlr3pipelines::PipeOp$train()</code></a></span></li>
+</ul></details><hr>
+<a id="method-softImpute_imputation-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>PipeOpSoftImpute$new(
+  id = "impute_softImpute_B",
+  cat_Fun = VIM::maxCat,
+  lambda = 0,
+  rank.max = 2,
+  type = "als",
+  thresh = 1e-05,
+  maxit = 100,
+  out_file = NULL
+)</pre></div>
+
+
+<hr>
+<a id="method-softImpute_imputation-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>PipeOpSoftImpute$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">{
+  graph &lt;- PipeOpAmelia$new() %&gt;&gt;% mlr3learners::LearnerClassifGlmnet$new()
+  graph_learner &lt;- GraphLearner$new(graph)
+
+  # Task with NA
+
+  resample(tsk("pima"), graph_learner, rsmp("cv", folds = 3))
+}
+</code></pre>
+
+
+</div>

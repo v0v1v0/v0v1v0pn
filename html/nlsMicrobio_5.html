@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>survivalmodels</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bacterial survival models</h2>
+
+<h3>Description</h3>
+
+<p>Formulas of primary survival models commonly used in predictive microbiology</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  geeraerd
+  geeraerd_without_Nres
+  geeraerd_without_Sl
+  mafart
+  albert
+  trilinear
+  bilinear_without_Nres
+  bilinear_without_Sl
+</code></pre>
+
+
+<h3>Details</h3>
+
+<p>These models describe the evolution of the decimal logarithm of the microbial count (LOG10N) as a function of the time (t).
+</p>
+<p><code>geeraerd</code> is the model of Geeraerd et al. (2005) with four parameters (LOG10N0, kmax, Sl, LOG10Nres)<br><br><code>geeraerd_without_Nres</code> is the model of of Geeraerd et al. (2005) with three parameters (LOG10N0, kmax, Sl), without tail<br><br><code>geeraerd_without_Sl</code> is the model of of Geeraerd et al. (2005) with three parameters (LOG10N0, kmax, Nres), without shoulder<br><br><code>mafart</code> is the Weibull model as parameterized by Mafart et al. (2002) with three parameters (p, delta, LOG10N0)<br><br><code>albert</code> is the modified Weibull model proposed by Albert and Mafart (2005) with four parameters (p, delta, LOG10N0, LOG10Nres)<br><br><code>trilinear</code> is the three-phase linear model with four parameters (LOG10N0, kmax, Sl, LOG10Nres)<br><br><code>bilinear_without_Nres</code> is the two-phase linear model with three parameters (LOG10N0, kmax, Sl), without tail<br><br><code>bilinear_without_Sl</code> is the two-phase linear model with three parameters (LOG10N0, kmax, LOG10Nres), without shoulder
+</p>
+
+
+<h3>Value</h3>
+
+ 
+<p>A formula 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Florent Baty, Marie-Laure Delignette-Muller</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Albert I, Mafart P (2005) A modified Weibull model for bacterial inactivation. <em>International Journal of Food Microbiology</em>, <b>100</b>, 197-211.<br><br>
+Geeraerd AH, Valdramidis VP, Van Impe JF (2005) GInaFiT, a freeware tool to assess non-log-linear microbial survivor curves. <em>International Journal of Food Microbiology</em>, <b>102</b>, 95-105.<br><br>
+Mafart P, Couvert O, Gaillard S, Leguerinel I (2002) On calculating sterility in thermal preservation methods : application of the Weibull frequency distribution model. <em>International Journal of Food Microbiology</em>, <b>72</b>, 107-113.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Example 1
+
+data(survivalcurve1)
+nls1a &lt;- nls(geeraerd, survivalcurve1,
+	list(Sl = 5, kmax = 1.5, LOG10N0 = 7, LOG10Nres = 1))
+nls1b &lt;- nls(trilinear, survivalcurve1,
+	list(Sl = 5, kmax = 1.5, LOG10N0 = 7, LOG10Nres = 1))
+nls1c &lt;- nls(albert,survivalcurve1,
+	list(p = 1.2, delta = 4, LOG10N0 = 7, LOG10Nres = 1))
+def.par &lt;- par(no.readonly = TRUE)
+par(mfrow = c(2,2))
+overview(nls1a)
+plotfit(nls1a, smooth = TRUE)
+overview(nls1b)
+plotfit(nls1b, smooth = TRUE)
+overview(nls1c)
+plotfit(nls1c, smooth = TRUE)
+par(def.par)
+
+# Example 2
+
+data(survivalcurve2)
+nls2a &lt;- nls(geeraerd_without_Nres, survivalcurve2,
+	list(Sl = 10, kmax = 1.5, LOG10N0 = 7.5))
+nls2b &lt;- nls(bilinear_without_Nres, survivalcurve2, 
+	list(Sl = 10, kmax = 1.5, LOG10N0 = 7.5))
+nls2c &lt;- nls(mafart, survivalcurve2,
+	list(p = 1.5, delta = 8, LOG10N0 = 7.5))
+def.par &lt;- par(no.readonly = TRUE)
+par(mfrow = c(2,2))
+overview(nls2a)
+plotfit(nls2a, smooth = TRUE)
+overview(nls2b)
+plotfit(nls2b, smooth = TRUE)
+overview(nls2c)
+plotfit(nls2c, smooth = TRUE)
+par(def.par)
+
+# Example 3
+
+data(survivalcurve3)
+nls3a &lt;- nls(geeraerd_without_Sl, survivalcurve3,
+	list(kmax = 4, LOG10N0 = 7.5, LOG10Nres = 1))
+nls3b &lt;- nls(bilinear_without_Sl, survivalcurve3,
+	list(kmax = 4, LOG10N0 = 7.5, LOG10Nres = 1))
+nls3c &lt;- nls(mafart, survivalcurve3,
+	list(p = 0.5, delta = 0.2, LOG10N0 = 7.5))
+def.par &lt;- par(no.readonly = TRUE)
+par(mfrow = c(2,2))
+overview(nls3a)
+plotfit(nls3a, smooth = TRUE)
+overview(nls3b)
+plotfit(nls3b, smooth = TRUE)
+overview(nls3c)
+plotfit(nls3c, smooth = TRUE)
+par(def.par)
+</code></pre>
+
+
+</div>

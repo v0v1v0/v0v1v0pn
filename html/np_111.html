@@ -1,0 +1,271 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npsymtest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Consistent Density Asymmetry Test with Mixed Data Types </h2>
+
+<h3>Description</h3>
+
+<p><code>npsymtest</code> implements the consistent metric entropy test of
+asymmetry as described in Maasoumi and Racine (2009).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npsymtest(data = NULL,
+          method = c("integration","summation"),
+          boot.num = 399,
+          bw = NULL,
+          boot.method = c("iid", "geom"),
+          random.seed = 42,
+          ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>a vector containing the variable.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>a character string used to specify whether to compute the integral
+version or the summation version of the statistic. Can be set as
+<code>integration</code> or <code>summation</code> (see below for
+details). Defaults to <code>integration</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+
+<p>an integer value specifying the number of bootstrap
+replications to use. Defaults to <code>399</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw</code></td>
+<td>
+
+<p>a numeric (scalar) bandwidth. Defaults to plug-in (see details below).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.method</code></td>
+<td>
+<p> a character string used to specify the
+bootstrap method. Can be set as <code>iid</code> or <code>geom</code> (see below
+for details). Defaults to <code>iid</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+
+<p>an integer used to seed R's random number generator. This is to
+ensure replicability. Defaults to 42.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> additional arguments supplied to specify the bandwidth
+type, kernel types, and so on.  This is used since we specify bw as
+a numeric scalar and not a <code>bandwidth</code> object, and is of
+interest if you do not desire the default behaviours. To change the
+defaults, you may specify any of <code>bwscaling</code>, <code>bwtype</code>,
+<code>ckertype</code>, <code>ckerorder</code>, <code>ukertype</code>,
+<code>okertype</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npsymtest</code> computes the nonparametric metric entropy (normalized
+Hellinger of Granger, Maasoumi and Racine (2004)) for testing
+symmetry using the densities/probabilities of the data and the
+rotated data, <code class="reqn">D[f(y), f(\tilde y)]</code>. See
+Maasoumi and Racine (2009) for details. Default bandwidths are of the
+plug-in variety (<code>bw.SJ</code> for continuous variables and
+direct plug-in for discrete variables).
+</p>
+<p>For bootstrapping the null distribution of the statistic, <code>iid</code>
+conducts simple random resampling, while <code>geom</code> conducts Politis
+and Romano's (1994) stationary bootstrap using automatic block length
+selection via the <code>b.star</code> function in the
+<code>np</code> package. See the <code>boot</code> package for
+details.
+</p>
+<p>The summation version of this statistic may be numerically unstable
+when <code>y</code> is sparse (the summation version involves division of
+densities while the integration version involves differences). Warning
+messages are produced should this occur (‘integration recommended’)
+and should be heeded.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npsymtest</code> returns an object of type <code>symtest</code> with the
+following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Srho</code></td>
+<td>
+<p> the statistic <code>Srho</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Srho.bootstrap</code></td>
+<td>
+<p> contains the bootstrap replications of <code>Srho</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p> the P-value of the statistic </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+<p> number of bootstrap replications </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.rotate</code></td>
+<td>
+<p> the rotated data series </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw</code></td>
+<td>
+<p> the numeric (scalar) bandwidth </p>
+</td>
+</tr>
+</table>
+<p><code>summary</code> supports object of type <code>symtest</code>.
+</p>
+
+
+<h3>Usage Issues</h3>
+
+<p>When using data of type <code>factor</code> it is crucial that the
+variable not be an alphabetic character string (i.e. the factor must
+be integer-valued). The rotation is conducted about the median after
+conversion to type <code>numeric</code> which is then converted back
+to type <code>factor</code>. Failure to do so will have unpredictable
+results. See the example below for proper usage.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Granger, C.W. and E. Maasoumi and J.S. Racine (2004), “A
+dependence metric for possibly nonlinear processes”, Journal of Time
+Series Analysis, 25, 649-669.
+</p>
+<p>Maasoumi, E. and J.S. Racine (2009), “A robust entropy-based
+test of asymmetry for discrete and continuous processes,” Econometric
+Reviews, 28, 246-261.
+</p>
+<p>Politis, D.N. and J.P. Romano (1994), “The stationary
+bootstrap,” Journal of the American Statistical Association, 89,
+1303-1313.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npdeneqtest,npdeptest,npsdeptest,npunitest</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+set.seed(1234)
+
+n &lt;- 100
+
+## Asymmetric discrete probability distribution function
+
+x &lt;- factor(rbinom(n,2,.8))
+npsymtest(x,boot.num=99)
+
+Sys.sleep(5)
+
+## Symmetric discrete probability distribution function
+
+x &lt;- factor(rbinom(n,2,.5))
+npsymtest(x,boot.num=99)
+
+Sys.sleep(5)
+
+## Asymmetric continuous distribution function
+
+y &lt;- rchisq(n,df=2)
+npsymtest(y,boot.num=99)
+
+Sys.sleep(5)
+
+## Symmetric continuous distribution function
+
+y &lt;- rnorm(n)
+npsymtest(y,boot.num=99)
+
+## Time-series bootstrap
+
+ar.series &lt;- function(phi,epsilon) {
+  n &lt;- length(epsilon)
+  series &lt;- numeric(n)
+  series[1] &lt;- epsilon[1]/(1-phi)
+  for(i in 2:n) {
+    series[i] &lt;- phi*series[i-1] + epsilon[i]
+  }
+  return(series)
+}
+
+## Asymmetric time-series
+
+yt &lt;- ar.series(0.5,rchisq(n,df=3))
+npsymtest(yt,boot.num=99,boot.method="geom")
+
+## Symmetric time-series
+
+yt &lt;- ar.series(0.5,rnorm(n))
+npsymtest(yt,boot.num=99,boot.method="geom")
+
+
+## End(Not run) 
+
+</code></pre>
+
+
+</div>

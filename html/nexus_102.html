@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>detect_outlier</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Outlier Detection</h2>
+
+<h3>Description</h3>
+
+<p>Outlier Detection
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">detect_outlier(object, reference, ...)
+
+is_outlier(object, ...)
+
+## S4 method for signature 'CompositionMatrix,missing'
+detect_outlier(
+  object,
+  ...,
+  robust = TRUE,
+  method = c("mve", "mcd"),
+  quantile = 0.975
+)
+
+## S4 method for signature 'CompositionMatrix,CompositionMatrix'
+detect_outlier(
+  object,
+  reference,
+  ...,
+  robust = TRUE,
+  method = c("mve", "mcd"),
+  quantile = 0.975
+)
+
+## S4 method for signature 'OutlierIndex'
+is_outlier(object, robust = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A <code>CompositionMatrix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference</code></td>
+<td>
+<p>A <code>CompositionMatrix</code>. If missing, <code>object</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further parameters to be passed to <code>MASS::cov.rob()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>robust</code></td>
+<td>
+<p>A <code>logical</code> scalar: should robust estimators be used?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A <code>character</code> string specifying the method to be used.
+It must be one of "<code>mve</code>" (minimum volume ellipsoid) or "<code>mcd</code>" (minimum
+covariance determinant; see <code>MASS::cov.rob()</code>).
+Only used if <code>robust</code> is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quantile</code></td>
+<td>
+<p>A length-one <code>numeric</code> vector giving the significance level.
+<code>quantile</code> is used as a cut-off value for outlier detection: observations
+with larger (squared) Mahalanobis distance are considered as potential
+outliers.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An outlier can be defined as having a very large Mahalanobis distance from
+all observations. In this way, a certain proportion of the observations can
+be identified, e.g. the top 2% of values (i.e. values above the 0.98th
+percentile of the Chi-2 distribution).
+</p>
+<p>On the one hand, the Mahalanobis distance is likely to be strongly
+affected by the presence of outliers. Rousseeuw and van Zomeren (1990) thus
+recommend using robust methods (which are not excessively affected by the
+presence of outliers).
+</p>
+<p>On the other hand, the choice of the threshold for classifying an
+observation as an outlier should be discussed. There is no apparent reason
+why a particular threshold should be applicable to all data sets
+(Filzmoser, Garrett, and Reimann 2005).
+</p>
+
+
+<h3>Value</h3>
+
+
+<ul>
+<li> <p><code>detect_outlier()</code> returns an <code>OutlierIndex</code> object.
+</p>
+</li>
+<li> <p><code>is_outlier()</code> returns a <code>logical</code> vector.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>N. Frerebeau
+</p>
+
+
+<h3>References</h3>
+
+<p>Filzmoser, P., Garrett, R. G. &amp; Reimann, C. (2005). Multivariate outlier
+detection in exploration geochemistry. <em>Computers &amp; Geosciences</em>,
+31(5), 579-587. <a href="https://doi.org/10.1016/j.cageo.2004.11.013">doi:10.1016/j.cageo.2004.11.013</a>.
+</p>
+<p>Filzmoser, P. &amp; Hron, K. (2008). Outlier Detection for Compositional Data
+Using Robust Methods. <em>Mathematical Geosciences</em>, 40(3), 233-248.
+<a href="https://doi.org/10.1007/s11004-007-9141-5">doi:10.1007/s11004-007-9141-5</a>.
+</p>
+<p>Filzmoser, P., Hron, K. &amp; Reimann, C. (2012). Interpretation of multivariate
+outliers for compositional data. <em>Computers &amp; Geosciences</em>, 39, 77-85.
+<a href="https://doi.org/10.1016/j.cageo.2011.06.014">doi:10.1016/j.cageo.2011.06.014</a>.
+</p>
+<p>Rousseeuw, P. J. &amp; van Zomeren, B. C. (1990). Unmasking Multivariate Outliers
+and Leverage Points. <em>Journal of the American Statistical Association</em>,
+85(411): 633-639. <a href="https://doi.org/10.1080/01621459.1990.10474920">doi:10.1080/01621459.1990.10474920</a>.
+</p>
+<p>Santos, F. (2020). Modern methods for old data: An overview of some robust
+methods for outliers detection with applications in osteology. <em>Journal of
+Archaeological Science: Reports</em>, 32, 102423.
+<a href="https://doi.org/10.1016/j.jasrep.2020.102423">doi:10.1016/j.jasrep.2020.102423</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other outlier detection methods: 
+<code>plot_outlier</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Data from Day et al. 2011
+data("kommos", package = "folio") # Coerce to compositional data
+kommos &lt;- remove_NA(kommos, margin = 1) # Remove cases with missing values
+coda &lt;- as_composition(kommos, parts = 3:17, groups = 1)
+
+## Detect outliers
+out &lt;- detect_outlier(coda)
+
+plot(out, type = "dotchart")
+plot(out, type = "distance")
+
+## Detect outliers according to CJ
+ref &lt;- extract(coda, "CJ")
+out &lt;- detect_outlier(coda, reference = ref, method = "mcd")
+plot(out, type = "dotchart")
+</code></pre>
+
+
+</div>

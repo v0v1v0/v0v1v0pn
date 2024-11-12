@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hist_evalues</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Histograms of environmental conditions in M and for occurrences (one species)</h2>
+
+<h3>Description</h3>
+
+<p>hist_evalues helps in creating histograms to explore environmental
+conditions in M, lines for the confidence limits of values in M, and the
+location of values in occurrence records, for one species at the time.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hist_evalues(M, occurrences, species, longitude, latitude, variable,
+             CL_lines = c(95, 99), col = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>a SpatVector object representing the accessible area (M)
+for one species. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>occurrences</code></td>
+<td>
+<p>a data.frame of occurrence records for one species. See
+details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>species</code></td>
+<td>
+<p>(character) name of the column in <code>occurrences</code> that
+contains the name of the species.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>longitude</code></td>
+<td>
+<p>(character) name of the column in <code>occurrences</code> containing
+values of longitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latitude</code></td>
+<td>
+<p>(character) name of the column in <code>occurrences</code> containing
+values of latitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable</code></td>
+<td>
+<p>a single SpatRaster layer representing an environmental
+variable of interest. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CL_lines</code></td>
+<td>
+<p>(numeric) confidence limits of environmental values in M to
+be plotted as lines in the histograms. See details. Default = c(95, 99).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>colors for lines representing confidence limits. If NULL, colors
+are selected from a gray palette. Default = NULL.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Coordinates in <code>occurrences</code>, SpatVector object in <code>M</code>, and
+SpatRaster in <code>variable</code> must coincide in the geographic projection in
+which they are represented. WGS84 with no planar projection is recommended.
+</p>
+<p>The accessible area (M) is understood as the geographic area that has been
+accessible to a species over relevant periods of time. Defining M is usually
+a hard task, but also a very important one because it allows identifying
+uncertainties about the ability of a species to maintain populations under
+certain environmental conditions. For further details on this topic, see
+Barve et al. (2011) <a href="doi:10.1016/j.ecolmodel.2011.02.011">doi:10.1016/j.ecolmodel.2011.02.011</a>
+and Machado-Stredel et al. (2021) <a href="doi:10.21425/F5FBG48814">doi:10.21425/F5FBG48814</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># example data
+## list of species records
+data("occ_list", package = "nichevol")
+
+## list of species accessible areas
+m_files &lt;- list.files(system.file("extdata", package = "nichevol"),
+                      pattern = "m\\d.gpkg", full.names = TRUE)
+
+m_list &lt;- lapply(m_files, terra::vect)
+
+## raster variable
+temp &lt;- terra::rast(system.file("extdata", "temp.tif", package = "nichevol"))
+
+# running stats
+hist_evalues(M = m_list[[1]], occurrences = occ_list[[1]], species = "species",
+             longitude = "x", latitude = "y", variable = temp,
+             CL_lines = c(95, 99), col = c("blue", "red"))
+</code></pre>
+
+
+</div>

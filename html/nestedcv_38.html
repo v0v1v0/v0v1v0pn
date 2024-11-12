@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model.hsstan</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>hsstan model for cross-validation</h2>
+
+<h3>Description</h3>
+
+<p>This function applies a cross-validation (CV) procedure for training Bayesian
+models with hierarchical shrinkage priors using the <code>hsstan</code> package. The
+function allows the option of embedded filtering of predictors for feature
+selection within the CV loop. Within each training fold, an optional
+filtering of predictors is performed, followed by fitting of an <code>hsstsan</code>
+model. Predictions on the testing folds are brought back together and error
+estimation/ accuracy determined. The default is 10-fold CV. The function is
+implemented within the <code>nestedcv</code> package. The <code>hsstan</code> models do not require
+tuning of meta-parameters and therefore only a single CV procedure is needed
+to evaluate performance. This is implemented using the <code>outer</code> CV procedure
+in the <code>nestedcv</code> package. Supports binary outcome (logistic regression) or
+continuous outcome. Multinomial models are currently not supported.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">model.hsstan(y, x, unpenalized = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Response vector. For classification this should be a factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Matrix of predictors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unpenalized</code></td>
+<td>
+<p>Vector of column names <code>x</code> which are always retained into
+the model (i.e. not penalized). Default <code>NULL</code> means the parameters for all
+predictors will be drawn from a hierarchical prior distribution, i.e. will
+be penalized. Note: if filtering of predictors is specified, then the
+vector of <code>unpenalized</code> predictors should also be passed to the filter
+function using the <code>filter_options$force_vars</code> argument. Filters currently
+implementing this option are the <code>partial_ttest_filter</code> for binary outcomes
+and the <code>lm_filter</code> for continuous outcomes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Optional arguments passed to <code>hsstan</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Caution should be used when setting the number of cores available for
+parallelisation. The default setting in <code>hsstan</code> is to use 4 cores to
+parallelise the Markov chains of the Bayesian inference procedure. This can
+be switched off either by adding argument <code>cores = 1</code> (passed on to <code>rstan</code>)
+or setting <code>options(mc.cores = 1)</code>.
+</p>
+<p>Argument <code>cv.cores</code> in <code>outercv()</code> controls parallelisation over the outer CV
+folds. On unix/mac setting <code>cv.cores</code> to &gt;1 will induce nested
+parallelisation which will generate an error, unless parallelisation of the
+chains is disabled using <code>cores = 1</code> or setting <code>options(mc.cores = 1)</code>.
+</p>
+<p>Nested parallelisation is feasible if <code>cv.cores</code> is &gt;1 and
+<code>multicore_fork = FALSE</code> is set as this uses cluster based parallelisation
+instead. Beware that large numbers of processes will be spawned. If we are
+performing 10-fold cross-validation with 4 chains and set <code>cv.cores = 10</code>
+then 40 processes will be invoked simultaneously.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>hsstan</code>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Athina Spiliopoulou
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>outercv()</code> <code>hsstan::hsstan()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Cross-validation is used to apply univariate filtering of predictors.
+# only one CV split is needed (outercv) as the Bayesian model does not
+# require learning of meta-parameters.
+
+# control number of cores used for parallelisation over chains
+oldopt &lt;- options(mc.cores = 2)
+
+# load iris dataset and simulate a continuous outcome
+data(iris)
+dt &lt;- iris[, 1:4]
+colnames(dt) &lt;- c("marker1", "marker2", "marker3", "marker4")
+dt &lt;- as.data.frame(apply(dt, 2, scale))
+dt$outcome.cont &lt;- -3 + 0.5 * dt$marker1 + 2 * dt$marker2 + rnorm(nrow(dt), 0, 2)
+
+library(hsstan)
+# unpenalised covariates: always retain in the prediction model
+uvars &lt;- "marker1"
+# penalised covariates: coefficients are drawn from hierarchical shrinkage
+# prior
+pvars &lt;- c("marker2", "marker3", "marker4") # penalised covariates
+# run cross-validation with univariate filter and hsstan
+# dummy sampling for fast execution of example
+# recommend 4 chains, warmup 1000, iter 2000 in practice
+res.cv.hsstan &lt;- outercv(y = dt$outcome.cont, x = dt[, c(uvars, pvars)],
+                         model = "model.hsstan",
+                         filterFUN = lm_filter,
+                         filter_options = list(force_vars = uvars,
+                                               nfilter = 2,
+                                               p_cutoff = NULL,
+                                               rsq_cutoff = 0.9),
+                         n_outer_folds = 3,
+                         chains = 2,
+                         cv.cores = 1,
+                         unpenalized = uvars, warmup = 100, iter = 200)
+# view prediction performance based on testing folds
+res.cv.hsstan$summary
+# view coefficients for the final model
+res.cv.hsstan$final_fit
+# view covariates selected by the univariate filter
+res.cv.hsstan$final_vars
+
+# use hsstan package to examine the Bayesian model
+sampler.stats(res.cv.hsstan$final_fit)
+print(projsel(res.cv.hsstan$final_fit), digits = 4)  # adding marker2
+options(oldopt)  # reset configuation
+
+# Here adding `marker2` improves the model fit: substantial decrease of
+# KL-divergence from the full model to the submodel. Adding `marker3` does
+# not improve the model fit: no decrease of KL-divergence from the full model
+# to the submodel.
+
+</code></pre>
+
+
+</div>

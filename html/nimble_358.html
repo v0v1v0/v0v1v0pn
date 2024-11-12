@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CAR-Normal</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The CAR-Normal Distribution</h2>
+
+<h3>Description</h3>
+
+<p>Density function and random generation for the improper (intrinsic)
+Gaussian conditional autoregressive (CAR) distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dcar_normal(
+  x,
+  adj,
+  weights = adj/adj,
+  num,
+  tau,
+  c = CAR_calcNumIslands(adj, num),
+  zero_mean = 0,
+  log = FALSE
+)
+
+rcar_normal(
+  n = 1,
+  adj,
+  weights = adj/adj,
+  num,
+  tau,
+  c = CAR_calcNumIslands(adj, num),
+  zero_mean = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adj</code></td>
+<td>
+<p>vector of indices of the adjacent locations (neighbors) of each spatial location.  This is a sparse representation of the full adjacency matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>vector of symmetric unnormalized weights associated with each pair of adjacent locations, of the same length as adj.  If omitted, all weights are taken to be one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num</code></td>
+<td>
+<p>vector giving the number of neighboring locations of each spatial location, with length equal to the total number of locations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>scalar precision of the Gaussian CAR prior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>integer number of constraints to impose on the improper density function.  If omitted, <code>c</code> is calculated as the number of disjoint groups of spatial locations in the adjacency structure, which implicitly assumes a first-order CAR process for each group. Note that <code>c</code> should be equal to the number of eigenvalues of the precision matrix that are zero. For example, if the neighborhood structure is based on a second-order Markov random field in one dimension then the matrix has two zero eigenvalues and in two dimensions it has three zero eigenvalues. See Rue and Held (2005) and the NIMBLE <a href="https://r-nimble.org/html_manual/cha-welcome-nimble.html">User Manual</a> for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero_mean</code></td>
+<td>
+<p>integer specifying whether to set the mean of all locations to zero during MCMC sampling of a node specified with this distribution in BUGS code (default <code>0</code>). This argument is used only in BUGS model code when specifying models in NIMBLE. If <code>0</code>, the overall process mean is included implicitly in the value of each location in a BUGS model; if <code>1</code>, then during MCMC sampling, the mean of all locations is set to zero at each MCMC iteration, and a separate intercept term should be included in the BUGS model. Note that centering during MCMC as implemented in NIMBLE follows the ad hoc approach of <span class="pkg">WinBUGS</span> and does not sample under the constraint that the mean is zero as discussed on p. 36 of Rue and Held (2005).  See ‘Details’.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, probability density is returned on the log scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of observations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When specifying a CAR distribution in BUGS model code, the <code>zero_mean</code> parameter should be specified as either <code>0</code> or <code>1</code> (rather than <code>TRUE</code> or <code>FALSE</code>).
+</p>
+<p>Note that because the distribution is improper, <code>rcar_normal</code> does not generate a sample from the distribution. However, as discussed in Rue and Held (2005), it is possible to generate a sample from the distribution under constraints imposed based on the eigenvalues of the precision matrix that are zero.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>dcar_normal</code> gives the density, while <code>rcar_normal</code> returns the current process values, since this distribution is improper.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Turek
+</p>
+
+
+<h3>References</h3>
+
+<p>Banerjee, S., Carlin, B.P., and Gelfand, A.E. (2015). <em>Hierarchical Modeling and Analysis for Spatial Data</em>, 2nd ed. Chapman and Hall/CRC.
+</p>
+<p>Rue, H. and L. Held (2005). <em>Gaussian Markov Random Fields</em>, Chapman and Hall/CRC.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>CAR-Proper, Distributions for other standard distributions
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- c(1, 3, 3, 4)
+num &lt;- c(1, 2, 2, 1)
+adj &lt;- c(2, 1,3, 2,4, 3)
+weights &lt;- c(1, 1, 1, 1, 1, 1)
+lp &lt;- dcar_normal(x, adj, weights, num, tau = 1)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_nlme</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate samples from a nonlinear mixed model from fixed effects</h2>
+
+<h3>Description</h3>
+
+<p>Simulate multiple samples from a nonlinear model
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_nlme(
+  object,
+  nsim = 1,
+  psim = 1,
+  value = c("matrix", "data.frame"),
+  data = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>gnls</code> or <code>nlme</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of samples, default 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psim</code></td>
+<td>
+<p>simulation level for fixed and random parameters see <code>simulate_nlme_one</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>whether to return a matrix (default) or an augmented data frame</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data argument is needed when using this function inside user defined functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to be passed to either <code>simulate_gnls</code> or <code>simulate_nlme_one</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The details can be found in either <code>simulate_gnls</code> or <code>simulate_nlme_one</code>.
+This function is very simple and it only sets up a matrix and a loop in order to simulate several instances of 
+model outputs.
+</p>
+
+
+<h3>Value</h3>
+
+<p>It returns a matrix with simulated values from the original object
+with number of rows equal to the number of rows of <code>fitted</code> and number
+of columns equal to the number of simulated samples (‘nsim’). In the case of ‘data.frame’
+it returns an augmented data.frame, which can potentially be a very large object, but which
+makes furhter plotting more convenient.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(nlme)
+data(barley, package = "nlraa")
+barley2 &lt;- subset(barley, year &lt; 1974)
+fit.lp.gnls2 &lt;- gnls(yield ~ SSlinp(NF, a, b, xs), data = barley2)
+barley2$year.f &lt;- as.factor(barley2$year)
+cfs &lt;- coef(fit.lp.gnls2)
+fit.lp.gnls3 &lt;- update(fit.lp.gnls2, 
+                      params = list(a + b + xs ~ year.f),
+                      start = c(cfs[1], 0, 0, 0, 
+                                cfs[2], 0, 0, 0,
+                                cfs[3], 0, 0, 0))
+                                
+sims &lt;- simulate_nlme(fit.lp.gnls3, nsim = 3)
+
+
+</code></pre>
+
+
+</div>

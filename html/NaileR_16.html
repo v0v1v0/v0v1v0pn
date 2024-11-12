@@ -1,0 +1,244 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nail_condes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Interpret a continuous latent variable</h2>
+
+<h3>Description</h3>
+
+<p>Generate an LLM response to analyze a continuous latent variable.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nail_condes(
+  dataset,
+  num.var,
+  introduction = "",
+  request = NULL,
+  model = "llama3",
+  quanti.threshold = 0,
+  quanti.cat = c("Significantly above average", "Significantly below average", "Average"),
+  weights = NULL,
+  proba = 0.05,
+  generate = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>a data frame made up of at least one quantitative variable and a set of quantitative variables and/or categorical variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.var</code></td>
+<td>
+<p>the index of the variable to be characterized.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>introduction</code></td>
+<td>
+<p>the introduction for the LLM prompt.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>request</code></td>
+<td>
+<p>the request made to the LLM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the model name ('llama3' by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quanti.threshold</code></td>
+<td>
+<p>the threshold above (resp. below) which a scaled variable is considered significantly above (resp.below) the average. Used when converting continuous variables to categorical ones.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quanti.cat</code></td>
+<td>
+<p>a vector of the 3 possible categories for continuous variables converted to categorical ones according to the threshold. Default is "above average", "below average" and "average".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>weights for the individuals (see <code>FactoMineR::condes()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proba</code></td>
+<td>
+<p>the significance threshold considered to characterize the category (by default 0.05).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>generate</code></td>
+<td>
+<p>a boolean that indicates whether to generate the LLM response. If FALSE, the function only returns the prompt.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function directly sends a prompt to an LLM. Therefore, to get a consistent answer, we highly recommend to customize the parameters introduction and request and add all relevant information on your data for the LLM. We also recommend renaming the columns with clear, unshortened and unambiguous names.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame containing the LLM's prompt and response (if generate = TRUE).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+### Example 1: decathlon dataset ###
+
+library(FactoMineR)
+data(decathlon)
+
+names(decathlon) &lt;- c('Time taken to complete the 100m',
+'Distance reached for the long jump',
+'Distance reached for the shot put',
+'Height reached for the high jump',
+'Time taken to complete the 400m',
+'Time taken to complete the 110m hurdle',
+'Distance reached for the discus',
+'Height reached for the pole vault',
+'Distance reached for the javeline',
+'Time taken to complete the 1500 m',
+'Rank/Counter-performance indicator',
+'Points', 'Competition')
+
+res_pca_deca &lt;- FactoMineR::PCA(decathlon,
+quanti.sup = 11:12, quali.sup = 13, graph = FALSE)
+plot.PCA(res_pca_deca, choix = 'var')
+deca_work &lt;- res_pca_deca$ind$coord |&gt; as.data.frame()
+deca_work &lt;- deca_work[,1] |&gt; cbind(decathlon)
+
+intro_deca &lt;- "A study was led on athletes
+participating in a decathlon event.
+Their performance was assessed on each part of the decathlon,
+and they were all placed on an unidimensional scale."
+intro_deca &lt;- gsub('\n', ' ', intro_deca) |&gt;
+stringr::str_squish()
+
+res_deca &lt;- nail_condes(deca_work, num.var = 1,
+quanti.threshold = 1, quanti.cat = c('High', 'Low', 'Average'),
+introduction = intro_deca)
+
+cat(res_deca$response)
+
+
+### Example 2: agri_studies dataset ###
+
+data(agri_studies)
+
+set.seed(1)
+res_mca_agri &lt;- FactoMineR::MCA(agri_studies, quali.sup = 39:42,
+level.ventil = 0.05, graph = FALSE)
+plot.MCA(res_mca_agri, choix = 'ind',
+invisible = c('var', 'quali.sup'), label = 'none')
+
+agri_work &lt;- res_mca_agri$ind$coord |&gt; as.data.frame()
+agri_work &lt;- agri_work[,1] |&gt; cbind(agri_studies)
+
+intro_agri &lt;- "These data were collected after a survey
+on students' expectations of agribusiness studies.
+Participants had to rank how much they agreed with 38 statements
+about possible benefits from agribusiness studies;
+then, they were asked personal questions."
+intro_agri &lt;- gsub('\n', ' ', intro_agri) |&gt;
+stringr::str_squish()
+
+res_agri &lt;- nail_condes(agri_work, num.var = 1,
+introduction = intro_agri)
+cat(res_agri$response)
+
+
+### Example 3: glossophobia dataset ###
+
+data(glossophobia)
+
+set.seed(1)
+res_mca_phobia &lt;- FactoMineR::MCA(glossophobia,
+quali.sup = 26:41, level.ventil = 0.05, graph = FALSE)
+plot.MCA(res_mca_phobia, choix = 'ind',
+invisible = c('var', 'quali.sup'), label = 'none')
+
+phobia_work &lt;- res_mca_phobia$ind$coord |&gt; as.data.frame()
+phobia_work &lt;- phobia_work[,1] |&gt; cbind(glossophobia)
+
+intro_phobia &lt;- "These data were collected after a survey
+on participants' feelings about speaking in public.
+Participants had to rank how much they agreed with
+25 descriptions of speaking in public;
+then, they were asked personal questions."
+intro_phobia &lt;- gsub('\n', ' ', intro_phobia) |&gt;
+stringr::str_squish()
+
+res_phobia &lt;- nail_condes(phobia_work, num.var = 1,
+introduction = intro_phobia)
+cat(res_phobia$response)
+
+
+### Example 4: beard_cont dataset ###
+
+data(beard_cont)
+
+set.seed(1)
+res_ca_beard &lt;- FactoMineR::CA(beard_cont, graph = FALSE)
+plot.CA(res_ca_beard, invisible = 'col')
+
+beard_work &lt;- res_ca_beard$row$coord |&gt; as.data.frame()
+beard_work &lt;- beard_work[,1] |&gt; cbind(beard_cont)
+
+intro_beard &lt;- "These data refer to 8 types of beards.
+Each beard was evaluated by 62 assessors."
+intro_beard &lt;- gsub('\n', ' ', intro_beard) |&gt;
+stringr::str_squish()
+
+req_beard &lt;- "Please explain what differentiates beards
+on both sides of the scale.
+Then, give the scale a name."
+req_beard &lt;- gsub('\n', ' ', req_beard) |&gt;
+stringr::str_squish()
+
+res_beard &lt;- nail_condes(beard_work, num.var = 1,
+quanti.threshold = 0.5, quanti.cat = c('Very often', 'Never', 'Sometimes'),
+introduction = intro_beard, request = req_beard,
+generate = FALSE)
+
+cat(res_beard$prompt)
+
+ppt &lt;- stringr::str_replace_all(res_beard$prompt, 'individuals', 'beards')
+cat(ppt)
+
+res_beard &lt;- ollamar::generate(model = 'llama3', prompt = ppt, output = 'df')
+
+cat(res_beard$response)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

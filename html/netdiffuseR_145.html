@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dgr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Indegree, outdegree and degree of the vertices</h2>
+
+<h3>Description</h3>
+
+<p>Computes the requested degree measure for each node in the graph.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dgr(
+  graph,
+  cmode = "degree",
+  undirected = getOption("diffnet.undirected", FALSE),
+  self = getOption("diffnet.self", FALSE),
+  valued = getOption("diffnet.valued", FALSE)
+)
+
+## S3 method for class 'diffnet_degSeq'
+plot(
+  x,
+  breaks = min(100L, nrow(x)/5),
+  freq = FALSE,
+  y = NULL,
+  log = "xy",
+  hist.args = list(),
+  slice = ncol(x),
+  xlab = "Degree",
+  ylab = "Freq",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>Any class of accepted graph format (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cmode</code></td>
+<td>
+<p>Character scalar. Either "indegree", "outdegree" or "degree".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>undirected</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> only the lower triangle of the adjacency matrix will considered (faster).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>self</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> autolinks (loops, self edges) are allowed (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valued</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> weights will be considered. Otherwise non-zero values will be replaced by ones.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An <code>diffnet_degSeq object</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breaks</code></td>
+<td>
+<p>Passed to <code>hist</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freq</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> the y-axis will reflex counts,
+otherwise densities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Ignored</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Passed to <code>plot</code> (see <code>par</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hist.args</code></td>
+<td>
+<p>Arguments passed to <code>hist</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slice</code></td>
+<td>
+<p>Integer scalar. In the case of dynamic graphs, number of time
+point to plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Character scalar. Passed to <code>plot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Character scalar. Passed to <code>plot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to <code>plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A numeric matrix of size <code class="reqn">n\times T</code>. In the case of <code>plot</code>,
+returns an object of class <code>histogram</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other statistics: 
+<code>bass</code>,
+<code>classify_adopters()</code>,
+<code>cumulative_adopt_count()</code>,
+<code>ego_variance()</code>,
+<code>exposure()</code>,
+<code>hazard_rate()</code>,
+<code>infection()</code>,
+<code>moran()</code>,
+<code>struct_equiv()</code>,
+<code>threshold()</code>,
+<code>vertex_covariate_dist()</code>
+</p>
+<p>Other visualizations: 
+<code>diffusionMap()</code>,
+<code>drawColorKey()</code>,
+<code>grid_distribution()</code>,
+<code>hazard_rate()</code>,
+<code>plot_adopters()</code>,
+<code>plot_diffnet2()</code>,
+<code>plot_diffnet()</code>,
+<code>plot_infectsuscep()</code>,
+<code>plot_threshold()</code>,
+<code>rescale_vertex_igraph()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Comparing degree measurements ---------------------------------------------
+# Creating an undirected graph
+graph &lt;- rgraph_ba()
+graph
+
+data.frame(
+   In=dgr(graph, "indegree", undirected = FALSE),
+   Out=dgr(graph, "outdegree", undirected = FALSE),
+   Degree=dgr(graph, "degree", undirected = FALSE)
+ )
+
+# Testing on Korean Family Planning (weighted graph) ------------------------
+data(kfamilyDiffNet)
+d_unvalued &lt;- dgr(kfamilyDiffNet, valued=FALSE)
+d_valued   &lt;- dgr(kfamilyDiffNet, valued=TRUE)
+
+any(d_valued!=d_unvalued)
+
+# Classic Scale-free plot ---------------------------------------------------
+set.seed(1122)
+g &lt;- rgraph_ba(t=1e3-1)
+hist(dgr(g))
+
+# Since by default uses logscale, here we suppress the warnings
+# on points been discarded for &lt;=0.
+suppressWarnings(plot(dgr(g)))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>table_neat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Table, descriptives</h2>
+
+<h3>Description</h3>
+
+<p>Creates a neat means (or similar descriptives) and standard
+deviations table, using <code>aggr_neat</code> functions as arguments.
+Alternatively, merges and transposes data frames into rows.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">table_neat(
+  values_list,
+  group_by = NULL,
+  group_per = "rows",
+  to_clipboard = FALSE,
+  method = "mean+sd",
+  transpose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>values_list</code></td>
+<td>
+<p>Data frames as returned from the <code>aggr_neat</code>
+function: variables from which the statistics for the table are to be
+calculated. The <code>group_by</code>, <code>method</code>, and <code>prefix</code>
+parameters are ignored when they are given in the <code>table_neat</code>
+function; see Details and also an extensive example via
+https://github.com/gasparl/neatstats.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_by</code></td>
+<td>
+<p>String, or vector of strings: the name(s) of the column(s) in
+the <code>dat</code> given data frame, containing the vector(s) of factors by
+which the statistics are grouped. (Overwrites <code>group_by</code> in
+<code>aggr_neat</code>; see Details.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_per</code></td>
+<td>
+<p>String, "rows" or "columns". If set to "columns" (or just
+"c" or "col", etc.), each column contains statistics for one group.
+Otherwise (default), each row contains statistics for one group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>to_clipboard</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, the table is copied to the
+clipboard (default: <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Function or string; overwrites the <code>method</code> argument in
+<code>aggr_neat</code> when used within this function. See <code>method</code>
+in the <code>aggr_neat</code> function for details. Default value:
+<code>"mean+sd"</code> (to calculate means and standard deviations table).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transpose</code></td>
+<td>
+<p>Logical (default: <code>FALSE</code>) or string. If <code>TRUE</code> or
+string, ignores all other parameters (except <code>values_list</code>), but
+merges all values from given list of data frames (as returned from the
+<code>aggr_neat</code>) and transposes them into a single row, using, by
+default, the <code>"aggr_group"</code> column values for new headers
+(corresponding to the output of <code>aggr_neat</code>; see Examples).
+However, a string given as argument for the <code>transpose</code> parameter can
+also specify a custom column name.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>values</code>, <code>round_to</code>, and <code>new_name</code> arguments
+given in the <code>aggr_neat</code> function are always applied. However,
+the <code>prefix</code> parameter will be overwritten as <code>NULL</code>. If
+<code>new_name</code> in <code>aggr_neat</code> is <code>NULL</code>, the given input
+variable names will be used instead of <code>"aggr_value"</code>. Furthermore,
+the <code>group_by</code> or <code>method</code> given in the <code>aggr_neat</code>
+function are only applied when no arguments are given in the
+<code>table_neat</code> function for the identical parameters
+(<code>group_by</code> or <code>medians</code>). If either parameter is given in the
+<code>table_neat</code> function, all separately given respective
+argument(s) in the <code>aggr_neat</code> function(s) are ignored.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a data frame with means or medians and SDs per variable and
+per group.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>aggr_neat</code> for more related details
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("mtcars") # load base R example dataset
+
+# overall means and SDs table for disp (Displacement) and hp (Gross horsepower)
+table_neat(list(aggr_neat(mtcars, disp),
+                aggr_neat(mtcars, hp)))
+
+# means and SDs table for mpg (Miles/(US) gallon), wt (Weight), and hp (Gross horsepower)
+# grouped by cyl (Number of cylinders)
+# each measure rounded to respective optimal number of digits
+# wt renamed to weight (for the column title)
+table_neat(list(
+    aggr_neat(mtcars, mpg, round_to = 1),
+    aggr_neat(mtcars, wt, new_name = 'weight', round_to = 2),
+    aggr_neat(mtcars, hp, round_to = 0)
+),
+group_by = 'cyl')
+
+# same as above, but with medians, and with groups per columns
+table_neat(
+    list(
+        aggr_neat(mtcars, mpg, round_to = 1),
+        aggr_neat(mtcars, wt, new_name = 'weight', round_to = 2),
+        aggr_neat(mtcars, hp, round_to = 0)
+    ),
+    group_by = 'cyl',
+    method = 'median+sd',
+    group_per = 'columns'
+)
+
+# an extensive example to show how to collect and aggregate raw data is
+# available via the README file at the repository:
+# https://github.com/gasparl/neatstats
+
+</code></pre>
+
+
+</div>

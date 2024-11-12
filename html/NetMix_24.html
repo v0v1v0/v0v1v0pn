@@ -1,0 +1,399 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mmsbm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Dynamic mixed-membership stochastic blockmodel with covariates</h2>
+
+<h3>Description</h3>
+
+<p>The function estimates a dynamic mixed-membership stochastic
+blockmodel that incorporates covariates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mmsbm(
+  formula.dyad,
+  formula.monad = ~1,
+  senderID,
+  receiverID,
+  nodeID = NULL,
+  timeID = NULL,
+  data.dyad,
+  data.monad = NULL,
+  n.blocks,
+  n.hmmstates = 1,
+  directed = TRUE,
+  mmsbm.control = list()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula.dyad</code></td>
+<td>
+<p>A <code>formula</code> object. The variable in <code>data.dyad</code> that contains 
+binary edges should be used as a LHS, and any dyadic predictors 
+can be included on the RHS (when no dyadic covariates are available, use <code>y ~ 1</code>).
+Same syntax as a <code>glm</code> formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula.monad</code></td>
+<td>
+<p>An optional <code>formula</code> object. LHS is ignored. RHS contains 
+names of nodal atrributes found in <code>data.monad</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>senderID</code></td>
+<td>
+<p>Character string. Quoted name of the variable in <code>data.dyad</code> identifying 
+the sender node. For undirected networks, the variable simply contains name of first node 
+in dyad. Cannot contain special charecter "'@'".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>receiverID</code></td>
+<td>
+<p>Character string. Quoted name of the variable in <code>data.dyad</code> identifying 
+the receiver node. For undirected networks, the variable simply contains name of second node 
+in dyad. Cannot contain special charecter "'@'".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodeID</code></td>
+<td>
+<p>Character string. Quoted name of the variable in <code>data.monad</code> identifying 
+a node in either <code>data.dyad[,senderID]</code> or <code>data.dyad[,senderID]</code>. If not <code>NULL</code>,
+every node <code>data.dyad[,senderID]</code> or <code>data.dyad[,senderID]</code> must be present in 
+<code>data.monad[,nodeID]</code>. Cannot contain special charecter "'@'".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeID</code></td>
+<td>
+<p>Character string. Quoted name of the variable in both <code>data.dyad</code> and
+<code>data.monad</code> indicating the time in which network (and correspding nodal atrributes)
+were observed. The variable itself must be composed of integers. Cannot contain special charecter "'@'".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.dyad</code></td>
+<td>
+<p>Data frame. Sociomatrix in “long” (i.e. dyadic) format. Must contain at
+least three variables: the sender identifier (or identifier of the first node in an undirected networks dyad),
+the receiver identifier (or identifier of the second node in an undirected network dyad), and the value
+of the edge between them. Currently, only edges between zero and one (inclusive) are supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.monad</code></td>
+<td>
+<p>Data frame. Nodal atributes. Must contain a node identifier matching the names of nodes
+used in the <code>data.dyad</code> data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.blocks</code></td>
+<td>
+<p>Integer value. How many latent groups should be used to estimate the model?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.hmmstates</code></td>
+<td>
+<p>Integer value. How many hidden Markov state should be used in the HMM? Defaults 
+to 1 (i.e. no HMM).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>Boolean. Is the network directed? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mmsbm.control</code></td>
+<td>
+<p>A named list of optional algorithm control parameters.
+</p>
+
+<dl>
+<dt>seed</dt>
+<dd>
+<p>Integer. Seed the RNG. By default, a random seed is generated and returned for reproducibility purposes.</p>
+</dd>
+<dt>nstart</dt>
+<dd>
+<p>Integer. Number of random initialization trials. Defaults to 5.</p>
+</dd>
+<dt>spectral</dt>
+<dd>
+<p>Boolean. Type of initialization algorithm for mixed-membership vectors in static case. If <code>TRUE</code> (default),
+use spectral clustering with degree correction; otherwise, use kmeans algorithm.</p>
+</dd>
+<dt>init_gibbs</dt>
+<dd>
+<p>Boolean. Should a collapsed Gibbs sampler of non-regression mmsbm be used to initialize
+mixed-membership vectors, instead of a spectral or simple kmeans initialization?
+Setting to <code>TRUE</code> will result in slower initialization and faster model estimation. When <code>TRUE</code>, results are typically very sensitive to
+choice of alpha (see below).</p>
+</dd>            
+<dt>alpha</dt>
+<dd>
+<p>Numeric positive value. Concentration parameter for collapsed Gibbs sampler to find initial
+mixed-membership values when <code>init_gibbs=TRUE</code>. Defaults to 1.0.</p>
+</dd>            
+<dt>missing</dt>
+<dd>
+<p>Means of handling missing data. One of "indicator method" (default) or "listwise deletion".</p>
+</dd>  
+<dt>svi</dt>
+<dd>
+<p>Boolean; should stochastic variational inference be used? Defaults to <code>TRUE</code>.</p>
+</dd>     
+<dt>vi_iter</dt>
+<dd>
+<p>Number of maximum iterations in stochastic variational updates. Defaults to 5e2.</p>
+</dd>
+<dt>batch_size</dt>
+<dd>
+<p>When <code>svi=TRUE</code>, proportion of nodes sampled in each local. Defaults to 0.05 when <code>svi=TRUE</code>, and to 1.0 otherwise.</p>
+</dd>                                 
+<dt>forget_rate</dt>
+<dd>
+<p>When <code>svi=TRUE</code>, value between (0.5,1], controlling speed of decay of weight of prior
+parameter values in global steps. Defaults to 0.75 when <code>svi=TRUE</code>, and to 0.0 otherwise.</p>
+</dd>
+<dt>delay</dt>
+<dd>
+<p>When <code>svi=TRUE</code>, non-negative value controlling weight of past iterations in global steps. Defaults to 1.0 when <code>svi=TRUE</code>,
+and ignored otherwise.</p>
+</dd>                    
+<dt>opt_iter</dt>
+<dd>
+<p>Number of maximum iterations of BFGS in global step. Defaults to 10e3.</p>
+</dd>
+<dt>hessian</dt>
+<dd>
+<p>Boolean indicating whether the Hessian matrix of regression coefficients should e returned. Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt>assortative</dt>
+<dd>
+<p>Boolean indicating whether blockmodel should be assortative (i.e. stronger connections within groups) or disassortative
+(i.e. stronger connections between groups). Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt>mu_block</dt>
+<dd>
+<p>Numeric vector with two elements: prior mean of blockmodel's main diagonal elements, and
+and prior mean of blockmodel's offdiagonal elements. Defaults to <code>c(5.0, -5.0)</code> if <code>assortative=TRUE</code> (default)
+and to <code>c(-5.0, 5.0)</code> otherwise.</p>
+</dd>
+<dt>var_block</dt>
+<dd>
+<p>Numeric vector with two positive elements: prior variance of blockmodel's main diagonal elements, and
+and prior variance of blockmodel's offdiagonal elements. Defaults to <code>c(5.0, 5.0)</code>.</p>
+</dd>
+<dt>mu_beta</dt>
+<dd>
+<p>Either single numeric value, in which case the same prior mean is applied to all monadic coefficients, or
+an array that is <code>npredictors</code> by <code>n.blocks</code> by <code>n.hmmstates</code>, where <code>npredictors</code>
+is the number of monadic predictors for which a prior mean is being set (prior means need not be set for all)
+predictors). The rows in the array should be named to identify which variables a prior mean is being set for.
+Defaults to a common prior mean of 0.0 for all monadic coefficients.</p>
+</dd>            
+<dt>var_beta</dt>
+<dd>
+<p>See <code>mu_beta</code>. Defaults to a single common prior variance of 5.0 for all (standardized) monadic coefficients.</p>
+</dd>
+<dt>mu_gamma</dt>
+<dd>
+<p>Either a single numeric value, in which case the same prior mean is applied to all dyadic coefficients, or
+a named vector of numeric values (with names corresponding to the name of the variable 
+for which a prior mean is being set). Defaults to a common prior mean of 0.0 for all dyadic coefficients.</p>
+</dd>
+<dt>var_gamma</dt>
+<dd>
+<p>See <code>mu_gamma</code>. Defaults to a single common prior variance of 5.0 for all (standardized) dyadic coefficients.</p>
+</dd>
+<dt>eta</dt>
+<dd>
+<p>Numeric positive value. Concentration hyper-parameter for HMM. Defaults to 1.0.</p>
+</dd>
+<dt>se_sim</dt>
+<dd>
+<p>Number of samples from variational posterior of latent variables on which approximation to variance-covariance
+matrices are based. Defaults to 10.</p>
+</dd>
+<dt>dyad_vcov_samp</dt>
+<dd>
+<p>Maximum number of dyads to sample in computation of variance-covariance of dyadic and blockmodel parameters, when compared to 
+ten percent of the observed dyads. Defaults to 1000.</p>
+</dd>
+<dt>fixed_mm</dt>
+<dd>
+<p>Optional character vector, with <code>"nodeID@timeID"</code> as elements, indicating which mixed-membership vectors
+should remain constant at their initial values throughout estimation. When only one year is observed, elements should be 
+<code>"nodeID@1"</code>. Typically used with <code>mm_init_t</code>.</p>
+</dd>                      
+<dt>mm_init_t</dt>
+<dd>
+<p>Matrix, <code>n.blocks</code> by nodes across years. Optional initial values for mixed-membership vectors.
+Although initial values need not be provided for all nodes, column names must have a <code>nodeID@timeID</code> format to 
+avoid ambiguity. When only one year is observed, names should be <code>"nodeID@1"</code>.</p>
+</dd>
+<dt>kappa_init_t</dt>
+<dd>
+<p>Matrix, <code>n.hmmstates</code> by number of years. Optional initial values for variational 
+parameters for state probabilities. Columns must be named according to unique year values.</p>
+</dd>
+<dt>b_init_t</dt>
+<dd>
+<p>Matrix, <code>n.blocks</code> by <code>n.blocks</code>. Optional initial values for blockmodel.</p>
+</dd>
+<dt>beta_init</dt>
+<dd>
+<p>Array, <code>predictors</code> by <code>n.blocks</code> by <code>n.hmmstates</code>. Optional initial values for monadic coefficients. If </p>
+</dd>
+<dt>gamma_init</dt>
+<dd>
+<p>Vector. Optional initial values for dyadic coefficients.</p>
+</dd>
+<dt>permute</dt>
+<dd>
+<p>Boolean. Should all permutations be tested to realign initial block models in dynamic case? If <code>FALSE</code>, realignment is 
+done via faster graph matching algorithm, but may not be exact. Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt>conv_tol</dt>
+<dd>
+<p>Numeric value. Absolute tolerance for VI convergence. Defaults to 1e-3.</p>
+</dd>
+<dt>verbose</dt>
+<dd>
+<p>Boolean. Should extra information be printed as model iterates? Defaults to FALSE.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Object of class <code>mmsbm</code>. List with named components:
+</p>
+
+<dl>
+<dt>MixedMembership</dt>
+<dd>
+<p>Matrix of variational posterior of mean of mixed-membership vectors. <code>nodes</code> by
+<code>n.blocks</code>.</p>
+</dd>
+<dt>BlockModel</dt>
+<dd>
+<p><code>n.blocks</code> by <code>n.blocks</code> matrix of estimated tie log-odds between members
+of corresponding latent groups. The blockmodel.</p>
+</dd>
+<dt>vcov_blockmodel</dt>
+<dd>
+<p>If <code>hessian=TRUE</code>, variance-covariance matrix of parameters in blockmodel, ordered in column-major order.</p>
+</dd>
+<dt>MonadCoef</dt>
+<dd>
+<p>Array of estimated coefficient values for monadic covariates. Has <code>n.blocks</code> columns,
+and <code>n.hmmstates</code> slices.</p>
+</dd>
+<dt>vcov_monad</dt>
+<dd>
+<p>If <code>hessian=TRUE</code>, variance-covariance matrix of monadic coefficients.</p>
+</dd>                  
+<dt>DyadCoef</dt>
+<dd>
+<p>Vector estimated coefficient values for dyadic covariates.</p>
+</dd>
+<dt>vcov_dyad</dt>
+<dd>
+<p>If <code>hessian=TRUE</code>, variance-covariance matrix of dyadic coefficients.</p>
+</dd>
+<dt>TransitionKernel</dt>
+<dd>
+<p>Matrix of estimated HMM transition probabilities.</p>
+</dd>
+<dt>Kappa</dt>
+<dd>
+<p>Matrix of marginal probabilities of being in an HMM state at any given point in time. 
+<code>n.hmmstates</code> by years (or whatever time interval networks are observed at).</p>
+</dd>
+<dt>LowerBound</dt>
+<dd>
+<p>Final LB value</p>
+</dd>
+<dt>lb</dt>
+<dd>
+<p>Vector of all LB across iterations, useful to check early convergence issues.</p>
+</dd>              
+<dt>niter</dt>
+<dd>
+<p>Final number of VI iterations.</p>
+</dd>
+<dt>converged</dt>
+<dd>
+<p>Convergence indicator; zero indicates failure to converge.</p>
+</dd>
+<dt>NodeIndex</dt>
+<dd>
+<p>Order in which nodes are stored in all return objects.</p>
+</dd>
+<dt>monadic.data, dyadic.data</dt>
+<dd>
+<p>Model frames used during estimation (stripped of attributes).</p>
+</dd>
+<dt>forms</dt>
+<dd>
+<p>Values of selected formal arguments used by other methods.</p>
+</dd>
+<dt>seed</dt>
+<dd>
+<p>The value of RNG seed used during estimation.</p>
+</dd>
+<dt>call</dt>
+<dd>
+<p>Original (unevaluated) function call.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Santiago Olivella (olivella@unc.edu), Adeline Lo (aylo@wisc.edu), Tyler Pratt (tyler.pratt@yale.edu), Kosuke Imai (imai@harvard.edu)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NetMix)
+## Load datasets
+data("lazega_dyadic")
+data("lazega_monadic")
+## Estimate model with 2 groups
+## Setting to `hessian=TRUE` increases computation time
+## but is needed if standard errors are to be computed. 
+lazega_mmsbm &lt;- mmsbm(SocializeWith ~ Coworkers,
+                      ~  School + Practice + Status,
+                      senderID = "Lawyer1",
+                      receiverID = "Lawyer2",
+                      nodeID = "Lawyer",
+                      data.dyad = lazega_dyadic,
+                      data.monad = lazega_monadic,
+                      n.blocks = 2,
+                      mmsbm.control = list(seed = 123,
+                                           conv_tol = 1e-2,
+                                           hessian = FALSE))
+
+</code></pre>
+
+
+</div>

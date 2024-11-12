@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>check_balance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Check covariate balance of the control and treated groups</h2>
+
+<h3>Description</h3>
+
+<p>Reports standardized differences in means between the treated and
+control group before and after choosing a subset of controls.
+These differences are reported both across strata and within strata.
+This function can also generate love plots of the same quantities.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">check_balance(
+  z,
+  X,
+  st,
+  selected,
+  treated = 1,
+  control = 0,
+  denom_variance = "treated",
+  plot = FALSE,
+  message = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>a factor with the <code>i</code>th entry equal to the treatment of unit <code>i</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a data frame containing the covariates in the columns over which balance is desired. The number
+of rows should equal the length of <code>z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a stratum vector with the <code>i</code>th entry equal to the
+stratum of unit <code>i</code>. This should have the same order of units and length
+as <code>z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>selected</code></td>
+<td>
+<p>a boolean vector including whether each unit was selected as part of the treated and control
+groups for analysis. Should be the same length as <code>z</code> and typically comes from the results of
+<code>optimize_controls()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treated</code></td>
+<td>
+<p>which treatment value should be considered the treated units. This
+must be one of the values of <code>z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>which treatment value should be considered the control units. This
+must be one of the values of <code>z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>denom_variance</code></td>
+<td>
+<p>character stating what variance to use in the standardization:
+either the default "treated", meaning the standardization will use the
+treated variance (across all strata), where the treated group is declared in
+the <code>treated</code> argument, or "pooled", meaning
+the standardization will use the average of the variances of each treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>a boolean denoting whether to generate love plots for the standardized differences.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>message</code></td>
+<td>
+<p>a boolean denoting whether to print a message about the level of balance achieved</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List containing:
+</p>
+
+<dl>
+<dt>sd_across</dt>
+<dd>
+<p>matrix with one row per covariate and two columns: one for the
+standardized difference before a subset of controls were selected and one for after.</p>
+</dd>
+<dt>sd_strata</dt>
+<dd>
+<p>matrix similar to <code>sd_across</code>, but with separate
+standardized differences for each stratum for each covariate.</p>
+</dd>
+<dt>sd_strata_avg</dt>
+<dd>
+<p>matrix similar to <code>sd_across</code>, but taking the
+average of the standardized differences within the strata, weighted by stratum size.</p>
+</dd>
+<dt>plot_across</dt>
+<dd>
+<p>ggplot object plotting <code>sd_across</code>, only exists if <code>plot = TRUE</code>.</p>
+</dd>
+<dt>plot_strata</dt>
+<dd>
+<p>a named list of ggplot objects plotting <code>sd_strata</code>,
+one for each stratum, only exists if <code>plot = TRUE</code>.</p>
+</dd>
+<dt>plot_strata_avg</dt>
+<dd>
+<p>ggplot object plotting <code>sd_strata_avg</code>, only exists if <code>plot = TRUE</code>.</p>
+</dd>
+<dt>plot_pair</dt>
+<dd>
+<p>ggplot object with two facets displaying <code>sd_across</code> and
+<code>sd_strata_avg</code> with one y-axis, only exists if <code>plot = TRUE</code>.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data('nh0506')
+
+# Create strata
+age_cat &lt;- cut(nh0506$age,
+               breaks = c(19, 39, 50, 85),
+               labels = c('&lt; 40 years', '40 - 50 years', '&gt; 50 years'))
+strata &lt;- age_cat : nh0506$sex
+
+# Balance age, race, education, poverty ratio, and bmi both across and within the levels of strata
+constraints &lt;- generate_constraints(
+                 balance_formulas = list(age + race + education + povertyr + bmi ~ 1 + strata),
+                 z = nh0506$z,
+                 data = nh0506)
+
+# Choose one control for every treated unit in each stratum,
+# balancing the covariates as described by the constraints
+results &lt;- optimize_controls(z = nh0506$z,
+                             X = constraints$X,
+                             st = strata,
+                             importances = constraints$importances,
+                             ratio = 1)
+
+cov_data &lt;- nh0506[, c('sex', 'age', 'race', 'education', 'povertyr', 'bmi')]
+
+# Check balance
+stand_diffs &lt;- check_balance(z = nh0506$z,
+                             X = cov_data,
+                             st = strata,
+                             selected = results$selected,
+                             plot = TRUE)
+</code></pre>
+
+
+</div>

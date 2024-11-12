@@ -1,0 +1,344 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>struct_test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Structure dependence test</h2>
+
+<h3>Description</h3>
+
+<p>Test whether or not a network estimates can be considered structurally dependent, i.e.
+a function of the network structure. By rewiring the graph and calculating
+a particular statistic <code class="reqn">t</code>, the test compares the observed mean of <code class="reqn">t</code>
+against the empirical distribution of it obtained from rewiring the network.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">n_rewires(graph, p = c(20L, rep(0.1, nslices(graph) - 1)))
+
+struct_test(graph, statistic, R, rewire.args = list(), ...)
+
+## S3 method for class 'diffnet_struct_test'
+c(..., recursive = FALSE)
+
+## S3 method for class 'diffnet_struct_test'
+print(x, ...)
+
+## S3 method for class 'diffnet_struct_test'
+hist(
+  x,
+  main = "Empirical Distribution of Statistic",
+  xlab = expression(Values ~ of ~ t),
+  breaks = 20,
+  annotated = TRUE,
+  b0 = expression(atop(plain("") %up% plain("")), t[0]),
+  b = expression(atop(plain("") %up% plain("")), t[]),
+  ask = TRUE,
+  ...
+)
+
+struct_test_asymp(graph, Y, statistic_name = "distance", p = 2, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>A <code>diffnet</code> graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Either a Numeric scalar or vector of length <code>nslices(graph)-1</code>
+with the number of rewires per links.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>A function that returns either a scalar or a vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>Integer scalar. Number of repetitions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rewire.args</code></td>
+<td>
+<p>List. Arguments to be passed to <code>rewire_graph</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to the method (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recursive</code></td>
+<td>
+<p>Ignored</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>diffnet_struct_test</code> class object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Character scalar. Title of the histogram.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Character scalar. x-axis label.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breaks</code></td>
+<td>
+<p>Passed to <code>hist</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>annotated</code></td>
+<td>
+<p>Logical scalar. When TRUE marks the observed data average and the simulated data average.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0</code></td>
+<td>
+<p>Character scalar. When <code>annotated=TRUE</code>, label for the value of <code>b0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>Character scalar. When <code>annotated=TRUE</code>, label for the value of <code>b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ask</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code>, asks the user to type <code>&lt;Enter&gt;</code> to see each plot (as
+many as statistics where computed).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Numeric vector of length <code class="reqn">n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic_name</code></td>
+<td>
+<p>Character scalar. Name of the metric to compute. Currently
+this can be either <code>"distance"</code>,<code>"&gt;"</code>,<code>"&lt;"</code>,<code>"=="</code>, <code>"&gt;="</code>,
+or <code>"&lt;="</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>struct_test</code> computes the test by generating the null distribution using
+Monte Carlo simulations (rewiring). <code>struct_test_asymp</code> computes the
+test using an asymptotic approximation. While available, we do not recommend
+using the asymptotic approximation since it has not shown good results when
+compared to the MC approximation. Furthermore, the asymptotic version has only
+been implemented for <code>graph</code> as static graph.
+</p>
+<p>The output from the <code>hist</code> method is the same as <code>hist.default</code>.
+</p>
+<p><code>struct_test</code> is a wrapper for the function <code>boot</code> from the
+<span class="pkg">boot</span> package. Instead of resampling data–vertices or edges–in each iteration the function
+rewires the original graph using <code>rewire_graph</code> and applies
+the function defined by the user in <code>statistic</code>.
+</p>
+<p>The default values to <code>rewire_graph</code> via <code>rewire.args</code> are:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<code>p</code>          </td>
+<td style="text-align: left;"> Number or Integer with default <code>n_rewires(graph)</code>. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>undirected</code> </td>
+<td style="text-align: left;"> Logical scalar with default <code>getOption("diffnet.undirected", FALSE)</code>. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>copy.first</code> </td>
+<td style="text-align: left;"> Logical scalar with <code>TRUE</code>. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>algorithm</code>  </td>
+<td style="text-align: left;"> Character scalar with default <code>"swap"</code>.
+</td>
+</tr>
+</table>
+<p>In <code>struct_test</code> <code>...</code> are passed to <code>boot</code>, otherwise are passed
+to the corresponding method (<code>hist</code> for instance).
+</p>
+<p>From the <code>print</code> method, p-value for the null of the statistic been
+equal between graph and its rewired versions is computed as follows
+</p>
+<p style="text-align: center;"><code class="reqn">%
+p(\tau)=2\times\min\left(\mbox{Pr}(t\leq\tau), \mbox{Pr}(t\geq\tau)\right) %
+</code>
+</p>
+
+<p>Where <code class="reqn">\mbox{Pr}\{\cdot\}</code> is approximated using the
+Empirical Distribution Function retrieved from the simulations.
+</p>
+<p>For the case of the asymptotic approximation, under the null we have
+</p>
+<p style="text-align: center;"><code class="reqn">%
+\sqrt{n}\left(\hat\beta(Y,G)-\mu_\beta\right)\sim^d\mbox{N}\left(0,\sigma_\beta^2\right)
+</code>
+</p>
+
+<p>The test is actually on development by Vega Yon and Valente. A copy of the
+working paper can be distributed upon request to <a href="mailto:g.vegayon@gmail.com">g.vegayon@gmail.com</a>.
+</p>
+<p>The function <code>n_rewires</code> proposes a vector of number of rewirings that
+are performed in each iteration.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class <code>diffnet_struct_test</code> containing the following:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>The graph passed to <code>struct_test</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>The resulting p-value of the test (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t0</code></td>
+<td>
+<p>The observed value of the statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean_t</code></td>
+<td>
+<p>The average value of the statistic applied to the simulated networks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>Number of simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>The function <code>statistic</code> passed to <code>struct_test</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot</code></td>
+<td>
+<p>A <code>boot</code> class object as return from the call to <code>boot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rewire.args</code></td>
+<td>
+<p>The list <code>rewire.args</code> passed to <code>struct_test</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>References</h3>
+
+<p>Vega Yon, George G. and Valente, Thomas W. (On development).
+</p>
+<p>Davidson, R., &amp; MacKinnon, J. G. (2004). Econometric Theory and Methods. New York:
+Oxford University Press.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Functions for inference: 
+<code>bootnet()</code>,
+<code>moran()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Creating a random graph
+set.seed(881)
+diffnet &lt;- rdiffnet(100, 5, seed.graph="small-world")
+
+# Testing structure-dependency of threshold
+res &lt;- struct_test(
+  diffnet,
+  function(g) mean(threshold(g), na.rm=TRUE),
+  R=100
+)
+
+res
+hist(res)
+
+# Adding a legend
+legend("topright", bty="n",
+ legend=c(
+   expression(t[0]:~Baseline),
+   expression(t:~Rewired~average)
+ )
+ )
+
+# Concatenating results
+c(res, res)
+
+# Running in parallel fashion
+res &lt;- struct_test(
+  diffnet, function(g) mean(threshold(g), na.rm=TRUE),
+  R=100, ncpus=2, parallel="multicore"
+)
+
+res
+
+hist(res)
+</code></pre>
+
+
+</div>

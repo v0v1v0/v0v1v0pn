@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>capture_first_glob</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>capture first glob</h2>
+
+<h3>Description</h3>
+
+<p>Glob files, then use <code>capture_first_vec</code> to get meta-data from each
+file name, and combine with contents of each file.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">capture_first_glob(glob, 
+    ..., READ = fread)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>glob</code></td>
+<td>
+<p>string: <code>glob</code> specifying files to read.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>pattern passed to <code>capture_first_vec</code>, used to get meta-data from
+file names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>READ</code></td>
+<td>
+<p>function of one argument (file name) which returns a data table,
+default <code>fread</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data table with columns of meta-data specified by pattern, plus
+contents of all files specified by <code>glob</code>.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre]</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data.table::setDTthreads(1)
+
+## Example 0: iris data, one file per species.
+library(data.table)
+dir.create(iris.dir &lt;- tempfile())
+icsv &lt;- function(sp)file.path(iris.dir, paste0(sp, ".csv"))
+data.table(iris)[, fwrite(.SD, icsv(Species)), by=Species]
+dir(iris.dir)
+data.table::fread(file.path(iris.dir,"setosa.csv"), nrows=2)
+(iglob &lt;- file.path(iris.dir,"*.csv"))
+nc::capture_first_glob(iglob, Species="[^/]+", "[.]csv")
+
+## Example 1: four files, two capture groups, custom read function.
+db &lt;- system.file("extdata/chip-seq-chunk-db", package="nc", mustWork=TRUE)
+suffix &lt;- if(interactive())"gz" else "head"
+(glob &lt;- paste0(db, "/*/*/counts/*", suffix))
+Sys.glob(glob)
+read.bedGraph &lt;- function(f)data.table::fread(
+  f, skip=1, col.names = c("chrom","start", "end", "count"))
+data.chunk.pattern &lt;- list(
+  data="H.*?",
+  "/",
+  chunk="[0-9]+", as.integer)
+(data.chunk.dt &lt;- nc::capture_first_glob(glob, data.chunk.pattern, READ=read.bedGraph))
+
+## Write same data set in Hive partition, then re-read.
+if(requireNamespace("arrow") &amp;&amp; arrow::arrow_with_dataset()){
+  path &lt;- tempfile()
+  max_rows_per_file &lt;- if(interactive())3 else 1000
+  arrow::write_dataset(
+    dataset=data.chunk.dt,
+    path=path,
+    format="csv",
+    partitioning=c("data","chunk"),
+    max_rows_per_file=max_rows_per_file)
+  hive.glob &lt;- file.path(path, "*", "*", "*.csv")
+  hive.pattern &lt;- list(
+    nc::field("data","=",".*?"),
+    "/",
+    nc::field("chunk","=",".*?", as.integer),
+    "/",
+    nc::field("part","-","[0-9]+", as.integer))
+  hive.dt &lt;- nc::capture_first_glob(hive.glob, hive.pattern)
+  hive.dt[, .(rows=.N), by=.(data,chunk,part)]
+}
+
+## Example 2: more complex pattern.
+count.dt &lt;- nc::capture_first_glob(
+  glob,
+  data.chunk.pattern,
+  "/counts/", 
+  name=list("McGill", id="[0-9]+", as.integer),
+  READ=read.bedGraph)
+count.dt[, .(count=.N), by=.(data, chunk, name, chrom)]
+
+if(require(ggplot2)){
+  ggplot()+
+    facet_wrap(~data+chunk+name+chrom, labeller=label_both, scales="free")+
+    geom_step(aes(
+      start, count),
+      data=count.dt)
+}
+
+## Example 3: parsing non-CSV data.
+vignettes &lt;- system.file("extdata/vignettes", package="nc", mustWork=TRUE)
+non.greedy.lines &lt;- list(
+  list(".*\n"), "*?")
+optional.name &lt;- list(
+  list(" ", chunk_name="[^,}]+"), "?")
+chunk.pattern &lt;- list(
+  before=non.greedy.lines,
+  "```\\{r",
+  optional.name,
+  parameters=".*",
+  "\\}\n",
+  code=non.greedy.lines,
+  "```")
+chunk.dt &lt;- nc::capture_first_glob(
+  paste0(vignettes, "/*.Rmd"),
+  "/v",
+  vignette_number="[0-9]", as.integer,
+  "-",
+  vignette_name=".*?",
+  ".Rmd",
+  READ=function(f)nc::capture_all_str(f, chunk.pattern))
+chunk.dt[, chunk_number := seq_along(chunk_name), by=vignette_number]
+chunk.dt[, .(
+  vignette_number, vignette_name, chunk_number, chunk_name, 
+  lines=nchar(code))]
+cat(chunk.dt$code[2])
+  
+</code></pre>
+
+
+</div>

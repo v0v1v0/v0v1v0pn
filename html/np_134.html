@@ -1,0 +1,229 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npuniden.reflect</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Bounded Univariate Density Estimation Via Data-Reflection </h2>
+
+<h3>Description</h3>
+
+<p><code>npuniden.reflect</code> computes kernel univariate unconditional
+density estimates given a vector of continuously distributed training
+data and, optionally, a bandwidth (otherwise likelihood
+cross-validation is used for its selection). Lower and upper bounds
+[<code>a</code>,<code>b</code>] can be supplied (default is [0,1]) and if <code>a</code>
+is set to <code>-Inf</code> there is only one bound on the right, while if
+<code>b</code> is set to <code>Inf</code> there is only one bound on the left.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npuniden.reflect(X = NULL,
+                 Y = NULL,
+                 h = NULL,
+                 a = 0,
+                 b = 1,
+                 ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>a required numeric vector of training data lying in <code class="reqn">[a,b]</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+
+<p>an optional numeric vector of evaluation data lying in <code class="reqn">[a,b]</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+
+<p>an optional bandwidth (&gt;0)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+
+<p>an optional lower bound (defaults to 0)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+
+<p>an optional upper bound (defaults to 1)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>optional arguments passed to <code>npudensbw</code> and <code>npudens</code>
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Typical usages are (see below for a complete list of options and also
+the examples at the end of this help file)
+</p>
+<pre>
+    model &lt;- npuniden.reflect(X,a=-2,b=3)
+  </pre>
+<p><code>npuniden.reflect</code> implements the data-reflection method for
+estimating a univariate density function defined over a continuous
+random variable in the presence of bounds.
+</p>
+<p>Note that data-reflection imposes a zero derivative at the boundary,
+i.e., <code class="reqn">f'(a)=f'(b)=0</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npuniden.reflect</code> returns the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p> estimated density at the points X </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F</code></td>
+<td>
+<p> estimated distribution at the points X (numeric integral of f) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd.f</code></td>
+<td>
+<p> asymptotic standard error of the estimated density at the points X </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd.F</code></td>
+<td>
+<p> asymptotic standard error of the estimated distribution at the points X </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p> bandwidth used </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmulti</code></td>
+<td>
+<p> number of multi-starts used </p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Boneva, L. I., Kendall, D., and Stefanov, I. (1971). “Spline
+transformations: Three new diagnostic aids for the statistical data-
+analyst,” Journal of the Royal Statistical Society. Series B
+(Methodological), 33(1):1-71.
+</p>
+<p>Cline, D. B. H. and Hart, J. D. (1991). “Kernel estimation of
+densities with discontinuities or discontinuous
+derivatives,” Statistics, 22(1):69-84.
+</p>
+<p>Hall, P. and Wehrly, T. E. (1991). “A geometrical method for
+removing edge effects from kernel- type nonparametric regression
+estimators,” Journal of the American Statistical Association,
+86(415):665-672.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The <span class="pkg">Ake</span>, <span class="pkg">bde</span>, and <span class="pkg">Conake</span> packages and the function <code>npuniden.boundary</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Example 1: f(0)=0, f(1)=1, plot boundary corrected density,
+## unadjusted density, and DGP
+set.seed(42)
+n &lt;- 100
+X &lt;- sort(rbeta(n,5,1))
+dgp &lt;- dbeta(X,5,1)
+model &lt;- npuniden.reflect(X)
+model.unadjusted &lt;- npuniden.boundary(X,a=-Inf,b=Inf)
+ylim &lt;- c(0,max(c(dgp,model$f,model.unadjusted$f)))
+plot(X,model$f,ylab="Density",ylim=ylim,type="l")
+lines(X,model.unadjusted$f,lty=2,col=2)
+lines(X,dgp,lty=3,col=3)
+rug(X)
+legend("topleft",c("Data-Reflection","Unadjusted","DGP"),col=1:3,lty=1:3,bty="n")
+
+## Example 2: f(0)=0, f(1)=0, plot density, distribution, DGP, and
+## asymptotic point-wise confidence intervals
+set.seed(42)
+X &lt;- sort(rbeta(100,5,3))
+model &lt;- npuniden.reflect(X)
+par(mfrow=c(1,2))
+ylim=range(c(model$f,model$f+1.96*model$sd.f,model$f-1.96*model$sd.f,dbeta(X,5,3)))
+plot(X,model$f,ylim=ylim,ylab="Density",type="l",)
+lines(X,model$f+1.96*model$sd.f,lty=2)
+lines(X,model$f-1.96*model$sd.f,lty=2)
+lines(X,dbeta(X,5,3),col=2)
+rug(X)
+legend("topleft",c("Density","DGP"),lty=c(1,1),col=1:2,bty="n")
+
+plot(X,model$F,ylab="Distribution",type="l")
+lines(X,model$F+1.96*model$sd.F,lty=2)
+lines(X,model$F-1.96*model$sd.F,lty=2)
+lines(X,pbeta(X,5,3),col=2)
+rug(X)
+legend("topleft",c("Distribution","DGP"),lty=c(1,1),col=1:2,bty="n")
+
+
+## Example 3: Age for working age males in the cps71 data set bounded
+## below by 21 and above by 65
+data(cps71)
+attach(cps71)
+model &lt;- npuniden.reflect(age,a=21,b=65)
+par(mfrow=c(1,1))
+hist(age,prob=TRUE,main="",ylim=c(0,max(model$f)))
+lines(age,model$f)
+lines(density(age,bw=model$h),col=2)
+legend("topright",c("Data-Reflection","Unadjusted"),lty=c(1,1),col=1:2,bty="n")
+detach(cps71)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

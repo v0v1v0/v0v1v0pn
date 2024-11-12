@@ -1,0 +1,190 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nn2poly</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Obtain polynomial representation</h2>
+
+<h3>Description</h3>
+
+<p>Implements the main NN2Poly algorithm to obtain a polynomial representation
+of a trained neural network using its weights and Taylor expansion of its
+activation functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nn2poly(
+  object,
+  max_order = 2,
+  keep_layers = FALSE,
+  taylor_orders = 8,
+  ...,
+  all_partitions = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object for which the computation of the NN2Poly algorithm is
+desired. Currently supports models from the following deep learning frameworks:
+</p>
+
+<ul>
+<li> <p><code>tensorflow</code>/<code>keras</code> models built as a sequential model.
+</p>
+</li>
+<li> <p><code>torch</code>/<code>luz</code> models built as a sequential model.
+</p>
+</li>
+</ul>
+<p>It also supports a named <code>list</code> as input which allows to introduce by
+hand a model from any other source. This <code>list</code> should be of length L
+(number of hidden layers + 1) containing the weights matrix for each layer.
+Each element of the list should be named as the activation function used at
+each layer. Currently supported activation functions are <code>"tanh"</code>,
+<code>"softplus"</code>, <code>"sigmoid"</code> and <code>"linear"</code>.
+</p>
+<p>At any layer <code class="reqn">l</code>, the expected shape of such matrices is of the form
+<code class="reqn">(h_{(l-1)} + 1)*(h_l)</code>, that is, the number of rows is the number of
+neurons in the previous layer plus the bias vector, and the number of columns
+is the number of neurons in the current layer L. Therefore, each column
+corresponds to the weight vector affecting each neuron in that layer.
+The bias vector should be in the first row.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_order</code></td>
+<td>
+<p><code>integer</code> that determines the maximum order
+that will be forced in the final polynomial, discarding terms of higher order
+that would naturally arise when considering all Taylor expansions allowed by
+<code>taylor_orders</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_layers</code></td>
+<td>
+<p>Boolean that determines if all polynomials computed in
+the internal layers have to be stored and given in the output (<code>TRUE</code>),
+or if only the polynomials from the last layer are needed (<code>FALSE</code>).
+Default set to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>taylor_orders</code></td>
+<td>
+<p><code>integer</code> or <code>vector</code> of length L that sets the
+degree at which Taylor expansion is truncated at each layer. If a single
+value is used, that value is set for each non linear layer and 1 for linear
+at each layer activation function. Default set to <code>8</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all_partitions</code></td>
+<td>
+<p>Optional argument containing the needed multipartitions
+as list of lists of lists. If set to <code>NULL</code>, nn2poly will compute said
+multipartitions. This step can be computationally expensive when the chosen
+polynomial order or the dimension are too high. In such cases, it is
+encouraged that the multipartitions are stored and reused when possible.
+Default set to <code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns an object of class <code>nn2poly</code>.
+</p>
+<p>If <code>keep_layers = FALSE</code> (default case), it returns a list with two
+items:
+</p>
+
+<ul><li>
+<p> An item named <code>labels</code> that is a list of integer vectors. Those vectors
+represent each monomial in the polynomial, where each integer in the vector
+represents each time one of the original variables appears in that term.
+As an example, vector c(1,1,2) represents the term <code class="reqn">x_1^2x_2</code>. Note that
+the variables are numbered from 1 to p, with the intercept is represented by
+</p>
+</li></ul>
+<ol><li> 
+</li></ol>
+<ul><li>
+<p> An item named <code>values</code> which contains a matrix in which each column contains
+the coefficients of the polynomial associated with an output neuron. That is,
+if the neural network has a single output unit, the matrix <code>values</code> will have
+a single column and if it has multiple output units, the matrix <code>values</code> will
+have several columns. Each row will be the coefficient associated with the
+label in the same position in the labels list.
+</p>
+</li></ul>
+<p>If <code>keep_layers = TRUE</code>, it returns a list of length the number of
+layers (represented by <code>layer_i</code>), where each one is another list with
+<code>input</code> and <code>output</code> elements. Each of those elements contains an
+item as explained before. The last layer output item will be the same element
+as if <code>keep_layers = FALSE</code>.
+</p>
+<p>The polynomials obtained at the hidden layers are not needed to represent the
+NN but can be used to explore other insights from the NN.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Predict method for <code>nn2poly</code> output <code>predict.nn2poly()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Build a NN estructure with random weights, with 2 (+ bias) inputs,
+# 4 (+bias) neurons in the first hidden layer with "tanh" activation
+# function, 4 (+bias) neurons in the second hidden layer with "softplus",
+# and 1 "linear" output unit
+
+weights_layer_1 &lt;- matrix(rnorm(12), nrow = 3, ncol = 4)
+weights_layer_2 &lt;- matrix(rnorm(20), nrow = 5, ncol = 4)
+weights_layer_3 &lt;- matrix(rnorm(5), nrow = 5, ncol = 1)
+
+# Set it as a list with activation functions as names
+nn_object = list("tanh" = weights_layer_1,
+                 "softplus" = weights_layer_2,
+                 "linear" = weights_layer_3)
+
+# Obtain the polynomial representation (order = 3) of that neural network
+final_poly &lt;- nn2poly(nn_object, max_order = 3)
+
+# Change the last layer to have 3 outputs (as in a multiclass classification)
+# problem
+weights_layer_4 &lt;- matrix(rnorm(20), nrow = 5, ncol = 4)
+
+# Set it as a list with activation functions as names
+nn_object = list("tanh" = weights_layer_1,
+                 "softplus" = weights_layer_2,
+                 "linear" = weights_layer_4)
+# Obtain the polynomial representation of that neural network
+# In this case the output is formed by several polynomials with the same
+# structure but different coefficient values
+final_poly &lt;- nn2poly(nn_object, max_order = 3)
+
+# Polynomial representation of each hidden neuron is given by
+final_poly &lt;- nn2poly(nn_object, max_order = 3, keep_layers = TRUE)
+
+</code></pre>
+
+
+</div>

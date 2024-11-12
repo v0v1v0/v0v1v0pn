@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>zscore_img</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Z-score over a margin of an img</h2>
+
+<h3>Description</h3>
+
+<p>Standardizes an image either by the axial, sagittal, or
+coronal slice or whole image
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">zscore_img(
+  img,
+  mask = NULL,
+  margin = NULL,
+  centrality = c("mean", "median", "trimmed_mean"),
+  variability = c("sd", "iqrdiff", "mad", "maddiff", "iqr", "trimmed_sd"),
+  trim = 0.2,
+  remove.na = TRUE,
+  remove.nan = TRUE,
+  remove.inf = TRUE,
+  remove.val = 0,
+  remask = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>character path of image or 
+an object of class nifti</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask</code></td>
+<td>
+<p>character path of mask or 
+an object of class nifti</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>margin</code></td>
+<td>
+<p>Margin of image to z-score over (<code>NULL</code> - whole brain,
+3-Axial, 2-Sagittal, 
+1-Coronal)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centrality</code></td>
+<td>
+<p>(character) Measure to center the data, 
+either mean or median</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variability</code></td>
+<td>
+<p>(character) Measure to scale the data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trim</code></td>
+<td>
+<p>if centrality is <code>trimmed_mean</code> or variability is 
+<code>trimmed_sd</code>, then the amount of trimming</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove.na</code></td>
+<td>
+<p>(logical) change NAs to remove.val</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove.nan</code></td>
+<td>
+<p>(logical) change NaN to remove.val</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove.inf</code></td>
+<td>
+<p>(logical) change Inf to remove.val</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove.val</code></td>
+<td>
+<p>(logical) value to put the NA/NaN/Inf</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remask</code></td>
+<td>
+<p>(logical) Should the image be remasked after normalizing?</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Array of object of class nifti
+</p>
+
+
+<h3>See Also</h3>
+
+<p>aperm
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dim = c(100, 30, 5)
+img = array(rnorm(prod(dim), mean=4, sd=4), 
+dim=dim)
+
+truth2 = img
+for (i in 1:dim(img)[2]) {
+truth2[,i,] = (truth2[,i,]- mean(truth2[,i,]))/sd(truth2[,i,])
+}
+
+truth1 = img
+for (i in 1:dim(img)[1]) {
+truth1[i,,] = (truth1[i,,]- mean(truth1[i,,]))/sd(truth1[i,,])
+}
+
+truth3 = img
+for (i in 1:dim(img)[3]) {
+truth3[,,i] = (truth3[,,i]- mean(truth3[,,i]))/sd(truth3[,,i])
+}
+try3 = zscore_img(img, margin=3)
+stopifnot(all.equal(try3, truth3))
+try2 = zscore_img(img, margin=2)
+stopifnot(all.equal(try2, truth2))
+try1 = zscore_img(img, margin=1)
+stopifnot(all.equal(try1, truth1))
+  
+z = zscore_img(img, margin=NULL)
+ztrim = zscore_img(img, margin=NULL, 
+centrality = "trimmed_mean", variability = "trimmed_sd")
+
+z = zscore_img(img, centrality = "median", variability = "iqr")
+z = zscore_img(img, centrality = "median", variability = "iqrdiff")
+z = zscore_img(img, centrality = "median", variability = "maddiff")
+
+
+</code></pre>
+
+
+</div>

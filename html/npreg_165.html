@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>wtd.quantile</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Weighted Quantiles
+</h2>
+
+<h3>Description</h3>
+
+<p>Generic function for calculating weighted quantiles.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">wtd.quantile(x, weights, probs = seq(0, 1, 0.25), 
+             na.rm = FALSE, names = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Numerical or logical vector.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>Vector of non-negative weights.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+
+<p>Numeric vector of probabilities with values in [0,1].
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+
+<p>Logical indicating whether <code>NA</code> values should be removed before calculation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+
+<p>Logical indicating if the result should have names corresponding to the probabilities.  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>weights</code> are missing, the weights are defined to be a vector of ones (which is the same as the unweighted quantiles).
+</p>
+<p>The weighted quantiles are computed by linearly interpolating the empirical cdf via the <code>approx</code> function. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns the weighted quantiles corresponding to the input probabilities.
+</p>
+
+
+<h3>Note</h3>
+
+<p>If the weights are all equal (or missing), the resulting quantiles are equivalent to those produced by the <code>quantile</code> function using the 'type = 4' argument.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>wtd.mean</code> for weighted mean calculations
+</p>
+<p><code>wtd.var</code> for weighted variance calculations
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data and weights
+set.seed(1)
+x &lt;- rnorm(10)
+w &lt;- rpois(10, lambda = 10)
+
+# unweighted quantiles
+quantile(x, probs = c(0.1, 0.9), type = 4)
+wtd.quantile(x, probs = c(0.1, 0.9))
+
+# weighted quantiles
+sx &lt;- sort(x, index.return = TRUE)
+sw &lt;- w[sx$ix]
+ecdf &lt;- cumsum(sw) / sum(sw)
+approx(x = ecdf, y = sx$x, xout = c(0.1, 0.9), rule = 2)$y
+wtd.quantile(x, w, probs = c(0.1, 0.9))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,193 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nmplot.ncat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create plots of the dose and the response differentiated by specified
+variables</h2>
+
+<h3>Description</h3>
+
+<p>This function generates scatter plots of the dose and the response for every
+unique value of a certain variable, with the colour of the data points
+differentiated according to the value of another variable.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nmplot.ncat(data.nm, data.control, id, nano, response, dose, end,
+  end.cat, unit, unit.cat,  cat, x.cat, type=c("dose","log"),
+  control.opt=c("same","all"), nrow=1, ncol=1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data.nm</code></td>
+<td>
+<p>Data containing the result of toxicity study</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.control</code></td>
+<td>
+<p>Data of control values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>Identifier of the experiment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nano</code></td>
+<td>
+<p>Name of the nanomaterial</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+<p>Response (endpoint value)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dose</code></td>
+<td>
+<p>Dose or concentration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end</code></td>
+<td>
+<p>Toxicity endpoint</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end.cat</code></td>
+<td>
+<p>Specific toxicity endpoint of interest</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit</code></td>
+<td>
+<p>Unit of measurement of the dose</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit.cat</code></td>
+<td>
+<p>Specific unit of measurement of the dose</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cat</code></td>
+<td>
+<p>Plot is generated for every unique value of <code>cat</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.cat</code></td>
+<td>
+<p>Variable used to differentiate the colour of the data points in
+the plot(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of the dose to be plotted ("<code>dose</code>" for dose and
+"<code>log</code>" for log(dose))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.opt</code></td>
+<td>
+<p>Option for the control doses. If only control doses with
+the same unit of measurement as the non-control ones are included, then
+specify "<code>same</code>" in the <code>control.opt</code>. If all control doses with
+any units of measurement are included, then specify "<code>all</code>".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrow</code></td>
+<td>
+<p>Number of rows in the plotting space (default is 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncol</code></td>
+<td>
+<p>Number of columns in the plotting space (default is 1)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ul>
+<li>
+<p>This function generates plots for each nanomaterial in the dataset. The
+different types of nanomaterials are identified by their names. Therefore, if
+some control values are named differently (see: <code>geninvitro</code>
+dataset and the <code>Examples</code>), a separate dataset containing only these
+values first needs to be created. Controls in the new dataset can be linked
+to the non-control observations belonging to the same experiment through the
+identifier of the experiment (the linking is performed inside this function).
+In this situation, it is necessary to have an indicator that can identify
+different experiments (such as experiment ID).
+</p>
+</li>
+<li>
+<p>If all controls in the dataset are named according to the related
+nanomaterial names, <code>data.control</code> and <code>id</code> do not need to be
+specified.
+</p>
+</li>
+<li>
+<p>If doses used in the experiment are all measured in the same unit of
+measurement, then specify "<code>same</code>" in <code>control.opt</code>.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>This function produces dose-response plots for every unique value of
+a certain variable, with different colours of data points based on the
+value of another variable
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create a dataset containing controls (which are named differently)
+# from geninvitro dataset:
+controldata&lt;-SubsetData(data=geninvitro, x="name", x.cat=c("control", "Control",
+             "medium", "medium + BSA", "untreated"))
+
+# Exclude controls (which are named differently) from geninvitro dataset:
+invitrodata&lt;-SubsetData(data=geninvitro, x="name", x.cat=c("control", "Control",
+             "medium", "medium + BSA", "untreated"), include=FALSE)
+
+# Generate dose-response plots for geninvitro, with DNA STRAND BREAKS as
+# the endpoint and concentrations measured in "ug/cm2" (plot is generated for
+# each study provider, with different colours represent different
+# experiments):
+#
+nmplot.ncat(data.nm=invitrodata, data.control=controldata,
+            id="experimentID", nano="name", response="value",
+            dose="concentration", end="endpoint", end.cat="DNA STRAND BREAKS",
+            unit="concentration_unit", unit.cat="ug/cm2", cat="studyprovider",
+            x.cat="experimentID", type="dose", control.opt="same", nrow=1,
+            ncol=1)
+
+</code></pre>
+
+
+</div>

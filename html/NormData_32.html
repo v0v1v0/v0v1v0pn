@@ -1,0 +1,314 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Stage.1</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Stage 1 of the regression-based normative analysis</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>Stage.1</code> fits a regression model with the specified mean and residual variance components, and conducts several model checks (homoscedasticity, normality, absence of outliers, and multicollinearity) that are useful in a setting where regression-based normative data have to be established.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Stage.1(Dataset, Model, Order.Poly.Var=3, 
+Alpha=0.05, Alpha.Homosc=0.05, Alpha.Norm = .05, 
+Assume.Homoscedasticity=NULL,
+Test.Assumptions=TRUE, Outlier.Cut.Off=4, 
+Show.VIF=TRUE, GVIF.Threshold=10, Sandwich.Type="HC0", 
+Alpha.CI.Group.Spec.SD.Resid=0.01)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Dataset</code></td>
+<td>
+<p>A <code>data.frame</code> that should consist of one line per test participant (the so-called ‘wide’ data-format). Each line should contain (at least) one test score and one independent variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Model</code></td>
+<td>
+<p>The regression model to be fitted (mean structure). A formula should be provided using the syntaxis of the  <code>lm</code> function (for help, see <code>?lm</code>). For example, <code>Test.Score~Gender</code> will fit a linear regression model in which <code>Gender</code> (the independent variable) is regressed on <code>Test.Score</code>. <code>Test.Score~Gender+Age+ Gender:Age</code> will regress <code>Test.Score</code> on <code>Gender</code>, <code>Age</code>, and the interaction term. <code>Test.Score~1</code> will fit an intercept-only model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Order.Poly.Var</code></td>
+<td>
+<p>If the homoscedasticity assumption is violated and the mean structure of the fitted model contains at least one quantitative variable, a polynomial variance prediction function is fitted. The argument <code>Order.Poly.Var=</code> determines the order of the polynomial, e.g., <code>Order.Poly.Var=1</code>, <code>Order.Poly.Var=2</code>, <code>Order.Poly.Var=3</code> for linear, quadratic and cubic polynomials, respectively. By default, <code>Order.Poly.Var = 3</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha</code></td>
+<td>
+<p>The significance level to be used when conducting inference for the mean structure of the model. Default <code>Alpha=0.05</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha.Homosc</code></td>
+<td>
+<p>The significance level to be used to evaluate the homoscedasticity assumption based on the Levene test (when all independent variables in the model are qualitative) or the Breusch-Pagan test (when at least one of the independent variables is quantitative). Default <code>Alpha.Homosc=0.05</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha.Norm</code></td>
+<td>
+<p>The significance level to be used to test the normality assumption for the standardized errors using the Shapiro-Wilk test. The normality assumption is evaluated based on the standardized residuals in the normative dataset, which are computed as explained in the <code>Assume.Homoscedasticity=</code> argument documentation below. Default <code>Alpha.Shapiro=0.05</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Homoscedasticity</code></td>
+<td>
+<p>Logical. The <code>NormData</code> package ‘decides’ whether the homoscedasticity assumption is valid based on the Levene or Breusch-Pagan tests (for models that only include qualitative independent variables versus models that include at least one quantitative independent variable, respectively). The <code>Assume.Homoscedasticity= TRUE/FALSE</code> argument can be used to overrule this decision process and ‘force’ the <code>NormData</code> package to assume or not assume homoscedasticity. When the argument <br><code>Assume.Homoscedasticity=TRUE</code> is used, the argument <code>Alpha.Homosc=0</code> is automatically used in the <code>Stage.1()</code> function call and thus the homoscedasticity assumption will never be rejected (because the <code class="reqn">p</code>-value of the Levene or Breusch-Pagan test-statistics will always be larger than the specified <code class="reqn">\alpha=0</code>). When <code>Assume.Homoscedasticity=FALSE</code> is used, the argument <code>Alpha.Homosc=1</code> is automatically used thus the homoscedasticity assumption will always be rejected (because the <code class="reqn">p</code>-value of the Levene or Breusch-Pagan test-statistics will always be smaller than the specified <code class="reqn">\alpha=1</code>).
+</p>
+<p>By default, the standardized residuals <code class="reqn">\widehat{\delta}_i</code> that are shown in the normality and outlier output sections of the results (and the plots, see <code>plot Stage.1</code>) are computed based on the overall residual standard error when the homoscedasticity assumption is valid (i.e., as <code class="reqn">\widehat{\delta}_i = \frac{\widehat{\varepsilon}_i}{\widehat{\sigma}^2_{\varepsilon}}</code>, with  <code class="reqn">\widehat{\sigma}^2_{\varepsilon}</code> corresponding to the overall residual standard error), or based on prediction-specific residual standard errors when the homoscedasticity assumption is invalid (i.e., as <code class="reqn">\widehat{\delta}_i = \frac{\widehat{\varepsilon}_i}{\widehat{\sigma}^2_{\varepsilon_i}}</code>, with  <code class="reqn">\widehat{\sigma}^2_{\varepsilon_i}</code> corresponding to e.g., a cubic polynomial variance prediction function <code class="reqn">\widehat{\sigma}^2_{\varepsilon_i} = \widehat{\gamma}_0 + \widehat{\gamma}_1 \: \widehat{Y} + \widehat{\gamma}_2 \: \widehat{Y}^2 + {\gamma}_3 \: \widehat{Y}^3</code> when the mean structure of the model contains quantitiative independent variables).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Test.Assumptions</code></td>
+<td>
+<p>Logical. Should the model assumptions be evaluated for the specified  model? Default <code>Test.Assumptions=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Outlier.Cut.Off</code></td>
+<td>
+<p>Outliers are evaluated based on the standardized residuals, which are computed as explained in the <code>Assume.Homoscedasticity=</code> argument documentation. The <code>Outlier.Cut.Off=</code> argument specifies the absolute value that is used as a threshold to detect outliers. Default <code>Outlier.Cut.Off=4</code>, so test scores with standardized residuals <code class="reqn">&lt; -4</code> or <code class="reqn">&gt; 4</code> are flagged as outliers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Show.VIF</code></td>
+<td>
+<p>Logical. Should the generalized VIF (Fox and Monette, 1992) be shown when the function <code>summary()</code> is applied to the fitted object? Default <code>Show.VIF=TRUE</code>. If all  names of the independent variables in the fitted Stage 1 model contain the string ‘Age’ (e.g., Age, Age.2 and Age.3), a higher-order polynomial model for the mean structure is being fitted. For such models, multicollinearity diagnostics are essentially irrelevant (see Van der Elst, 2023) and in such cases the generalized VIF is not printed in the summary output. The generalized VIF is also not shown whenn there is only one independent variable in the model (because multicollinearity relates to the linear association of two or more independent variables).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>GVIF.Threshold</code></td>
+<td>
+<p>The threshold value to be used to detect multicollinearity based on the generalized VIF. Default <code>GVIF.Threshold=10</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Sandwich.Type</code></td>
+<td>
+<p>When the homoscedasticity assumption is violated, so-called sandwich estimators (or heteroscedasticity-consistent estimators) for the standard errors of the regression parameters are used. For example, the sandwich estimator for the standard error of <code class="reqn">\widehat{\beta}_1</code> in a simple linear regression model corresponds to <code class="reqn">\widehat{\sigma}_{{\beta}_1}=\sqrt{\frac{
+\sum\limits_{i=1}^{N}\left(\left(X_i - \widehat{\mu}_{X_{i}}\right)^2 \: \widehat{\varepsilon}_i^2 \right)}{\left(\sum\limits_{i=1}^{N}(X_i - \widehat{\mu}_{X_{i}})^2\right)^2}}</code>. For multiple linear regression models, the sandwich estimators for the different independent variables  <code class="reqn">\widehat{\sigma}_{{\beta}_0}</code>, <code class="reqn">\widehat{\sigma}_{{\beta}_1}</code>, ...correspond to the square roots of the diagonal elements of <code class="reqn">\boldsymbol{\widehat{\Sigma}}_{\beta} = \\
+\left(\boldsymbol{X}^{'}\boldsymbol{X}\right)^{-1}
+\left(\boldsymbol{X}^{'} \left[\begin{array}{cccc}
+\widehat{\varepsilon}^2_1 &amp; 0 &amp; \ldots &amp; 0\\
+0 &amp; \widehat{\varepsilon}^2_2 &amp; \ldots &amp; 0\\
+\vdots &amp; \vdots &amp; \ddots &amp; 0\\
+0 &amp; 0 &amp; 0 &amp; \widehat{\varepsilon}^2_N
+\end{array}\right] \boldsymbol{X}\right)
+\left(\boldsymbol{X}^{'}\boldsymbol{X}\right)^{-1}.</code>
+The sandwich-estimators that are shown in the above expressions are referred to as the Heteroscedasticity-Consistent 0 estimator (or HC0 estimator), which is the first sandwich-estimator that was proposed in the literature. The HC0 sandwich-estimator is justified based on asymptotic theory, and its application thus requires large sample sizes. For smaller sample sizes of <code class="reqn">N &lt; 250</code>, the use of the HC3 estimator is recommended because the HC0 sandwich-estimator tends to be negatively biased (Long and Erwin, 2000). By default, the HC0 estimator is used. The argument <code>Sandwich.Type=</code> can be used to request another type of the heteroscedasticity-consistent estimator. For details on these estimators, see the <code>vcovHC</code> function of the <code>sandwich</code> package. If <code class="reqn">N &lt; 250</code> and the homoscedasticity assumption is violated, a note will be given that the use of the HC3-estimator is recommended. To this end, the argument <code>Sandwich.Type="HC3"</code> can be added in the <code>Stage.1()</code> function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha.CI.Group.Spec.SD.Resid</code></td>
+<td>
+<p>The <code class="reqn">\alpha</code>-level to be used for the CIs around the prediction-specific residual standard errors (when the homoscedasticity assumption is invalid and the model only contains qualitative independent variable). These CIs are used in the variance function plot. Default <code>Alpha.CI.Group.Spec.SD.Resid=0.01</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details, see Van der Elst (2023).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>Stage.1</code> with components,
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>HomoNorm</code></td>
+<td>
+<p>The fitted regression model assuming homoscedasticity and normality.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NoHomoNorm</code></td>
+<td>
+<p>The fitted regression model assuming no homoscedasticity and normality.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HomoNoNorm</code></td>
+<td>
+<p>The fitted regression model assuming homoscedasticity and no normality. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NoHomoNoNorm</code></td>
+<td>
+<p>The fitted regression model assuming no homoscedasticity and no normality. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Predicted</code></td>
+<td>
+<p>The predicted test scores based on the fitted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Sandwich.Type</code></td>
+<td>
+<p>The requested sandwich estimator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Order.Poly.Var</code></td>
+<td>
+<p>The order of the polynomial variance prediction function.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Wim Van der Elst
+</p>
+
+
+<h3>References</h3>
+
+<p>Fox, J. and Monette, G. (1992). Generalized collinearity diagnostics. <em>JASA, 87,</em> 178-183.
+</p>
+<p>Long, J. S. and Ervin, L. H. (2000). Using Heteroscedasticity Consistent Standard Errors in the Linear Regression Model. <em>The American Statistician, 54,</em> 217-224.
+</p>
+<p>Van der Elst, W. (2024). <em>Regression-based normative data for psychological assessment: A hands-on approach using R.</em> Springer Nature. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot Stage.1</code>, <code>Stage.2.AutoScore</code>, <code>Stage.2.NormScore</code>, <code>Stage.2.NormTable</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Replicate the Stage 1 results that were obtained in 
+# Case study 1 of Chapter 4 in Van der Elst (2023)
+# ---------------------------------------------------
+library(NormData)   # load the NormData package
+data(GCSE)          # load the GCSE dataset
+
+# Conduct the Stage 1 analysis
+Model.1.GCSE &lt;- Stage.1(Dataset=GCSE, 
+    Model=Science.Exam~Gender)
+
+summary(Model.1.GCSE)
+plot(Model.1.GCSE)
+
+
+# Replicate the Stage 1 results that were obtained in 
+# Case study 1 of Chapter 7 in Van der Elst (2023)
+# ---------------------------------------------------
+library(NormData)   # load the NormData package
+data(Substitution)  # load the Substitution dataset
+
+# Add the variable Age.C (= Age centered) and its 
+# quadratic and cubic terms to the Substitution dataset
+Substitution$Age.C &lt;- Substitution$Age - 50
+Substitution$Age.C2 &lt;- (Substitution$Age - 50)**2
+Substitution$Age.C3 &lt;- (Substitution$Age - 50)**3
+
+# Fit the full Stage 1 model
+Substitution.Model.1 &lt;- Stage.1(Dataset=Substitution,
+   Model=LDST~Age.C+Age.C2+Age.C3+Gender+LE+Age.C:LE+
+   Gender:LE+Age.C:Gender, Alpha=0.005)
+summary(Substitution.Model.1)
+
+# Fit the model in which the non-significant Age.C:Gender
+# interaction term is removed
+Substitution.Model.2 &lt;- Stage.1(Dataset=Substitution, 
+    Alpha=0.005,
+    Model=LDST~Age.C+Age.C2+Age.C3+Gender+LE+
+    Age.C:LE+Gender:LE)
+summary(Substitution.Model.2)
+
+# Evaluate the significance of the Gender:LE interaction term
+# GLT is used because the interaction involves multiple regression
+# parameters
+GLT.1 &lt;- GLT(Dataset=Substitution, Alpha=0.005, 
+   Unrestricted.Model=LDST~Age.C+Age.C2+Age.C3+
+      Gender+LE+Age.C:LE+Gender:LE, 
+   Restricted.Model=LDST~Age.C+Age.C2+Age.C3+
+      Gender+LE+Age.C:LE)
+summary(GLT.1)
+
+# Fit the model in which the non-significant Gender:LE
+# interaction term is removed
+Substitution.Model.3 &lt;- Stage.1(Dataset=Substitution, 
+    Alpha=0.005,
+    Model=LDST~Age.C+Age.C2+Age.C3+Gender+LE+Age.C:LE)
+summary(Substitution.Model.3)
+
+# Evaluate the significance of the Age:LE interaction
+# using the General Linear Test framework
+GLT.2 &lt;- GLT(Dataset=Substitution,
+    Unrestricted.Model=LDST~Age.C+Age.C2+Age.C3+Gender+LE+Age.C:LE,
+    Restricted.Model=LDST~Age.C+Age.C2+Age.C3+Gender+LE, Alpha=0.005)
+summary(GLT.2)
+
+# Fit the model in which the non-significant Age_c:LE
+# interaction term is removed
+Substitution.Model.4 &lt;- Stage.1(Dataset=Substitution,
+   Alpha=0.005, Model=LDST~Age.C+Age.C2+Age.C3+Gender+LE)
+summary(Substitution.Model.4)
+
+# Fit the model in which the non-significant Age.C3 term is removed
+Substitution.Model.5 &lt;- Stage.1(Dataset=Substitution,
+   Alpha=0.005, Model=LDST~Age.C+Age.C2+Gender+LE)
+summary(Substitution.Model.5)
+
+# Fit the model in which the non-significant Age.C2 term is removed
+Substitution.Model.6 &lt;- Stage.1(Dataset=Substitution,
+   Alpha=0.005, Model=LDST~Age.C+Gender+LE)
+summary(Substitution.Model.6)
+
+# Fit the model in which the non-significant main effect of Gender 
+# is removed
+Substitution.Model.7 &lt;- Stage.1(Dataset=Substitution, 
+  Alpha=0.005, Model=LDST~Age.C+LE)
+summary(Substitution.Model.7)
+plot(Substitution.Model.7, Normality = FALSE, Outliers = FALSE)
+
+# Check the significance of LE using the GLT framework
+GLT.3 &lt;- GLT(Dataset=Substitution, Alpha=0.005,
+    Unrestricted.Model=LDST~Age.C+LE, 
+    Restricted.Model=LDST~Age.C)
+summary(GLT.3)
+
+# Residual variance function. Substitution.Model.7 uses
+# a cubic polynomial variance prediction function. 
+# Remove cubic Pred.Y term from Substitution.Model.7, so
+# fit quadratic variance prediction function
+Substitution.Model.8 &lt;- Stage.1(Dataset=Substitution, 
+    Alpha=0.005, Model=LDST~Age.C+LE,
+    Order.Poly.Var=2)  # Order.Poly.Var=2 specifies a quadratic polynomial
+                       # for the variiance prediction function
+summary(Substitution.Model.8)
+plot(Substitution.Model.8, Normality = FALSE, Outliers = FALSE)
+
+# Remove quadratic Pred.Y term, so fit linear variance 
+# prediction function
+Substitution.Model.9 &lt;- Stage.1(Dataset=Substitution, 
+    Alpha=0.005, Model=LDST~Age.C+LE,
+    Order.Poly.Var=1) # Order.Poly.Var=1 specifies a linear polynomial
+                      # for the variiance prediction function
+
+# Final Stage 1 model
+summary(Substitution.Model.9)
+plot(Substitution.Model.9) 
+</code></pre>
+
+
+</div>

@@ -1,0 +1,203 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nbrrr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Negative binomial reduced rank regression (NBRRR)</h2>
+
+<h3>Description</h3>
+
+<p>In the range of 1 to maxrank, the estimation procedure selects the rank r of the coefficient matrix using a cross-validation approach. For the selected rank, a rank r coefficient matrix is estimated that best fits the observations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nbrrr(
+  Yt,
+  X,
+  maxrank = 10,
+  cIndex = NULL,
+  ofset = NULL,
+  control = list(),
+  nfold = 5,
+  trace = FALSE,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Yt</code></td>
+<td>
+<p>response matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>design matrix; when X = NULL, we set X as identity matrix and perform generalized PCA.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxrank</code></td>
+<td>
+<p>an integer specifying the maximum possible rank of the coefficient matrix or the number of factors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cIndex</code></td>
+<td>
+<p>specify index of control variable in the design matrix X</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ofset</code></td>
+<td>
+<p>offset matrix or microbiome data analysis specific scaling: common sum scaling = CSS (default), total sum scaling = TSS, median-ratio scaling = MRS, centered-log-ratio scaling  = CLR</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of internal parameters controlling the model fitting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfold</code></td>
+<td>
+<p>number of folds in k-fold crossvalidation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>TRUE/FALSE checking progress of cross validation error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>TRUE/FALSE checking progress of estimation procedure</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>estimated coefficient matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>estimated control variable coefficient matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PHI</code></td>
+<td>
+<p>estimted dispersion parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>U</code></td>
+<td>
+<p>estimated U matrix (generalize latent factor weights)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>estimated singular values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>V</code></td>
+<td>
+<p>estimated V matrix (factor loadings)</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Mishra, A., Müller, C. (2022) <em>Negative binomial factor regression models with application to microbiome data analysis.  https://doi.org/10.1101/2021.11.29.470304</em>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Model specification:
+SD &lt;- 123
+set.seed(SD)
+p &lt;- 50; n &lt;- 200
+pz &lt;- 0
+nrank &lt;- 3                # true rank
+rank.est &lt;- 5             # estimated rank
+nlam &lt;- 20                # number of tuning parameter
+s  = 0.5
+q &lt;- 30
+control &lt;- nbfar_control()  # control parameters
+#
+#
+## Generate data
+D &lt;- rep(0, nrank)
+V &lt;- matrix(0, ncol = nrank, nrow = q)
+U &lt;- matrix(0, ncol = nrank, nrow = p)
+#
+U[, 1] &lt;- c(sample(c(1, -1), 8, replace = TRUE), rep(0, p - 8))
+U[, 2] &lt;- c(rep(0, 5), sample(c(1, -1), 9, replace = TRUE), rep(0, p - 14))
+U[, 3] &lt;- c(rep(0, 11), sample(c(1, -1), 9, replace = TRUE), rep(0, p - 20))
+#
+  # for similar type response type setting
+  V[, 1] &lt;- c(rep(0, 8), sample(c(1, -1), 8,
+    replace =
+      TRUE
+  ) * runif(8, 0.3, 1), rep(0, q - 16))
+  V[, 2] &lt;- c(rep(0, 20), sample(c(1, -1), 8,
+    replace =
+      TRUE
+  ) * runif(8, 0.3, 1), rep(0, q - 28))
+  V[, 3] &lt;- c(
+    sample(c(1, -1), 5, replace = TRUE) * runif(5, 0.3, 1), rep(0, 23),
+    sample(c(1, -1), 2, replace = TRUE) * runif(2, 0.3, 1), rep(0, q - 30)
+  )
+U[, 1:3] &lt;- apply(U[, 1:3], 2, function(x) x / sqrt(sum(x^2)))
+V[, 1:3] &lt;- apply(V[, 1:3], 2, function(x) x / sqrt(sum(x^2)))
+#
+D &lt;- s * c(4, 6, 5) # signal strength varries as per the value of s
+or &lt;- order(D, decreasing = TRUE)
+U &lt;- U[, or]
+V &lt;- V[, or]
+D &lt;- D[or]
+C &lt;- U %*% (D * t(V)) # simulated coefficient matrix
+intercept &lt;- rep(0.5, q) # specifying intercept to the model:
+C0 &lt;- rbind(intercept, C)
+#
+Xsigma &lt;- 0.5^abs(outer(1:p, 1:p, FUN = "-"))
+# Simulated data
+sim.sample &lt;- nbfar_sim(U, D, V, n, Xsigma, C0,disp = 3, depth = 10)  # Simulated sample
+# Dispersion parameter
+X &lt;- sim.sample$X[1:n, ]
+Y &lt;- sim.sample$Y[1:n, ]
+X0 &lt;- cbind(1, X)                     # 1st column accounting for intercept
+
+# Model with known offset
+set.seed(1234)
+offset &lt;- log(10)*matrix(1,n,q)
+control_nbrr &lt;- nbfar_control(initmaxit = 5000, initepsilon = 1e-4)
+# nbrrr_test &lt;- nbrrr(Y, X, maxrank = 5, cIndex = NULL, ofset = offset,
+#                       control = control_nbrr, nfold = 5)
+
+</code></pre>
+
+
+</div>

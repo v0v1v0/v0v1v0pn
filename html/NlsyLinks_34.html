@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Survey79</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Dataset containing survey details for each subject, for each year</h2>
+
+<h3>Description</h3>
+
+<p>Each row represents a survey that a subject completed (or didn't complete).
+It can be very helpful when restructuring the NLS investigator extracts into a
+longitudinal dataset that's aligned by age (instead of by survey wave).
+The Age variables can help to align other response variables across subjects.
+While the 'SurveySource' indicates where to look for their responses.
+</p>
+<p>These variables are useful to many types of analyses (not just behavior genetics), and are
+provided to save users time.
+</p>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 580,752 observations on the following 6 variables.
+</p>
+
+<ul>
+<li> <p><strong>SubjectTag</strong> see the variable of the same name in Links79Pair
+</p>
+</li>
+<li> <p><strong>SurveySource</strong> The location of that subject's survey responses that year.  Values are <code>NoInterview</code>, <code>Gen1</code>, <code>Gen2C</code> or <code>Gen2YA</code>.
+</p>
+</li>
+<li> <p><strong>SurveyYear</strong> The year/wave of the survey.
+</p>
+</li>
+<li> <p><strong>Survey79</strong> The exact date of the administered survey.
+</p>
+</li>
+<li> <p><strong>Age</strong> The subject's age at the time of the survey, rounded to 1 decimal.
+See Details below.
+</p>
+</li>
+</ul>
+<h3>Details</h3>
+
+<p><code>Age</code> uses a variable called <code>AgeCalculateYears</code> (according to a their own
+response, or their mother's response) if it's available, and uses
+<code>AgeSelfReportYears</code> (according to a their own response, or their mother's
+response)
+if not.  The values usually agree, but not always.
+These two separated variables are available for download,
+but withheld from the R package
+(otherwise we would exceed CRAN's maximum size).
+</p>
+<p>The exact <em>date</em> of birth isn't public (only the subject's <em>month</em> of birth).
+To balance the downward bias of two weeks, their birthday is set to the
+15th day of the month to produce <code>AgeCalculateYears</code>.
+</p>
+<p>In the Gen2 Child dataset, self-reported age is
+stated by month (eg, the child is 38 months old); a constant of 0.5 months has been added to balance the downward bias.  In the Gen2 YA and
+Gen1 datasets, self-reported age is stated by year (eg, the subject is 52 years old); a constant of 0.5 years has been added.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Will Beasley
+</p>
+<p><strong>Download CSV</strong>
+If you're using the NlsyLinks package in R, the dataset is automatically available.
+To use it in a different environment,
+<a href="https://github.com/nlsy-links/NlsyLinks/blob/master/outside-data/nlsy-79/survey-79.csv?raw=true">download the csv</a>,
+which is readable by all statistical software.
+<a href="https://github.com/nlsy-links/NlsyLinks/blob/master/outside-data/nlsy-79/links-metadata-2017-79.yml">links-metadata-2017-79.yml</a>
+documents the dataset version information.
+</p>
+
+
+<h3>Source</h3>
+
+<p>Gen1 information comes from the Summer 2013 release of the <a href="https://www.nlsinfo.org/content/cohorts/nlsy79">NLSY79 sample</a>.  Gen2 information
+comes from the January 2015 release of the
+<a href="https://www.nlsinfo.org/content/cohorts/nlsy79-children">NLSY79 Children and Young Adults sample</a>.  Data were extracted with the NLS Investigator
+(https://www.nlsinfo.org/investigator/).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NlsyLinks) # Load the package into the current R session.
+
+summary(Survey79)
+table(Survey79$SurveyYear, Survey79$SurveySource)
+table(is.na(Survey79$AgeSelfReportYears), is.na(Survey79$AgeCalculateYears))
+
+if (require(ggplot2) &amp; require(dplyr)) {
+  dsSourceYear &lt;- Survey79 %&gt;%
+    dplyr::count(SurveyYear, SurveySource) %&gt;%
+    dplyr::filter(SurveySource != "NoInterview")
+
+  Survey79 %&gt;%
+    dplyr::filter(SurveySource != "NoInterview") %&gt;%
+    dplyr::group_by(SurveySource, SurveyYear) %&gt;%
+    dplyr::summarize(
+      age_min = min(Age, na.rm = TRUE),
+      age_max = max(Age, na.rm = TRUE)
+    ) %&gt;%
+    dplyr::ungroup() %&gt;%
+    ggplot(aes(x = SurveyYear, ymin = age_min, ymax = age_max, color = SurveySource)) +
+    geom_errorbar() +
+    scale_color_brewer(palette = "Dark2") +
+    theme_minimal() +
+    theme(legend.position = c(0, 1), legend.justification = c(0, 1))
+}
+
+</code></pre>
+
+
+</div>

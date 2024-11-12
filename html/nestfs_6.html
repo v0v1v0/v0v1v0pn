@@ -1,0 +1,294 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-validated forward selection</h2>
+
+<h3>Description</h3>
+
+<p>Run forward selection starting from a baseline model. As it uses
+all observations in the input data frame, it is not possible to
+produce unbiased estimates of the predictive performance of the panel
+selected (use <code>nested.fs()</code> for that purpose).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fs(
+  formula,
+  data,
+  family,
+  choose.from = NULL,
+  test = c("t", "wilcoxon"),
+  num.inner.folds = 30,
+  max.iters = 10,
+  min.llk.diff = 2,
+  max.pval = 0.5,
+  sel.crit = c("paired.test", "total.loglik", "both"),
+  num.filter = 0,
+  filter.ignore = NULL,
+  seed = 50,
+  verbose = TRUE
+)
+
+forward.selection(x, y, init.model, family, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>An object of class <code>formula</code> (or one that can be coerced to
+that class) that describes the baseline model to be fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data frame or matrix containing outcome variable and predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>Type of model fitted: either <code>gaussian()</code> for linear regression
+or <code>binomial()</code> for logistic regression. This can be specified also as
+a function name (<code>gaussian</code>) or as a string (<code>"gaussian"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>choose.from</code></td>
+<td>
+<p>Indices or variable names over which the selection should
+be performed. If <code>NULL</code> (default), all variables in <code>x</code> that are not
+in <code>init.model</code> are considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>Type of statistical paired test to use (ignored if
+<code>sel.crit="total.loglik"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.inner.folds</code></td>
+<td>
+<p>Number of folds in the inner cross-validation. It
+must be at least 5 (default: 30).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.iters</code></td>
+<td>
+<p>Maximum number of iterations (default: 10).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.llk.diff</code></td>
+<td>
+<p>Minimum improvement in log-likelihood required before
+selection is terminated (default: 2).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.pval</code></td>
+<td>
+<p>Interrupt the selection when the best achievable p-value
+exceeds this threshold (default: 0.5).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sel.crit</code></td>
+<td>
+<p>Selection criterion: <code>"paired.test"</code> chooses the
+variable with smallest p-value using the paired test specified by
+<code>test</code> (see <strong>Details</strong>), as long as this is smaller than
+<code>max.pval</code>; <code>"total.loglik"</code> picks the variable that gives
+the largest increase in log-likelihood; <code>"both"</code> attempts to
+combine both previous criteria, choosing the variable that produces
+the largest increase in log-likelihood only among the best 5
+variables ranked according to the paired-test p-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.filter</code></td>
+<td>
+<p>Number of variables to be retained by the univariate
+association filter (see <strong>Details</strong>), which can only be enabled
+if <code>family=binomial()</code>. Variables listed in <code>init.model</code>
+are never filtered. If set to 0 (default), the filter is disabled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter.ignore</code></td>
+<td>
+<p>Vector of variable names that should not be pruned by
+the univariate association filter so that they are always allowed to
+be selected (ignored if <code>num.filter=0</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Seed of the random number generator for the inner folds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Whether the variable chosen at each iteration should be
+printed out (default: <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Dataframe of predictors: this should include all variables in
+the initial set and the variables that are allowed to enter the
+selected panel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Outcome variable. If <code>family=binomial</code>, it can only contain
+two classes of values that can be coerced to 0-1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.model</code></td>
+<td>
+<p>Either a formula or a vector of names of the initial set
+of variables that define the model from which the forward selection
+should start.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to <code>fs</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>At each iteration, this function runs cross-validation to choose which
+variable enters the final panel by fitting the current model augmented by
+each remaining variable considered one at a time.
+</p>
+<p>By default variables are selected according to the <code>paired.test</code>
+criterion. At each iteration, the sampling distribution of differences in
+validation log-likelihood obtained across all inner cross-validation folds
+of the models with and without each additional variable are tested against
+the null hypothesis of zero mean (with the alternative hypothesis being
+that the model with the additional variable is better). The test is paired
+according to the inner folds. Although the training folds are not
+independent, the p-value from this test approximates the probability that
+including the marker will not decrease the validation log-likelihood
+(approximate false discovery rate).
+</p>
+<p>In the case of a binary outcome when very large number of predictors is
+available, it may be convenient to apply a univariate association filter.
+If <code>num.filter</code> is set to a positive value, then all available
+predictors (excluding those whose name is matched by <code>filter.ignore</code>)
+are tested for univariate association with the outcome, and only the first
+<code>num.filter</code> enter the selection phase, while the others are filtered
+out. This is done on the training part of all inner folds. Filtering can
+enhance the performance of forward selection when the number of available
+variables exceeds about 30-40.
+</p>
+<p><code>forward.selection</code> provides the legacy interface used up to version 0.9.2.
+It is considered discontinued, and in the future it will be deprecated and
+eventually removed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>fs</code> containing the following fields:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fs</code></td>
+<td>
+<p>A data frame containing the forward selection summary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>The set of variables used in the initial model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>panel</code></td>
+<td>
+<p>Names of variables selected (in order).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.model</code></td>
+<td>
+<p>Right-hand side of the formula corresponding to the
+initial model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>final.model</code></td>
+<td>
+<p>Right-hand side of the formula corresponding to the
+final model after forward selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>Type of model fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>params</code></td>
+<td>
+<p>List of parameters used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter1</code></td>
+<td>
+<p>Summary statistics for all variables at the first iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.iter</code></td>
+<td>
+<p>Validation log-likelihoods for all inner folds at all
+iterations.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>nested.fs()</code> and <code>summary.fs()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(diabetes)
+fs.res &lt;- fs(Y ~ age + sex, data=diabetes, family=gaussian(),
+             choose.from=1:10, num.inner.folds=5, max.iters=3)
+summary(fs.res)
+
+
+</code></pre>
+
+
+</div>

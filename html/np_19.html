@@ -1,0 +1,561 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npcdens</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kernel Conditional Density Estimation with Mixed Data Types</h2>
+
+<h3>Description</h3>
+
+<p><code>npcdens</code> computes kernel conditional density estimates on
+<code class="reqn">p+q</code>-variate evaluation data, given a set of training data (both
+explanatory and dependent) and a bandwidth specification (a
+<code>conbandwidth</code> object or a bandwidth vector, bandwidth type, and
+kernel type) using the method of Hall, Racine, and Li (2004).
+The data may be continuous, discrete (unordered and ordered
+factors), or some combination thereof. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npcdens(bws, ...)
+
+## S3 method for class 'formula'
+npcdens(bws, data = NULL, newdata = NULL, ...)
+
+## S3 method for class 'call'
+npcdens(bws, ...)
+
+## S3 method for class 'conbandwidth'
+npcdens(bws,
+        txdat = stop("invoked without training data 'txdat'"),
+        tydat = stop("invoked without training data 'tydat'"),
+        exdat,
+        eydat,
+        gradients = FALSE,
+        ...)
+
+## Default S3 method:
+npcdens(bws, txdat, tydat, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as a <code>conbandwidth</code>
+object returned from a previous invocation of
+<code>npcdensbw</code>, or as a <code class="reqn">p+q</code>-vector of bandwidths,
+with each element <code class="reqn">i</code> up to <code class="reqn">i=q</code> corresponding to the
+bandwidth for column <code class="reqn">i</code> in <code>tydat</code>, and each element
+<code class="reqn">i</code> from <code class="reqn">i=q+1</code> to <code class="reqn">i=p+q</code> corresponding to the
+bandwidth for column <code class="reqn">i-q</code> in <code>txdat</code>. If specified as a
+vector, then additional arguments will need to be supplied as
+necessary to specify the bandwidth type, kernel types, training
+data, and so on.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradients</code></td>
+<td>
+
+<p>a logical value specifying whether to return estimates of the
+gradients at the evaluation points. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the bandwidth type,
+kernel types, and so on.  This is necessary if you
+specify bws as a <code class="reqn">p+q</code>-vector and not a <code>conbandwidth</code>
+object, and you do not desire the default behaviours. To do this,
+you may specify any of <code>bwmethod</code>, <code>bwscaling</code>,
+<code>bwtype</code>, <code>cxkertype</code>, <code>cxkerorder</code>,
+<code>cykertype</code>, <code>cykerorder</code>, <code>uxkertype</code>,
+<code>uykertype</code>, <code>oxkertype</code>, <code>oykertype</code>, as described
+in <code>npcdensbw</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(bws)</code>, typically the environment from which
+<code>npcdensbw</code> was called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, the training data are used.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>txdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of sample realizations of explanatory
+data (training data). Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tydat</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of sample realizations of dependent
+data (training data). Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data on which
+conditional densities will be evaluated. By default,
+evaluation takes place on the data provided by <code>txdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eydat</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of dependent data on which conditional
+densities will be evaluated. By default,
+evaluation takes place on the data provided by <code>tydat</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npcdens</code> implements a variety of methods for estimating
+multivariate conditional distributions (<code class="reqn">p+q</code>-variate) defined
+over a set of possibly continuous and/or discrete (unordered, ordered)
+data. The approach is based on Li and Racine (2004) who employ
+‘generalized product kernels’ that admit a mix of continuous
+and discrete data types.
+</p>
+<p>Three classes of kernel estimators for the continuous data types are
+available: fixed, adaptive nearest-neighbor, and generalized
+nearest-neighbor. Adaptive nearest-neighbor bandwidths change with
+each sample realization in the set, <code class="reqn">x_i</code>, when estimating
+the density at the point <code class="reqn">x</code>. Generalized nearest-neighbor
+bandwidths change with the point at which the density is estimated,
+<code class="reqn">x</code>. Fixed bandwidths are constant over the support of <code class="reqn">x</code>.
+</p>
+<p>Training and evaluation input data  may be a
+mix of continuous (default), unordered discrete (to be specified in
+the data frames using <code>factor</code>), and ordered discrete (to be
+specified in the data frames using <code>ordered</code>). Data can be
+entered in an arbitrary order and data types will be detected
+automatically by the routine (see <code>np</code> for details).
+</p>
+<p>A variety of kernels may be specified by the user. Kernels implemented
+for continuous data types include the second, fourth, sixth, and eighth
+order Gaussian and Epanechnikov kernels, and the uniform
+kernel. Unordered discrete data types use a variation on Aitchison and
+Aitken's (1976) kernel, while ordered data types use a variation of the
+Wang and van Ryzin (1981) kernel.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npcdens</code> returns a <code>condensity</code> object. The generic
+accessor functions <code>fitted</code>, <code>se</code>, and
+<code>gradients</code>, extract estimated values, asymptotic standard
+errors on estimates, and gradients, respectively, from the returned
+object. Furthermore, the functions <code>predict</code>,
+<code>summary</code> and <code>plot</code> support objects of both
+classes. The returned objects have the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xbw</code></td>
+<td>
+<p> bandwidth(s), scale factor(s) or nearest neighbours for the
+explanatory data, <code>txdat</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ybw</code></td>
+<td>
+<p> bandwidth(s), scale factor(s) or nearest neighbours for the
+dependent data, <code>tydat</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xeval</code></td>
+<td>
+<p> the evaluation points of the explanatory data </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yeval</code></td>
+<td>
+<p> the evaluation points of the dependent data </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>condens</code></td>
+<td>
+<p> estimates of the conditional density at the evaluation
+points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conderr</code></td>
+<td>
+<p> standard errors of the conditional density
+estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>congrad</code></td>
+<td>
+<p> if invoked with <code>gradients = TRUE</code>, estimates of
+the gradients at the evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>congerr</code></td>
+<td>
+<p> if invoked with <code>gradients = TRUE</code>, standard
+errors of the gradients at the evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log_likelihood</code></td>
+<td>
+<p> log likelihood of the conditional density estimate </p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>    
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Hall, P. and J.S. Racine and Q. Li (2004), “Cross-validation and the
+estimation of conditional probability densities,” Journal of the
+American Statistical Association, 99, 1015-1026.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics: Theory
+and Practice,</em> Princeton University Press.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em> Cambridge
+University Press. 
+</p>
+<p>Scott, D.W. (1992), <em>Multivariate Density Estimation. Theory,
+Practice and Visualization,</em> New York: Wiley.
+</p>
+<p>Silverman, B.W. (1986), <em>Density Estimation,</em> London: Chapman and
+Hall.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth estimators
+for discrete distributions,”  Biometrika, 68, 301-309.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npudens</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA): For this example, we load Giovanni
+# Baiocchi's Italian GDP panel (see Italy for details), and compute the
+# likelihood cross-validated bandwidths (default) using a second-order
+# Gaussian kernel (default). Note - this may take a minute or two
+# depending on the speed of your computer.
+
+data("Italy")
+attach(Italy)
+
+# First, compute the bandwidths... note that this may take a minute or
+# two depending on the speed of your computer. 
+
+bw &lt;- npcdensbw(formula=gdp~ordered(year))
+
+# Next, compute the condensity object...
+
+fhat &lt;- npcdens(bws=bw)
+
+# The object fhat now contains results such as the estimated conditional
+# density function (fhat$condens) and so on...
+
+summary(fhat)
+
+# Call the plot() function to visualize the results (&lt;ctrl&gt;-C will
+# interrupt on *NIX systems, &lt;esc&gt; will interrupt on MS Windows
+# systems).
+
+plot(bw)
+
+detach(Italy)
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): For this example, we load Giovanni
+# Baiocchi's Italian GDP panel (see Italy for details), and compute the
+# likelihood cross-validated bandwidths (default) using a second-order
+# Gaussian kernel (default). Note - this may take a minute or two
+# depending on the speed of your computer.
+
+data("Italy")
+attach(Italy)
+
+# First, compute the bandwidths... note that this may take a minute or
+# two depending on the speed of your computer. 
+
+# Note - we cast `X' and `y' as data frames so that plot() can
+# automatically grab names (this looks like overkill, but in
+# multivariate settings you would do this anyway, so may as well get in
+# the habit).
+
+X &lt;- data.frame(year=ordered(year))
+y &lt;- data.frame(gdp)
+
+bw &lt;- npcdensbw(xdat=X, ydat=y)
+
+# Next, compute the condensity object...
+
+fhat &lt;- npcdens(bws=bw)
+
+# The object fhat now contains results such as the estimated conditional
+# density function (fhat$condens) and so on...
+
+summary(fhat)
+
+# Call the plot() function to visualize the results (&lt;ctrl&gt;-C will
+# interrupt on *NIX systems, &lt;esc&gt; will interrupt on MS Windows systems).
+
+plot(bw)
+
+detach(Italy)
+
+# EXAMPLE 2 (INTERFACE=FORMULA): For this example, we load the old
+# faithful geyser data from the R `datasets' library and compute the
+# conditional density function.
+
+library("datasets")
+data("faithful")
+attach(faithful)
+
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+bw &lt;- npcdensbw(formula=eruptions~waiting)
+
+summary(bw)
+
+# Plot the density function (&lt;ctrl&gt;-C will interrupt on *NIX systems,
+# &lt;esc&gt; will interrupt on MS Windows systems).
+
+plot(bw)
+
+detach(faithful)
+
+# EXAMPLE 2 (INTERFACE=DATA FRAME): For this example, we load the old
+# faithful geyser data from the R `datasets' library and compute the
+# conditional density function.
+
+library("datasets")
+data("faithful")
+attach(faithful)
+
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+# Note - we cast `X' and `y' as data frames so that plot() can
+# automatically grab names (this looks like overkill, but in
+# multivariate settings you would do this anyway, so may as well get in
+# the habit).
+
+X &lt;- data.frame(waiting)
+y &lt;- data.frame(eruptions)
+
+bw &lt;- npcdensbw(xdat=X, ydat=y)
+
+summary(bw)
+
+# Plot the density function (&lt;ctrl&gt;-C will interrupt on *NIX systems, 
+# &lt;esc&gt; will interrupt on MS Windows systems)
+
+plot(bw)
+
+detach(faithful)
+
+# EXAMPLE 3 (INTERFACE=FORMULA): Replicate the DGP of Klein &amp; Spady
+# (1993) (see their description on page 405, pay careful attention to
+# footnote 6 on page 405).
+
+set.seed(123)
+
+n &lt;- 1000
+
+# x1 is chi-squared having 3 df truncated at 6 standardized by
+# subtracting 2.348 and dividing by 1.511
+
+x &lt;- rchisq(n, df=3)
+x1 &lt;- (ifelse(x &lt; 6, x, 6) - 2.348)/1.511
+
+# x2 is normal (0, 1) truncated at +- 2 divided by 0.8796
+
+x &lt;- rnorm(n)
+x2 &lt;- ifelse(abs(x) &lt; 2 , x, 2) / 0.8796
+
+# y is 1 if y* &gt; 0, 0 otherwise.
+
+y &lt;- ifelse(x1 + x2 + rnorm(n) &gt; 0, 1, 0)
+
+# Generate data-driven bandwidths (likelihood cross-validation). Note -
+# this may take a few minutes depending on the speed of your computer...
+
+bw &lt;- npcdensbw(formula=factor(y)~x1+x2)
+
+# Next, create the evaluation data in order to generate a perspective
+# plot
+
+x1.seq &lt;- seq(min(x1), max(x1), length=50)
+x2.seq &lt;- seq(min(x2), max(x2), length=50)
+X.eval &lt;- expand.grid(x1=x1.seq,x2=x2.seq)
+
+data.eval &lt;- data.frame(y=factor(rep(1, nrow(X.eval))),x1=X.eval[,1],x2=X.eval[,2])
+
+# Now evaluate the conditional probability for y=1 and for the
+# evaluation Xs
+
+fit &lt;- fitted(npcdens(bws=bw,newdata=data.eval))
+
+# Finally, coerce the data into a matrix for plotting with persp()
+
+fit.mat &lt;- matrix(fit, 50, 50)
+
+# Generate a perspective plot similar to Figure 2 b of Klein and Spady
+# (1993)
+
+persp(x1.seq, 
+      x2.seq, 
+      fit.mat, 
+      col="white", 
+      ticktype="detailed", 
+      expand=0.5, 
+      axes=FALSE, 
+      box=FALSE, 
+      main="Estimated Nonparametric Probability Perspective", 
+      theta=310, 
+      phi=25)
+
+# EXAMPLE 3 (INTERFACE=DATA FRAME): Replicate the DGP of Klein &amp; Spady
+# (1993) (see their description on page 405, pay careful attention to
+# footnote 6 on page 405).
+
+set.seed(123)
+
+n &lt;- 1000
+
+# x1 is chi-squared having 3 df truncated at 6 standardized by
+# subtracting 2.348 and dividing by 1.511
+
+x &lt;- rchisq(n, df=3)
+x1 &lt;- (ifelse(x &lt; 6, x, 6) - 2.348)/1.511
+
+# x2 is normal (0, 1) truncated at +- 2 divided by 0.8796
+
+x &lt;- rnorm(n)
+x2 &lt;- ifelse(abs(x) &lt; 2 , x, 2) / 0.8796
+
+# y is 1 if y* &gt; 0, 0 otherwise.
+
+y &lt;- ifelse(x1 + x2 + rnorm(n) &gt; 0, 1, 0)
+
+# Create the X matrix
+
+X &lt;- cbind(x1, x2)
+
+# Generate data-driven bandwidths (likelihood cross-validation). Note -
+# this may take a few minutes depending on the speed of your computer...
+
+bw &lt;- npcdensbw(xdat=X, ydat=factor(y))
+
+# Next, create the evaluation data in order to generate a perspective
+# plot
+
+x1.seq &lt;- seq(min(x1), max(x1), length=50)
+x2.seq &lt;- seq(min(x2), max(x2), length=50)
+X.eval &lt;- expand.grid(x1=x1.seq,x2=x2.seq)
+
+# Now evaluate the conditional probability for y=1 and for the
+# evaluation Xs
+
+fit &lt;- fitted(npcdens(exdat=X.eval, 
+               eydat=factor(rep(1, nrow(X.eval))), 
+               bws=bw))
+
+# Finally, coerce the data into a matrix for plotting with persp()
+
+fit.mat &lt;- matrix(fit, 50, 50)
+
+# Generate a perspective plot similar to Figure 2 b of Klein and Spady
+# (1993)
+
+persp(x1.seq, 
+      x2.seq, 
+      fit.mat, 
+      col="white", 
+      ticktype="detailed", 
+      expand=0.5, 
+      axes=FALSE, 
+      box=FALSE, 
+      main="Estimated Nonparametric Probability Perspective", 
+      theta=310, 
+      phi=25)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

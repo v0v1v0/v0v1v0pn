@@ -1,0 +1,81 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.nametagger</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform Named Entity Recognition on tokenised text</h2>
+
+<h3>Description</h3>
+
+<p>Perform Named Entity Recognition on tokenised text using a nametagger model
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nametagger'
+predict(object, newdata, split = "[[:space:]]+", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>an object of class <code>nametagger</code> as returned by <code>nametagger_load_model</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>a data.frame with tokenised sentences. This data.frame should contain the columns doc_id, sentence_id and text where
+<code>text</code> contains tokens in vertical format, meaning each token is put on a new line. Column doc_id should be of type character, column sentence_id of type integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split</code></td>
+<td>
+<p>a regular expression used to split <code>newdata</code>. Only used if <code>newdata</code> is a character vector containing text which is not tokenised</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a data.frame with columns doc_id, sentence_id, token and entity
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">path  &lt;- system.file(package = "nametagger", "models", "exampletagger.ner")
+model &lt;- nametagger_load_model(path)
+model
+
+x &lt;- c("I ga naar Brussel op reis.", "Goed zo dat zal je deugd doen Karel")
+entities &lt;- predict(model, x, split = "[[:space:][:punct:]]+")                          
+entities
+
+
+model &lt;- nametagger_download_model("english-conll-140408", model_dir = tempdir())
+
+x &lt;- data.frame(doc_id = c(1, 1, 2),
+                sentence_id = c(1, 2, 1),
+                text = c("I\nlive\nin\nNew\nYork\nand\nI\nwork\nfor\nApple\nInc.", 
+                         "Why\ndon't\nyou\ncome\nvisit\nme", 
+                         "Good\nnews\nfrom\nAmazon\nas\nJohn\nworks\nthere\n."))
+entities &lt;- predict(model, x)                          
+entities
+
+</code></pre>
+
+
+</div>

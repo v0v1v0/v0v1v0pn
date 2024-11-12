@@ -1,0 +1,250 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>setupMargNodes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Organize model nodes for marginalization</h2>
+
+<h3>Description</h3>
+
+<p>Process model to organize nodes for marginalization (integration over latent 
+nodes or random effects) as by Laplace approximation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">setupMargNodes(
+  model,
+  paramNodes,
+  randomEffectsNodes,
+  calcNodes,
+  calcNodesOther,
+  split = TRUE,
+  check = TRUE,
+  allowDiscreteLatent = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A nimble model such as returned by <code>nimbleModel</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>paramNodes</code></td>
+<td>
+<p>A character vector of names of stochastic nodes that are
+parameters of nodes to be marginalized over (<code>randomEffectsNodes</code>).
+See details for default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>randomEffectsNodes</code></td>
+<td>
+<p>A character vector of nodes to be marginalized over
+(or "integrated out"). In the case of calculating the likelihood of a model
+with continuous random effects, the nodes to be marginalized over are the
+random effects, hence the name of this argument. However, one can
+marginalize over any nodes desired as long as they are continuous. 
+See details for default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calcNodes</code></td>
+<td>
+<p>A character vector of nodes to be calculated as the
+integrand for marginalization. Typically this will include
+<code>randomEffectsNodes</code> and some data nodes. Se details for default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calcNodesOther</code></td>
+<td>
+<p>A character vector of nodes to be calculated as part of
+the log likelihood that are not connected to the <code>randomEffectNodes</code>
+and so are not actually part of the marginalization. These are somewhat
+extraneous to the purpose of this function, but it is convenient to handle
+them here because often the purpose of marginalization is to calculate log
+likelihoods, including from "other" parts of the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split</code></td>
+<td>
+<p>A logical indicating whether to split <code>randomEffectsNodes</code>
+into conditionally independent sets that can be marginalized separately
+(<code>TRUE</code>) or to keep them all in one set for a single marginalization
+calculation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>check</code></td>
+<td>
+<p>A logical indicating whether to try to give reasonable warnings
+of badly formed inputs that might be missing important nodes or include
+unnecessary nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allowDiscreteLatent</code></td>
+<td>
+<p>A logical indicating whether to
+allow discrete latent states. (default = <code>FALSE</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is used by <code>buildLaplace</code> to organize model nodes into
+roles needed for setting up the (approximate) marginalization done by Laplace
+approximation. It is also possible to call this function directly and pass
+the resulting list (possibly modified for your needs) to <code>buildLaplace</code>.
+</p>
+<p>Any of the input node vectors, when provided, will be processed using
+<code>nodes &lt;- model$expandNodeNames(nodes)</code>, where <code>nodes</code> may be
+<code>paramNodes</code>, <code>randomEffectsNodes</code>, and so on. This step allows
+any of the inputs to include node-name-like syntax that might contain
+multiple nodes. For example, <code>paramNodes = 'beta[1:10]'</code> can be
+provided if there are actually 10 scalar parameters, 'beta[1]' through
+'beta[10]'. The actual node names in the model will be determined by the
+<code>exapndNodeNames</code> step.
+</p>
+<p>This function does not do any of the marginalization calculations. It only
+organizes nodes into roles of parameters, random effects, integrand
+calculations, and other log likelihood calculations.
+</p>
+<p>The checking done if ‘check=TRUE' tries to be reasonable, but it can’t cover
+all cases perfectly. If it gives an unnecessary warning, simply set 'check=FALSE'.
+</p>
+<p>If <code>paramNodes</code> is not provided, its default depends on what other
+arguments were provided. If neither <code>randomEffectsNodes</code> nor
+<code>calcNodes</code> were provided, <code>paramNodes</code> defaults to all
+top-level, stochastic nodes, excluding any posterior predictive nodes
+(those with no data anywhere downstream). These are determined by
+<code>model$getNodeNames(topOnly = TRUE, stochOnly = TRUE,
+  includePredictive = FALSE)</code>. If <code>randomEffectsNodes</code> was provided,
+<code>paramNodes</code> defaults to stochastic parents of
+<code>randomEffectsNodes</code>. In these cases, any provided <code>calcNodes</code> or
+<code>calcNodesOther</code> are excluded from default <code>paramNodes</code>. If
+<code>calcNodes</code> but not <code>randomEffectsNodes</code> was provided, then the
+default for <code>randomEffectsNodes</code> is determined first, and then
+<code>paramNodes</code> defaults to stochastic parents of
+<code>randomEffectsNodes</code>. Finally, any stochastic parents of
+<code>calcNodes</code> (whether provided or default) that are not in
+<code>calcNodes</code> are added to the default for <code>paramNodes</code>, but only
+after <code>paramNodes</code> has been used to determine the defaults for
+<code>randomEffectsNodes</code>, if necessary.
+</p>
+<p>Note that to obtain sensible defaults, some nodes must have been marked as
+data, either by the <code>data</code> argument in <code>nimbleModel</code> or by
+<code>model$setData</code>. Otherwise, all nodes will appear to be posterior
+predictive nodes, and the default <code>paramNodes</code> may be empty.
+</p>
+<p>For purposes of <code>buildLaplace</code>, <code>paramNodes</code> does not need to (but
+may) include deterministic nodes between the parameters and any
+<code>calcNodes</code>. Such deterministic nodes will be included in
+calculations automatically when needed.
+</p>
+<p>If <code>randomEffectsNodes</code> is missing, the default is a bit complicated: it
+includes all latent nodes that are descendants (or "downstream") of
+<code>paramNodes</code> (if provided) and are either (i) ancestors (or
+"upstream") of data nodes (if <code>calcNodes</code> is missing), or (ii)
+ancestors or elements of <code>calcNodes</code> (if <code>calcNodes</code> and
+<code>paramNodes</code> are provided), or (iii) elements of <code>calcNodes</code> (if
+<code>calcNodes</code> is provided but <code>paramNodes</code> is missing). In all
+cases, discrete nodes (with warning if <code>check=TRUE</code>), posterior
+predictive nodes and <code>paramNodes</code> are excluded.
+</p>
+<p><code>randomEffectsNodes</code> should only include stochastic nodes.
+</p>
+<p>If <code>calcNodes</code> is missing, the default is <code>randomEffectsNodes</code> and
+their descendants to the next stochastic nodes, excluding posterior
+predictive nodes. These are determined by
+<code>model$getDependencies(randomEffectsNodes, includePredictive=FALSE)</code>.
+</p>
+<p>If <code>calcNodesOther</code> is missing, the default is all stochastic
+descendants of <code>paramNodes</code>, excluding posterior predictive nodes
+(from <code>model$getDependencies(paramNodes, stochOnly=TRUE, self=FALSE,
+  includePosterior=FALSE)</code>) that are not part of <code>calcNodes</code>.
+</p>
+<p>For purposes of <code>buildLaplace</code>, neither <code>calcNodes</code> nor
+<code>calcNodesOther</code> needs to (but may) contain deterministic nodes
+between <code>paramNodes</code> and <code>calcNodes</code> or <code>calcNodesOther</code>,
+respectively. These will be included in calculations automatically when
+needed.
+</p>
+<p>If <code>split</code> is <code>TRUE</code>, <code>model$getConditionallyIndependentSets</code>
+is used to determine sets of the <code>randomEffectsNodes</code> that can be
+independently marginalized. The <code>givenNodes</code> are the
+<code>paramNodes</code> and <code>calcNodes</code> excluding any
+<code>randomEffectsNodes</code> and their deterministic descendants. The
+<code>nodes</code> (to be split into sets) are the <code>randomEffectsNodes</code>.
+</p>
+<p>If <code>split</code> is a numeric vector, <code>randomEffectsNodes</code> will be split
+by <code>split</code>(<code>randomEffectsNodes</code>, <code>control$split</code>). The last
+option allows arbitrary control over how <code>randomEffectsNodes</code> are
+blocked.
+</p>
+<p>If <code>check=TRUE</code>, then defaults for each of the four categories of nodes
+are created even if the corresponding argument was provided. Then warnings
+are emitted if there are any extra (potentially unnecessary) nodes provided
+compared to the default or if there are any nodes in the default that were
+not provided (potentially necessary). These checks are not perfect and may
+be simply turned off if you are confident in your inputs.
+</p>
+<p>(If <code>randomEffectsNodes</code> was provided but <code>calcNodes</code> was not
+provided, the default (for purposes of <code>check=TRUE</code> only) for
+<code>randomEffectsNodes</code> differs from the above description. It uses
+stochastic descendants of <code>randomEffectsNodes</code> in place of the
+"data nodes" when determining ancestors of data nodes. And it uses item
+(ii) instead of (iii) in the list above.)
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list is returned with elements:
+</p>
+
+<ul>
+<li> <p><code>paramNodes</code>: final processed version of <code>paramNodes</code>
+</p>
+</li>
+<li> <p><code>randomEffectsNodes</code>: final processed version of <code>randomEffectsNodes</code>
+</p>
+</li>
+<li> <p><code>calcNodes</code>: final processed version of <code>calcNodes</code>
+</p>
+</li>
+<li> <p><code>calcNodesOther</code>: final processed version of <code>calcNodesOther</code>
+</p>
+</li>
+<li> <p><code>givenNodes</code>: Input to <code>model$getConditionallyIndependentSets</code>, if <code>split=TRUE</code>.
+</p>
+</li>
+<li> <p><code>randomEffectsSets</code>: Output from
+<code>model$getConditionallyIndependentSets</code>, if <code>split=TRUE</code>. This
+will be a list of vectors of node names. The node names in one list element
+can be marginalized independently from those in other list elements. The
+union of the list elements should be all of <code>randomEffectsNodes</code>. If
+<code>split=FALSE</code>, <code>randomEffectsSets</code> will be a list with one
+element, simply containing <code>randomEffectsNodes</code>. If <code>split</code> is a
+numeric vector,  <code>randomEffectsSets</code> will be the result of
+<code>split</code>(<code>randomEffectsNodes</code>, <code>control$split</code>).
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Wei Zhang, Perry de Valpine, Paul van Dam-Bates
+</p>
+
+
+</div>

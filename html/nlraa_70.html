@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SSratio</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>self start for a rational curve</h2>
+
+<h3>Description</h3>
+
+<p>Self starter for a rational curve
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ratio(x, a, b, c, d)
+
+SSratio(x, a, b, c, d)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>input vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>parameter related to the maximum value of the response (numerator)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>power exponent for numerator</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>parameter related to the maximum value of the response (denominator)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>power exponent for denominator</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The equation is: </p>
+<p style="text-align: center;"><code class="reqn"> a * x ^ c / (1 + b * x ^ d)</code>
+</p>
+
+<p>This function is described in Archontoulis and Miguez (2015) - (doi:10.2134/agronj2012.0506).  
+One example application is in Bril et al. (1994) <a href="https://edepot.wur.nl/333930">https://edepot.wur.nl/333930</a> - pages 19 and 21. 
+The parameters are difficult to interpret, but the function is very flexible. I have not tested this, 
+but it might be beneficial to re-scale x and y to the (0,1) range if this function is hard to fit.
+<a href="https://en.wikipedia.org/wiki/Rational_function">https://en.wikipedia.org/wiki/Rational_function</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a numeric vector of the same length as x containing parameter estimates for equation specified
+</p>
+<p>ratio: vector of the same length as x using a rational function
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(ggplot2)
+require(minpack.lm)
+set.seed(1234)
+x &lt;- 1:100
+y &lt;- ratio(x, 1, 0.5, 1, 1.5) + rnorm(length(x), 0, 0.025)
+dat &lt;- data.frame(x = x, y = y)
+fit &lt;- nlsLM(y ~ SSratio(x, a, b, c, d), data = dat)
+## plot
+ggplot(data = dat, aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_line(aes(y = fitted(fit)))
+
+</code></pre>
+
+
+</div>

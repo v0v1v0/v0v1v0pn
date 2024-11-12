@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>clustConfigurations</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Fit of Cluster Configurations for Networks </h2>
+
+<h3>Description</h3>
+
+ 
+<p>Evaluates clustering solutions for n = 1, n = 2, ..., n = n clusters, by comparing 
+the clustered matrix to the observed correlation matrix. Returns a correlation vector 
+and a plot. Designed for networks.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">clustConfigurations(vertices, hclustresult, observedcorrelation)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>vertices</code></td>
+<td>
+<p> scalar value indicating the number of vertices </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hclustresult</code></td>
+<td>
+<p> hclust result matrix object (or similar object that works 
+with the cutree() function) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>observedcorrelation</code></td>
+<td>
+<p> the observed correlation matrix </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p> This function helps the user discern the number of clusters that best 
+describe the underlying data. It loops through all of possible 
+clusters (1 through n, where n is the number of actors in the network). 
+For each solution corresponding to a given number of 
+clusters, it uses the cutree() to assign the vertices (or columns) to 
+their respective clusters corresponding to that solution.
+</p>
+<p>From this, the function generates a matrix of within- and between-
+cluster correlations. When there is one cluster for each vertex in 
+the network, the cell values will be identical to the observed 
+correlation matrix. When there is one cluster for the whole network, 
+the values will all be equal to the average correlation across the 
+observed matrix.
+</p>
+<p>From a visual inspection of the correlation matrix, the user can 
+decide on the proper number of clusters in this network. 
+</p>
+
+
+<h3>Value</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>clustConfigurations$correlations</code></td>
+<td>
+<p> a vector of length n showing correlation between 
+clustered and observed correlation matrix </p>
+</td>
+</tr></table>
+<h3>Author(s)</h3>
+
+<p>Mike Nowak <a href="mailto:michael.nowak@gmail.com">michael.nowak@gmail.com</a></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">	# Generate socmatrix
+	socmatrix = matrix(c(1,1,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,1,0), nrow = 5, ncol = 5)
+	socmatrix 
+	socmatrix_cors &lt;- cor(socmatrix)
+	socmatrix_cors
+	
+	# To use correlation values in hierarchical clustering, they must 
+	# first be coerced into a "dissimilarity structure" using dist().
+	# We subtract the values from 1 so that they are all greater than 
+	# or equal to 0; thus, highly dissimilar (i.e., negatively 
+	# correlated) actors have higher values.
+	dissimilarity &lt;- 1 - socmatrix_cors
+	socmatrix_dist &lt;- as.dist(dissimilarity)
+	socmatrix_dist
+	
+	# hclust() performs a hierarchical agglomerative clustering 
+	# operation based on the values in the dissimilarity matrix 
+	# yielded by as.dist() above. The standard visualization is a 
+	# dendrogram. 
+	socmatrix_hclust &lt;- hclust(socmatrix_dist)
+	plot(socmatrix_hclust)
+	
+	# cutree() allows us to use the output of hclust() to set
+	# different numbers of clusters and assign vertices to clusters
+	# as appropriate. For example:
+	cutree(socmatrix_hclust, k=2)
+	
+	# Now we'll try to figure out the number of clusters that best 
+	# describes the underlying data. To do this, we'll loop through
+	# all of the possible numbers of clusters (1 through n, where n is
+	# the number of actors in the network). For each solution
+	# corresponding to a given number of clusters, we'll use cutree()
+	# to assign the vertices to their respective clusters 
+	# corresponding to that solution.
+	#
+	# From this, we can generate a matrix of within- and between-
+	# cluster correlations. Thus, when there is one cluster for each 
+	# vertex in the network, the cell values will be identical to the
+	# observed correlation matrix, and when there is one cluster for 
+	# the whole network, the values will all be equal to the average
+	# correlation across the observed matrix.
+	#
+	# We can then correlate each by-cluster matrix with the observed
+	# correlation matrix to see how well the by-cluster matrix fits
+	# the data. We'll store the correlation for each number of
+	# clusters in a vector, which we can then plot.
+	
+	# First, find n:
+	num_vertices = ncol(socmatrix)
+	
+	# Next, use the clustConfigurations function:
+	clustered_observed_cors &lt;-clustConfigurations(num_vertices,socmatrix_hclust,socmatrix_cors)
+	
+	# Choose n where the line starts to flatten beyond 45 degrees. 
+	# Three looks like a good number for this example.
+	
+	num_clusters = 3
+	
+	clusters &lt;- cutree(socmatrix_hclust, k = num_clusters)
+	clusters
+	
+	( cluster_cor_mat &lt;- clusterCorr(socmatrix_cors, clusters) )
+</code></pre>
+
+
+</div>

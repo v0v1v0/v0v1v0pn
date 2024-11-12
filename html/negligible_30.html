@@ -1,0 +1,315 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neg.twocors</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test for Evaluating Negligible Effects of Two Independent or Dependent Correlation Coefficients: Based on Counsell &amp; Cribbie (2015)</h2>
+
+<h3>Description</h3>
+
+<p>This function evaluates whether the difference between two correlation coefficients can be considered statistically and practically negligible
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neg.twocors(
+  data = NULL,
+  r1v1 = NULL,
+  r1v2 = NULL,
+  r2v1 = NULL,
+  r2v2 = NULL,
+  r1 = NULL,
+  n1 = NULL,
+  r2 = NULL,
+  n2 = NULL,
+  dep = FALSE,
+  r3 = NA,
+  test = "AH",
+  eiu,
+  eil,
+  alpha = 0.05,
+  bootstrap = TRUE,
+  nboot = 1000,
+  seed = NA,
+  plots = TRUE,
+  saveplots = FALSE,
+  ...
+)
+
+## S3 method for class 'neg.twocors'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data.frame or matrix which includes the variables in r1 and r2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r1v1</code></td>
+<td>
+<p>the name of the 1st variable included in the 1st correlation coefficient (r1, variable 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r1v2</code></td>
+<td>
+<p>the name of the 2nd variable included in the 1st correlation coefficient (r1, variable 2)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r2v1</code></td>
+<td>
+<p>the name of the 1st variable included in the 2nd correlation coefficient (r2, variable 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r2v2</code></td>
+<td>
+<p>the name of the 2nd variable included in the 2st correlation coefficient (r2, variable 2)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r1</code></td>
+<td>
+<p>entered 1st correlation coefficient manually, without a dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n1</code></td>
+<td>
+<p>entered sample size associated with r1 manually, without a dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r2</code></td>
+<td>
+<p>entered 2nd correlation coefficient manually, without a dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n2</code></td>
+<td>
+<p>entered sample size associated with r2 manually, without a dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dep</code></td>
+<td>
+<p>are the correlation coefficients dependent (overlapping)?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r3</code></td>
+<td>
+<p>if the correlation coefficients are dependent and no datasets were entered, specify the correlation between the two, non-intersecting variables (e.g. if r1 = r12 and r2 = r13, then r3 = r23)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>'AH' is the default based on recommendation in Counsell &amp; Cribbie (2015), 'TOST' is an additional (albeit, more conservative) option.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eiu</code></td>
+<td>
+<p>upper bound of the equivalence interval measured as the largest difference between the two correlations for which the two coefficients would still be considered equivalent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eil</code></td>
+<td>
+<p>lower bound of the equivalence interval measured as the largest difference between the two correlations for which the two coefficients would still be considered equivalent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>desired alpha level, defualt is .05</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstrap</code></td>
+<td>
+<p>logical, default is TRUE, incorporating bootstrapping when calculating regression coefficients, SE, and CIs</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>1000 is the default. indicate if other number of bootstrapping iterations is desired</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>to reproduce previous analyses using bootstrapping, the user can set their seed of choice</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+<p>logical, plotting the results. TRUE is set as default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>saveplots</code></td>
+<td>
+<p>FALSE for no, "png" and "jpeg" for different formats</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>extra arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>neg.twocors</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function evaluates whether the difference between two correlation coefficients can be considered statistically and practically negligible according to a predefined interval. i.e., minimally meaningful effect size (MMES)/smallest effect size of interest (SESOI). The effect size tested is the difference between two correlation coefficients (i.e., r1 - r2).
+</p>
+<p>Unlike the most common null hypothesis significance tests looking to detect a difference or the existence of an effect statistically different than zero, in negligible effect testing, the hypotheses are flipped: In essence, H0 states that the effect is non-negligible, whereas H1 states that the effect is in fact statistically and practically negligible.
+</p>
+<p>The statistical tests are based on Anderson-Hauck (1983) and Schuirmann's (1987) Two One-Sided Test (TOST) equivalence testing procedures; namely addressing the question of whether the estimated effect size (and its associated uncertainty) of a difference between two correlation coefficients (i.e., r1 and r2) is smaller than the what the user defines as negligible effect size. Defining what is considered negligible effect is done by specifying the negligible (equivalence) interval: its upper (eiu) and lower (eil) bounds.
+</p>
+<p>The negligible (equivalence) interval should be set based on the context of the research. Because the two correlations (and, therefore their difference) are in standardized units, setting eil and eiu is a matter of determining what is the smallest difference between the two correlations that can be considered of practical significance. For example, if the user determines that the smallest effect of interest is 0.1 – that is, any difference between the two correlation coefficient larger than 0.1 is meaningful in this context - then eil will be set to -0.1 and eiu to 0.1. Therefore, any observable difference that is larger than -0.1 AND smaller than 0.1, will be considered practically negligible.
+</p>
+<p>There are two main approaches to using neg.twocors. The first (and more recommended) is by inserting a dataset ('data' argument) into the function. If the user/s have access to the dataset, they should use the following set of arguments: data, formula, r1v1, r1v2, r2v1, r2v2, dep (if applicable), bootstrap (optional), nboot (optional), and seed (optional). However, this function also accommodates cases where no dataset is available. In this case, users should use the following set of arguments instead: r1, n1, r2, n2, and r3 (if applicable). In either situation, users must specify the negligible interval bounds (eiu and eil). Other optional arguments and features include: alpha, test, plots, and saveplots.
+</p>
+<p>This function accommodates both independent and dependent correlations. A user might want to compare two independent correlations. For example, the correlation between X and Y in one group (e.g., Control group; rXYc) with the correlation between X and Y in a different, independent group (e.g., Treatment group; rXYt). The ‘independent correlations’ setting (i.e., dep=FALSE) is the default in this function. However, in other cases, a user might want to compare two dependent correlation coefficients. That is, the two correlations share a common variable (i.e., same variable values). For example, the correlation between X and Y in one group (e.g., Treatment group; rXYt) with the correlation between X and B in the same group (e.g., Treatment group; rXBt). Because values in variable X are shared among the two correlations, the two correlations (e.g., rXYt and rXBt) are not independent from one another, but, in fact, dependent. To compare two dependent correlation coefficients, users need only to specify dep=TRUE. If no dataset is entered into the function, users should also use the argument r3, which will hold the correlation between the two non-shared variables. In the example above (i.e., rXYt and rXBt), the two non-shared variables are Y and B. In this case, r3 = rYBt.  If dep=TRUE is entered into the function, test statistics and p values will be calculated differently to account for the shared variable. The negligible testing methods for comparing dependent correlations in this function are based on Williams’s (1959) modification to Hotelling’s (1931) test for comparing overlapping dependent correlations. For more details see Counsell and Cribbie (2015).
+</p>
+<p>The proportional distance (PD; effect size/eiu) estimates the proportional distance of the estimated effect to eiu, and acts as an alternative effect size measure.
+</p>
+<p>The confidence interval for the PD is computed via bootstrapping (percentile bootstrap), unless the user does not insert a dataset. In which case, the PD confidence interval is calculated by dividing the upper and lower CI bounds for the effect size estimate by the absolute value of the negligible interval bounds.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>list</code> containing the following:
+</p>
+
+<ul>
+<li> <p><code>r1v1</code> Name of the 1st variable included in the 1st correlation coefficient (r1, variable 1 ; if applicable)
+</p>
+</li>
+<li> <p><code>r1v2</code> Name of the 2nd variable included in the 1st correlation coefficient (r1, variable 2; if applicable)
+</p>
+</li>
+<li> <p><code>r2v1</code> Name of the 1st variable included in the 2nd correlation coefficient (r2, variable 1; if applicable)
+</p>
+</li>
+<li> <p><code>r2v2</code> Name of the 2nd variable included in the 2nd correlation coefficient (r2, variable 2; if applicable)
+</p>
+</li>
+<li> <p><code>r1</code> Effect size of the first bivariate relationship (1st correlation coefficient)
+</p>
+</li>
+<li> <p><code>n1</code> Sample size in each variable included in the first correlation (r1)
+</p>
+</li>
+<li> <p><code>r2</code> Effect size of the second bivariate relationship (2nd correlation coefficient)
+</p>
+</li>
+<li> <p><code>n2</code> Sample size in each variable included in the second correlation (r2)
+</p>
+</li>
+<li> <p><code>r3</code> If the correlation coefficients (r1 and r2) are dependent, r3 is then the correlation coefficient of the two, non-intersecting variables (e.g. if r1 = r12 and r2 = r13, then r3 = r23; if applicable)
+</p>
+</li>
+<li> <p><code>rsdiff</code> The difference between the two correlation coefficients. Specifically, r1 - r2.
+</p>
+</li>
+<li> <p><code>se</code> Standard error associated with the effect size point estimate (the difference between r1 and r2). The SE calculations are based on Kraatz (2007) and can be found in  Counsell &amp; Cribbie (2015)
+</p>
+</li>
+<li> <p><code>dep</code> Logical. TRUE if r1 and r2 are dependent, otherwise FALSE
+</p>
+</li>
+<li> <p><code>eil</code> Lower bound of the negligible effect (equivalence) interval
+</p>
+</li>
+<li> <p><code>eiu</code> Upper bound of the negligible effect (equivalence) interval
+</p>
+</li>
+<li> <p><code>u.ci.a</code> Upper bound of the 1-alpha CI for the effect size
+</p>
+</li>
+<li> <p><code>l.ci.a</code> Lower bound of the 1-alpha CI for the effect size
+</p>
+</li>
+<li> <p><code>pd</code> Proportional distance
+</p>
+</li>
+<li> <p><code>pd.l.ci</code> Lower bound of the 1-alpha CI for the PD
+</p>
+</li>
+<li> <p><code>pd.u.ci</code> Upper bound of the 1-alpha CI for the PD
+</p>
+</li>
+<li> <p><code>seed</code> Seed identity if bootstrapping is used (if applicable)
+</p>
+</li>
+<li> <p><code>nboot</code> Number of bootstrapping iterations, if bootstrapping was used (if applicable)
+</p>
+</li>
+<li> <p><code>which.test</code> Test type, e.g., AH-rho-D, KTOST-rho etc. See Counsell &amp; Cribbie (2015) for details
+</p>
+</li>
+<li> <p><code>degfree</code> Degrees of freedom associated with the test statistic
+</p>
+</li>
+<li> <p><code>pv</code> p value associated with the test statistic. If TOST was specified, only the larger of the p values will be presented
+</p>
+</li>
+<li> <p><code>NHSTdecision</code> NHST decision
+</p>
+</li>
+<li> <p><code>alpha</code> Nominal Type I error rate
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Rob Cribbie <a href="mailto:cribbie@yorku.ca">cribbie@yorku.ca</a> and
+Alyssa Counsell <a href="mailto:a.counsell@ryerson.ca">a.counsell@ryerson.ca</a> and
+Udi Alter <a href="mailto:udialter@gmail.com">udialter@gmail.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Negligible difference between two correlation coefficients
+# Equivalence interval: -.15 to .15
+v1a&lt;-stats::rnorm(10)
+v2a&lt;-stats::rnorm(10)
+v1b &lt;- stats::rnorm(10)
+v2b &lt;- stats::rnorm(10)
+dat&lt;-data.frame(v1a, v2a, v1b, v2b)
+# dataset available (independent correlation coefficients):
+neg.twocors(r1v1=v1a,r1v2=v2a,r2v1=v1b,r2v2=v2b,data=dat,eiu=.15,eil=-.15,nboot=50, dep=FALSE)
+neg.twocors(r1=0.5,n1=300,r2=0.6,n2=500,eiu=.15,eil=-0.15, dep=TRUE, r3=0.51)
+# end.
+
+
+
+
+</code></pre>
+
+
+</div>

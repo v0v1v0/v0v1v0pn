@@ -1,0 +1,88 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>replace_outside_surface</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Replace Values Outside Surface of image</h2>
+
+<h3>Description</h3>
+
+<p>Determines values outside the surface of an image and gives a 
+mask back with those values set to a replacement.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">replace_outside_surface(
+  img,
+  value = 0,
+  threshold = 0,
+  replace_value = NA,
+  reorient = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>nifti object or array</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>Value to check against.  If zero, then 
+<code>replace_outside_surface</code> will include any dimension that has 
+fewer than <code>threshold</code> zeroes. May be a vector of values, matched with 
+<code>match</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>Include dimension if fewer than <code>threshold</code> voxels
+are in the slice</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace_value</code></td>
+<td>
+<p>Value to replace those outside the surface.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reorient</code></td>
+<td>
+<p>Should image be reoriented if a filename?
+Passed to <code>check_nifti</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Creates an array of binary values.  If <code>img</code> is a <code>nifti</code>
+object, then a <code>nifti</code> is returned
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(5)
+dims = rep(10, 3)
+arr = array(0, dim = dims)
+
+arr[ 3:5, 4:6, c(2, 6:8, 5)] = 1
+nim = oro.nifti::nifti(arr)
+out = replace_outside_surface(nim, replace_value = 0)
+out_arr = replace_outside_surface(arr, replace_value = 0)
+testthat::expect_equal(out_arr, array(out, dim = dim(out)))
+</code></pre>
+
+
+</div>

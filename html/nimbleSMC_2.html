@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>buildBootstrapFilter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a bootstrap particle filter algorithm to estimate log-likelihood.</h2>
+
+<h3>Description</h3>
+
+<p>Create a bootstrap particle filter algorithm for a given NIMBLE state space model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">buildBootstrapFilter(model, nodes, control = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A nimble model object, typically representing a state 
+space model or a hidden Markov model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>A character vector specifying the stochastic latent model nodes 
+over which the particle filter will stochastically integrate to
+estimate the log-likelihood function.  All provided nodes must be stochastic.
+Can be one of three forms: a variable name, in which case all elements in the variable
+are taken to be latent (e.g., 'x'); an indexed variable, in which case all indexed elements are taken
+to be latent (e.g., 'x[1:100]' or 'x[1:100, 1:2]'); or a vector of multiple nodes, one per time point,
+in increasing time order (e.g., c("x[1:2, 1]", "x[1:2, 2]", "x[1:2, 3]", "x[1:2, 4]")).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list specifying different control options for the particle filter.  Options are described in the details section below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Each of the <code>control()</code> list options are described in detail here:
+</p>
+
+<dl>
+<dt>thresh</dt>
+<dd>
+<p> A number between 0 and 1 specifying when to resample: the resampling step will occur when the
+effective sample size is less than <code>thresh</code> times the number of particles. Defaults to 0.8. Note that at the last time step, resampling will always occur so that the <code>mvEWsamples</code> <code>modelValues</code> contains equally-weighted samples.</p>
+</dd>
+<dt>resamplingMethod</dt>
+<dd>
+<p>The type of resampling algorithm to be used within the particle filter. Can choose between <code>'default'</code> (which uses NIMBLE's <code>rankSample()</code> function),  <code>'systematic'</code>, <code>'stratified'</code>, <code>'residual'</code>, and <code>'multinomial'</code>.  Defaults to <code>'default'</code>.  Resampling methods other than <code>'default'</code> are currently experimental.</p>
+</dd>
+<dt>saveAll</dt>
+<dd>
+<p>Indicates whether to save state samples for all time points (TRUE), or only for the most recent time point (FALSE)</p>
+</dd>
+<dt>smoothing</dt>
+<dd>
+<p>Decides whether to save smoothed estimates of latent states, i.e., samples from f(x[1:t]|y[1:t]) if <code>smoothing = TRUE</code>, or instead to save filtered samples from f(x[t]|y[1:t]) if <code>smoothing = FALSE</code>.  <code>smoothing = TRUE</code> only works if <code>saveAll = TRUE</code>.</p>
+</dd>
+<dt>timeIndex</dt>
+<dd>
+<p>An integer used to manually specify which dimension of the latent state variable indexes time.  
+Only needs to be set if the number of time points is less than or equal to the size of the latent state at each time point.</p>
+</dd>
+<dt>initModel</dt>
+<dd>
+<p>A logical value indicating whether to initialize the model before running the filtering algorithm.  Defaults to TRUE.</p>
+</dd>
+</dl>
+<p>The bootstrap filter starts by generating a sample of estimates from the 
+prior distribution of the latent states of a state space model.  At each time point, these particles are propagated forward 
+by the model's transition equation.  Each particle is then given a weight 
+proportional to the value of the observation equation given that particle. 
+The weights are used to draw an equally-weighted sample of the particles at this time point.
+The algorithm then proceeds
+to the next time point.  Neither the transition nor the observation equations are required to 
+be normal for the bootstrap filter to work.   
+</p>
+<p>The resulting specialized particle filter algorthm will accept a
+single integer argument (<code>m</code>, default 10,000), which specifies the number
+of random \'particles\' to use for estimating the log-likelihood.  The algorithm 
+returns the estimated log-likelihood value, and saves
+unequally weighted samples from the posterior distribution of the latent
+states in the <code>mvWSamples</code> modelValues object, with corresponding logged weights in <code>mvWSamples['wts',]</code>.
+An equally weighted sample from the posterior can be found in the <code>mvEWSamples</code> <code>modelValues</code> object.
+</p>
+<p>Note that if the <code>thresh</code> argument is set to a value less than 1, resampling may not take place at every time point.  
+At time points for which resampling did not take place, <code>mvEWSamples</code> will not contain equally weighted samples.
+To ensure equally weighted samples in the case that <code>thresh &lt; 1</code>, we recommend resampling from <code>mvWSamples</code> at each time point 
+after the filter has been run, rather than using <code>mvEWSamples</code>.
+</p>
+
+
+<h3>
+<code>returnESS()</code> Method</h3>
+
+<p>Calling the <code>returnESS()</code> method of a bootstrap filter after that filter has been <code>run()</code> for a given model will return a vector of ESS (effective
+sample size) values, one value for each time point.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Turek and Nicholas Michaud
+</p>
+
+
+<h3>References</h3>
+
+<p>Gordon, N.J., D.J. Salmond, and A.F.M. Smith. (1993). Novel approach to nonlinear/non-Gaussian Bayesian state estimation. <em>IEEE Proceedings F (Radar and Signal Processing)</em>. Vol. 140. No. 2. IET Digital Library, 1993.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other particle filtering methods: 
+<code>buildAuxiliaryFilter</code>,
+<code>buildEnsembleKF</code>,
+<code>buildIteratedFilter2()</code>,
+<code>buildLiuWestFilter</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## For illustration only.
+exampleCode &lt;- nimbleCode({
+  x0 ~ dnorm(0, var = 1)
+  x[1] ~ dnorm(.8 * x0, var = 1)
+  y[1] ~ dnorm(x[1], var = .5)
+  for(t in 2:10){
+    x[t] ~ dnorm(.8 * x[t-1], var = 1)
+    y[t] ~ dnorm(x[t], var = .5)
+  }
+})
+
+model &lt;- nimbleModel(code = exampleCode, data = list(y = rnorm(10)),
+                     inits = list(x0 = 0, x = rnorm(10)))
+my_BootF &lt;- buildBootstrapFilter(model, 'x',
+                control = list(saveAll = TRUE, thresh = 1))
+## Now compile and run, e.g.,
+## Cmodel &lt;- compileNimble(model)
+## Cmy_BootF &lt;- compileNimble(my_BootF, project = model)
+## logLik &lt;- Cmy_BootF$run(m = 1000)
+## ESS &lt;- Cmy_BootF$returnESS()
+## boot_X &lt;- as.matrix(Cmy_BootF$mvEWSamples, 'x')
+</code></pre>
+
+
+</div>

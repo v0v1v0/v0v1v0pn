@@ -1,0 +1,596 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>modulePreservation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Replication and preservation of network modules across datasets</h2>
+
+<h3>Description</h3>
+
+<p>Quantify the preservation of network modules (sub-graphs) in an independent
+dataset through permutation testing on module topology. Seven network
+statistics (see details) are calculated for each module and then tested by
+comparing to distributions generated from their calculation on random subsets
+in the test dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">modulePreservation(
+  network,
+  data,
+  correlation,
+  moduleAssignments,
+  modules = NULL,
+  backgroundLabel = "0",
+  discovery = 1,
+  test = 2,
+  selfPreservation = FALSE,
+  nThreads = NULL,
+  nPerm = NULL,
+  null = "overlap",
+  alternative = "greater",
+  simplify = TRUE,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p>a list of interaction networks, one for each dataset. Each 
+entry of the list should be a <code class="reqn">n * n</code> matrix or where each element 
+contains the edge weight between nodes <code class="reqn">i</code> and <code class="reqn">j</code> in the inferred 
+network for that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a list of matrices, one for each dataset. Each entry of the list 
+should be the data used to infer the interaction <code>network</code> for that 
+dataset. The columns should correspond to variables in the data
+(nodes in the network) and rows to samples in that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correlation</code></td>
+<td>
+<p>a list of matrices, one for each dataset. Each entry of
+the list should be a <code class="reqn">n * n</code> matrix where each element contains the 
+correlation coefficient between nodes <code class="reqn">i</code> and <code class="reqn">j</code> in the 
+<code>data</code> used to infer the interaction network for that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>moduleAssignments</code></td>
+<td>
+<p>a list of vectors, one for each <em>discovery</em> 
+dataset, containing the module assignments for each node in that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modules</code></td>
+<td>
+<p>a list of vectors, one for each <code>discovery</code> dataset, 
+of modules to perform the analysis on. If unspecified, all modules
+in each <code>discovery</code> dataset will be analysed, with the exception of 
+those specified in <code>backgroundLabel</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backgroundLabel</code></td>
+<td>
+<p>a single label given to nodes that do not belong to 
+any module in the <code>moduleAssignments</code> argument. Defaults to "0". Set 
+to <code>NULL</code> if you do not want to skip the network background module.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discovery</code></td>
+<td>
+<p>a vector of names or indices denoting the <em>discovery</em>
+dataset(s) in the <code>data</code>, <code>correlation</code>, <code>network</code>, 
+<code>moduleAssignments</code>, <code>modules</code>, and <code>test</code> lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>a list of vectors, one for each <code>discovery</code> dataset,
+of names or indices denoting the <em>test</em> dataset(s) in the <code>data</code>, 
+<code>correlation</code>, and <code>network</code> lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>selfPreservation</code></td>
+<td>
+<p>logical; if <code>FALSE</code> (default) then module 
+preservation analysis will not be performed within a dataset (<em>i.e.</em> 
+where the <code>discovery</code> and <code>test</code> datasets are the same).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nThreads</code></td>
+<td>
+<p>number of threads to parallelise the calculation of network 
+properties over. Automatically determined as the number of cores - 1 if 
+not specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nPerm</code></td>
+<td>
+<p>number of permutations to use. If not specified, the number of 
+permutations will be automatically determined (see details). When set to 0
+the permutation procedure will be skipped and the observed module 
+preservation will be returned without p-values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null</code></td>
+<td>
+<p>variables to include when generating the null distributions. 
+Must be either "overlap" or "all" (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>The type of module preservation test to perform. Must be 
+one of "greater" (default), "less" or "two.sided" (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplify</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, simplify the structure of the output
+list if possible (see Return Value).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical; should progress be reported? Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+
+<h4>Input data structures:</h4>
+
+<p>The preservation of network modules in a second dataset is quantified by
+measuring the preservation of topological properties between the
+<em>discovery</em> and <em>test</em> datasets. These properties are calculated
+not only from the interaction networks inferred in each dataset, but also
+from the data used to infer those networks (e.g. gene expression data) as
+well as the correlation structure between variables/nodes. Thus, all
+functions in the <code>NetRep</code> package have the following arguments:
+</p>
+
+<ul>
+<li>
+<p><code>network</code>:
+a list of interaction networks, one for each dataset.
+
+</p>
+</li>
+<li>
+<p><code>data</code>:
+a list of data matrices used to infer those networks, one for each 
+dataset.
+
+</p>
+</li>
+<li>
+<p><code>correlation</code>:
+a list of matrices containing the pairwise correlation coefficients 
+between variables/nodes in each dataset.
+ 
+</p>
+</li>
+<li>
+<p><code>moduleAssignments</code>:
+a list of vectors, one for each <em>discovery</em> dataset, containing 
+the module assignments for each node in that dataset.
+
+</p>
+</li>
+<li>
+<p><code>modules</code>:
+a list of vectors, one for each <em>discovery</em> dataset, containing
+the names of the modules from that dataset to analyse.  
+
+</p>
+</li>
+<li>
+<p><code>discovery</code>:
+a vector indicating the names or indices of the previous arguments' 
+lists to use as the <em>discovery</em> dataset(s) for the analyses.
+
+</p>
+</li>
+<li>
+<p><code>test</code>:
+a list of vectors, one vector for each <em>discovery</em> dataset, 
+containing the names or indices of the <code>network</code>, <code>data</code>, and 
+<code>correlation</code> argument lists to use as the <em>test</em> dataset(s) 
+for the analysis of each <em>discovery</em> dataset.
+
+</p>
+</li>
+</ul>
+<p>The formatting of these arguments is not strict: each function will attempt
+to make sense of the user input. For example, if there is only one 
+<code>discovery</code> dataset, then input to the <code>moduleAssigments</code> and 
+<code>test</code> arguments may be vectors, rather than lists. 
+</p>
+
+
+
+<h4>Analysing large datasets:</h4>
+
+<p>Matrices in the <code>network</code>, <code>data</code>, and <code>correlation</code> lists
+can be supplied as <code>disk.matrix</code> objects. This class allows 
+matrix data to be kept on disk and loaded as required by <span class="pkg">NetRep</span>. 
+This dramatically decreases memory usage: the matrices for only one 
+dataset will be kept in RAM at any point in time.
+</p>
+<p>Additional memory usage of the permutation procedure is directly
+proportional to the sum of module sizes squared multiplied by the number 
+of threads. Very large modules may result in significant additional memory
+usage per core due to extraction of the correlation coefficient sub-matrix
+at each permutation.
+</p>
+
+
+
+<h4>Module Preservation Statistics:</h4>
+
+<p>Module preservation is assessed through seven module preservation statistics,
+each of which captures a different aspect of a module's topology; <em>i.e.</em>
+the structure of the relationships between its nodes <em>(1,2)</em>. Below is
+a description of each statistic, what they seek to measure, and where their
+interpretation may be inappropriate. 
+</p>
+<p>The <em>module coherence</em> (<code>'coherence'</code>), <em>average node 
+contribution</em> (<code>'avg.contrib'</code>), and <em>concordance of node 
+contribution</em> (<code>'cor.contrib'</code>) are all calculated from the data used 
+to infer the network (provided in the <code>'data'</code> argument). They are 
+calculated from the module's <em>summary profile</em>. This is the eigenvector
+of the 1st principal component across all observations for every node
+composing the module. For gene coexpression modules this can be interpreted
+as a "summary expression profile". It is typically referred to as the
+"module eigengene" in the weighted gene coexpression network analysis
+literature <em>(4)</em>.
+</p>
+<p>The <em>module coherence</em> (<code>'coherence'</code>) quantifies the proportion 
+of module variance explained by the module's "summary profile". The higher
+this value, the more "coherent" the data is, <em>i.e.</em> the more similar
+the observations are nodes for each sample. With the default alternate
+hypothesis, a small permutation <em>P</em>-value indicates that the module is
+more coherent than expected by chance.
+</p>
+<p>The <em>average node contribution</em> (<code>'avg.contrib'</code>) and 
+<em>concordance of node contribution</em> (<code>'cor.contrib'</code>) are calculated 
+from the <em>node contribution</em>, which quantifies how similar each node is 
+to the modules's <em>summary profile</em>. It is calculated as the Pearson
+correlation coefficient between each node and the module summary profile. In
+the weighted gene coexpression network literature it is typically called the
+"module membership" <em>(2)</em>.
+</p>
+<p>The <em>average node contribution</em> (<code>'avg.contrib'</code>) quantifies how
+similar nodes are to the module summary profile in the test dataset. Nodes
+detract from this score where the sign of their node contribution flips 
+between the discovery and test datasets, <em>e.g.</em> in the case of 
+differential gene expression across conditions. A high <em>average node
+contribution</em> with a small permutation <em>P</em>-value indicates that the
+module remains coherent in the test dataset, and that the nodes are acting
+together in a similar way.  
+</p>
+<p>The <em>concordance of node contribution</em> (<code>'cor.contrib'</code>) measures 
+whether the relative rank of nodes (in terms of their node contribution) is 
+preserved across datasets. If a module is coherent enough that all nodes 
+contribute strongly, then this statistic will not be meaningful as its value
+will be heavily influenced by tiny variations in node rank. This can be
+assessed through visualisation of the module topology (see 
+<code>plotContribution</code>.) Similarly, a strong
+<code>'cor.contrib'</code> is unlikely to be meaningful if the
+<code>'avg.contrib'</code> is not significant.
+</p>
+<p>The <em>concordance of correlation strucutre</em> (<code>'cor.cor'</code>) and 
+<em>density of correlation structure</em> (<code>'avg.cor'</code>) are calculated 
+from the user-provided correlation structure between nodes (provided in the 
+<code>'correlation'</code> argument). This is referred to as "coexpression" when
+calculated on gene expression data.
+</p>
+<p>The <code>'avg.cor'</code> measures how strongly nodes within a module are 
+correlation on average in the test dataset. This average depends on the 
+correlation coefficients in the discovery dataset: the score is penalised 
+where correlation coefficients change in sign between datasets. A high 
+<code>'avg.cor'</code> with a small permutation <em>P</em>-value indicates that the 
+module is (a) more strongly correlated than expected by chance for a module 
+of the same size, and (b) more consistently correlated with respect to the 
+discovery dataset than expected by chance.
+</p>
+<p>The <code>'cor.cor'</code> measures how similar the correlation coefficients are 
+across the two datasets. A high <code>'cor.cor'</code> with a small permutation 
+<em>P</em>-value indicates that the correlation structure within a module is 
+more similar across datasets than expected by chance. If all nodes within a 
+module are very similarly correlated then this statistic will not be 
+meaningful, as its value will be heavily influenced by tiny, non-meaningful, 
+variations in correlation strength. This can be assessed through
+visualisation of the module topology (see <code>plotCorrelation</code>.)
+Similarly, a strong <code>'cor.cor'</code> is unlikely to be meaningful if the
+<code>'avg.cor'</code> is not significant.
+</p>
+<p>The <em>average edge weight</em> (<code>'avg.weight'</code>) and <em>concordance
+of weighted degree</em> (<code>'cor.degree'</code>) are both calculated from the 
+interaction network (provided as adjacency matrices to the <code>'network'</code>
+argument). 
+</p>
+<p>The <code>'avg.weight'</code> measures the average connection strength between 
+nodes in the test dataset. In the weighted gene coexpression network 
+literature this is typically called the "module density" <em>(2)</em>. A high
+<code>'avg.weight'</code> with a small permutation <em>P</em>-value indicates that
+the module is more strongly connected in the test dataset than expected by
+chance. 
+</p>
+<p>The <code>'cor.degree'</code> calculates whether the relative rank of each node's 
+<em>weighted degree</em> is similar across datasets. The <em>weighted
+degree</em> is calculated as the sum of a node's edge weights to all other nodes
+in the module. In the weighted gene coexpression network literature this is 
+typically called the "intramodular connectivity" <em>(2)</em>. This statistic 
+will not be meaningful where all nodes are connected to each other with 
+similar strength, as its value will be heavily influenced by tiny,
+non-meaningful, variations in weighted degree. This can be assessed through
+visualisation of the module topology (see <code>plotDegree</code>.)
+</p>
+<p>Both the <code>'avg.weight'</code> and <code>'cor.degree'</code> assume edges are 
+weighted, and that the network is densely connected. Note that for sparse 
+networks, edges with zero weight are included when calculating both
+statistics. Only the magnitude of the weights, not their sign, contribute to
+the score. If the network is <em>unweighted</em>, <em>i.e.</em> edges indicate
+presence or absence of a relationship, then the <code>'avg.weight'</code> will be
+the proportion of the number of edges to the total number of possible edges
+while the <em>weighted degree</em> simply becomes the <em>degree</em>. A high
+<code>'avg.weight'</code> in this case measures how interconnected a module is in
+the test dataset. A high <em>degree</em> indicates that a node is connected to
+many other nodes. The interpretation of the <code>'cor.degree'</code> remains
+unchanged between weighted and unweighted networks. If the network is
+directed the interpretation of the <code>'avg.weight'</code> remains unchanged,
+while the <em>cor.degree</em> will measure the concordance of the node
+<em>in-</em>degree in the test network. To measure the <em>out-</em>degree
+instead, the adjacency matrices provided to the <code>'network'</code> argument
+should be transposed.
+</p>
+
+
+
+<h4>Sparse data:</h4>
+
+<p>Caution should be used when running <code>NetRep</code>
+on sparse data (<em>i.e.</em> where there are many zero values in the data 
+used to infer the network). For this data, the <em>average node contribution</em> 
+(<code>'avg.contrib'</code>), <em>concordance of node contribution</em> 
+(<code>'cor.contrib'</code>), and <em>module coherence</em> (<code>'coherence'</code>)
+will all be systematically underestimated due to their reliance on the 
+Pearson correlation coefficient to calculate the <em>node contribution</em>.
+</p>
+<p>Care should also be taken to use appropriate methods for inferring the
+correlation structure when the data is sparse for the same reason.
+</p>
+
+
+
+<h4>Proportional data:</h4>
+
+<p>Caution should be used when running <code>NetRep</code> on proportional data (
+<em>i.e.</em> where observations across samples all sum to the same value, 
+<em>e.g.</em> 1). For this data, the <em>average node contribution</em> 
+(<code>'avg.contrib'</code>), <em>concordance of node contribution</em> 
+(<code>'cor.contrib'</code>), and <em>module coherence</em> (<code>'coherence'</code>)
+will all be systematically overestimated due to their reliance on the 
+Pearson correlation coefficient to calculate the <em>node contribution</em>.
+</p>
+<p>Care should also be taken to use appropriate methods for inferring the
+correlation structure from proportional data for the same reason.
+</p>
+
+
+
+<h4>Hypothesis testing:</h4>
+
+<p>Three alternative hypotheses are available. "greater", the default, tests
+whether each module preservation statistic is larger than expected by 
+chance. "lesser" tests whether each module preservation statistic is smaller
+than expected by chance, which may be useful for identifying modules that
+are extremely different in the <em>test</em> dataset. "two.sided" can be used
+to test both alternate hypotheses.
+</p>
+<p>To determine whether a module preservation statistic deviates from chance, a
+permutation procedure is employed. Each statistic is calculated between the
+module in the <em>discovery</em> dataset and <code>nPerm</code> random subsets of
+the same size in the <em>test</em> dataset in order to assess the distribution
+of each statistic under the null hypothesis. 
+</p>
+<p>Two models for the null hypothesis are available: "overlap", the default, 
+only nodes that are present in both the <em>discovery</em> and <em>test</em>
+networks are used when generating null distributions. This is appropriate
+under an assumption that nodes that are present in the <em>test</em> dataset, 
+but not present in the <em>discovery</em> dataset, are unobserved: that is,
+they may fall in the module(s) of interest in the <em>discovery</em> dataset
+if they were to be measured there. Alternatively, "all" will use all nodes
+in the <em>test</em> network when generating the null distributions.
+</p>
+<p>The number of permutations required for any given significance threshold is 
+approximately 1 / the desired significance for one sided tests, and double 
+that for two-sided tests. This can be calculated with 
+<code>requiredPerms</code>. When <code>nPerm</code> is not specified, the number 
+of permutations is automatically calculated as the number required for a 
+Bonferroni corrected significance threshold adjusting for the total number 
+of tests for each statistic, i.e. the total number of modules to be analysed
+multiplied by the number of <em>test</em> datasets each module is tested in. 
+Although assessing the replication of a small numberof modules calls for 
+very few permutations, we recommend using no fewer than 1,000 as fewer 
+permutations are unlikely to generate representative null distributions. 
+<strong>Note:</strong> the assumption used by <code>requiredPerms</code> to 
+determine the correct number of permtutations breaks down when assessing the
+preservation of modules in a very small dataset (e.g. gene sets in a dataset
+with less than 100 genes total). However, the reported p-values will still
+be accurate (see <code>permutationTest</code>) <em>(3)</em>.
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>A nested list structure. At the top level, the list has one element per 
+<code>'discovery'</code> dataset. Each of these elements is a list that has one
+element per <code>'test'</code> dataset analysed for that <code>'discovery'</code> 
+dataset. Each of these elements is also a list, containing the following
+objects:
+</p>
+
+<ul>
+<li>
+<p><code>observed</code>:
+A matrix of the observed values for the module preservation statistics.
+Rows correspond to modules, and columns to the module preservation
+statistics.
+
+</p>
+</li>
+<li>
+<p><code>nulls</code>:
+A three dimensional array containing the values of the module 
+preservation statistics evaluated on random permutation of module 
+assignment in the test network. Rows correspond to modules, columns to
+the module preservation statistics, and the third dimension to the 
+permutations.
+
+</p>
+</li>
+<li>
+<p><code>p.values</code>:
+A matrix of p-values for the <code>observed</code> module preservation 
+statistics as evaluated through a permutation test using the 
+corresponding values in <code>nulls</code>.
+
+</p>
+</li>
+<li>
+<p><code>nVarsPresent</code>:
+A vector containing the number of variables that are present in the test
+dataset for each module.
+
+</p>
+</li>
+<li>
+<p><code>propVarsPresent</code>:
+A vector containing the proportion of variables present in the test dataset
+for each module. Modules where this is less than 1 should be 
+investigated further before making judgements about preservation to 
+ensure that the missing variables are not the most connected ones.
+
+</p>
+</li>
+<li>
+<p><code>contingency</code>: 
+If <code>moduleAssignments</code> are present for both the <em>discovery</em>
+and <em>test</em> datasets, then a contingency table showing the overlap
+between modules across datasets is returned. Rows correspond to modules
+in the <em>discovery</em> dataset, columns to modules in the <em>test</em>
+dataset.
+
+</p>
+</li>
+</ul>
+<p>When <code>simplify = TRUE</code> then the simplest possible structure will be 
+returned. E.g. if module preservation is tested in only one dataset, then
+the returned list will have only the above elements. 
+</p>
+<p>When <code>simplify = FALSE</code> then a nested list of datasets will always be 
+returned, i.e. each element at the top level and second level correspond to
+a dataset, e.g. <code>results[["Dataset1"]][["Dataset2"]]</code> indicates an 
+analysis where modules discovered in "Dataset1" are assessed for 
+preservation in "Dataset2". Dataset comparisons which have not been 
+assessed will contain <code>NULL</code>.
+</p>
+
+
+<h3>References</h3>
+
+
+<ol>
+<li>
+<p>Ritchie, S.C., <em>et al.</em>, <em>A scalable permutation approach 
+reveals replication and preservation patterns of network modules in 
+large datasets</em>. Cell Systems. <strong>3</strong>, 71-82 (2016).
+
+</p>
+</li>
+<li>
+<p>Langfelder, P., Luo, R., Oldham, M. C. &amp; Horvath, S. <em>Is my
+network module preserved and reproducible?</em> PLoS Comput. Biol. 
+<strong>7</strong>, e1001057 (2011). 
+
+</p>
+</li>
+<li>
+<p>Phipson, B. &amp; Smyth, G. K. <em>Permutation P-values should never be 
+zero: calculating exact P-values when permutations are randomly drawn.</em>
+Stat. Appl. Genet. Mol. Biol. <strong>9</strong>, Article39 (2010). 
+
+</p>
+</li>
+<li>
+<p>Langfelder, P. &amp; Horvath, S. <em>WGCNA: an R package for weighted 
+correlation network analysis.</em> BMC Bioinformatics <strong>9</strong>, 559 
+(2008).
+
+</p>
+</li>
+</ol>
+<h3>See Also</h3>
+
+<p>Functions for: 
+visualising network modules,
+calculating module topology, 
+calculating permutation test P-values, and 
+splitting computation over multiple machines.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load in example data, correlation, and network matrices for a discovery and test dataset:
+data("NetRep")
+
+# Set up input lists for each input matrix type across datasets. The list
+# elements can have any names, so long as they are consistent between the
+# inputs.
+network_list &lt;- list(discovery=discovery_network, test=test_network)
+data_list &lt;- list(discovery=discovery_data, test=test_data)
+correlation_list &lt;- list(discovery=discovery_correlation, test=test_correlation)
+labels_list &lt;- list(discovery=module_labels)
+
+# Assess module preservation: you should run at least 10,000 permutations
+preservation &lt;- modulePreservation(
+ network=network_list, data=data_list, correlation=correlation_list, 
+ moduleAssignments=labels_list, nPerm=1000, discovery="discovery", 
+ test="test", nThreads=2
+)
+
+</code></pre>
+
+
+</div>

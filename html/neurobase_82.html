@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>finite_img-methods</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Finite Image</h2>
+
+<h3>Description</h3>
+
+<p>Simple wrapper for setting non-finite values to zero
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">finite_img(img, replace = 0)
+
+## S4 method for signature 'nifti'
+finite_img(img, replace = 0)
+
+## S4 method for signature 'array'
+finite_img(img, replace = 0)
+
+## S4 method for signature 'ANY'
+finite_img(img, replace = 0)
+
+## S4 method for signature 'character'
+finite_img(img, replace = 0)
+
+## S4 method for signature 'list'
+finite_img(img, replace = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>character path of image or 
+an object of class <code>nifti</code>, or list of images</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace</code></td>
+<td>
+<p>Value to replace non-finite values to</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>nifti object
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>John Muschelli <a href="mailto:muschellij2@gmail.com">muschellij2@gmail.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(5)
+dims = rep(10, 3)
+arr = array(rpois(prod(dims), lambda = 2), dim = dims)
+arr[c(5, 6, 7, 8)] = c(NA, NaN, Inf, -Inf)
+nim = nifti(arr)
+finite_img(nim)
+finite_img(arr)
+tfile = tempimg(nim)
+checkimg(c(tfile, tfile))
+checkimg(list(tfile, tfile))
+finite_img(list(tfile, tfile))
+finite_img(c(tfile, tfile))
+img = RNifti::readNifti(tfile)
+checkimg(img)
+img[c(5, 6, 7, 8)] = c(NA, NaN, Inf, -Inf)
+stopifnot(!any(c(is.na(c(finite_img(img))))))
+</code></pre>
+
+
+</div>

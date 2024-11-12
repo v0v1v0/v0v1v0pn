@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_flowline_index</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Flowline Index</h2>
+
+<h3>Description</h3>
+
+<p>given an sf point geometry column, return COMID, reachcode,
+and measure for each.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_flowline_index(
+  flines,
+  points,
+  search_radius = NULL,
+  precision = NA,
+  max_matches = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>flines</code></td>
+<td>
+<p>sf data.frame of type LINESTRING or MULTILINESTRING including
+COMID, REACHCODE, ToMeas, and FromMeas. Can be "download_nhdplusv2" and remote
+nhdplusv2 data will be downloaded for the bounding box surround the submitted points.
+NOTE: The download option may not work for large areas, use with caution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points</code></td>
+<td>
+<p>sf or sfc of type POINT in analysis projection. NOTE: flines will
+be projected to the projection of the points layer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>search_radius</code></td>
+<td>
+<p>units distance for the nearest neighbor search
+to extend in analysis projection. If missing or NULL, and points are in a lon
+lat projection, a default of 0.01 degree is used, otherwise 200 m is used.
+Conversion to the linear unit used by the provided crs of points is attempted.
+See RANN nn2 documentation for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>precision</code></td>
+<td>
+<p>numeric the resolution of measure precision in the output in meters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_matches</code></td>
+<td>
+<p>numeric the maximum number of matches to return if multiple are
+found in search_radius</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note 1: Inputs are cast into LINESTRINGS. Because of this,
+the measure output
+of inputs that are true multipart lines may be in error.
+</p>
+<p>Note 2: This algorithm finds the nearest node in the input flowlines to
+identify which flowline the point should belong to. As a second pass,
+it can calculate the measure to greater precision than the nearest flowline
+geometry node.
+</p>
+<p>Note 3: Offset is returned in units consistent with the projection of
+the input points.
+</p>
+<p>Note 4: See 'dfMaxLength' input to sf::st_segmentize() for details of
+handling of precision parameter.
+</p>
+<p>Note 5: "from" is downstream – 0 is the outlet "to" is upstream – 100 is the inlet
+</p>
+
+
+<h3>Value</h3>
+
+<p>data.frame with five columns, id, COMID, REACHCODE, REACH_meas, and offset. id is the
+row or list element in the point input.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+source(system.file("extdata", "sample_flines.R", package = "nhdplusTools"))
+
+point &lt;- sf::st_sfc(sf::st_point(c(-76.87479, 39.48233)),
+                    crs = 4326)
+
+get_flowline_index(sample_flines, point)
+
+point &lt;- sf::st_transform(point, 5070)
+
+get_flowline_index(sample_flines, point,
+                   search_radius = units::set_units(200, "m"))
+
+get_flowline_index("download_nhdplusv2", point)
+
+get_flowline_index(sample_flines, point, precision = 30)
+
+get_flowline_index(sample_flines,
+                   sf::st_sfc(list(sf::st_point(c(-76.86934, 39.49328)),
+                                   sf::st_point(c(-76.91711, 39.40884)),
+                                   sf::st_point(c(-76.88081, 39.36354))),
+                              crs = 4326),
+                   search_radius = units::set_units(0.2, "degrees"),
+                   max_matches = 10)
+
+
+
+</code></pre>
+
+
+</div>

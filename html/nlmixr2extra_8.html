@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bootstrapFit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bootstrap nlmixr2 fit</h2>
+
+<h3>Description</h3>
+
+<p>Bootstrap input dataset and rerun the model to get confidence bounds and aggregated parameters
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bootstrapFit(
+  fit,
+  nboot = 200,
+  nSampIndiv,
+  stratVar,
+  stdErrType = c("perc", "sd", "se"),
+  ci = 0.95,
+  pvalues = NULL,
+  restart = FALSE,
+  plotHist = FALSE,
+  fitName = as.character(substitute(fit))
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>the nlmixr2 fit object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>an integer giving the number of bootstrapped models to
+be fit; default value is 200</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nSampIndiv</code></td>
+<td>
+<p>an integer specifying the number of samples in
+each bootstrapped sample; default is the number of unique
+subjects in the original dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stratVar</code></td>
+<td>
+<p>Variable in the original dataset to stratify on;
+This is useful to distinguish between sparse and full sampling
+and other features you may wish to keep distinct in your
+bootstrap</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stdErrType</code></td>
+<td>
+<p>This gives the standard error type for the
+updated standard errors; The current possibilities are: <code>"perc"</code>
+which gives the standard errors by percentiles (default), <code>"sd"</code>
+which gives the standard errors by the using the normal
+approximation of the mean with standard devaition, or <code>"se"</code>
+which uses the normal approximation with standard errors
+calculated with <code>nSampIndiv</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>Confidence interval level to calculate.  Default is 0.95
+for a 95 percent confidence interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvalues</code></td>
+<td>
+<p>a vector of pvalues indicating the probability of
+each subject to get selected; default value is <code>NULL</code> implying
+that probability of each subject is the same</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>restart</code></td>
+<td>
+<p>A boolean to try to restart an interrupted or
+incomplete boostrap.  By default this is <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotHist</code></td>
+<td>
+<p>A boolean indicating if a histogram plot to assess
+how well the bootstrap is doing.  By default this is turned off
+(<code>FALSE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitName</code></td>
+<td>
+<p>is the fit name that is used for the name of the
+boostrap files.  By default it is the fit provided though it
+could be something else.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Nothing, called for the side effects; The original fit is
+updated with the bootstrap confidence bands
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vipul Mann, Matthew Fidler
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+one.cmt &lt;- function() {
+  ini({
+    tka &lt;- 0.45; label("Ka")
+    tcl &lt;- 1; label("Cl")
+    tv &lt;- 3.45; label("V")
+    eta.ka ~ 0.6
+    eta.cl ~ 0.3
+    eta.v ~ 0.1
+    add.sd &lt;- 0.7
+  })
+  model({
+    ka &lt;- exp(tka + eta.ka)
+    cl &lt;- exp(tcl + eta.cl)
+    v &lt;- exp(tv + eta.v)
+    linCmt() ~ add(add.sd)
+  })
+}
+
+fit &lt;- nlmixr2(one.cmt, nlmixr2data::theo_sd, est = "saem", control = list(print = 0))
+
+withr::with_tempdir({ # Run example in temp dir
+
+bootstrapFit(fit, nboot = 5, restart = TRUE) # overwrites any of the existing data or model files
+bootstrapFit(fit, nboot = 7) # resumes fitting using the stored data and model files
+
+# Note this resumes because the total number of bootstrap samples is not 10
+
+bootstrapFit(fit, nboot=10)
+
+# Note the boostrap standard error and variance/covariance matrix is retained.
+# If you wish to switch back you can change the covariance matrix by
+
+nlmixr2est::setCov(fit, "linFim")
+
+# And change it back again
+
+nlmixr2est::setCov(fit, "boot10")
+
+# This change will affect any simulations with uncertainty in their parameters
+
+# You may also do a chi-square diagnostic plot check for the bootstrap with
+bootplot(fit)
+})
+
+## End(Not run)
+</code></pre>
+
+
+</div>

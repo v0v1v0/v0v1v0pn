@@ -1,0 +1,279 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nbc4vaIO</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Run nbc4va using file input and output</h2>
+
+<h3>Description</h3>
+
+<p>Runs <code>nbc</code> and uses <code>summary.nbc</code> on input data files or dataframes to output
+result files or dataframes with data on predictions, probabilities, causes, and performance metrics in an easily accessible way.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nbc4vaIO(
+  trainFile,
+  testFile,
+  known = TRUE,
+  csmfaFile = NULL,
+  saveFiles = TRUE,
+  outDir = dirname(testFile),
+  fileHeader = strsplit(basename(testFile), "\\.")[[1]][[1]],
+  fileReader = read.csv,
+  fileReaderIn = "file",
+  fileReaderArgs = list(as.is = TRUE),
+  fileWriter = write.csv,
+  fileWriterIn = "x",
+  fileWriterOut = "file",
+  fileWriterArgs = list(row.names = FALSE),
+  outExt = "csv"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>trainFile</code></td>
+<td>
+<p>A character value of the path to the data to be used as the <em>train</em> argument for <code>nbc</code> or a dataframe of the <em>train</em> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>testFile</code></td>
+<td>
+<p>A character value of the path to the data to be used as the <em>test</em> argument for <code>nbc</code>  or a dataframe of the <em>test</em> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>known</code></td>
+<td>
+<p>TRUE to indicate that the <em>test</em> causes are available in the 2nd column and FALSE to indicate that they are not known</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>csmfaFile</code></td>
+<td>
+<p>A character value of the path to the data to be used as the <em>csmfa.obs</em> argument for <code>summary.nbc</code> or a named vector of the <em>csmfa.obs</em> argument.
+</p>
+
+<ul><li>
+<p> If (csmfaFile is char): the file must have only 1 column of the causes per case
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>saveFiles</code></td>
+<td>
+<p>Set to TRUE to save the return object as files or FALSE to return the actual object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outDir</code></td>
+<td>
+<p>A character value of the path to the directory to store the output results files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileHeader</code></td>
+<td>
+<p>A character value of the file header name to use for the output results files.
+</p>
+
+<ul><li>
+<p> The default is to use the name of the <em>testFile</em>
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileReader</code></td>
+<td>
+<p>A function that is able to read the <em>trainFile</em> and the <em>testFile</em>.
+</p>
+
+<ul><li>
+<p> The default is set to read csv files using <code>read.csv</code>
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileReaderIn</code></td>
+<td>
+<p>A character value of the <em>fileReader</em> argument name that accepts a file path for reading as an input.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileReaderArgs</code></td>
+<td>
+<p>A list of the <em>fileReader</em> arguments to be called with <code>do.call</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileWriter</code></td>
+<td>
+<p>A function that is able to write <code>data.frame</code> objects to a file location.
+</p>
+
+<ul><li>
+<p> The default is set to write csv files using <code>write.csv</code>
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileWriterIn</code></td>
+<td>
+<p>A character value of the <em>fileWriter</em> argument name that accepts a dataframe for writing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileWriterOut</code></td>
+<td>
+<p>A character value of the <em>fileWriter</em> argument name that accepts a file path for writing as an output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileWriterArgs</code></td>
+<td>
+<p>A list of arguments of the <em>fileWriter</em> arguments to be called with <code>do.call</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outExt</code></td>
+<td>
+<p>A character value of the extension (without the period) to use for the result files.
+</p>
+
+<ul><li>
+<p> The default is set to use the "csv" extension
+</p>
+</li></ul>
+<ul><li>
+<p> The default is the directory of the <em>testFile</em>
+</p>
+</li></ul>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See <a href="https://rrwen.github.io/nbc4va/methods">Methods documentation</a> for details on the methodology and implementation
+of the Naive Bayes Classifier algorithm. This function may also act as a wrapper for the
+main nbc4va package functions.
+</p>
+
+
+<h3>Value</h3>
+
+<p>out Vector or list of respective paths or data from the naive bayes classifier:
+</p>
+
+<ul>
+<li>
+<p> If (<em>saveFiles</em> is TRUE) return a named character vector of the following:
+</p>
+
+<ul>
+<li>
+<p> Names: dir, pred, prob, causes, summary
+</p>
+</li>
+<li>
+<p> dir (char): the path to the directory of the output files
+</p>
+</li>
+<li>
+<p> pred (char): the path to the prediction table file, where the columns of Pred1..PredN are ordered by the prediction probability with Pred1 being the most probable cause
+</p>
+</li>
+<li>
+<p> prob (char): the path to the probability table file, where the columns excluding the CaseID are the cause and each cell has a probability value
+</p>
+</li>
+<li>
+<p> causes (char): the path to the cause performance metrics table file, where each column is a metric and each row is a cause
+</p>
+</li>
+<li>
+<p> metrics (char): the path to the overall performance metrics table file, where each column is a metric
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> If (<em>saveFiles</em> is FALSE) return a list of the following:
+</p>
+
+<ul>
+<li>
+<p> Names: pred, prob, causes, summary
+</p>
+</li>
+<li>
+<p> pred (dataframe): the prediction table, where the columns of Pred1..PredN are ordered by the prediction probability with Pred1 being the most probable cause
+</p>
+</li>
+<li>
+<p> prob (dataframe): the probability table, where the columns excluding the CaseID are the cause and each cell has a probability value
+</p>
+</li>
+<li>
+<p> causes (dataframe): the cause performance metrics table, where each column is a metric and each row is a cause
+</p>
+</li>
+<li>
+<p> metrics (dataframe): the summary table, where each column is a performance metric
+</p>
+</li>
+<li>
+<p> nbc (object): the returned <code>nbc</code> object
+</p>
+</li>
+<li>
+<p> nbc_summary (object): the returned <code>summary.nbc</code> object
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Other utility functions: 
+<code>nbc4vaGUI()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nbc4va)
+data(nbc4vaData)
+
+# Split data into train and test sets
+train &lt;- nbc4vaData[1:50, ]
+test &lt;- nbc4vaData[51:100, ]
+
+# Save train and test data as csv in temp location
+trainFile &lt;- tempfile(fileext=".csv")
+testFile &lt;- tempfile(fileext=".csv")
+write.csv(train, trainFile, row.names=FALSE)
+write.csv(test, testFile, row.names=FALSE)
+
+# Use nbc4vaIO via file input and output
+# Set "known" to indicate whether test causes are known
+outFiles &lt;- nbc4vaIO(trainFile, testFile, known=TRUE)
+
+# Use nbc4vaIO as a wrapper
+out &lt;- nbc4vaIO(train, test, known=TRUE, saveFiles=FALSE)
+
+</code></pre>
+
+
+</div>

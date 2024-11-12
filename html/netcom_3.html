@@ -1,0 +1,247 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>best_fit_optim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Empirical parameterization</h2>
+
+<h3>Description</h3>
+
+<p>Helper function to find the best fitting version of a mechanism by searching across its parameter space
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">best_fit_optim(
+  parameter,
+  process,
+  network,
+  net_size,
+  net_kind,
+  mechanism_kind,
+  resolution,
+  resolution_min,
+  resolution_max,
+  reps,
+  power_max,
+  connectance_max,
+  divergence_max,
+  mutation_max,
+  cores,
+  directed,
+  method,
+  cause_orientation,
+  DD_kind,
+  DD_weight,
+  max_norm,
+  best_fit_kind = "avg",
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>parameter</code></td>
+<td>
+<p>The parameter being tested for its ability to generate networks alike the input 'network'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>process</code></td>
+<td>
+<p>Name of mechanism. Currently only "ER", "PA", "DD", "DM" "SW", and "NM" are supported. Future versions will accept user-defined network-generating functions and associated parameters. ER = Erdos-Renyi random. PA = Preferential Attachment. DD = Duplication and Divergence. DM = Duplication and Mutation. SW = Small World. NM = Niche Model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p>The network being compared to a hypothesized 'process' with a given 'parameter' value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_size</code></td>
+<td>
+<p>Number of nodes in the network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_kind</code></td>
+<td>
+<p>If the network is an adjacency matrix ("matrix") or an edge list ("list").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mechanism_kind</code></td>
+<td>
+<p>Either "canonical" or "grow" can be used to simulate networks. If "grow" is used, note that here it will only simulate pure mixtures made of a single mechanism.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution</code></td>
+<td>
+<p>The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution_min</code></td>
+<td>
+<p>= The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution_max</code></td>
+<td>
+<p>The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+<p>The number of networks to simulate for each parameter. More replicates increases accuracy by making the estimation of the parameter that produces networks most similar to the target network less idiosyncratic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>power_max</code></td>
+<td>
+<p>The maximum power of attachment in the Preferential Attachment process (PA).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>connectance_max</code></td>
+<td>
+<p>The maximum connectance parameter for the Niche Model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>divergence_max</code></td>
+<td>
+<p>The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mutation_max</code></td>
+<td>
+<p>The maximum mutation parameter for the Duplication and Mutation mechanism.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>The number of cores to run the classification on. When set to 1 parallelization will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>Whether the target network is directed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cause_orientation</code></td>
+<td>
+<p>The orientation of directed adjacency matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DD_kind</code></td>
+<td>
+<p>A vector of network properties to be used to compare networks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DD_weight</code></td>
+<td>
+<p>Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_norm</code></td>
+<td>
+<p>Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>best_fit_kind</code></td>
+<td>
+<p>How to aggregate the stochastic replicates of the process + parameter combination.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Defaults to TRUE. Whether to print all messages.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note: Currently each process is assumed to have a single governing parameter.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A number measuring how different the input network is from the parameter + process combination.
+</p>
+
+
+<h3>References</h3>
+
+<p>Langendorf, R. E., &amp; Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import netcom
+library(netcom)
+
+# Adjacency matrix
+size &lt;- 10
+network &lt;- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+
+# Calculate how similar the input network is to Small-World networks with 
+# a rewiring probability of 0.28.
+best_fit_optim(
+     parameter = 0.28, 
+     process = "SW", 
+     network = network, 
+     net_size = 12, 
+     net_kind = "matrix", 
+     mechanism_kind = "grow", 
+     resolution = 100, 
+     resolution_min = 0.01, 
+     resolution_max = 0.99, 
+     reps = 3, 
+     power_max = 5, 
+     connectance_max = 0.5, 
+     divergence_max = 0.5, 
+     mutation_max = 0.5, 
+     cores = 1, 
+     directed = TRUE, 
+     method = "DD", 
+     cause_orientation = "row", 
+     DD_kind = c(
+         "in", "out", "entropy_in", "entropy_out", 
+         "clustering_coefficient", "page_rank", "communities"
+     ), 
+     DD_weight = 1, 
+     max_norm = FALSE,
+     verbose = FALSE
+)
+
+</code></pre>
+
+
+</div>

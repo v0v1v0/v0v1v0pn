@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>qml</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Quasi-maximum likelihood estimation of a nonlinear structural equation model</h2>
+
+<h3>Description</h3>
+
+<p>Fits a structural equation model with latent interaction effects using
+Quasi-maximum likelihood estimation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  qml(model, data, start, max.iter = 150, optimizer = c("nlminb",
+      "optim"), neg.hessian = TRUE, ...) </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>a specified structural equation model of class
+<code>singleClass</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data the model should be fitted to. Data needs to be a
+matrix and variables need to be in the order x1, x2, ..., y1, y2, ...
+as specified in <code>specify_sem</code>. Data matrix needs no column
+names (will be ignored anyways).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>starting values for parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.iter</code></td>
+<td>
+<p>maximum number of iterations for optimizer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optimizer</code></td>
+<td>
+<p>which optimizer should be used for maximization of
+parameters: <code>nlminb</code> or <code>optim</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neg.hessian</code></td>
+<td>
+<p>should negative Hessian be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments. See Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Additional arguments can be passed to ... for these optimizers. See
+documentation for <code>optim</code> and <code>nlminb</code>.
+</p>
+<p>Quasi-maximum likelihood (QML) estimation is in principle a faster
+version for LMS, but might be less accurate for normal data. For
+practical purposes differences are negligible, though. For nonnormal
+data QML outperforms LMS.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>qmlEst</code> that consists of the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>model.class</code></td>
+<td>
+<p>class of model that was fitted. Will always be
+<code>singleClass</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>estimated parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>objective</code></td>
+<td>
+<p>final loglikelihood obtained with EM algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convergence</code></td>
+<td>
+<p>convergence code for optimizer. See documentation
+for <code>optim</code> and <code>nlminb</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Hessian</code></td>
+<td>
+<p>negative Hessian matrix for final parameter estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>info</code></td>
+<td>
+<p>list of number of exogenous (<code>num.xi</code>) and endogenous
+(<code>num.eta</code>) variables and of indicators (<code>num.x</code> and
+<code>num.y</code>). Corresponds to specifications given to
+<code>specify_sem</code> when specifiying structural equation model.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Klein, A. &amp;, Muthen, B. O. (2007). Quasi-Maximum Likelihood Estimation of
+Structural Equation Models With Multiple Interaction and Quadratic
+Effects. <em>Multivariate Behavior Research, 42</em>, 647–673.
+doi:http://dx.doi.org/10.1080/00273170701710205
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>specify_sem</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># specify model of class singleClass
+sc &lt;- specify_sem(num.x=4, num.y=2, num.xi=2, num.eta=1, xi="x1-x2,x3-x4",
+                  eta="y1-y2", interaction="eta1~xi1:xi2") 
+
+# simulate data
+pars.orig &lt;- c(0.6, 0.7,                 # Lx
+               0.8,                      # Ly
+               0.2, 0.4,                 # G
+               0.25, 0.25, 0.25, 0.25,   # Td
+               0.25, 0.25,               # Te
+               0.2,                      # Psi
+               0.49, 0.235, 0.64,        # Phi
+               0, 0,                     # nu.x
+               0,                        # nu.x
+               1,                        # alpha
+               1, 1,                     # tau
+               0.7                       # Omega
+              )
+
+dat &lt;- simulate(sc, parameters=pars.orig, seed=81)
+
+# fit model
+set.seed(1609)
+start &lt;- runif(count_free_parameters(sc))
+## Not run: 
+qml1 &lt;- qml(sc, dat, start)
+summary(qml1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

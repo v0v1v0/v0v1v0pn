@@ -1,0 +1,73 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>waste</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Food waste survey</h2>
+
+<h3>Description</h3>
+
+<p>These data were collected after a survey on food waste, with participants describing their habits.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">waste
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 180 rows (participants) and 77 columns (questions).
+</p>
+
+
+<h3>Source</h3>
+
+<p>Héloïse BILLES and Amélie RATEAU, students at l'Institut Agro Rennes-Angers
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+library(NaileR)
+library(FactoMineR)
+data(waste)
+waste &lt;- waste[-14]
+
+res_mca_waste &lt;- MCA(waste, quali.sup = c(1,2,50:76),
+ncp = 35, level.ventil = 0.05, graph = FALSE)
+res_hcpc_waste &lt;- HCPC(res_mca_waste, nb.clust = 3, graph = FALSE)
+don_clust_waste &lt;- res_hcpc_waste$data.clust
+
+intro_waste &lt;- 'These data were collected
+after a survey on food waste,
+with participants describing their habits.'
+intro_waste &lt;- gsub('\n', ' ', intro_waste) |&gt;
+stringr::str_squish()
+
+req_waste &lt;- 'Please summarize the characteristics of each group.
+Then, give each group a new name, based on your conclusions.
+Finally, give each group a grade between 0 and 10,
+based on how wasteful they are with food:
+0 being "not at all", 10 being "absolutely".'
+req_waste &lt;- gsub('\n', ' ', req_waste) |&gt;
+stringr::str_squish()
+
+res_waste &lt;- nail_catdes(don_clust_waste,
+num.var = ncol(don_clust_waste),
+introduction = intro_waste, request = req_waste,
+drop.negative = TRUE)
+cat(res_waste$response)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

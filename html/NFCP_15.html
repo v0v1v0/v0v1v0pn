@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>TSfit_volatility</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate the volatility term structure of futures returns</h2>
+
+<h3>Description</h3>
+
+<p>Estimate the theoretical and empirical volatility term structure of futures returns
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">TSfit_volatility(parameters, futures, futures_TTM, dt)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>parameters</code></td>
+<td>
+<p><code>vector</code>. A named vector of parameters of an N-factor model. Function <code>NFCP_parameters</code> is recommended.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>futures</code></td>
+<td>
+<p><code>matrix</code>. Historical observes futures price data. Each column must correspond to a listed futures contract and each row must correspond to a discrete observation of futures contracts. NA's are permitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>futures_TTM</code></td>
+<td>
+<p><code>vector</code>. Each element of 'futures_TTM' must correspond to the time-to-maturity from the current observation point of futures contracts listed in object 'futures'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt</code></td>
+<td>
+<p><code>numeric</code>. Constant, discrete time step of observations, in years.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<script id="MathJax-script" async src="../../mathjaxr/doc/mathjax/es5/tex-chtml-full.js"></script><p>The fit of an N-factor models theoretical volatility term structure of futures returns to those obtained directly from observed futures prices can be used as a measure of robustness for
+the models ability to explain the behaviour of a commodities term structure.
+</p>
+<p>The theoretical model volatility term structure of futures returns is given by the following equation:
+</p>
+\[\sigma_F(\tau) = \sum_{i=1}^N \sum_{j=1}^N \sigma_i \sigma_j \rho_{i,j} e^{-(\kappa_i + \kappa_j)\tau}\]
+<p>Under the case that \(\kappa_1 = 0\), the model volatility term structure converges to \(\sigma_1^2\) as \(\tau\) grows large.
+</p>
+<p>The empirical volatility term structure of futures returns is given by:
+</p>
+\[\hat\sigma_F^2(\tau) = \frac{1}{\Delta t}\sum_{i=1}^N(log(F(t_i,\tau)/F(t_i-\Delta t,\tau)) - \bar\mu)^2\]
+<p>According to Cortazar and Naranjo (2006): "A larger number of factors gives more flexibility to adjust first and second moments simultaneously, hence explaining why (a) four-factor (may) outperform (a) three-factor one in fitting the volatility term structure."
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>TSfit_volatility</code> returns a matrix with the theoretical and empirical volatility term structure of futures returns, with the number of columns of this matrix coinciding with the number of input futures contracts.
+</p>
+
+
+<h3>References</h3>
+
+<p>Schwartz, E. S., and J. E. Smith, (2000). Short-Term Variations and Long-Term Dynamics in Commodity Prices. <em>Manage. Sci.</em>, 46, 893-911.
+</p>
+<p>Cortazar, G., and L. Naranjo, (2006). An N-factor Gaussian model of oil futures prices. <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em>, 26(3), 243-268.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Test the volatility term structure fit of the Schwartz-Smith two-factor model on crude oil:
+V_TSFit &lt;- TSfit_volatility(
+parameters = SS_oil$two_factor,
+futures = SS_oil$stitched_futures,
+futures_TTM = SS_oil$stitched_TTM,
+dt = SS_oil$dt)
+
+</code></pre>
+
+
+</div>

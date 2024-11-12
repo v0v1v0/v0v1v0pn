@@ -1,0 +1,201 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nhl_schedule</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve metadata on NHL schedule from the API</h2>
+
+<h3>Description</h3>
+
+<p>The general-purpose <code>nhl_schedule()</code> exposes many parameters,
+some useful helpers are exposed as separate functions to
+reflect common use cases. Arguments can be passed to these
+named via <code>...</code>.
+</p>
+
+<ul>
+<li> <p><code>nhl_schedule_today()</code>
+</p>
+</li>
+<li> <p><code>nhl_schedule_seasons()</code>
+</p>
+</li>
+<li> <p><code>nhl_schedule_date_range()</code>
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">nhl_schedule(
+  seasons = NULL,
+  teamIds = NULL,
+  startDate = NULL,
+  endDate = NULL,
+  gameTypes = NULL,
+  expand = NULL
+)
+
+nhl_schedule_today(...)
+
+nhl_schedule_seasons(seasons, ...)
+
+nhl_schedule_date_range(startDate, endDate, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>seasons</code></td>
+<td>
+<p><code>numeric()</code>, <code>integer()</code> or <code>character()</code>,
+vector of starting years of desired seasons in <code>YYYY</code>
+format, e.g. <code>1995</code> or <code>"1995"</code> for season 1995-1996.
+Accepts vectors such as <code>c(1995:2000, 2010)</code> to generate
+multiple seasons.
+</p>
+<p>Alternatively, also accepts <code>character()</code> with seasons in the
+format <code>"YYYYZZZZ"</code>, where <code>ZZZZ = YYYY + 1</code>, e.g. <code>"19951996"</code>.
+This is the format that ultimately gets sent to the NHL API.
+</p>
+<p>Some API endpoints, notably <code>seasons</code> exposed via <code>nhl_seasons()</code>
+also allow the value <code>"current"</code> to passed. This value will be
+returned unchanged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>teamIds</code></td>
+<td>
+<p><code>integer()</code>, ids of the teams or <code>NULL</code> (default)
+for all teams. As of end of 2019, the valid team ids seem to be
+in the <code>1:54</code> range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>startDate</code></td>
+<td>
+<p><code>character(1)</code>, date in the format <code>"YYYY-MM-DD"</code>
+defining the start of the date interval for which the schedule is
+to be retrieved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endDate</code></td>
+<td>
+<p><code>character(1)</code>, date in the format <code>"YYYY-MM-DD"</code>
+defining the end of the date interval for which the schedule is
+to be retrieved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gameTypes</code></td>
+<td>
+<p><code>character()</code>, defining the game types to retrieve.
+Valid game types are for example <code>"R"</code> for regular season or <code>"P"</code>
+for playoffs. See <code>nhl_md_game_types()</code> for all values and their
+descriptions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expand</code></td>
+<td>
+<p><code>character()</code>, of parameters passed as <code>expand</code>
+to the API URL. Some valid examples seem to be <code>"round.series"</code>
+and <code>"schedule.broadcasts"</code>, <code>"schedule.linescore"</code>,
+<code>"schedule.ticket"</code>. <code>NULL</code> for no expand parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other named parameters passed to <code>nhl_schedule()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>list</code>, with information on schedule, depending on
+provided arguments.
+</p>
+
+
+<h3>Functions</h3>
+
+
+<ul>
+<li> <p><code>nhl_schedule_today</code>: Shortcut to get information on
+today's schedule.
+</p>
+</li>
+<li> <p><code>nhl_schedule_seasons</code>: Shortcut to get information on schedule for
+one or more seasons.
+</p>
+</li>
+<li> <p><code>nhl_schedule_date_range</code>: Shortcut to get information on
+schedule for a range of dates in <code>"YYYY-MM-DD"</code> format.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+ # Get current schedule
+ nhl_schedule()
+
+ # Get schedule for historical seasons
+ nhl_schedule(seasons = 2015:2016)
+
+ # Get schedule for a date range
+ nhl_schedule(startDate = "2018-01-02", endDate = "2018-01-02")
+
+ # Get schedule for a date range, specific teams
+ # and expand on line scores
+ nhl_schedule(
+   startDate = "2018-01-02",
+   endDate = "2018-01-02",
+   teamIds = c(29, 30),
+   expand = "schedule.linescore"
+ )
+
+## End(Not run)
+
+## Not run: 
+  nhl_schedule_today()
+
+## End(Not run)
+## Not run: 
+  # Schedule for seasons starting in 2015 and 2016
+  nhl_schedule_seasons(2015:2016)
+
+  # Schedule for seasons starting in 2015 and 2016
+  # Only 1 team and expand line scores
+  nhl_schedule_seasons(
+    2015:2016,
+    teamIds = 1,
+    expand = "schedule.linescore"
+  )
+
+## End(Not run)
+## Not run: 
+  # Schedule for October and November 2015
+  nhl_schedule_date_range(
+    startDate = "2015-10-01",
+    endDate = "2015-11-30"
+  )
+
+  # Schedule for October and November 2015
+  # Regular seasons only, specific team and expand line scores
+  nhl_schedule_date_range(
+    startDate = "2015-10-01", endDate = "2015-11-30",
+    gameTypes = "R",
+    teamIds = 2,
+    expand = "schedule.linescore"
+  )
+
+## End(Not run)
+</code></pre>
+
+
+</div>

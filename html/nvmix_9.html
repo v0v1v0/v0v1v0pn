@@ -1,0 +1,218 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>skewstudent</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Functionalities for the skew-t distribution and copula</h2>
+
+<h3>Description</h3>
+
+<p>Sampling and density evaluation for the multivariate skew-t distribution and copula.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rskewt(n, loc = rep(0, d), scale = diag(2), factor = NULL, gamma = rep(0, d),
+       df = Inf, method = c("PRNG", "sobol", "ghalton"), skip = 0)
+dskewt(x, loc = rep(0, d), scale = diag(2), gamma = rep(0, d), df,
+       log = FALSE, scale.inv, ldet)
+
+rskewtcopula(n, scale = diag(2), factor = NULL, gamma = rep(0, d), df = Inf,
+             pseudo = TRUE, method = c("PRNG", "sobol", "ghalton"), skip = 0)
+dskewtcopula(u, scale = diag(2), gamma = rep(0, d), df, log = FALSE,
+             scale.inv, ldet)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p><code class="reqn">(n, d)</code>-<code>matrix</code> of evaluation points or data;
+Have to be in <code class="reqn">(0,1)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code class="reqn">(n, d)</code>-<code>matrix</code> of evaluation points or data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>sample size <code class="reqn">n</code> (positive integer).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>positive degress of freedom; can also be <code>Inf</code> in which
+case the copula is interpreted as the Gaussian copula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc</code></td>
+<td>
+<p>location of length <code class="reqn">d</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>Skewness-vector of dimension <code class="reqn">d</code>; if <code>all(gamma == 0)</code>,
+the classical t distribution or copula results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>scale matrix (a covariance matrix entering the
+distribution as a parameter) of dimension <code class="reqn">(d, d)</code> (defaults to
+<code class="reqn">d = 2</code>). Note that <code>scale</code> must be positive definite,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factor</code></td>
+<td>
+
+<p><code class="reqn">(d, d)</code>-<code>matrix</code> such that
+<code>factor %*% t(factor)</code> equals <code>scale</code>.
+If not provided, <code>factor</code> is internally determined via <code>chol()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.inv</code></td>
+<td>
+<p>inverse of <code>scale</code>; if not provided, computed via
+<code>pd.solve(scale)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ldet</code></td>
+<td>
+<p><code>log(det(scale))</code>; if not provided, computed via <code>pd.solve(scale)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p><code>logical</code> indicating whether the logarithmic
+density is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pseudo</code></td>
+<td>
+<p><code>logical</code>; if <code>TRUE</code>, copula samples are computed
+via <code>pobs()</code> from a multivariate skew-t sample. If <code>FALSE</code>, the univariate skew t distribution functions are internally approximated via
+<code>integrate()</code>; see details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>see <code>rnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skip</code></td>
+<td>
+<p>see <code>rnvmix()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Functionalities for sampling from the multivariate skew-<em>t</em> distribution
+and copula; the former has stochastic representation <code class="reqn">\mu + W\gamma + \sqrt{W}AZ</code>
+where <code class="reqn">AA^T=scale</code>, <code class="reqn">W</code> follows an inverse-gamma distrubution with
+parameters <code>df/2</code> and is independent of the <code class="reqn">d</code>-dimensional vector <code class="reqn">Z</code>
+following a standard multivariate normal distribution. When <code class="reqn">gamma</code> is the
+null-vector, the distribution becomes the multivariate <code class="reqn">t</code> distribution.
+</p>
+<p>A major computational challenge when working with the skew <em>t</em> copula is
+the lack of an available distribution and quantile function of the univariate
+skew <em>t</em> distribution. These are required in <code>rskewtcopula(, pobs = FALSE)</code>
+and in <code>dskewtcopula()</code>. The unviarate skew <em>t</em> distribution and
+quantile functions are currently implemented as described Yoshiba, T. (2018).
+</p>
+<p>The functions described here are currently being further developed to improve
+stability, accuracy and speed, so that arguments may change in subsequent
+versions of <code>nvmix</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code class="reqn">n</code>-vector of (log-)density values and <code class="reqn">(n, d)</code>-matrix of samples, respectively.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2020),
+Grouped Normal Variance Mixtures.
+<em>Risks</em> 8(4), 103.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+<p>McNeil, A. J., Frey, R. and Embrechts, P. (2015).
+<em>Quantitative Risk Management: Concepts, Techniques, Tools</em>.
+Princeton University Press.
+</p>
+<p>Yoshiba, T. (2018).
+Maximum Likelihood Estimation of Skew-<em>t</em> Copulas with Its Applications to Stock
+Returns.
+<em>Journal of Statistical Computation and Simulation</em> 88 (13): 2489–2506.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rStudent()</code>, <code>dStudent()</code>, <code>rStudentcopula()</code>, <code>dStudentcopula()</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Sampling from the skew-t copula
+
+n &lt;- 100 # sample size
+d &lt;- 10 # dimension
+rho &lt;- 0.5
+scale &lt;- matrix(rho, ncol = d, nrow = d)
+diag(scale) &lt;- 1 # scale
+gamma &lt;- rep(1, d) # skewness
+df &lt;- 7 # degrees-of-freedom parameter
+set.seed(1) # same random numbers for both runs
+system.time(samplecop_pobs &lt;- rskewtcopula(n, scale = scale, gamma = gamma,
+                                           df = df, pseudo = TRUE))
+set.seed(1)
+system.time(samplecop_pskewt &lt;- rskewtcopula(n, scale = scale, gamma = gamma,
+                                             df = df, pseudo = FALSE))
+## Plot first two coordinates
+layout(rbind(1:2))
+plot(samplecop_pobs, xlab = expression(U[1]), ylab = expression(U[2]))
+mtext("pobs = TRUE")
+plot(samplecop_pskewt, xlab = expression(U[1]), ylab = expression(U[2]))
+mtext("pobs = FALSE")
+layout(1)
+</code></pre>
+
+
+</div>

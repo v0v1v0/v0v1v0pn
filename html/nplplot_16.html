@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prepareplot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prepare input data files for bedplot and genomeplot</h2>
+
+<h3>Description</h3>
+
+<p>The prepareplot function prepares input data files for
+bedplot and genomeplot functions from nplplot-formatted
+score files and a Mega2 annotated format map file with physical positions. </p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> prepareplot(prefix, chrlist=c(1:23,25), mapfile, output="both")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>prefix</code></td>
+<td>
+<p>Prefix of the names of R table files, e.g. “RMERLINDATA” for R table files 
+“RMERLINDATA.01”, “RMERLINDATA.02”, etc. Using
+<code>chrlist</code> below, it automatically finds R table files with the
+specified prefix and chromosome-specific extensions to convert.
+</p>
+<p>Alternatively, <code>prefix</code> may be a <em>list</em> of
+<em>data.frames</em> named by the chromosomes supplied in <code>chrlist</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chrlist</code></td>
+<td>
+<p>List of chromosome numbers to create plots for, default 1 through
+23. Chromosomes 23 and 25 produces files for the X chromosome X, 25
+denoting pseudo-autosomal markers on chromosome X. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapfile</code></td>
+<td>
+<p>Mega2 annnotated format map file, containing
+marker names and and exactly one set of physical
+positions. <code>mapfile</code> may instead be a <em>data.frame</em>
+containing the same information as the map file, viz. the marker
+names and physical positions.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>Which plotting function to generate data for,
+“both” for both bedplot and genomeplot functions,
+“bed” for generating input files for bedplot function,
+“GG” for generating input file for genomeplot
+function. output is set to default “both”. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>mapfile example:
+</p>
+<pre>
+Chromosome   Map.h.a   Name   Map.h.m   Map.h.f   Build52.p
+5            0.0       M1     0.0       0.0       144255
+5            5.0       M3     2.0       7.0       144355
+5            8.0       M2     4.0       12.0      144400
+8            0.0       M4     0.0       0.0       144255
+8            5.0       M6     2.0       7.0       144355
+8            8.0       M5     4.0       12.0      144400
+</pre>
+<p>The names of R table files should be linkage or association analysis
+score files in nplplot-format with Mega2-style file names, i.e., having
+a common specified prefix and 01-09, 11- 24, X, or XY as suffixes. The
+list of suffixes are determined by the chromosome list. If this list
+includes 23 or X, R table files with either the “23”
+suffix or “X” suffix are accepted. If both files exist, the one
+with the “X” suffix is read in and the user warned. If the XY
+chromosome is chosen, R table files can have either “24” or
+“XY” as a suffix, with “XY” suffixed file having
+precedence.
+</p>
+<p>The prepareplot function generates chromosome-specific formatted score
+files “bed.data.#” for use by bedplot with the same
+suffix as the R table file. If X chromosome is chosen, the output file
+is named “bed.data.23”. If XY chromosome is chosen, those records
+on XY chromosome are included in “bed.data.23” file. The output
+file “bed.data.#” contains marker names and physical
+positions followed by one or more score columns. The header is taken
+from the input score file(s).
+</p>
+<p>Prepareplot generates a combined file over all chromosomes
+“GG.data.all” for genomeplot. For pseudo-autosomal markers
+denoted by chromosome XY or 24, these scores are assigned the X
+chromosome. The output file “GG.data.all” contains four or more
+columns with headings. The first, second and third columns contain
+chromosomes, marker names and physical positions respectively, followed
+by one or more score columns with score names as headers.
+</p>
+
+
+<h3>Value</h3>
+
+<p>TRUE or FALSE depending on whether runs successfully. </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: prepareplot("RMERLINDATA", c(5,8), "map.all", "GG")
+</code></pre>
+
+
+</div>

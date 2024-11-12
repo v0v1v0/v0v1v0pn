@@ -1,0 +1,535 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npplreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Partially Linear Kernel Regression with Mixed Data Types</h2>
+
+<h3>Description</h3>
+
+<p><code>npplreg</code> computes a partially linear kernel regression estimate
+of a one (1) dimensional dependent variable on <code class="reqn">p+q</code>-variate
+explanatory data, using the model <code class="reqn">Y = X\beta + \Theta (Z) +
+  \epsilon</code> given a set of estimation
+points, training points (consisting of explanatory data and dependent
+data), and a bandwidth specification, which can be a <code>rbandwidth</code>
+object, or a bandwidth vector, bandwidth type and kernel type.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npplreg(bws, ...)
+
+## S3 method for class 'formula'
+npplreg(bws, data = NULL, newdata = NULL, y.eval =
+FALSE, ...)
+
+## S3 method for class 'call'
+npplreg(bws, ...)
+
+## S3 method for class 'plbandwidth'
+npplreg(bws,
+        txdat = stop("training data txdat missing"),
+        tydat = stop("training data tydat missing"),
+        tzdat = stop("training data tzdat missing"),
+        exdat,
+        eydat,
+        ezdat,
+        residuals = FALSE,
+        ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as a <code>plbandwidth</code>
+object returned from an invocation of <code>npplregbw</code>, or as
+a matrix of bandwidths, where each row is a set of bandwidths for <code class="reqn">Z</code>,
+with a column for each variable <code class="reqn">Z_i</code>. In the first row are
+the bandwidths for the regression of <code class="reqn">Y</code> on <code class="reqn">Z</code>, the following
+rows contain the bandwidths for the regressions of the columns of
+<code class="reqn">X</code> on <code class="reqn">Z</code>.  If specified as a matrix
+additional arguments will need to be supplied as necessary to
+specify the bandwidth type, kernel types, training data, and so on.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the regression type,
+bandwidth type, kernel types, selection methods, and so on. To do
+this, you may specify any of <code>regtype</code>, 
+<code>bwmethod</code>, <code>bwscaling</code>, <code>bwtype</code>, <code>ckertype</code>,
+<code>ckerorder</code>, <code>ukertype</code>, <code>okertype</code>, as described in
+<code>npregbw</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(bws)</code>, typically the environment from which
+<code>npplregbw</code> was called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, the training data are used.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y.eval</code></td>
+<td>
+
+<p>If <code>newdata</code> contains dependent data and <code>y.eval = TRUE</code>,
+<code>np</code> will compute goodness of fit statistics on these
+data and return them. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>txdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data (training data),
+corresponding to <code class="reqn">X</code> in the model equation, whose linear
+relationship with the dependent data <code class="reqn">Y</code> is posited. Defaults to
+the training data used to 
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>txdat</code>. Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tzdat</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of explanatory data (training data),
+corresponding to <code class="reqn">Z</code> in the model equation, whose relationship
+to the dependent variable is unspecified (nonparametric). Defaults to
+the training data used to 
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of points on which the regression will be
+estimated (evaluation data).  By default,
+evaluation takes place on the data provided by <code>txdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of the true values
+of the dependent variable. Optional, and used only to calculate the
+true errors.  By default,
+evaluation takes place on the data provided by <code>tydat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ezdat</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of points on which the regression will
+be estimated (evaluation data).  By default,
+evaluation takes place on the data provided by <code>tzdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+
+<p>a logical value indicating that you want residuals computed and
+returned in the resulting <code>plregression</code> object. Defaults to
+<code>FALSE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npplreg</code> uses a combination of OLS and nonparametric
+regression to estimate the parameter <code class="reqn">\beta</code> in the model
+<code class="reqn">Y = X\beta + \Theta (Z) + \epsilon</code>.
+</p>
+<p><code>npplreg</code> implements a variety of methods for
+nonparametric regression on multivariate (<code class="reqn">q</code>-variate) explanatory
+data defined over a set of possibly continuous and/or discrete
+(unordered, ordered) data. The approach is based on Li and Racine
+(2003) who employ ‘generalized product kernels’ that admit a mix
+of continuous and discrete data types.
+</p>
+<p>Three classes of kernel estimators for the continuous data types are
+available: fixed, adaptive nearest-neighbor, and generalized
+nearest-neighbor. Adaptive nearest-neighbor bandwidths change with
+each sample realization in the set, <code class="reqn">x_i</code>, when estimating the
+density at the point <code class="reqn">x</code>. Generalized nearest-neighbor bandwidths change
+with the point at which the density is estimated, <code class="reqn">x</code>. Fixed bandwidths
+are constant over the support of <code class="reqn">x</code>.
+</p>
+<p>Data contained in the data frame <code>tzdat</code> may be a mix of
+continuous (default), unordered discrete (to be specified in the data
+frame <code>tzdat</code> using <code>factor</code>), and ordered discrete
+(to be specified in the data frame <code>tzdat</code> using
+<code>ordered</code>). Data can be entered in an arbitrary order and
+data types will be detected automatically by the routine (see
+<code>np</code> for details).
+</p>
+<p>A variety of kernels may be specified by the user. Kernels implemented
+for continuous data types include the second, fourth, sixth, and eighth
+order Gaussian and Epanechnikov kernels, and the uniform
+kernel. Unordered discrete data types use a variation on Aitchison and
+Aitken's (1976) kernel, while ordered data types use a variation of the
+Wang and van Ryzin (1981) kernel.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npplreg</code> returns a <code>plregression</code> object. The generic
+accessor functions <code>coef</code>, <code>fitted</code>,
+<code>residuals</code>, <code>predict</code>, and
+<code>vcov</code>, extract (or
+estimate) coefficients, estimated values, residuals,
+predictions, and variance-covariance matrices,
+respectively, from
+the returned object. Furthermore, the functions <code>summary</code>
+and <code>plot</code> support objects of this type. The returned object
+has the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>evalx</code></td>
+<td>
+<p> evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evalz</code></td>
+<td>
+<p> evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean</code></td>
+<td>
+<p> estimation of the regression, or conditional mean, at the
+evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xcoef</code></td>
+<td>
+<p> coefficient(s) corresponding to the components
+<code class="reqn">\beta_i</code> in the model </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xcoeferr</code></td>
+<td>
+<p> standard errors of the coefficients </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xcoefvcov</code></td>
+<td>
+<p> covariance matrix of the coefficients </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw</code></td>
+<td>
+<p> the bandwidths, stored as a <code>plbandwidth</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid</code></td>
+<td>
+<p> if <code>residuals = TRUE</code>, in-sample or out-of-sample
+residuals where appropriate (or possible) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R2</code></td>
+<td>
+<p> coefficient of determination (Doksum and Samarov (1995))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MSE</code></td>
+<td>
+<p> mean squared error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MAE</code></td>
+<td>
+<p> mean absolute error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MAPE</code></td>
+<td>
+<p> mean absolute percentage error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CORR</code></td>
+<td>
+<p> absolute value of Pearson's correlation coefficient </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SIGN</code></td>
+<td>
+<p> fraction of observations where fitted and observed values
+agree in sign </p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Doksum, K. and A. Samarov (1995), “Nonparametric estimation of
+global functionals and a measure of the explanatory power of covariates
+in regression,” The Annals of Statistics, 23 1443-1473.
+</p>
+<p>Gao, Q. and L. Liu and J.S. Racine (2015), “A partially linear
+kernel estimator for categorical data,” Econometric Reviews, 34 (6-10),
+958-977.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics: Theory
+and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2004), “Cross-validated local linear
+nonparametric regression,” Statistica Sinica, 14, 485-512.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em>
+Cambridge University Press.
+</p>
+<p>Racine, J.S. and Q. Li (2004), “Nonparametric estimation of regression
+functions with both categorical and continuous data,” Journal of
+Econometrics, 119, 99-130.
+</p>
+<p>Robinson, P.M. (1988), “Root-n-consistent semiparametric regression,”
+Econometrica, 56, 931-954. 
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth estimators
+for discrete distributions,”  Biometrika, 68, 301-309.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npregbw</code>, <code>npreg</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA): For this example, we simulate an
+# example for a partially linear model and compare the coefficient
+# estimates from the partially linear model with those from a correctly
+# specified parametric model...
+
+set.seed(42)
+
+n &lt;- 250
+x1 &lt;- rnorm(n)
+x2 &lt;- rbinom(n, 1, .5)
+
+z1 &lt;- rbinom(n, 1, .5)
+z2 &lt;- rnorm(n)
+
+y &lt;- 1 + x1 + x2 + z1 + sin(z2) + rnorm(n)
+
+# First, compute data-driven bandwidths. This may take a few minutes
+# depending on the speed of your computer...
+
+bw &lt;- npplregbw(formula=y~x1+factor(x2)|factor(z1)+z2)
+
+# Next, compute the partially linear fit
+
+pl &lt;- npplreg(bws=bw)
+
+# Print a summary of the model...
+
+summary(pl)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Retrieve the coefficient estimates and their standard errors...
+
+coef(pl)
+coef(pl, errors = TRUE)
+
+# Compare the partially linear results to those from a correctly
+# specified model's coefficients for x1 and x2
+
+ols &lt;- lm(y~x1+factor(x2)+factor(z1)+I(sin(z2)))
+
+# The intercept is coef()[1], and those for x1 and x2 are coef()[2] and
+# coef()[3]. The standard errors are the square root of the diagonal of
+# the variance-covariance matrix (elements 2 and 3)
+
+coef(ols)[2:3]
+sqrt(diag(vcov(ols)))[2:3]
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Plot the regression surfaces via plot() (i.e., plot the `partial
+# regression surface plots').
+
+plot(bw)
+
+# Note - to plot regression surfaces with variability bounds constructed
+# from bootstrapped standard errors, use the following (note that this
+# may take a minute or two depending on the speed of your computer as
+# the bootstrapping is done in real time, and note also that we override
+# the default number of bootstrap replications (399) reducing them to 25
+# in order to quickly compute standard errors in this instance - don't
+# of course do this in general)
+
+plot(bw,
+     plot.errors.boot.num=25, 
+     plot.errors.method="bootstrap")
+
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): For this example, we simulate an
+# example for a partially linear model and compare the coefficient
+# estimates from the partially linear model with those from a correctly
+# specified parametric model...
+
+set.seed(42)
+
+n &lt;- 250
+x1 &lt;- rnorm(n)
+x2 &lt;- rbinom(n, 1, .5)
+
+z1 &lt;- rbinom(n, 1, .5)
+z2 &lt;- rnorm(n)
+
+y &lt;- 1 + x1 + x2 + z1 + sin(z2) + rnorm(n)
+
+X &lt;- data.frame(x1, factor(x2))
+Z &lt;- data.frame(factor(z1), z2)
+
+# First, compute data-driven bandwidths. This may take a few minutes
+# depending on the speed of your computer...
+
+bw &lt;- npplregbw(xdat=X, zdat=Z, ydat=y)
+
+# Next, compute the partially linear fit
+
+pl &lt;- npplreg(bws=bw)
+
+# Print a summary of the model...
+
+summary(pl)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Retrieve the coefficient estimates and their standard errors...
+
+coef(pl)
+coef(pl, errors = TRUE)
+
+# Compare the partially linear results to those from a correctly
+# specified model's coefficients for x1 and x2
+
+ols &lt;- lm(y~x1+factor(x2)+factor(z1)+I(sin(z2)))
+
+# The intercept is coef()[1], and those for x1 and x2 are coef()[2] and
+# coef()[3]. The standard errors are the square root of the diagonal of
+# the variance-covariance matrix (elements 2 and 3)
+
+coef(ols)[2:3]
+sqrt(diag(vcov(ols)))[2:3]
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Plot the regression surfaces via plot() (i.e., plot the `partial
+# regression surface plots').
+
+plot(bw)
+
+# Note - to plot regression surfaces with variability bounds constructed
+# from bootstrapped standard errors, use the following (note that this
+# may take a minute or two depending on the speed of your computer as
+# the bootstrapping is done in real time, and note also that we override
+# the default number of bootstrap replications (399) reducing them to 25
+# in order to quickly compute standard errors in this instance - don't
+# of course do this in general)
+
+plot(bw,
+     plot.errors.boot.num=25, 
+     plot.errors.method="bootstrap")
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

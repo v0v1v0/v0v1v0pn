@@ -1,0 +1,359 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>analyseBINdata</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>BIN data analysis</h2>
+
+<h3>Description</h3>
+
+<p>Analysing signal data records extracted from a BIN file.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">analyseBINdata(obj_pickBIN, nfchn, nlchn, bg = "late", 
+               me = 2.0, distp = "p", kph = NULL, 
+               kdc = NULL, dcr = NULL, FR.fchn = NULL, 
+               FR.mchn = NULL, FR.lchn = NULL, 
+               signal.type = "LxTx", outfile = NULL)
+
+analyseBINdata0(obj_pickBIN, fchn, lchn, bg="late", me=2.0, 
+                distp="p", kph=NULL, kdc=NULL, dcr=NULL, 
+                FR.fchn=NULL, FR.mchn=NULL, FR.lchn=NULL, 
+                signal.type="LxTx", outfile=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj_pickBIN</code></td>
+<td>
+<p>list(<b>required</b>): an object of S3 class <code>"pickBIN"</code> produced by<br> 
+function pickBINdata</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfchn</code></td>
+<td>
+<p>integer(<b>required</b>): number of the first few channels from the initial<br>
+part of a decay curve. Number of counts summed over channels<br><code>(Delay+1L):(Delay+nfchn)</code> is calculated as the fast-component<br>
+plus backgroud signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlchn</code></td>
+<td>
+<p>integer(<b>required</b>): number of the last few channels from the latter part<br>
+of a decay curve. If <code>bg="late"</code>, number of counts averaged over channels<br><code>(Delay+On-nlchn+1L):(Delay+On)</code> will be calculated as the backgroud<br>
+signal, if <code>bg="early"</code>, number of counts averaged over channels<br><code>(Delay+nfchn+1L):(Delay+nfchn+nlchn)</code> will be calculated as the<br>
+backgroud signal. <code>Delay</code> and <code>On</code> are obtained internally from the BIN file. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fchn</code></td>
+<td>
+<p>integer(<b>required</b>): channels used for calculating the fast-component signals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lchn</code></td>
+<td>
+<p>integer(<b>required</b>): channels used for calculating the background counts</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bg</code></td>
+<td>
+<p>character(with default): background subtraction method, i.e.,<br><code>bg="early"</code> or <code>bg="late"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>me</code></td>
+<td>
+<p>numeric(with default): measurement error of Lx (or Tx) in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distp</code></td>
+<td>
+<p>character(with default): distribution of photon counts, <code>distp="p"</code> denotes<br>
+Poisson distribution, <code>distp="op"</code> denotes Over Poisson distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kph</code></td>
+<td>
+<p>numeric(optional): correction factor for photon counts</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kdc</code></td>
+<td>
+<p>numeric(optional): correction factor for dark counts</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dcr</code></td>
+<td>
+<p>numeric(optional): dark count rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FR.fchn</code></td>
+<td>
+<p>vector(optional): fast-component signal channels, note that those channels are extracted
+internally from the "ON" channels,<br>
+i.e., <code>FR.fchn=((Delay+1):(Delay+On))[FR.fchn]</code>.<br>
+Example: <code>FR.fchn=1:5</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FR.mchn</code></td>
+<td>
+<p>vector(optional): medium-component signal channels, note that those channels are extracted 
+internally from the "ON" channels,<br>
+i.e., <code>FR.mchn=((Delay+1):(Delay+On))[FR.mchn]</code>.<br>
+Example: <code>FR.mchn=31:60</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FR.lchn</code></td>
+<td>
+<p>vector(optional): background signal channels, note that those channels are extracted 
+internally from the "ON" channels,<br>
+i.e., <code>FR.lchn=((Delay+1):(Delay+On))[FR.lchn]</code>.<br>
+Example: <code>FR.lchn=201:250</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>signal.type</code></td>
+<td>
+<p>character(with default): type of signal, <code>"LxTx"</code>, <code>"Lx"</code>, or <code>"Tx"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outfile</code></td>
+<td>
+<p>character(optional): if specified, analysis results (i.e., <code>NO</code>, <code>Position</code>, <code>Grain</code>, 
+<code>SAR.Cycle</code>, <code>Dose</code>, <code>Init</code>, <code>BG</code>, <code>Lx</code>, <code>seLx</code>, <code>TInit</code>, <code>TBG</code>, <code>Tx</code>, <code>seTx</code>, 
+<code>LxTx</code>, <code>seLxTx</code>) will be written to a CSV file named <code>"outfile"</code> and saved to the current work directory</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function analyseBINdata is used for signal (i.e., Lx, Tx, and Lx/Tx) calculation. 
+It provides two protocols for background subtraction (i.e., the early and late background subtraction methods).<br><br>
+Standard error of signals are assessed using two methods: if photon counts are assummed to follow Poisson distributions, 
+<b>Eqn.(3)</b> of Galbraith (2002) will be applied; if photon counts are over-dispersed, <b>Eqn.(10)</b> of Bluszcz et al. (2015) will be applied.<br><br>
+If arguments <code>FR.fchn</code>, <code>FR.mchn</code>, and <code>FR.lchn</code> are provided, fast ratio will be calculated according to Madsen et al. (2009).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Return an invisible list of S3 class object "analyseBIN" containing the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>SARdata</code></td>
+<td>
+<p>a data.frame containing calculated SAR data sets</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criteria</code></td>
+<td>
+<p>values used as rejection criteria (0-1 values indicating if Tn is more than 3 sigma above BG or not, 
+ratio of initial Tn signal to BG and associated standard error, relative standard error of Tn in percent, fast ratio of Tn and associated standard error), 
+<code>NA</code> is produced if the value can not be calculated. Note that in this function rejection criteria are calculated but not applied</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tn</code></td>
+<td>
+<p>values of Tn and associated standard errors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LnTn.curve</code></td>
+<td>
+<p>decay curves for Ln and Tn for different aliquots (grains)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TxTn</code></td>
+<td>
+<p>ratios of Tx to Tn for various SAR cycles</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agID</code></td>
+<td>
+<p>aliquot or grain ID (i.e., <code>NO</code>, <code>Position</code>, and <code>Grain</code>)</p>
+</td>
+</tr>
+</table>
+<p><code>SARdata</code> is a data.frame containing the following elements if <code>signal.type="LxTx"</code>:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<b>Element</b>    </td>
+<td style="text-align: left;">  <b>Description</b>                             </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>NO</code>         </td>
+<td style="text-align: left;">  aliquot (grain) number                         </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>SAR.Cycle</code>  </td>
+<td style="text-align: left;">  SAR cycle (N, R1, R2, R3, ...)                 </td>
+</tr>
+<tr>
+<td style="text-align: left;"> 
+<code>Dose</code>       </td>
+<td style="text-align: left;">  regenerative dose                              </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>LxTx</code>       </td>
+<td style="text-align: left;">  sensitivity-corrected regenerative-dose signal </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>seLxTx</code>     </td>
+<td style="text-align: left;">  standard error of LxTx                                  
+</td>
+</tr>
+</table>
+<p><code>SARdata</code> contains the following elements if <code>signal.type="Lx"</code>:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<b>Element</b>    </td>
+<td style="text-align: left;">  <b>Description</b>                </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>NO</code>         </td>
+<td style="text-align: left;">  aliquot (grain) number            </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>SAR.Cycle</code>  </td>
+<td style="text-align: left;">  SAR cycle (N, R1, R2, R3, ...)    </td>
+</tr>
+<tr>
+<td style="text-align: left;"> 
+<code>Dose</code>       </td>
+<td style="text-align: left;">  regenerative dose                 </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>Lx</code>         </td>
+<td style="text-align: left;">  regenerative-dose signal          </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>seLx</code>       </td>
+<td style="text-align: left;">  standard error of Lx                                 
+</td>
+</tr>
+</table>
+<p><code>SARdata</code> contains the following elements if <code>signal.type="Tx"</code>:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<b>Element</b>    </td>
+<td style="text-align: left;">  <b>Description</b>                   </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>NO</code>         </td>
+<td style="text-align: left;">  aliquot (grain) number               </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>SAR.Cycle</code>  </td>
+<td style="text-align: left;">  SAR cycle (N, R1, R2, R3, ...)       </td>
+</tr>
+<tr>
+<td style="text-align: left;"> 
+<code>Dose</code>       </td>
+<td style="text-align: left;">  regenerative dose                    </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>Tx</code>         </td>
+<td style="text-align: left;">  test-dose signal                     </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>seTx</code>       </td>
+<td style="text-align: left;">  standard error of Tx                                 
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Though function analyseBINdata is originally designed to analyze CW-OSL data sets, IRSL data sets obtained from the SAR protocol can also be analyzed.
+</p>
+
+
+<h3>References</h3>
+
+<p>Ballarini M, Wallinga J, Wintle AG, Bos AJJ, 2007. A modified SAR protocol for optical dating of individual grains from young quartz samples. 
+Radiation Measurements, 42(3): 360-369.
+</p>
+<p>Bluszcz A, Adamiec G, Heer AJ, 2015. Estimation of equivalent dose and its uncertainty in the OSL SAR protocol when count numbers do not follow a Poisson distribution. Radiation Measurements, 81: 46-54. 
+</p>
+<p>Cunningham AC, Wallinga J, 2010. Selection of integration time intervals for quartz OSL decay curves. Quaternary Geochronology, 5(6): 657-666
+</p>
+<p>Duller GAT, 2016. Analyst (v4.31.9), User Mannual.
+</p>
+<p>Durcan JA, Duller GAT, 2011. The fast ratio: A rapid measure for testing the dominance of the fast component in the initial OSL signal from quartz. Radiation Measurements, 46(10): 1065-1072.
+</p>
+<p>Galbraith R, 2002. A note on the variance of a backround-corrected OSL count. Ancient TL, 20(2): 49-51.
+</p>
+<p>Madsen AT, Duller GAT, Donnelly JP, Roberts HM, Wintle AG, 2009. A chronology of hurricane landfalls at Little Sippewissett Marsh, Massachusetts, USA, using optical dating. Geomorphology, 109(1-2): 36-45.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>loadBINdata; pickBINdata; pickSARdata; calED;<br>
+calSARED; calSGCED; fitGrowth; lsNORM; BIN
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">   ### Example 1 (not run):
+   # obj_loadBIN &lt;- loadBINdata("foo.bin", view=TRUE)
+   # obj_pickBIN &lt;- pickBINdata(obj_loadBIN, Position=2, LType="OSL")
+   # analyseBINdata(obj_pickBIN, nfchn=3, nlchn=20)
+
+   ### Example 2:
+   data(BIN)
+   obj_pickBIN &lt;- pickBINdata(BIN, Position=c(2,4,6,8,10), 
+                              LType="OSL", view=FALSE)
+   obj_analyseBIN &lt;- analyseBINdata(obj_pickBIN, nfchn=4, nlchn=20) 
+   #obj_analyseBIN &lt;- analyseBINdata0(obj_pickBIN, fchn=1:4, nlchn=231:250)
+   obj_analyseBIN$SARdata
+</code></pre>
+
+
+</div>

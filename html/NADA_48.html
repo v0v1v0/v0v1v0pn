@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cenreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute regression equations and likelihood correlation coefficient
+for censored data.
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes regression equations for singly censored data using maximum
+likelihood estimation. Estimates of slopes and intercept, tests
+for significance of parameters,and predicted quantiles (Median =
+points on the line) with confidence intervals can be computed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">    cenreg(obs, censored, groups, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+
+<p>Either a numeric vector of observations or a formula.
+See examples below.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>censored</code></td>
+<td>
+
+<p>If a formula is not specified, this should be
+a logical vector indicating TRUE where an observation in obs is
+censored (a less-than value) and FALSE otherwise.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+
+<p>If a formula is not specified, this should be a numeric
+or factor vector that represents the explanatory variable.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional items that are common to this function and the <code>survreg</code>
+function from the ‘survival’ package.  The most important of which
+is ‘dist’ and ‘conf.int’.  See Details below.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This routine is a front end to the <code>survreg</code> routine in the
+<code>survival</code> package.  
+</p>
+<p>There are many additional options that are supported and documented
+in <code>survfit</code>.  Only a few have relevance to the evironmental
+sciences.
+</p>
+<p>A very important option is ‘dist’ which specifies the distributional
+model to use in the regression.  The default is ‘lognormal’.  
+</p>
+<p>Another important option is ‘conf.int’.  This is NOT an option to
+<code>survreg</code> but is an added feature (due to some arcane details of
+R it can't be documented above).  The ‘conf.int’ option specifies
+the level for a two-sided confidence interval on the regression.
+The default is 0.95.  This interval will be used in when the output
+object is passed to other generic functions such as <code>mean</code>
+and <code>quantile</code>.  See Examples below.
+</p>
+<p>Also supported is a ‘gaussian’ or a normal distribution.  The use of
+a gaussian distribution requires an interval censoring context for
+left-censored data.  Luckily, this routine automatically does this
+for you – simply specify ‘gaussian’ and the correct manipulations
+are done.
+</p>
+<p>If any other distribution is specified besides lognormal or gaussian, 
+the return object is a raw survreg object – it is up to the user to
+‘do the right thing’ with the output (and input for that matter).
+</p>
+<p>If you are using the formula interface:  The <code>censored</code> and
+<code>groups</code> parameters are not specified – all information is
+provided via a formula as the <code>obs</code> parameter.  The formula
+must have a <code>Cen</code> object as the response on the left of the
+<code>~</code> operator and, if desired, terms separated by + operators
+on the right. See examples below.
+</p>
+<p>The reported likelihood r correlation coefficient measures the linear
+association between y (groups) and x (obs), based on the difference
+in log likelihoods between the fitted model and the null model.
+Slopes and intercepts are fit by maximum likelihood.  A lognormal
+distribution is fit by default, with a normal distribution being an
+option.  Estimates of predicted values on the line can be obtained
+by specifying the values for all x variables at which y is to be
+predicted.  Requesting the median (p=0.5) will provide estimates on
+the line for a lognormal distribution.  Estimates of the mean are
+also possible, as are estimates of other percentiles.  Equations for
+confidence intervals follow those of Meeker and Escobar (1098).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a <code>summary.cenreg</code> object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>R. Lopaka Lee &lt;rclee@usgs.gov&gt;
+</p>
+<p>Dennis Helsel &lt;dhelsel@practicalstats.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Helsel, Dennis R. (2005).  Nondectects and Data Analysis; Statistics for
+censored environmental data.  John Wiley and Sons, USA, NJ.
+</p>
+<p>Meeker, W.Q. and L. A. Escobar (1998).  Statistical Methods for
+Reliability Data.  John Wiley and Sons, USA, NJ.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Cen</code>,
+<code>cenmle</code>,
+<code>predict-methods</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+
+    # (examples in Chap 12 of the NADA book)
+    data(TCEReg)
+
+    # Using the formula interface
+    with(TCEReg, cenreg(Cen(TCEConc, TCECen)~PopDensity))
+
+    # Two or more explanatory variables requires the formula interface
+    tcemle2 = with(TCEReg, cenreg(Cen(TCEConc, TCECen)~PopDensity+Depth))
+
+    # Prediction of quantiles at PopDensity=5 and Depth=110
+    predict(tcemle2, c(5, 110))
+</code></pre>
+
+
+</div>

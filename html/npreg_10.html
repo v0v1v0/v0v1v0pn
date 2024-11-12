@@ -1,0 +1,210 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ordinal</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Ordinal Smoothing Spline Basis and Penalty
+</h2>
+
+<h3>Description</h3>
+
+<p>Generate the smoothing spline basis and penalty matrix for an ordinal spline. This basis and penalty are for an ordered factor.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">basis.ord(x, knots, K = NULL, intercept = FALSE, ridge = FALSE)
+
+penalty.ord(x, K = NULL, xlev = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Predictor variable (basis) or spline knots (penalty). Ordered factor or integer vector of length <code class="reqn">n</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knots</code></td>
+<td>
+
+<p>Spline knots. Ordered factor or integer vector of length <code class="reqn">r</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+
+<p>Number of levels of <code>x</code>. If <code>NULL</code>, this argument is defined as <code>K = length(unique(x))</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlev</code></td>
+<td>
+
+<p>Factor levels of <code>x</code> (for penalty). If <code>NULL</code>, the levels are defined as <code>levels(as.ordered(x))</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the first column of the basis will be a column of ones. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ridge</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the basis matrix is post-multiplied by the inverse square root of the penalty matrix. See Note and Examples.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Generates a basis function or penalty matrix used to fit ordinal smoothing splines.
+</p>
+<p>With an intercept included, the basis function matrix has the form 
+</p>
+<p style="text-align: center;"><code class="reqn">X = [X_0,  X_1]</code>
+</p>
+
+<p>where matrix <code>X_0</code> is an <code class="reqn">n</code> by 1 matrix of ones, and <code>X_1</code> is a matrix of dimension <code class="reqn">n</code> by <code class="reqn">r</code>. The <code>X_0</code> matrix contains the "parametric part" of the basis (i.e., the intercept). The matrix <code>X_1</code> contains the "nonparametric part" of the basis, which consists of the <em>reproducing kernel</em> function
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = 1 - (x \vee y) + (1 / 2K) * ( x(x-1) + y(y-1) ) + c </code>
+</p>
+
+<p>evaluated at all combinations of <code>x</code> and <code>knots</code>. The notation <code class="reqn">(x \vee y)</code> denotes the maximum of <code class="reqn">x</code> and <code class="reqn">y</code>, and the constant is <code class="reqn">c = (K-1)(2K-1) / (6K)</code>.
+</p>
+<p>The penalty matrix consists of the <em>reproducing kernel</em> function
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = 1 - (x \vee y) + (1 / 2K) * ( x(x-1) + y(y-1) ) + c </code>
+</p>
+
+<p>evaluated at all combinations of <code>x</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Basis: Matrix of dimension <code>c(length(x), df)</code> where <code>df = length(knots) + intercept</code>.
+</p>
+<p>Penalty: Matrix of dimension <code>c(r, r)</code> where <code>r = length(x)</code> is the number of knots.
+</p>
+
+
+<h3>Note</h3>
+
+<p>If the inputs <code>x</code> and <code>knots</code> are factors, they should have the same levels.
+</p>
+<p>If the inputs <code>x</code> and <code>knots</code> are integers, the <code>knots</code> should be a subset of the input <code>x</code>.
+</p>
+<p>If <code>ridge = TRUE</code>, the penalty matrix is the identity matrix.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. <em>Frontiers in Applied Mathematics and Statistics, 3</em>(15), 1-13. <a href="https://doi.org/10.3389/fams.2017.00015">doi:10.3389/fams.2017.00015</a>
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), <em>SAGE Research Methods Foundations.</em> <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>nominal</code> for a basis and penalty for unordered factors.
+</p>
+<p>See <code>polynomial</code> for a basis and penalty for numeric variables.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">######***######   standard parameterization   ######***######
+
+# generate data
+set.seed(0)
+n &lt;- 101
+x &lt;- factor(sort(rep(LETTERS[1:4], length.out = n)))
+knots &lt;- LETTERS[1:3]
+eta &lt;- 1:4
+y &lt;- eta[x] + rnorm(n, sd = 0.5)
+
+# ordinal smoothing spline basis
+X &lt;- basis.ord(x, knots, intercept = TRUE)
+
+# ordinal smoothing spline penalty
+Q &lt;- penalty.ord(knots, K = 4)
+
+# pad Q with zeros (for intercept)
+Q &lt;- rbind(0, cbind(0, Q))
+
+# define smoothing parameter
+lambda &lt;- 1e-5
+
+# estimate coefficients
+coefs &lt;- solve(crossprod(X) + n * lambda * Q) %*% crossprod(X, y)
+
+# estimate eta
+yhat &lt;- X %*% coefs
+
+# check rmse
+sqrt(mean((eta[x] - yhat)^2))
+
+
+
+######***######   ridge parameterization   ######***######
+
+# generate data
+set.seed(0)
+n &lt;- 101
+x &lt;- factor(sort(rep(LETTERS[1:4], length.out = n)))
+knots &lt;- LETTERS[1:3]
+eta &lt;- 1:4
+y &lt;- eta[x] + rnorm(n, sd = 0.5)
+
+# ordinal smoothing spline basis
+X &lt;- basis.ord(x, knots, intercept = TRUE, ridge = TRUE)
+
+# ordinal smoothing spline penalty (ridge)
+Q &lt;- diag(rep(c(0, 1), times = c(1, ncol(X) - 1)))
+
+# define smoothing parameter
+lambda &lt;- 1e-5
+
+# estimate coefficients
+coefs &lt;- solve(crossprod(X) + n * lambda * Q) %*% crossprod(X, y)
+
+# estimate eta
+yhat &lt;- X %*% coefs
+
+# check rmse
+sqrt(mean((eta[x] - yhat)^2))
+
+</code></pre>
+
+
+</div>

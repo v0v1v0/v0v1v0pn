@@ -1,0 +1,541 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>multiNetLeroux</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+A function that generates samples for a multivariate fixed effects, spatial,
+and network model.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function that generates samples for a multivariate fixed effects, spatial,
+and network model, which is given by
+</p>
+<p style="text-align: center;"><code class="reqn">Y_{i_sr}|\mu_{i_sr} \sim f(y_{i_sr}| \mu_{i_sr}, \sigma_{er}^{2}) ~~~ i=1,\ldots, N_{s},~s=1,\ldots,S ,~r=1,\ldots,R,</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">g(\mu_{i_sr}) = \boldsymbol{x}^\top_{i_s} \boldsymbol{\beta}_{r} + \phi_{sr} + \sum_{j\in \textrm{net}(i_s)}w_{i_sj}u_{jr}+ w^{*}_{i_s}u^{*}_{r},</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\boldsymbol{\beta}_{r} \sim \textrm{N}(\boldsymbol{0}, \alpha\boldsymbol{I})</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\boldsymbol{\phi}_{r} = (\phi_{1r},\ldots, \phi_{Sr}) \sim \textrm{N}(\boldsymbol{0}, \tau_{r}^{2}(\rho_{r}(\textrm{diag}(\boldsymbol{A1})-\boldsymbol{A})+(1-\rho_{r})\boldsymbol{I})^{-1}),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\boldsymbol{u}_{j} = (u_{1j},\ldots, u_{Rj}) \sim \textrm{N}(\boldsymbol{0}, \boldsymbol{\Sigma}_{\boldsymbol{u}}),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\boldsymbol{u}^{*} = (u_{1}^*,\ldots, u_{R}^*) \sim \textrm{N}(\boldsymbol{0}, \boldsymbol{\Sigma}_{\boldsymbol{u}}),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\tau_{r}^{2} \sim \textrm{Inverse-Gamma}(a_{1}, b_{1}),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\rho_{r} \sim \textrm{Uniform}(0, 1),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\boldsymbol{\Sigma}_{\boldsymbol{u}} \sim \textrm{Inverse-Wishart}(\xi_{\boldsymbol{u}}, \boldsymbol{\Omega}_{\boldsymbol{u}}),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\sigma_{er}^{2} \sim \textrm{Inverse-Gamma}(\alpha_{3}, \xi_{3}).</code>
+</p>
+
+<p>The covariates for the <code class="reqn">i</code>th individual in the <code class="reqn">s</code>th spatial unit or other grouping are included in a <code class="reqn">p \times 1</code> vector <code class="reqn">\boldsymbol{x}_{i_s}</code>. The corresponding <code class="reqn">p \times 1</code> vector of fixed effect parameters relating to the <code class="reqn">r</code>th response are denoted by <code class="reqn">\boldsymbol{\beta}_{r}</code>, which has an assumed multivariate Gaussian prior with mean <code class="reqn">\boldsymbol{0}</code> and diagonal covariance matrix <code class="reqn">\alpha\boldsymbol{I}</code> that can be chosen by the user. A conjugate Inverse-Gamma prior is specified for <code class="reqn">\sigma_{er}^{2}</code>, and the corresponding hyperparamaterers (<code class="reqn">\alpha_{3}</code>, <code class="reqn">\xi_{3}</code>) can be chosen by the user.
+</p>
+<p>Spatial correlation in these areal unit level random effects is most often modelled by a conditional autoregressive (CAR) prior distribution. Using this model 
+spatial correlation is induced into the random effects via a non-negative spatial adjacency matrix <code class="reqn">\boldsymbol{A} = (a_{sl})_{S \times S}</code>, which defines how spatially close the <code class="reqn">S</code> areal units are to each other. The elements of <code class="reqn">\boldsymbol{A}_{S \times S}</code> can be binary or non-binary, and the most common specification is that <code class="reqn">a_{sl} = 1</code> if a pair of areal units (<code class="reqn">\mathcal{G}_{s}</code>, <code class="reqn">\mathcal{G}_{l}</code>) share a common border or are considered neighbours by some other measure, and <code class="reqn">a_{sl} = 0</code> otherwise. Note, <code class="reqn">a_{ss} = 0</code> for all <code class="reqn">s</code>. <code class="reqn">\tau^{2}_{r}</code> measures the variance  of these random effects for the  <code class="reqn">r</code>th response, where a conjugate Inverse-Gamma prior is specified for <code class="reqn">\tau^{2}_{r}</code> and the corresponding hyperparamaterers (<code class="reqn">a_{1}</code>, <code class="reqn">b_{1}</code>) can be chosen by the user. <code class="reqn">\rho_{r}</code> controls the level of spatial autocorrelation. A non-conjugate uniform prior is specified for <code class="reqn">\rho_{r}</code>.
+</p>
+<p>The <code class="reqn">R \times 1</code> vector of random effects for the <code class="reqn">j</code>th alter is denoted by <code class="reqn">\boldsymbol{u}_{j} = (u_{j1}, \ldots, u_{jR})_{R \times 1}</code>, while the <code class="reqn">R \times 1</code> vector of isolation effects for all <code class="reqn">R</code> outcomes is  denoted by <code class="reqn">\boldsymbol{u}^{*} = (u_{1}^*,\ldots, u_{R}^*)</code>, and both are assigned multivariate Gaussian prior distributions. The unstructured covariance matrix <code class="reqn">\boldsymbol{\Sigma}_{\boldsymbol{u}}</code> captures the covariance between the <code class="reqn">R</code> outcomes at the network level, and a conjugate Inverse-Wishart prior is specified for this covariance matrix <code class="reqn">\boldsymbol{\Sigma}_{\boldsymbol{u}}</code>. The corresponding hyperparamaterers (<code class="reqn">\xi_{\boldsymbol{u}}</code>, <code class="reqn">\boldsymbol{\Omega}_{\boldsymbol{u}}</code>) can be chosen by the user.
+</p>
+<p>The exact specification of each of the likelihoods (binomial, Gaussian, and Poisson) are given below:
+</p>
+<p style="text-align: center;"><code class="reqn">\textrm{Binomial:} ~ Y_{i_sr} \sim \textrm{Binomial}(n_{i_sr}, \theta_{i_sr}) ~ \textrm{and} ~ g(\mu_{i_sr}) = \textrm{ln}(\theta_{i_sr} / (1 - \theta_{i_sr})),</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\textrm{Gaussian:} ~ Y_{i_sr} \sim \textrm{N}(\mu_{i_sr}, \sigma_{er}^{2}) ~ \textrm{and} ~ g(\mu_{i_sr}) = \mu_{i_sr},</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\textrm{Poisson:} ~ Y_{i_sr} \sim \textrm{Poisson}(\mu_{i_sr}) ~ \textrm{and} ~ g(\mu_{i_sr}) = \textrm{ln}(\mu_{i_sr}).</code>
+</p>
+
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">multiNetLeroux(formula, data, trials, family, squareSpatialNeighbourhoodMatrix,
+spatialAssignment, W, numberOfSamples = 10, burnin = 0, thin = 1, seed = 1,
+trueBeta = NULL, trueSpatialRandomEffects = NULL, trueURandomEffects = NULL, 
+trueSpatialTauSquared = NULL, trueSpatialRho = NULL, 
+trueVarianceCovarianceU = NULL, trueSigmaSquaredE = NULL, 
+covarianceBetaPrior = 10^5, a1 = 0.001, b1 = 0.001, xi, omega, a3 = 0.001, 
+b3 = 0.001, centerSpatialRandomEffects = TRUE, centerURandomEffects = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>A formula for the covariate part of the model using a similar 
+syntax to that used in the lm() function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>An optional data.frame containing the variables in the formula.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trials</code></td>
+<td>
+
+<p>A vector the same length as the response containing the total number of trials 
+<code class="reqn">n_{i_sr}</code>. Only used if <code class="reqn">\texttt{family}</code>=“binomial".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+
+<p>The data likelihood model that must be “gaussian", “poisson" or 
+“binomial".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>squareSpatialNeighbourhoodMatrix</code></td>
+<td>
+
+<p>An <code class="reqn">S \times S</code> symmetric and non-negative neighbourhood 
+matrix <code class="reqn">\boldsymbol{A} = (a_{sl})_{S \times S}</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+
+<p>A matrix <code class="reqn">\boldsymbol{W}</code> that encodes the social network structure and whose rows sum to 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spatialAssignment</code></td>
+<td>
+
+<p>The binary matrix of individual's assignment to spatial area used in the model fitting process.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numberOfSamples</code></td>
+<td>
+
+<p>The number of samples to generate pre-thin.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+
+<p>The number of MCMC samples to discard as the burn-in period.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+
+<p>The value by which to thin <code class="reqn">\texttt{numberOfSamples}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+
+<p>A seed for the MCMC algorithm.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueBeta</code></td>
+<td>
+
+<p>If available, the true value of <code class="reqn">\boldsymbol{\beta}_{1}, \ldots, \boldsymbol{\beta}_{R}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueSpatialRandomEffects</code></td>
+<td>
+
+<p>If available, the true values of <code class="reqn">\boldsymbol{\phi}_{1}, \ldots, \boldsymbol{\phi}_{R}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueURandomEffects</code></td>
+<td>
+
+<p>If available, the true values of <code class="reqn">\boldsymbol{u}_{1}, \ldots, \boldsymbol{u}_{J}, \boldsymbol{u}^{*}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueSpatialTauSquared</code></td>
+<td>
+
+<p>If available, the true values of <code class="reqn">\tau^{2}_{1}, \ldots, \tau^{2}_{R}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueSpatialRho</code></td>
+<td>
+
+<p>If available, the true value of <code class="reqn">\rho_{1}, \ldots, \rho_{R}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueVarianceCovarianceU</code></td>
+<td>
+
+<p>If available, the true value of <code class="reqn">\boldsymbol{\Sigma}_{\boldsymbol{u}}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trueSigmaSquaredE</code></td>
+<td>
+
+<p>If available, the true value of <code class="reqn">\sigma_{e1}^{2}</code>, <code class="reqn">\ldots</code>,  <code class="reqn">\sigma_{eR}^{2}</code>. Only used if <code class="reqn">\texttt{family}</code>=“gaussian".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covarianceBetaPrior</code></td>
+<td>
+
+<p>A scalar prior <code class="reqn">\alpha</code> for the covariance parameter of the 
+beta prior, such that the covariance is <code class="reqn">\alpha\boldsymbol{I}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a1</code></td>
+<td>
+
+<p>The shape parameter for the Inverse-Gamma distribution 
+relating to the spatial random effects <code class="reqn">\alpha_{1}</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b1</code></td>
+<td>
+
+<p>The scale parameter for the Inverse-Gamma distribution 
+relating to the spatial random effects <code class="reqn">\xi_{1}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xi</code></td>
+<td>
+
+<p>The degrees of freedom parameter for the Inverse-Wishart
+distribution relating to the network random effects <code class="reqn">\xi_{\boldsymbol{u}}</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omega</code></td>
+<td>
+
+<p>The scale parameter for the Inverse-Wishart distribution 
+relating to the network random effects <code class="reqn">\boldsymbol{\Omega}_{\boldsymbol{u}}</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a3</code></td>
+<td>
+
+<p>The shape parameter for the Inverse-Gamma distribution 
+relating to the error terms <code class="reqn">\alpha_{3}</code>. Only used if <code class="reqn">\texttt{family}</code>=“gaussian".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b3</code></td>
+<td>
+
+<p>The scale parameter for the Inverse-Gamma distribution 
+relating to the error terms <code class="reqn">\xi_{3}</code>. Only used if <code class="reqn">\texttt{family}</code>=“gaussian".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centerSpatialRandomEffects</code></td>
+<td>
+
+<p>A choice to center the spatial random effects after each 
+iteration of the MCMC sampler.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centerURandomEffects</code></td>
+<td>
+
+<p>A choice to center the network random effects after each 
+iteration of the MCMC sampler.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+
+<p>The matched call.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>The response used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>The design matrix used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardizedX</code></td>
+<td>
+
+<p>The standardized design matrix used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>squareSpatialNeighbourhoodMatrix</code></td>
+<td>
+
+<p>The spatial neighbourhood matrix used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spatialAssignment</code></td>
+<td>
+
+<p>The spatial assignment matrix used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+
+<p>The network matrix used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+
+<p>The matrix of simulated samples from the posterior
+distribution of each parameter in the model (excluding random effects).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betaSamples</code></td>
+<td>
+
+<p>The matrix of simulated samples from the posterior 
+distribution of <code class="reqn">\boldsymbol{\beta}_{1}, \ldots, \boldsymbol{\beta}_{R}</code> parameters in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spatialTauSquaredSamples</code></td>
+<td>
+
+<p>Type: matrix. The matrix of simulated samples from the posterior 
+distribution of <code class="reqn">\tau^{2}_{1}, \ldots, \tau^{2}_{R}</code> in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spatialRhoSamples</code></td>
+<td>
+
+<p>The vector of simulated samples from the posterior 
+distribution of <code class="reqn">\rho_{1}, \ldots, \rho_{R}</code> in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varianceCovarianceUSamples</code></td>
+<td>
+
+<p>The matrix of simulated samples from the posterior 
+distribution of <code class="reqn">\boldsymbol{\Sigma}_{\boldsymbol{u}}</code> in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spatialRandomEffectsSamples</code></td>
+<td>
+
+<p>The matrix of simulated samples from the posterior 
+distribution of spatial random effects <code class="reqn">\boldsymbol{\phi}_{1}, \ldots, \boldsymbol{\phi}_{R}</code> in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uRandomEffectsSamples</code></td>
+<td>
+
+<p>The matrix of simulated samples from the posterior 
+distribution of network random effects <code class="reqn">\boldsymbol{u}_{1}, \ldots, \boldsymbol{u}_{J}, \boldsymbol{u}^{*}</code> in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmaSquaredESamples</code></td>
+<td>
+
+<p>The vector of simulated samples from the posterior 
+distribution of <code class="reqn">\sigma_{e1}^{2}</code>, <code class="reqn">\ldots</code>,  <code class="reqn">\sigma_{eR}^{2}</code> in the model. Only used if <code class="reqn">\texttt{family}</code>=“gaussian".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acceptanceRates</code></td>
+<td>
+
+<p>The acceptance rates of parameters in the model from the MCMC 
+sampling scheme .
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spatialRandomEffectsAcceptanceRate</code></td>
+<td>
+
+<p>The acceptance rates of spatial random effects in the model 
+from the MCMC sampling scheme.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uRandomEffectsAcceptanceRate</code></td>
+<td>
+
+<p>The acceptance rates of network random effects in the model 
+from the MCMC sampling scheme.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeTaken</code></td>
+<td>
+
+<p>The time taken for the model to run.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+
+<p>The number of MCMC samples to discard as the burn-in period.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+
+<p>The value by which to thin <code class="reqn">\texttt{numberOfSamples}</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DBar</code></td>
+<td>
+
+<p>DBar for the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posteriorDeviance</code></td>
+<td>
+
+<p>The posterior deviance for the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posteriorLogLikelihood</code></td>
+<td>
+
+<p>The posterior log likelihood for the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd</code></td>
+<td>
+
+<p>The number of effective parameters in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DIC</code></td>
+<td>
+
+<p>The DIC for the model.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George Gerogiannis
+</p>
+
+
+</div>

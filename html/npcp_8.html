@@ -1,0 +1,289 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cpDist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test for Change-Point Detection in Possibly Multivariate Observations
+Sensitive to Changes in the Distribution Function</h2>
+
+<h3>Description</h3>
+
+<p>Nonparametric test for change-point detection based on the
+(multivariate) empirical distribution function. The observations can
+be continuous univariate or multivariate, and serially independent or
+dependent (strongly mixing).  Approximate p-values for the test
+statistics are obtained by means of a <em>multiplier</em>
+approach. The first reference treats the serially
+independent case while details about the serially
+dependent case can be found in second and third references.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cpDist(x, statistic = c("cvmmax", "cvmmean", "ksmax", "ksmean"),
+       method = c("nonseq", "seq"), b = NULL, gamma = 0,
+       delta = 1e-4, weights = c("parzen", "bartlett"),
+       m = 5, L.method=c("max","median","mean","min"),
+       N = 1000, init.seq = NULL, include.replicates = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data matrix whose rows are continuous observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>a string specifying the statistic whose value and
+p-value will be displayed; can be either <code>"cvmmax"</code> or
+<code>"cvmmean"</code> (the maximum or average of the <code>nrow(x)-1</code>
+intermediate Cramér-von Mises statistics), or
+<code>"ksmax"</code> or <code>"ksmean"</code> (the maximum or average of the
+<code>nrow(x)-1</code> intermediate Kolmogorov-Smirnov statistics); see
+Section 3 in the first reference. The four statistics and the
+corresponding p-values are computed at each execution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a string specifying the simulation method for
+generating multiplier replicates of the test statistic;
+can be either <code>"nonseq"</code> (the 'check' approach
+in the first reference) or <code>"seq"</code> (the 'hat' approach
+in the first reference). The 'check' approach appears to lead to
+better behaved tests and is recommended.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>strictly positive integer specifying the value of the
+bandwidth parameter determining the serial dependence when
+generating dependent multiplier sequences using the 'moving average
+approach'; see Section 5 of the second reference. The
+value 1 will create i.i.d. multiplier
+sequences suitable for serially independent observations. If set to
+<code>NULL</code>, <code>b</code> will be estimated from <code>x</code> using the
+function <code>bOptEmpProc()</code>; see the procedure described in
+Section 5 of the second reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>parameter between 0 and 0.5 appearing in the definition
+of the weight function used in the detector function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>parameter between 0 and 1 appearing in the definition
+of the weight function used in the detector function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>a string specifying the kernel for creating the
+weights used in the generation of dependent multiplier sequences within the
+'moving average approach'; see Section 5 of the second reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>a strictly positive integer specifying the number of points of the
+uniform grid on <code class="reqn">(0,1)^d</code> (where <code class="reqn">d</code> is
+<code>ncol(x)</code>) involved in the estimation of the bandwidth
+parameter; see Section 5 of the third reference. The number of
+points of the grid is given by <code>m^ncol(x)</code> so that <code>m</code> needs to be
+decreased as <code class="reqn">d</code> increases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L.method</code></td>
+<td>
+<p>a string specifying how the parameter <code class="reqn">L</code> involved
+in the estimation of the bandwidth parameter is computed; see
+Section 5 of the second reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>number of multiplier replications.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.seq</code></td>
+<td>
+<p>a sequence of independent standard normal variates of
+length <code>N * (nrow(x) + 2 * (b - 1))</code> used to generate dependent
+multiplier sequences.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.replicates</code></td>
+<td>
+<p>a logical specifying whether the
+object of <code>class</code> <code>htest</code> returned by the function
+(see below) will include the multiplier replicates.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The approximate p-value is computed as
+</p>
+<p style="text-align: center;"><code class="reqn">(0.5 +\sum_{i=1}^N\mathbf{1}_{\{S_i\ge S\}})/(N+1),</code>
+</p>
+
+<p>where <code class="reqn">S</code> and <code class="reqn">S_i</code> denote the test statistic and
+a multiplier replication, respectively. This ensures that the
+approximate p-value is a number strictly between 0 and 1, which is
+sometimes necessary for further treatments.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of <code>class</code> <code>htest</code> which is a list,
+some of the components of which are
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>value of the test statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>corresponding approximate p-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvm</code></td>
+<td>
+<p>the values of the <code>nrow(x)-1</code> intermediate
+Cramér-von Mises change-point statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ks</code></td>
+<td>
+<p>the values of the <code>nrow(x)-1</code> intermediate
+Kolmogorov-Smirnov change-point statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.statistics</code></td>
+<td>
+<p>the values of all four test statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.p.values</code></td>
+<td>
+<p>the corresponding p-values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>the value of parameter <code>b</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Note that when the observations are continuous univariate and serially
+independent, independent realizations of the tests statistics under
+the null hypothesis of no change in the distribution can be
+obtained by simulation; see Section 4 in the first reference.
+</p>
+
+
+<h3>References</h3>
+
+<p>M. Holmes, I. Kojadinovic and J-F. Quessy (2013), Nonparametric tests
+for change-point detection à la Gombay and Horváth,
+<em>Journal of Multivariate Analysis</em> <b>115</b>, pages 16-32.
+</p>
+<p>A. Bücher and I. Kojadinovic (2016), A dependent multiplier
+bootstrap for the sequential empirical copula process under strong
+mixing, <em>Bernoulli</em> <b>22:2</b>, pages 927-968,
+<a href="https://arxiv.org/abs/1306.3930">https://arxiv.org/abs/1306.3930</a>.
+</p>
+<p>A. Bücher, J.-D. Fermanian and I. Kojadinovic (2019),
+Combining cumulative sum change-point detection tests for assessing
+the stationarity of univariate time series, <em>Journal of Time
+Series Analysis</em> <b>40</b>, pages 124-150,
+<a href="https://arxiv.org/abs/1709.02673">https://arxiv.org/abs/1709.02673</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cpCopula()</code> for a related test based on the empirical
+copula, <code>cpRho()</code> for a related test based on
+Spearman's rho, <code>cpTau()</code> for a related test based on
+Kendall's tau, <code>bOptEmpProc()</code> for the function used to
+estimate <code>b</code> from <code>x</code> if <code>b = NULL</code>,
+<code>seqClosedEndCpDist</code> for the corresponding sequential test.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## A univariate example
+n &lt;- 100
+k &lt;- 50 ## the true change-point
+y &lt;- rnorm(k)
+z &lt;- rexp(n-k)
+x &lt;- matrix(c(y,z))
+cp &lt;- cpDist(x, b = 1)
+cp
+
+## All statistics
+cp$all.statistics
+## Corresponding p.values
+cp$all.p.values
+
+## Estimated change-point
+which(cp$cvm == max(cp$cvm))
+which(cp$ks == max(cp$ks))
+
+## A very artificial trivariate example
+## with a break in the first margin
+n &lt;- 100
+k &lt;- 50 ## the true change-point
+y &lt;- rnorm(k)
+z &lt;- rnorm(n-k, mean = 2)
+x &lt;- cbind(c(y,z),matrix(rnorm(2*n), n, 2))
+cp &lt;- cpDist(x, b = 1)
+cp
+
+## All statistics
+cp$all.statistics
+## Corresponding p.values
+cp$all.p.values
+
+## Estimated change-point
+which(cp$cvm == max(cp$cvm))
+which(cp$ks == max(cp$ks))
+</code></pre>
+
+
+</div>

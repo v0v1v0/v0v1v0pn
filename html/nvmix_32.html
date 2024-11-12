@@ -1,0 +1,232 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gammamix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Functionalities for Gamma Scale Mixture Models</h2>
+
+<h3>Description</h3>
+
+<p>Evaluating density-, distribution- and quantile-function of Gamma scale
+mixtures as well as random variate generation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dgammamix(x, qmix, d, control = list(), verbose = TRUE, log = FALSE, ...)
+pgammamix(x, qmix, d, lower.tail = TRUE, control = list(), verbose = TRUE, ...)
+qgammamix(u, qmix, d, control = list(), verbose = TRUE, q.only = TRUE,
+          stored.values = NULL, ...)
+rgammamix(n, rmix, qmix, d, method = c("PRNG", "sobol", "ghalton"),
+          skip = 0, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code class="reqn">n</code>-<code>vector</code> of evaluation points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p><code class="reqn">n</code>-<code>vector</code> of probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmix</code></td>
+<td>
+<p>see <code>pnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rmix</code></td>
+<td>
+<p>see <code>rnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>dimension of the underlying normal variance mixture, see also
+details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>sample size <code class="reqn">n</code> (positive integer).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.tail</code></td>
+<td>
+<p><code>logical</code>; if <code>TRUE</code> (default),
+probabilities are <code class="reqn">P(X&lt;= x)</code>, otherwise <code class="reqn">P(X &gt; x)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p><code>logical</code> indicating whether the log-density
+shall be returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.only</code></td>
+<td>
+<p>see <code>qnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stored.values</code></td>
+<td>
+<p>see <code>qnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>see <code>rnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skip</code></td>
+<td>
+<p>see <code>rnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p><code>list</code> specifying algorithm specific
+parameters; see <code>get_set_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p><code>logical</code>
+indicating whether a warning is given if the required precision
+has not been reached.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (for example, parameters) passed to
+the underlying mixing distribution when <code>qmix</code> is a
+<code>character</code> string or <code>function</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We define a Gamma mixture as a random variable <code class="reqn">Dsq</code> satisfying,
+in distribution, <code class="reqn">Dsq = W*Gamma(d/2, 2)</code> where <code class="reqn">W</code> is
+specified via <code>qmix</code>.  If <code class="reqn">X</code> follows a <code class="reqn">d-</code>dimensional
+normal variance mixture, the squared Mahalanobis distance
+<code class="reqn">(X-\mu)^T Sigma^{-1}(X-\mu)</code> has the same distribution as
+<code class="reqn">Dsq</code>.
+</p>
+<p>The functions presented here are similar to the corresponding
+functions for normal variance mixtures (<code>d/p/q/rnvmix()</code>),
+details can be found in the corresponding help-files there.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>pgammamix()</code> and <code>dgammamix()</code> return
+a <code>numeric</code> <code class="reqn">n</code>-vector with the computed
+probabilities/densities and corresponding attributes <code>"abs. error"</code>
+and <code>"rel. error"</code> (error estimates of the RQMC estimator) and
+<code>"numiter"</code> (number of iterations).
+</p>
+<p>If <code>q.only = TRUE</code>, <code>qgammamix()</code> a vector of the same length as
+<code>u</code> with entries <code class="reqn">q_i</code> where <code class="reqn">q_i</code> satisfies
+<code class="reqn">q_i = inf_x { F(x) &gt;= u_i}</code> where <code class="reqn">F(x)</code> the df of the Gamma mixture
+specified via qmix; if <code>q.only = FALSE</code>, see <code>qnvmix</code>.
+</p>
+<p><code>rgammamix()</code> returns a <code class="reqn">n</code>-<code>vector</code> containing <code class="reqn">n</code>
+samples of the specified (via mix) Gamma mixture.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dnvmix()</code>, <code>pnvmix()</code>, <code>qnvmix()</code>,
+<code>rnvmix()</code>, <code>get_set_param()</code>,
+<code>qqplot_maha()</code>, <code>fitnvmix()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Specify inverse-gamma mixture =&gt; results in d * F(d, nu) dist'n,
+## handled correctly when 'qmix = "inverse.gamma"' is specified
+qmix &lt;- function(u, nu) 1/qgamma(1 - u, shape = nu/2, rate = nu/2)
+
+## Example for rgammamix()
+set.seed(271) # for reproducibility
+n  &lt;- 25
+nu &lt;- 3
+d  &lt;- 5
+x  &lt;- rgammamix(n, qmix = qmix, d = d, nu = nu)
+
+## Evaluate distribution function at 'x'
+p.true_1 &lt;- pgammamix(x, qmix = "inverse.gamma", d = d, df = nu) # calls pf(...)
+p.true_2 &lt;- pf(x/d, df1 = d, df2 = nu)
+p.estim  &lt;- pgammamix(x, qmix = qmix, d = d, nu = nu)
+stopifnot(all.equal(p.true_1, p.true_2, tol = 1e-3,
+                    check.attributes = FALSE),
+          all.equal(p.true_1, p.estim, tol = 1e-3,
+                    check.attributes = FALSE))
+
+## Evaluate density function at 'x'
+d.true_1 &lt;- dgammamix(x, qmix = "inverse.gamma", d = d, df = nu)
+d.true_2 &lt;- df(x/d, df1 = d, df2 = nu)/d
+d.est  &lt;- dgammamix(x, qmix = qmix, d = d, nu = nu)
+stopifnot(all.equal(d.true_1, d.true_2, tol = 5e-4,
+                    check.attributes = FALSE),
+          all.equal(d.true_1, d.est, tol = 5e-4,
+                    check.attributes = FALSE))
+
+## Evaluate quantile function
+u &lt;- seq(from = 0.5, to = 0.9, by = 0.1)
+q.true_1 &lt;- qgammamix(u, qmix = "inverse.gamma", d = d, df = nu)
+q.true_2 &lt;- qf(u, df1 = d, df2 = nu) * d
+q.est  &lt;- qgammamix(u, qmix = qmix, d = d, nu = nu)
+stopifnot(all.equal(q.true_1, q.true_2, tol = 5e-4,
+                    check.attributes = FALSE),
+          all.equal(q.true_1, q.est, tol = 5e-4,
+                    check.attributes = FALSE))
+
+</code></pre>
+
+
+</div>

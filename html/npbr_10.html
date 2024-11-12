@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>kern_smooth</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Frontier estimation via kernel smoothing  
+</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>kern_smooth</code> implements two frontier estimators based on kernel smoothing techniques. One is from Noh (2014) and the other is from Parmeter and Racine (2013).  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">kern_smooth(xtab, ytab, x, h, method="u", technique="noh", 
+ control = list("tm_limit" = 700))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>determines the bandwidth at which the smoothed kernel estimate will be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a character equal to "u" (unconstrained estimator), "m" (under the monotonicity constraint) or "mc" (under simultaneous monotonicity and concavity constraints).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>technique</code></td>
+<td>
+<p>which estimation method to use. "Noh"" specifies the use of the method in Noh (2014) and "pr" is for the method in Parameter and Racine (2013).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of parameters to the GLPK solver. See *Details* of help(Rglpk_solve_LP).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To estimate the frontier function, Parameter and Racine (2013) considered the following generalization of linear regression smoothers 
+</p>
+<p style="text-align: center;"><code class="reqn">\hat \varphi(x|p) = \sum_{i=1}^n p_i A_i(x)y_i,</code>
+</p>
+<p> where <code class="reqn">A_i(x)</code> is the kernel weight function of <code class="reqn">x</code> for the <code class="reqn">i</code>th data depending on <code class="reqn">x_i</code>'s and the sort of linear smoothers. For example, the Nadaraya-Watson kernel weights are <code class="reqn">A_i(x) = K_i(x)/(\sum_{j=1}^n K_j(x)),</code> where <code class="reqn">K_i(x) = h^{-1} K\{ (x-x_i)/h\}</code>, with the kernel function <code class="reqn">K</code> being a bounded and symmetric probability density, and <code class="reqn">h</code> is a bandwidth. Then, the weight vector <code class="reqn">p=(p_1,\ldots,p_n)^T</code> is chosen to minimize the distance <code class="reqn">D(p)=(p-p_u)^T(p-p_u)</code> subject to the envelopment constraints and the choice of the shape constraints, where <code class="reqn">p_u</code> is an <code class="reqn">n</code>-dimensional vector with all elements being one. The envelopement and shape constraints are 
+</p>
+<p style="text-align: center;"><code class="reqn">
+\begin{array}{rcl}
+\hat \varphi(x_i|p) - y_i &amp;=&amp; \sum_{i=1}^n p_i A_i(x_i)y_i - y_i \geq 0,~i=1,\ldots,n;~~~{\sf (envelopment~constraints)} 
+\\ \hat \varphi^{(1)}(x|p) &amp;=&amp; \sum_{i=1}^n p_i A_i^{(1)}(x)y_i \geq 0,~x \in \mathcal{M};~~~{\sf (monotonocity~constraints)} 
+\\  \hat \varphi^{(2)}(x|p) &amp;=&amp; \sum_{i=1}^n p_i A_i^{(2)}(x)y_i \leq 0,~x \in \mathcal{C},~~~{\sf (concavity~constraints)} 
+\end{array}</code>
+</p>
+
+<p>where <code class="reqn">\hat \varphi^{(s)}(x|p) = \sum_{i=1}^n p_i A_i^{(s)}(x) y_i</code> is the <code class="reqn">s</code>th derivative of <code class="reqn">\hat \varphi(x|p)</code>, with <code class="reqn">\mathcal{M}</code> and <code class="reqn">\mathcal{C}</code> being the collections of points where monotonicity and concavity are imposed, respectively. In our implementation of the estimator, we simply take the entire dataset <code class="reqn"> \{(x_i,y_i),~i=1,\ldots,n\}</code> to be <code class="reqn">\mathcal{M}</code> and <code class="reqn">\mathcal{C}</code> and, in case of small samples, we augment the sample points by an equispaced grid of length 201 over the observed support <code class="reqn">[\min_i x_i,\max_i x_i]</code> of <code class="reqn">X</code>. For the weight <code class="reqn">A_i(x)</code>, we use the Nadaraya-Watson weights.
+</p>
+<p>Noh (2014) considered the same generalization of linear smoothers <code class="reqn">\hat \varphi(x|p)</code> for frontier estimation, but with a difference choice of the weight <code class="reqn">p</code>. Using the same envelopment and shape constraints as Parmeter and Racine (2013), the weight vector <code class="reqn">p</code> is chosen to minimize the area under the fitted curve <code class="reqn">\hat \varphi(x|p)</code>, that is <code class="reqn">A(p) = \int_a^b\hat \varphi(x|p) dx = \sum_{i=1}^n p_i y_i \left( \int_a^b A_i(x) dx \right)</code>, where <code class="reqn">[a,b]</code> is the true support of <code class="reqn">X</code>. In practice, we integrate over the observed support <code class="reqn">[\min_i x_i,\max_i x_i]</code> since the theoretic one is unknown. In what concerns the kernel weights <code class="reqn">A_i(x)</code>, we use the Priestley-Chao weights 
+</p>
+<p style="text-align: center;"><code class="reqn">
+A_i(x) = \left\{ \begin{array}{cc} 0 &amp;,~i=1 \\ (x_i - x_{i-1}) K_i(x) &amp;,~i \neq 1 \end{array} \right.,
+</code>
+</p>
+
+<p>where it is assumed that the pairs <code class="reqn">(x_i,y_i)</code> have been ordered so that <code class="reqn">x_1 \leq \cdots \leq x_n</code>. The choice of such weights is motivated by their convenience for the evaluation of the integral <code class="reqn">\int A_i(x) dx</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>. Returns a vector of NA if no solution has been found by the solver (GLPK). 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hohsuk Noh
+</p>
+
+
+<h3>References</h3>
+
+<p>Noh, H. (2014). Frontier estimation using kernel smoothing estimators with data transformation. <em>Journal of the Korean Statistical Society</em>, 43, 503-512.
+</p>
+<p>Parmeter, C.F. and Racine, J.S. (2013). Smooth constrained frontier analysis in <em>Recent Advances and Future Directions in Causality, Prediction, and Specification Analysis</em>, Springer-Verlag, New York, 463-488.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>kern_smooth_bw</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data("green")
+x.green &lt;- seq(min(log(green$COST)), max(log(green$COST)), 
+ length.out = 101)
+options(np.tree=TRUE, crs.messages=FALSE, np.messages=FALSE)
+# 1. Unconstrained 
+(h.bic.green.u &lt;- kern_smooth_bw(log(green$COST), 
+ log(green$OUTPUT), method = "u", technique = "noh", 
+ bw_method = "bic"))
+y.ks.green.u &lt;- kern_smooth(log(green$COST), 
+ log(green$OUTPUT), x.green, h = h.bic.green.u, 
+ method = "u", technique = "noh")
+
+# 2. Monotonicity constraint
+(h.bic.green.m &lt;- kern_smooth_bw(log(green$COST),
+ log(green$OUTPUT), method = "m", technique = "noh",
+ bw_method = "bic"))
+y.ks.green.m &lt;- kern_smooth(log(green$COST), 
+ log(green$OUTPUT), x.green, h = h.bic.green.m, 
+ method = "m", technique = "noh")
+
+# 3. Monotonicity and Concavity constraints
+(h.bic.green.mc&lt;-kern_smooth_bw(log(green$COST), log(green$OUTPUT), 
+ method="mc", technique="noh", bw_method="bic"))
+y.ks.green.mc&lt;-kern_smooth(log(green$COST), 
+ log(green$OUTPUT), x.green, h=h.bic.green.mc, method="mc", 
+ technique="noh")
+
+# Representation 
+plot(log(OUTPUT)~log(COST), data=green, xlab="log(COST)", 
+ ylab="log(OUTPUT)") 
+lines(x.green, y.ks.green.u, lty=1, lwd=4, col="green")
+lines(x.green, y.ks.green.m, lty=2, lwd=4, col="cyan")
+lines(x.green, y.ks.green.mc, lty=3, lwd=4, col="magenta")   
+legend("topleft", col=c("green","cyan","magenta"), 
+lty=c(1,2,3), legend=c("unconstrained", "monotone", 
+ "monotone + concave"), lwd=4, cex=0.8)
+
+## End(Not run)    
+</code></pre>
+
+
+</div>

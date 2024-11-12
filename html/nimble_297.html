@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nimbleModel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a NIMBLE model from BUGS code</h2>
+
+<h3>Description</h3>
+
+<p>Processes BUGS model code and optional constants, data, and initial values. Returns a NIMBLE model (see <code>modelBaseClass</code>) or model definition.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nimbleModel(
+  code,
+  constants = list(),
+  data = list(),
+  inits = list(),
+  dimensions = list(),
+  returnDef = FALSE,
+  where = globalenv(),
+  debug = FALSE,
+  check = getNimbleOption("checkModel"),
+  calculate = TRUE,
+  name = NULL,
+  buildDerivs = getNimbleOption("buildModelDerivs"),
+  userEnv = parent.frame()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>code</code></td>
+<td>
+<p>code for the model in the form returned by <code>nimbleCode</code> or (equivalently) <code>quote</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constants</code></td>
+<td>
+<p>named list of constants in the model.  Constants cannot be subsequently modified. For compatibility with JAGS and BUGS, one can include data values with constants and <code>nimbleModel</code> will automatically distinguish them based on what appears on the left-hand side of expressions in <code>code</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>named list of values for the data nodes.  Data values can be subsequently modified.  Providing this argument also flags nodes as having data for purposes of algorithms that inspect model structure. Values that are NA will not be flagged as data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inits</code></td>
+<td>
+<p>named list of starting values for model variables. Unlike JAGS, should only be a single list, not a list of lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dimensions</code></td>
+<td>
+<p>named list of dimensions for variables.  Only needed for variables used with empty indices in model code that are not provided in constants or data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnDef</code></td>
+<td>
+<p>logical indicating whether the model should be returned (FALSE) or just the model definition (TRUE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>where</code></td>
+<td>
+<p>argument passed to <code>setRefClass</code>, indicating the environment in which the reference class definitions generated for the model and its modelValues should be created.  This is needed for managing package namespace issues during package loading and does not normally need to be provided by a user.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>debug</code></td>
+<td>
+<p>logical indicating whether to put the user in a browser for debugging.  Intended for developer use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>check</code></td>
+<td>
+<p>logical indicating whether to check the model object for missing or invalid values.  Default is given by the NIMBLE option 'checkModel'.  See <code>nimbleOptions</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calculate</code></td>
+<td>
+<p>logical indicating whether to run <code>calculate</code> on the model after building it; this will calculate all deterministic nodes and logProbability values given the current state of all nodes. Default is TRUE. For large models, one might want to disable this, but note that deterministic nodes, including nodes introduced into the model by NIMBLE, may be <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>optional character vector giving a name of the model for internal use.  If omitted, a name will be provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buildDerivs</code></td>
+<td>
+<p>logical indicating whether to build derivative capabilities for the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>userEnv</code></td>
+<td>
+<p>environment in which if-then-else statements in BUGS code will be evaluated if needed information not found in <code>constants</code>; intended primarily for internal use only</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See the <a href="https://r-nimble.org/html_manual/cha-welcome-nimble.html">User Manual</a> or <code>help(modelBaseClass)</code> for information about manipulating NIMBLE models created by <code>nimbleModel</code>, including methods that operate on models, such as <code>getDependencies</code>.
+</p>
+<p>The user may need to provide dimensions for certain variables as in some cases NIMBLE cannot automatically determine the dimensions and sizes of variables. See the <a href="https://r-nimble.org/html_manual/cha-welcome-nimble.html">User Manual</a> for more information.
+</p>
+<p>As noted above, one may lump together constants and data (as part of the <code>constants</code> argument (unlike R interfaces to JAGS and BUGS where they are provided as the <code>data</code> argument). One may not provide lumped constants and data as the <code>data</code> argument.
+</p>
+<p>For variables that are a mixture of data nodes and non-data nodes, any values passed in via <code>inits</code> for components of the variable that are data will be ignored. All data values should be passed in through <code>data</code> (or <code>constants</code> as just discussed).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>NIMBLE development team
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>readBUGSmodel</code> for creating models from BUGS-format model files
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">code &lt;- nimbleCode({
+    x ~ dnorm(mu, sd = 1)
+    mu ~ dnorm(0, sd = prior_sd)
+})
+constants = list(prior_sd = 1)
+data = list(x = 4)
+Rmodel &lt;- nimbleModel(code, constants = constants, data = data)
+</code></pre>
+
+
+</div>

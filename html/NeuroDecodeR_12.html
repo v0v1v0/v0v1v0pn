@@ -1,0 +1,191 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cv_standard</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The standard cross-validator (CV)</h2>
+
+<h3>Description</h3>
+
+<p>This object runs a decoding analysis where a classifier is repeatedly trained
+and tested using cross-validation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cv_standard(
+  ndr_container = NULL,
+  datasource = NULL,
+  classifier = NULL,
+  feature_preprocessors = NULL,
+  result_metrics = NULL,
+  num_resample_runs = 50,
+  run_TCD = TRUE,
+  num_parallel_cores = NULL,
+  parallel_outfile = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ndr_container</code></td>
+<td>
+<p>The purpose of this argument is to make the
+constructor of the cv_standard cross-validator work with the magrittr
+pipe (|&gt;) operator. This argument would almost always be set at the
+end of a sequence of piping operators that include a datasource and a
+classifier. Alternatively, one can keep this set to NULL and directly use
+the datasource and classifier arguments (one would almost never use
+both types of arguments). See the examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datasource</code></td>
+<td>
+<p>A datasource (DS) object that will generate the training
+and test data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classifier</code></td>
+<td>
+<p>A classifier (CS) object that will learn parameters based
+on the training data and will generate predictions based on the test data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>feature_preprocessors</code></td>
+<td>
+<p>A list of feature preprocessor (FP) objects that
+learn preprocessing parameters from the training data and apply
+preprocessing of both the training and test data based on these parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>result_metrics</code></td>
+<td>
+<p>A list of result metric (RM) objects that are used to
+evaluate the classification performance. If this is set to NULL then the
+rm_main_results(), rm_confusion_matrix() results metrics will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_resample_runs</code></td>
+<td>
+<p>The number of times the cross-validation should be
+run (i.e., "resample runs"), where on each run, new training and test sets
+are generated. If pseudo-populations are used (e.g., with the ds_basic),
+then new pseudo-populations will be generated on each resample run as well.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>run_TCD</code></td>
+<td>
+<p>A Boolean indicating whether a Temporal Cross-Decoding (TCD)
+analysis should be run where the the classifier is trained and tested at
+all points in time. Setting this to FALSE causes the classifier to only be
+tested at same time it is trained on which can speed up the analysis run
+time and save memory at the cost of not calculated the temporal cross
+decoding results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_parallel_cores</code></td>
+<td>
+<p>An integers specifying the number of parallel cores
+to use when executing the resample runs in the analysis. The default (NULL)
+value is to use half of the cores detected on the system. If this value is
+set to a value of less than 1, then the code will be run serially and
+messages will be printed showing how long each CV split took to run which
+is useful for debugging.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel_outfile</code></td>
+<td>
+<p>A string specifying the name of a file where the
+output from running the code in parallel is written (this argument is
+ignored if num_parallel_cores &lt; 1). By default the parallel output is
+written to dev/null so it is not accessible. If this is changed to an empty
+string the output will be written to the screen, otherwise it will be
+written to a file name specified. See parallel::makeCluster for more
+details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A cross-validator object takes a datasource (DS), a classifier (CL),
+feature preprocessors (FP) and result metric (RM) objects, and runs
+multiple cross-validation cycles where:
+</p>
+
+<ol>
+<li>
+<p> A datasource (DS) generates training and test data splits of the data
+</p>
+</li>
+<li>
+<p> Feature preprocessors (FPs) do preprocessing of the data
+</p>
+</li>
+<li>
+<p> A classifier (CL) is trained and predictions are generated on a test set
+</p>
+</li>
+<li>
+<p> Result metrics (RMs) assess the accuracy of the predictions and compile
+the results.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>This constructor creates an NDR cross-validator object with the class
+<code>cv_standard</code>. Like all NDR cross-validator objects, one should use
+<code>run_decoding</code> method to run a decoding analysis.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data_file &lt;- system.file("extdata/ZD_150bins_50sampled.Rda",
+  package = "NeuroDecodeR")
+
+ds &lt;- ds_basic(data_file, "stimulus_ID", 18)
+fps &lt;- list(fp_zscore())
+cl &lt;- cl_max_correlation()
+
+cv &lt;- cv_standard(datasource = ds, 
+                 classifier = cl, 
+                 feature_preprocessors = fps,
+                  num_resample_runs = 2)  # better to use more resample runs (default is 50)
+
+
+
+
+# alternatively, one can also use the pipe (|&gt;) to do an analysis
+data_file2 &lt;- system.file("extdata/ZD_500bins_500sampled.Rda",
+  package = "NeuroDecodeR")
+  
+DECODING_RESULTS &lt;- data_file2 |&gt;
+    ds_basic('stimulus_ID', 18) |&gt;
+    cl_max_correlation() |&gt;
+    fp_zscore() |&gt;
+    rm_main_results() |&gt;
+    rm_confusion_matrix() |&gt;
+    cv_standard(num_resample_runs = 2) |&gt;
+    run_decoding()
+
+
+
+
+</code></pre>
+
+
+</div>

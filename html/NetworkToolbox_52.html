@@ -1,0 +1,215 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MFCF</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximally Filtered Clique Forest</h2>
+
+<h3>Description</h3>
+
+<p>Applies the Maximally Filtered Clique Forest (MFCF) filtering method
+(<strong>Please see and cite Massara &amp; Aste</strong>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MFCF(
+  data,
+  cases = NULL,
+  na.data = c("pairwise", "listwise", "fiml", "none"),
+  time.series = FALSE,
+  gain.fxn = c("logLik", "logLik.val", "rSquared.val"),
+  min_size = 0,
+  max_size = 8,
+  pval = 0.05,
+  pen = 0,
+  drop_sep = FALSE,
+  use_returns = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Matrix (n <code>x</code> n or p <code>x</code> n) or data frame.
+Can be a dataset or a correlation matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cases</code></td>
+<td>
+<p>Numeric. If <code>data</code> is a (partial) correlation
+matrix, then number of cases must be input.
+Defaults to <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.data</code></td>
+<td>
+<p>Character.
+How should missing data be handled?
+</p>
+
+<ul>
+<li>
+<p><code>"listwise"</code>
+Removes case if <strong>any</strong> missing data exists.
+Applies <code>na.omit</code>
+</p>
+</li>
+<li>
+<p><code>"pairwise"</code>
+Estimates correlations using the available data
+for each variable
+</p>
+</li>
+<li>
+<p><code>"fiml"</code>
+Estimates correlations using the Full Information
+Maximum Likelihood. Recommended and most robust but time consuming
+</p>
+</li>
+<li>
+<p><code>"none"</code>
+Default. No missing data or missing data has been
+handled by the user
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.series</code></td>
+<td>
+<p>Boolean.
+Is <code>data</code> a time-series dataset?
+Defaults to <code>FALSE</code>.
+Set to <code>TRUE</code> to handle time-series data (n <code>x</code> p)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gain.fxn</code></td>
+<td>
+<p>Character.
+Gain function to be used for inclusion of nodes in cliques.
+There are several options available
+(see <code>gain.functions</code> for more details):
+<code>"logLik"</code>, <code>"logLik.val"</code>, <code>"rSquared.val"</code>.
+Defaults to <code>"rSquared.val"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_size</code></td>
+<td>
+<p>Numeric. Minimum number of nodes allowed per
+clique. Defaults to <code>0</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_size</code></td>
+<td>
+<p>Numeric. Maximum number of nodes allowed per
+clique. Defaults to <code>8</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval</code></td>
+<td>
+<p>Numeric. <em>p</em>-value used to determine cut-offs for nodes
+to include in a clique</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen</code></td>
+<td>
+<p>Numeric. Multiplies the number of edges added to penalise 
+complex models. Similar to the penalty term in AIC</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_sep</code></td>
+<td>
+<p>Boolean. This parameter influences the MFCF only.
+Defaults to <code>FALSE</code>.
+If <code>TRUE</code>, then any separator can be used only once (similar
+to the <code>TMFG</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use_returns</code></td>
+<td>
+<p>Boolean. Only used in <code>"gain.fxn = rSquared.val"</code>.
+If set to <code>TRUE</code> the regression is 
+performed on log-returns.
+Defaults to <code>FALSE</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a list containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>MFCF filtered partial correlation network (adjacency matrix)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>J</code></td>
+<td>
+<p>MFCF filtered inverse covariance matrix (precision matrix)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cliques</code></td>
+<td>
+<p>Cliques in the network
+(output for <code>LoGo</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>separators</code></td>
+<td>
+<p>Separators in the network
+(output for <code>LoGo</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Guido Previde Massara &lt;gprevide@gmail.com&gt; and Alexander Christensen &lt;alexpaulchristensen@gmail.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Massara, G. P. &amp; Aste, T. (2019).
+Learning clique forests.
+<em>ArXiv</em>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load data
+data &lt;- neoOpen
+
+## Not run:  
+# Use polychoric correlations and R-squared method
+MFCF.net &lt;- MFCF(qgraph::cor_auto(data), cases = nrow(neoOpen))$A
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

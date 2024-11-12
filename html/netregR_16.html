@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lmnet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Linear regression for network response</h2>
+
+<h3>Description</h3>
+
+<p>This function takes <code class="reqn">X</code> and <code class="reqn">Y</code> values and fits the multiple linear regression <code class="reqn">Y = X \beta + \epsilon</code> and returns standard errors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lmnet(Y, X, directed = TRUE, tmax = 1, nodes = NULL, reweight = FALSE,
+  type = "exchangeable", tol = 1e-06, maxit = 10000, ndstop = TRUE,
+  verbose = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Vector of relations to be regress, of length <code class="reqn">d</code>. Column-wise vectorization of adjacency matrix without diagonal entries (self-loops).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Matrix of covariates to be regressed upon, including intercept if intercept is desired, must have <code class="reqn">d</code> rows. Ordering of rows should match <code>Y</code> and optional input <code>nodes</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>Optional logical indicator of whether input data is for a directed network, default is <code>TRUE</code>. Undirected data format is lower triangle of adjacencey matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tmax</code></td>
+<td>
+<p>Optional numeric of third dimension of relational data array, default is <code>1</code>, i.e. a relational matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>Optional <code class="reqn">d \times 2</code> matrix indicating the (directed) relation pairs to which each entry in <code class="reqn">Y</code> and each row in <code class="reqn">X</code> corresponds. If not input, complete network observation with column-wise vectorization of adjacency matrix without diagonal entries (self-loops) is assumed. The size <code class="reqn">d</code> and <code>directed</code> must correspond to an appropriate network of size <code class="reqn">n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reweight</code></td>
+<td>
+<p>Optional logical indicator of whether iteratively reweighted least squares should be used to compute estimate of <code class="reqn">\beta</code>. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Optional character specifying degree of exchangeability of third dimension of array (when present, i.e. in temporal relational arrays). Default is <code>exchangeable</code>, and the remaining option is <code>independent</code>. Truncated inputs are accepted. See details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Optional numeric, tolerance of stopping criteria of iteratively reweighted least squares estimate of <code class="reqn">\beta</code>. Default is <code>tol=1e-6</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>Optional numeric, maximum number of iterations for iteratively reweighted least squares estimate of <code class="reqn">\beta</code>. Default is <code>maxit=1e4</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ndstop</code></td>
+<td>
+<p>Optional logical indicator of whether negative definite weighting matrix in iteratively reweighted least squares should stop the descent. Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Optional logical indicator of whether information from iteratively reweighted least squares estimate of <code class="reqn">\beta</code> should be printed. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function takes <code class="reqn">X</code> and <code class="reqn">Y</code> values and fits the multiple linear regression <code class="reqn">Y = X \beta + \epsilon</code> by ordinary least squares or iteratively reweighted least squares as indicated by the input. The covariance structure is exchangeable from that of Marrs et. al. (2017). The standard errors and test statistics are based on the same paper.    
+</p>
+<p>The three dimensional relational array case, i.e. temporal relational data, requires a specification of the type of exchangeability in this third dimension. We may assume that different time periods are independent. On the other hand, we might assume each repeated observation is exchangeable (for example decomposing trade networks into sectors of trade: goods vs. services). See Figure 6a of Marrs et. al. (2017) for the exchangeable case and the surrounding discussion for the independent case.
+</p>
+
+
+<h3>Value</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>An <code>lmnet</code> object containing summary information.</p>
+</td>
+</tr></table>
+<h3>References</h3>
+
+<p>Marrs, F. W., Fosdick, B. K., &amp; McCormick, T. H., (2017). Standard errors for regression on relational data with exchangeable errors. arXiv preprint arXiv:1701.05530.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>vhat_exch</code>, <code>inputs_lmnet</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+n &lt;- 10
+d &lt;- n*(n-1)
+X &lt;- cbind(1, rnorm(d), sample(c(0,1), d, replace=TRUE))
+betatrue &lt;- rep(1,3)
+Y &lt;- X %*% betatrue + rnorm(d)
+fit &lt;- lmnet(Y,X)
+fit
+fit2 &lt;- lmnet(Y,X,reweight=TRUE)
+fit2
+
+</code></pre>
+
+
+</div>

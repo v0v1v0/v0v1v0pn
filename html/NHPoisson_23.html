@@ -1,0 +1,177 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>graphResCov.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform lurking variable plots for a set of variables</h2>
+
+<h3>Description</h3>
+
+<p>This function performs  lurking variable plots 
+for a set of variables. The function 
+<code>graphResX.fun</code>  performs the lurking  variable plot for one variable and
+<code>graphResCov.fun</code>  calls this function for a set of variables;
+see <code>graphResX.fun</code> for details.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">graphResCov.fun(Xvar, nint, mlePP, h = NULL, typeRes = "Pearson", namX = NULL, 
+ histWgraph=TRUE, plotDisp=c(2,2), tit = "")</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Xvar</code></td>
+<td>
+<p>Matrix of variables (each column is a variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nint</code></td>
+<td>
+<p>Number of intervals each  covariate  is divided into to perform
+the lurking variable plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mlePP</code></td>
+<td>
+<p>An object of class <code>mlePP-class</code>; usually,
+the output  from <code>fitPP.fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeRes</code></td>
+<td>
+<p>Label indicating the type of residuals ("Raw" or any type of 
+scaled residuals such as "Pearson") used in the plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>Optional. Weight function  used to calculate the scaled residuals (if
+typeRes is not equal to "Raw"). By default,  Pearson residuals with 
+<code class="reqn">h(t)=1/\sqrt{\hat \lambda(t)}</code> are calculated. <code class="reqn">\hat \lambda(t)</code> is provided
+by element lambdafit in mlePP.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>namX</code></td>
+<td>
+<p>Optional. Vector of  the names of the variables in Xvar.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>histWgraph</code></td>
+<td>
+<p> Logical flag.   If it is TRUE,  a new graphical device is opened
+with the option <code>record=TRUE</code>, so that the history of all plots is recorded in the new device. 
+This option may not work on some platforms; for example, RStudio does not allow the user to open
+new  graphical devices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotDisp</code></td>
+<td>
+<p> A vector of the form <code>c(nr, nc)</code>.  The lurking variable plots will be drawn in 
+a nr<code class="reqn">\times</code>nc array. It is used as argument <code>mfrow</code> in <code>par</code>. By default,  
+a 2 <code class="reqn">\times</code> 2 window is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tit</code></td>
+<td>
+<p>Character string. A title for the plot.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>mXres</code></td>
+<td>
+<p>Matrix of  residuals (each column contains the  residuals of a variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mXm</code></td>
+<td>
+<p>Matrix of   mean values (each column contains
+the  mean values of a variable in each interval).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mXpc</code></td>
+<td>
+<p>Matrix of the quantiles that define the intervals of each variable
+(each column contains the  quantiles of one variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nint</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mlePP</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Atkinson, A. (1985). <em>Plots, transformations and regression.</em> Oxford 
+University Press.
+</p>
+<p>Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005).
+Residual analysis for spatial point processes.
+<em>Journal of the Royal Statistical Society</em>, Series B 67,617-666.
+</p>
+<p>Cebrian, A.C., Abaurrea, J. and Asin, J. (2015). NHPoisson: An R Package for 
+Fitting and Validating Nonhomogeneous Poisson Processes. 
+<em>Journal of Statistical Software</em>, 64(6), 1-24.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>graphResX.fun</code>, <code>graphres.fun</code>  </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+
+#Simulated process without any relationship with variables Y1 and Y2
+#The plots are performed dividing the  variables into  50 intervals
+#Raw residuals. 
+
+X1&lt;-rnorm(500)
+X2&lt;-rnorm(500)
+auxmlePP&lt;-fitPP.fun(posE=round(runif(50,1,500)), inddat=rep(1,500),
+	covariates=cbind(X1,X2),start=list(b0=1,b1=0,b2=0))
+
+Y1&lt;-rnorm(500)
+Y2&lt;-rnorm(500)
+res&lt;-graphResCov.fun(mlePP=auxmlePP, Xvar=cbind(Y1,Y2), nint=50,  
+	typeRes="Raw",namX=c("Y1","Y2"),plotDisp=c(2,1))
+
+#If more variables were specified in the argument Xvar, with
+#the same 2X1 layout specified in plotDisp, the resulting plots could be 
+#scrolled up and down with the "Page Up" and "Page Down" keys.
+
+</code></pre>
+
+
+</div>

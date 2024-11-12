@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nichevol_labels</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Labels to represent changes of niche characteristics between ancestors and descendants</h2>
+
+<h3>Description</h3>
+
+<p>nichevol_labels helps in adding bar-type labels that represent how
+species' niches changed from ancestors to descendants.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nichevol_labels(tree, whole_rec_table, ancestor_line = FALSE,
+  present = "1", absent = "0", unknown = "?",
+  present_col = "#252525", unknown_col = "#d9d9d9",
+  no_change_col = "#b2df8a", retraction_col = "#984ea3",
+  expansion_col = "#4daf4a", width = 1, height = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tree</code></td>
+<td>
+<p>an object of class "phylo".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>whole_rec_table</code></td>
+<td>
+<p>matrix of reconstructed bins for nodes and species
+derived from a process of maximum parsimony or maximum likelihood reconstruction.
+See functions <code>bin_par_rec</code> or <code>bin_ml_rec</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ancestor_line</code></td>
+<td>
+<p>controls whether ancestor line is plotted.
+Default = FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>present</code></td>
+<td>
+<p>(character) code indicating environmental bins in which the
+species is present. Default = "1".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>absent</code></td>
+<td>
+<p>(character) code indicating environmental bins in which the
+species is absent. Default = "0".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unknown</code></td>
+<td>
+<p>(character) code indicating environmental bins in which the
+species presence is unknown (uncertain). Default = "?".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>present_col</code></td>
+<td>
+<p>color for line representing environments where the species
+is present. Default = "#252525".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unknown_col</code></td>
+<td>
+<p>color for line representing environments where the species
+presence is unknown (uncertain). Default = "#d9d9d9".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no_change_col</code></td>
+<td>
+<p>color for area of the bar representing environments where
+no change has been detected. Default = "#b2df8a".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>retraction_col</code></td>
+<td>
+<p>color for area of the bar representing environments where
+niche retraction has been detected. Default = "#984ea3".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expansion_col</code></td>
+<td>
+<p>color for area of the bar representing environments where
+niche expansion has been detected. Default = "#4daf4a".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width</code></td>
+<td>
+<p>value defining the width of bars representing changes in niches;
+default = 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>height</code></td>
+<td>
+<p>value defining the height of bars representing changes in niches;
+default = 1.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For the moment, only plots of type "phylogram" with "rightwards" or "leftwards"
+directions, created with the function <code>plot.phylo</code> from the
+package <code>ape</code> are supported.
+</p>
+<p>Evolution of ecological niches is represented in one environmental dimension,
+with vertical bars indicating if the niche of the descendant has expanded,
+retracted, or has not changed compared to its ancestor's niche. Lower values of
+environmental variables are represented in the lower part of the bar, and the
+opposite part of the bar represents higher values.
+</p>
+<p>Changes in niches (evolution) are defined as follows:
+</p>
+
+<ul>
+<li>
+<p> if (ancestor == present &amp; descendant == absent) change &lt;- "retraction"
+</p>
+</li>
+<li>
+<p> if (ancestor == present &amp; descendant == present) change &lt;- "no_change"
+</p>
+</li>
+<li>
+<p> if (ancestor == present &amp; descendant == unknown) change &lt;- "no_change"
+</p>
+</li>
+<li>
+<p> if (ancestor == absent &amp; descendant == present) change &lt;- "expansion"
+</p>
+</li>
+<li>
+<p> if (ancestor == absent &amp; descendant == absent) change &lt;- "no_change"
+</p>
+</li>
+<li>
+<p> if (ancestor == absent &amp; descendant == unknown) change &lt;- "no_change"
+</p>
+</li>
+<li>
+<p> if (ancestor == unknown &amp; descendant == absent) change &lt;- "no_change"
+</p>
+</li>
+<li>
+<p> if (ancestor == unknown &amp; descendant == present) change &lt;- "no_change"
+</p>
+</li>
+<li>
+<p> if (ancestor == unknown &amp; descendant == unknown) change &lt;- "no_change"
+</p>
+</li>
+</ul>
+<p>If <code>ancestor_line</code> is TRUE, the ancestor line will be plotted on the bar
+representing niche evolution. The line will represent where, in the range of
+environmental conditions, the ancestor was present, and where its presence is
+uncertain (unknown).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># a simple tree
+data("tree5", package = "nichevol")
+
+# a matrix of niche charactes (1 = present, 0 = absent, ? = unknown)
+dataTable &lt;- cbind("241" = rep("1", length(tree5$tip.label)),
+                   "242" = rep("1", length(tree5$tip.label)),
+                   "243" = c("1", "1", "0", "0", "0"),
+                   "244" = c("1", "1", "0", "0", "0"),
+                   "245" = c("1", "?", "0", "0", "0"))
+rownames(dataTable) &lt;- tree5$tip.label
+
+# list with two objects (tree and character table)
+treeWdata &lt;- geiger::treedata(tree5, dataTable)
+
+# Maximum parsimony reconstruction
+rec_tab &lt;- smooth_rec(bin_par_rec(treeWdata))
+
+# plotting and adding labels
+ape::plot.phylo(tree5, label.offset = 0.04)
+nichevol_labels(tree5, rec_tab, height = 0.6)
+</code></pre>
+
+
+</div>

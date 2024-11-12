@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>HRSurv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate of the constant in the optimal AMISE expression</h2>
+
+<h3>Description</h3>
+
+<p>Calculation of the integrand of the contant term in the AMISE plugin bandwidth rule implemented in <code>PlugInBand</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">HRSurv(x, xin, cens, h, kfun) </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p> A vector of data points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> The point at which the estimates should be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cens</code></td>
+<td>
+<p> Censoring Indicators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p> bandwidth to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kfun</code></td>
+<td>
+<p> The kernel function to use.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Calculates the term
+</p>
+<p style="text-align: center;"><code class="reqn">  \frac{\lambda_T(x)}{1-F(x)}\,dx </code>
+</p>
+
+<p>which is passed then as argument to the function  <code>NP.M.Estimate</code> for numerical integtaion. Currrently the fraction is estimated by
+</p>
+<p style="text-align: center;"><code class="reqn">\frac{\hat \lambda(x;b)}{1-\hat F(x)}</code>
+</p>
+
+<p>where <code class="reqn">\hat \lambda(x;b)</code> is implemented by <code>HazardRateEst</code> using bandwidth <code>bw.nrd{xin}</code>. For <code class="reqn">1-\hat F(x)</code> the Kaplan-Meier estimate <code>KMest</code> is used.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector with the value of the fraction.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://onlinelibrary.wiley.com/doi/full/10.1111/anzs.12224">Hua, Patil and Bagkavos, An $L_1$ analysis of a kernel-based hazard rate estimator, Australian and New Zealand J. Statist., (60), 43-64, (2018).</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>PlugInBand, NP.M.Estimate </code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+SampleSize&lt;-100 #amount of data to be generated
+ti&lt;- rweibull(SampleSize, .6, 1) # draw a random sample
+ui&lt;-rexp(SampleSize, .2)         # censoring sample
+cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+x1&lt;-pmin(ti,ui)                  # observed data
+cen&lt;-rep.int(1, SampleSize)      # initialize censoring indicators
+cen[which(ti&gt;ui)]&lt;-0             # 0's correspond to censored indicators
+
+HRSurv(x, x1, cen, bw.nrd(x1), Biweight)
+</code></pre>
+
+
+</div>

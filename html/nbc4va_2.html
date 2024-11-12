@@ -1,0 +1,213 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>internalCheckNBC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Check arguments for nbc()</h2>
+
+<h3>Description</h3>
+
+<p>Performs checks to ensure that the arguments passed to <code>internalNBC</code> are correct.
+This function will also auto-clean when appropriate, and display
+warning messages of the cleaning tasks.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">internalCheckNBC(train, test, known = TRUE, assume = FALSE, unknown = 99)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>train</code></td>
+<td>
+<p>Dataframe of verbal autopsy train data (See <a href="https://rrwen.github.io/nbc4va/data">Data documentation</a>).
+</p>
+
+<ul>
+<li>
+<p> Columns (in order): ID, Cause, Symptom-1 to Symptom-n..
+</p>
+</li>
+<li>
+<p> ID (vectorof char): unique case identifiers
+</p>
+</li>
+<li>
+<p> Cause (vectorof char): observed causes for each case
+</p>
+</li>
+<li>
+<p> Symptom-n.. (vectorsof (1 OR 0)): 1 for presence, 0 for absence, other values are treated as unknown
+</p>
+</li>
+<li>
+<p> Unknown symptoms are imputed randomly from distributions of 1s and 0s per symptom column; if no 1s or 0s exist then the column is removed
+</p>
+</li>
+</ul>
+<p>Example:
+</p>
+
+<table>
+<tr>
+<td style="text-align: center;">
+  ID </td>
+<td style="text-align: center;"> Cause </td>
+<td style="text-align: center;"> S1 </td>
+<td style="text-align: center;"> S2 </td>
+<td style="text-align: center;"> S3 </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "a1" </td>
+<td style="text-align: center;"> "HIV" </td>
+<td style="text-align: center;"> 1 </td>
+<td style="text-align: center;"> 0 </td>
+<td style="text-align: center;"> 0</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "b2" </td>
+<td style="text-align: center;"> "Stroke" </td>
+<td style="text-align: center;"> 0 </td>
+<td style="text-align: center;"> 0 </td>
+<td style="text-align: center;"> 1</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "c3" </td>
+<td style="text-align: center;"> "HIV" </td>
+<td style="text-align: center;"> 1 </td>
+<td style="text-align: center;"> 1 </td>
+<td style="text-align: center;"> 0
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>Dataframe of verbal autopsy test data in the same format as <em>train</em> except if causes are not known:
+</p>
+
+<ul><li>
+<p> The 2nd column (Cause) can be omitted if <em>known</em> is FALSE
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>known</code></td>
+<td>
+<p>TRUE to indicate that the <em>test</em> causes are available in the 2nd column and FALSE to indicate that they are not known</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>assume</code></td>
+<td>
+<p>TRUE to set all symptoms not equal to 1 as 0 and FALSE to raise error if symptoms are not 0 or 1. This takes priority over <em>unknown</em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unknown</code></td>
+<td>
+<p>A single integer value which determines if a symptom is unknown as to if is present or absent.
+</p>
+
+<ul>
+<li>
+<p> The unknown values are substituted according to the proportion of the 1s and 0s per column
+</p>
+</li>
+<li>
+<p> Setting this to NULL will ignore this substitution
+</p>
+</li>
+<li>
+<p> All other values that are not the unknown value or 1 will be set to 0 after the substition
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The following checks are applied to <em>train</em> and <em>test</em> to ensure they:
+</p>
+
+<ul>
+<li>
+<p> are a dataframe
+</p>
+</li>
+<li>
+<p> have required number of rows and columns
+</p>
+</li>
+<li>
+<p> have required data types for each column
+</p>
+</li>
+<li>
+<p> have required symptom values
+</p>
+</li>
+<li>
+<p> are in the same format
+</p>
+</li>
+<li>
+<p> have unique ids
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>out A list object containing the checked inputs:
+</p>
+
+<ul>
+<li>
+<p> $train: dataframe of id, cause and symptoms
+</p>
+</li>
+<li>
+<p> $test: dataframe of id, cause and symptoms in the same format as <em>train</em>
+</p>
+</li>
+<li>
+<p> $known: TRUE if the <em>test</em> causes are known or FALSE if not
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Other validation functions: 
+<code>internalCheckNBCSummary()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nbc4va)
+data(nbc4vaData)
+
+# Check train and test inputs, error if it does not pass check
+train &lt;- nbc4vaData[1:50, ]
+test &lt;- nbc4vaData[51:100, ]
+checked &lt;- nbc4va::internalCheckNBC(train, test)
+train &lt;- checked$train
+test &lt;- checked$test
+
+</code></pre>
+
+
+</div>

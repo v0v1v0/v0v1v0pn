@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iHazardRateEst</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kernel Integrated Hazard Rate Estimation</h2>
+
+<h3>Description</h3>
+
+<p>Implements the integrated kernel hazard rate estimator for right censored data, i.e. a kernel estimate of the cummulative hazard function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iHazardRateEst(xin, xout, ikfun, h, ci)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p>A vector of data points.  Missing values not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xout</code></td>
+<td>
+<p>A vector of grid points at which the estimates will be calculated. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ikfun</code></td>
+<td>
+<p>Integrated kernel function to use</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>A scalar, the bandwidth to use in the estimate. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>A vector of censoring indicators: 1's indicate uncensored observations, 0's correspond to censored obs.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>iHazardRateEst</code> implements the cummulative hazard rate estimator <code class="reqn">\hat \Lambda(x; h_1)</code> given by
+</p>
+<p style="text-align: center;"><code class="reqn">\hat \Lambda(x; h_1) =   \sum_{i=1}^n \frac{k\left \{(x-X_{(i)})h_1^{-1}\right \}\delta_{(i)}}{n-i+1}</code>
+</p>
+
+<p>where
+</p>
+<p style="text-align: center;"><code class="reqn">k(x) = \int_{-\infty}^x K(y)\,dy</code>
+</p>
+
+<p>Note that  <code>iHazardRateEst</code> is used in the implementation of the transformed hazard rate estimate  <code>TransHazRateEst</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector with the cummulative hazard rate estimates at the designated points xout.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://projecteuclid.org/download/pdf_1/euclid.aos/1176346265">Tanner and Wong (1983), The Estimation Of The Hazard Function From Randomly Censored Data By The Kernel Method, Annals of Statistics,  3, pp. 989-993.</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>VarBandHazEst, TransHazRateEst, PlugInBand</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+
+SampleSize &lt;- 100
+ti&lt;- rweibull(SampleSize, .6, 1)  #draw a random sample from the actual distribution
+ui&lt;-rexp(SampleSize, .2)  #draw a random sample from the censoring distribution
+cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+x1&lt;-pmin(ti,ui)             #this is the observed sample
+cen&lt;-rep.int(1, SampleSize) #censoring indicators
+cen[which(ti&gt;ui)]&lt;-0        #censored values correspond to zero
+huse&lt;-PlugInBand(x1, x,   cen, Biweight)
+arg2&lt;-iHazardRateEst(x1, x, IntEpanechnikov, huse, cen) #Calculate the estimate
+</code></pre>
+
+
+</div>

@@ -1,0 +1,63 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>array_stream_set_finalizer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Register an array stream finalizer</h2>
+
+<h3>Description</h3>
+
+<p>In some cases, R functions that return a nanoarrow_array_stream
+may require that the scope of some other object outlive that of the array
+stream. If there is a need for that object to be released deterministically
+(e.g., to close open files), you can register a function to run after the
+stream's release callback is invoked from the R thread. Note that this
+finalizer will <strong>not</strong> be run if the stream's release callback is invoked
+from a <strong>non</strong>-R thread. In this case, the finalizer and its chain of
+environments will be garbage-collected when <code>nanoarrow:::preserved_empty()</code>
+is run.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">array_stream_set_finalizer(array_stream, finalizer)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>array_stream</code></td>
+<td>
+<p>A nanoarrow_array_stream</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>finalizer</code></td>
+<td>
+<p>A function that will be called with zero arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A newly allocated <code>array_stream</code> whose release callback will call
+the supplied finalizer.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">stream &lt;- array_stream_set_finalizer(
+  basic_array_stream(list(1:5)),
+  function() message("All done!")
+)
+stream$release()
+
+</code></pre>
+
+
+</div>

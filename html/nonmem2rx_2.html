@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>as.nonmem2rx</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert a model to a nonmem2rx model</h2>
+
+<h3>Description</h3>
+
+<p>Convert a model to a nonmem2rx model
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">as.nonmem2rx(model1, model2, compress = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model1</code></td>
+<td>
+<p>Input model 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model2</code></td>
+<td>
+<p>Input model 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compress</code></td>
+<td>
+<p>boolean to compress the ui at the end</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>nonmem2rx model
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matthew L. Fidler
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+
+ mod &lt;- nonmem2rx(system.file("mods/cpt/runODE032.ctl", package="nonmem2rx"),
+                  determineError=FALSE, lst=".res", save=FALSE)
+
+ mod2 &lt;-function() {
+   ini({
+     lcl &lt;- 1.37034036528946
+     lvc &lt;- 4.19814911033061
+     lq &lt;- 1.38003493562413
+     lvp &lt;- 3.87657341967489
+     RSV &lt;- c(0, 0.196446108190896, 1)
+     eta.cl ~ 0.101251418415006
+     eta.v ~ 0.0993872449483344
+     eta.q ~ 0.101302674763154
+     eta.v2 ~ 0.0730497519364148
+   })
+   model({
+     cmt(CENTRAL)
+     cmt(PERI)
+     cl &lt;- exp(lcl + eta.cl)
+     v &lt;- exp(lvc + eta.v)
+     q &lt;- exp(lq + eta.q)
+     v2 &lt;- exp(lvp + eta.v2)
+     v1 &lt;- v
+     scale1 &lt;- v
+     k21 &lt;- q/v2
+     k12 &lt;- q/v
+     d/dt(CENTRAL) &lt;- k21 * PERI - k12 * CENTRAL - cl * CENTRAL/v1
+     d/dt(PERI) &lt;- -k21 * PERI + k12 * CENTRAL
+     f &lt;- CENTRAL/scale1
+     f ~ prop(RSV)
+   })
+ }
+
+new &lt;- try(as.nonmem2rx(mod2, mod))
+if (!inherits(new, "try-error")) print(new, page=1)
+
+
+
+</code></pre>
+
+
+</div>

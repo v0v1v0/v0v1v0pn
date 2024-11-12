@@ -1,0 +1,190 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>varimp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Variable Importance Indices
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes variable importance indices for terms of a smooth model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">varimp(object, newdata = NULL, combine = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class "sm" output by the <code>sm</code> function or an object of class "gsm" output by the <code>gsm</code> function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>the data used for variable importance calculation (if <code>NULL</code> training data are used).  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>combine</code></td>
+<td>
+
+<p>a switch indicating if the parametric and smooth components of the importance should be combined (default) or returned separately.  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Suppose that the function can be written as
+</p>
+<p style="text-align: center;"><code class="reqn">\eta = \eta_0 + \eta_1 + \eta_2 + ... + \eta_p</code>
+</p>
+
+<p>where <code class="reqn">\eta_0</code> is a constant (intercept) term, and <code class="reqn">\eta_j</code> denotes the <code class="reqn">j</code>-th effect function, which is assumed to have mean zero. Note that <code class="reqn">\eta_j</code> could be a main or interaction effect function for all <code class="reqn">j = 1, ..., p</code>.
+</p>
+<p>The variable importance index for the <code class="reqn">j</code>-th effect term is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\pi_j = (\eta_j^\top \eta_*) / (\eta_*^\top \eta_*)</code>
+</p>
+
+<p>where <code class="reqn">\eta_* = \eta_1 + \eta_2 + ... + \eta_p</code>. Note that <code class="reqn">\sum_{j = 1}^p \pi_j = 1</code> but there is no guarantee that <code class="reqn">\pi_j &gt; 0</code>. 
+</p>
+<p>If all <code class="reqn">\pi_j</code> are non-negative, then <code class="reqn">\pi_j</code> gives the proportion of the model's R-squared that can be accounted for by the <code class="reqn">j</code>-th effect term. Thus, values of <code class="reqn">\pi_j</code> closer to 1 indicate that <code class="reqn">\eta_j</code> is more important, whereas values of <code class="reqn">\pi_j</code> closer to 0 (including negative values) indicate that <code class="reqn">\eta_j</code> is less important.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>combine = TRUE</code>, returns a named vector containing the importance indices for each effect function (in <code>object$terms</code>).
+</p>
+<p>If <code>combine = FALSE</code>, returns a data frame where the first column gives the importance indices for the <code>p</code>arametric components and the second column gives the importance indices for the <code>s</code>mooth (nonparametric) components.
+</p>
+
+
+<h3>Note</h3>
+
+<p>When <code>combine = FALSE</code>, importance indices will be equal to zero for non-existent components of a model term. For example, a <code>nominal</code> effect does not have a parametric component, so the <code>$p</code> component of the importance index for a nominal effect will be zero.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), SAGE Research Methods Foundations. <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>summary.sm</code> for more thorough summaries of smooth models.
+</p>
+<p>See <code>summary.gsm</code> for more thorough summaries of generalized smooth models.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+##########   EXAMPLE 1   ##########
+### 1 continuous and 1 nominal predictor
+
+# generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+z &lt;- factor(sample(letters[1:3], size = n, replace = TRUE))
+fun &lt;- function(x, z){
+  mu &lt;- c(-2, 0, 2)
+  zi &lt;- as.integer(z)
+  fx &lt;- mu[zi] + 3 * x + sin(2 * pi * x)
+}
+fx &lt;- fun(x, z)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# define marginal knots
+probs &lt;- seq(0, 0.9, by = 0.1)
+knots &lt;- list(x = quantile(x, probs = probs),
+              z = letters[1:3])
+
+# fit correct (additive) model
+sm.add &lt;- sm(y ~ x + z, knots = knots)
+
+# fit incorrect (interaction) model
+sm.int &lt;- sm(y ~ x * z, knots = knots)
+
+# true importance indices
+eff &lt;- data.frame(x = 3 * x + sin(2 * pi * x), z = c(-2, 0, 2)[as.integer(z)])
+eff &lt;- scale(eff, scale = FALSE)
+fstar &lt;- rowSums(eff)
+colSums(eff * fstar) / sum(fstar^2)
+
+# estimated importance indices
+varimp(sm.add)
+varimp(sm.int)
+
+
+
+##########   EXAMPLE 2   ##########
+### 4 continuous predictors
+### additive model
+
+# generate data
+set.seed(1)
+n &lt;- 100
+fun &lt;- function(x){
+  sin(pi*x[,1]) + sin(2*pi*x[,2]) + sin(3*pi*x[,3]) + sin(4*pi*x[,4])
+}
+data &lt;- as.data.frame(replicate(4, runif(n)))
+colnames(data) &lt;- c("x1v", "x2v", "x3v", "x4v")
+fx &lt;- fun(data)
+y &lt;- fx + rnorm(n)
+
+# define ssa knot indices
+knots.indx &lt;- c(bin.sample(data$x1v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x2v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x3v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x4v, nbin = 10, index.return = TRUE)$ix)
+
+# fit correct (additive) model
+sm.add &lt;- sm(y ~ x1v + x2v + x3v + x4v, data = data, knots = knots.indx)
+
+# fit incorrect (interaction) model
+sm.int &lt;- sm(y ~ x1v * x2v + x3v + x4v, data = data, knots = knots.indx)
+
+# true importance indices
+eff &lt;- data.frame(x1v = sin(pi*data[,1]), x2v = sin(2*pi*data[,2]),
+                  x3v = sin(3*pi*data[,3]), x4v = sin(4*pi*data[,4]))
+eff &lt;- scale(eff, scale = FALSE)
+fstar &lt;- rowSums(eff)
+colSums(eff * fstar) / sum(fstar^2)
+
+# estimated importance indices
+varimp(sm.add)
+varimp(sm.int)
+
+</code></pre>
+
+
+</div>

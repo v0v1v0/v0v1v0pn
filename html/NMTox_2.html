@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>FrCtrl</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a frequency table of the control values</h2>
+
+<h3>Description</h3>
+
+<p>This function provides a table containing the frequencies of the control
+values and the number of available data in the specified dataset. Since it is
+possible to have a dose with different units of measurement in one dataset,
+this function helps in showing how many control values are available for each
+nanomaterial for a specific unit of measurement of the dose.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">FrCtrl(data.nm, data.control, id, nano, dose, end, end.cat, unit,
+  unit.cat, vars)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data.nm</code></td>
+<td>
+<p>Data containing the result of toxicity study</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.control</code></td>
+<td>
+<p>Data of control values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>Identifier of the experiment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nano</code></td>
+<td>
+<p>Name of the nanomaterial</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dose</code></td>
+<td>
+<p>Dose or concentration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end</code></td>
+<td>
+<p>Toxicity endpoint</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end.cat</code></td>
+<td>
+<p>Specific toxicity endpoint of interest</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit</code></td>
+<td>
+<p>Unit of measurement of the dose</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit.cat</code></td>
+<td>
+<p>Specific unit of measurement of the dose</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars</code></td>
+<td>
+<p>Variables used to subset the data</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ul>
+<li>
+<p>This function performs data exploration for each nanomaterial in the
+dataset (or for each subset of data). The different types of nanomaterials
+are identified by their names. Therefore, if some control values are named
+differently (see: <code>geninvitro</code> dataset and the <code>Examples</code>),
+a separate dataset containing only these values first needs to be created.
+Controls in the new dataset can be linked to the non-control observations
+belonging to the same experiment through the identifier of the experiment
+(the linking is performed inside this function). In this situation, it is
+necessary to have an indicator that can identify different experiments (such
+as experiment ID).
+</p>
+</li>
+<li>
+<p>If all controls in the dataset are named according to the related
+nanomaterial names, <code>data.control</code> and <code>id</code> do not need to be
+specified.
+</p>
+</li>
+<li>
+<p>The exploration can also be performed on the subsets of data by
+splitting the data of each nanomaterial according to the variable(s)
+specified in <code>vars</code>
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>The value returned from <code>FrCtrl</code> is a table containing:
+</p>
+
+<ul>
+<li>
+<p><code>Freq(Dose=0.0).same</code>: frequency of control values with dose
+measured in <code>unit.cat</code>
+</p>
+</li>
+<li>
+<p><code>Freq(obs).same</code>: number of observations with dose measured in
+<code>unit.cat</code>
+</p>
+</li>
+<li>
+<p><code>Freq(Dose=0.0).all</code>: frequency of control values with dose
+measured <code>unit.cat</code> and in other units of measurement
+</p>
+</li>
+<li>
+<p><code>Freq(obs).all</code>: number of observations with dose measured in
+<code>unit.cat</code> and control dose measured in any units,
+</p>
+</li>
+</ul>
+<p>for each nanomaterial or subset of data
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create a dataset containing controls (which are named differently)
+# from geninvitro dataset:
+controldata&lt;-SubsetData(data=geninvitro, x="name", x.cat=c("control", "Control",
+             "medium", "medium + BSA", "untreated"))
+
+# Exclude controls (which are named differently) from geninvitro dataset:
+invitrodata&lt;-SubsetData(data=geninvitro, x="name", x.cat=c("control", "Control",
+             "medium", "medium + BSA", "untreated"), include=FALSE)
+
+# Frequency of controls for each nanomaterial in geninvitro dataset
+# with DNA STRAND BREAKS as the toxicity endpoint and concentration
+# measured in "ug/cm2":
+#
+FrCtrl(data.nm=invitrodata, data.control=controldata, nano="name",
+       end="endpoint", end.cat="DNA STRAND BREAKS", id="experimentID",
+       dose="concentration", unit="concentration_unit", unit.cat="ug/cm2")
+
+# Frequency of controls for each cell type in each nanomaterial
+# (in geninvitro dataset) with DNA STRAND BREAKS as the toxicity
+# endpoint and concentration measured in "ug/cm2":
+#
+FrCtrl(data.nm=invitrodata, data.control=controldata, nano="name",
+       end="endpoint", end.cat="DNA STRAND BREAKS", id="experimentID",
+       dose="concentration", unit="concentration_unit", unit.cat="ug/cm2",
+       vars="celltype")
+</code></pre>
+
+
+</div>

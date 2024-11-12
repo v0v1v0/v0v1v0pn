@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>na.replace</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Replace Missing Values</h2>
+
+<h3>Description</h3>
+
+<p>Replaces <code>NA</code> values with explicit values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">na.replace(x, .na, ...)
+
+na.explicit(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector in which <code>NA</code> values are to be replaced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.na</code></td>
+<td>
+<p>scalar, length(x)-vector or function used to replace <code>NA</code>. See #Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments passed to <code>.na</code> when it is a function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>na.replace</code> replaces missing values in <code>x</code> by <code>.na</code> if possible.
+</p>
+<p>In R, replacement of values can cause a change in the class/type of an object.
+This is not often desired. <code>na.replace</code> is class/type-safe and length-safe.
+It replaces missing values without changing the <code>x</code>'s class or length
+regardless of the value provided by <code>.na</code>.
+</p>
+<p><strong>Param: <code>x</code></strong>
+</p>
+<p>If <code>x</code> is <strong>categorical</strong> (e.g. character or factor), <code>.na</code> is optional.
+The default is "(NA)" and can be set with
+<code>options( NA_explicit_ = new_value )</code>. It can also be
+referenced directly with NA_explicit_.
+</p>
+<p>If <code>x</code> is a <strong>factor</strong>, unique values of <code>.na</code> not in already present in
+<code>levels(x)</code> will be added. They are appended silently unless
+<code>getOption('verbose')==TRUE</code> in which a message reports the added levels.
+</p>
+<p><strong>Param: <code>.na</code></strong>
+</p>
+<p><code>.na</code> can be either a scalar, vector or function.
+</p>
+<p>If a <strong>scalar</strong>, each missing value of <code>x</code> is replaced by <code>na</code>.
+</p>
+<p>If a <strong>vector</strong>, <code>.na</code> must have length(x)<code>. Missing values of</code>x<code>are replaced by corresponding elements of</code>.na<code>. Recycling values of</code>.na<code>is not allowed. An error will be thrown in the event that</code>length(.na)<code>is not</code>1<code>or</code>length(x)<code>.</code>
+</p>
+<p>If a <strong>function</strong>, <code>x</code> is transformed by .na' with:</p>
+<pre>     .na(x, ...)
+</pre>
+<p>then preceding with normal operations.
+</p>
+<p><code>na.explicit</code> is an alias for na.replace that uses NA_explicit_ for '.na“;
+it returns x unchanged if it cannot change the value.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector with the class and length of <code>x</code>.
+<code>NA</code>s in <code>x</code> will be replaced by <code>.na</code>. <code>.na</code> is coerced as necessary.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>base::ifelse()</code>, <code>base::replace()</code>
+</p>
+</li>
+<li> <p><code>forcats::fct_explicit_na</code> - which only handles factors
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  # Integers and numerics
+  na.replace( c(1,NA,3,NA), 2 )    # 1 2 3 2   
+  na.replace( c(1,NA,3,NA), 1:4 )  # 1 2 3 4
+
+  # This produces an error because it would change the type
+  ## Not run: 
+  na.replace( c(1,NA,3,NA), letters[1:4] )  # "1" "b" "3" "d"
+  
+## End(Not run)
+  
+  # Characters 
+  lets &lt;- letters[1:5]
+  lets[ c(2,4) ] &lt;- NA
+  na.replace(lets)  # replace with NA_explicit_
+
+  # Factors 
+  fct &lt;- as.factor( c( NA, letters[2:4], NA) )
+  fct
+  na.replace(fct, "z")  # z b c d z  -- level z added
+  na.replace(fct, letters[1:5] )
+  na.replace(fct)
+     
+ ## Not run: 
+   na.replace( rep(NA,3), rep(NA,3) )
+ 
+## End(Not run)
+     
+</code></pre>
+
+
+</div>

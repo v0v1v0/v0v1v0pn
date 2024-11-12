@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute_median</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Impute the median value into a vector with missing values</h2>
+
+<h3>Description</h3>
+
+<p>Impute the median value into a vector with missing values
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute_median(x)
+
+## Default S3 method:
+impute_median(x)
+
+## S3 method for class 'factor'
+impute_median(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>vector with median values replaced
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+vec &lt;- rnorm(10)
+
+vec[sample(1:10, 3)] &lt;- NA
+
+impute_median(vec)
+
+library(dplyr)
+
+dat &lt;- tibble(
+  num = rnorm(10),
+  int = as.integer(rpois(10, 5)),
+  fct = factor(LETTERS[1:10])
+) %&gt;%
+  mutate(
+    across(
+      everything(),
+      \(x) set_prop_miss(x, prop = 0.25)
+    )
+  )
+
+dat
+
+dat %&gt;%
+  nabular() %&gt;%
+  mutate(
+    num = impute_median(num),
+    int = impute_median(int),
+  )
+
+dat %&gt;%
+  nabular() %&gt;%
+  mutate(
+    across(
+      where(is.numeric),
+      impute_median
+    )
+  )
+
+dat %&gt;%
+  nabular() %&gt;%
+  mutate(
+    across(
+      c("num", "int"),
+      impute_median
+    )
+ )
+
+</code></pre>
+
+
+</div>

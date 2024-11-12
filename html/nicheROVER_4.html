@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>niche.par.plot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot for niche parameters.</h2>
+
+<h3>Description</h3>
+
+<p>For one or more species, plots some or all of the niche parameters <code class="reqn">\mu</code> and <code class="reqn">\Sigma</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">niche.par.plot(
+  niche.par,
+  plot.mu = TRUE,
+  plot.Sigma = TRUE,
+  plot.index,
+  col,
+  ndens = 512,
+  ylab
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>niche.par</code></td>
+<td>
+<p>List with <code>nspecies = length(niche.par)</code>, each element of which is a list with parameters <code>mu</code> and <code>Sigma</code>.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.mu</code></td>
+<td>
+<p>Logical.  If <code>TRUE</code>, plot the distribution of <code class="reqn">\mu</code> for each niche indicator (e.g., stable isotope).  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.Sigma</code></td>
+<td>
+<p>Logical.  If <code>TRUE</code>, plot the distribution of <code class="reqn">\Sigma</code> for each niche indicator.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.index</code></td>
+<td>
+<p>Either a scalar of a numeric vector of length 2.  If <code>plot.index = i</code> then plot the distribution of <code class="reqn">\mu_i</code>.  If <code>plot.index = c(i,j)</code> then plot the distribution of <code class="reqn">\Sigma_{ij}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Vector of colors in which to plot each species.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ndens</code></td>
+<td>
+<p>Number of points at which to evaluate density estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Optional label for <code class="reqn">y</code>-axis.  If missing, defaults to <code class="reqn">p(\mu_i | X)</code> and <code class="reqn">p(\Sigma_{ij} | X)</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Each element of the list <code>niche.par</code> is a distribution of niche parameters.  That is, <code>names(niche.par[[1]]) = c("mu", "Sigma")</code>, and if <code>niso</code> is the number of niche indicators (e.g., stable isotopes), then <code>dim(niche.par[[1]]$mu) = c(nsamples, niso)</code> and <code>dim(niche.par[[1]]$Sigma) = c(niso, niso, nsamples)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a plot of the distribution of some or all niche parameters.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>niw.post()</code>, <code>niiw.post()</code> for niche parameter output, <code>stats::density()</code> for density estimation from sample data.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># fish data
+data(fish)
+
+# generate parameter draws from the "default" posteriors of each fish
+nsamples &lt;- 1e3
+system.time({
+  fish.par &lt;- tapply(1:nrow(fish), fish$species,
+                     function(ii) niw.post(nsamples = nsamples, X = fish[ii,2:4]))
+})
+
+# various parameter plots
+clrs &lt;- c("black", "red", "blue", "orange") # colors for each species
+
+# mu1, mu2, and Sigma12
+par(mar = c(4, 4, .5, .1)+.1, mfrow = c(1,3))
+niche.par.plot(fish.par, col = clrs, plot.index = 1)
+niche.par.plot(fish.par, col = clrs, plot.index = 2)
+niche.par.plot(fish.par, col = clrs, plot.index = 1:2)
+legend("topright", legend = names(fish.par), fill = clrs)
+
+# all mu
+niche.par.plot(fish.par, col = clrs, plot.mu = TRUE, plot.Sigma = FALSE)
+legend("topright", legend = names(fish.par), fill = clrs)
+
+# all mu and Sigma
+par(mar = c(4.2, 4.2, 2, 1)+.1)
+niche.par.plot(fish.par, col = clrs, plot.mu = TRUE, plot.Sigma = TRUE)
+legend("topright", legend = names(fish.par), fill = clrs)
+</code></pre>
+
+
+</div>

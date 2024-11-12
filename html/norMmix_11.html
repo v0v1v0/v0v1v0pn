@@ -1,0 +1,243 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>norMmixMLE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum Likelihood Estimation for Multivariate Normal Mixtures</h2>
+
+<h3>Description</h3>
+
+<p>Direct Maximum Likelihood Estimation (MLE) for multivariate normal
+mixture models <code>"norMmix"</code>.  Starting from a
+<code>clara</code> (package <a href="https://CRAN.R-project.org/package=cluster"><span class="pkg">cluster</span></a>) clustering plus
+one M-step by default, or alternatively from the default start of (package)
+<a href="https://CRAN.R-project.org/package=mclust"><span class="pkg">mclust</span></a>, perform direct likelihood maximization via <code>optim()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">norMmixMLE(x, k,
+           model = c("EII", "VII", "EEI", "VEI", "EVI",
+                     "VVI", "EEE", "VEE", "EVV", "VVV"),
+           initFUN = claraInit,
+           ll = c("nmm", "mvt"),
+           keep.optr = TRUE, keep.data = keep.optr,
+           method = "BFGS", maxit = 100, trace = 2,
+           optREPORT = 10, reltol = sqrt(.Machine$double.eps),
+ 	   ...)
+
+claraInit(x, k, samples = 128,
+          sampsize = ssClara2kL, trace)
+mclVVVinit(x, k, ...)
+
+ssClara2kL(n, k, p)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>numeric [n x p] matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>positive number of components</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>a <code>character</code> string, specifying the model (for
+the <code>k</code> covariance matrices) to be assumed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initFUN</code></td>
+<td>
+<p>a <code>function</code>, that takes arguments <code>x</code> and
+<code>k</code> and returns a clustering index; a vector of length <code class="reqn">p = </code><code>ncol(x)</code>,
+with entries in <code>1:k</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ll</code></td>
+<td>
+<p>a string specifying the method to be used for the likelihood
+computation;  the default, <code>"nmm"</code> uses <code>llnorMmix()</code>,
+whereas <code>"mvt"</code> uses <code>llmvtnorm()</code> which is based on
+the MV normal density from package <a href="https://CRAN.R-project.org/package=mvtnorm"><span class="pkg">mvtnorm</span></a>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.optr, keep.data</code></td>
+<td>
+<p><code>logical</code>, each indicating of the
+optimization result (from <code>optim()</code>, currently), or the data
+<code>x</code> respectively, should be saved as part of the result (function
+‘value’, see also below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method, maxit, optREPORT, reltol</code></td>
+<td>
+<p>arguments for tuning the
+optimizer <code>optim(*, method=method, control = list(...))</code>.</p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+
+<dl>
+<dt>in <code>norMmixMLE()</code>:</dt>
+<dd>
+<p>passed to <code>optim(*, control=..)</code>, see above.</p>
+</dd>
+<dt>in <code>claraInit()</code>: </dt>
+<dd>
+<p>a non-negative integer indicating how
+much <code>clara()</code> calls should be traced.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<dl>
+<dt>in <code>norMmixMLE()</code>:</dt>
+<dd>
+<p>passed to <code>optim(*, control=..)</code>, see above.</p>
+</dd>
+<dt>in <code>mclVVVinit()</code>:</dt>
+<dd>
+<p>further arguments passed to (package
+<a href="https://CRAN.R-project.org/package=mclust"><span class="pkg">mclust</span></a>) function <code>hcVVV()</code>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+<p>the number of subsamples to take in
+<code>clara()</code>, package <a href="https://CRAN.R-project.org/package=cluster"><span class="pkg">cluster</span></a>, see its help.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampsize</code></td>
+<td>
+<p>the sample size to take in
+<code>clara()</code>, package <a href="https://CRAN.R-project.org/package=cluster"><span class="pkg">cluster</span></a>.
+Here, can be a positive integer <em>or</em>, as by default, a
+<code>function</code> with arguments <code>(n,k,p)</code>.</p>
+</td>
+</tr>
+</table>
+<table><tr style="vertical-align: top;">
+<td><code>n,p</code></td>
+<td>
+<p>matrix dimensions <code>nrow(x)</code> and <code>ncol(x)</code>.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>By default, <code>initFUN=claraInit</code>, uses <code>clara()</code>
+and one M-step from EM-algorithm to initialize parameters
+after that uses general optimizer <code>optim()</code> to calculate the MLE.
+</p>
+<p>To silence the output of <code>norMmixMLE</code>, set <code>optREPORT</code> very high and <code>trace</code> to 0. For details on output behavior, see the "details" section of <code>optim</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>norMmixMLE</code> returns an object of <code>class</code>
+<code>"norMmixMLE"</code> which is a <code>list</code> with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>norMmix</code></td>
+<td>
+<p>the <code>"norMmix"</code> object corresponding to the
+specified model and the fitted (MLE) parameter vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optr</code></td>
+<td>
+<p>(if <code>keep.optr</code> is true:) the [r]eturn value of
+optimization, i.e., currently, <code>optim()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>the number of free parameters, a function of <code class="reqn">(p, k, model)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>the sample size, i.e., the number of observations or rows of <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>the result of (the hidden function) <code>parcond(..)</code>, that is the ratio of sample size
+over parameter count.</p>
+</td>
+</tr>
+</table>
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>(if <code>keep.optr</code> is true:) the <code class="reqn">n \times p</code> data matrix.</p>
+</td>
+</tr></table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">MW214
+set.seed(105)
+x &lt;- rnorMmix(1000, MW214)
+
+## Fitting, assuming to know the true model (k=6, "VII")
+fm1  &lt;- norMmixMLE(x, k = 6, model = "VII", initFUN=claraInit)
+fm1 # {using print.norMmixMLE() method}
+fm1M &lt;- norMmixMLE(x, k = 6, model = "VII", initFUN=mclVVVinit)
+
+## Fitting "wrong" overparametrized model: typically need more iterations:
+fmW &lt;- norMmixMLE(x, k = 7, model = "VVV", maxit = 200, initFUN=claraInit)
+## default maxit=100 is often too small    ^^^^^^^^^^^
+
+
+x &lt;- rnorMmix(2^12, MW51)
+fM5 &lt;- norMmixMLE(x, k = 4) # k = 3 is sufficient
+fM5
+c(logLik = logLik(fM5), AIC = AIC(fM5), BIC = BIC(fM5))
+plot(fM5, show.x=FALSE)
+plot(fM5, lwd=3, pch.data=".")
+
+# this takes several seconds
+ fM5big &lt;- norMmixMLE(x, model = "VVV", k = 4, maxit = 300) # k = 3 is sufficient
+ summary(warnings())
+ fM5big ; c(logLik = logLik(fM5big), AIC = AIC(fM5big), BIC = BIC(fM5big))
+ plot(fM5big, show.x=FALSE)
+
+</code></pre>
+
+
+</div>

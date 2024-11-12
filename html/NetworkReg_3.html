@@ -1,0 +1,259 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SP.Inf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fitting Linear Regression Models on Network-Linked Data
+</h2>
+
+<h3>Description</h3>
+
+<p>SP.Inf is used to the regression model on network-linked data by subspace project and produce the inference result.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SP.Inf(X, Y, A, K, r = NULL, sigma2 = NULL, thr = NULL, alpha.CI = 0.05,
+boot.thr = TRUE, boot.n = 50)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>the covariate matrix where each row is an observation and each column is a covariate. If an intercept is to be included in the model, the column of ones should be in the matrix.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+
+<p>the column vector of response.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+
+<p>the network information. The most natural choice is the adjacency matrix of the network. However, if the network is assumed to be noisy and a better estimate of the structural connection strength, it can also be used. This corresponds to the Phat matrix in the original paper. A Laplacian matrix can also be used, but it should be flipped. See 'Details'. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+
+<p>the dimension of the network eigenspace for network effect. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+
+<p>the covariate-network cofounding space dimension. This is typically unknown and can be unspecified by using the default value 'NULL'. If so, the user should provide a threshold or resort to a tuning procedure by either the theoretical rule or a bootstrapping method, as described in the paper.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2</code></td>
+<td>
+
+<p>the variance of random noise. Typically unknown.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thr</code></td>
+<td>
+
+<p>threshold for r estimation. If r is unspecified, we will use the thereshold to select r. If this is also 'NULL', aa theoretical threshold or a bootsrapping method can be evoked to estimate it.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.CI</code></td>
+<td>
+
+<p>the 1-alpha.CI confidence level will be produced for the parameters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.thr</code></td>
+<td>
+
+<p>logical. Only effective if both r and thr are NULLs. If FALSE, the theoretical threshold will be used to select r. Otherwise, the bootstrapping procedure will be used to find the threshold.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.n</code></td>
+<td>
+
+<p>the number of bootstrapping samples used when boot.thr is TRUE.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The model fitting procedure is following the paper exactly, so please check the procedure and theory in the paper. If the Laplacian matrix L=D-A is the network quantity to use, notice that typically we treat the smallest values and their corresponding eigenvectors as network cohesive space. Therefore, one should consider flip the Laplacian matrix by using cI - L as the value for A, where c is sufficiently large to ensure PSD of cI-L.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list object with
+
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>beta </code></td>
+<td>
+<p>estimate of beta, the covariate effects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha </code></td>
+<td>
+<p>individual effects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>coefficients of confounding effects with respect to the covariates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>confounding dimension</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>estimated random noise variance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cov.hat</code></td>
+<td>
+<p>covariance matrix of beta</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coef.mat</code></td>
+<td>
+<p>beta and the confidence intervals according to alpha.CI and the p-values of the significance test</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted</code></td>
+<td>
+<p>fitted value of response</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chisq.val</code></td>
+<td>
+<p>the value of the chi-square statistic for the significance test for network effect</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chisq.p</code></td>
+<td>
+<p>the p-value of the significance test for network effect</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Can M. Le and  Tianxi Li.<br></p>
+<p>Maintainer: Tianxi Li &lt;tianxili@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Le, C. M., &amp; Li, T. (2022). Linear regression and its inference on noisy network-linked data. Journal of the Royal Statistical Society Series B: Statistical Methodology, 84(5), 1851-1885.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(randnet)
+library(RSpectra)
+### data generating procedure in Section 5.3 of the paper
+
+n &lt;- 1000
+big.model &lt;- BlockModel.Gen(lambda=n^(1/2),n=n,beta=0.2,K=4)
+P &lt;- big.model$P
+big.X &lt;- cbind(rnorm(n),runif(n),rexp(n))
+
+eigen.P &lt;- eigs_sym(A=P,k=4)
+X.true &lt;- big.X
+X.true &lt;- scale(X.true,center=TRUE,scale=TRUE)*sqrt(n/(n-1))
+X.true &lt;- cbind(sqrt(n)*eigen.P$vectors[,1],X.true)
+X.svd &lt;- svd(X.true)
+x.proj &lt;- X.svd$v%*%(t(X.svd$u)/X.svd$d)
+Theta &lt;- X.svd$v%*%(t(X.svd$v)/(X.svd$d^2))*n
+R &lt;- X.svd$u
+U &lt;- eigen.P$vectors[,1:4]
+true.SVD &lt;- svd(t(R)%*%U,nu=4,nv=4)
+V &lt;- true.SVD$v
+r &lt;- 1
+U.tilde &lt;- U%*%V
+R.tilde &lt;- R%*%true.SVD$u
+theta.tilde &lt;- matrix(c(sqrt(n),0,0,0),ncol=1)
+beta.tilde &lt;- matrix(sqrt(n)*c(0,1,1,1),ncol=1)
+Xtheta &lt;- R.tilde%*%theta.tilde
+Xbeta &lt;- R.tilde%*%beta.tilde
+
+theta &lt;- solve(t(X.true)%*%X.true,t(X.true)%*%Xtheta)
+beta &lt;- solve(t(X.true)%*%X.true,t(X.true)%*%Xbeta)
+alpha.coef &lt;- matrix(sqrt(n)*c(0,1,1,1),ncol=1)
+alpha &lt;- U.tilde%*%alpha.coef
+
+EY &lt;- Xtheta+Xbeta + alpha
+
+
+#### model fitting
+
+
+A &lt;- net.gen.from.P(P)
+Khat &lt;- BHMC.estimate(A, K.max = 15)$K  ### estimate K to use
+
+## model fitting
+Y &lt;- EY + rnorm(n)
+fit &lt;- SP.Inf(X.true,Y,A,K=Khat,alpha=0.05,boot.thr=FALSE)
+### In general, boot.thr = T works better for small sample but is slower.
+### It was used in the paper.
+fit$coef.mat  
+### notice that beta1 inference is meaningful here. Check the paper.
+beta
+fit$chisq.p
+
+## find a parametric estimation of the network. This is generally not available.
+rsc &lt;- reg.SP(A,K=Khat,tau=0.1)
+est &lt;- SBM.estimate(A,rsc$cluster)
+Phat &lt;- est$Phat
+fit2 &lt;- SP.Inf(X.true,Y,Phat,K=Khat,alpha=0.05,boot.thr=FALSE)
+fit2$coef.mat  
+### notice that beta1 inference is meaningful here. Check the paper.
+
+</code></pre>
+
+
+</div>

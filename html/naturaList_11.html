@@ -1,0 +1,211 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>env_grid_filter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Filter occurrences in environmental space</h2>
+
+<h3>Description</h3>
+
+<p>Filter the occurrence with the most realible species identification in the
+environmental space. This function is based in the function envSample
+provided by Varela et al. (2014) and were adapted to the naturaList package to
+select the occurrence with the most realible species identification in each
+environmental grid.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">env_grid_filter(
+  occ.cl,
+  env.data,
+  grid.res,
+  institution.code = "institutionCode",
+  collection.code = "collectionCode",
+  catalog.number = "catalogNumber",
+  year = "year",
+  date.identified = "dateIdentified",
+  species = "species",
+  identified.by = "identifiedBy",
+  decimal.latitude = "decimalLatitude",
+  decimal.longitude = "decimalLongitude",
+  basis.of.record = "basisOfRecord",
+  media.type = "mediaType",
+  occurrence.id = "occurrenceID"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>occ.cl</code></td>
+<td>
+<p>data frame with occurrence records information already
+classified by <code>classify_occ</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env.data</code></td>
+<td>
+<p>data frame with rows for occurrence observation and columns for
+each environmental variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid.res</code></td>
+<td>
+<p>numeric vector. Each value represents the width of each bin
+in the scale of the environmental variable. The order in this vector is
+assumed to be the same order in the of the variables in the <code>env.data</code>
+data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>institution.code</code></td>
+<td>
+<p>column name of <code>occ.cl</code> with the name (or acronym)
+in use by the institution having custody of the object(s) or information
+referred to in the record.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>collection.code</code></td>
+<td>
+<p>column name of <code>occ.cl</code> with The name, acronym,
+code, or initials identifying the collection or data set from which the
+record was derived.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>catalog.number</code></td>
+<td>
+<p>column name of <code>occ.cl</code> with an identifier
+(preferably unique) for the record within the data set or collection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>Column name of <code>occ.cl</code> the four-digit year in which the
+Event occurred, according to the Common Era Calendar.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>date.identified</code></td>
+<td>
+<p>Column name of <code>occ.cl</code> with the date on which the
+subject was determined as representing the Taxon.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>species</code></td>
+<td>
+<p>column name of <code>occ</code> with the species names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>identified.by</code></td>
+<td>
+<p>column name of <code>occ.cl</code> with the name of who
+determined the species.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>decimal.latitude</code></td>
+<td>
+<p>column name of <code>occ.cl</code> latitude in decimal
+degrees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>decimal.longitude</code></td>
+<td>
+<p>column name of <code>occ.cl</code> longitude in decimal
+degrees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>basis.of.record</code></td>
+<td>
+<p>column name with the specific nature of the data
+record. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>media.type</code></td>
+<td>
+<p>column name of <code>occ.cl</code> with the media type of recording.
+See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>occurrence.id</code></td>
+<td>
+<p>column name of <code>occ</code> with link or code for the
+occurrence record. See in
+<a href="https://dwc.tdwg.org/terms/#dwc:occurrenceID">Darwin Core Format</a></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data frame with the same columns of <code>occ.cl</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Varela et al. (2014). Environmental filters reduce the effects
+of sampling bias and improve predictions of ecological niche models.
+*Ecography*. 37(11) 1084-1091.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>classify_occ</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+library(naturaList)
+library(tidyverse)
+
+data("cyathea.br")
+data("speciaLists")
+data("r.temp.prec")
+
+occ &lt;- cyathea.br %&gt;%
+  filter(species == "Cyathea atrovirens")
+
+occ.cl &lt;- classify_occ(occ, speciaLists, spec.ambiguity = "is.spec")
+
+# temperature and precipitaion data
+env.data &lt;- raster::extract(
+  r.temp.prec,
+  occ.cl[,c("decimalLongitude", "decimalLatitude")]
+) %&gt;% as.data.frame()
+
+# the bins for temperature has 5 degrees each and for precipitation has 100 mm each
+grid.res &lt;- c(5, 100)
+
+occ.filtered &lt;- env_grid_filter(
+  occ.cl,
+  env.data,
+  grid.res
+)
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

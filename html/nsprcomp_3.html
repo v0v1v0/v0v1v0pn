@@ -1,0 +1,292 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nscumcomp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-Negative and Sparse Cumulative PCA</h2>
+
+<h3>Description</h3>
+
+<p>Performs a PCA-like analysis on the given data matrix, where
+non-negativity and/or sparsity constraints are enforced on the principal axes
+(PAs). In contrast to regular PCA, which greedily maximises the variance of
+each principal component (PC), <code>nscumcomp</code> <em>jointly</em> optimizes the
+components such that the cumulative variance of all PCs is maximal.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nscumcomp(x, ...)
+
+## Default S3 method:
+nscumcomp(x, ncomp = min(dim(x)), omega = rep(1, nrow(x)),
+  k = d * ncomp, nneg = FALSE, gamma = 0, center = TRUE,
+  scale. = FALSE, nrestart = 5, em_tol = 0.001, em_maxiter = 20,
+  verbosity = 0, ...)
+
+## S3 method for class 'formula'
+nscumcomp(formula, data = NULL, subset, na.action, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric matrix or data frame which provides the data for the
+analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments passed to or from other methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncomp</code></td>
+<td>
+<p>the number of principal components (PCs) to be computed. The 
+default is to compute a full basis for <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omega</code></td>
+<td>
+<p>a vector with as many entries as there are data samples, to 
+perform weighted PCA (analogous to weighted least-squares regression). The 
+default is an equal weighting of all samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>an upper bound on the total number of non-zero loadings of the 
+pseudo-rotation matrix <code class="reqn">\mathbf{W}</code>. <code>k</code> is increased if
+necessary to ensure at least one non-zero coefficient per principal axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nneg</code></td>
+<td>
+<p>a logical value indicating whether the loadings should be 
+non-negative, i.e. the PAs should be constrained to the non-negative 
+orthant.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>a non-negative penalty on the divergence from orthonormality of 
+the pseudo-rotation matrix. The default is not to penalize, but a positive 
+value is sometimes necessary to avoid PAs collapsing onto each other.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>a logical value indicating whether the empirical mean of (the 
+columns of) <code>x</code> should be subtracted. Alternatively, a vector of 
+length equal to the number of columns of <code>x</code> can be supplied. The 
+value is passed to <code>scale</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.</code></td>
+<td>
+<p>a logical value indicating whether the columns of <code>x</code> 
+should be scaled to have unit variance before the analysis takes place. The
+default is <code>FALSE</code> for consistency with <code>prcomp</code>. Alternatively, 
+a vector of length equal to the number of columns of <code>x</code> can be 
+supplied. The value is passed to <code>scale</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrestart</code></td>
+<td>
+<p>the number of random restarts for computing the 
+pseudo-rotation matrix via expectation-maximization (EM) iterations. The 
+solution achieving the minimum of the objective function over all random 
+restarts is kept. A value greater than one can help to avoid poor local 
+minima.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em_tol</code></td>
+<td>
+<p>If the relative change of the objective is less than 
+<code>em_tol</code> between iterations, the EM procedure is asssumed to have 
+converged to a local optimum.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em_maxiter</code></td>
+<td>
+<p>the maximum number of EM iterations to be performed. The EM
+procedure is terminated if either the <code>em_tol</code> or the 
+<code>em_maxiter</code> criterion is satisfied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbosity</code></td>
+<td>
+<p>an integer specifying the verbosity level. Greater values 
+result in more output, the default is to be quiet.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula with no response variable, referring only to numeric variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an optional data frame (or similar: see
+<code>model.frame</code>) containing the variables in the
+formula <code>formula</code>.  By default the variables are taken from
+<code>environment(formula)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>an optional vector used to select rows (observations) of the
+data matrix <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function which indicates what should happen
+when the data contain <code>NA</code>s.  The default is set by
+the <code>na.action</code> setting of <code>options</code>, and is
+<code>na.fail</code> if that is unset.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>nscumcomp</code> computes all PCs jointly using expectation-maximization (EM)
+iterations. The M-step is equivalent to minimizing the objective function
+</p>
+<p style="text-align: center;"><code class="reqn">\left\Vert \mathbf{X}-\mathbf{Z}\mathbf{W}^{\top}\right\Vert
+_{F}^{2}+\gamma\left\Vert \mathbf{W}^{\top}\mathbf{W}-\mathbf{I}\right\Vert
+_{F}^{2}</code>
+</p>
+
+<p>w.r.t. the pseudo-rotation matrix <code class="reqn">\mathbf{W}</code>, where 
+<code class="reqn">\mathbf{Z}=\mathbf{X}\mathbf{W}\left(\mathbf{W}^\top\mathbf{W}\right)^{-1}</code>
+is the scores matrix modified to account for the non-orthogonality of 
+<code class="reqn">\mathbf{W}</code>, <code class="reqn">\mathbf{I}</code> is the identity matrix and 
+<code>gamma</code> is the Lagrange parameter associated with the ortho-normality 
+penalty on <code class="reqn">\mathbf{W}</code>. Non-negativity of the loadings is achieved by
+enforcing a zero lower bound in the L-BFGS-B algorithm used for the
+minimization of the objective, and sparsity is achieved by a subsequent soft
+thresholding of <code class="reqn">\mathbf{W}</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>nscumcomp</code> returns a list with class <code>(nsprcomp, prcomp)</code> 
+containing the following elements: </p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>sdev</code></td>
+<td>
+<p>the additional standard 
+deviation explained by each component, see <code>asdev</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rotation</code></td>
+<td>
+<p>the matrix of non-negative and/or sparse loadings, 
+containing the principal axes as columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>the scores matrix 
+<code class="reqn">\mathbf{XW}</code> containing the principal components as columns 
+(after centering and scaling if requested)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center, scale</code></td>
+<td>
+<p>the 
+centering and scaling used, or <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xp</code></td>
+<td>
+<p>the deflated data 
+matrix corresponding to <code>x</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>an orthonormal basis for the 
+principal subspace</p>
+</td>
+</tr>
+</table>
+<p>The components are returned in order of decreasing variance for 
+convenience.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The PCA terminology is not consistent across the literature. Given a 
+zero mean data matrix <code class="reqn">\mathbf{X}</code> (with observations as rows) and a
+basis <code class="reqn">\mathbf{W}</code> of the principal subspace, we define the scores 
+matrix as <code class="reqn">\mathbf{Z}=\mathbf{XW}</code> which contains the principal 
+components as its columns. The columns of the pseudo-rotation matrix 
+<code class="reqn">\mathbf{W}</code> are called the principal axes, and the elements of 
+<code class="reqn">\mathbf{W}</code> are called the loadings.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>asdev</code>,  <code>peav</code>, <code>nsprcomp</code>, 
+<code>scale</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (requireNamespace("MASS", quietly = TRUE)) withAutoprint({
+
+  set.seed(1)
+
+  # Regular PCA, with tolerance set to return five PCs
+  pca &lt;- prcomp(MASS::Boston, tol = 0.35, scale. = TRUE)
+  cumsum(pca$sdev[1:5])
+
+  # Sparse cumulative PCA with five components and a total of 20 non-zero loadings.
+  # The orthonormality penalty is set to a value which avoids co-linear principal
+  # axes. Note that the non-zero loadings are not distributed uniformly over
+  # the components.
+  scc &lt;- nscumcomp(MASS::Boston, ncomp = 5, k = 20, gamma = 1e4, scale. = TRUE)
+  cumsum(scc$sdev)
+  cardinality(scc$rotation)
+
+  # Non-negative sparse cumulative PCA
+  nscumcomp(MASS::Boston, ncomp = 5, nneg = TRUE, k = 20, gamma = 1e4, scale. = TRUE)
+})
+</code></pre>
+
+
+</div>

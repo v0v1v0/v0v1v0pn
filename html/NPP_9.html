@@ -1,0 +1,230 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LMNPP_MCMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MCMC Sampling for Normal Linear Model using Normalized Power Prior</h2>
+
+<h3>Description</h3>
+
+<p>Conduct posterior sampling for normal linear model with normalized power prior.
+For the power parameter <code class="reqn">\delta</code>, a Metropolis-Hastings algorithm with either
+independence proposal, or a random walk proposal on its logit scale is used.
+For the regression parameter <code class="reqn">\beta</code> and <code class="reqn">\sigma^2</code>, Gibbs sampling is used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LMNPP_MCMC(y.Cur, y.Hist, x.Cur = NULL, x.Hist = NULL,
+           prior = list(a = 1.5, b = 0, mu0 = 0,
+                   Rinv = matrix(1, nrow = 1), delta.alpha = 1, delta.beta = 1),
+           MCMCmethod = 'IND', rw.logit.delta = 0.1,
+           ind.delta.alpha= 1, ind.delta.beta= 1, nsample = 5000,
+           control.mcmc = list(delta.ini = NULL, burnin = 0, thin = 1))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y.Cur</code></td>
+<td>
+<p>a vector of individual level of the response y in current data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y.Hist</code></td>
+<td>
+<p>a vector of individual level of the response y in historical data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.Cur</code></td>
+<td>
+<p>a vector or matrix or data frame of covariate observed in the current data.
+If more than 1 covariate available, the number of rows is equal to the number of
+observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.Hist</code></td>
+<td>
+<p>a vector or matrix or data frame of covariate observed in the historical data.
+If more than 1 covariate available, the number of rows is equal to the number of
+observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>a list of the hyperparameters in the prior for model parameters
+<code class="reqn">(\beta, \sigma^2)</code> and <code class="reqn">\delta</code>.
+The form of the prior for model parameter <code class="reqn">(\beta, \sigma^2)</code> is in the section "Details".
+</p>
+<p><code>a</code> a positive hyperparameter for prior on model parameters. It is the power <code class="reqn">a</code> in formula <code class="reqn">(1/\sigma^2)^a</code>;
+See details.
+</p>
+<p><code>b</code> equals 0 if a flat prior is used for <code class="reqn">\beta</code>. Equals 1 if a normal prior is used for <code class="reqn">\beta</code>; See details.
+</p>
+<p><code>mu0</code> a vector of the mean for prior <code class="reqn">\beta|\sigma^2</code>. Only applicable if <code>b = 1</code>.
+</p>
+<p><code>Rinv</code> inverse of the matrix <code class="reqn">R</code>. The covariance matrix of the prior for <code class="reqn">\beta|\sigma^2</code> is <code class="reqn">\sigma^2 R^{-1}</code>.
+</p>
+<p><code>delta.alpha</code> is the hyperparameter <code class="reqn">\alpha</code> in the prior distribution <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">\delta</code>.
+</p>
+<p><code>delta.beta</code> is the hyperparameter <code class="reqn">\beta</code> in the prior distribution <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">\delta</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MCMCmethod</code></td>
+<td>
+<p>sampling method for <code class="reqn">\delta</code> in MCMC. It can be either 'IND' for independence proposal; or 'RW' for
+random walk proposal on logit scale. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rw.logit.delta</code></td>
+<td>
+<p>the stepsize(variance of the normal distribution) for the random walk proposal of logit <code class="reqn">\delta</code>.
+Only applicable if <code>MCMCmethod = 'RW'. </code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.delta.alpha</code></td>
+<td>
+<p>specifies the first parameter <code class="reqn">\alpha</code> when
+independent proposal <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">\delta</code> is used. Only applicable if <code>MCMCmethod = 'IND'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.delta.beta</code></td>
+<td>
+<p>specifies the first parameter <code class="reqn">\beta</code> when
+independent proposal <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">\delta</code> is used. Only applicable if <code>MCMCmethod = 'IND'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsample</code></td>
+<td>
+<p>specifies the number of posterior samples in the output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.mcmc</code></td>
+<td>
+<p>a list of three elements used in posterior sampling.
+</p>
+<p><code>delta.ini</code> is the initial value of <code class="reqn">\delta</code> in MCMC sampling.
+</p>
+<p><code>burnin</code> is the number of burn-ins. The output will only show MCMC samples after bunrin.
+</p>
+<p><code>thin</code> is the thinning parameter in MCMC sampling.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code class="reqn">b = 1</code>, prior for <code class="reqn">(\beta, \sigma)</code> is <code class="reqn">(1/\sigma^2)^a * N(mu0, \sigma^2 R^{-1})</code>, which includes the g-prior.
+If <code class="reqn">b = 0</code>, prior for <code class="reqn">(\beta, \sigma)</code> is <code class="reqn">(1/\sigma^2)^a</code>.
+The outputs include posteriors of the model parameter(s) and power parameter, acceptance rate when sampling <code class="reqn">\delta</code>, and
+the deviance information criteria.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class "NPP" with five elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>posterior of the model parameter <code class="reqn">\beta</code> in vector or matrix form.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmasq</code></td>
+<td>
+<p>posterior of the model parameter <code class="reqn">\sigma^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>posterior of the power parameter <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acceptance</code></td>
+<td>
+<p>the acceptance rate in MCMC sampling for <code class="reqn">\delta</code> using Metropolis-Hastings algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DIC</code></td>
+<td>
+<p>the deviance information criteria for model diagnostics.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Zifei Han <a href="mailto:hanzifei1@gmail.com">hanzifei1@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Ibrahim, J.G., Chen, M.-H., Gwon, Y. and Chen, F. (2015).
+The Power Prior: Theory and Applications.
+<em>Statistics in Medicine  34:3724-3749.</em>
+</p>
+<p>Duan, Y., Ye, K. and Smith, E.P. (2006).
+Evaluating Water Quality: Using Power Priors to Incorporate Historical Information.
+<em>Environmetrics  17:95-106.</em>
+</p>
+<p>Berger, J.O. and Bernardo, J.M. (1992).
+On the development of reference priors.
+<em>Bayesian Statistics 4: Proceedings of
+the Fourth Valencia International Meeting, Bernardo, J.M, Berger,
+J.O., Dawid, A.P. and Smith, A.F.M. eds., 35-60, Clarendon Press:Oxford.</em>
+</p>
+<p>Jeffreys, H. (1946).
+An Invariant Form for the Prior Probability in Estimation Problems.
+<em>Proceedings of the Royal Statistical Society of London, Series A  186:453-461.</em>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>BerNPP_MCMC</code>;
+<code>MultinomialNPP_MCMC</code>;
+<code>PoissonNPP_MCMC</code>;
+<code>NormalNPP_MCMC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123)
+x1 = runif(100, min = 0, max = 10)
+x0 = runif(100, min = 0, max = 1)
+y1 = 10+ 2*x1 + rnorm(100, mean = 0, sd = 1)
+y0 = 10+ 1.5*x0 + rnorm(100, mean = 0, sd = 1)
+
+RegPost = LMNPP_MCMC(y.Cur = y1, y.Hist = y0, x.Cur = x1, x.Hist = x0,
+                     prior = list(a = 1.5, b = 0, mu0 = c(0, 0),
+                                  Rinv = diag(100, nrow = 2),
+                     delta.alpha = 1, delta.beta = 1), MCMCmethod = 'IND',
+                     ind.delta.alpha= 1, ind.delta.beta= 1, nsample = 5000,
+                     control.mcmc = list(delta.ini = NULL,
+                                         burnin = 2000, thin = 2))
+</code></pre>
+
+
+</div>

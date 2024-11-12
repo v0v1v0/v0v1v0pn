@@ -1,0 +1,266 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NNtrainPredict</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generic Functions for Training and Predicting</h2>
+
+<h3>Description</h3>
+
+<p>An implementation with <code>do.call</code> so that any neural network function that fits 
+the format can be tested. 
+</p>
+<p>In <code>trainPredict_1mth1data</code>, a neural network is trained on one dataset
+and then used for predictions, with several functionalities. Then, the performance 
+of the neural network is summarized.
+</p>
+<p><code>trainPredict_1data</code> serves as a wrapper function for <code>trainPredict_1mth1data</code> 
+for multiple methods.
+</p>
+<p><code>trainPredict_1pkg</code> serves as a wrapper function for <code>trainPredict_1mth1data</code> 
+for multiple datasets.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">trainPredict_1mth1data(dset, method, trainFUN, hyperparamFUN, predictFUN,
+  summaryFUN, prepareZZ.arg = list(), nrep = 5, doplot = FALSE,
+  plot.arg = list(col1 = 1:nrep, lwd1 = 1, col2 = 4, lwd2 = 3), pkgname,
+  pkgfun, csvfile = FALSE, rdafile = FALSE, odir = ".", echo = FALSE,
+  echoreport = FALSE, appendcsv = TRUE, ...)
+
+trainPredict_1data(dset, methodlist, trainFUN, hyperparamFUN, predictFUN,
+  summaryFUN, closeFUN, startNN = NA, prepareZZ.arg = list(), nrep = 5,
+  doplot = FALSE, plot.arg = list(), pkgname = "pkg", pkgfun = "train",
+  csvfile = FALSE, rdafile = FALSE, odir = ".", echo = FALSE, ...)
+
+trainPredict_1pkg(dsetnum, pkgname = "pkg", pkgfun = "train", methodvect,
+  prepareZZ.arg = list(), summaryFUN, nrep = 5, doplot = FALSE,
+  plot.arg = list(), csvfile = FALSE, rdafile = FALSE, odir = ".",
+  echo = FALSE, appendcsv = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dset</code></td>
+<td>
+<p>a number or string indicating which dataset to use, see <code>NNdataSummary</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a method for a particular function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trainFUN</code></td>
+<td>
+<p>the training function used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyperparamFUN</code></td>
+<td>
+<p>the function resulting in parameters needed for training</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictFUN</code></td>
+<td>
+<p>the prediction function used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summaryFUN</code></td>
+<td>
+<p>measure performance by observed and predicted y values, <code>NNsummary</code> is ready to use</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prepareZZ.arg</code></td>
+<td>
+<p>list of arguments for <code>prepareZZ</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrep</code></td>
+<td>
+<p>a number for how many times a neural network should be trained with a package/function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doplot</code></td>
+<td>
+<p>logical value, TRUE executes plots and FALSE does not</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.arg</code></td>
+<td>
+<p>list of arguments for plots</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pkgname</code></td>
+<td>
+<p>package name</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pkgfun</code></td>
+<td>
+<p>name of the package function to train neural network</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>csvfile</code></td>
+<td>
+<p>logical value, adds summary to csv files per dataset if TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rdafile</code></td>
+<td>
+<p>logical value, outputs rdafile of predictions and summary if TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>odir</code></td>
+<td>
+<p>output directory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>echo</code></td>
+<td>
+<p>logical value, separates training between packages with some text and enables echoreport if TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>echoreport</code></td>
+<td>
+<p>logical value, detailed reports are printed (such as model summaries and str(data)) if TRUE, will not work if echo is FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>appendcsv</code></td>
+<td>
+<p>logical value, if <code>TRUE</code>, the csv output is appended to the csv file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodlist</code></td>
+<td>
+<p>list of methods per package/function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>closeFUN</code></td>
+<td>
+<p>a function to detach packages or other necessary environment clearing</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>startNN</code></td>
+<td>
+<p>a function to start needed outside libraries, for example, h2o</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dsetnum</code></td>
+<td>
+<p>a vector of numbers indicating which dataset to use in <code>NNdataSummary</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodvect</code></td>
+<td>
+<p>vector of methods per package/function</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An array with values as in NNsummary including each repetition, with options for plots and output files
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">nrep &lt;- 2       
+odir &lt;- tempdir()
+
+### Package with one method/optimization algorithm
+library("brnn")
+brnn.method &lt;- "gaussNewton"
+hyperParams.brnn &lt;- function(optim_method, ...) {
+  return(list(iter = 200))
+  }
+brnn.prepareZZ &lt;- list(xdmv = "m", ydmv = "v", zdm = "d", scale = TRUE)
+
+NNtrain.brnn   &lt;- function(x, y, dataxy, formula, neur, optim_method, hyperParams,...) {
+  hyper_params &lt;- do.call(hyperParams.brnn, list(brnn.method))
+  iter  &lt;- hyper_params$iter
+  
+  NNreg &lt;- brnn::brnn(x, y, neur, normalize = FALSE, epochs = iter, verbose = FALSE)
+  return(NNreg)
+  }
+NNpredict.brnn &lt;- function(object, x, ...) { predict(object, x) }
+NNclose.brnn &lt;- function(){
+  if("package:brnn" %in% search())
+    detach("package:brnn", unload=TRUE)
+  }
+
+
+res &lt;- trainPredict_1pkg(1:2, pkgname = "brnn", pkgfun = "brnn", brnn.method,
+                         prepareZZ.arg = brnn.prepareZZ, nrep = nrep, doplot = TRUE,
+                         csvfile = FALSE, rdafile = FALSE, odir = odir, echo = FALSE)
+                         
+### Package with more than one method/optimization algorithm
+library(validann)
+validann.method &lt;- c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN")
+hyperParams.validann &lt;- function(optim_method, ...) {
+  if(optim_method == "Nelder-Mead")  { maxiter &lt;- 10000 } 
+  if(optim_method == "BFGS")         { maxiter &lt;- 200   }
+  if(optim_method == "CG")           { maxiter &lt;- 1000  }
+  if(optim_method == "L-BFGS-B")     { maxiter &lt;- 200   }
+  if(optim_method == "SANN")         { maxiter &lt;- 1000  }
+  return(list(iter = maxiter, method = optim_method, params))
+  }
+validann.prepareZZ &lt;- list(xdmv = "m", ydmv = "m", zdm = "d", scale = TRUE)
+
+NNtrain.validann &lt;- function(x, y, dataxy, formula, neur, optim_method, hyperParams, ...) {
+  hyper_params &lt;- do.call(hyperParams, list(optim_method, ...))
+  iter &lt;- hyper_params$iter
+  method &lt;- hyper_params$method
+  
+  NNreg &lt;- validann::ann(x, y, size = neur, method = method, maxit = iter)
+  return (NNreg)
+  }
+NNpredict.validann &lt;- function(object, x, ...) { predict(object, x) }
+NNclose.validann &lt;- function() {
+  if("package:validann" %in% search())
+  detach("package:validann", unload=TRUE)
+  }
+
+res &lt;- trainPredict_1pkg(1:2, pkgname = "validann", pkgfun = "ann", validann.method,
+                         repareZZ.arg = validann.prepareZZ, nrep = nrep, doplot = FALSE,
+                         csvfile = TRUE, rdafile = TRUE, odir = odir, echo = FALSE)
+                        
+
+</code></pre>
+
+
+</div>

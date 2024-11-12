@@ -1,0 +1,80 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mask_img</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mask Image</h2>
+
+<h3>Description</h3>
+
+<p>Takes an image, masks it by 
+<code>mask</code>, and returns an object of class <code>nifti</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mask_img(img, mask, allow.NA = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>object of class <code>nifti</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask</code></td>
+<td>
+<p>array or object of class <code>nifti</code>, same dimensions as img</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow.NA</code></td>
+<td>
+<p>allow NAs in the mask</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Object of class nifti with values outside mask set to 0 if mask is
+0 and NA if mask is NA and img if mask == 1
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  set.seed(5)
+  dims = rep(10, 3)
+  arr = array(rnorm(prod(dims)), dim = dims)
+  nim = oro.nifti::nifti(arr)
+  mask = abs(nim) &gt; 1
+  masked = mask_img(nim, mask)
+  mask[mask == 0] = NA
+  na_masked = mask_img(nim, mask, allow.NA = TRUE)
+  
+set.seed(5)
+dims = rep(10, 3)
+arr = array(rnorm(prod(dims)), dim = dims)
+arr[,,10] = 0
+nim = oro.nifti::nifti(arr)
+rnifti = RNifti::asNifti(nim)
+mask = nim &gt; 0
+timg = tempimg(nim)
+limg = list(factor(timg), factor(timg))
+func = function(...) mask_img(..., mask = mask)
+func(arr)
+func(nim)
+func(rnifti)
+func(timg)
+lapply(limg, func)
+</code></pre>
+
+
+</div>

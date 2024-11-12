@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>leaf_reaches</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return leaf reaches from a network or query intersecting lake</h2>
+
+<h3>Description</h3>
+
+<p>A leaf reach is a stream flowline that has upstream connections but is
+not in the focal set.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">leaf_reaches(
+  lon = NA,
+  lat = NA,
+  network = NA,
+  approve_all_dl = FALSE,
+  temporary = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lon</code></td>
+<td>
+<p>numeric decimal degree longitude. optional. See Details section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lat</code></td>
+<td>
+<p>numeric decimal degree latitude. optional. See Details section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p>sf lines collection. optional. See Details section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>approve_all_dl</code></td>
+<td>
+<p>logical blanket approval to download all missing data.
+Defaults to TRUE if session is non-interactive.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temporary</code></td>
+<td>
+<p>logical set FALSE to save data to a persistent
+rappdirs location</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>parameters passed on to sf::st_read</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An sf data frame with LINESTRING geometries
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+coords &lt;- data.frame(lat = 20.79722, lon = -156.47833)
+# nhd_plus_get(
+#  nhdR::find_vpu(
+#    sf::st_as_sf(coords, coords = c("lon", "lat"), crs = 4326)),
+# temporary = FALSE)
+leaf_reaches(coords$lon, coords$lat)
+
+coords  &lt;- data.frame(lat = 41.42217, lon = -73.24189)
+l_reach &lt;- leaf_reaches(coords$lon, coords$lat)
+
+network_focal &lt;- nhd_plus_query(lon = coords$lon, lat = coords$lat,
+  dsn = "NHDFlowline", buffer_dist = units::as_units(2, "km"))$sp$NHDFlowline
+network &lt;- nhd_plus_query(lon = coords$lon, lat = coords$lat,
+  dsn = "NHDFlowline", buffer_dist = units::as_units(5, "km"))$sp$NHDFlowline
+l_reach &lt;- leaf_reaches(network = network_focal)
+
+plot(network$geometry)
+plot(network_focal$geometry, col = "darkgreen", add=TRUE)
+plot(l_reach$geometry, col = "red", add = TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nomogramEx</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extract Equations from a Nomogram</h2>
+
+<h3>Description</h3>
+
+<p>A nomogram can not be easily applied,
+because it is difficult to calculate the points or even the survival probability.
+The package, including a function of nomogramEx(),
+is to extract the polynomial equations to calculate the points of each variable,
+and the survival probability corresponding to the total points.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nomogramEx(nomo,np,digit)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nomo</code></td>
+<td>
+<p>a object of nomogram()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>np</code></td>
+<td>
+<p>the number of predicitons in your nomogram, for example: if you predicted 3- and 6- month, np=2, default is 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digit</code></td>
+<td>
+<p>the number of decimal digits, default is 9</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>list</code></td>
+<td>
+<p>the result is a list including polynomial equations to calculate the points of each variable, and the polynomial equations to calculate the probability of points</p>
+</td>
+</tr></table>
+<h3>Note</h3>
+
+<p>The polynomial equations extracted by this package are equal and less than cubic function.
+</p>
+<p>Update:
+</p>
+<p>Version 1.0: 1.the order of variables in the polynomial equations is opposite. 2.the number of the demical digits can not be controled.
+</p>
+<p>Version 2.0: 1.the argument 'lp' from the 'nomogram' function can not be recognized.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Zhicheng Du&lt;dgdzc@hotmail.com&gt;, Yuantao Hao&lt;haoyt@mail.sysu.edu.cn&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p>nothing
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(require("rms")){
+n &lt;-1000
+age &lt;- rnorm(n,50,10)
+sex &lt;- factor(sample(c('female','male'),n,TRUE))
+sex &lt;- as.numeric(sex)
+ddist &lt;- datadist(age,sex)
+options(datadist='ddist')
+cens &lt;- 15*runif(n)
+time &lt;- -log(runif(n))/0.02*exp(.04*(age-50)+.8*(sex=='Female'))
+death &lt;- ifelse(time &lt;= cens,1,0)
+time &lt;- pmin(time,cens)
+units(time)="month"
+f &lt;- cph(formula(Surv(time,death)~sex+age),x=TRUE,y=TRUE,surv=TRUE,time.inc=3)
+surv &lt;- Survival(f)
+nomo &lt;- nomogram(f, fun=list(function(x) surv(3,x),function(x) surv(6,x)),
+  lp=TRUE,funlabel=c("3-Month Survival Prob","6-Month Survival Prob"))
+nomogramEx(nomo=nomo,np=2,digit=9)
+}
+</code></pre>
+
+
+</div>

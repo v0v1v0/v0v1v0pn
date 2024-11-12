@@ -1,0 +1,207 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NMreadParsText</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read comments to parameter definitions in Nonmem control streams</h2>
+
+<h3>Description</h3>
+
+<p>When interpreting parameter estimates, it is often needed to
+recover information about the meaning of the different parameters
+from control stream. 'NMreadParsText' provides a flexible way to
+organize the comments in the parameter sections into a
+'data.frame'. This can subsequently easily be merged with parameter
+values as obtained with 'NMreadExt'.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NMreadParsText(
+  file,
+  lines,
+  format,
+  format.omega = format,
+  format.sigma = format.omega,
+  spaces.split = FALSE,
+  field.idx = "idx",
+  use.theta.idx = FALSE,
+  modelname,
+  col.model,
+  as.fun,
+  fields,
+  fields.omega = fields,
+  fields.sigma = fields.omega
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>Path to the control stream to read.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lines</code></td>
+<td>
+<p>As an alternative to 'file', the control stream or
+selected lines of the control stream can be provided as a
+vector of lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format</code></td>
+<td>
+<p>Defines naming and splitting of contents of lines in
+parameter sections. Default is
+<code>"%init;%idx;%symbol;%label;%unit"</code>. Be careful to
+remember percentage symbols in front of any variable names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format.omega</code></td>
+<td>
+<p>Like 'fields', applied to '$OMEGA'
+section. Default is to reuse 'fields'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format.sigma</code></td>
+<td>
+<p>Like 'fields', applied to '$SIGMA'
+section. Default is to reuse 'fields.omega'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spaces.split</code></td>
+<td>
+<p>Is a blank in 'fields' to be treated as a
+field seperator? Default is not to (i.e. neglect spaces in
+'fields').</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>field.idx</code></td>
+<td>
+<p>If an index field is manually provided in the
+control stream comments, define the name of that field in
+'format' and tell 'NMreadParsTab()' to use this idx to
+organize especially OMEGA and SIGMA elements by pointing to it
+with 'field.idx'. The default is to look for a varible called
+'idx'. If the index has values like 1-2 on an OMEGA or SIGMA
+row, the row is interpreted as the covariance between
+OMEGA/SIGMA 1 and 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.theta.idx</code></td>
+<td>
+<p>If an index field in comments should be used
+to number thetas. The index field is used to organize
+'$OMEGA's and '$SIGMA's because they are matrices but I do not
+see where this is advantageous to do for '$THETA's. Default
+'use.theta.idx=FALSE' which means '$THETA's are simply
+counted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>See ?NMscanData</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.model</code></td>
+<td>
+<p>See ?NMscanData</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>See ?NMscanData</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fields</code></td>
+<td>
+<p>Deprecated. Use 'format'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fields.omega</code></td>
+<td>
+<p>Deprecated. Use 'format.omega'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fields.sigma</code></td>
+<td>
+<p>Deprecated. Use 'format.sigma'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Off-diagonal omega and sigma elements will only be
+correctly treated if their num field specifies say 1-2 to
+specify it is covariance between 1 and 2.
+</p>
+<p><code>SAME</code> elements in <code>$OMEGA</code> will be skipped altogether.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+## notice, examples on explicitly stated lines. Most often in
+## practice, one would use the file argument to automatically
+## extract the $THETA, $OMEGA and $SIGMA sections from a control
+## stream.
+
+text &lt;- c("
+
+$THETA  (.1)             ;[1]; LTVKA (mL/h)
+$OMEGA  BLOCK(3)
+0.126303  ;    IIV.CL  ; 1   ;IIV     ;Between-subject variability on CL;-
+0.024  ; IIV.CL.V2.cov  ; 1-2 ;IIV     ;Covariance of BSV on CL and V2;-
+0.127  ;    IIV.V2  ; 2   ;IIV     ;Between-subject variability on V2;-
+0.2  ; IIV.CL.V3.cov  ; 1-3 ;IIV     ;Covariance of BSV on CL and V3;-
+0.2  ; IIV.V2.V3.cov  ; 2-3 ;IIV     ;Covariance of BSV on V2 and V3;-
+0.38  ;    IIV.V3  ; 3   ;IIV     ;Between-subject variability on V3;-
+$OMEGA 0 FIX ; IIV.KA ; 4  ;IIV     ;Between-subject variability on KA;-
+$SIGMA 1
+")
+   lines &lt;- strsplit(text,split="\n")[[1]]
+
+res &lt;- NMreadParsText(lines=lines,
+format="%init;[%num];%symbol",
+format.omega="%init; %symbol ; %num ; %type   ; %label ; %unit",
+field.idx="num")
+
+## BLOCK() SAME are skipped
+text &lt;- c("
+$THETA
+(0,0.1) ; THE1      - 1) 1st theta
+(0,4.2) ; THE2        - 2) 2nd theta
+$OMEGA  0.08   ;    IIV.TH1  ; 1  ;IIV
+$OMEGA  BLOCK(1)
+0.547465  ; IOV.TH1  ; 2 ;IOV
+$OMEGA  BLOCK(1) SAME
+$OMEGA  BLOCK(1) SAME")
+lines &lt;- strsplit(text,split="\n")[[1]]
+res &lt;- NMreadParsText(lines=lines,
+                         format="%init;%symbol - %idx) %label",
+                         format.omega="%init; %symbol  ; %idx  ; %label "
+                         )
+</code></pre>
+
+
+</div>

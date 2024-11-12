@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_xs_points</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Cross Section Endpoints (experimental)</h2>
+
+<h3>Description</h3>
+
+<p>Uses a cross section retrieval web services to retrieve a
+cross section between two endpoints.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_xs_points(point1, point2, num_pts, res = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>point1</code></td>
+<td>
+<p>sfc POINT including crs as created by:
+<code>sf::st_sfc(sf::st_point(.. ,..), crs)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point2</code></td>
+<td>
+<p>sfc POINT including crs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_pts</code></td>
+<td>
+<p>numeric number of points to retrieve along the cross section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res</code></td>
+<td>
+<p>integer resolution of 3D Elevation Program data to request.
+Must be on of: 1, 3, 5, 10, 30, 60.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>sf data.frame containing points retrieved.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+point1 &lt;- sf::st_sfc(sf::st_point(x = c(-105.9667, 36.17602)), crs = 4326)
+point2 &lt;- sf::st_sfc(sf::st_point(x = c(-105.97768, 36.17526)), crs = 4326)
+
+(xs &lt;- get_xs_points(point1, point2, 100))
+
+if(inherits(xs, "sf")) {
+
+bbox &lt;- sf::st_bbox(xs) + c(-0.005, -0.005, 0.005, 0.005)
+
+nhdplusTools::plot_nhdplus(bbox = bbox, cache_data = FALSE)
+
+plot(sf::st_transform(sf::st_geometry(xs), 3857), pch = ".", add = TRUE, col = "red")
+plot(sf::st_transform(sf::st_sfc(point1, crs = 4326), 3857), add = TRUE)
+plot(sf::st_transform(sf::st_sfc(point2, crs = 4326), 3857), add = TRUE)
+
+plot(xs$distance_m, xs$elevation_m)
+}
+
+
+</code></pre>
+
+
+</div>

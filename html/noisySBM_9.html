@@ -1,0 +1,252 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fitNSBM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>VEM algorithm to adjust the noisy stochastic block model to an observed dense adjacency matrix</h2>
+
+<h3>Description</h3>
+
+<p><code>fitNSBM()</code> estimates model parameters of the noisy stochastic block model and provides a clustering of the nodes
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fitNSBM(
+  dataMatrix,
+  model = "Gauss0",
+  sbmSize = list(Qmin = 1, Qmax = NULL, explor = 1.5),
+  filename = NULL,
+  initParam = list(nbOfTau = NULL, nbOfPointsPerTau = NULL, maxNbOfPasses = NULL,
+    minNbOfPasses = 1),
+  nbCores = parallel::detectCores()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataMatrix</code></td>
+<td>
+<p>observed dense adjacency matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Implemented models:
+</p>
+
+<dl>
+<dt><code>Gauss</code></dt>
+<dd>
+<p>all Gaussian parameters of the null and the alternative distributions are unknown ; this is the Gaussian model with maximum number of unknown parameters</p>
+</dd>
+<dt><code>Gauss0</code></dt>
+<dd>
+<p>compared to <code>Gauss</code>, the mean of the null distribution is set to 0</p>
+</dd>
+<dt><code>Gauss01</code></dt>
+<dd>
+<p>compared to <code>Gauss</code>, the null distribution is set to N(0,1)</p>
+</dd>
+<dt><code>GaussEqVar</code></dt>
+<dd>
+<p>compared to <code>Gauss</code>, all Gaussian variances (of both the null and the alternative) are supposed to be equal, but unknown</p>
+</dd>
+<dt><code>Gauss0EqVar</code></dt>
+<dd>
+<p>compared to <code>GaussEqVar</code>, the mean of the null distribution is set to 0</p>
+</dd>
+<dt><code>Gauss0Var1</code></dt>
+<dd>
+<p>compared to <code>Gauss</code>, all Gaussian variances are set to 1 and the null distribution is set to N(0,1)</p>
+</dd>
+<dt><code>Gauss2distr</code></dt>
+<dd>
+<p>the alternative distribution is a single Gaussian distribution, i.e. the block memberships of the nodes do not influence on the alternative distribution</p>
+</dd>
+<dt><code>GaussAffil</code></dt>
+<dd>
+<p>compared to <code>Gauss</code>, for the alternative distribution, there's a distribution for inter-group and another for intra-group interactions</p>
+</dd>
+<dt><code>Exp</code></dt>
+<dd>
+<p>the null and the alternatives are all exponential distributions (i.e. Gamma distributions with shape parameter equal to one)  with unknown scale parameters</p>
+</dd>
+<dt><code>ExpGamma</code></dt>
+<dd>
+<p>the null distribution is an unknown exponential, the alterantive distribution are Gamma distributions with unknown parameters</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sbmSize</code></td>
+<td>
+<p>list of parameters determining the size of SBM (the number of latent blocks) to be expored
+</p>
+
+<dl>
+<dt><code>Qmin</code></dt>
+<dd>
+<p>minimum number of latent blocks</p>
+</dd>
+<dt><code>Qmax</code></dt>
+<dd>
+<p>maximum number of latent blocks</p>
+</dd>
+<dt><code>explor</code></dt>
+<dd>
+<p>if <code>Qmax</code> is not provided, then <code>Qmax</code> is automatically determined as <code>explor</code> times the number of blocks where the ICL is maximal</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filename</code></td>
+<td>
+<p>results are saved in a file with this name (if provided)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initParam</code></td>
+<td>
+<p>list of parameters that fix the number of initializations
+</p>
+
+<dl>
+<dt><code>nbOfTau</code></dt>
+<dd>
+<p>number of initial points for the node clustering (i. e. for the variational parameters <code>tau</code>)</p>
+</dd>
+<dt><code>nbOfPointsPerTau</code></dt>
+<dd>
+<p>number of initial points of the latent binary graph</p>
+</dd>
+<dt><code>maxNbOfPasses</code></dt>
+<dd>
+<p>maximum number of passes through the SBM models, that is, passes from <code>Qmin</code> to <code>Qmax</code> or inversely</p>
+</dd>
+<dt><code>minNbOfPasses</code></dt>
+<dd>
+<p>minimum number of passes through the SBM models</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbCores</code></td>
+<td>
+<p>number of cores used for parallelization</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>fitNSBM()</code> supports different probability distributions for the edges and can estimate the number of node blocks
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list of estimation results for all numbers of latent blocks considered by the algorithm.
+Every element is a list composed of:
+</p>
+
+<dl>
+<dt><code>theta</code></dt>
+<dd>
+<p>estimated parameters of the noisy stochastic block model; a list with the following elements:
+</p>
+
+<dl>
+<dt><code>pi</code></dt>
+<dd>
+<p>parameter estimate of pi</p>
+</dd>
+<dt><code>w</code></dt>
+<dd>
+<p>parameter estimate of w</p>
+</dd>
+<dt><code>nu0</code></dt>
+<dd>
+<p>parameter estimate of nu0</p>
+</dd>
+<dt><code>nu</code></dt>
+<dd>
+<p>parameter estimate of nu</p>
+</dd>
+</dl>
+</dd>
+<dt><code>clustering</code></dt>
+<dd>
+<p>node clustering obtained by the noisy stochastic block model, more precisely, a hard clustering given by the
+maximum aposterior estimate of the variational parameters <code>sbmParam$edgeProba</code></p>
+</dd>
+<dt><code>sbmParam</code></dt>
+<dd>
+<p>further results concerning the latent binary stochastic block model. A list with the following elements:
+</p>
+
+<dl>
+<dt><code>Q</code></dt>
+<dd>
+<p>number of latent blocks in the noisy stochastic block model</p>
+</dd>
+<dt><code>clusterProba</code></dt>
+<dd>
+<p>soft clustering given by the conditional probabilities of a node to belong to a given latent block.
+In other words, these are the variational parameters <code>tau</code>; (Q x n)-matrix</p>
+</dd>
+<dt><code>edgeProba</code></dt>
+<dd>
+<p>conditional probabilities <code>rho</code> of an edges given the node memberships of the interacting nodes; (N_Q x N)-matrix</p>
+</dd>
+<dt><code>ICL</code></dt>
+<dd>
+<p>value of the ICL criterion at the end of the algorithm</p>
+</dd>
+</dl>
+</dd>
+<dt><code>convergence</code></dt>
+<dd>
+<p>a list of convergence indicators:
+</p>
+
+<dl>
+<dt><code>J</code></dt>
+<dd>
+<p>value of the lower bound of the log-likelihood function at the end of the algorithm</p>
+</dd>
+<dt><code>complLogLik</code></dt>
+<dd>
+<p>value of the complete log-likelihood function at the end of the algorithm</p>
+</dd>
+<dt><code>converged</code></dt>
+<dd>
+<p>indicates if algorithm has converged</p>
+</dd>
+<dt><code>nbIter</code></dt>
+<dd>
+<p>number of iterations performed</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 10
+theta &lt;- list(pi= c(0.5,0.5), nu0=c(0,.1),
+       nu=matrix(c(-2,10,-2, 1,1,1),3,2),  w=c(.5, .9, .3))
+obs &lt;- rnsbm(n, theta, modelFamily='Gauss')
+res &lt;- fitNSBM(obs$dataMatrix, sbmSize = list(Qmax=3),
+       initParam=list(nbOfTau=1, nbOfPointsPerTau=1), nbCores=1)
+</code></pre>
+
+
+</div>

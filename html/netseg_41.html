@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ssi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Spectral Segregation Index for Social Networks</h2>
+
+<h3>Description</h3>
+
+<p>These functions implement Spectral Segregation Index as proposed by
+Echenique &amp; Fryer (2006). This index is a node-level measure of segregation
+in a given network.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ssi(g, vattr)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>object of class "igraph" representing a network</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vattr</code></td>
+<td>
+<p>character, name of the vertex attribute</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For a full description and axiomatization see Echenique &amp; Fryer (2006).
+</p>
+<p>The network <code>g</code> is converted to adjacency matrix and normalized so that
+all rows sum-up to 1.
+</p>
+<p>The procedure essentially consists of creating a submatrix, say, <code class="reqn">B</code> of
+the adjacency matrix, say <code class="reqn">A</code>. This submatrix <code class="reqn">B</code> contains only
+vertices of the given type. It may be viewed as a type-homogeneous
+subnetwork of <code>A</code>. This subnetwork is further decomposed into connected
+components.  Then, for every component, an eigenvalue decomposition is
+applied.  The value of the index for the component is simply the largest
+eigenvalue, and the individual-level indices are obtained by distributing it
+according to the corresponding eigenvector.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Named vector of individual level values of SSI. Names correspond to vertex
+ids in <code>g</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Echenique, F., &amp; Fryer Jr, R. G. (2007). A measure of segregation based on
+social interactions. The Quarterly Journal of Economics, 122(2), 441-485.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other segregation measures: 
+<code>assort()</code>,
+<code>coleman()</code>,
+<code>ei()</code>,
+<code>freeman()</code>,
+<code>gamix()</code>,
+<code>orwg()</code>,
+<code>smi()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(requireNamespace("igraph", quietly = TRUE)) {
+
+### artificial EF data
+x &lt;- ssi(EF3, "race")
+x
+
+
+# show it on picture
+a &lt;- igraph::V(EF3)$race
+# rescale SSI values to use as shades of gray
+k &lt;- 1 - scale(x, center=min(x), scale=max(x) - min(x))
+plot( EF3, layout=igraph::layout.fruchterman.reingold,
+vertex.color= gray(k),
+vertex.label.family="",
+vertex.shape=c("circle", "square")[a],
+vertex.label.color=gray( (1-k) &gt; .4 )
+)
+
+### For White's kinship data
+x &lt;- ssi(WhiteKinship, "gender")
+x
+
+# plot it
+a &lt;- match(igraph::V(WhiteKinship)$gender, unique(igraph::V(WhiteKinship)$gender))
+k &lt;- 1 - scale(x, center=min(x), scale=max(x) - min(x))
+set.seed(1234)
+plot( WhiteKinship, layout=igraph::layout.fruchterman.reingold,
+main="Node segregation in White's kinship data",
+vertex.label.family="",
+vertex.label=igraph::V(WhiteKinship)$name,
+vertex.color= gray(k),
+vertex.shape=c("circle", "csquare")[a],
+vertex.label.color="black")
+legend( "topleft", legend=c("Men", "Women"), pch=c(0,1), col=1)
+}
+</code></pre>
+
+
+</div>

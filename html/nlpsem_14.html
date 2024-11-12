@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getLRT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform Bootstrap Likelihood Ratio Test for Comparing Full and Reduced Models</h2>
+
+<h3>Description</h3>
+
+<p>This function performs the likelihood ratio test (LRT) to compare a full model (an intrinsically nonlinear
+longitudinal model) with a corresponding parsimonious alternative (a non-intrinsically nonlinear longitudinal model).
+It also provides an option to perform bootstrapping for the comparison.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getLRT(full, reduced, boot = FALSE, rep = NA)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>full</code></td>
+<td>
+<p>A fitted mxModel object for the full model. Specifically, this should be the <code>mxOutput</code> slot from the result
+returned by one of the estimation functions provided by this package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reduced</code></td>
+<td>
+<p>A fitted mxModel object for the reduced model. Specifically, this should be the <code>mxOutput</code> slot from the
+result returned by one of the estimation functions provided by this package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot</code></td>
+<td>
+<p>A logical flag indicating whether to perform bootstrapping for the comparison. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rep</code></td>
+<td>
+<p>An integer specifying the number of bootstrap replications if <code>boot</code> is <code>TRUE</code>. Default is <code>NA</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame containing the number of free parameters, estimated likelihood (-2ll), degrees of freedom, differences
+in log-likelihood and degrees of freedom, p-values, AIC, and BIC for both the full and reduced models.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Load ECLS-K (2011) data
+data("RMS_dat")
+RMS_dat0 &lt;- RMS_dat
+# Re-baseline the data so that the estimated initial status is for the starting point of the study
+baseT &lt;- RMS_dat0$T1
+RMS_dat0$T1 &lt;- RMS_dat0$T1 - baseT
+RMS_dat0$T2 &lt;- RMS_dat0$T2 - baseT
+RMS_dat0$T3 &lt;- RMS_dat0$T3 - baseT
+RMS_dat0$T4 &lt;- RMS_dat0$T4 - baseT
+RMS_dat0$T5 &lt;- RMS_dat0$T5 - baseT
+RMS_dat0$T6 &lt;- RMS_dat0$T6 - baseT
+RMS_dat0$T7 &lt;- RMS_dat0$T7 - baseT
+RMS_dat0$T8 &lt;- RMS_dat0$T8 - baseT
+RMS_dat0$T9 &lt;- RMS_dat0$T9 - baseT
+
+
+# Fit bilinear spline growth model with random knot (intrinsically nonlinear model)
+BLS_LGCM_f &lt;- getLGCM(dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "bilinear spline",
+                      intrinsic = TRUE, records = 1:9, res_scale = 0.1)
+# Fit bilinear spline growth model with fix knot (non-intrinsically nonlinear model)
+BLS_LGCM_r &lt;- getLGCM(dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "bilinear spline",
+                      intrinsic = FALSE, records = 1:9, res_scale = 0.1)
+# Likelihood ratio test
+getLRT(full = BLS_LGCM_f@mxOutput, reduced = BLS_LGCM_r@mxOutput, boot = FALSE, rep = NA)
+
+
+</code></pre>
+
+
+</div>

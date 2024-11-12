@@ -1,0 +1,271 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_nhdplus</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot NHDPlus</h2>
+
+<h3>Description</h3>
+
+<p>Given a list of outlets, get their basin boundaries and network and return a plot in
+EPSG:3857 Web Mercator Projection.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_nhdplus(
+  outlets = NULL,
+  bbox = NULL,
+  streamorder = NULL,
+  nhdplus_data = NULL,
+  gpkg = NULL,
+  plot_config = NULL,
+  basemap = "Esri.NatGeoWorldMap",
+  zoom = NULL,
+  add = FALSE,
+  actually_plot = TRUE,
+  overwrite = TRUE,
+  flowline_only = NULL,
+  cache_data = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>outlets</code></td>
+<td>
+<p>list of nldi outlets. Other inputs are coerced into nldi outlets, see details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bbox</code></td>
+<td>
+<p>object of class bbox with a defined crs. See examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>streamorder</code></td>
+<td>
+<p>integer only streams of order greater than or equal will be returned</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nhdplus_data</code></td>
+<td>
+<p>geopackage containing source nhdplus data (omit to download)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gpkg</code></td>
+<td>
+<p>path and file with .gpkg ending. If omitted, no file is written.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_config</code></td>
+<td>
+<p>list containing plot configuration, see details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>basemap</code></td>
+<td>
+<p>character indicating which basemap type to use. Chose from:
+get_tiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zoom</code></td>
+<td>
+<p>integer passed on to get_tiles. This value will
+override the default set by the package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>boolean should this plot be added to an already built map.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>actually_plot</code></td>
+<td>
+<p>boolean actually draw the plot? Use to get data subset only.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>passed on the subset_nhdplus.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flowline_only</code></td>
+<td>
+<p>boolean only subset and plot flowlines only, default=FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cache_data</code></td>
+<td>
+<p>character path to rds file where all plot data can be cached.
+If file doesn't exist, it will be created. If set to FALSE, all caching will
+be turned off – this includes basemap tiles.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>plot_nhdplus supports several input specifications. An unexported function "as_outlet"
+is used to convert the outlet formats as described below.
+</p>
+
+<ol>
+<li>
+<p> if outlets is omitted, the bbox input is required and all nhdplus data
+in the bounding box is plotted.
+</p>
+</li>
+<li>
+<p> If outlets is a list of integers, it is assumed to be NHDPlus IDs (comids)
+and all upstream tributaries are plotted.
+</p>
+</li>
+<li>
+<p> if outlets is an integer vector, it is assumed to be all NHDPlus IDs (comids)
+that should be plotted. Allows custom filtering.
+</p>
+</li>
+<li>
+<p> If outlets is a character vector, it is assumed to be NWIS site ids.
+</p>
+</li>
+<li>
+<p> if outlets is a list containing only characters, it is assumed to be a list
+of nldi features and all upstream tributaries are plotted.
+</p>
+</li>
+<li>
+<p> if outlets is a data.frame with point geometry, a point in polygon match
+is performed and upstream with tributaries from the identified catchments is plotted.
+</p>
+</li>
+</ol>
+<p>The <code>plot_config</code> parameter is a list with names "basin", "flowline", "outlets",
+"network_wtbd", and "off_network_wtbd".
+The following shows the defaults that can be altered.
+</p>
+
+<ol>
+<li>
+<p> basin </p>
+<pre>
+    list(lwd = 1, col = NA, border = "black")</pre>
+</li>
+<li>
+<p> flowline </p>
+<pre>
+    list(lwd = 1, col = "blue")</pre>
+</li>
+<li>
+<p> outlets </p>
+<pre>
+   list(default = list(col = "black", border = NA, pch = 19, cex = 1),
+        nwissite = list(col = "grey40", border = NA, pch = 17, cex = 1),
+        huc12pp = list(col = "white", border = "black", pch = 22, cex = 1),
+        wqp = list(col = "red", border = NA, pch = 20, cex = 1))</pre>
+</li>
+<li>
+<p> network_wtbd  <code>list(lwd = 1, col = "lightblue", border = "black")</code>
+</p>
+</li>
+<li>
+<p> off_network_wtbd  <code>list(lwd = 1, col = "darkblue", border = "black")</code>
+</p>
+</li>
+</ol>
+<p>If adding additional layers to the plot, data must be projected to EPSG:3857 with
+'sf::st_transform(x, 3857)' prior to adding to the plot.
+</p>
+
+
+<h3>Value</h3>
+
+<p>data.frame plot data is returned invisibly in NAD83 Lat/Lon.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+options("rgdal_show_exportToProj4_warnings"="none")
+# Beware plot_nhdplus caches data to the default location.
+# If you do not want data in "user space" change the default.
+old_dir &lt;- nhdplusTools::nhdplusTools_data_dir()
+nhdplusTools_data_dir(tempdir())
+
+plot_nhdplus("05428500")
+
+plot_nhdplus("05428500", streamorder = 2)
+
+plot_nhdplus(list(13293970, 13293750))
+
+source(system.file("extdata/sample_data.R", package = "nhdplusTools"))
+
+plot_nhdplus(list(13293970, 13293750), streamorder = 3, nhdplus_data = sample_data)
+
+plot_nhdplus(list(list("comid", "13293970"),
+                  list("nwissite", "USGS-05428500"),
+                  list("huc12pp", "070900020603"),
+                  list("huc12pp", "070900020602")),
+             streamorder = 2,
+             nhdplus_data = sample_data)
+
+
+plot_nhdplus(sf::st_as_sf(data.frame(x = -89.36083,
+                                     y = 43.08944),
+                          coords = c("x", "y"), crs = 4326),
+             streamorder = 2,
+             nhdplus_data = sample_data)
+
+plot_nhdplus(list(list("comid", "13293970"),
+                  list("nwissite", "USGS-05428500"),
+                  list("huc12pp", "070900020603"),
+                  list("huc12pp", "070900020602")),
+             streamorder = 2,
+             nhdplus_data = sample_data,
+             plot_config = list(basin = list(lwd = 2),
+                                outlets = list(huc12pp = list(cex = 1.5),
+                                               comid = list(col = "green"))))
+
+bbox &lt;- sf::st_bbox(c(xmin = -89.43, ymin = 43, xmax = -89.28, ymax = 43.1),
+                    crs = "+proj=longlat +datum=WGS84 +no_defs")
+
+fline &lt;- sf::read_sf(sample_data, "NHDFlowline_Network")
+comids &lt;- nhdplusTools::get_UT(fline, 13293970)
+
+plot_nhdplus(comids)
+
+#' # With Local Data
+plot_nhdplus(bbox = bbox, nhdplus_data = sample_data)
+
+# With downloaded data
+plot_nhdplus(bbox = bbox, streamorder = 3)
+
+# Can also plot on top of the previous!
+plot_nhdplus(bbox = bbox, nhdplus_data = sample_data,
+             plot_config = list(flowline = list(lwd = 0.5)))
+plot_nhdplus(comids, nhdplus_data = sample_data, streamorder = 3, add = TRUE,
+             plot_config = list(flowline = list(col = "darkblue")))
+
+nhdplusTools::nhdplusTools_data_dir(old_dir)
+
+</code></pre>
+
+
+</div>

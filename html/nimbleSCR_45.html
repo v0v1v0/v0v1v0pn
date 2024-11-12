@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dbernppAC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bernoulli point process for the distribution of activity centers</h2>
+
+<h3>Description</h3>
+
+<p>Density and random generation functions of the Bernoulli point process for the distribution of activity centers.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dbernppAC(
+  x,
+  lowerCoords,
+  upperCoords,
+  logIntensities,
+  logSumIntensity,
+  habitatGrid,
+  numGridRows,
+  numGridCols,
+  log = 0
+)
+
+rbernppAC(
+  n,
+  lowerCoords,
+  upperCoords,
+  logIntensities,
+  logSumIntensity,
+  habitatGrid,
+  numGridRows,
+  numGridCols
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector of x- and y-coordinates of a single spatial point (i.e. AC location) scaled to the habitat (see (<code>scaleCoordsToHabitatGrid</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lowerCoords, upperCoords</code></td>
+<td>
+<p>Matrices of lower and upper x- and y-coordinates of all habitat windows scaled to the habitat (see (<code>scaleCoordsToHabitatGrid</code>). One row for each window. 
+Each window should be of size 1x1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logIntensities</code></td>
+<td>
+<p>Vector of log habitat intensities for all habitat windows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logSumIntensity</code></td>
+<td>
+<p>Log of the sum of habitat intensities over all windows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>habitatGrid</code></td>
+<td>
+<p>Matrix of habitat window indices. Cell values should correspond to the order of habitat windows in
+<code>lowerCoords</code>, <code>upperCoords</code>, and <code>logIntensities</code>. 
+When the habitat grid only consists of a single row or column of windows, an additional row or column of dummy indices has to be added because the <code>nimble</code> model code requires a matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numGridRows, numGridCols</code></td>
+<td>
+<p>Numbers of rows and columns of the habitat grid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical argument, specifying whether to return the log-probability of the distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Integer specifying the number of realisations to generate.  Only n = 1 is supported.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>dbernppAC</code> distribution is a NIMBLE custom distribution which can be used to model and simulate
+the activity center location (<em>x</em>) of a single individual in continuous space over a set of habitat windows defined by their upper and lower
+coordinates (<em>lowerCoords,upperCoords</em>). The distribution assumes that the activity center  
+follows a Bernoulli point process with intensity = <em>exp(logIntensities)</em>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>dbernppAC</code> gives the (log) probability density of the observation vector <code>x</code>. 
+<code>rbernppAC</code> gives coordinates of a randomly generated spatial point.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Wei Zhang
+</p>
+
+
+<h3>References</h3>
+
+<p>W. Zhang, J. D. Chipperfield, J. B. Illian, P. Dupont, C. Milleret, P. de Valpine and R. Bischof. 2020. 
+A hierarchical point process model for spatial capture-recapture data. bioRxiv. DOI 10.1101/2020.10.06.325035
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Use the distribution in R
+lowerCoords &lt;- matrix(c(0, 0, 1, 0, 0, 1, 1, 1), nrow = 4, byrow = TRUE)
+upperCoords &lt;- matrix(c(1, 1, 2, 1, 1, 2, 2, 2), nrow = 4, byrow = TRUE)  
+logIntensities &lt;- log(c(1:4))
+logSumIntensity &lt;- log(sum(c(1:4)))  
+habitatGrid &lt;- matrix(c(1:4), nrow = 2, byrow = TRUE)
+numGridRows &lt;- nrow(habitatGrid)
+numGridCols &lt;- ncol(habitatGrid)
+dbernppAC(c(0.5, 1.5), lowerCoords, upperCoords, logIntensities, logSumIntensity, 
+          habitatGrid, numGridRows, numGridCols, log = TRUE)
+</code></pre>
+
+
+</div>

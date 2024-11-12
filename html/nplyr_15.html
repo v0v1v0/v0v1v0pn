@@ -1,0 +1,303 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nest-mutate-joins</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nested Mutating joins</h2>
+
+<h3>Description</h3>
+
+<p>Nested mutating joins add columns from <code>y</code> to each of the nested data frames
+in <code>.nest_data</code>, matching observations based on the keys. There are four
+nested mutating joins:
+</p>
+
+
+<h4>Inner join</h4>
+
+<p><code>nest_inner_join()</code> only keeps observations from <code>.nest_data</code> that have a
+matching key in <code>y</code>.
+</p>
+<p>The most important property of an inner join is that unmatched rows in either
+input are not included in the result.
+</p>
+
+
+
+<h4>Outer joins</h4>
+
+<p>There are three outer joins that keep observations that appear in at least
+one of the data frames:
+</p>
+
+<ul>
+<li> <p><code>nest_left_join()</code> keeps all observations in <code>.nest_data</code>.
+</p>
+</li>
+<li> <p><code>nest_right_join()</code> keeps all observations in <code>y</code>.
+</p>
+</li>
+<li> <p><code>nest_full_join()</code> keeps all observations in <code>.nest_data</code> and <code>y</code>.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">nest_inner_join(
+  .data,
+  .nest_data,
+  y,
+  by = NULL,
+  copy = FALSE,
+  suffix = c(".x", ".y"),
+  ...,
+  keep = FALSE
+)
+
+nest_left_join(
+  .data,
+  .nest_data,
+  y,
+  by = NULL,
+  copy = FALSE,
+  suffix = c(".x", ".y"),
+  ...,
+  keep = FALSE
+)
+
+nest_right_join(
+  .data,
+  .nest_data,
+  y,
+  by = NULL,
+  copy = FALSE,
+  suffix = c(".x", ".y"),
+  ...,
+  keep = FALSE
+)
+
+nest_full_join(
+  .data,
+  .nest_data,
+  y,
+  by = NULL,
+  copy = FALSE,
+  suffix = c(".x", ".y"),
+  ...,
+  keep = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>A data frame, data frame extension (e.g., a tibble), or a lazy
+data frame (e.g., from dbplyr or dtplyr).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.nest_data</code></td>
+<td>
+<p>A list-column containing data frames</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A data frame, data frame extension (e.g., a tibble), or a lazy data
+frame (e.g., from dbplyr or dtplyr).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>A character vector of variables to join by or a join specification
+created with <code>join_by()</code>.
+</p>
+<p>If <code>NULL</code>, the default, <code style="white-space: pre;">⁠nest_*_join()⁠</code> will perform a natural join, using
+all variables in common across each object in <code>.nest_data</code> and <code>y</code>. A
+message lists the variables so you can check they're correct; suppress the
+message by supplying <code>by</code> explicitly.
+</p>
+<p>To join on different variables between the objects in <code>.nest_data</code> and <code>y</code>,
+use a named vector. For example, <code>by = c("a" = "b")</code> will match
+<code>.nest_data$a</code> to <code>y$b</code> for each object in <code>.nest_data</code>.
+</p>
+<p>To join by multiple variables, use a vector with length &gt;1. For example,
+<code>by = c("a", "b")</code> will match <code>.nest_data$a</code> to <code>y$a</code> and <code>.nest_data$b</code> to
+<code>y$b</code> for each object in <code>.nest_data</code>. Use a named vector to match
+different variables in <code>.nest_data</code> and <code>y</code>. For example,
+<code>by = c("a" = "b", "c" = "d")</code> will match <code>.nest_data$a</code> to <code>y$b</code> and
+<code>.nest_data$c</code> to <code>y$d</code> for each object in <code>.nest_data</code>.
+</p>
+<p>To perform a cross-join, generating all combinations of each object in
+<code>.nest_data</code> and <code>y</code>, use <code>by = character()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>copy</code></td>
+<td>
+<p>If <code>.nest_data</code> and <code>y</code> are not from the same data source and
+<code>copy = TRUE</code> then <code>y</code> will be copied into the same src as <code>.nest_data</code>.
+<em>(Need to review this parameter in more detail for applicability with nplyr)</em></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffix</code></td>
+<td>
+<p>If there are non-joined duplicate variables in <code>.nest_data</code> and
+<code>y</code>, these suffixes will be added to the output to disambiguate them.
+Should be a character vector of length 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other parameters passed onto methods. Includes:
+</p>
+
+<ul>
+<li> <p><code>na_matches</code> : Should two <code>NA</code> or two <code>NaN</code> values match?
+</p>
+
+<ul>
+<li> <p><code>"na"</code>, the default, treats two <code>NA</code> or two <code>NaN</code> values as equal.
+</p>
+</li>
+<li> <p><code>"never"</code> treats two <code>NA</code> or two <code>NaN</code> values as different, and will
+never match them together or to any other values.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>multiple</code> : Handling of rows in <code>.nest_data</code> with multiple matches in <code>y</code>.
+</p>
+
+<ul>
+<li> <p><code>"all"</code> returns every match detected in <code>y</code>.
+</p>
+</li>
+<li> <p><code>"any"</code> returns one match detected in <code>y</code>, with no guarantees on which
+match will be returned. It is often faster than <code>"first"</code> and <code>"last"</code> if
+you just need to detect if there is at least one match.
+</p>
+</li>
+<li> <p><code>"first"</code> returns the first match detected in <code>y</code>.
+</p>
+</li>
+<li> <p><code>"last"</code> returns the last match detected in <code>y</code>.
+</p>
+</li>
+<li> <p><code>"warning"</code> throws a warning if multiple matches are detected, and then
+falls back to <code>"all"</code>.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if multiple matches are detected.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>unmatched</code> : How should unmatched keys that would result in dropped rows
+be handled?
+</p>
+
+<ul>
+<li> <p><code>"drop"</code> drops unmatched keys from the result.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if unmatched keys are detected.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep</code></td>
+<td>
+<p>Should the join keys from both <code>.nest_data</code> and <code>y</code> be preserved
+in the output?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>nest_inner_join()</code>, <code>nest_left_join()</code>, <code>nest_right_join()</code>, and
+<code>nest_full_join()</code> are largely wrappers for <code>dplyr::inner_join()</code>,
+<code>dplyr::left_join()</code>, <code>dplyr::right_join()</code>, and <code>dplyr::full_join()</code> and
+maintain the functionality of these verbs within each nested data frame. For
+more information on <code>inner_join()</code>, <code>left_join()</code>, <code>right_join()</code>, or
+<code>full_join()</code>, please refer to the documentation in
+<a href="https://dplyr.tidyverse.org/"><code>dplyr</code></a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of the same type as <code>.data</code>. Each object in the column <code>.nest_data</code>
+will also be of the same type as the input. The order of the rows and columns
+of each object in <code>.nest_data</code> is preserved as much as possible. Each object
+in <code>.nest_data</code> has the following properties:
+</p>
+
+<ul>
+<li>
+<p> For <code>nest_inner_join()</code>, a subset of rows in each object in <code>.nest_data</code>.
+For <code>nest_left_join()</code>, all rows in each object in <code>.nest_data</code>.
+For <code>nest_right_join()</code>, a subset of rows in each object in <code>.nest_data</code>,
+followed by unmatched <code>y</code> rows.
+For <code>nest_full_join()</code>, all rows in each object in <code>.nest_data</code>, followed
+by unmatched <code>y</code> rows.
+</p>
+</li>
+<li>
+<p> Output columns include all columns from each <code>.nest_data</code> and all non-key
+columns from <code>y</code>. If <code>keep = TRUE</code>, the key columns from <code>y</code> are included
+as well.
+</p>
+</li>
+<li>
+<p> If non-key columns in any object in <code>.nest_data</code> and <code>y</code> have the same name,
+<code>suffix</code>es are added to disambiguate. If <code>keep = TRUE</code> and key columns in
+<code>.nest_data</code> and <code>y</code> have the same name, <code>suffix</code>es are added to
+disambiguate these as well.
+</p>
+</li>
+<li>
+<p> If <code>keep = FALSE</code>, output columns included in <code>by</code> are coerced to their
+common type between the objects in <code>.nest_data</code> and <code>y</code>.
+</p>
+</li>
+<li>
+<p> Groups are taken from <code>.nest_data</code>.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Other joins: 
+<code>nest-filter-joins</code>,
+<code>nest_nest_join()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">gm_nest &lt;- gapminder::gapminder %&gt;% tidyr::nest(country_data = -continent)
+gm_codes &lt;- gapminder::country_codes
+
+gm_nest %&gt;% nest_inner_join(country_data, gm_codes, by = "country")
+gm_nest %&gt;% nest_left_join(country_data, gm_codes, by = "country")
+gm_nest %&gt;% nest_right_join(country_data, gm_codes, by = "country")
+gm_nest %&gt;% nest_full_join(country_data, gm_codes, by = "country")
+
+</code></pre>
+
+
+</div>

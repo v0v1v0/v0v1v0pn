@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>correlog</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Uni- and multivariate spatial correlograms</h2>
+
+<h3>Description</h3>
+
+<p><code>correlog</code> is the function to estimate spatial (cross-)correlograms. Either univariate or multivariate (time seres) for each site can be used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">correlog(
+  x,
+  y,
+  z,
+  w = NULL,
+  increment,
+  resamp = 999,
+  latlon = FALSE,
+  na.rm = FALSE,
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of length n representing the x coordinates (or longitude; see latlon).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>vector of length n representing the y coordinates (or latitude).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>vector of length n or matrix of dimension n x p representing p observation at each location.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>an optional second variable with identical dimension to z (to estimate cross-correlograms).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>increment</code></td>
+<td>
+<p>increment for the uniformly distributed distance classes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resamp</code></td>
+<td>
+<p>the number of permutations under the null to assess level of significance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latlon</code></td>
+<td>
+<p>If TRUE, coordinates are latitude and longitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>If TRUE, NA's will be dealt with through pairwise deletion of missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>If TRUE, the counter is suppressed during execution.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The spatial (cross-)correlogram and Mantel (cross-)correlogram estimates the spatial dependence at discrete distance classes. 
+</p>
+<p>The region-wide similarity forms the reference line (the zero-line); the x-intercept is thus the distance at which object are no more similar than that expected by-chance-alone across the region.
+</p>
+<p>If the data are univariate, the spatial dependence is measured by Moran's <em>I</em>. If it is multivariate, it is measured by the <em>centred</em> Mantel statistic. (Use <code>correlog.nc</code> if the non-centered multivariate correlogram is desired).
+</p>
+<p>Missing values are allowed – values are assumed missing at random.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "correlog" is returned, consisting of the following components: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>correlation</code></td>
+<td>
+<p>the value for the Moran (or Mantel) similarity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.of.class</code></td>
+<td>
+<p>the actual average of the distances within each distance class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlok</code></td>
+<td>
+<p>the number of pairs within each distance class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.intercept</code></td>
+<td>
+<p>the interpolate x.intercept of Epperson (1993).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>the permutation two-sided p-value for each distance-class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corr0</code></td>
+<td>
+<p>If a cross-correlogram is calculated, corr0 gives the empirical cross-correlation at distance zero.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ottar N. Bjornstad <a href="mailto:onb1@psu.edu">onb1@psu.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bjornstad, O.N., Ims, R.A. &amp; Lambin, X. (1999) Spatial population dynamics: Analysing patterns and processes of population synchrony. Trends in Ecology and Evolution, 11, 427-431. &lt;doi:10.1016/S0169-5347(99)01677-8&gt;
+</p>
+<p>Bjornstad, O.N. &amp; Falck, W. (2001) Nonparametric spatial covariance functions: estimation and testing. Environmental and Ecological Statistics, 8:53-70. &lt;doi:10.1023/A:1009601932481&gt;
+</p>
+<p>Epperson, B.K. (1993) Recent advances in correlation studies of spatial patterns of genetic variation. Evolutionary Biology, 27, 95-155. &lt;doi:10.1007/978-1-4615-2878-4_4&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.correlog</code>, <code>spline.correlog</code>, <code>correlog.nc</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># first generate some sample data
+x &lt;- expand.grid(1:20, 1:5)[, 1]
+y &lt;- expand.grid(1:20, 1:5)[, 2]
+
+# z data from an exponential random field
+z &lt;- cbind(
+  rmvn.spa(x = x, y = y, p = 2, method = "exp"), 
+  rmvn.spa(x = x, y = y, p = 2, method = "exp")
+  )
+
+# w data from a gaussian random field
+w &lt;- cbind(
+  rmvn.spa(x = x, y = y, p = 2, method = "gaus"), 
+  rmvn.spa(x = x, y = y, p = 2, method = "gaus")
+  )
+
+# Spatial correlogram 
+fit1 &lt;- correlog(x = x, y = y, z = z[, 1], increment = 2, resamp = 0) 
+## Not run: plot(fit1)
+
+# Mantel correlogram 
+fit2 &lt;- correlog(x = x, y = y, z = z, increment = 2, resamp = 0) 
+## Not run: plot(fit2)
+
+# Mantel cross-correlogram 
+fit3 &lt;- correlog(x = x, y = y, z = z, w = w, increment = 2, resamp = 0) 
+## Not run: plot(fit3)
+</code></pre>
+
+
+</div>

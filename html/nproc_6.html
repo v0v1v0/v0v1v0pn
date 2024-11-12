@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.npc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predicting the outcome of a set of new observations using the fitted npc
+object.</h2>
+
+<h3>Description</h3>
+
+<p>Predicting the outcome of a set of new observations using the fitted npc
+object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'npc'
+predict(object, newx = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>fitted npc object using <code>npc</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newx</code></td>
+<td>
+<p>a set of new observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing the predicted label and score.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pred.label</code></td>
+<td>
+<p>Predicted label vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred.score</code></td>
+<td>
+<p>Predicted score vector.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>npc</code> and <code>nproc</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n = 1000
+x = matrix(rnorm(n*2),n,2)
+c = 1+3*x[,1]
+y = rbinom(n,1,1/(1+exp(-c)))
+xtest = matrix(rnorm(n*2),n,2)
+ctest = 1+3*xtest[,1]
+ytest = rbinom(n,1,1/(1+exp(-ctest)))
+
+
+## Not run: 
+##Use logistic classifier and the default type I error control with alpha=0.05
+fit = npc(x, y, method = 'logistic')
+pred = predict(fit,xtest)
+fit.score = predict(fit,x)
+accuracy = mean(pred$pred.label==ytest)
+cat('Overall Accuracy: ',  accuracy,'\n')
+ind0 = which(ytest==0)
+ind1 = which(ytest==1)
+typeI = mean(pred$pred.label[ind0]!=ytest[ind0]) #type I error on test set
+cat('Type I error: ', typeI, '\n')
+typeII = mean(pred$pred.label[ind1]!=ytest[ind1]) #type II error on test set
+cat('Type II error: ', typeII, '\n')
+
+## End(Not run)
+</code></pre>
+
+
+</div>

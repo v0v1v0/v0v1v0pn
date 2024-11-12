@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nst.boot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bootstrapping test for ST and NST
+</h2>
+
+<h3>Description</h3>
+
+<p>To test the distribution of ST and NST in each group, and the significance of ST and NST difference between each pair of groups.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nst.boot(nst.result, group=NULL, rand=999, trace=TRUE,
+         two.tail=FALSE, out.detail=FALSE, between.group=FALSE,
+         nworker=1, SES=FALSE, RC=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nst.result</code></td>
+<td>
+<p>list object, the output of tNST, must have "details", thus the output.rand must be TRUE in tNST function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>n x 1 matrix, if the grouping is different from the nst.result. default is NULL, means to use the grouping in nst.result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rand</code></td>
+<td>
+<p>integer, random draw times for bootstrapping test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>logic, whether to show message when randomizing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>two.tail</code></td>
+<td>
+<p>logic, the p value is two-tail or one-tail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.detail</code></td>
+<td>
+<p>logic, whether to output details rather than just summarized results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>between.group</code></td>
+<td>
+<p>Logic, whether to calculate for between-group turnovers. default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nworker</code></td>
+<td>
+<p>for parallel computing. Either a character vector of host names on which to run the worker copies of R, or a positive integer (in which case that number of copies is run on localhost). default is 1, means not to use parallel computing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SES</code></td>
+<td>
+<p>Logic, whether to perform bootstrapping test for standardized effect size (SES). SES is (observed dissimilarity - mean of null dissimilarity)/standard deviation of null dissimilarity. default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RC</code></td>
+<td>
+<p>Logic, whether to perform bootstrapping test for modified Raup-Crick metric (RC). RC is percentage of null dissimilarity lower than observed dissimilarity x 2 - 1. default is FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Normalized stochasticity ratio (NST, Ning et al 2019) is a index to estimate average stochasticity within a group of samples. Bootstrapping is an excellent method to evaluate the statistical variation. Since the observed/null dissimilarity values are not independent (pairwise comparisons), bootstrapping should be random draw of samples rather than the pairwise values. Bootstrapping for stochasticity ratio (ST, Zhou et al 2014) or SES or RC can also be performed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Output is a list object, includes
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>summary</code></td>
+<td>
+<p>Index, based on ST, NST, or MST; Group, group/treatment; obs, the index value of observed samples; mean, mean value of bootstrapping results; stdev, standard deviation; Min, minimal value; Quantile25, quantile of 25 percent; Median, median value; Quantile75, 75 percent quantile; Max, maximum value; LowerWhisker, LowerHinge, Median, HigherHinge, HigherWhisker, values for box-and-whisker plot; Outliers, outliers in bootstrapping values which out of the range of 1.5 fold of IQR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compare</code></td>
+<td>
+<p>Comparison between each pair of groups, and p values. p.wtest, p value from wilcox.test; w.value, w value from wilcom.test; p.count, p value calculated by directly comparing all values in two groups; ..noOut, means outliers were not included for significance test. In principle, p.count or p.count.noOutis preferred, and others have defects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detail</code></td>
+<td>
+<p>a list object. ST.boot, a list of bootstrapping detail results of ST for each group, each element in the list means the result of one random draw; NST.boot and MST.boot, bootstrapping results of NST and MST; ST.boot.rmout, bootstrapping results of ST without outliers; NST.boot.rmout and MST.boot.rmout, bootstrapping results of NST and MST without outliers; STb.boot, NSTb.boot, MSTb.boot, STb.boot.rmout, NSTb.boot.rmout, and MSTb.boot.rmout have the same meanning but for between-group comparisons.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Version 6: 2021.10.29, add bootstrapping test for SES and RC.
+Version 5: 2021.8.25, revised to avoid error for special cases in MST calculation.
+Version 4: 2020.9.19, Add MST results into output.
+Version 3: 2019.10.8, Update reference.
+Version 2: 2019.5.10
+Version 1: 2018.1.9
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Ning D., Deng Y., Tiedje J.M. &amp; Zhou J. (2019) A general framework for quantitatively assessing ecological stochasticity. Proceedings of the National Academy of Sciences 116, 16892-16898. doi:10.1073/pnas.1904623116. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>tNST</code>, <code>nst.panova</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(tda)
+comm=tda$comm
+group=tda$group
+tnst=tNST(comm=comm, group=group, rand=20,
+          output.rand=TRUE, nworker=1)
+# rand is usually set as 1000, here set rand=20 to save test time.
+
+nst.bt=nst.boot(nst.result=tnst, group=NULL, rand=99,
+                trace=TRUE, two.tail=FALSE, out.detail=FALSE,
+                between.group=FALSE, nworker=1)
+# rand is usually set as 999, here set rand=99 to save test time.
+
+</code></pre>
+
+
+</div>

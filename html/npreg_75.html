@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model.matrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Construct Design Matrix for Fit Model
+</h2>
+
+<h3>Description</h3>
+
+<p><code>model.matrix</code> returns the design (or model) matrix used by the input <code>object</code> to produce the fitted values (for objects of class <code>ss</code> or <code>sm</code>) or the linear predictors (for objects of class <code>gsm</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ss'
+model.matrix(object, ...)
+
+## S3 method for class 'sm'
+model.matrix(object, ...)
+
+## S3 method for class 'gsm'
+model.matrix(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class <code>ss</code>, <code>sm</code>, or <code>gsm</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments (currently ignored)  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For <code>ss</code> objects, the <code>basis.poly</code> function is used to construct the design matrix. 
+</p>
+<p>For <code>sm</code> objects, the <code>predict.sm</code> function with option <code>design = TRUE</code> is used to construct the design matrix. 
+</p>
+<p>For <code>gsm</code> objects, the <code>predict.gsm</code> function with option <code>design = TRUE</code> is used to construct the design matrix.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The design matrix that is post-multiplied by the coefficients to produce the fitted values (or linear predictors).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Chambers, J. M. (1992) Data for models. Chapter 3 of <em>Statistical Models in S</em> eds J. M. Chambers and T. J. Hastie, Wadsworth &amp; Brooks/Cole.
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), SAGE Research Methods Foundations. <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>basis.poly</code> for the smoothing spline basis
+</p>
+<p><code>predict.sm</code> for predicting from smooth models
+</p>
+<p><code>predict.gsm</code> for predicting from generalized smooth models
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+fx &lt;- 2 + 3 * x + sin(2 * pi * x)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# smoothing spline
+mod.ss &lt;- ss(x, y, nknots = 10)
+X.ss &lt;- model.matrix(mod.ss)
+mean((mod.ss$y - X.ss %*% mod.ss$fit$coef)^2)
+
+
+# smooth model
+mod.sm &lt;- sm(y ~ x, knots = 10)
+X.sm &lt;- model.matrix(mod.sm)
+mean((mod.sm$fitted.values - X.sm %*% mod.sm$coefficients)^2)
+
+# generalized smooth model (family = gaussian)
+mod.gsm &lt;- gsm(y ~ x, knots = 10)
+X.gsm &lt;- model.matrix(mod.gsm)
+mean((mod.gsm$linear.predictors - X.gsm %*% mod.gsm$coefficients)^2)
+
+</code></pre>
+
+
+</div>

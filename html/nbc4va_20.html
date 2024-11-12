@@ -1,0 +1,286 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summary.nbc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarize a NBC model with metrics</h2>
+
+<h3>Description</h3>
+
+<p>Summarizes the results from a <code>nbc</code> object. The summary
+can be either for a particular case or for the entirety of cases.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nbc'
+summary(object, top = 5, id = NULL, csmfa.obs = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>The result <code>nbc</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>top</code></td>
+<td>
+<p>A number that produces top causes depending on <em>id</em>:
+</p>
+
+<ul>
+<li>
+<p> If (<em>id</em> is char): provide the <em>top</em> causes of the case by probability
+</p>
+</li>
+<li>
+<p> If (<em>id</em> is NULL): provide the <em>top</em> causes by predicted Cause Specific Mortality Fractions (CSMF)
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>A character representing a case id in the test data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>csmfa.obs</code></td>
+<td>
+<p>A character vector of the true causes for calculating the CSMF accuracy.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed if applicable</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See <a href="https://rrwen.github.io/nbc4va/methods">Methods documentation</a> for details on calculations and metrics.
+</p>
+
+
+<h3>Value</h3>
+
+<p>out A summary object built from a <code>nbc</code> object with modifications/additions:
+</p>
+
+<ul>
+<li>
+<p> If (<em>id</em> is char):
+</p>
+
+<ul>
+<li>
+<p> Additions to a <code>nbc</code> object:
+</p>
+
+<ul>
+<li>
+<p> $id (char): the case <em>id</em> chosen by the user
+</p>
+</li>
+<li>
+<p> $top (numeric): the input number of <em>top</em> causes for <em>id</em>
+</p>
+</li>
+<li>
+<p> $top.prob (vectorof double): the <em>top</em> probabilities for <em>id</em>
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> The following are modified from a nbc object to be <em>id</em> specific:<br> $test, $test.ids, $test.causes, $obs.causes, $prob, $prob.causes, $pred, $pred.causes
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> If (<em>id</em> is NULL):
+</p>
+
+<ul><li>
+<p> Additions to the <code>nbc</code> object:
+</p>
+
+<ul>
+<li>
+<p> * indicates that the item is only available if <em>test</em> causes are known
+</p>
+</li>
+<li>
+<p> ** indicates that the item ignores * if <em>csmfa.obs</em> is given
+</p>
+</li>
+<li>
+<p> $top.csmf.pred (vectorof double): the <em>top</em> predicted CSMFs by cause
+</p>
+</li>
+<li>
+<p> $top.csmf.obs* (vectorof double): the <em>top</em> observed CSMFs by cause
+</p>
+</li>
+<li>
+<p> $metrics.all** (vectorof double): a numeric vector of overall metrics.
+</p>
+
+<ul>
+<li>
+<p> Names: TruePositives, TrueNegatives, FalsePositives, FalseNegatives, Accuracy, Sensitivity, PCCC, CSMFMaxError, CSMFaccuracy
+</p>
+</li>
+<li>
+<p> TruePositives* (double): total number of true positives
+</p>
+</li>
+<li>
+<p> TrueNegatives* (double): total number of true negatives
+</p>
+</li>
+<li>
+<p> FalsePositives* (double): total number of false positives
+</p>
+</li>
+<li>
+<p> FalseNegatives* (double): total number of false negatives
+</p>
+</li>
+<li>
+<p> Sensitivity* (double): the overall sensitivity
+</p>
+</li>
+<li>
+<p> PCCC* (double): the partial chance corrected concordance
+</p>
+</li>
+<li>
+<p> CSMFMaxError** (double): the maximum Cause Specific Mortality Fraction Error
+</p>
+</li>
+<li>
+<p> CSMFaccuracy** (double): the Cause Specific Mortaliy Fraction accuracy
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> $metrics.causes (dataframe): a perfomance table of metrics by cause.
+</p>
+
+<ul>
+<li>
+<p> Columns: Cause, Sensitivity, CSMFpredicted, CSMFobserved
+</p>
+</li>
+<li>
+<p> Cause (vectorof char): The unique causes from both the <em>obs</em> and <em>pred</em> inputs
+</p>
+</li>
+<li>
+<p> Sensitivity* (vectorof double): the sensitivity for a cause
+</p>
+</li>
+<li>
+<p> CSMFpredicted (vectorof double): the cause specific mortality fraction for a cause given the predicted deaths
+</p>
+</li>
+<li>
+<p> CSMFobserved* (vectorof double): the cause specific mortality fraction for a cause given the observed deaths
+</p>
+</li>
+<li>
+<p> TruePositives (vectorof double): The total number of true positives per cause
+</p>
+</li>
+<li>
+<p> TrueNegatives (vectorof double): The total number of true negatives per cause
+</p>
+</li>
+<li>
+<p> FalsePositives (vectorof double): The total number of false positives per cause
+</p>
+</li>
+<li>
+<p> FalseNegatives (vectorof double): The total number of false negatives per cause
+</p>
+</li>
+<li>
+<p> PredictedFrequency (vectorof double): The occurence of a cause in the <em>pred</em> input
+</p>
+</li>
+<li>
+<p> ObservedFrequency (vectorof double): The occurence of a cause in the <em>obs</em> input
+</p>
+</li>
+<li>
+<p> Example:
+</p>
+
+<table>
+<tr>
+<td style="text-align: center;">
+              Cause </td>
+<td style="text-align: center;"> Sensitivity </td>
+<td style="text-align: center;"> Metric-n.. </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+              HIV </td>
+<td style="text-align: center;"> 0.5 </td>
+<td style="text-align: center;"> #.. </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+              Stroke </td>
+<td style="text-align: center;"> 0.5 </td>
+<td style="text-align: center;"> #..
+            </td>
+</tr>
+</table>
+</li>
+</ul>
+</li>
+</ul>
+</li></ul>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Other main functions: 
+<code>nbc()</code>,
+<code>plot.nbc()</code>,
+<code>print.nbc_summary()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nbc4va)
+data(nbc4vaData)
+
+# Run naive bayes classifier on random train and test data
+train &lt;- nbc4vaData[1:50, ]
+test &lt;- nbc4vaData[51:100, ]
+results &lt;- nbc(train, test)
+
+# Obtain a summary for the results
+brief &lt;- summary(results, top=2)  # top 2 causes by CSMF for all test data
+briefID &lt;- summary(results, id="v48")  # top 5 causes by probability for case "v48"
+
+</code></pre>
+
+
+</div>

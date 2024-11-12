@@ -1,0 +1,216 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>aggr_neat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Aggregation, descriptives</h2>
+
+<h3>Description</h3>
+
+<p>Returns aggregated values per group for given variable. Serves
+as argument in the <code>table_neat</code> function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">aggr_neat(
+  dat,
+  values,
+  method = mean,
+  group_by = NULL,
+  filt = NULL,
+  sep = "_",
+  prefix = NULL,
+  new_name = NULL,
+  round_to = 2
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>A data frame (or a <code>data.table</code>, or the name of either
+as string).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>values</code></td>
+<td>
+<p>The vector of numbers from which the statistics are to be
+calculated, or the name of the column in the <code>dat</code> data frame, that
+contains the vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Function of string. If function, uses the <code>values</code> to
+calculate the returned value for the given function (e.g. means, as per
+default, using the <code>mean</code> function). Such a function may return a
+vector of results as well; see Examples. If string, one of two internal
+functions will be used. If the string end with <code>"+sd"</code>, e.g.,
+<code>"mean+sd"</code>, the function preceding the <code>"+"</code> sign will be
+calculated along with the standard deviation, displayed in a single column,
+rounded as set in the <code>round_to</code> argument. (This is primarily for use
+in the <code>table_neat</code> function for summary tables.) If the string
+does not end with <code>"+sd"</code>, a ratio for the occurrences of given
+elements will be calculated. Multiple elements can by given as a vector of
+strings. The number of occurrences of these elements will be the numerator
+(dividend), while the entire column length (i.e., number of all elements)
+will be the denominator (divisor). For example, if a column contains
+elements <code>"correct"</code>, <code>"incorrect"</code>, <code>"tooslow"</code>, the ratio
+of <code>"correct"</code> to all other elements (i.e., including elements
+<code>"correct"</code>, <code>"incorrect"</code>, and <code>"tooslow"</code>) can be written
+simply as <code>method = "correct"</code>. The complementary ratio, of
+<code>"incorrect"</code> and <code>"tooslow"</code>, can be written as <code>method =
+"incorrect, tooslow"</code>. (Hint: filter to get ratios of subgroups, e.g. to
+include only <code>"correct"</code> and <code>"incorrect"</code> elements, and
+calculate their ratio; see below.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_by</code></td>
+<td>
+<p>String, or vector of strings: the name(s) of the column(s) in
+the <code>dat</code> data frame, containing the vector(s) of factors by which the
+statistics are grouped.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filt</code></td>
+<td>
+<p>An expression to filter, by column values, the entire <code>dat</code>
+data frame before performing the aggregation. The expression should use
+column names alone; see Examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>String (underscore <code>"_"</code> by default) for separating group
+names (and prefix, if given).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prefix</code></td>
+<td>
+<p><code>NULL</code> (default) or string. String specifies a prefix for
+each group type under the <code>group</code> column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new_name</code></td>
+<td>
+<p><code>NULL</code> (default) or string. String specifies new name
+for the variable to be used as column title. If <code>NULL</code>, the name will
+be <code>"aggr_value"</code> (or, if used with <code>table_neat</code>, the
+input variable name is used).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round_to</code></td>
+<td>
+<p>Number of digits after the decimal point to round to, when
+using <code>"+sd"</code> in <code>method</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>data.table</code> with the statistics per group, with a
+single column (<code>"aggr_group"</code>) indicating the grouping.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>table_neat</code> to create full tables using multiple
+variables
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("mtcars") # load base R example dataset
+
+# overall means and SDs for wt (Weight)
+aggr_neat(mtcars, wt)
+
+# rename column
+aggr_neat(mtcars, wt, new_name = 'weight')
+
+# grouped by cyl (Number of cylinders)
+aggr_neat(mtcars, wt, group_by = 'cyl')
+
+# grouped by cyl and gear
+aggr_neat(mtcars, wt, group_by = c('cyl', 'gear'))
+
+# prefix for group names
+aggr_neat(mtcars, wt, group_by = 'cyl', prefix = 'cyl')
+
+# filter to only have cyl larger than  4
+aggr_neat(mtcars, wt, group_by = 'cyl', filt = cyl &gt; 4)
+
+# filter to only have hp (Gross horsepower) smaller than  200
+aggr_neat(mtcars, wt, group_by = 'cyl', filt = hp &lt; 200)
+
+# combine two filters above, and add prefix
+aggr_neat(
+    mtcars,
+    wt,
+    group_by = 'cyl',
+    filt = (hp &lt; 200 &amp; cyl &gt; 4),
+    prefix = 'filtered'
+)
+
+# add SD (and round output numbers to 2)
+aggr_neat(mtcars,
+          wt,
+          group_by = 'cyl',
+          method = 'mean+sd',
+          round_to = 2)
+
+# now medians instead of means
+aggr_neat(mtcars, wt, group_by = 'cyl', method = median)
+
+# with SD
+aggr_neat(mtcars,
+          wt,
+          group_by = 'cyl',
+          method = 'median+sd',
+          round_to = 1)
+
+# overall ratio of gear 4 (Number of gears)
+aggr_neat(mtcars, gear, method = '4')
+
+# overall ratio of gear 4 and 5
+aggr_neat(mtcars, gear, method = '4, 5')
+
+# same ratio calculated per each cyl
+aggr_neat(mtcars, gear, group_by = 'cyl', method = '4, 5')
+
+# per each cyl and per vs (engine type)
+aggr_neat(mtcars,
+          gear,
+          group_by = c('cyl', 'vs'),
+          method = '4, 5')
+
+# ratio of gear 3 per gear 3 and 5
+aggr_neat(
+    mtcars,
+    gear,
+    group_by = 'cyl',
+    method = '3',
+    filt = gear %in% c(3, 5)
+)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>missMDA_FMAD_MCA_PCA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform imputation using MCA, PCA, or FMAD algorithm.</h2>
+
+<h3>Description</h3>
+
+<p>Function use missMDA package to perform data imputation. Function can found the best number of dimensions for this imputation.
+User can choose whether to return one imputed dataset or list or imputed datasets form Multiple Imputation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">missMDA_FMAD_MCA_PCA(
+  df,
+  col_type = NULL,
+  percent_of_missing = NULL,
+  optimize_ncp = TRUE,
+  set_ncp = 2,
+  col_0_1 = FALSE,
+  ncp.max = 5,
+  return_one = TRUE,
+  random.seed = 123,
+  maxiter = 998,
+  coeff.ridge = 1,
+  threshold = 1e-06,
+  method = "Regularized",
+  out_file = NULL,
+  return_ncp = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data.frame. Df to impute with column names and without target column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_type</code></td>
+<td>
+<p>character vector. Vector containing column type names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percent_of_missing</code></td>
+<td>
+<p>numeric vector. Vector contatining percent of missing data in columns for example  c(0,1,0,0,11.3,..)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optimize_ncp</code></td>
+<td>
+<p>logical. If true number of dimensions used to predict the missing entries will be optimized. If False by default ncp = 2 it's used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>set_ncp</code></td>
+<td>
+<p>intiger &gt;0. Number of dimensions used by algortims. Used only if optimize_ncp = Flase.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_0_1</code></td>
+<td>
+<p>Decaid if add bonus column informing where imputation been done. 0 - value was in dataset, 1 - value was imputed. Default False. (Works only for returning one dataset).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncp.max</code></td>
+<td>
+<p>integer corresponding to the maximum number of components to test. Default 5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_one</code></td>
+<td>
+<p>One or many imputed sets will be returned. Default True.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+<p>integer, by default random.seed = NULL implies that missing values are initially imputed by the mean of each variable. Other values leads to a random initialization</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>maximal number of iteration in algortihm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coeff.ridge</code></td>
+<td>
+<p>Value use in Regularized method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>threshold for convergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>method used in imputation algoritm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out_file</code></td>
+<td>
+<p>Output log file location if file already exists log message will be added. If NULL no log will be produced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_ncp</code></td>
+<td>
+<p>Function should return used ncp value</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function use different algorithm to adjust for variable types in df. For only numeric data PCA will be used. MCA for only categorical and FMAD for mixed. If optimize==TRUE function will try to find optimal ncp if its not possible default ncp=2 will be used. In some cases ncp=1 will be used if ncp=2 don't work. For multiple imputations, if set ncp don't work error will be return.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Retrun one imputed data.frame if retrun_one=True or list of imputed data.frames if retrun_one=False.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Julie Josse, Francois Husson (2016)   <a href="https://doi.org/10.18637/jss.v070.i01">doi:10.18637/jss.v070.i01</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Julie Josse, Francois Husson (2016). missMDA: A Package for Handling Missing Values in Multivariate Data Analysis. Journal of Statistical Software, 70(1), 1-31. doi:10.18637/jss.v070.i01
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">{
+  raw_data &lt;- data.frame(
+    a = as.factor(sample(c("red", "yellow", "blue", NA), 1000, replace = TRUE)),
+    b = as.integer(1:1000),
+    c = as.factor(sample(c("YES", "NO", NA), 1000, replace = TRUE)),
+    d = runif(1000, 1, 10),
+    e = as.factor(sample(c("YES", "NO"), 1000, replace = TRUE)),
+    f = as.factor(sample(c("male", "female", "trans", "other", NA), 1000, replace = TRUE)))
+
+  # Prepering col_type
+  col_type &lt;- c("factor", "integer", "factor", "numeric", "factor", "factor")
+
+  percent_of_missing &lt;- 1:6
+  for (i in percent_of_missing) {
+    percent_of_missing[i] &lt;- 100 * (sum(is.na(raw_data[, i])) / nrow(raw_data))
+  }
+
+
+  imp_data &lt;- missMDA_FMAD_MCA_PCA(raw_data, col_type, percent_of_missing, optimize_ncp = FALSE)
+  # Check if all missing value was imputed
+  sum(is.na(imp_data)) == 0
+  # TRUE
+}
+</code></pre>
+
+
+</div>

@@ -1,0 +1,283 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>f_denom</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Abbreviate Numbers</h2>
+
+<h3>Description</h3>
+
+<p>Use the denomination abbreviations K (thousands), M (millions), and
+B (billions) with abbreviated numbers.<br><code>f_denom</code> - Auto-detect the
+maximum denomination and attempt to use it (if max(x) is &lt; 1K then x is
+returned).
+</p>
+<p><code>f_trills</code> - Force the abbreviation to the trillions
+denomination (B).
+</p>
+<p><code>f_bills</code> - Force the abbreviation to the billions
+denomination (B).
+</p>
+<p><code>f_mills</code> - Force the abbreviation to the millions
+denomination (B).
+</p>
+<p><code>f_thous</code> - Force the abbreviation to the thousands
+denomination (B).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">f_denom(
+  x,
+  relative = 0,
+  prefix = "",
+  pad.char = ifelse(prefix == "", NA, " "),
+  less.than.replace = FALSE,
+  mix.denom = FALSE,
+  ...
+)
+
+ff_denom(...)
+
+f_trills(
+  x,
+  relative = 0,
+  digits = -12,
+  prefix = "",
+  pad.char = ifelse(prefix == "", NA, " "),
+  less.than.replace = FALSE,
+  ...
+)
+
+ff_trills(...)
+
+f_bills(
+  x,
+  relative = 0,
+  digits = -9,
+  prefix = "",
+  pad.char = ifelse(prefix == "", NA, " "),
+  less.than.replace = FALSE,
+  ...
+)
+
+ff_bills(...)
+
+f_mills(
+  x,
+  relative = 0,
+  digits = -6,
+  prefix = "",
+  pad.char = ifelse(prefix == "", NA, " "),
+  less.than.replace = FALSE,
+  ...
+)
+
+ff_mills(...)
+
+f_thous(
+  x,
+  relative = 0,
+  digits = -3,
+  prefix = "",
+  pad.char = ifelse(prefix == "", NA, " "),
+  less.than.replace = FALSE,
+  ...
+)
+
+ff_thous(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of large numbers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>relative</code></td>
+<td>
+<p>A factor relative to the current <code>digits</code> being rounded.
+For example <code>relative = -1</code> moves one to the left while
+<code>relative = 1</code> moves one to the right.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prefix</code></td>
+<td>
+<p>A string to append to the front of elements.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pad.char</code></td>
+<td>
+<p>A character to use for leading padding if lengths of output
+are unequal.  Use <code>NA</code> to forgo padding.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>less.than.replace</code></td>
+<td>
+<p>logical.  If <code>TRUE</code> values lower than lowest
+place value will be replaced with a less than sign followed by the
+<code>integer</code> representation of the place value.  For example, if <code>"$0K"</code>
+then replacement will be <code>"&lt;1K"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mix.denom</code></td>
+<td>
+<p>logical.  If <code>TRUE</code> then denominations can be mixed.
+Typically this is not a good idea for the sake of comparison.  It is most
+useful when there is a total row which is a sum of the column and this value's
+denomination exceeds the denomination of the rest of the column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>The number of digits to round to.  Actual <code>digits</code>
+calculated as <code>digits</code> +  <code>relative</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns an abbreviated vector of numbers.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f_denom(c(12345, 12563, 191919), prefix = '$')
+f_denom(c(12345, 12563, 191919), prefix = '$', pad.char = '')
+f_denom(c(1234365, 122123563, 12913919), prefix = '$')
+f_denom(c(12343676215, 122126763563, 1291673919), prefix = '$')
+f_denom(c(NA, 2, 12343676215, 122126763563, 1291673919), prefix = '$')
+f_denom(c(NA, 2, 123436, 122126763, 1291673919), prefix = '$', mix.denom = TRUE)
+f_denom(c(NA, 2, 12343676215, 122126763563, 1291673919), prefix = '$', pad.char = '')
+f_denom(c(NA, 2, 12343676215, 122126763563, 1291673919), relative = 1, prefix = '$')
+f_denom(c(NA, 2, 12343676215, 122126763563, 1291673919), relative = 9, prefix = '$')
+f_denom(c(NA, 2, 12343676215, 122126763563, 1291673919), less.than.replace = TRUE)
+
+f_thous(1234)
+f_thous(12345)
+f_thous(123456)
+f_mills(1234567)
+f_mills(12345678)
+f_mills(123456789)
+f_bills(1234567891)
+f_bills(12345678912)
+f_bills(123456789123)
+
+f_bills(123456789123, -1) # round to tens
+f_bills(123456789123, -2) # round to hundreds
+f_bills(123456789123, +1) # round to tenths
+f_bills(123456789123, +2) # round to hundreths
+
+x &lt;- c(3886902.8696, 4044584.0424, 6591893.2104, 591893.2104, -3454678)
+f_mills(x)
+f_mills(x, 1)
+f_mills(x, 1, prefix = '$')
+f_mills(x, 1, prefix = '$', pad.char = '0')
+
+## Not run: 
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, magrittr)
+
+f_bills(123456789123, -2) %&gt;%
+    f_prefix("$")
+
+
+data_frame(
+    revenue = rnorm(100, 500000, 50000),
+    deals = sample(20:50, 100, TRUE)
+) %&gt;%
+    mutate(
+        dollar = f_dollar(revenue, digits = -3),
+        thous = f_thous(revenue),
+        thous_dollars = f_thous(revenue, prefix = '$')
+    ) %T&gt;%
+    print() %&gt;%
+    ggplot(aes(deals, revenue)) +
+        geom_point() +
+        geom_smooth() +
+        scale_y_continuous(label = ff_thous(prefix = '$') )
+
+data_frame(
+    revenue = rnorm(10000, 500000, 50000),
+    date = sample(seq(as.Date('1999/01/01'), as.Date('2000/01/01'), by="day"), 10000, TRUE),
+    site = sample(paste("Site", 1:5), 10000, TRUE)
+) %&gt;%
+    mutate(
+        dollar = f_dollar(revenue, digits = -3),
+        thous = f_thous(revenue),
+        thous_dollars = f_thous(revenue, prefix = '$'),
+        abb_month = f_month(date),
+        abb_week = factor(f_weekday(date, distinct = TRUE),
+        levels = c('Su', 'M', 'T', 'W', 'Th', 'F', 'S'))
+    ) %T&gt;%
+    print() %&gt;%
+    ggplot(aes(abb_week, revenue)) +
+        geom_jitter(width = .2, height = 0, alpha = .2) +
+        scale_y_continuous(label = ff_thous(prefix = '$'))+
+        facet_wrap(~site)
+
+set.seed(10)
+data_frame(
+    w = paste(constant_months, rep(2016:2017, each = 12))[1:20] ,
+    x = rnorm(20, 200000, 75000)
+) %&gt;%
+    {
+        a &lt;- .
+        rbind(
+            a,
+            a %&gt;%
+                mutate(w = 'Total') %&gt;%
+                group_by(w) %&gt;%
+                summarize(x = sum(x))
+        )
+    } %&gt;%
+    mutate(
+        y = f_denom(x, prefix = '$'),
+        z = f_denom(x, mix.denom = TRUE, prefix = '$')
+    )  %&gt;%
+    data.frame(stringsAsFactors = FALSE, check.names = FALSE) %&gt;%
+    pander::pander(split.tables = Inf, justify = alignment(.))
+
+## Scale with mixed units
+library(tidyverse)
+library(numform)
+
+dat &lt;- data_frame(
+    Value = c(111, 2345, 34567, 456789, 1000001, 1000000001),
+    Time = 1:6
+)
+
+## Uniform units
+ggplot(dat, aes(Time, Value)) +
+    geom_line() +
+    scale_y_continuous(labels = ff_denom( prefix = '$'))
+
+## Mixed units
+ggplot(dat, aes(Time, Value)) +
+    geom_line() +
+    scale_y_continuous(labels = ff_denom(mix.denom = TRUE, prefix = '$', pad.char = ''))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

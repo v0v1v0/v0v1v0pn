@@ -1,0 +1,177 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PLOT_NO.PING.PONG</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plots of output from the NO.PING.PONG function</h2>
+
+<h3>Description</h3>
+
+<p>Provides plots of the output from the NO.PING.PONG function for a 
+sequence of studies</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PLOT_NO.PING.PONG(nopingpongOutput,
+	                  plot_this = c('NHST','CUM_META','BAYES_SR'),
+	                  plot_save = FALSE, plot_save_type = 'png', 
+	                  plot_title=NULL, Xrange=NULL)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nopingpongOutput</code></td>
+<td>
+
+<p>Output from the NO.PING.PONG function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_this</code></td>
+<td>
+
+<p>The kind of output data to be plotted. The options are one or any
+combination of 'NHST', 'CUM_META', 'BAYES_GEN', 'BAYES_RAW', and 'BAYES_SR'. 
+'CUM_META' is for meta-analysis results;
+'BAYES_GEN' is for results based on Bayesian generated data analyses;
+'BAYES_RAW' is for results based on Bayesian raw data analyses;
+'BAYES_SR' is for results based on the Schmidt-Raju (2007) Bayesian method.
+The default is
+plot_this = c('NHST', 'CUM_META', 'BAYES_SR').</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_save</code></td>
+<td>
+
+<p>Should a plot be saved to disk? TRUE or FALSE (the default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_save_type</code></td>
+<td>
+
+<p>The output format if plot_save = TRUE. The options are 'bitmap', 'tiff', 
+'png' (the default), 'jpeg', and 'bmp'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_title</code></td>
+<td>
+
+<p>optional. A title for the plot that will appear in the saved file name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xrange</code></td>
+<td>
+
+<p>optional. A range for the x axis in the plots.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function provides plots of the output from the NO.PING.PONG 
+function for a sequence of studies, with options for specifying
+the kind of results to be plotted (via the plot_this argument),
+whether to save the plot to disc, the file type of the saved
+plot (via the plot_save_type argument), the plot title,
+and the x axis range for the plot.</p>
+
+
+<h3>Value</h3>
+
+<p>A plot is produced, but there are no returned values.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian P. O'Connor</p>
+
+
+<h3>References</h3>
+
+<p>O'Connor, B. P., &amp; Ermacora, D. (2021). Unnecessary ping-pong: Illustrations of 
+why previous findings should be taken into account when evaluating new datasets. 
+<em>Canadian Journal of Behavioural Science, 53(3),</em> 328-341. https://doi.org/10.1037/cbs0000259       	
+<br><br> O'Connor, B. P., &amp; Khattar, N. (2022). Controversies regarding 
+null hypothesis testing. In W. O'Donohue, A. Masuda, &amp; S. O. Lilienfeld (Eds.). 
+<em>Avoiding Questionable Research Practices in Applied Psychology</em> (pp. 147-174). 
+Cham, Switzerland: Springer Nature Switzerland.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># data from SchmidtRaju (2007, p. 303)
+data_Schmidt_Raju &lt;- '
+1    60   .44 
+2    75   .20 
+3    85   .60 
+4   110   .32 
+5    50   .41 
+6    90   .25 
+7   100   .12 
+8    65   .35 
+9    80   .35 
+10   65   .19 '
+data_Schmidt_Raju &lt;- data.frame(read.table(text=data_Schmidt_Raju, fill=TRUE))
+colnames(data_Schmidt_Raju) &lt;- c('Study','N','r')
+data_Schmidt_Raju &lt;- data_Schmidt_Raju[,2:3]  
+
+nppOutput &lt;- NO.PING.PONG(data_Schmidt_Raju, ES_type_IN='r', ES_type_OUT='r', 
+                          ma_method='REML',
+                          Bayes_type = c('Schmidt_Raju', 'generated'), 
+                          prior_type='META', CI_level_in = 95,
+                          ES = 'r', N = 'N', ES_var = NULL,
+                          nitt=13000, burnin=3000, thin=10, verbose=TRUE)      
+
+PLOT_NO.PING.PONG(nppOutput, plot_this = c('NHST','CUM_META','BAYES_SR','BAYES_GEN'))
+
+
+ 
+# Cannabis Psychosis data
+nppOutput &lt;- NO.PING.PONG(data_NPP$Cannabis_Psychosis, ES_type_IN='d', ma_method='REML',
+                          Bayes_type = c('Schmidt_Raju', 'generated'), prior_type='META',
+                          ES = 'Std_diff_in_mean', N = 'N', ES_var = NULL, #ES_var = 'Variance',
+                          nitt=13000, burnin=3000, thin=10, verbose=TRUE) 
+
+PLOT_NO.PING.PONG(nppOutput, plot_this = c('NHST','CUM_META'))
+PLOT_NO.PING.PONG(nppOutput, plot_this = c('NHST','CUM_META','BAYES_SR','BAYES_GEN'))
+PLOT_NO.PING.PONG(nppOutput, plot_this = c('NHST','CUM_META','BAYES_GEN','BAYES_RAW'))
+
+
+# PopulationR.20 data (has raw data)
+nppOutput &lt;- NO.PING.PONG(data_NPP$PopulationR.20, ES_type_OUT='r',
+                          rawdata_type = 'for_correl',
+                          ma_method='REML',
+                          Bayes_type = c('generated', 'Schmidt_Raju'), 
+                          prior_type='META', CI_level_in = 95,
+                          ES = 'r', N = 'N', ES_var = NULL,
+                          nitt=13000, burnin=3000, thin=10, verbose=TRUE) 
+                         
+PLOT_NO.PING.PONG(nppOutput, plot_this = c('NHST','CUM_META','BAYES_GEN','BAYES_RAW'))
+
+
+
+# raw data for paired samples             
+nppOutput &lt;- 
+NO.PING.PONG(donnes=data_NPP$Paired_Samples, 
+             rawdata_type = 'paired_samples',
+             ES_type_OUT = 'd',
+             paired_samples_ES_type = 'SMCRH') 
+
+PLOT_NO.PING.PONG(nppOutput, plot_this = c('NHST','CUM_META'))
+PLOT_NO.PING.PONG(nppOutput, plot_this = c('NHST','CUM_META','BAYES_GEN'))
+PLOT_NO.PING.PONG(nppOutput, plot_this = c('NHST','CUM_META','BAYES_GEN','BAYES_RAW'))
+
+
+</code></pre>
+
+
+</div>

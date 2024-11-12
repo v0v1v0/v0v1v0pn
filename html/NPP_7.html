@@ -1,0 +1,251 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LMMNPP_MCMC1</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+MCMC Sampling for Linear Regression Model of multiple historical data using
+Normalized Power Prior
+</h2>
+
+<h3>Description</h3>
+
+<p>Multiple historical data are incorporated together.
+Conduct posterior sampling for Linear Regression Model with normalized power prior.
+For the power parameter <code class="reqn">\delta</code>, a Metropolis-Hastings algorithm with either
+independence proposal, or a random walk proposal on its logit scale is used.
+For the model parameters <code class="reqn">(\beta, \sigma^2)</code>, Gibbs sampling is used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LMMNPP_MCMC1(D0, X, Y, a0, b, mu0, R, delta_ini, prop_delta,
+             prior_delta_alpha, prior_delta_beta, prop_delta_alpha,
+             prop_delta_beta, rw_delta, nsample, burnin, thin)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>D0</code></td>
+<td>
+<p>a list of <code class="reqn">k</code> elements representing <code class="reqn">k</code> historical data, where the
+<code class="reqn">i^{th}</code> element corresponds to the <code class="reqn">i^{th}</code> historical data named
+as “D0i”.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a vector or matrix or data frame of covariate observed in the current data.
+If more than 1 covariate available, the number of rows is equal to the
+number of observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>a vector of individual level of the response y in the current data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a0</code></td>
+<td>
+<p>a positive shape parameter for inverse-gamma prior on model parameter                        <code class="reqn">\sigma^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>a positive scale parameter for inverse-gamma prior on model parameter                        <code class="reqn">\sigma^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu0</code></td>
+<td>
+<p>a vector of the mean for prior <code class="reqn">\beta|\sigma^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>a inverse matrix of the covariance matrix for prior <code class="reqn">\beta|\sigma^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta_ini</code></td>
+<td>
+<p>the initial value of <code class="reqn">\delta</code> in MCMC sampling.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop_delta</code></td>
+<td>
+<p>the class of proposal distribution for <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_delta_alpha</code></td>
+<td>
+<p>a vector of the hyperparameter <code class="reqn">\alpha</code> in the prior                                     distribution <code class="reqn">Beta(\alpha, \beta)</code> for each <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_delta_beta</code></td>
+<td>
+<p>a vector of the hyperparameter <code class="reqn">\beta</code> in the prior distribution                         <code class="reqn">Beta(\alpha, \beta)</code> for each <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop_delta_alpha</code></td>
+<td>
+<p>a vector of the hyperparameter <code class="reqn">\alpha</code> in the proposal                                  distribution <code class="reqn">Beta(\alpha, \beta)</code> for each <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop_delta_beta</code></td>
+<td>
+<p>a vector of the hyperparameter <code class="reqn">\beta</code> in the proposal                                   distribution <code class="reqn">Beta(\alpha, \beta)</code> for each <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rw_delta</code></td>
+<td>
+<p>the stepsize(variance of the normal distribution) for the random walk                        proposal of logit <code class="reqn">\delta</code>. Only applicable if prop_delta = 'RW'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsample</code></td>
+<td>
+<p>specifies the number of posterior samples in the output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+<p>the number of burn-ins. The output will only show MCMC samples after bunrin.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+<p>the thinning parameter in MCMC sampling.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The outputs include posteriors of the model parameters and power parameter,
+acceptance rate in sampling <code class="reqn">\delta</code>.
+Let <code class="reqn">\theta</code>=<code class="reqn">(\beta, \sigma^2)</code>, the normalized power prior distribution is
+</p>
+<p style="text-align: center;"><code class="reqn">\frac{\pi_0(\delta)\pi_0(\theta)\prod_{k=1}^{K}L(\theta|D_{0k})^{\delta_k}}{\int \pi_0(\theta)\prod_{k=1}^{K}L(\theta|D_{0k})^{\delta_k}\,d\theta}.</code>
+</p>
+
+<p>Here <code class="reqn">\pi_0(\delta)</code> and <code class="reqn">\pi_0(\theta)</code> are the initial prior distributions of <code class="reqn">\delta</code> and <code class="reqn">\theta</code>, respectively. <code class="reqn">L(\theta|D_{0k})</code> is the likelihood function of historical data <code class="reqn">D_{0k}</code>, and <code class="reqn">\delta_k</code> is the corresponding power parameter.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class "NPP" with four elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>acceptrate</code></td>
+<td>
+<p>the acceptance rate in MCMC sampling for <code class="reqn">\delta</code> using
+Metropolis-Hastings algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>posterior of the model parameter <code class="reqn">\beta</code> in vector or matrix form.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>posterior of the model parameter <code class="reqn">\sigma^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>posterior of the power parameter <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Qiang Zhang <a href="mailto:zqzjf0408@163.com">zqzjf0408@163.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Ibrahim, J.G., Chen, M.-H., Gwon, Y. and Chen, F. (2015).
+The Power Prior: Theory and Applications.
+<em>Statistics in Medicine  34:3724-3749.</em>
+</p>
+<p>Duan, Y., Ye, K. and Smith, E.P. (2006).
+Evaluating Water Quality: Using Power Priors to Incorporate Historical Information.
+<em>Environmetrics  17:95-106.</em>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>LMMNPP_MCMC2</code>;
+<code>LMOMNPP_MCMC1</code>;
+<code>LMOMNPP_MCMC2</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+set.seed(1234)
+sigsq0 = 1
+
+n01 = 100
+theta01 = c(0, 1, 1)
+X01 = cbind(1, rnorm(n01, mean=0, sd=1), runif(n01, min=-1, max=1))
+Y01 = X01%*%as.vector(theta01) + rnorm(n01, mean=0, sd=sqrt(sigsq0))
+D01 = cbind(X01, Y01)
+
+n02 = 70
+theta02 = c(0, 2, 3)
+X02 = cbind(1, rnorm(n02, mean=0, sd=1), runif(n02, min=-1, max=1))
+Y02 = X02%*%as.vector(theta02) + rnorm(n02, mean=0, sd=sqrt(sigsq0))
+D02 = cbind(X02, Y02)
+
+n03 = 50
+theta03 = c(0, 3, 5)
+X03 = cbind(1, rnorm(n03, mean=0, sd=1), runif(n03, min=-1, max=1))
+Y03 = X03%*%as.vector(theta03) + rnorm(n03, mean=0, sd=sqrt(sigsq0))
+D03 = cbind(X03, Y03)
+
+D0 = list(D01, D02, D03)
+n0 = c(n01, n02, n03)
+
+n = 100
+theta = c(0, 3, 5)
+X = cbind(1, rnorm(n, mean=0, sd=1), runif(n, min=-1, max=1))
+Y = X%*%as.vector(theta) + rnorm(n, mean=0, sd=sqrt(sigsq0))
+
+LMMNPP_MCMC1(D0=D0, X=X, Y=Y, a0=2, b=2, mu0=c(0,0,0), R=diag(c(1/64,1/64,1/64)),
+             delta_ini=NULL, prior_delta_alpha=c(1,1,1), prior_delta_beta=c(1,1,1),
+             prop_delta_alpha=c(1,1,1), prop_delta_beta=c(1,1,1),
+             prop_delta="RW", rw_delta=0.9, nsample=5000, burnin=1000, thin=3)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,389 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PSopt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Particle Swarm Optimisation
+</h2>
+
+<h3>Description</h3>
+
+<p>The function implements Particle Swarm Optimisation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PSopt(OF, algo = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>OF</code></td>
+<td>
+
+<p>the objective function to be minimised. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algo</code></td>
+<td>
+
+<p>a list with the settings for algorithm. See Details and Examples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>pieces of data required to evaluate the objective function. See Details.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function implements Particle Swarm Optimisation (<abbr><span class="acronym">PS</span></abbr>);
+see the references for details on the implementation. <abbr><span class="acronym">PS</span></abbr> is
+a population-based optimisation heuristic. It develops several
+solutions (a ‘population’) over a number of
+iterations. <abbr><span class="acronym">PS</span></abbr> is directly applicable to continuous problems
+since the population is stored in real-valued vectors. In each
+iteration, a solution is updated by adding another vector called
+velocity. Think of a solution as a position in the search space, and
+of velocity as the direction into which this solution moves. Velocity
+changes over the course of the optimization: it is biased towards the
+best solution found by the particular solution and the best overall
+solution. The algorithm stops after a fixed number of iterations.
+</p>
+<p>To allow for constraints, the evaluation works as follows: after a new
+solution is created, it is (i) repaired, (ii) evaluated through the
+objective function, (iii) penalised. Step (ii) is done by a call to
+<code>OF</code>; steps (i) and (iii) by calls to <code>algo$repair</code> and
+<code>algo$pen</code>. Step (i) and (iii) are optional, so the respective
+functions default to <code>NULL</code>. A penalty can also be directly
+written in the <code>OF</code>, since it amounts to a positive number added
+to the ‘clean’ objective function value.  It can be
+advantageous to write a separate penalty function if either only the
+objective function or only the penalty function can be vectorised.
+(Constraints can also be added without these mechanisms. Solutions
+that violate constraints can, for instance, be mapped to feasible
+solutions, but without actually changing them. See Maringer and
+Oyewumi, 2007, for an example with Differential Evolution.)
+</p>
+<p>Conceptually, <abbr><span class="acronym">PS</span></abbr> consists of two loops: one loop across the
+iterations and, in any given generation, one loop across the
+solutions.  This is the default, controlled by the variables
+<code>algo$loopOF</code>, <code>algo$loopRepair</code>, <code>algo$loopPen</code> and
+<code>loopChangeV</code> which all default to <code>TRUE</code>. But it does not
+matter in what order the solutions are evaluated (or repaired or
+penalised), so the second loop can be vectorised. Examples are given
+in the vignettes and in the book. The respective <code>algo$loopFun</code>
+must then be set to <code>FALSE</code>.
+</p>
+<p>The objective function, the repair function and and the penalty
+function will be called as <code>fun(solution, ...)</code>.
+</p>
+<p>The list <code>algo</code> contains the following items:
+</p>
+
+<dl>
+<dt><code>nP</code></dt>
+<dd>
+<p>population size. Defaults to 100. Using default
+settings may not be a good idea.</p>
+</dd>
+<dt><code>nG</code></dt>
+<dd>
+<p>number of iterations. Defaults to 500. Using
+default settings may not be a good idea.</p>
+</dd>
+<dt><code>c1</code></dt>
+<dd>
+<p>the weight towards the individual's best
+solution. Typically between 0 and 2; defaults to 1.  Using default
+settings may not be a good idea. In some cases, even negative
+values work well: the solution is then driven off its past best
+position. For ‘simple’ problems, setting <code>c1</code> to zero
+may work well: the population moves then towards the best overall
+solution.</p>
+</dd>
+<dt><code>c2</code></dt>
+<dd>
+<p>the weight towards the populations's best
+solution. Typically between 0 and 2; defaults to 1.  Using default
+settings may not be a good idea. In some cases, even negative
+values work well: the solution is then driven off the population's
+past best position.</p>
+</dd>
+<dt><code>iner</code></dt>
+<dd>
+<p>the inertia weight (a scalar), which reduces
+velocity. Typically between 0 and 1. Default is 0.9.</p>
+</dd>
+<dt><code>initV</code></dt>
+<dd>
+<p>the standard deviation of the initial
+velocities. Defaults to 1.</p>
+</dd>
+<dt><code>maxV</code></dt>
+<dd>
+<p>the maximum (absolute) velocity. Setting limits
+to velocity is sometimes called velocity clamping. Velocity is the
+change in a given solution in a given iteration. A maximum
+velocity can be set so to prevent unreasonable velocities
+(‘overshooting’): for instance, if a decision variable may
+lie between 0 and 1, then an absolute velocity much greater than 1
+makes rarely sense.</p>
+</dd>
+<dt>
+<code>min</code>, <code>max</code>
+</dt>
+<dd>
+<p>vectors of minimum and maximum parameter
+values. The vectors <code>min</code> and <code>max</code> are used to determine the
+dimension of the problem and to randomly initialise the
+population. Per default, they are no constraints: a solution may well be outside
+these limits. Only if <code>algo$minmaxConstr</code> is <code>TRUE</code> will the
+algorithm repair solutions outside the <code>min</code> and <code>max</code> range.</p>
+</dd>
+<dt><code>minmaxConstr</code></dt>
+<dd>
+<p>if <code>TRUE</code>, <code>algo$min</code> and
+<code>algo$max</code> are considered constraints. Default is
+<code>FALSE</code>.</p>
+</dd>
+<dt><code>pen</code></dt>
+<dd>
+<p>a penalty function. Default is <code>NULL</code> (no
+penalty).</p>
+</dd>
+<dt><code>repair</code></dt>
+<dd>
+<p>a repair function. Default is <code>NULL</code> (no
+repairing).</p>
+</dd>
+<dt><code>changeV</code></dt>
+<dd>
+<p>a function to change velocity. Default is
+<code>NULL</code> (no change). This function is called before the
+velocity is added to the current solutions; it can be used to
+impose restrictions like changing only a number of decision
+variables.</p>
+</dd>
+<dt><code>initP</code></dt>
+<dd>
+<p>optional: the initial population. A matrix of
+size <code>length(algo$min)</code> times <code>algo$nP</code>, or a function
+that creates such a matrix. If a function, it should take no
+arguments.</p>
+</dd>
+<dt><code>loopOF</code></dt>
+<dd>
+<p>logical. Should the <code>OF</code> be evaluated
+through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>loopPen</code></dt>
+<dd>
+<p>logical. Should the penalty function (if
+specified) be evaluated through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>loopRepair</code></dt>
+<dd>
+<p>logical. Should the repair function (if
+specified) be evaluated through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>loopChangeV</code></dt>
+<dd>
+<p>logical. Should the <code>changeV</code>
+function (if specified) be evaluated through a loop? Defaults to
+<code>TRUE</code>.</p>
+</dd>
+<dt><code>printDetail</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), information
+is printed. If an integer <code>i</code> greater then one, information
+is printed at very <code>i</code>th iteration.</p>
+</dd>
+<dt><code>printBar</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), a
+<code>txtProgressBar</code> (from package <span class="pkg">utils</span>) is printed).</p>
+</dd>
+<dt><code>storeF</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), the objective
+function values for every solution in every generation are stored
+and returned as matrix <code>Fmat</code>.</p>
+</dd>
+<dt><code>storeSolutions</code></dt>
+<dd>
+<p>default is <code>FALSE</code>. If
+<code>TRUE</code>, the solutions (ie, decision variables) in every
+generation are stored as lists <code>P</code> and <code>Pbest</code>, both
+stored in the list <code>xlist</code> which the function returns. To
+check, for instance, the solutions at the end of the <code>i</code>th
+iteration, retrieve <code>xlist[[c(1L, i)]]</code>; the best solutions
+at the end of this iteration are in <code>xlist[[c(2L,
+      i)]]</code>. <code>P[[i]]</code> and <code>Pbest[[i]]</code> will be matrices of size
+<code>length(algo$min)</code> times <code>algo$nP</code>.</p>
+</dd>
+<dt><code>classify</code></dt>
+<dd>
+<p>Logical; default is <code>FALSE</code>. If
+<code>TRUE</code>, the result will have a class attribute <code>TAopt</code>
+attached. This feature is <strong>experimental</strong>: the supported
+methods may change without warning.</p>
+</dd>
+<dt><code>drop</code></dt>
+<dd>
+<p>Default is <code>TRUE</code>. If <code>FALSE</code>, the dimension is
+not dropped from a single solution when it is
+passed to a function. (That is, the function will
+receive a single-column matrix.)
+</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>Returns a list:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xbest</code></td>
+<td>
+<p>the solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OFvalue</code></td>
+<td>
+<p>objective function value of best solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>popF</code></td>
+<td>
+<p>a vector: the objective function values in the final population</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fmat</code></td>
+<td>
+<p>if <code>algo$storeF</code> is <code>TRUE</code>, a matrix of size <code>algo$nG</code>
+times <code>algo$nP</code>. Each column contains the best objective function value found by the particular solution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlist</code></td>
+<td>
+<p>if <code>algo$storeSolutions</code> is <code>TRUE</code>, a list that contains two
+lists <code>P</code> and <code>Pbest</code> of matrices, and a matrix <code>initP</code> (the
+initial solution); else <code>NA</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.state</code></td>
+<td>
+<p>the value of <code>.Random.seed</code>
+when <code>PSopt</code> was called.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Eberhart, R.C. and Kennedy, J. (1995) A New Optimizer using Particle
+Swarm theory.  <em>Proceedings of the Sixth International Symposium
+on Micromachine and Human Science</em>, pp. 39–43.
+</p>
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>DEopt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Least Median of Squares (LMS) estimation
+genData &lt;- function(nP, nO, ol, dy) {
+    ## create dataset as in Salibian-Barrera &amp; Yohai 2006
+    ## nP = regressors, nO  = number of obs
+    ## ol = number of outliers, dy  = outlier size
+    mRN &lt;- function(m, n) array(rnorm(m * n), dim = c(m, n))
+    y &lt;- mRN(nO, 1)
+    X &lt;- cbind(as.matrix(numeric(nO) + 1), mRN(nO, nP - 1L))
+    zz &lt;- sample(nO)
+    z  &lt;- cbind(1, 100, array(0, dim = c(1L, nP - 2L)))
+    for (i in seq_len(ol)) {
+        X[zz[i], ] &lt;- z
+        y[zz[i]] &lt;- dy
+    }
+    list(X = X, y = y)
+}
+
+OF &lt;- function(param, data) {
+    X &lt;- data$X
+    y &lt;- data$y
+    aux &lt;- as.vector(y) - X %*% param
+    ## as.vector(y) for recycling (param is a matrix)
+    aux &lt;- aux * aux
+    aux &lt;- apply(aux, 2, sort, partial = data$h)
+    aux[h, ]
+}
+
+nP &lt;- 2L; nO &lt;- 100L; ol &lt;- 10L; dy &lt;- 150
+aux &lt;- genData(nP,nO,ol,dy); X &lt;- aux$X; y &lt;- aux$y
+
+h &lt;- (nO + nP + 1L) %/% 2
+data &lt;- list(y = y, X = X, h = h)
+
+algo &lt;- list(min = rep(-10, nP), max = rep( 10, nP),
+    c1 = 1.0, c2 = 2.0,
+    iner = 0.7, initV = 1, maxV = 3,
+    nP = 100L, nG = 300L, loopOF = FALSE)
+
+system.time(sol &lt;- PSopt(OF = OF, algo = algo, data = data))
+if (require("MASS", quietly = TRUE)) {
+    ## for nsamp = "best", in this case, complete enumeration
+    ## will be tried. See ?lqs
+    system.time(test1 &lt;- lqs(data$y ~ data$X[, -1L],
+            adjust = TRUE,
+            nsamp = "best",
+            method = "lqs",
+            quantile = data$h))
+}
+## check
+x1 &lt;- sort((y - X %*% as.matrix(sol$xbest))^2)[h]
+cat("Particle Swarm\n",x1,"\n\n")
+
+if (require("MASS", quietly = TRUE)) {
+    x2 &lt;- sort((y - X %*% as.matrix(coef(test1)))^2)[h]
+    cat("lqs\n", x2, "\n\n")
+}
+</code></pre>
+
+
+</div>

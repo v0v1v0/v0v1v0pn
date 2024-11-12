@@ -1,0 +1,188 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ova2nbc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Translate open verbal autopsy arguments to train a NBC model</h2>
+
+<h3>Description</h3>
+
+<p>A wrapper function for creating an nbc object with the parameters specified by
+the <a href="https://cran.r-project.org/package=openVA"><span class="pkg">openVA</span></a> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ova2nbc(symps.train, symps.test, causes.train, causes.table = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>symps.train</code></td>
+<td>
+<p>Dataframe of verbal autopsy train data.
+</p>
+
+<ul>
+<li>
+<p> Columns (in order): ID, Cause, Symptom-1 to Symptom-n..
+</p>
+</li>
+<li>
+<p> ID (vectorof char): case identifiers
+</p>
+</li>
+<li>
+<p> Cause (vectorof char): observed causes for each case
+</p>
+</li>
+<li>
+<p> Symptom-n.. (vectorsof char): "Y" for presence, "" for absence, "." for missing
+</p>
+</li>
+</ul>
+<p>Example:
+</p>
+
+<table>
+<tr>
+<td style="text-align: center;">
+  ID </td>
+<td style="text-align: center;"> Cause </td>
+<td style="text-align: center;"> S1 </td>
+<td style="text-align: center;"> S2 </td>
+<td style="text-align: center;"> S3 </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "a1" </td>
+<td style="text-align: center;"> "HIV" </td>
+<td style="text-align: center;"> "Y" </td>
+<td style="text-align: center;"> "" </td>
+<td style="text-align: center;"> "."</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "b2" </td>
+<td style="text-align: center;"> "Stroke" </td>
+<td style="text-align: center;"> "." </td>
+<td style="text-align: center;"> "" </td>
+<td style="text-align: center;"> "Y"</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "c3" </td>
+<td style="text-align: center;"> "HIV" </td>
+<td style="text-align: center;"> "Y" </td>
+<td style="text-align: center;"> "Y" </td>
+<td style="text-align: center;"> "."
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>symps.test</code></td>
+<td>
+<p>Dataframe of verbal autopsy test data in the same format as <em>symps.train</em>.
+</p>
+
+<ul><li>
+<p> If (<em>causes.train</em> is (vectorof char)): <em>symps.test</em> is assumed to not have a cause column
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>causes.train</code></td>
+<td>
+<p>The train vector or column for the causes of death to use.
+</p>
+
+<ul>
+<li>
+<p> If (vectorof char): cause of death values with number of values equal to nrow(<em>symps.train</em>);
+it is assumed that <em>symps.test</em> has no causes of death column
+</p>
+</li>
+<li>
+<p> If (char): name of cause of death column from <em>symps.train</em>
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>causes.table</code></td>
+<td>
+<p>Character list of unique causes to learn.
+</p>
+
+<ul><li>
+<p> If (NULL): set to unique causes of death in <em>symps.train</em>
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to avoid errors if necessary.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>nbc An <code>nbc</code> object with the following modifications:
+</p>
+
+<ul>
+<li>
+<p> $id (vectorof char): set to test data ids
+</p>
+</li>
+<li>
+<p> $prob (matrixof numeric): set to a matrix of likelihood for each cause of death for the test cases
+</p>
+</li>
+<li>
+<p> $CSMF (vectorof char): set to the predicted CSMFs with names for the corresponding causes
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul><li>
+<p> Li Z, McCormick T, Clark S. openVA: Automated Method for Verbal Autopsy [Internet]. 2016. [cited 2016 Apr 29]. Available from: <a href="https://cran.r-project.org/package=openVA">https://cran.r-project.org/package=openVA</a>
+</p>
+</li></ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(openVA)  # install.packages("openVA")
+library(nbc4va)
+
+# Obtain some openVA formatted data
+data(RandomVA3) # cols: deathId, cause, symptoms..
+train &lt;- RandomVA3[1:100, ]
+test &lt;- RandomVA3[101:200, ]
+
+# Run naive bayes classifier on openVA data
+results &lt;- ova2nbc(train, test, "cause")
+
+# Obtain the probabilities and predictions
+prob &lt;- results$prob.causes
+pred &lt;- results$pred.causes
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

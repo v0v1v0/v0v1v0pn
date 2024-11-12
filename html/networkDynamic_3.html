@@ -1,0 +1,203 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>network.extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Temporal Extracts/Cross-sections of Dynamically Extended Network Objects </h2>
+
+<h3>Description</h3>
+
+<p>Given a networkDynamic and a specified time point (or interval), return a reduced networkDynamic  that only contains the vertices and edges active at the given point or over the given interval.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">network.extract(x, onset = NULL, terminus = NULL, length = NULL, at = NULL,
+    rule = c("any", "all"), active.default = TRUE, retain.all.vertices = FALSE,
+    trim.spells=FALSE)
+
+x %t% at
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> an object of class <code>network</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>onset</code></td>
+<td>
+<p> optionally, the start of the specified interval.  This must be  accompanied by one of <code>terminus</code> or <code>length</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terminus</code></td>
+<td>
+<p> optionally, the end of the specified interval.  This must be  accompanied by one of <code>onset</code> or <code>length</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>length</code></td>
+<td>
+<p> optionally, the length of the specified interval. This must be  accompanied by one of <code>onset</code> or <code>terminus</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>at</code></td>
+<td>
+<p> optionally, a single time point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rule</code></td>
+<td>
+<p> a text string for defining “active” for this call:  <code>any</code> if elements active at any time during the interval are to be used, or <code>all</code> if elements must be active over the entire interval. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>active.default</code></td>
+<td>
+<p> logical; should elements without an activity attribute be regarded as active by default? </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>retain.all.vertices</code></td>
+<td>
+<p> logical; should the extracted network retain all vertices, ignoring the vertex activity spells of x in order to ensure that the network returned has the same size as x?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trim.spells</code></td>
+<td>
+<p> logical; should the spells of vertices, edges and their attributes in the extracted network be trimmed to match the query range? (Sensible thing to do, but could be expensive)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For the purposes of extraction, edges are only considered active over some interval if: the edge itself is active over this time period, and both of the incident vertices are also active over the given time period.
+</p>
+<p>When <code>retain.all.vertices=FALSE</code> (the default), the function has the following behavior:
+</p>
+
+<ul>
+<li>
+<p> If <code>at</code> is used to specify the spell of interest, the returned network consists of all edges and vertices
+active at that time point.  
+</p>
+</li>
+<li>
+<p> If an interval is supplied to specify the spell (via <code>onset</code> and one of <code>terminus</code> or <code>length</code>), edges and vertices active
+over the specified interval are used.   If <code>rule="any"</code>, then edges and vertices active at any time during the interval are returned; otherwise, only those active during the entire period are returned. 
+</p>
+</li>
+</ul>
+<p>Vertices in the extracted network will have the same order as the original network, with inactive vertices removed. 
+</p>
+<p>When <code>retain.all.vertices=TRUE</code>
+</p>
+
+<ul>
+<li>
+<p>All vertices are preserved in the output net to preserved network size and ids.
+</p>
+</li>
+<li>
+<p>if <code>trim.spells=TRUE</code>, 'retained' vertices will be marked as inactive (they will have 'null' spell (Inf,Inf)) 
+</p>
+</li>
+<li>
+<p>Edges that are active (by the specified <code>rule</code>) during the specified spell are included in the returned network (same as above.)
+</p>
+</li>
+<li>
+<p>Edges with one or more inactive vertices still will be removed (even if the vertex is being 'retained' to preserve network size)
+</p>
+</li>
+</ul>
+<p>If a <code>net.obs.period</code> network attribute is present, its observation spells will be truncated by the onset and terminus of extraction.  If the onset and terminus do not intersect with any observation spells, the '$observations' component will be set to the 'null' spell <code>c(Inf,Inf)</code>.
+</p>
+<p><code>%t%</code> (the temporal cross-section operator) is  a
+simplified (and less flexible) wrapper for <code>network.extract</code> that
+returns the network of active vertices and edges at a given time point.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>networkDynamic</code> object containing the active edges and vertices for the specified spell, when <code>retain.all.vertices=FALSE</code>, otherwise the network object containing all vertices, and only those edges active for the specified spell. 
+</p>
+
+
+<h3>Note</h3>
+
+<p>Note that only active vertices are included by default (<code>retain.all.vertices=FALSE</code>).  As a result, the size of the extracted network may be smaller than the original. Vertex and edge ids will be translated, but may not correspond to their original values. If it is necessary to maintain the identities of vertices, see <code>persistent.ids</code>. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Carter T. Butts <a href="mailto:buttsc@uci.edu">buttsc@uci.edu</a>, skyebend</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>is.active</code>, <code>activity.attribute</code>, <code>network.extensions</code>, and <code>get.inducedSubgraph</code> for a related non-temporal version, <code>network.collapse</code> to squish a <code>networkDynamic</code> object into a static <code>network</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+triangle &lt;- network.initialize(3)    # create a toy network
+
+# add edges with activity
+# first add an edge between vertices 1 and 2
+add.edges.active(triangle,onset=0,terminus=10,tail=1,head=2)
+# add a more edges
+add.edges.active(triangle,onset=0,length=4,tail=2,head=3)      
+add.edges.active(triangle,at=4.5,tail=3,head=1)
+
+# specify some vertex activity
+activate.vertices(triangle,onset=0,terminus=10)
+deactivate.vertices(triangle,onset=1,terminus=2,v=3)
+
+degree&lt;-function(x){as.vector(rowSums(as.matrix(x)) 
+  + colSums(as.matrix(x)))} # handmade degree function
+
+degree(triangle) # degree of each vertex, ignoring time
+
+degree(network.extract(triangle,at=0))
+degree(network.extract(triangle,at=1)) # just look at t=1
+degree(network.extract(triangle,at=2))
+degree(network.extract(triangle,at=5))
+
+# watch out for empty networks! they are just an empty list
+t10 &lt;- network.extract(triangle,at=10)
+t10
+
+# notice difference between 'at' syntax and 'onset,terminus'
+# when network is not in discrete time
+degree(network.extract(triangle,at=4))
+degree(network.extract(triangle,onset=4,terminus=5))
+
+# the %t% (time) operator is like an alias for the 'at' extraction syntax
+degree(triangle%t%4)
+
+par(mfrow=c(2,2))
+#show multiple plots
+plot(triangle,main='ignoring dynamics',displaylabels=TRUE)
+plot(network.extract(triangle,onset=1,terminus=2),main='at time 1',displaylabels=TRUE)
+plot(network.extract(triangle,onset=2,terminus=3),main='at time 2',displaylabels=TRUE)
+plot(network.extract(triangle,onset=5,terminus=6),main='at time 5',displaylabels=TRUE)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,177 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>thresh_2d</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Producing two-dimensional invariant regions</h2>
+
+<h3>Description</h3>
+
+<p>This function produces two-dimensional threshold lines and invariant regions,
+as shown by Phillippo <em>et al.</em> (2018).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">thresh_2d(
+  thresh,
+  idx,
+  idy,
+  xlab = paste("Adjustment to data point", idx),
+  ylab = paste("Adjustment to data point", idy),
+  xlim = NULL,
+  ylim = NULL,
+  breaks = waiver(),
+  xbreaks = breaks,
+  ybreaks = breaks,
+  fill = rgb(0.72, 0.8, 0.93, 0.7),
+  lwd = 1,
+  fontsize = 12
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>A <code>thresh</code> object, as produced by
+<code>nma_thresh</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idx</code></td>
+<td>
+<p>Integer specifying the index (with respect to
+<code>thresh$thresholds</code>) of the first data point to consider adjusting.
+Will be shown on the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idy</code></td>
+<td>
+<p>Integer specifying the index (with respect to
+<code>thresh$thresholds</code>) of the second data point to consider adjusting.
+Will be shown on the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Character string giving the label for the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Character string giving the label for the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>Numeric vector of length 2, giving the x axis limits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>Numeric vector of length 2, giving the y axis limits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breaks</code></td>
+<td>
+<p>Numeric vector giving position of tick marks on the x and y
+axes. Calculated automatically by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xbreaks</code></td>
+<td>
+<p>Numeric vector giving position of tick marks on the x axis.
+Equal to <code>breaks</code> by default, if set this overrides any value given to
+<code>breaks</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ybreaks</code></td>
+<td>
+<p>Numeric vector giving position of tick marks on the y axis.
+Equal to <code>breaks</code> by default, if set this overrides any value given to
+<code>breaks</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fill</code></td>
+<td>
+<p>Fill colour for invariant region. Defaults to a nice shade of
+blue <code>rgb(.72, .80, .93, .7)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>Line width for threshold lines. Default 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fontsize</code></td>
+<td>
+<p>Font size for labels. Default 12.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>ggplot</code> object containing the 2D threshold plot, which is
+returned invisibly and plotted (unless assigned).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Please see the vignette "Examples" for worked examples including use of
+# this function, including more information on the brief code below.
+
+vignette("Examples", package = "nmathresh")
+
+### Contrast level thresholds for Thrombolytic treatments NMA
+K &lt;- 6   # Number of treatments
+
+# Contrast design matrix is
+X &lt;- matrix(ncol = K-1, byrow = TRUE,
+            c(1, 0, 0, 0, 0,
+              0, 1, 0, 0, 0,
+              0, 0, 1, 0, 0,
+              0, 0, 0, 1, 0,
+              0, -1, 1, 0, 0,
+              0, -1, 0, 1, 0,
+              0, -1, 0, 0, 1))
+
+# Reconstruct hypothetical likelihood covariance matrix using NNLS
+lik.cov &lt;- recon_vcov(Thrombo.post.cov, prior.prec = .0001, X = X)
+
+# Thresholds are then
+thresh &lt;- nma_thresh(mean.dk = Thrombo.post.summary$statistics[1:(K-1), "Mean"],
+                     lhood = lik.cov,
+                     post = Thrombo.post.cov,
+                     nmatype = "fixed",
+                     X = X,
+                     opt.max = FALSE)
+
+# Produce an invariant region for simultaneous adjustments to both arms of Study 1
+thresh_2d(thresh, 1, 2,
+          xlab = "Adjustment in Study 1 LOR: 3 vs. 1",
+          ylab = "Adjustment in Study 1 LOR: 4 vs. 1",
+          xlim = c(-1.5, 0.5), ylim = c(-2, 14),
+          ybreaks = seq(-2, 14, 2))
+
+</code></pre>
+
+
+</div>

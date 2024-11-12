@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>docdb_create</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create documents in a database</h2>
+
+<h3>Description</h3>
+
+<p>A message is emitted if the container <code>key</code> already exists.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">docdb_create(src, key, value, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>src</code></td>
+<td>
+<p>Source object, result of call to any of functions
+<code>src_mongo()</code>, <code>src_sqlite()</code>, <code>src_elastic()</code>, <code>src_couchdb()</code>
+<code>src_duckdb()</code> or <code>src_postgres()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>key</code></td>
+<td>
+<p>(character) The name of the container in the
+database backend (corresponds to <code>collection</code> for MongoDB,
+<code>dbname</code> for CouchDB, <code>index</code> for Elasticsearch, and to
+a table name for DuckDB, SQLite and PostgreSQL)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>The data to be created in the database:
+a single data.frame, a JSON string, a list, or a
+file name or URL that points to NDJSON documents</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Passed to functions <code>sofa::db_bulk_create()</code>,
+<code>elastic::docs_bulk()</code>, and <code>mongolite::mongo()</code>$insert()</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An error is raised for document(s) in <code>value</code> when their
+<code style="white-space: pre;">⁠_id⁠</code> already exist(s) in the collection <code>key</code>;
+use <code>docdb_update()</code> to update such document(s).
+</p>
+
+
+<h3>Value</h3>
+
+<p>(integer) Number of successfully created documents
+</p>
+
+
+<h3>Identifiers</h3>
+
+<p>If <code>value</code> is a data.frame that has a column <code style="white-space: pre;">⁠_id⁠</code>,
+or is a JSON string having a key <code style="white-space: pre;">⁠_id⁠</code> at root level,
+or is a list having an item <code style="white-space: pre;">⁠_id⁠</code> at its top level,
+this will be used as <code style="white-space: pre;">⁠_id⁠</code>'s and primary index
+in the database. If there are no such <code style="white-space: pre;">⁠_id⁠</code>'s in <code>value</code>,
+row names (if any exist) of <code>value</code> will be used as <code style="white-space: pre;">⁠_id⁠</code>'s,
+otherwise random <code style="white-space: pre;">⁠_id⁠</code>'s will be created (using
+<code>uuid::UUIDgenerate()</code> with <code>use.time = TRUE</code> for
+SQLite and PostgreSQL, or using DuckDB's built-in <code>uuid()</code>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+src &lt;- src_sqlite()
+docdb_create(src,
+  key = "diamonds_small",
+  value = as.data.frame(diamonds[1:3000L, ])
+)
+head(docdb_get(src, "diamonds_small"))
+docdb_create(src, key = "contacts", value = contacts)
+docdb_get(src, "contacts")[["friends"]]
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

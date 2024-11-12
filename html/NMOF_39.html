@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Simple Moving Average
+</h2>
+
+<h3>Description</h3>
+
+<p>The function computes a moving average of a vector.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MA(y, order, pad = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>a numeric vector
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+
+<p>An integer. The order of the moving average. The function is defined
+such that order one returns <code>y</code> (see Examples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pad</code></td>
+<td>
+
+<p>Defaults to <code>NULL</code>. If not <code>NULL</code>, all elements of the
+returned moving average with position smaller than <code>order</code> are
+replaced by the value of <code>pad</code>. Sensible values may be
+<code>NA</code> or 0.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a vector of length <code>length(y)</code>.</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Enrico Schumann </p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">MA(1:10, 3)
+MA(1:10, 3, pad = NA)
+
+y &lt;- seq(1, 4, by = 0.3)
+z &lt;- MA(y, 1)
+all(y == z)      ### (typically) FALSE
+all.equal(y, z)  ### should be TRUE
+
+## 'Relative strength index'
+rsi &lt;- function(y, t) {
+    y &lt;- diff(y)
+    ups   &lt;- y + abs(y)
+    downs &lt;- y - abs(y)
+    RS &lt;- -MA(ups, t) / MA(downs, t)
+    RS/(1 + RS)
+}
+x &lt;- cumprod(c(100, 1 + rnorm(100, sd = 0.01)))
+par(mfrow = c(2,1))
+plot(x, type = "l")
+plot(rsi(x, 14), ylim = c(0,1), type = "l")
+</code></pre>
+
+
+</div>

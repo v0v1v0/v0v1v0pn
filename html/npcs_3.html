@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gamma_smote</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Gamma-synthetic minority over-sampling technique (gamma-SMOTE).</h2>
+
+<h3>Description</h3>
+
+<p>gamma-SMOTE with some gamma in [0,1], which is a variant of the original SMOTE proposed by Chawla, N. V. et. al (2002). This can be combined with the NPMC methods proposed in Tian, Y., &amp; Feng, Y. (2021). See Section 5.2.3 in Tian, Y., &amp; Feng, Y. (2021) for more details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gamma_smote(x, y, dup_rate = 1, gamma = 0.5, k = 5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>the predictor matrix, where each row and column represents an observation and predictor, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>the response vector. Must be integers from 1 to K for some K &gt;= 2. Can either be a numerical or factor vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dup_rate</code></td>
+<td>
+<p>duplicate rate of original data. Default = 1, which finally leads to a new data set with twice sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>the upper bound of uniform distribution used when generating synthetic data points in SMOTE. Can be any number between 0 and 1. Default = 0.5. When it equals to 1, gamma-SMOTE is equivalent to the original SMOTE (Chawla, N. V. et. al (2002)).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number of nearest neighbors during sampling process in SMOTE. Default = 5.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list consisting of merged original and synthetic data, with two components x and y. x is the predictor matrix and y is the label vector.
+</p>
+
+
+<h3>References</h3>
+
+<p>Chawla, N. V., Bowyer, K. W., Hall, L. O., &amp; Kegelmeyer, W. P. (2002). SMOTE: synthetic minority over-sampling technique. Journal of artificial intelligence research, 16, 321-357.
+</p>
+<p>Tian, Y., &amp; Feng, Y. (2021). Neyman-Pearson Multi-class Classification via Cost-sensitive Learning. Submitted. Available soon on arXiv.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npcs</code>, <code>predict.npcs</code>, <code>error_rate</code>, and <code>generate_data</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+set.seed(123, kind = "L'Ecuyer-CMRG")
+train.set &lt;- generate_data(n = 200, model.no = 1)
+x &lt;- train.set$x
+y &lt;- train.set$y
+
+test.set &lt;- generate_data(n = 1000, model.no = 1)
+x.test &lt;- test.set$x
+y.test &lt;- test.set$y
+
+# contruct the multi-class NP problem: case 1 in Tian, Y., &amp; Feng, Y. (2021)
+alpha &lt;- c(0.05, NA, 0.01)
+w &lt;- c(0, 1, 0)
+
+## try NPMC-CX, NPMC-ER based on multinomial logistic regression, and vanilla multinomial
+## logistic regression without SMOTE. NPMC-ER outputs the infeasibility error information.
+fit.npmc.CX &lt;- try(npcs(x, y, algorithm = "CX", classifier = "multinom", w = w, alpha = alpha))
+fit.npmc.ER &lt;- try(npcs(x, y, algorithm = "ER", classifier = "multinom", w = w, alpha = alpha,
+refit = TRUE))
+fit.vanilla &lt;- nnet::multinom(y~., data = data.frame(x = x, y = factor(y)), trace = FALSE)
+
+# test error of NPMC-CX based on multinomial logistic regression without SMOTE
+y.pred.CX &lt;- predict(fit.npmc.CX, x.test)
+error_rate(y.pred.CX, y.test)
+
+# test error of vanilla multinomial logistic regression without SMOTE
+y.pred.vanilla &lt;- predict(fit.vanilla, newdata = data.frame(x = x.test))
+error_rate(y.pred.vanilla, y.test)
+
+
+## create synthetic data by 0.5-SMOTE
+D.syn &lt;- gamma_smote(x, y, dup_rate = 1, gamma = 0.5, k = 5)
+x &lt;- D.syn$x
+y &lt;- D.syn$y
+
+## try NPMC-CX, NPMC-ER based on multinomial logistic regression, and vanilla multinomial logistic
+## regression with SMOTE. NPMC-ER can successfully find a solution after SMOTE.
+fit.npmc.CX &lt;- try(npcs(x, y, algorithm = "CX", classifier = "multinom", w = w, alpha = alpha))
+fit.npmc.ER &lt;- try(npcs(x, y, algorithm = "ER", classifier = "multinom", w = w, alpha = alpha,
+refit = TRUE))
+fit.vanilla &lt;- nnet::multinom(y~., data = data.frame(x = x, y = factor(y)), trace = FALSE)
+
+# test error of NPMC-CX based on multinomial logistic regression with SMOTE
+y.pred.CX &lt;- predict(fit.npmc.CX, x.test)
+error_rate(y.pred.CX, y.test)
+
+# test error of NPMC-ER based on multinomial logistic regression with SMOTE
+y.pred.ER &lt;- predict(fit.npmc.ER, x.test)
+error_rate(y.pred.ER, y.test)
+
+# test error of vanilla multinomial logistic regression wit SMOTE
+y.pred.vanilla &lt;- predict(fit.vanilla, newdata = data.frame(x = x.test))
+error_rate(y.pred.vanilla, y.test)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

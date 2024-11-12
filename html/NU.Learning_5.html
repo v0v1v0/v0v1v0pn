@@ -1,0 +1,224 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lrcagg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate the observed Distribution of LRCs in NU.Learning</h2>
+
+<h3>Description</h3>
+
+<p>For a given number, K, of Clusters of Experimental Units in baseline X-covariate
+space, lrcagg() calculates the observed distribution of "Local Rank Correlations" (LRCs)
+across Clusters ...where each LRC = cor(trex, Y, method = "spearman") within a Cluster,
+trex is a numeric measure of Exposure, and Y is a numeric measure of Outcome.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  lrcagg(K, envir)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>Number of Clusters in baseline X-covariate space.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>envir</code></td>
+<td>
+<p>R environment output by a previous call to NUsetup().</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Multiple calls to lrcagg(K) for varying numbers of clusters, K, are typically made
+after first invoking NUcluster() to hierarchically cluster patients in X-space and then
+invoking NUsetup() to specify a Y Outcome variable and a continuous, numerical treatment
+Exposure: trex. lrcagg() computes an observed LRC Distribution, updates information stored
+in its envir object, and outputs an object that is typically saved in the user's .GlobalEnv
+to allow subsequent use by print.lrcagg(), plot.lrcagg(), confirm() or KSperm(). Uninformative
+Clusters (those containing only 1 or 2 experimental units) contribute <b>NA</b>
+values to the LRCtabl$LRC and LRCdist$LRC objects within the lrcagg() output list.   
+</p>
+
+
+<h3>Value</h3>
+
+<p> An output list of 12 objects, of class lrcagg:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>hclobj</code></td>
+<td>
+<p>Name of clustering dendrogram object created by NUcluster().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dframe</code></td>
+<td>
+<p>Name of data.frame containing X, trex &amp; Y variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trex</code></td>
+<td>
+<p>Name of numerical treatment/exposure level variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yvar</code></td>
+<td>
+<p>Name of outcome Y variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>Number of Clusters Requested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>actclust</code></td>
+<td>
+<p>Number of Clusters delivered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCtabl</code></td>
+<td>
+<p>data.frame with 5 columns and K rows for Clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCtabl$c</code></td>
+<td>
+<p>Cluster ID Factor, "1", "2", ..., "K".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCtabl$LRC</code></td>
+<td>
+<p>Numerical value of Local Treatment Difference for a Cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCtabl$w</code></td>
+<td>
+<p>Integer value of "weight" = Cluster Size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCtabl$LAO</code></td>
+<td>
+<p>Numerical value of within-cluster Local Average Outcome (Y-value).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCtabl$PS</code></td>
+<td>
+<p>Numerical value of Local Relative Propensity for Exposure, 0.0 to 1.0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCdist</code></td>
+<td>
+<p>data.frame with 5 columns and same number of rows as the data: dframe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCdist$c.K</code></td>
+<td>
+<p>Cluster ID Variable of the form: "c.K" </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCdist$ID</code></td>
+<td>
+<p>Observation ID Variable for the rows of the input dframe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCdist$y</code></td>
+<td>
+<p>Numerical values of Y-Outcomes for Experimental Units.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCdist$t</code></td>
+<td>
+<p>Numerical values of Treatment-Exposure Levels for Experimental Units.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCdist$LRC</code></td>
+<td>
+<p>Numerical values of the LRC for the Cluster containing each Unit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>infoclus</code></td>
+<td>
+<p>Integer value of Number of Informative Clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>infounits</code></td>
+<td>
+<p>Integer value of Number of Units within Informative Clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCmean</code></td>
+<td>
+<p>Numerical value of mean(LRCdist$LRC) = Weighted Average of
+LRCtabl$LRC values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRCstde</code></td>
+<td>
+<p>Numerical value of sqrt(var(LRCdist$LRC)) = Weighted Standard
+Deviation of LRCtabl$LRC values.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Bob Obenchain &lt;wizbob@att.net&gt;</p>
+
+
+<h3>References</h3>
+
+<p>Obenchain RL. (2010) The Local Control Approach using JMP. Chapter 7 of
+<b>Analysis of Observational Health Care Data using SAS</b>, <em>Cary, NC:SAS Press</em>,
+pages 151-192.
+</p>
+<p>Obenchain RL. (2019) <b>NU.Learning_in_R.pdf</b> http://localcontrolstatistics.org 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ivadj</code>, <code>ltdagg</code> and <code>NUcompare</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">    data(radon)
+    xvars = c("obesity", "over65", "cursmoke")
+    hclobj = NUcluster(radon, xvars)
+    e = NUsetup(hclobj, radon, lnradon, lcanmort)
+    lrc050 = lrcagg(50, e)
+    lrc050
+    plot(lrc050, e)
+</code></pre>
+
+
+</div>

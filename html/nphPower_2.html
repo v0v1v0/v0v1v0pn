@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cureHR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Control hazard and hazard ratio generation function</h2>
+
+<h3>Description</h3>
+
+<p>Generate control hazard and hazard ratio function used for sample size calculation for cure model
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cureHR(pi0, pi1 = NULL, k0, lmd0, theta, HRType, tchg = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pi0</code></td>
+<td>
+<p>cure rate for the control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi1</code></td>
+<td>
+<p>cure rate for the treatment group, Default: NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k0</code></td>
+<td>
+<p>shape parameter of the Weibull distribution for the control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lmd0</code></td>
+<td>
+<p>rate parameter of the Weibull distribution for the control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>hazard ratio function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HRType</code></td>
+<td>
+<p>hazard ratio function type. <code>susceptible</code> indicates the hazard
+ratio function applies to the susceptible only; <code>overall</code> indicates the hazard
+ratio function applies to the overall population; <code>delayed</code> indicates a cure model
+with delayed treatment effects. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tchg</code></td>
+<td>
+<p>delayed timepoint for <code>HRType</code> = <code>delayed</code>, Default: NULL</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>DETAILS
+The control group has a survival function of <code class="reqn">S_o0=\pi_0+(1-\pi_0)S_0</code>,where
+<code class="reqn">\pi_0</code> is the cure rate and <code class="reqn">S_0</code> is the survival function for the susceptible
+population. For <code>HRType</code> = <code>susceptible</code>, the user also needs to provide
+the cure rate for the experimental group. The provided hazard ratio applies to the susceptible
+population only. The returned hazard ratio function is the overall one. For <code>HRType</code>=<code>delayed</code>,
+the returned hazard ratio is derived based on the paper of Wei and Wu (2020) .
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of components including
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>ctrl_hr</code></td>
+<td>
+<p>a hazard function for the control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hr</code></td>
+<td>
+<p>a hazard ratio function</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Wei, J. and Wu, J., 2020. Cancer immunotherapy trial design with
+cure rate and delayed treatment effect. Statistics in medicine, 39(6), pp.698-708.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>integrate</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">p0 &lt;- 0.2; p1 &lt;- 0.3; param &lt;- c(1, log(2)/12);
+theta_eg &lt;-function(t){t^0*0.7}
+fit &lt;- cureHR(p0, p1, param[1], param[2],theta_eg, HRType="susceptible")
+# with delayed effects
+theta_eg2 &lt;- function(t){(t&lt;=9)+(t&gt;9)*0.7}
+fit2 &lt;- cureHR(p0, p1, param[1], param[2],theta_eg2, HRType="delayed", tchg=9)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,200 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>AscInd</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Ascendency network indices
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates measures of system growth and development: Ascendency,
+Overhead and Capacity for several (sub)networks.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">AscInd(Flow = NULL, Tij = t(Flow), Import = NULL, 
+       Export = NULL, Dissipation = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Flow </code></td>
+<td>
+<p>network matrix with Flow[i,j] the flow from i (row) to j
+(column); component positions in rows and columns must be the same;
+if present, rownames or columnnames denote the compartment names.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tij </code></td>
+<td>
+<p>network matrix where connectance is from column j to row i;
+component positions in rows and columns must be the same ;
+if present, rownames or columnnames denote the compartment names.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Import </code></td>
+<td>
+<p>vector with either the *indices* or the *names* of
+<em>external</em> compartmens from where flow enters the network; the
+indices point to the <b>column</b> positions in <code>Tij</code> (and the
+row positions in Flow).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Export </code></td>
+<td>
+<p>vector with either the *indices* or the *names* of
+<em>external</em> compartmens to where flow leaves the network; the
+indices point to the <b>row</b> positions in <code>Tij</code> (and the
+column positions in Flow).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Dissipation </code></td>
+<td>
+<p>vector with either the *indices* or the *names* to
+<em>external</em> compartments that dissipate flows (e.g. respiration); the
+indices point to the <b>row</b> positions in <code>Tij</code> (and the column
+positions in Flow).
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The mathematical formulation of these indices can be found in the package
+vignette - <em>vignette("NetIndices")</em>.
+</p>
+<p>The PDF can be found in the subdirectory ‘<span class="file">doc</span>’ of the NetIndices package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix with ascendency values (columns) for several subnetworks (rows).
+</p>
+<p>The subnetworks (rows) are:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>total</code></td>
+<td>
+<p> network</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>internal</code></td>
+<td>
+<p> network (excluding flows from and to external)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>import</code></td>
+<td>
+<p> flows</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>export</code></td>
+<td>
+<p> flows; this includes the usuable and unusable flows
+(i.e. +dissipation)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dissipation</code></td>
+<td>
+<p> flows</p>
+</td>
+</tr>
+</table>
+<p>The ascendency indices comprise (columns:)
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>asc</code></td>
+<td>
+<p> the ascendency of the network, a measure of growth and
+development.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overh</code></td>
+<td>
+<p> the overhead of the network.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cap</code></td>
+<td>
+<p> the development capacity of the network, an upper bound
+on ascendency.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ACratio</code></td>
+<td>
+<p> the ratio of ascendency and capacity.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Karline Soetaert &lt;karline.soetaert@nioz.nl&gt;,
+Julius Kipyegon Kones&lt;jkones@uonbi.ac.ke&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Latham LG. 2006. Network flow analysis algorithms.
+Ecological Modelling 192: 586-600.
+</p>
+<p>Ulanowicz RE. 2000. Ascendency: a measure of ecosystem performacne.
+Jorgensen SE, Muller F, editors. Handbook of Ecosystem Theories and
+Management. Lewis Publishers, Boca Raton, p303-315.
+</p>
+<p>Ulanowicz RE, Norden JS. 1990. Symmetrical overhead in flow networks.
+International Journal of System Science 21: 429-437.
+</p>
+<p>Kones, J.K., Soetaert, K., van Oevelen, D. and J.Owino (2009).
+Are network indices robust indicators of food web functioning? a
+Monte Carlo approach.  Ecological Modelling, 220, 370-382.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># The takapoto atoll network
+AscInd(Takapoto, Import = "CO2",
+       Export = c("CO2", "Sedimentation", "Grazing"),
+       Dissipation = "CO2")
+       
+# Conesprings is the example set 1a from Latham 2006.
+as.data.frame(
+    AscInd(Tij = Conesprings, Import = "Inflows",
+    Export = c("Export","Dissipation"), 
+    Dissipation = "Dissipation")
+    )
+</code></pre>
+
+
+</div>

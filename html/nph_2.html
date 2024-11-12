@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>logrank.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Weighted log-rank test</h2>
+
+<h3>Description</h3>
+
+<p>Calculates a weighted log-rank test for the comparison of two groups.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">logrank.test(
+  time,
+  event,
+  group,
+  alternative = c("two.sided", "less", "greater"),
+  rho = 0,
+  gamma = 0,
+  event_time_weights = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>Vector of observed event/censored times</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>logical vector or numeric vector with entries 0 or 1, indicating if an event was observed (TRUE or 1) or the time is censored (FALSE or 0)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>Vector of group allocations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>Either of <code>"two.sided"</code>,<code>"less"</code> or <code>"greater"</code>, specifies if two-sided or respective
+one-sided p-values are calculated. In any case the z test statistic of each included weighted log-rank test
+is based on the (weighted) sum of expected minus observed
+events in the group corresponding to the first factor level of <code>group</code>. Hence a small value of the test statistic corresponds to a
+lower (weighted average) hazard rate in the first group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>Parameter to calculate weights in the rho-gamma family</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>Parameter to calculate weights in the rho-gamma family</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event_time_weights</code></td>
+<td>
+<p>Optional vector of user defined weights. This weight vector needs to have one entry per event time (not per event, as multiple events may
+occur at the same time) and must be sorted by increasing event time.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For a given sample, let <code class="reqn">\mathcal{D}</code> be the set of unique event times.
+For a time-point <code class="reqn">t \in \mathcal{D}</code>, let <code class="reqn">n_{t,ctr}</code> and <code class="reqn">n_{t,trt}</code> be
+the number of patients at risk in the control and treatment group and let
+<code class="reqn">d_{t,ctr}</code> and <code class="reqn">d_{t,trt}</code> be the respective number of events.
+The expected number of events in the control group is calculated under the
+least favorable configuration in <code class="reqn">H_0</code>,
+<code class="reqn">\lambda_{ctr}(t) = \lambda_{trt}(t)</code>, as <code class="reqn">e_{t,ctr}=(d_{t,ctr}+d_{t,trt}) 
+\frac{n_{t0}}{n_{t0}+n_{t1}}</code>. The conditional variance of <code class="reqn">d_{t,ctr}</code>
+is calculated from a hypergeometric distribution as
+<code class="reqn">var(d_{t,ctr})=\frac{n_{t0} n_{t1} (d_{t0}+d_{t1}) (n_{t0}+n_{t1} - d_{t0} - d_{t1})}{(n_{t0}+n_{t1})^2 (n_{t0}+n_{t1}-1)}</code>.
+Further define a weighting function <code class="reqn">w(t)</code>.
+The weighted logrank test statistic for a comparison of two groups is
+</p>
+<p style="text-align: center;"><code class="reqn">z=\sum_{t \in \mathcal{D}} w(t) (d_{t,ctr}-e_{t,ctr}) / \sqrt{\sum_{t \in \mathcal{D}} w(t)^2 var(d_{t,ctr})}</code>
+</p>
+
+<p>Under the the least favorable configuration in <code class="reqn">H_0</code>,
+the test statistic is asymptotically standard normally distributed and large
+values of <code class="reqn">z</code> are in favor of the alternative.
+</p>
+<p>The function consider particular weights in the Fleming-Harrington <code class="reqn">\rho-\gamma</code>
+family <code class="reqn">w(t)=\hat S(t-)^\rho (1-\hat S(t-))^\gamma</code>.
+Here, <code class="reqn">\hat{S}(t)=\prod_{s \in \mathcal{D}: s \leq t} 1-\frac{d_{t,ctr}+d_{t,trt}}{n_{t,ctr}+n_{t,trt}}</code>
+is the pooled sample Kaplan-Meier estimator.
+(Note: Prior to package version 2.1, <code class="reqn">S(t)</code> was used in the definition of <code class="reqn">\rho-\gamma</code> weights,
+this was changed to <code class="reqn">S(t-)</code> with version 2.1.)
+Weights <code class="reqn">\rho=0, \gamma=0</code> correspond to the standard logrank test with
+constant weights <code class="reqn">w(t)=1</code>. Choosing <code class="reqn">\rho=0, \gamma=1</code> puts more weight on
+late events, <code class="reqn">\rho=1, \gamma=0</code> puts more weight on early events and
+<code class="reqn">\rho=1, \gamma=1</code> puts most weight on events at intermediate time points.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements:
+</p>
+
+<dl>
+<dt><code>D</code></dt>
+<dd>
+<p>A data frame event numbers, numbers at risk and expected number of events for each event time</p>
+</dd>
+<dt><code>test</code></dt>
+<dd>
+<p>A data frame containing the z and chi-squared statistic for the one-sided and two-sided test, respectively,
+of the null hypothesis of equal hazard functions in both groups and the p-value for the one-sided test.
+</p>
+</dd>
+<dt><code>var</code></dt>
+<dd>
+<p>The estimated variance of the sum of expected minus observed events in the first group.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Robin Ristl, <a href="mailto:robin.ristl@meduniwien.ac.at">robin.ristl@meduniwien.ac.at</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Robin Ristl, Nicolas Ballarini, Heiko Götte, Armin Schüler, Martin Posch, Franz König. Delayed treatment effects, treatment switching and
+heterogeneous patient populations: How to design and analyze RCTs in oncology. Pharmaceutical statistics. 2021; 20(1):129-145.
+</p>
+<p>Thomas R Fleming and David P Harrington. Counting processes and survival analysis. John Wiley &amp; Sons, 2011
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>logrank.maxtest</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">A &lt;- pop_pchaz(Tint = c(0, 90, 1500),
+  lambdaMat1 = matrix(c(0.2, 0.1, 0.4, 0.1), 2, 2) / 365,
+ lambdaMat2 = matrix(c(0.5, 0.2, 0.6, 0.2), 2, 2) / 365,
+ lambdaProg = matrix(c(0.5, 0.5, 0.4, 0.4), 2, 2) / 365,
+ p = c(0.8, 0.2), 
+ timezero = FALSE, discrete_approximation = TRUE)
+B &lt;- pop_pchaz(Tint = c(0, 90, 1500),
+  lambdaMat1 = matrix(c(0.2, 0.1, 0.4, 0.1), 2, 2) / 365,
+ lambdaMat2 = matrix(c(0.5, 0.1, 0.6, 0.1), 2, 2) / 365,
+ lambdaProg = matrix(c(0.5, 0.5, 0.04, 0.04), 2, 2) / 365,
+ p = c(0.8, 0.2), 
+ timezero = FALSE, discrete_approximation = TRUE)
+dat &lt;- sample_fun(A, B, r0 = 0.5, eventEnd = 30,
+  lambdaRecr = 0.5, lambdaCens = 0.25 / 365,
+ maxRecrCalendarTime = 2 * 365,
+ maxCalendar = 4 * 365)
+logrank.test(dat$y, dat$event, dat$group)
+
+
+</code></pre>
+
+
+</div>

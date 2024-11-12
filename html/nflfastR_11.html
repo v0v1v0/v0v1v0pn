@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculate_standings</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute Division Standings and Conference Seeds from Play by Play</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates division standings as well as playoff
+seeds per conference based on either nflverse play-by-play data or nflverse
+schedule data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculate_standings(
+  nflverse_object,
+  tiebreaker_depth = 3,
+  playoff_seeds = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nflverse_object</code></td>
+<td>
+<p>Data object of class <code>nflverse_data</code>. Either schedules
+as returned by <code>fast_scraper_schedules()</code> or <code>nflreadr::load_schedules()</code>.
+Or play-by-play data as returned by <code>load_pbp()</code>, <code>build_nflfastR_pbp()</code>, or
+<code>fast_scraper()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tiebreaker_depth</code></td>
+<td>
+<p>A single value equal to 1, 2, or 3. The default is 3. The
+value controls the depth of tiebreakers that shall be applied. The deepest
+currently implemented tiebreaker is strength of schedule. The following
+values are valid:
+</p>
+
+<dl>
+<dt>tiebreaker_depth = 1</dt>
+<dd>
+<p>Break all ties with a coinflip. Fastest variant.</p>
+</dd>
+<dt>tiebreaker_depth = 2</dt>
+<dd>
+<p>Apply head-to-head and division win percentage tiebreakers. Random if still tied.</p>
+</dd>
+<dt>tiebreaker_depth = 3</dt>
+<dd>
+<p>Apply all tiebreakers through strength of schedule. Random if still tied.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>playoff_seeds</code></td>
+<td>
+<p>Number of playoff teams per conference. If <code>NULL</code> (the
+default), the function will try to split <code>nflverse_object</code> into seasons prior
+2020 (6 seeds) and 2020ff (7 seeds). If set to a numeric, it will be used
+for all seasons in <code>nflverse_object</code>!</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A tibble with NFL regular season standings
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+try({# to avoid CRAN test problems
+  # load nflverse data both schedules and pbp
+  scheds &lt;- fast_scraper_schedules(2014)
+  pbp &lt;- load_pbp(c(2018, 2021))
+
+  # calculate standings based on pbp
+  calculate_standings(pbp)
+
+  # calculate standings based on schedules
+  calculate_standings(scheds)
+})
+
+</code></pre>
+
+
+</div>

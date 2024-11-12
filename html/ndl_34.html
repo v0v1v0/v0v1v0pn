@@ -1,0 +1,200 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RescorlaWagner</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Implementation of the Rescorla-Wagner equations.
+</h2>
+
+<h3>Description</h3>
+
+<p><code>RescorlaWagner</code> implements an iterative simulation based on the Rescorla-Wagner equations. Given a data frame specifying cues, outcomes, and frequencies, it calculates, for a given cue-outcome pair,
+the temporal sequence of developing weights.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RescorlaWagner(cuesOutcomes, traceCue="h", traceOutcome="hand",
+   nruns=1, random=TRUE, randomOrder = NA, alpha=0.1, lambda=1,
+   beta1=0.1, beta2=0.1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cuesOutcomes</code></td>
+<td>
+
+<p>A data frame specifying cues, outcomes, and frequencies of combinations of cues and outcomes.
+In the data frame, cues and outcomes should be character vectors.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traceCue</code></td>
+<td>
+ 
+<p>A character string specifying the cue to be traced over time.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traceOutcome</code></td>
+<td>
+ 
+<p>A character string specifying the outcome to be traced over time.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nruns</code></td>
+<td>
+ 
+<p>An integer specifying the number of times the data have to be presented 
+for learning.  The total number of learning trials is 
+<code>nruns*sum(cuesOutcomes$Frequency)</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+
+<p>A logical specifying whether the order of the learning trials for a given
+run should be randomly reordered.  Can be set to <code>FALSE</code> in case all
+frequencies are 1, and the sequence of learning trials in <code>cuesOutcomes</code>
+is given by the order of the rows.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>randomOrder</code></td>
+<td>
+
+<p>If not <code>NA</code>, a vector specifying the (usually random) order
+of the learning trials.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+
+<p>The salience of the trace cue.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+
+<p>The maximum level of associative strength possible.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta1</code></td>
+<td>
+
+<p>The salience of the situation in which the outcome occurs.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta2</code></td>
+<td>
+
+<p>The salience of the situation in which the outcome does not occur.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The equilibrium weights (Danks, 2003) are also estimated.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of the class <code>"RescorlaWagner"</code>, being a list with
+the following components:
+</p>
+
+<dl>
+<dt><code>weightvector</code></dt>
+<dd>
+<p> A numeric vector with the weights for all 
+<code>nruns*sum(dat[,"Frequency"])</code> training trials.</p>
+</dd>
+<dt><code>equilibriumWeight</code></dt>
+<dd>
+<p> The weight of the cue-outcome link at equilibrium.</p>
+</dd>
+<dt><code>traceCue</code></dt>
+<dd>
+<p> A character string specifying the trace cue.</p>
+</dd>
+<dt><code>traceOutcome</code></dt>
+<dd>
+<p> A character string specifying the trace outcome.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>R. H. Baayen and Antti Arppe
+</p>
+
+
+<h3>References</h3>
+
+<p>Danks, D. (2003). Equilibria of the Rescorla-Wagner model. Journal of
+Mathematical Psychology, 47 (2), 109-121.
+</p>
+<p>Rescorla, R. A., &amp; Wagner, A. R. (1972). A theory of Pavlovian
+conditioning: Variations in the effectiveness of reinforcement and
+nonreinforcement. In Black, A. H., &amp; Prokasy, W. F. (Eds.),
+Classical conditioning II: Current research and theory (pp. 64-99).
+New York: Appleton-Century-Crofts.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>orthoCoding</code>, <code>plot.RescorlaWagner</code>, <code>numbers</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(lexample)
+lexample$Cues &lt;- orthoCoding(lexample$Word, grams=1)
+lexample.rw &lt;- RescorlaWagner(lexample, nruns=25, 
+   traceCue="h", traceOutcome="hand")
+plot(lexample.rw)
+
+data(numbers)
+traceCues=c( "exactly1", "exactly2", "exactly3", "exactly4",
+   "exactly5", "exactly6", "exactly7", "exactly10", "exactly15")
+traceOutcomes=c("1", "2", "3", "4", "5", "6", "7", "10", "15")
+ylimit=c(0,1)
+par(mfrow=c(3,3),mar=c(4,4,1,1))
+     
+for(i in 1:length(traceCues)) {
+   numbers.rw &lt;- RescorlaWagner(numbers, nruns=1,
+      traceCue=traceCues[i], traceOutcome=traceOutcomes[i])
+    plot(numbers.rw, ylimit=ylimit)
+    mtext(paste(traceCues[i], " - ", traceOutcomes[i], sep=""), 
+       side=3, line=-1, cex=0.7)
+  }
+par(mfrow=c(1,1))
+
+</code></pre>
+
+
+</div>

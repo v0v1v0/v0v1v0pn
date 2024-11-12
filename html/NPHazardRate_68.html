@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>VarBandHazEst</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Variable Bandwidth Hazard Rate Estimator</h2>
+
+<h3>Description</h3>
+
+<p>Implements the adaptive variable bandwidth hazard rate estimator of <a href="http://dx.doi.org/10.1080/03610920802364088">Bagkavos and Patil (2009)</a>. The estimate itself is an extension of the classical kernel hazard rate estimator of <a href="https://projecteuclid.org/download/pdf_1/euclid.aos/1176346265">Tanner and Wong (1983)</a> implemented in <code>HazardRateEst</code>. The difference is that instead of <code class="reqn">h</code>, the variable bandwidth estimate uses bandwidth <code class="reqn">h \lambda(X_i)^{-1/2}</code>. This particular choice cancels the second order term in the bias expansion of the hazard rate estimate and thus it is expected to result in a more precise estimation compared to <code>HazardRateEst</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">VarBandHazEst(xin, xout, kfun, h1, h2, ci)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p>A vector of data points.  Missing values not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xout</code></td>
+<td>
+<p>A vector of points at which the hazard rate function will be estimated. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kfun</code></td>
+<td>
+<p>Kernel function to use. Supported kernels: Epanechnikov, Biweight, Gaussian, Rectangular, Triangular, HigherOrder</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h1</code></td>
+<td>
+<p>A scalar, pilot bandwidth. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h2</code></td>
+<td>
+<p>A scalar, variable kernel (adaptive) bandwidth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>A vector of censoring indicators: 1's  indicate uncensored observations, 0's correspond to censored obs.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Implements the adaptive variable bandwidth hazard rate estimator of Bagkavos and Patil (2009), Comm. Statist. Theory and Methods.
+</p>
+<p style="text-align: center;"><code class="reqn">\hat \lambda_v(x;h_1, h_2) = \sum_{i=1}^n \hat \lambda^{-1/2}(x;h_1 ) \frac{K_{h_2}\left \{ (x-X_{(i)})\hat \lambda^{-1/2}(x;h_1 ) \right \}\delta_{(i)}}{n-i+1}</code>
+</p>
+
+<p>The pilot bandwidth <code class="reqn">h_1</code> is determined by an optimal bandwidth rule such as <code>PlugInBand</code>. and used as input to the pilot kernel estimate, implemented by <code>HazardRateEst</code>.
+</p>
+
+<ul><li>
+<p> TO DO: Insert a  rule for the adaptive bandwidth  <code class="reqn">h_2</code>. </p>
+</li></ul>
+<h3>Value</h3>
+
+<p>A vector with the values of the function at the designated points xout.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="http://dx.doi.org/10.1080/03610920802364088">Bagkavos and Patil (2009), Variable Bandwidths for Nonparametric Hazard Rate Estimation, Communications in Statistics - Theory and Methods, 38:7, 1055-1078</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>HazardRateEst, TransHazRateEst, PlugInBand </code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+plot(x, HazardRate(x, "weibull", .6, 1),  type="l",
+     xlab = "x", ylab="Hazard rate") #plot true hazard rate function
+SampleSize &lt;- 100
+mat&lt;-matrix(nrow=SampleSize, ncol=20)
+for(i in 1:20)
+{
+  ti&lt;- rweibull(SampleSize, .6, 1)#draw a random sample from the actual distribution
+  ui&lt;-rexp(SampleSize, .05)       #draw a random sample from the censoring distribution
+  cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+  x1&lt;-pmin(ti,ui)                 #this is the observed sample
+  cen&lt;-rep.int(1, SampleSize)     #censoring indicators
+  cen[which(ti&gt;ui)]&lt;-0            #censored values correspond to zero
+
+  h2&lt;-DefVarBandRule(ti, cen)     #Deafult Band. Rule - Weibull Reference
+  huse1&lt;-  PlugInBand(x1, x,   cen, Biweight)
+  mat[,i]&lt;- VarBandHazEst(x1, x, Epanechnikov, huse1,h2, cen) #Var. bandwidth est.
+}
+lines(x, rowMeans(mat) , lty=2)   #draw the average  vb estimate
+</code></pre>
+
+
+</div>

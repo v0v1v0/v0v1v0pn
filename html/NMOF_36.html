@@ -1,0 +1,287 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gridSearch</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Grid Search
+</h2>
+
+<h3>Description</h3>
+
+<p>Evaluate a function for a given list of arguments.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gridSearch(fun, levels, ..., lower, upper, npar = 1L, n = 5L,
+           printDetail = TRUE,
+           method = NULL,
+           mc.control = list(), cl = NULL,
+           keepNames = FALSE, asList = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+
+<p>a function of the form <code>fun(x, ...)</code>, with <code>x</code> being a
+numeric vector or a list
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels</code></td>
+<td>
+
+<p>a list of levels for the arguments (see Examples)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>objects passed to <code>fun</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+
+<p>a numeric vector. Ignored if levels are explicitly specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+
+<p>a numeric vector. Ignored if levels are explicitly specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+
+<p>the number of parameters. Must be supplied if <code>lower</code> and
+<code>upper</code> are to be expanded; see Details. Ignored when <code>levels</code> are
+explicitly specified, or when <code>lower</code>/<code>upper</code> are used and
+at least one has length greater than one. See Examples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>the number of levels. Default is 5. Ignored if levels are explicitly specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>printDetail</code></td>
+<td>
+
+<p>print information on the number of objective function evaluations
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>can be <code>loop</code> (the default), <code>multicore</code>
+or <code>snow</code>. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mc.control</code></td>
+<td>
+
+<p>a list containing settings that will be passed to <code>mclapply</code> if
+<code>method</code> is <code>multicore</code>. Must be a list of named
+elements; see the documentation of <code>mclapply</code> in <span class="pkg">parallel</span>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+<p>default is <code>NULL</code>. If method <code>snow</code> is used, this must be a
+cluster object or an integer (the number of cores).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keepNames</code></td>
+<td>
+
+<p><code>logical</code>: should the names of <code>levels</code> be kept?
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>asList</code></td>
+<td>
+
+<p>does <code>fun</code> expect a list? Default is <code>FALSE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A grid search can be used to find ‘good’ parameter values for a
+function. In principle, a grid search has an obvious deficiency: as
+the length of <code>x</code> (the first argument to <code>fun</code>) increases,
+the number of necessary function evaluations grows exponentially. Note
+that <code>gridSearch</code> will not warn about an unreasonable number of
+function evaluations, but if <code>printDetail</code> is <code>TRUE</code> it will
+print the required number of function evaluations.
+</p>
+<p>In practice, grid search is often better than its reputation. If a
+function takes only a few parameters, it is often a reasonable approach
+to find ‘good’ parameter values.
+</p>
+<p>The function uses the mechanism of <code>expand.grid</code> to create
+the list of parameter combinations for which <code>fun</code> is evaluated; it
+calls <code>lapply</code> to evaluate <code>fun</code> if
+<code>method == "loop"</code> (the default).
+</p>
+<p>If <code>method</code> is <code>multicore</code>, then function <code>mclapply</code>
+from package <span class="pkg">parallel</span> is used. Further settings for
+<code>mclapply</code> can be passed through the list <code>mc.control</code>. If
+<code>multicore</code> is chosen but the functionality is not available,
+then <code>method</code> will be set to <code>loop</code> and a warning is
+issued. If <code>method == "snow"</code>, the function <code>clusterApply</code>
+from package <span class="pkg">parallel</span> is used. In this case, the argument <code>cl</code>
+must either be a cluster object (see the documentation of
+<code>clusterApply</code>) or an integer. If an integer, a cluster will be
+set up via <code>makeCluster(c(rep("localhost", cl)), type = "SOCK")</code>
+(and <code>stopCluster</code> is called when the function is exited). If
+<code>snow</code> is chosen but not available or <code>cl</code> is not specified,
+then <code>method</code> will be set to <code>loop</code> and a warning is issued.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>minfun</code></td>
+<td>
+<p>the minimum of <code>fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minlevels</code></td>
+<td>
+<p>the levels that give this minimum.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>values</code></td>
+<td>
+<p>a list. All the function values of <code>fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels</code></td>
+<td>
+<p>a list. All the levels for which <code>fun</code> was evaluated.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">testFun &lt;- function(x)
+    x[1L] + x[2L]^2
+
+sol &lt;- gridSearch(fun = testFun, levels = list(1:2, c(2, 3, 5)))
+sol$minfun
+sol$minlevels
+
+## specify all levels
+levels &lt;- list(a = 1:2, b = 1:3)
+res &lt;- gridSearch(testFun, levels)
+res$minfun
+sol$minlevels
+
+## specify lower, upper and npar
+lower &lt;- 1; upper &lt;- 3; npar &lt;- 2
+res &lt;- gridSearch(testFun, lower = lower, upper = upper, npar = npar)
+res$minfun
+sol$minlevels
+
+## specify lower, upper, npar and n
+lower &lt;- 1; upper &lt;- 3; npar &lt;- 2; n &lt;- 4
+res &lt;- gridSearch(testFun, lower = lower, upper = upper, npar = npar, n = n)
+res$minfun
+sol$minlevels
+
+## specify lower, upper and n
+lower &lt;- c(1,1); upper &lt;- c(3,3); n &lt;- 4
+res &lt;- gridSearch(testFun, lower = lower, upper = upper, n = n)
+res$minfun
+sol$minlevels
+
+## specify lower, upper (auto-expanded) and n
+lower &lt;- c(1,1); upper &lt;- 3; n &lt;- 4
+res &lt;- gridSearch(testFun, lower = lower, upper = upper, n = n)
+res$minfun
+sol$minlevels
+
+
+
+## non-numeric inputs
+test_fun &lt;- function(x) {
+    -(length(x$S) + x$N1 + x$N2)
+}
+
+ans &lt;- gridSearch(test_fun,
+                  levels = list(S  = list("a", c("a", "b"), c("a", "b", "c")),
+                                N1 = 1:5,
+                                N2 = 101:105),
+                  asList = TRUE, keepNames = TRUE)
+ans$minlevels
+## $S
+## [1] "a" "b" "c"
+##
+## $N1
+## [1] 5
+##
+## $N2
+## [1] 105
+
+</code></pre>
+
+
+</div>

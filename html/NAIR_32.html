@@ -1,0 +1,210 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>labelClusters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Label Clusters in a Network Graph Plot
+</h2>
+
+<h3>Description</h3>
+
+<p>Functions for labeling the clusters in network graph plots with their cluster
+IDs.
+The user can specify a cluster-level property by which to rank the clusters,
+labeling only those clusters above a specified rank.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">labelClusters(
+  net,
+  plots = NULL,
+  top_n_clusters = 20,
+  cluster_id_col = "cluster_id",
+  criterion = "node_count",
+  size = 5, color = "black",
+  greatest_values = TRUE
+)
+
+addClusterLabels(
+  plot,
+  net,
+  top_n_clusters = 20,
+  cluster_id_col = "cluster_id",
+  criterion = "node_count",
+  size = 5,
+  color = "black",
+  greatest_values = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+
+<p>A <code>list</code> of network objects conforming to the output of
+<code>buildRepSeqNetwork()</code> or
+<code>generateNetworkObjects()</code>.
+See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+
+<p>Specifies which plots in <code>net$plots</code> to annotate.
+Accepts a character vector of element names or a numeric vector of element
+position indices.
+The default <code>NULL</code> annotates all plots.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+
+<p>A <code>ggraph</code> object containing the network graph plot.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>top_n_clusters</code></td>
+<td>
+
+<p>A positive integer specifying the number of clusters to label. Those with the
+highest rank according to the <code>criterion</code> argument will be labeled.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_id_col</code></td>
+<td>
+
+<p>Specifies the column of <code>net$node_data</code> containing
+the variable for cluster membership.
+Accepts a character string containing the column name.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+
+<p>Can be used to specify a cluster-level network property by which to rank the
+clusters. Non-default values are ignored unless <code>net$cluster_data</code> exists and
+corresponds to the cluster membership variable specified by <code>cluster_id_col</code>.
+Accepts a character string containing a column name of <code>net$cluster_data</code>.
+The property must be quantitative for the ranking to be meaningful.
+By default, clusters are ranked by node count, which is computed based on the
+cluster membership values if necessary.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+
+<p>The font size of the cluster ID labels. Passed to the <code>size</code> argument of
+<code>geom_node_text()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+
+<p>The color of the cluster ID labels. Passed to the <code>color</code> argument of
+<code>geom_node_text()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>greatest_values</code></td>
+<td>
+
+<p>Logical. Controls whether clusters are ranked according to the greatest or
+least values of the property specified by the <code>criterion</code> argument. If
+<code>TRUE</code>, clusters with greater values will be ranked above those with
+lower values, thereby receiving a higher priority to be labeled.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The list <code>net</code> must contain the named elements
+<code>igraph</code> (of class <code>igraph</code>),
+<code>adjacency_matrix</code> (a <code>matrix</code> or
+<code>dgCMatrix</code> encoding edge connections),
+and <code>node_data</code> (a <code>data.frame</code> containing node metadata),
+all corresponding to the same network. The lists returned by
+<code>buildRepSeqNetwork()</code> and
+<code>generateNetworkObjects()</code>
+are examples of valid inputs for the <code>net</code> argument.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>labelClusters()</code> returns a copy of <code>net</code> with the specified plots
+annotated.
+</p>
+<p><code>addClusterLabels()</code> returns an annotated copy of <code>plot</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>addClusterMembership()</code>,
+<code>getClusterStats()</code>,
+<code>generateNetworkGraphPlots()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+network &lt;- buildRepSeqNetwork(
+  toy_data, "CloneSeq",
+  cluster_stats = TRUE,
+  color_nodes_by = "cluster_id",
+  color_scheme = "turbo",
+  color_legend = FALSE,
+  plot_title = NULL,
+  plot_subtitle = NULL,
+  size_nodes_by = 1
+)
+
+network &lt;- labelClusters(network)
+
+network$plots$cluster_id
+</code></pre>
+
+
+</div>

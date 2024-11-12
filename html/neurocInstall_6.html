@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neuro_install</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Neuroconductor Installer</h2>
+
+<h3>Description</h3>
+
+<p>Install function for neuroconductor packages
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neuro_install(
+  repo,
+  release = c("stable", "current"),
+  release_repo = latest_neuroc_release(),
+  upgrade_dependencies = FALSE,
+  type = getOption("pkgType"),
+  ...
+)
+
+neuroc_install(...)
+
+neurocLite(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>repo</code></td>
+<td>
+<p>Package name in neuroconductor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>release</code></td>
+<td>
+<p>Stable or current (development) versions/branches</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>release_repo</code></td>
+<td>
+<p>Repository for release repository, passed to
+<code>install.packages</code>.  If <code>release_repo = "github"</code>,
+then it will install using GitHub.  If you set this using
+<code>make_release_version</code> or specify the URL directly,
+it will override <code>release</code> option.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upgrade_dependencies</code></td>
+<td>
+<p>Should dependencies be updated?
+passed to <code>install</code> if using
+<code>release_repo = "github"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character, indicating the type of package to download and
+install, passed to <code>install.packages</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments passed to
+<code>install.packages</code>
+or <code>install_github</code> if
+<code>release_repo = "github"</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Result from  <code>install.packages</code> or
+<code>install_github</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+   tlib = tempfile()
+   dir.create(tlib, showWarnings = FALSE)
+   system.time({
+   install.packages("oro.asl",
+   lib = tlib,
+   repos = "https://neuroconductor.org/releases/2019/12/")
+   })
+   repos = getOption("repos")
+   print(repos)
+   #if (repos["CRAN"] == "@CRAN@") {
+   #    repos["CRAN"] = "https://cloud.r-project.org"
+   #    options(repos = repos)
+   #}
+   options(repos = NULL)
+   print(getOption("repos"))
+   neuro_install("oro.asl", lib = tlib,
+   release_repo = "https://neuroconductor.org/releases/2019/12")
+   options(repos = repos)
+ 
+
+   neuro_install("cifti", type = "source", lib = tlib)
+   neuro_install("cifti",
+   release_repo = latest_neuroc_release("stable"),
+   lib = tlib)
+
+   neuro_install("cifti", release_repo = "github")
+
+
+</code></pre>
+
+
+</div>

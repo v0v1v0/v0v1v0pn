@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>f_wrap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Wrap Strings</h2>
+
+<h3>Description</h3>
+
+<p>Wrap strings by splitting n width, and paste collapsing with new line
+characters.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">f_wrap(
+  x,
+  width = 15,
+  sep = "\n",
+  exdent = 0,
+  indent = 0,
+  equal.lines = FALSE,
+  collapse = FALSE,
+  ...
+)
+
+ff_wrap(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of text strings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width</code></td>
+<td>
+<p>A positive integer giving the target column for wrapping lines
+in the output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>A new line separator (defaults to <code>"\n"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdent</code></td>
+<td>
+<p>A non-negative integer specifying the indentation of subsequent
+lines in paragraphs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indent</code></td>
+<td>
+<p>A non-negative integer giving the indentation of the first line
+in a paragraph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal.lines</code></td>
+<td>
+<p>logical.  If <code>TRUE</code> the number of lines for each
+element will be made the same by appending additional '\n' to those below
+the max number of lines.  This is useful for legend spacing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>collapse</code></td>
+<td>
+<p>logical. If <code>TRUE</code> then <code>x</code> is collapsed via
+<code>paste(x, collapse = ' ')</code> before processing.  This is useful for
+muti-line text wrapping of longer subtitles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed to <code>strwrap</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a string vector with wrapped new line characters.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>strwrap</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">cat(f_wrap('really long label names are the pits'))
+cat(f_wrap('really long label names are the pits', width = 20, exdent = 2))
+f_wrap(c('really long label names are the pits and make us sad',
+    'not nearly so long'), equal.lines = TRUE)
+
+## Not run: 
+library(tidyverse); library(gridExtra)
+
+set.seed(10)
+dat &lt;- data_frame(
+    level = c('Not Involved', 'Somewhat Involved Single Group',
+        'Somewhat Involved Multiple Groups', 'Very Involved One Group',
+        'Very Involved Multiple Groups'
+    ),
+    n = sample(1:10, length(level))
+) %&gt;%
+    mutate(
+        level = factor(level, levels = unique(level)),
+        `%` = n/sum(n)
+    )
+
+gridExtra::grid.arrange(
+    dat %&gt;%
+        ggplot(aes(level, `%`)) +
+            geom_col() +
+            labs(title = 'Yucky Labels', y = NULL),
+
+    dat %&gt;%
+        ggplot(aes(level, `%`)) +
+            geom_col() +
+            scale_x_discrete(labels = f_wrap) +
+            scale_y_continuous(labels = ff_prop2percent(digits = 0)) +
+            labs(title = 'Happy Labels', y = NULL),
+
+    ncol = 1, heights = c(.45, .55)
+)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

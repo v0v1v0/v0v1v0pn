@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dLogWeib</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Log transformed Weibull distribution.</h2>
+
+<h3>Description</h3>
+
+<p><code>dLogWeib</code> and <code>rLogWeib</code> provide a log-transformed Weibull distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dLogWeib(x, shape = 1, scale = 1, log = 0)
+
+rLogWeib(n = 1, shape = 1, scale = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A continuous random variable on the real line, where y=exp(x) and y ~ dweib(shape,scale).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>Shape parameter of y ~ dweib(shape,scale).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>Scale parameter of y ~ dweib(shape,scale).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical flag to toggle returning the log density.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of random variables. Currently limited to 1, as is common in nimble. See ?replicate for an alternative.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The density or log density of x, such that x = log(y) and y ~ dweib(shape,scale).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>David R.J. Pleydell
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Create a Weibull random variable, and transform it to the log scale
+n      = 100000
+shape = 2
+scale = 2
+y      = rweibull(n=n, shape=shape, scale=scale)
+x      = log(y)
+
+## Plot histograms of the two random variables
+oldpar &lt;- par()
+par(mfrow=n2mfrow(2))
+## Plot 1
+hist(x, n=100, freq=FALSE, xlab="x = log(y)",
+     main="Histogram of log-transformed random numbers from rweibull.")
+curve(dLogWeib(x, shape=shape, scale=scale), -6, 3, n=1001, col="red", add=TRUE, lwd=3)
+## Plot 2: back-transformed
+xNew = replicate(n=n, rLogWeib(n=1, shape=shape, scale=scale))
+yNew = exp(xNew)
+hist(yNew, n=100, freq=FALSE, xlab="y = exp(x)", main="Histogram of random numbers from rLogWeib.")
+curve(dweibull(x, shape=shape, scale=scale), 0, 100, n=1001, col="red", lwd=3, add=TRUE)
+par(oldpar)
+
+## Create a NIMBLE model that uses this transformed distribution
+code = nimbleCode({
+  log(y) ~ dLogWeib(shape=shape, scale=scale)
+})
+
+
+## Build &amp; compile the model
+const = list (shape=shape, scale=scale)
+modelR = nimbleModel(code=code, const=const)
+simulate(modelR)
+modelC = compileNimble(modelR)
+
+## Configure, build and compile an MCMC
+conf  = configureMCMC(modelC)
+mcmc  = buildMCMC(conf=conf)
+cMcmc = compileNimble(mcmc)
+
+## Run the MCMC
+x = as.vector(runMCMC(mcmc=cMcmc, niter=50000))
+y = exp(x)
+
+## Plot MCMC output
+oldpar &lt;- par()
+par(mfrow=n2mfrow(3))
+## Plot 1: MCMC trajectory
+plot(x, typ="l")
+## Plot 2: taget density on unbounded sampling scale
+hist(x, n=100, freq=FALSE, main="Histogram of MCMC samples", xlab="x = log(y)")
+curve(dLogWeib(x, shape=shape, scale=scale), -5, 3, n=1001, col="red", lwd=3, add=TRUE)
+## Plot 3: taget density on bounded scale
+hist(y, n=100, freq=FALSE, xlab="y = exp(x)",
+     main="Histogram of back-transformed MCMC samples")
+curve(dweibull(x, shape=shape, scale=scale), 0, 8, n=1001, col="red", lwd=3, add=TRUE)
+par(oldpar)
+
+</code></pre>
+
+
+</div>

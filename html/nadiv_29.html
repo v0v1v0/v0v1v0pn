@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>makeTinv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates components of the additive genetic relationship matrix and its inverse</h2>
+
+<h3>Description</h3>
+
+<p>This returns the Cholesky decomposition of the numerator relationship matrix
+and its inverse. It can also be used to obtain coefficients of inbreeding for
+the pedigreed population.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">makeTinv(pedigree, ...)
+
+## Default S3 method:
+makeTinv(pedigree, ...)
+
+## S3 method for class 'numPed'
+makeTinv(pedigree, ...)
+
+## Default S3 method:
+makeT(pedigree, genCol = NULL, ...)
+
+## Default S3 method:
+makeDiiF(pedigree, f = NULL, ...)
+
+## S3 method for class 'numPed'
+makeDiiF(pedigree, f = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pedigree</code></td>
+<td>
+<p>A pedigree where the columns are ordered ID, Dam, Sire</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments to be passed to methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genCol</code></td>
+<td>
+<p>An integer value indicating the generation up to which the
+<code>T</code> matrix is to be created (corresponding to columns of the lower
+triangle <code>T</code> matrix). The first generation is numbered 0, default is
+all generations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>A numeric vector indicating the level of inbreeding. See Details</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Missing parents (e.g., base population) should be denoted by either 'NA',
+'0', or '*'.
+</p>
+<p>The function implements an adaptation of the Meuwissen and Luo (1992)
+algorithm (particularly, following the description of the algorithm in
+Mrode 2005) with some code borrowed from the <code>inverseA</code> function by
+Jarrod Hadfield in the <code>MCMCglmm</code> package. 
+</p>
+<p>The inbreeding level of individuals can be provided instead of calculated.
+<code>f</code> must be a vector that is the same length as individuals in the
+pedigree. Supplied coefficients of inbreeding are used instead of being 
+calculated until a <code>NA</code> is encountered in the vector. From this position
+on, then coefficients of inbreeding are calculated and replace entries in 
+<code>f</code>. This can be used, for example, to calculate coefficients of
+inbreeding for later generations when coefficients of inbreeding in the
+previous generations have already been calculated. To specify an average
+coefficient of inbreeding for the base population, modify the pedigree to
+include a single phantom parent and specify this individual's non-zero
+coefficient of inbreeding in <code>f</code> with the rest of the terms as NA.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a <code>list</code>:
+</p>
+
+<dl>
+<dt>Tinv </dt>
+<dd>
+<p>the inverse of the Cholesky decomposition of the additive
+genetic relationship matrix (Ainv=Tinv' Dinv Tinv) in sparse matrix form</p>
+</dd>
+<dt>D </dt>
+<dd>
+<p>the diagonal D matrix of the A=TDT' Cholesky decomposition.
+Contains the variance of Mendelian sampling. Matches
+the order of the first/ID column of the pedigree.</p>
+</dd> 
+<dt>f </dt>
+<dd>
+<p>the individual coefficients of inbreeding for each individual 
+in the pedigree (matches the order of the first/ID column of the
+pedigree).</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p><a href="mailto:matthewwolak@gmail.com">matthewwolak@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Meuwissen, T.H.E &amp; Luo, Z. 1992. Computing inbreeding 
+coefficients in large populations. Genetics, Selection, Evolution. 24:305-313.
+</p>
+<p>Mrode, R.A. 2005. Linear Models for the Prediction of Animal Breeding
+Values, 2nd ed.  Cambridge, MA: CABI Publishing.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>makeAinv</code>, <code>makeA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+ Tinv &lt;- makeTinv(Mrode2)
+ # Method for a numeric pedigree (of `nadiv` class "numPed")
+ nPed &lt;- numPed(Mrode2)
+ Tinv2 &lt;- makeTinv(nPed)
+
+ ########
+ DF &lt;- makeDiiF(Mrode2)
+ # manually construct the inverse of the relatedness matrix `Ainv`
+ Dinv &lt;- DF$D  #&lt;-- not the inverse yet, just copying the object
+ Dinv@x &lt;- 1 / DF$D@x  #&lt;-- inverse of a diagonal matrix
+ handAinv &lt;- crossprod(Tinv, Dinv) %*% Tinv
+   # make the A-inverse directly
+   Ainv &lt;- makeAinv(Mrode2)$Ainv
+   # Compare
+   handAinv
+   Ainv
+   stopifnot(all(abs((Ainv - handAinv)@x) &lt; 1e-6))
+
+ # supply previous generation coefficients of inbreeding (f)
+ ## to keep from re-calculating their f when analyzing subsequent generations
+ DF &lt;- makeDiiF(Mrode2[, 1:3])
+ Mrode2$gen &lt;- genAssign(Mrode2)
+ Mrode2$f_full &lt;- DF$f
+ Mrode2$f_in &lt;- with(Mrode2, c(f_full[gen &lt;= 1], rep(NA, sum(gen &gt; 1))))
+ DF2 &lt;- makeDiiF(Mrode2[, 1:3], f = Mrode2$f_in) 
+ stopifnot(identical(DF, DF2))
+
+</code></pre>
+
+
+</div>

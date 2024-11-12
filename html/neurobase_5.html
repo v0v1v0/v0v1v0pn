@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>applyEmptyImageDimensions-methods</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply Subsetting from Empty Image Dimensions</h2>
+
+<h3>Description</h3>
+
+<p>Simple wrapper for subsetting an image with indices, 
+dropping empty dimensions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">applyEmptyImageDimensions(img, inds, reorient = FALSE, ...)
+
+## S4 method for signature 'nifti'
+applyEmptyImageDimensions(img, inds, reorient = FALSE, ...)
+
+## S4 method for signature 'character'
+applyEmptyImageDimensions(img, inds, reorient = FALSE, ...)
+
+## S4 method for signature 'factor'
+applyEmptyImageDimensions(img, inds, reorient = FALSE, ...)
+
+## S4 method for signature 'list'
+applyEmptyImageDimensions(img, inds, reorient = FALSE, ...)
+
+## S4 method for signature 'array'
+applyEmptyImageDimensions(img, inds, reorient = FALSE, ...)
+
+## S4 method for signature 'anlz'
+applyEmptyImageDimensions(img, inds, reorient = FALSE, ...)
+
+## S4 method for signature 'ANY'
+applyEmptyImageDimensions(img, inds, reorient = FALSE, ...)
+
+apply_empty_dim(img, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>image, nifti object, or array</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inds</code></td>
+<td>
+<p>indices of subset from <code>getEmptyImageDimensions</code> or
+<code>dropEmptyImageDimensions</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reorient</code></td>
+<td>
+<p>Should image be reoriented if a filename?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Object of class <code>nifti</code> or <code>array</code> if <code>nifti</code>
+is not supplied
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>apply_empty_dim</code> is a shorthand for 
+<code>applyEmptyImageDimensions</code> with all the same arguments.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getEmptyImageDimensions</code>, 
+<code>dropEmptyImageDimensions</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(5)
+dims = rep(10, 3)
+arr = array(rnorm(prod(dims)), dim = dims)
+arr[,,10] = 0
+nim = oro.nifti::nifti(arr)
+inds = getEmptyImageDimensions(nim)
+inds_arr = getEmptyImageDimensions(arr)
+testthat::expect_equal(inds, inds_arr)
+
+out = applyEmptyImageDimensions(nim, inds = inds)
+out_arr = applyEmptyImageDimensions(arr, inds = inds)
+testthat::expect_equal(out_arr, array(out, dim = dim(out)))
+out = apply_empty_dim(nim, inds = inds)
+
+set.seed(5)
+dims = rep(10, 3)
+arr = array(rnorm(prod(dims)), dim = dims)
+arr[,,10] = 0
+nim = oro.nifti::nifti(arr)
+inds = getEmptyImageDimensions(nim)
+rnifti = RNifti::asNifti(nim)
+timg = tempimg(nim)
+limg = list(factor(timg), factor(timg))
+apply_empty_dim(nim, inds = inds)
+func = function(...) applyEmptyImageDimensions(..., inds = inds)
+func(arr)
+func(nim)
+func(rnifti)
+func(timg)
+func(limg)
+
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nonparametric_naive_bayes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-Parametric Naive Bayes Classifier</h2>
+
+<h3>Description</h3>
+
+<p><code>nonparametric_naive_bayes</code> is used to fit the Non-Parametric Naive Bayes model in which all class conditional distributions are non-parametrically estimated using kernel density estimator and are assumed to be independent.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nonparametric_naive_bayes(x, y, prior = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>matrix with metric predictors (only numeric matrix accepted).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>class vector (character/factor/logical).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>vector with prior probabilities of the classes. If unspecified, the class proportions for the training set are used. If present, the probabilities should be specified in the order of the factor levels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters to <code>density</code> (for instance <code>adjust</code>, <code>kernel</code> or <code>bw</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This is a specialized version of the Naive Bayes classifier, in which all features take on real values (numeric/integer) and class conditional probabilities are estimated in a non-parametric way with the kernel density estimator (KDE). By default Gaussian kernel is used and the smoothing bandwidth is selected according to the Silverman's 'rule of thumb'. For more details, please see the references and the documentation of <code>density</code> and <code>bw.nrd0</code>.
+</p>
+<p>The Non-Parametric Naive Bayes is available in both, <code>naive_bayes()</code> and <code>nonparametric_naive_bayes()</code>. The latter does not provide a substantial speed up over the general <code>naive_bayes()</code> function but it is meant to be more transparent and user friendly.
+</p>
+<p>The <code>nonparametric_naive_bayes</code> and <code>naive_bayes()</code> are equivalent when the latter is used with <code>usekernel = TRUE</code> and <code>usepoisson = FALSE</code>; and a matrix/data.frame contains only numeric variables.
+</p>
+<p>The missing values (NAs) are omitted during the estimation process. Also, the corresponding predict function excludes all NAs from the calculation of posterior probabilities  (an informative warning is always given).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>nonparametric_naive_bayes</code> returns an object of class <code>"nonparametric_naive_bayes"</code> which is a list with following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>list with two components: <code>x</code> (matrix with predictors) and <code>y</code> (class variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels</code></td>
+<td>
+<p>character vector with values of the class variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dens</code></td>
+<td>
+<p>nested list containing <code>density</code> objects for each feature and class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>numeric vector with prior probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the call that produced this object.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Michal Majka, <a href="mailto:michalmajka@hotmail.com">michalmajka@hotmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Silverman, B. W. (1986). Density Estimation for Statistics and Data Analysis. Chapman &amp; Hall.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.nonparametric_naive_bayes</code>, <code>plot.nonparametric_naive_bayes</code>, <code>tables</code>, <code>get_cond_dist</code>, <code>%class%</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># library(naivebayes)
+data(iris)
+y &lt;- iris[[5]]
+M &lt;- as.matrix(iris[-5])
+
+### Train the Non-Parametric Naive Bayes
+nnb &lt;- nonparametric_naive_bayes(x = M, y = y)
+summary(nnb)
+head(predict(nnb, newdata = M, type = "prob"))
+
+###  Equivalent calculation with general naive_bayes function:
+nb &lt;- naive_bayes(M, y, usekernel = TRUE)
+summary(nb)
+head(predict(nb, type = "prob"))
+
+### Change kernel
+nnb_kernel &lt;- nonparametric_naive_bayes(x = M, y = y, kernel = "biweight")
+plot(nnb_kernel, 1, prob = "conditional")
+
+### Adjust bandwidth
+nnb_adjust &lt;- nonparametric_naive_bayes(M, y, adjust = 1.5)
+plot(nnb_adjust, 1, prob = "conditional")
+
+### Change bandwidth selector
+nnb_bw &lt;- nonparametric_naive_bayes(M, y, bw = "SJ")
+plot(nnb_bw, 1, prob = "conditional")
+
+### Obtain tables with conditional densities
+# tables(nnb, which = 1)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,82 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>km.pool</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform Kaplan-Meier estmation over the multiply imputed survival data sets</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates Kaplan-Meier estimates based on Rubin's rules (multiple imputation algorithms) (Rubin, 2004).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">km.pool(obj, time, status)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>A 'nnmi' object, that contains imputed data for the missing covariate and the censored observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>A vector contains the observed time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>status</code></td>
+<td>
+<p>A vector contains the event indicator.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame contains pooled Kaplan-Meier estimates.
+</p>
+
+
+<h3>References</h3>
+
+<p>Rubin DB. Multiple imputation for nonresponse in surveys. New York: John Wiley and Sons; 2004.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# load required packages
+library(NNMIS)
+library(survival)
+
+# load data set - stanford2 in package 'survival'
+data("stanford2")
+head(stanford2)
+attach(stanford2)
+
+# performance multiple imputation on missing covariate t5 and
+# censored observations based on the imputed missing covariates
+imp.dat &lt;- NNMIS(t5, xa=age, xb=age, time=time, event=status, imputeCT=TRUE, Seed = 2016)
+
+# check imputation results
+head(imp.dat$dat.T.NNMI)
+
+# combine inference from imputed data sets using Rubin's rules
+# Kaplan-Meier estimates
+kmfit &lt;- km.pool(imp.dat, time, status)
+plotKM(kmfit)
+
+</code></pre>
+
+
+</div>

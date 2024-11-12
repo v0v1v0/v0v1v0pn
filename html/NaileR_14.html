@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>local_food</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Local food systems survey</h2>
+
+<h3>Description</h3>
+
+<p>These data were collected after a Q-method-like survey on sustainable food systems.
+Participants had to rank how acceptable they found 45 statements about a sustainable food system; then, they were asked if they agreed with 14 other statements.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">local_food
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 573 rows (participants) and 63 columns (questions):
+</p>
+
+<ul>
+<li>
+<p> columns 1-45 statements about food systems
+</p>
+</li>
+<li>
+<p> columns 46-59 opinions
+</p>
+</li>
+<li>
+<p> columns 60-63 personal information
+</p>
+</li>
+</ul>
+<h3>Source</h3>
+
+<p>Applied mathematics department, Institut Agro Rennes-Angers
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+library(FactoMineR)
+library(NaileR)
+data(local_food)
+
+res_mca_food &lt;- MCA(local_food, quali.sup = 46:63,
+ncp = 100, level.ventil = 0.05, graph = FALSE)
+res_hcpc_food &lt;- HCPC(res_mca_food, nb.clust = 3, graph = FALSE)
+don_clust_food &lt;- res_hcpc_food$data.clust
+
+intro_food &lt;- 'A study on sustainable food systems
+was led on several French participants.
+This study had 2 parts. In the first part,
+participants had to rate how acceptable
+"a food system that..." (e.g, "a food system that
+only uses renewable energy") was to them.
+In the second part, they had to say
+if they agreed or disagreed with some statements.'
+intro_food &lt;- gsub('\n', ' ', intro_food) |&gt;
+stringr::str_squish()
+
+req_food &lt;- 'I will give you the answers from one group.
+Please explain who the individuals of this group are,
+what their beliefs are.
+Then, give this group a new name,
+and explain why you chose this name.
+Do not use 1st person ("I", "my"...) in your answer.'
+req_food &lt;- gsub('\n', ' ', req_food) |&gt;
+stringr::str_squish()
+
+res_food &lt;- nail_catdes(don_clust_food, num.var = 64,
+introduction = intro_food,
+request = req_food,
+isolate.groups = TRUE, drop.negative = TRUE)
+res_food[[1]]$response |&gt; cat()
+
+## End(Not run)
+</code></pre>
+
+
+</div>

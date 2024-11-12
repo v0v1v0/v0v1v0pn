@@ -1,0 +1,225 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pickSARdata</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+SAR data set selection
+</h2>
+
+<h3>Description</h3>
+
+<p>Selecting SAR data sets (growth curves) in a batch model according to specified rejection criteria.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pickSARdata(obj_analyseBIN, model = "gok", origin = FALSE, 
+            weight = TRUE, trial = TRUE, nofit.rgd = NULL, 
+            Tn.above.3BG = TRUE, TnBG.ratio.low = NULL, 
+            rseTn.up = NULL, FR.low = NULL, rcy1.range = NULL, 
+            rcy2.range = NULL, rcy3.range = NULL, 
+            rcp1.up = NULL, rcp2.up = NULL, fom.up = NULL, 
+            rcs.up = NULL, use.se = TRUE, norm.dose = NULL, 
+            outpdf = NULL, outfile = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj_analyseBIN</code></td>
+<td>
+<p>list(<b>required</b>): an object of S3 class "analyseBIN" produced by<br> 
+function analyseBINdata or as_analyseBIN</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>character(with default): model used for growth curve fitting, see fitGrowth for available models</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>origin</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be forced to pass the origin</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be fitted using a weighted procedure, 
+see function fitGrowth for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be fitted using other models if the given model fails, see function fitGrowth for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nofit.rgd</code></td>
+<td>
+<p>integer(optional): regenerative doses that will not be used during the fitting. 
+For example, if <code>nofit.rgd=2</code> then the second regenerative dose will not be used during growth curve fitting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tn.above.3BG</code></td>
+<td>
+<p>logical(with default): logical value indicating if aliquot (grain) with Tn below 3 sigma BG should be rejected</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TnBG.ratio.low</code></td>
+<td>
+<p>numeric(optional): lower limit on ratio of initial Tn signal to BG</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rseTn.up</code></td>
+<td>
+<p>numeric(optional): upper limit on relative standard error of Tn in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FR.low</code></td>
+<td>
+<p>numeric(optional): lower limit on fast ratio of Tn</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcy1.range</code></td>
+<td>
+<p>vector(optional): a two-element vector indicating the lower and upper limits on recycling ratio 1, 
+Example: <code>rcy1.range=c(0.9,1.1)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcy2.range</code></td>
+<td>
+<p>vector(optional): a two-element vector indicating the lower and upper limits on recycling ratio 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcy3.range</code></td>
+<td>
+<p>vector(optional): a two-element vector indicating the lower and upper limits on recycling ratio 3</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcp1.up</code></td>
+<td>
+<p>numeric(optional): upper limit on recuperation 1 (i.e., ratio of the<br>
+sensitivity-corrected zero-dose signal to natural-dose signal) in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcp2.up</code></td>
+<td>
+<p>numeric(optional): upper limit on recuperation 2 (i.e., ratio of the<br>
+sensitivity-corrected zero-dose signal to maximum regenerative-dose signal)<br>
+in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fom.up</code></td>
+<td>
+<p>numeric(optional): upper limit on figure of merit (FOM) values of growth curves in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcs.up</code></td>
+<td>
+<p>numeric(optional): upper limit on reduced chi-square (RCS) values of growth curves</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.se</code></td>
+<td>
+<p>logical(with default): logical value indicating if standard errors of values should be used during application of rejection criteria</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.dose</code></td>
+<td>
+<p>numeric(optional): dose value used for SAR data set re-normalisation, 
+for example, if <code>norm.dose=100</code>, then sensitivity-corrected signal for <code>Redose=100</code> obtained 
+through growth curve fitting will be used to re-normalise a SAR data set</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outpdf</code></td>
+<td>
+<p>character(optional): if specified, results of growth curve fitting will be written to 
+a PDF file named <code>"outpdf"</code> and saved to the current work directory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outfile</code></td>
+<td>
+<p>character(optional): if specified, SAR data related quantities will be written
+to a CSV file named <code>"outfile"</code> and saved to the current work directory</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return an invisible list that contains the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>LMpars</code></td>
+<td>
+<p>a list containing optimized parameters of growth curves of selected SAR data sets</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SARdata</code></td>
+<td>
+<p>a data.frame containing selected SAR data sets</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.SARdata</code></td>
+<td>
+<p>a data.frame containing re-normalised SAR data sets,<br>
+it returns <code>NULL</code> if <code>norm.dose=NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agID</code></td>
+<td>
+<p>aliquot or grain ID (i.e., <code>c("NO","Position","Grain")</code>) of selected SAR data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary.info</code></td>
+<td>
+<p>a summary of the SAR data selection</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p>analyseBINdata; fitGrowth; lsNORM; calSARED
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> # Not run.
+ # data(BIN)
+ # obj_pickBIN &lt;- pickBINdata(BIN, Position=1:48, Grain=0, 
+ #                            LType="OSL", view=FALSE)
+ # obj_analyseBIN &lt;- analyseBINdata(obj_pickBIN, nfchn=3, nlchn=20) 
+ # pickSARdata(obj_analyseBIN, model="gok", fom.up=3, outpdf="SARdata")
+</code></pre>
+
+
+</div>

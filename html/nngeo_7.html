@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>st_connect</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create lines between features of two layers</h2>
+
+<h3>Description</h3>
+
+<p>Returns a line layer with line segments which connect the nearest feature(s) from <code>y</code> for each feature in <code>x</code>. This is mostly useful for graphical purposes (see Note and Examples below).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">st_connect(x, y, ids = NULL, progress = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Object of class <code>sf</code> or <code>sfc</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Object of class <code>sf</code> or <code>sfc</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ids</code></td>
+<td>
+<p>A sparse list representation of features to connect such as returned by function <code>st_nn</code>. If <code>NULL</code> the function automatically calculates <code>ids</code> using <code>st_nn</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress</code></td>
+<td>
+<p>Display progress bar? (default <code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed to <code>st_nn</code> when calculating <code>ids</code>, such as <code>k</code> and <code>maxdist</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Object of class <code>sfc</code> with geometry type <code>LINESTRING</code>
+</p>
+
+
+<h3>Note</h3>
+
+<p>The segments are straight lines, i.e., they correspond to shortest path assuming planar geometry regardless of CRS. Therefore, the lines should serve as a graphical indication of features that are nearest to each other; the exact shortest path between features should be calculated by other means, such as <code>geosphere::greatCircle</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Nearest 'city' per 'town'
+l = st_connect(towns, cities, progress = FALSE)
+plot(st_geometry(towns), col = "darkgrey")
+plot(st_geometry(l), add = TRUE)
+plot(st_geometry(cities), col = "red", add = TRUE)
+
+# Ten nearest 'towns' per 'city'
+l = st_connect(cities, towns, k = 10, progress = FALSE)
+plot(st_geometry(towns), col = "darkgrey")
+plot(st_geometry(l), add = TRUE)
+plot(st_geometry(cities), col = "red", add = TRUE)
+
+## Not run: 
+
+# Nearest 'city' per 'town', search radius of 30 km
+cities = st_transform(cities, 32636)
+towns = st_transform(towns, 32636)
+l = st_connect(cities, towns, k = nrow(towns), maxdist = 30000, progress = FALSE)
+plot(st_geometry(towns), col = "darkgrey")
+plot(st_geometry(l), add = TRUE)
+plot(st_buffer(st_geometry(cities), units::set_units(30, km)), border = "red", add = TRUE)
+
+# The 20-nearest towns for each water body, search radius of 100 km
+water = st_transform(water, 32636)
+l = st_connect(water[-1, ], towns, k = 20, maxdist = 100000, progress = FALSE)
+plot(st_geometry(water[-1, ]), col = "lightblue", border = NA)
+plot(st_geometry(towns), col = "darkgrey", add = TRUE)
+plot(st_geometry(l), col = "red", add = TRUE)
+
+
+# The 2-nearest water bodies for each town, search radius of 100 km
+l = st_connect(towns, water[-1, ], k = 2, maxdist = 100000)
+plot(st_geometry(water[-1, ]), col = "lightblue", border = NA, extent = l)
+plot(st_geometry(towns), col = "darkgrey", add = TRUE)
+plot(st_geometry(l), col = "red", add = TRUE)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

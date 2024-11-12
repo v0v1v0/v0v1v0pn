@@ -1,0 +1,268 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cnm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum Likelihood Estimation of a Nonparametric Mixture Model</h2>
+
+<h3>Description</h3>
+
+<p>Function <code>cnm</code> can be used to compute the maximum likelihood estimate
+of a nonparametric mixing distribution (NPMLE) that has a one-dimensional
+mixing parameter. or simply the mixing proportions with support points held
+fixed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cnm(
+  x,
+  init = NULL,
+  model = c("npmle", "proportions"),
+  maxit = 100,
+  tol = 1e-06,
+  grid = 100,
+  plot = c("null", "gradient", "probability"),
+  verbose = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data object of some class that is fully defined by the user. The
+user needs to supply certain functions as described below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>list of user-provided initial values for the mixing distribution
+<code>mix</code> and the structural parameter <code>beta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the type of model that is to estimated: the non-parametric MLE
+(if <code>npmle</code>), or mixing proportions only (if <code>proportions</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>maximum number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>a tolerance value needed to terminate an algorithm. Specifically,
+the algorithm is terminated, if the increase of the log-likelihood value
+after an iteration is less than <code>tol</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid</code></td>
+<td>
+<p>number of grid points that are used by the algorithm to locate
+all the local maxima of the gradient function. A larger number increases the
+chance of locating all local maxima, at the expense of an increased
+computational cost. The locations of the grid points are determined by the
+function <code>gridpoints</code> provided by each individual mixture family, and
+they do not have to be equally spaced. If needed, a <code>gridpoints</code>
+function may choose to return a different number of grid points than
+specified by <code>grid</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>whether a plot is produced at each iteration. Useful for
+monitoring the convergence of the algorithm. If <code>="null"</code>, no plot is
+produced. If <code>="gradient"</code>, it plots the gradient curves and if
+<code>="probability"</code>, the <code>plot</code> function defined by the user for the
+class is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>verbosity level for printing intermediate results in each
+iteration, including none (= 0), the log-likelihood value (= 1), the maximum
+gradient (= 2), the support points of the mixing distribution (= 3), the
+mixing proportions (= 4), and if available, the value of the structural
+parameter beta (= 5).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A finite mixture model has a density of the form
+</p>
+<p style="text-align: center;"><code class="reqn">f(x; \pi, \theta, \beta) = \sum_{j=1}^k \pi_j f(x; \theta_j,
+\beta).</code>
+</p>
+
+<p>where <code class="reqn">\pi_j \ge 0</code> and <code class="reqn">\sum_{j=1}^k \pi_j </code><code class="reqn"> =1</code>.
+</p>
+<p>A nonparametric mixture model has a density of the form
+</p>
+<p style="text-align: center;"><code class="reqn">f(x; G) = \int f(x; \theta) d G(\theta),</code>
+</p>
+<p> where <code class="reqn">G</code> is a mixing distribution that is
+completely unspecified. The maximum likelihood estimate of the nonparametric
+<code class="reqn">G</code>, or the NPMLE of <code class="reqn">G</code>, is known to be a discrete distribution
+function.
+</p>
+<p>Function <code>cnm</code> implements the CNM algorithm that is proposed in Wang
+(2007) and the hierarchical CNM algorithm of Wang and Taylor (2013). The
+implementation is generic using S3 object-oriented programming, in the sense
+that it works for an arbitrary family of mixture models defined by the user.
+The user, however, needs to supply the implementations of the following
+functions for their self-defined family of mixture models, as they are
+needed internally by function <code>cnm</code>:
+</p>
+<p><code>initial(x, beta, mix, kmax)</code>
+</p>
+<p><code>valid(x, beta)</code>
+</p>
+<p><code>logd(x, beta, pt, which)</code>
+</p>
+<p><code>gridpoints(x, beta, grid)</code>
+</p>
+<p><code>suppspace(x, beta)</code>
+</p>
+<p><code>length(x)</code>
+</p>
+<p><code>print(x, ...)</code>
+</p>
+<p><code>weight(x, ...)</code>
+</p>
+<p>While not needed by the algorithm for finding the solution, one may also
+implement
+</p>
+<p><code>plot(x, mix, beta, ...)</code>
+</p>
+<p>so that the fitted model can be shown graphically in a user-defined way.
+Inside <code>cnm</code>, it is used when <code>plot="probability"</code> so that the
+convergence of the algorithm can be graphically monitored.
+</p>
+<p>For creating a new class, the user may consult the implementations of these
+functions for the families of mixture models included in the package, e.g.,
+<code>npnorm</code> and <code>nppois</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>the name of the mixture family that is used to fit to the
+data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.iterations</code></td>
+<td>
+<p>number of iterations required by the algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.gradient</code></td>
+<td>
+<p>maximum value of the gradient function, evaluated at the
+beginning of the final iteration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convergence</code></td>
+<td>
+<p>convergence code. <code>=0</code> means a success, and
+<code>=1</code> reaching the maximum number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ll</code></td>
+<td>
+<p>log-likelihood value at convergence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mix</code></td>
+<td>
+<p>MLE of the mixing distribution, being an object of the class
+<code>disc</code> for discrete distributions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>value of the structural parameter, that is held fixed throughout
+the computation.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Yong Wang &lt;yongwang@auckland.ac.nz&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Wang, Y. (2007). On fast computation of the non-parametric maximum
+likelihood estimate of a mixing distribution. <em>Journal of the Royal
+Statistical Society, Ser. B</em>, <b>69</b>, 185-198.
+</p>
+<p>Wang, Y. (2010). Maximum likelihood computation for fitting semiparametric
+mixture models. <em>Statistics and Computing</em>, <b>20</b>, 75-86
+</p>
+<p>Wang, Y. and Taylor, S. M. (2013). Efficient computation of nonparametric
+survival functions via a hierarchical mixture formulation. <em>Statistics
+and Computing</em>, <b>23</b>, 713-725.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nnls</code>, <code>npnorm</code>, <code>nppois</code>,
+<code>cnmms</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Simulated data
+x = rnppois(1000, disc(c(1,4), c(0.7,0.3))) # Poisson mixture
+(r = cnm(x))
+plot(r, x)
+
+x = rnpnorm(1000, disc(c(0,4), c(0.3,0.7)), sd=1) # Normal mixture
+plot(cnm(x), x)                        # sd = 1
+plot(cnm(x, init=list(beta=0.5)), x)   # sd = 0.5
+mix0 = disc(seq(min(x$v),max(x$v), len=100)) # over a finite grid
+plot(cnm(x, init=list(beta=0.5, mix=mix0), model="p"),
+    x, add=TRUE, col="blue")          # An approximate NPMLE
+
+## Real-world data
+data(thai)
+plot(cnm(x &lt;- nppois(thai)), x)     # Poisson mixture
+
+data(brca)
+plot(cnm(x &lt;- npnorm(brca)), x)     # Normal mixture
+
+
+</code></pre>
+
+
+</div>

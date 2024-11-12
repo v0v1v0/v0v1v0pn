@@ -1,0 +1,390 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>render.d3movie</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Render out a web-based animation of a networkDynamic object using ndtv-d3 player app
+</h2>
+
+<h3>Description</h3>
+
+<p>Exports a self-contained HTML file including an SVG animation of the networkDynamic object and displays it in a web browser.   See <code>render.animation</code> for details of animation construction.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">render.d3movie(net, filename=tempfile(fileext = '.html'), 
+                           render.par=list(tween.frames=10,
+                                           show.time=TRUE,
+                                           show.stats=NULL,
+                                           extraPlotCmds=NULL,
+                                           initial.coords=0),
+                           plot.par=list(bg='white'),
+                           d3.options, 
+                           output.mode=c('HTML','JSON','inline','htmlWidget'),
+                           script.type=c('embedded','remoteSrc'),
+                           launchBrowser=TRUE,
+                           verbose=TRUE,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+
+<p>The network (usally <code>networkDynamic</code>) object to be rendered, usually containing pre-computed vertex positions as dynamic attributes cached by <code>compute.animation</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filename</code></td>
+<td>
+
+<p>The file name of the HTML or JSON file to be generated. Must end the proper file extension ('.json' for JSON '.html' for HTML) for correct browser display.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>render.par</code></td>
+<td>
+
+<p>Named list of parameters to specify the behavior of the animation.
+</p>
+
+<dl>
+<dt><code>tween.frames</code></dt>
+<dd>
+<p>the number of interpolated frames to generate between each calculated network layout (default 10).</p>
+</dd>
+<dt><code>show.time</code></dt>
+<dd>
+<p>If <code>TRUE</code>, labels the plot with onset and terminus time for each slice.</p>
+</dd>
+<dt><code>show.stats</code></dt>
+<dd>
+<p><code>NULL</code>, or a string containing a formula to be passed to summary.stergm to display the network statistics for the current slice on the plot. e.g. <code>"~edges+gwesp(0,fixed=TRUE)"</code></p>
+</dd>
+<dt><code>extraPlotCmds</code></dt>
+<dd>
+<p><code>NULL</code>, or additional plot commands to draw on each frame of the animation.</p>
+</dd>
+<dt><code>initial.coords</code></dt>
+<dd>
+<p>default initial coords to be assigned to vertices. Can be a two-column numeric coordinate matrix, or a numeric values to be formed into a matrix.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.par</code></td>
+<td>
+
+<p>list of ‘high-level’ plotting control arguments to be passed to <code>par</code>. e.g. <code>bg</code> <code>main</code> for background color, margins, fonts, etc. MANY OF THESE ARE NOT YET SUPPORTED BY THE NDTV-D3 PLAYER. See list in Details below.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d3.options</code></td>
+<td>
+
+<p>list of options to configure ndtv-d3 player app. <code>list(
+                             animationDuration=800,
+                             scrubDuration=0,
+                             enterExitAnimationFactor=0,
+                             nodeSizeFactor=0.01,
+                             playControls=TRUE,
+                             animateOnLoad=FALSE,
+                             slider=TRUE,
+                             debugFrameInfo=FALSE,
+                             debugDurationControl=FALSE,
+                           )</code> See Details below for explanations
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output.mode</code></td>
+<td>
+
+<p>character string, one of <code>'HTML'</code>,<code>'JSON'</code> or <code>'inline'</code>.  The first exports an HTML file with embedded javascript player app including the JSON data structure describing the animation. The second just exports the JSON data structure (for loading into an existing page).  The 3rd renders the HTML inside an iframe tag and supresses all other output in an attempt to make it embedable in rmarkdown documents. The 4th generates a <code>htmlWidget</code> suitable for displaying in an RStudio plot window or Shiny app. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>script.type</code></td>
+<td>
+<p>if <code>script.type='embedded'</code>, the scripts will be embedded directly in the output html page. This option is the most portable, but will require large file sizes. If <code>script.type='remoteSrc'</code>, only the links to the scripts will be included, so the page will require an active internet connection to play the animation. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>launchBrowser</code></td>
+<td>
+
+<p>if TRUE, after exporting the file R will attempt to open it in a browser
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>If <code>TRUE</code>, update text will be printed to the console to report the status of the rendering process.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Other parameters to control network rendering. See <code>plot.network.default</code>. Most parameters can be set to TEA attribute names, or specified as a function to be evaluated at each timestep.  NOT ALL PLOT PARAMS ARE IMPLEMENTED YET</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Animations are generated using a process nearly identical to <code>render.animation</code>. However, instead of using R's plotting functions and the <code>animation</code> library, the relevant information is cached and written into a JSON-formatted file, embedded into a web page along with <code>ndtv-d3</code> player, and displayed in a web browser as an interactive HTML5 SVG animation.
+</p>
+<p>The <code>ndtv-d3</code> player app is not a fully-featured R plot device.  It only attempts to emulate the elements of plot normally used by <code>plot.network</code> and it understands the graphic elements and a somewhat higher level so that it will be able to handle interaction with edge and vertex objects.
+</p>
+<p>However,  <code>ndtv-d3</code> includes several nice features to support exploring the network: 
+</p>
+
+<ul>
+<li>
+<p>controller buttons for playing, pausing and stepping through the animation
+</p>
+</li>
+<li>
+<p>time slider for jumping and 'scrubing' to parts of the movie
+</p>
+</li>
+<li>
+<p>pan and zoom into the network using the mouse-wheel
+</p>
+</li>
+<li>
+<p>click on vertices and edges to reveal their ids or abitrary text attached using the <code>vertex.tooltip</code> and <code>edge.tooltip</code> properties
+</p>
+</li>
+<li>
+<p>double-click on a vertex to highlight all of the connected edges and vertices
+</p>
+</li>
+</ul>
+<p>If passed a static network, by default only a single slice will be rendered and the time slider and controllers will be disabled. For consistency with <code>plot.network</code> the static mode also supports passing in a matrix of coordinates via <code>coord</code> argument which will prevent the default call to <code>compute.animation</code>.
+</p>
+<p>Another advantage of <code>ndtv-d3</code> is that it does not require installing system libraries such as <code>ffmpeg</code> to render out the movie. 
+</p>
+<p>The coordinates for vertex postitions are read from the <code>animation.x</code> and <code>animation.y</code> TEA attributes, normally created using <code>compute.animation</code>
+</p>
+<p>The list of currently supported <code>plot</code>,<code>plot.network</code> and <code>par</code> elements is
+</p>
+
+<dl>
+<dt><code>xlab</code></dt>
+<dd>
+<p>: label caption below the render, on the xaxis</p>
+</dd>
+<dt><code>main</code></dt>
+<dd>
+<p>: main headline above the render</p>
+</dd>
+<dt><code>displaylabels</code></dt>
+<dd>
+<p>: should vertex labels be displayed?</p>
+</dd>
+<dt><code>usearrows</code></dt>
+<dd>
+<p>: should arrows be drawn on edges?</p>
+</dd>
+<dt><code>bg</code></dt>
+<dd>
+<p>: background color (must be html compatible? need to check this)</p>
+</dd>
+<dt><code>vertex.cex</code></dt>
+<dd>
+<p>: vertex expansion scale factor</p>
+</dd>
+<dt><code>label</code></dt>
+<dd>
+<p>: labels for vertices (defaults to vertex.names)</p>
+</dd>
+<dt><code>label.col</code></dt>
+<dd>
+<p>: color of vertex labels</p>
+</dd>
+<dt><code>label.cex</code></dt>
+<dd>
+<p>: vertex label expansion scale factor</p>
+</dd>
+<dt><code>vertex.col</code></dt>
+<dd>
+<p>: vertex fill colors</p>
+</dd>
+<dt><code>vertex.sides</code></dt>
+<dd>
+<p>: number of sides for vertex polygon (shape)</p>
+</dd>
+<dt><code>vertex.rot</code></dt>
+<dd>
+<p>: rotation for vertex polygon</p>
+</dd>
+<dt><code>vertex.border</code></dt>
+<dd>
+<p>: color of vertex border stroke</p>
+</dd>
+<dt><code>vertex.lwd</code></dt>
+<dd>
+<p>: width of vertex border stroke</p>
+</dd>
+<dt><code>edge.lwd</code></dt>
+<dd>
+<p>: width of edge stroke</p>
+</dd>
+<dt><code>edge.col</code></dt>
+<dd>
+<p>: edge stroke color</p>
+</dd>   
+</dl>
+<p>All of the above properties can be defined as dynamic (TEA) attributes. Noteably, curved edges, edge labels, and label positioning are not yet implemented and will be ignored. The <code>main</code> and <code>xlab</code> params will not be positioned exactly as they are in <code>plot</code>
+</p>
+<p>There are a few special plot parameters that are only supported by <code>render.d3move</code>:
+</p>
+
+<dl>
+<dt><code>vertex.tooltip</code></dt>
+<dd>
+<p> arbitrary text or html to be displayed when a vertex is clicked (default is the vertex id)</p>
+</dd>
+<dt><code>edge.tooltip</code></dt>
+<dd>
+<p> arbitrary text or html to be displayed when an edge is clicked (default is the edge id)</p>
+</dd>
+<dt><code>vertex.css.class</code></dt>
+<dd>
+<p>properties for adding arbitrary class attributes for use in CSS styling of vertices</p>
+</dd>
+<dt><code>edge.css.class</code></dt>
+<dd>
+<p>properties for adding arbitrary class attributes for use in CSS styling of edges</p>
+</dd>
+<dt><code>vertex.label.css.class</code></dt>
+<dd>
+<p>properties for adding arbitrary class attributes for use in CSS styling of vertex labels</p>
+</dd>
+</dl>
+<p>ndtv-d3 has its own configuration properties passed in via the <code>d3.options</code> argument list, shown below with their default properties. Values which are set to <code>NULL</code> or omitted will be set to the ndtv-d3 player defaults.  
+</p>
+
+<dl>
+<dt><code>animationDuration=800</code></dt>
+<dd>
+<p> Duration (milliseconds) of each animation step during play or step actions</p>
+</dd>
+<dt><code>enterExitAnimationFactor=0</code></dt>
+<dd>
+<p> Fraction (0-1) of total step animation time that edge enter/exit animations should take</p>
+</dd>
+<dt><code>nodeSizeFactor=0.01</code></dt>
+<dd>
+<p> Sets default node (vertex) size, as a fraction of viewport size. </p>
+</dd>
+<dt><code>playControls=TRUE</code></dt>
+<dd>
+<p> Show the player controls (play, pause, step, etc)</p>
+</dd>
+<dt><code>animateOnLoad=FALSE</code></dt>
+<dd>
+<p> If true, animation will start playing as soon as page loads.</p>
+</dd>
+<dt><code>slider=TRUE</code></dt>
+<dd>
+<p> Show the time slider control</p>
+</dd>
+<dt><code>margin=list(x=20,y=10)</code></dt>
+<dd>
+<p> SVG margins - may be overridden when setting fixed aspect ratio </p>
+</dd>
+<dt><code>debugFrameInfo=FALSE</code></dt>
+<dd>
+<p>Show the slice timing info in corner</p>
+</dd>
+<dt><code>durationControl=TRUE</code></dt>
+<dd>
+<p>Show a control to change speed of animation under the menu in the upper right corner</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>If <code>output.mode='HTML'</code>, a file will be generated including the necessary javascript and JSON data structures
+If <code>output.mode='JSON'</code>, a JSON file will be generated including a section describing all of the rendered slices, and a seperate section including the entire networkDynamic object.
+If <code>output.mode='inline'</code>, HTML code for an iframe elment suitible for embedding in markdown documents will be printed, all other output supressed.  
+If <code>output.mode='htmlWidget'</code>, a <code>htmlwidgets</code> object will be returned which, will produce appropriate html when 'printed' or emedded in a Shiny app
+</p>
+
+
+<h3>Note</h3>
+
+<p>This is a very preliminary draft implementation. The animations preform poorly in the Linux Firefox browser, but are ok in Firefox on other platforms and excellent in the Chrome web browser. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>skyebend@uw.edu
+</p>
+
+
+<h3>References</h3>
+
+<p>The github repository for the ndtv-d3 javascript library is at <a href="https://github.com/statnet/ndtv-d3/">https://github.com/statnet/ndtv-d3/</a> (which is the statnet release fork of <a href="https://github.com/michalgm/ndtv-d3/">https://github.com/michalgm/ndtv-d3/</a>)
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See also the ndtv-d3 vignette <a href="https://cran.r-project.org/package=ndtv/vignettes/ndtv.pdf">https://cran.r-project.org/package=ndtv/vignettes/ndtv.pdf</a>, ndtv workshop <a href="https://statnet.org/workshop-ndtv/ndtv_workshop.html">https://statnet.org/workshop-ndtv/ndtv_workshop.html</a>, <code>render.animation</code>, <code>compute.animation</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># render an interactive SVG animation of short.stergm.sim and open it in a browser
+data(short.stergm.sim)
+render.d3movie(short.stergm.sim)
+
+# render interactive widget in rmarkdown or RStudio plot window
+render.d3movie(short.stergm.sim,output.mode='htmlWidget')
+
+# render a static network as interactive SVG with lots of html tooltip info
+data(emon)
+render.d3movie(emon[[5]],
+    vertex.tooltip=paste(emon[[5]]%v%'vertex.names',
+      emon[[5]]%v%'Command.Rank.Score',
+      emon[[5]]%v%'Sponsorship',
+      sep="&lt;br&gt;"),
+    edge.tooltip=paste('Frequency:',emon[[5]]%e%'Frequency'),
+    edge.lwd='Frequency')
+
+## Not run: 
+
+
+# alternate code for embeding in rmarkdown
+```{r,results='asis'}
+render.d3movie(short.stergm.sim,output.mode='inline')
+```
+
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

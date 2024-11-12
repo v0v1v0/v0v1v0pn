@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Option Pricing via Monte-Carlo Simulation
+</h2>
+
+<h3>Description</h3>
+
+<p>Functions to calculate the theoretical prices of options through
+simulation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gbm(npaths, timesteps, r, v, tau, S0,
+    exp.result = TRUE, antithetic = FALSE)
+gbb(npaths, timesteps, S0, ST, v, tau,
+    log = FALSE, exp.result = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>npaths</code></td>
+<td>
+
+<p>the number of paths
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timesteps</code></td>
+<td>
+
+<p>timesteps per path
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>the mean per unit of time
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>the variance per unit of time
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>time
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S0</code></td>
+<td>
+<p>initial value
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ST</code></td>
+<td>
+<p>final value of Brownian bridge
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>logical: construct bridge from log series?
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exp.result</code></td>
+<td>
+<p>logical: compute <code>exp</code> of the final
+path, or return log values?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>antithetic</code></td>
+<td>
+
+<p>logical: if <code>TRUE</code>, random numbers for only
+<code>npaths/2</code> are drawn, and the random numbers
+are mirrored
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>gbm</code> generates sample paths of geometric Brownian motion.
+</p>
+<p><code>gbb</code> generates sample paths of a Brownian bridge by first creating
+paths of Brownian motion <code>W</code> from time <code>0</code> to time <code>T</code>,
+with <code>W_0</code> equal to zero.  Then, at each <code>t</code>, it subtracts <code>t/T
+* W_T</code> and adds <code>S0*(1-t/T)+ST*(t/T)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix of sample paths; each column contains the price path of an
+asset. Even with only a single time-step, the matrix will have two
+rows (the first row is <code>S0</code>).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>vanillaOptionEuropean</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## price a European option
+## ... parameters
+npaths &lt;- 5000   ## increase number to get more precise results
+timesteps &lt;- 1
+S0   &lt;- 100
+ST   &lt;- 100
+tau  &lt;- 1
+r &lt;- 0.01
+v   &lt;- 0.25^2
+
+## ... create paths
+paths &lt;- gbm(npaths, timesteps, r, v, tau, S0 = S0)
+
+## ... a helper function
+mc &lt;- function(paths, payoff, ...)
+    payoff(paths, ...)
+
+## ... a payoff function (European call)
+payoff &lt;- function(paths, X, r, tau)
+    exp(-r * tau) * mean(pmax(paths[NROW(paths), ] - X, 0))
+
+## ... compute and check
+mc(paths, payoff, X = 100, r = r, tau = tau)
+vanillaOptionEuropean(S0, X = 100, tau = tau, r = r, v = v)$value
+
+
+## compute delta via forward difference
+## (see Gilli/Maringer/Schumann, ch. 9)
+h &lt;- 1e-6                 ## a small number
+rnorm(1)                  ## make sure RNG is initialised
+rnd.seed &lt;- .Random.seed  ## store current seed
+paths1 &lt;- gbm(npaths, timesteps, r, v, tau, S0 = S0)
+.Random.seed &lt;- rnd.seed
+paths2 &lt;- gbm(npaths, timesteps, r, v, tau, S0 = S0 + h)
+
+delta.mc &lt;- (mc(paths2, payoff, X = 100, r = r, tau = tau)-
+             mc(paths1, payoff, X = 100, r = r, tau = tau))/h
+delta &lt;- vanillaOptionEuropean(S0, X = 100, tau = tau,
+                               r = r, v = v)$delta
+delta.mc - delta
+
+
+
+
+## a fanplot
+steps &lt;- 100
+paths &lt;- results &lt;- gbm(1000, steps, r = 0, v = 0.2^2,
+                        tau = 1, S0 = 100)
+
+levels &lt;- seq(0.01, 0.49, length.out = 20)
+greys  &lt;- seq(0.9,  0.50, length.out = length(levels))
+
+## start with an empty plot ...
+plot(0:steps, rep(100, steps+1), ylim = range(paths),
+     xlab = "", ylab = "", lty = 0, type = "l")
+
+## ... and add polygons
+for (level in levels) {
+
+    l &lt;- apply(paths, 1, quantile, level)
+    u &lt;- apply(paths, 1, quantile, 1 - level)
+    col &lt;- grey(greys[level == levels])
+    polygon(c(0:steps, steps:0), c(l, rev(u)),
+            col = col, border = NA)
+
+    ## add border lines
+    ## lines(0:steps, l, col = grey(0.4))
+    ## lines(0:steps, u, col = grey(0.4))
+}
+
+</code></pre>
+
+
+</div>

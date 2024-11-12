@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LIVE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Logistic-regression Instrumental Variables Estimator</h2>
+
+<h3>Description</h3>
+
+<p>Binary endogenous variables are commonly encountered in program evaluations using observational data. This is a two-stage approach to estimate the dummy endogenous treatment effect using high-dimensional instrumental variables (IV). In the first stage, we use a penalized logistic reduced form model to accommodate both the binary nature of the endogenous treatment and the high-dimensionality of instrumental variables. In the second stage, we replace the original treatment variable by its estimated propensity score and run a least squares regression to obtain a penalized Logistic-regression Instrumental Variables Estimator (LIVE). If the structural equation model is also high-dimensional, one could use DS-LIVE in this package for selecting both the control variables and IVs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LIVE(
+  y,
+  x,
+  z,
+  penalty = c("SCAD", "MCP", "lasso"),
+  nfolds = 5,
+  endogenous.index = c(),
+  gamma = 3.7,
+  alpha = 1,
+  lambda.min = 0.05,
+  nlambda = 100,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Response variable, an N x 1 vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The design matrix, including endogenous variable, the value of endogenous variable is 0 or 1 (binary).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>The instrumental variables matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>The penalty to be applied to the model. Either "SCAD" (the default), "MCP", or "lasso".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfolds</code></td>
+<td>
+<p>The response number of folds - default is 5. Although nfolds can be as large as the sample size (leave-one-out CV), it is not recommended for large datasets. Smallest value allowable is nfolds=3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endogenous.index</code></td>
+<td>
+<p>Specify which variables in design matrix are endogenous variables, the variable corresponds to the value 1 is endogenous variables,  the  variable corresponds to the value 0 is exogenous variable, the default is all endogenous variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>The tuning parameter of the MCP/SCAD penalty. Default is 3.7.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Tuning parameter for the Mnet estimator which controls the relative contributions from the MCP/SCAD penalty and the ridge, or L2 penalty. alpha=1 is equivalent to MCP/SCAD penalty, while alpha=0 would be equivalent to ridge regression. However, alpha=0 is not supported; alpha may be arbitrarily small, but not exactly 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.min</code></td>
+<td>
+<p>The smallest value for lambda, as a fraction of lambda.max, default is 0.05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlambda</code></td>
+<td>
+<p>The number of lambda values, default is 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This is a two stage estimation. In the first stage, a high-dimensional logistic reduced form model with penalty (such as SCAD, lasso, etc.) is used to approximate the optimal instrument. In the second stage, we replace the original treatment variable by its estimated propensity score and run a least squares regression to obtain the penalized Logistic-regression Instrumental Variables Estimator (LIVE). The large dimensional IV could be the original variables or the functional transformations such as series, B-spline functions, etc.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of type <code>LIVE</code> which is a list with the following
+components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>The coefficients of x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.min</code></td>
+<td>
+<p>The value of lambda that gives minimum cvm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind</code></td>
+<td>
+<p>The selected variables of z.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xhat</code></td>
+<td>
+<p>The xhat estimated by z.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IVnum</code></td>
+<td>
+<p>The number of instrumented variables after filtering.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>Same as above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Same as above.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Qingliang Fan, KongYu He, Wei Zhong
+</p>
+
+
+<h3>References</h3>
+
+<p>Wei Zhong, Wei Zhou, Qingliang Fan and Yang Gao (2020), “Dummy Endogenous Treatment Effect Estimation Using High-Dimensional Instrumental Variables”, working paper.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Logistic-regression Instrumental Variables Estimator
+data("LIVEdata")
+y=LIVEdata[,1]
+x=LIVEdata[,2]
+z=LIVEdata[,3:52]
+res = LIVE(y,x,z,penalty='SCAD',gamma = 3.7,alpha = 1,lambda.min = 0.05)
+</code></pre>
+
+
+</div>

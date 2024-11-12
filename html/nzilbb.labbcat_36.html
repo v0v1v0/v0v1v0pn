@@ -1,0 +1,395 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getMatches</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Search for tokens.</h2>
+
+<h3>Description</h3>
+
+<p>Searches through transcripts for tokens matching the given pattern.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getMatches(
+  labbcat.url,
+  pattern,
+  participant.expression = NULL,
+  transcript.expression = NULL,
+  main.participant = TRUE,
+  aligned = NULL,
+  matches.per.transcript = NULL,
+  words.context = 0,
+  max.matches = NULL,
+  overlap.threshold = NULL,
+  anchor.confidence.min = NULL,
+  page.length = 1000,
+  no.progress = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>labbcat.url</code></td>
+<td>
+<p>URL to the LaBB-CAT instance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pattern</code></td>
+<td>
+<p>An object representing the pattern to search for.
+</p>
+<p>This can be:
+</p>
+
+<ul>
+<li>
+<p>A string, representing a search of the orthography layer - spaces are
+taken to be word boundaries
+</p>
+</li>
+<li>
+<p>A single named list, representing a one-column search - names are taken to be layer IDs
+</p>
+</li>
+<li>
+<p>A list of named lists, representing a multi-column search - the outer list
+represents the columns of the search matrix where each column 'immediately
+follows' the previous, and the names of the inner lists are taken to be layer IDs 
+</p>
+</li>
+<li>
+<p>A named list fully replicating the structure of the search matrix in the
+LaBB-CAT browser interface, with one element called “columns”, containing a
+named list for each column.
+</p>
+<p>Each element in the “columns” named list contains an element named “layers”, whose
+value is a named list for patterns to match on each layer, and optionally an
+element named “adj”, whose value is a number representing the maximum distance, in
+tokens, between this column and the next column - if “adj” is not specified, the
+value defaults to 1, so tokens are contiguous.
+</p>
+<p>Each element in the “layers” named list is named after the layer it matches, and the
+value is a named list with the following possible elements:
+</p>
+
+<ul>
+<li>
+<p><em>pattern</em>  A regular expression to match against the label
+</p>
+</li>
+<li>
+<p><em>min</em>  An inclusive minimum numeric value for the label
+</p>
+</li>
+<li>
+<p><em>max</em>  An exclusive maximum numeric value for the label
+</p>
+</li>
+<li>
+<p><em>not</em>  TRUE to negate the match
+</p>
+</li>
+<li>
+<p><em>anchorStart</em>  TRUE to anchor to the start of the annotation on this layer
+(i.e. the matching word token will be the first at/after the start of the matching
+annotation on this layer)
+</p>
+</li>
+<li>
+<p><em>anchorEnd</em>  TRUE to anchor to the end of the annotation on this layer
+(i.e. the matching word token will be the last before/at the end of the matching
+annotation on this layer)
+</p>
+</li>
+<li>
+<p><em>target</em>  TRUE to make this layer the target of the search; the
+results will contain one row for each match on the target layer
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>Examples of valid pattern objects include:
+</p>
+<pre>
+## the word 'the' followed immediately by a word starting with an orthographic vowel
+pattern &lt;- "the [aeiou]"
+
+## a word spelt with "k" but pronounced "n" word initially
+pattern &lt;- list(orthography = "k.*", phonemes = "n.*")
+
+## the word 'the' followed immediately by a word starting with an phonemic vowel
+pattern &lt;- list(
+    list(orthography = "the"),
+    list(phonemes = "[cCEFHiIPqQuUV0123456789~#\$@].*"))
+
+## the word 'the' followed immediately or with one intervening word by
+## a hapax legomenon (word with a frequency of 1) that doesn't start with a vowel
+pattern &lt;- list(columns = list(
+    list(layers = list(
+           orthography = list(pattern = "the")),
+         adj = 2),
+    list(layers = list(
+           phonemes = list(not = TRUE, pattern = "[cCEFHiIPqQuUV0123456789~#\$@].*"),
+           frequency = list(max = "2")))))
+</pre>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>participant.expression</code></td>
+<td>
+<p>An optional participant query expression for identifying
+participants to search the utterances of. This should be the output of
+expressionFromIds, expressionFromAttributeValue,
+or expressionFromAttributeValues, or more than one concatentated together
+and delimited by ' &amp;&amp; '. If not supplied, utterances of all participants will be searched.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transcript.expression</code></td>
+<td>
+<p>An optional transript query expression for identifying
+transcripts to search in. This should be the output of expressionFromIds,
+expressionFromTranscriptTypes, expressionFromAttributeValue,
+or expressionFromAttributeValues, or more than one concatentated together
+and delimited by ' &amp;&amp; '. If not supplied, all transcripts will be searched.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main.participant</code></td>
+<td>
+<p>TRUE to search only main-participant utterances, FALSE to
+search all utterances.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aligned</code></td>
+<td>
+<p>This parameter is deprecated and will be removed in future versions;
+please use anchor.confidence.min=50 instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>matches.per.transcript</code></td>
+<td>
+<p>Optional maximum number of matches per transcript to
+return. NULL means all matches.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>words.context</code></td>
+<td>
+<p>Number of words context to include in the ‘Before.Match’ and
+‘After.Match’ columns in the results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.matches</code></td>
+<td>
+<p>The maximum number of matches to return, or null to return all.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlap.threshold</code></td>
+<td>
+<p>The percentage overlap with other utterances before
+simultaneous speech is excluded, or null to include overlapping speech.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>anchor.confidence.min</code></td>
+<td>
+<p>The minimum confidence for alignments, e.g.
+</p>
+
+<ul>
+<li>
+<p><em>0</em> – return all alignments, regardless of confidence;
+</p>
+</li>
+<li>
+<p><em>50</em> – return only alignments that have been at least automatically aligned;
+</p>
+</li>
+<li>
+<p><em>100</em> – return only manually-set alignments.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>page.length</code></td>
+<td>
+<p>In order to prevent timeouts when there are a large number of
+matches or the network connection is slow, rather than retrieving matches in one
+big request, they are retrieved using many smaller requests. This parameter
+controls the number of results retrieved per request.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.progress</code></td>
+<td>
+<p>TRUE to supress visual progress bar. Otherwise, progress bar will be
+shown when interactive().</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame identifying matches, containing the following columns:
+</p>
+
+<ul>
+<li>
+<p><em>SearchName</em> A name based on the pattern – the same for all rows
+</p>
+</li>
+<li>
+<p><em>MatchId</em> A unique ID for the matching target token
+</p>
+</li>
+<li>
+<p><em>Transcript</em> Name of the transcript in which the match was found
+</p>
+</li>
+<li>
+<p><em>Participant</em> Name of the speaker
+</p>
+</li>
+<li>
+<p><em>Corpus</em> The corpus of the transcript
+</p>
+</li>
+<li>
+<p><em>Line</em> The start offset of the utterance/line
+</p>
+</li>
+<li>
+<p><em>LineEnd</em> The end offset of the utterance/line
+</p>
+</li>
+<li>
+<p><em>Before.Match</em> Transcript text immediately before the match
+</p>
+</li>
+<li>
+<p><em>Text</em> Transcript text of the match
+</p>
+</li>
+<li>
+<p><em>After.Match</em> Transcript text immediately after the match
+</p>
+</li>
+<li>
+<p><em>Number</em> Row number
+</p>
+</li>
+<li>
+<p><em>URL</em> URL of the first matching word token
+</p>
+</li>
+<li>
+<p><em>Target.word</em> Text of the target word token
+</p>
+</li>
+<li>
+<p><em>Target.word.start</em> Start offset of the target word token
+</p>
+</li>
+<li>
+<p><em>Target.word.end</em> End offset of the target word token
+</p>
+</li>
+<li>
+<p><em>Target.segment</em> Label of the target segment (only present if the segment
+layer is included in the pattern)
+</p>
+</li>
+<li>
+<p><em>Target.segment.start</em> Start offset of the target segment (only present if the
+segment layer is included in the pattern)
+</p>
+</li>
+<li>
+<p><em>Target.segment.end</em> End offset of the target segment (only present if the
+segment layer is included in the pattern)
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>getFragments</code>
+</p>
+<p><code>getSoundFragments</code>
+</p>
+<p><code>getMatchLabels</code>
+</p>
+<p><code>getMatchAlignments</code>
+</p>
+<p><code>processWithPraat</code>
+</p>
+<p><code>getParticipantIds</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## define the LaBB-CAT URL
+labbcat.url &lt;- "https://labbcat.canterbury.ac.nz/demo/"
+
+## the word 'the' followed immediately by a word starting with an orthographic vowel
+theThenOrthVowel &lt;- getMatches(labbcat.url, "the [aeiou]")
+
+## a word spelt with "k" but pronounced "n" word initially
+knWords &lt;- getMatches(labbcat.url, list(orthography = "k.*", phonemes = "n.*"))
+
+## the word 'the' followed immediately by a word starting with an phonemic vowel
+theThenPhonVowel &lt;- getMatches(
+  labbcat.url, list(
+    list(orthography = "the"),
+    list(phonemes = "[cCEFHiIPqQuUV0123456789~#\\$@].*")))
+
+## the word 'the' followed immediately or with one intervening word by
+## a hapax legomenon (word with a frequency of 1) that doesn't start with a vowel
+results &lt;- getMatches(
+  labbcat.url, list(columns = list(
+    list(layers = list(
+           orthography = list(pattern = "the")),
+         adj = 2),
+    list(layers = list(
+           phonemes = list(not=TRUE, pattern = "[cCEFHiIPqQuUV0123456789~#\\$@].*"),
+           frequency = list(max = "2"))))),
+  overlap.threshold = 5)
+
+## all tokens of the KIT vowel, from the interview or monologue
+## of the participants AP511_MikeThorpe and BR2044_OllyOhlson
+results &lt;- getMatches(labbcat.url, list(segment="I"),
+  participant.expression = expressionFromIds(c("AP511_MikeThorpe","BR2044_OllyOhlson")),
+  transcript.expression = expressionFromTranscriptTypes(c("interview","monologue")))
+
+## all tokens of the KIT vowel for male speakers who speak English
+results &lt;- getMatches(labbcat.url, list(segment="I"),
+  participant.expression = paste(
+    expressionFromAttributeValue("participant_gender", "M"),
+    expressionFromAttributeValues("participant_languages_spoken", "en"),
+    sep=" &amp;&amp; "))
+
+## results$Text is the text that matched
+## results$MatchId can be used to access results using other functions
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

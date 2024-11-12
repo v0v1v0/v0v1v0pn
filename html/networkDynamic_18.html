@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>adjust.activity</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Adjust the activity ranges in all of the spells of a networkDynamic object
+</h2>
+
+<h3>Description</h3>
+
+<p>Transforms the values of all the activity spells of vertices and edges, as well as spells of dynamic TEA attributes (and the <code>net.obs.period</code> if it exists).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">adjust.activity(nd, offset = 0, factor = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nd</code></td>
+<td>
+
+<p>networkDynamic object to be modified
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+
+<p>numeric value to be added (or subtracted) to all spell values
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factor</code></td>
+<td>
+
+<p>numeric factor for multiplying all spell values
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Spell values are modified by first adding the value of <code>offset</code> and then multiplying by <code>factor</code>. If a <code>net.obs.period</code> attribute exists, it's observation spell values are transformed, and the <code>time.increment</code> value is multiplied by <code>factor</code>. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>The <code>nd</code> argument is modified in place and returned invisibly.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>skyebend@uw.edu
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See also <code>activity.attribute</code>, <code>attribute.activity.functions</code> and <code>net.obs.period</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># convert steps of an imaginary discrete sim
+# with each steps corresponding to 1 day
+# into decimal 'years' since 1990
+sim&lt;-network.initialize(5)
+activate.vertices(sim,onset=0,terminus=2546)
+add.edges.active(sim,head=1:4,tail=2:5,onset=0,terminus=2546)
+set.network.attribute(sim,'net.obs.period',list(
+   observations=list(c(0,2546)),mode="discrete", 
+   time.increment=1,time.unit="step"))
+
+# do the transformation
+adjust.activity(sim,offset=1990*365.25,factor=1/365.25)
+
+# modify the 'units' of net.obs.period
+obs &lt;-get.network.attribute(sim,'net.obs.period')
+obs$time.unit&lt;-'year'
+set.network.attribute(sim,'net.obs.period',obs)
+
+# peek at the new values
+as.data.frame(sim)
+get.network.attribute(sim,'net.obs.period')
+</code></pre>
+
+
+</div>

@@ -1,0 +1,164 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NMreadExt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read information from Nonmem ext files</h2>
+
+<h3>Description</h3>
+
+<p>Read information from Nonmem ext files
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NMreadExt(
+  file,
+  return,
+  as.fun,
+  modelname,
+  col.model,
+  auto.ext,
+  tableno = "max",
+  file.ext
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>Path to the ext file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return</code></td>
+<td>
+<p>The .ext file contains both final parameter
+estimates and iterations of the estimates. If
+<code>return="pars"</code> (default) the final estimates are
+returned in addition to what other parameter-level information
+is found, like FIX, sd etc. as columns. If
+<code>return="iterations"</code>, the iterations are returned
+(including objective function value). If <code>return="obj"</code>
+objective function value at final estimate is returned. If
+<code>return="all"</code>, all er returned, though in separate
+data.frames compiled in a list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>The default is to return data as a data.frame. Pass
+a function (say 'tibble::as_tibble') in as.fun to convert to
+something else. If 'data.table's are wanted, use
+'as.fun="data.table"'. The default can be configured using
+'NMdataConf()'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>See '?NMscanData'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.model</code></td>
+<td>
+<p>See '?NMscanData'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auto.ext</code></td>
+<td>
+<p>If 'TRUE' (default) the extension will automatically
+be modified using 'NMdataConf()$file.ext'. This means 'file'
+can be the path to an input or output control stream, and
+'NMreadExt' will still read the '.ext' file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tableno</code></td>
+<td>
+<p>In case the ext file contains multiple tables, this
+argument controls which one to choose. The options are
+</p>
+
+<ul>
+<li>
+<p> "max" (default) Pick the table with the highest table
+number. This typically means the results from the last
+'$ESTIMATION' step are used.
+</p>
+</li>
+<li>
+<p> "min" Pick results from the first table available.
+</p>
+</li>
+<li>
+<p> "all" Keep all results. The tables can be distinguished by
+the 'tableno' column.
+</p>
+</li>
+<li>
+<p> an integer greater than 0, in which case the table with this
+table number will be picked.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file.ext</code></td>
+<td>
+<p>Deprecated. Please use <code>file</code> instead.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The parameter table returned if <code>return="pars"</code> or <code>return="all"</code> will contain columns based on the Nonmem 7.5 manual. It defines codes for different parameter-level values. They are:
+</p>
+<p>-1e+09: se
+-1000000002: eigCor
+-1000000003: cond
+-1000000004: stdDevCor
+-1000000005: seStdDevCor
+-1000000006: FIX
+-1000000007: termStat
+-1000000008: partLik
+</p>
+<p>The parameter name is in the <code>parameter</code> column. The
+"parameter type", like "THETA", "OMEGA", "SIGMA" are available in
+the <code>par.type</code> column. Counters are available in <code>i</code> and
+<code>j</code> columns. <code>j</code> will be <code>NA</code> for
+<code>par.type=="THETA"</code>
+</p>
+<p>The objective function value is included as a parameter.
+</p>
+<p>Notice that in case multiple tables are available in the 'ext'
+file, the column names are taken from the first table. E.g., in
+case of SAEM/IMP estimation, the objective function values will be
+in the 'SAEMOBJ' column, even for the IMP step. This may change in
+the future.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>return="all"</code>, a list with a final parameter
+table and a table of the iterations. If <code>return="pars"</code>,
+only the parameter table, and if <code>return="iterations"</code>
+only the iterations table. If you need both, it may be more
+efficient to only read the file once and use
+<code>return="all"</code>. Often, only one of the two are needed,
+and it more convenient to just extract one.
+</p>
+
+
+</div>

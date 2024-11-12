@@ -1,0 +1,215 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>aggregateIdenticalClones</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Aggregate Counts/Frequencies for Clones With Identical Receptor Sequences
+</h2>
+
+<h3>Description</h3>
+
+<p>Given bulk Adaptive Immune Receptor Repertoire Sequencing (AIRR-Seq) data
+with clones indexed by row, returns a data frame containing one row for each
+unique receptor sequence. Includes the number of clones sharing each sequence,
+as well as aggregate values for clone count and clone frequency across all
+clones sharing each sequence. Clones can be grouped according to metadata,
+in which case aggregation is performed within (but not across) groups.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">aggregateIdenticalClones(
+  data,
+  clone_col,
+  count_col,
+  freq_col,
+  grouping_cols = NULL,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A data frame containing the bulk AIRR-Seq data, with clones indexed by row.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clone_col</code></td>
+<td>
+
+<p>Specifies the column of <code>data</code> containing
+the receptor sequences.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count_col</code></td>
+<td>
+
+<p>Specifies the column of <code>data</code> containing
+the clone counts.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freq_col</code></td>
+<td>
+
+<p>Specifies the column of <code>data</code> containing
+the clone frequencies.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grouping_cols</code></td>
+<td>
+
+<p>An optional character vector of column names
+or numeric vector of column indices, specifying
+one or more columns of <code>data</code> used to assign clones to groups.
+If provided, aggregation occurs within groups, but not across groups.
+See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>grouping_cols</code> is left unspecified, the returned data frame will contain
+one row for each unique receptor sequence appearing in <code>data</code>.
+</p>
+<p>If one or more columns of <code>data</code> are specified using the <code>grouping_cols</code>
+argument, then each clone (row) in <code>data</code> is assigned to a group based on its
+combination of values in these columns. If two clones share the same receptor sequence
+but belong to different groups, their receptor sequence will appear multiple times
+in the returned data frame, with one row for each group in which the sequence appears.
+In each such row, the aggregate clone count, aggregate clone frequency, and number of
+clones sharing the sequence are reported within the group for that row.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame whose first column contains the receptor sequences and has the
+same name as the column of <code>data</code> specified by <code>clone_col</code>. One
+additional column will be present for each column of <code>data</code> that is
+specified using the <code>grouping_cols</code> argument, with each having the same
+column name. The remaining columns are as follows:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>AggregatedCloneCount</code></td>
+<td>
+<p>The aggregate clone count across all clones (within
+the same group, if applicable) that share the receptor sequence in that row.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AggregatedCloneFrequency</code></td>
+<td>
+<p>The aggregate clone frequency across all clones
+(within the same group, if applicable) that share the receptor sequence in that row.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>UniqueCloneCount</code></td>
+<td>
+<p>The number of clones (rows) in <code>data</code> (within the
+same group, if applicable) possessing the receptor sequence for the current row.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">my_data &lt;- data.frame(
+  clone_seq = c("ATCG", rep("ACAC", 2), rep("GGGG", 4)),
+  clone_count = rep(1, 7),
+  clone_freq = rep(1/7, 7),
+  time_point = c("t_0", rep(c("t_0", "t_1"), 3)),
+  subject_id = c(rep(1, 5), rep(2, 2))
+)
+my_data
+
+aggregateIdenticalClones(
+  my_data,
+  "clone_seq",
+  "clone_count",
+  "clone_freq",
+)
+
+# group clones by time point
+aggregateIdenticalClones(
+  my_data,
+  "clone_seq",
+  "clone_count",
+  "clone_freq",
+  grouping_cols = "time_point"
+)
+
+# group clones by subject ID
+aggregateIdenticalClones(
+  my_data,
+  "clone_seq",
+  "clone_count",
+  "clone_freq",
+  grouping_cols = "subject_id"
+)
+
+# group clones by time point and subject ID
+aggregateIdenticalClones(
+  my_data,
+  "clone_seq",
+  "clone_count",
+  "clone_freq",
+  grouping_cols =
+    c("subject_id", "time_point")
+)
+</code></pre>
+
+
+</div>

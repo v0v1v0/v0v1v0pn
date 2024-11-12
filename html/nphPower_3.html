@@ -1,0 +1,162 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>evalfup</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualization of the Relationship between Follow-up and Sample Size</h2>
+
+<h3>Description</h3>
+
+<p><code>evalfup</code> function displays the graph showing the relationship
+between the follow-up time and the total sample size/event number required to
+achieve the the same power
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">evalfup(
+  object,
+  lower.time,
+  upper.time,
+  size,
+  increment = 0.5,
+  xlabel = "Follow-up Time",
+  ylabel = "Total Sample Size/Event Number",
+  title = "Relationship between Follow-up and \n Total Sample Size"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>returned object by function <code>pwr2n.NPH</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.time</code></td>
+<td>
+<p>a numeric value specifying the shortest duration time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.time</code></td>
+<td>
+<p>a numeric value specifying the longest duration time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>an integer specifying the planned total sample size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>increment</code></td>
+<td>
+<p>a numeric value specifying an increment number used for creating
+a sequence of duration times in plotting, Default: 0.5</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlabel</code></td>
+<td>
+<p>a text for labeling the x axis in the plot, Default: 'Follow-up Time'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylabel</code></td>
+<td>
+<p>a text for labeling the y axis in the plot, Default: 'Total Sample Size'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>a text for title in the plot: 'Relationship between Follow-up and
+Total Sample Size'</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>evalfun</code> function helps to evaluate the relationship between
+sample size/event number and follow-up duration. It retrieves the trial
+design information from the <code>object</code> returned by <code>pwr2n.NPH</code>
+function. A sequence of follow-up times starting from <code>lower.time</code>
+and ending with <code>upper.time</code> are generated. The number of subjects and
+number of events required for achieving the specified power in <code>object</code>
+are calculated at each time point. An interpolation function <code>approx</code>
+from <span class="pkg">stats</span> is applied to smooth the curves. In case of
+proportional hazards, the follow-up duration has little impact on the
+event number except for variations from numeric approximations, while in
+case of nonproportional hazards, the follow-up time imposes an important impact
+on both the total sample size and event number.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a graph showing the relationship and a list of components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>approx.time</code></td>
+<td>
+<p>approximate follow-up time corresponding to specified sample size
+to reach the same target power </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>original</code></td>
+<td>
+<p>a list with elements of <code>x</code> and <code>y</code>. Vector <code>x</code> contains
+the follow-up duration and vector <code>y</code> contains the corresponding sample
+size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interp</code></td>
+<td>
+<p>a list containing the interpolated <code>x</code> and <code>y</code> included
+in <code>original</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Esize</code></td>
+<td>
+<p>a vector of events number corresponding to <code>x</code> in <code>original</code></p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># The following code takes more than 5 seconds to run.
+
+# define design parameters
+  t_enrl &lt;- 12; t_fup &lt;- 18; lmd0 &lt;- log(2)/12
+# define hazard ratio function
+  f_hr_delay &lt;- function(x){(x&lt;=6)+(x&gt;6)*0.75}
+# define control hazard
+  f_haz0 &lt;- function(x){lmd0*x^0}
+# perform sample size calculation using logrank test
+# generate weight for test
+  wlr &lt;- gen.wgt(method="LR")
+  snph1 &lt;- pwr2n.NPH(entry = t_enrl, fup = t_fup, Wlist = wlr,
+                    k = 100, ratio = 2, CtrlHaz = f_haz0, hazR = f_hr_delay)
+
+# suppose the follow-up duration that are taken into consideration ranges
+# from 12 to 24. The planned number of patients to recruit 2200.
+# draw the graph
+  efun &lt;- evalfup(snph1,lower.time = 12, upper.time = 24, size = 2200,
+               title = NULL)
+
+</code></pre>
+
+
+</div>

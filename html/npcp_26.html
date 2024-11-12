@@ -1,0 +1,176 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stDistAutocop</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Combined Test of Stationarity for Univariate Continuous Time Series Sensitive
+to Changes in the Distribution Function and the Autocopula</h2>
+
+<h3>Description</h3>
+
+<p>A nonparametric test of stationarity for univariate continuous time
+series resulting from a combination à la Fisher of the
+change-point test sensitive to changes in the distribution function
+implemented in <code>cpDist()</code> and the change-point test
+sensitive to changes in the autcopula implemented in
+<code>cpAutocop()</code>. Approximate p-values are obtained by
+combining two <em>multiplier</em> resampling schemes. Details can be
+found in the first reference.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stDistAutocop(x, lag = 1, b = NULL, pairwise = FALSE,
+              weights = c("parzen", "bartlett"), m = 5, N = 1000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a one-column matrix containing continuous observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lag</code></td>
+<td>
+<p>an integer specifying at which lag to consider the
+autocopula; the autcopula is a (<code>lag+1</code>)-dimensional copula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>strictly positive integer specifying the value of the
+bandwidth parameter determining the serial dependence when
+generating dependent multiplier sequences using the 'moving average
+approach'; see Section 5 of the second reference. If set to
+<code>NULL</code>, <code>b</code> will be estimated using the
+function <code>bOptEmpProc()</code>; see the first reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pairwise</code></td>
+<td>
+<p>a logical specifying whether the test should focus
+only on the bivariate margins of the (<code>lag+1</code>)-dimensional
+autocopula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>a string specifying the kernel for creating the
+weights used in the generation of dependent multiplier sequences within the
+'moving average approach'; see Section 5 of the second reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>a strictly positive integer specifying the number of points of the
+uniform grid on <code class="reqn">(0,1)</code> involved in the estimation of the bandwidth
+parameter; see Section 5 of the second reference. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>number of multiplier replications.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The testing procedure is described in detail in the second section of
+the first reference.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of <code>class</code> <code>htest</code> which is a list,
+some of the components of which are
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>value of the test statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>corresponding approximate p-value à Fisher.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>component.p.values</code></td>
+<td>
+<p>p-values of the component tests arising in the combination.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>the value of parameter <code>b</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>This is a test for continuous univariate time series.
+</p>
+
+
+<h3>References</h3>
+
+<p>A. Bücher, J.-D. Fermanian and I. Kojadinovic (2019),
+Combining cumulative sum change-point detection tests for assessing
+the stationarity of univariate time series, <em>Journal of Time
+Series Analysis</em> <b>40</b>, pages 124-150,
+<a href="https://arxiv.org/abs/1709.02673">https://arxiv.org/abs/1709.02673</a>.
+</p>
+<p>A. Bücher and I. Kojadinovic (2016), A dependent multiplier
+bootstrap for the sequential empirical copula process under strong
+mixing, <em>Bernoulli</em> <b>22:2</b>, pages 927-968,
+<a href="https://arxiv.org/abs/1306.3930">https://arxiv.org/abs/1306.3930</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>see <code>cpDist()</code> and <code>cpAutocop()</code> for the
+component tests.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## AR1 example
+n &lt;- 200
+k &lt;- n/2 ## the true change-point
+x &lt;- matrix(c(arima.sim(list(ar = -0.1), n = k),
+              arima.sim(list(ar = 0.5), n = n - k)))
+stDistAutocop(x)
+
+## AR2 example
+n &lt;- 200
+k &lt;- n/2 ## the true change-point
+x &lt;- matrix(c(arima.sim(list(ar = c(0,-0.1)), n = k),
+              arima.sim(list(ar = c(0,0.5)), n = n - k)))
+## Not run: 
+stDistAutocop(x)
+stDistAutocop(x, lag = 2)
+## End(Not run)
+stDistAutocop(x, lag = 2, pairwise = TRUE)
+</code></pre>
+
+
+</div>

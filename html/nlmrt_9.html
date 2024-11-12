@@ -1,0 +1,263 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlfb</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nash variant of Marquardt nonlinear least squares solution via
+qr linear solver.
+</h2>
+
+<h3>Description</h3>
+
+<p>Given a nonlinear model expressed as an expression of the form
+lhs ~ formula_for_rhs
+and a start vector where parameters used in the model formula are named,
+attempts to find the minimum of the residual sum of squares using the
+Nash variant (Nash, 1979) of the Marquardt algorithm, where the linear 
+sub-problem is solved by a qr method.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">   nlfb(start, resfn, jacfn=NULL, trace=FALSE, lower=-Inf, upper=Inf, 
+         maskidx=NULL, control, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>resfn</code></td>
+<td>
+
+<p>A function that evaluates the residual vector for computing the elements of
+the sum of squares function at the set of parameters <code>start</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jacfn</code></td>
+<td>
+
+<p>A function that evaluates the Jacobian of the sum of squares function, that
+is, the matrix of partial derivatives of the residuals with respect to each
+of the parameters. If NULL (default), uses an approximation.
+?? put in character form as in optimx??
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+
+<p>A named parameter vector. For our example, we could use
+start=c(b1=1, b2=2.345, b3=0.123)
+<code>nls()</code> takes a list, and that is permitted here also.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+
+<p>Logical TRUE if we want intermediate progress to be reported. Default is FALSE.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+
+<p>Lower bounds on the parameters. If a single number, this will be applied to all
+parameters. Default -Inf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+
+<p>Upper bounds on the parameters. If a single number, this will be applied to all
+parameters. Default Inf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maskidx</code></td>
+<td>
+
+<p>Vector if indices of the parameters to be masked. These parameters will NOT be altered
+by the algorithm. Note that the mechanism here is different from that in <code>nlxb</code>
+which uses the names of the parameters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+ 
+<p>A list of controls for the algorithm. These are:
+</p>
+
+<dl>
+<dt><code>watch</code></dt>
+<dd>
+<p>Monitor progress if TRUE. Default is FALSE.</p>
+</dd>
+<dt><code>phi</code></dt>
+<dd>
+<p>Default is phi=1, which adds phi*Identity to Jacobian inner product.</p>
+</dd>
+<dt><code>lamda</code></dt>
+<dd>
+<p>Initial Marquardt adjustment (Default 0.0001). Odd spelling is deliberate.</p>
+</dd>
+<dt><code>offset</code></dt>
+<dd>
+<p>Shift to test for floating-point equality. Default is 100.</p>
+</dd>
+<dt><code>laminc</code></dt>
+<dd>
+<p>Factor to use to increase lamda. Default is 10.</p>
+</dd>
+<dt><code>lamdec</code></dt>
+<dd>
+<p>Factor to use to decrease lamda is lamdec/laminc. Default lamdec=4.</p>
+</dd>
+<dt><code>femax</code></dt>
+<dd>
+<p>Maximum function (sum of squares) evaluations. Default is 10000,
+which is extremely aggressive.</p>
+</dd>
+<dt><code>jemax</code></dt>
+<dd>
+<p>Maximum number of Jacobian evaluations. Default is 5000.</p>
+</dd>
+<dt><code>ndstep</code></dt>
+<dd>
+<p>Stepsize to use to computer numerical Jacobian approximatin. Default
+is 1e-7.</p>
+</dd>
+<dt><code>rofftest</code></dt>
+<dd>
+<p>Default is TRUE. Use a termination test of the relative offset 
+orthogonality type. Useful for nonlinear regression problems.</p>
+</dd>
+<dt><code>smallsstest</code></dt>
+<dd>
+<p>Default is TRUE. Exit the function if the sum of squares falls
+below (100 * .Machine$double.eps)^4 times the initial sumsquares. This is a test
+for a “small” sum of squares, but there are problems which are very extreme 
+for which this control needs to be set FALSE.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Any data needed for computation of the residual vector from the expression
+rhsexpression - lhsvar. Note that this is the negative of the usual residual,
+but the sum of squares is the same. It is not clear how the dot variables should
+be used, since data should be in 'data'.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>nlfb</code> attempts to solve the nonlinear sum of squares problem by using
+a variant of Marquardt's approach to stabilizing the Gauss-Newton method using
+the Levenberg-Marquardt adjustment. This is explained in Nash (1979 or 1990) in
+the sections that discuss Algorithm 23.
+</p>
+<p>In this code, we solve the (adjusted) Marquardt equations by use of the 
+<code>qr.solve()</code>. Rather than forming the J'J + lambda*D matrix, we augment
+the J matrix with extra rows and the y vector with null elements. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of the following items
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>A named vector giving the parameter values at the supposed solution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ssquares</code></td>
+<td>
+<p>The sum of squared residuals at this set of parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid</code></td>
+<td>
+<p>The residual vector at the returned parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jacobian</code></td>
+<td>
+<p>The jacobian matrix (partial derivatives of residuals w.r.t. the parameters)
+at the returned parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>feval</code></td>
+<td>
+<p>The number of residual evaluations (sum of squares computations) used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jeval</code></td>
+<td>
+<p>The number of Jacobian evaluations used.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Special notes, if any, will appear here.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>John C Nash &lt;nashjc@uottawa.ca&gt;
+</p>
+
+
+<h3>References</h3>
+
+
+<p>Nash, J. C. (1979, 1990) _Compact Numerical Methods for Computers.
+Linear Algebra and Function Minimisation._ Adam Hilger./Institute
+of Physics Publications
+</p>
+<p>others!!
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Function <code>nls()</code>, packages <code>optim</code> and <code>optimx</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">cat("See examples in nlmrt-package.Rd\n")
+
+</code></pre>
+
+
+</div>

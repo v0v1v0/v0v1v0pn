@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>messer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Neighborhood Deprivation Index based on Messer <em>et al.</em> (2006)</h2>
+
+<h3>Description</h3>
+
+<p>Compute the aspatial Neighborhood Deprivation Index (Messer).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">messer(
+  geo = "tract",
+  year = 2020,
+  imp = FALSE,
+  quiet = FALSE,
+  round_output = FALSE,
+  df = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>geo</code></td>
+<td>
+<p>Character string specifying the geography of the data either census tracts <code>geo = "tract"</code> (the default) or counties <code>geo = "county"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>Numeric. The year to compute the estimate. The default is 2020, and the years 2010 onward are currently available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imp</code></td>
+<td>
+<p>Logical. If TRUE, will impute missing census characteristics within the internal <code>principal</code>. If FALSE (the default), will not impute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Logical. If TRUE, will display messages about potential missing census information and the proportion of variance explained by principal component analysis. The default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round_output</code></td>
+<td>
+<p>Logical. If TRUE, will round the output of raw census and NDI values from the <code>get_acs</code> at one and four significant digits, respectively. The default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>Optional. Pass a pre-formatted <code>'dataframe'</code> or <code>'tibble'</code> with the desired variables through the function. Bypasses the data obtained by <code>get_acs</code>. The default is NULL. See Details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to <code>get_acs</code> to select state, county, and other arguments for census characteristics</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function will compute the aspatial Neighborhood Deprivation Index (NDI) of U.S. census tracts or counties for a specified geographical referent (e.g., US-standardized) based on Messer <em>et al.</em> (2006) <a href="https://doi.org/10.1007/s11524-006-9094-x">doi:10.1007/s11524-006-9094-x</a>.
+</p>
+<p>The function uses the <code>get_acs</code> function to obtain U.S. Census Bureau 5-year American Community Survey characteristics used for computation involving a principal component analysis with the <code>principal</code> function. The yearly estimates are available for 2010 and after when all census characteristics became available. The eight characteristics are:
+</p>
+
+<ul>
+<li> <p><strong>OCC (C24030)</strong>: percent males in management, science, and arts occupation
+</p>
+</li>
+<li> <p><strong>CWD (B25014)</strong>: percent of crowded housing
+</p>
+</li>
+<li> <p><strong>POV (B17017)</strong>: percent of households in poverty
+</p>
+</li>
+<li> <p><strong>FHH (B25115)</strong>: percent of female headed households with dependents
+</p>
+</li>
+<li> <p><strong>PUB (B19058)</strong>: percent of households on public assistance
+</p>
+</li>
+<li> <p><strong>U30 (B19001)</strong>: percent of households earning &lt;$30,000 per year
+</p>
+</li>
+<li> <p><strong>EDU (B06009)</strong>: percent earning less than a high school education
+</p>
+</li>
+<li> <p><strong>EMP (B23025)</strong>: percent unemployed (2011 onward)
+</p>
+</li>
+<li> <p><strong>EMP (B23001)</strong>: percent unemployed (2010 only)
+</p>
+</li>
+</ul>
+<p>Use the internal <code>state</code> and <code>county</code> arguments within the <code>get_acs</code> function to specify the referent for standardizing the NDI (Messer) values. For example, if all U.S. states are specified for the <code>state</code> argument, then the output would be a U.S.-standardized index.
+</p>
+<p>The continuous NDI (Messer) values are z-transformed, i.e., "standardized," and the categorical NDI (Messer) values are quartiles of the standardized continuous NDI (Messer) values.
+</p>
+<p>Check if the proportion of variance explained by the first principal component is high (more than 0.5).
+</p>
+<p>Users can bypass <code>get_acs</code> by specifying a pre-formatted data frame or tibble using the <code>df</code> argument. This function will compute an index using the first component of a principal component analysis (PCA) with a Varimax rotation (the default for <code>principal</code>) and only one factor (note: PCA set-up not unspecified in Messer <em>et al.</em> (2006)). The recommended structure of the data frame or tibble is an ID (e.g., GEOID) in the first feature (column), followed by the variables of interest (in any order) and no additional information (e.g., omit state or county names from the <code>df</code> argument input).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class 'list'. This is a named list with the following components:
+</p>
+
+<dl>
+<dt><code>ndi</code></dt>
+<dd>
+<p>An object of class 'tbl' for the GEOID, name, NDI (standardized), NDI (quartile), and raw census values of specified census geographies.</p>
+</dd>
+<dt><code>pca</code></dt>
+<dd>
+<p>An object of class 'principal', returns the output of <code>principal</code> used to compute the NDI values.</p>
+</dd>
+<dt><code>missing</code></dt>
+<dd>
+<p>An object of class 'tbl' of the count and proportion of missingness for each census variable used to compute NDI.</p>
+</dd>
+</dl>
+<h3>See Also</h3>
+
+<p><code>get_acs</code> for additional arguments for geographic referent selection (i.e., <code>state</code> and <code>county</code>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+messer(df = DCtracts2020[ , c(1, 3:10)])
+
+## Not run: 
+# Wrapped in \dontrun{} because these examples require a Census API key.
+  
+  # Tract-level metric (2020)
+  messer(geo = "tract", state = "GA", year = 2020)
+
+  # Impute NDI for tracts (2020) with missing census information (median values)
+  messer(state = "tract", "GA", year = 2020, imp = TRUE)
+  
+  # County-level metric (2020)
+  messer(geo = "county", state = "GA", year = 2020)
+  
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NMcreateDoses</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Easily generate dosing records</h2>
+
+<h3>Description</h3>
+
+<p>Combinations of different columns can be generated. Columns will
+be extended by repeating last value of the column if needed in
+order to match length of other columns.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NMcreateDoses(
+  TIME,
+  AMT = NULL,
+  RATE = NULL,
+  SS = NULL,
+  CMT = 1,
+  EVID = 1,
+  addl = NULL,
+  as.fun
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>TIME</code></td>
+<td>
+<p>The time of the dosing events</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AMT</code></td>
+<td>
+<p>vector or dataa.frame with amounts amount</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RATE</code></td>
+<td>
+<p>Optional infusion rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SS</code></td>
+<td>
+<p>Optional steady-state flag</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CMT</code></td>
+<td>
+<p>Compartment number. Default is to dose into CMT=1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EVID</code></td>
+<td>
+<p>The event ID to use for doses. Default is to use
+EVID=1, but EVID might also be wanted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>addl</code></td>
+<td>
+<p>Optinal. A list of ADDL and II that will be applied to
+last dose</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>The default is to return data as a data.frame. Pass
+a function (say 'tibble::as_tibble') in as.fun to convert to
+something else. If data.tables are wanted, use
+as.fun="data.table". The default can be configured using
+NMdataConf.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Experimental. Please check output before use. AMT, RATE,
+SS, II, CMT are vectors of length 1 or longer. Those not of
+max length 1 are repeated.  If TIME is longer than those, they
+are extended to match length of TIME. Allowed combinations of
+AMT, RATE, SS, II here:
+<a href="https://ascpt.onlinelibrary.wiley.com/doi/10.1002/psp4.12404">https://ascpt.onlinelibrary.wiley.com/doi/10.1002/psp4.12404</a>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data.frame with dosing events
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(data.table)
+## Users should not use setDTthreads. This is for CRAN to only use 1 core.
+data.table::setDTthreads(1) 
+## arguments are expanded - makes loading easy
+NMcreateDoses(TIME=c(0,12,24,36),AMT=c(2,1))
+## Different doses by covariate
+NMcreateDoses(TIME=c(0,12,24),AMT=data.table(AMT=c(2,1,4,2),DOSE=c(1,2)))
+## Make Nonmem repeat the last dose. This is a total of 20 dosing events.
+NMcreateDoses(TIME=c(0,12),AMT=c(2,1),addl=list(ADDL=c(NA,9*2),II=c(NA,12)))
+dt.amt &lt;- data.table(DOSE=c(100,400))
+dt.amt[,AMT:=DOSE*1000]
+dt.amt
+doses.sd &lt;- NMcreateDoses(TIME=0,AMT=dt.amt)
+doses.sd$dose &lt;- paste(doses.sd$DOSE,"mg")
+doses.sd$regimen &lt;- "SD"
+doses.sd
+
+### multiple dose regimens with loading are easily created with NMcreateDoses too
+## Specifying the time points explicitly
+dt.amt &lt;- data.table(AMT=c(200,100,800,400)*1000,DOSE=c(100,100,400,400))
+doses.md.1 &lt;- NMcreateDoses(TIME=seq(0,by=24,length.out=7),AMT=dt.amt)
+doses.md.1$dose &lt;- paste(doses.md.1$DOSE,"mg")
+doses.md.1$regimen &lt;- "QD"
+doses.md.1
+## or using ADDL+II
+dt.amt &lt;- data.table(AMT=c(200,100,800,400)*1000,DOSE=c(100,100,400,400))
+doses.md.2 &lt;- NMcreateDoses(TIME=c(0,24),AMT=dt.amt,addl=data.table(ADDL=c(0,5),II=c(0,24)))
+doses.md.2$dose &lt;- paste(doses.md.2$DOSE,"mg")
+doses.md.2$regimen &lt;- "QD"
+doses.md.2
+</code></pre>
+
+
+</div>

@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_matlab_raster_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reads MATLAB raster data</h2>
+
+<h3>Description</h3>
+
+<p>Reads MATLAB data in raster format into an R raster_data format data frame. This
+is similar to the general read_raster_data() function but it contains additional
+arguments specific to MALTAB raster data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_matlab_raster_data(
+  matlab_raster_file_name,
+  sampling_interval_width = 1,
+  zero_time_bin = NULL,
+  add_sequential_trial_numbers = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>matlab_raster_file_name</code></td>
+<td>
+<p>A character string specifying the file name,
+including the full path to a raster data in MATLAB .mat files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampling_interval_width</code></td>
+<td>
+<p>A number specifying how successive time bins
+will be labeled The default value of 1 means that points will be labeled as
+successive integers; i.e., time.1_2, time.2_3, etc. If this value was set
+to a larger number, then time points will be specified at the given
+sampling width. From example, if sampling_width is set to 10, then the time
+labels would be time.1_10, time.10_20, etc. This is useful if the data is
+sampled at a particular rate (e.g., if the data is sampled at 500Hz, one
+might want to use sampling_interval_width = 2, so that the times listed on
+the raster column names are in milliseconds).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero_time_bin</code></td>
+<td>
+<p>A number specifying the time bin that should be marked
+as time 0. The default (NULL value) is to use the first bin as time 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add_sequential_trial_numbers</code></td>
+<td>
+<p>A Boolean specifying one should add a
+variable to the data called 'trial_number' that has sequential trial. These
+trials numbers are needed for data that was recorded simultaneously so that
+trials can be aligned across different sites. If the MATLAB raster data has
+a field site_info.trial_number then this will override the trial_number that
+would automatically be set to that value (and print a message about it).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a data frame of data in <code style="white-space: pre;">⁠raster format⁠</code> (i.e., with class
+<code>raster_data</code>). Data that is in <code style="white-space: pre;">⁠raster format⁠</code> as the following variables:
+</p>
+
+<ol>
+<li> <p><code>labels.XXX</code>  These variables contain labels of which experimental conditions were shown on a given trial.
+</p>
+</li>
+<li> <p><code>time.XXX_YYY</code>  These variables contain the data for a given time, XXX is
+the start time of the data in a particular bin and YYY is the end time.
+</p>
+</li>
+<li> <p><code>site_info.XXX</code> These variables contain additional meta data about the site.
+</p>
+</li>
+<li> <p><code>trial_number</code> This variable specifies a unique number for each row
+indicating which trial a given row of data came from.
+</p>
+</li>
+</ol>
+<p>For more details on <code style="white-space: pre;">⁠raster format⁠</code> data see the vignette:
+<code>vignette("data_formats", package = "NeuroDecodeR")</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+matlab_raster_file_name &lt;- file.path(
+  system.file("extdata", package = "NeuroDecodeR"),
+  "Zhang_Desimone_7object_raster_data_small_mat",
+  "bp1001spk_01A_raster_data.mat")
+
+raster_data &lt;- read_matlab_raster_data(matlab_raster_file_name)
+
+
+</code></pre>
+
+
+</div>

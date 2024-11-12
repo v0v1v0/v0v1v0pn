@@ -1,0 +1,211 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>forest.netcomparison</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forest plot for complex interventions in component network
+meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>Draws a forest plot in the active graphics window (using grid
+graphics system).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'netcomparison'
+forest(
+  x,
+  pooled = ifelse(x$random, "random", "common"),
+  leftcols = c("studlab", "treat1", "treat2"),
+  leftlabs = c("Comparison", "Trt 1", "Trt 2"),
+  rightcols = c("effect", "ci", "statistic", "pval"),
+  rightlabs = c(NA, NA, "z", "p-value"),
+  nchar.comps = x$nchar.trts,
+  digits = gs("digits.forest"),
+  digits.stat = gs("digits.stat"),
+  digits.pval = gs("digits.pval"),
+  smlab = NULL,
+  backtransf = x$backtransf,
+  lab.NA = ".",
+  weight.study = "same",
+  ...
+)
+
+## S3 method for class 'netcomparison'
+plot(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netcomparison</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pooled</code></td>
+<td>
+<p>A character string indicating whether results for the
+common (<code>"common"</code>) or random effects model (<code>"random"</code>)
+should be plotted. Can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>leftcols</code></td>
+<td>
+<p>A character vector specifying (additional) columns
+to be plotted on the left side of the forest plot or a logical
+value (see <code>forest.meta</code> help page for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>leftlabs</code></td>
+<td>
+<p>A character vector specifying labels for
+(additional) columns on left side of the forest plot (see
+<code>forest.meta</code> help page for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rightcols</code></td>
+<td>
+<p>A character vector specifying (additional) columns
+to be plotted on the right side of the forest plot or a logical
+value (see <code>forest.meta</code> help page for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rightlabs</code></td>
+<td>
+<p>A character vector specifying labels for
+(additional) columns on right side of the forest plot (see
+<code>forest.meta</code> help page for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.comps</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique names for components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits for treatment
+effects and confidence intervals, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.stat</code></td>
+<td>
+<p>Minimal number of significant digits for tests
+of overall effect, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.pval</code></td>
+<td>
+<p>Minimal number of significant digits for p-value
+of overall effects, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smlab</code></td>
+<td>
+<p>A label printed at top of figure. By default, text
+indicating either common or random effects model is printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether results should be
+back transformed in forest plots. If <code>backtransf = TRUE</code>,
+results for <code>sm = "OR"</code> are presented as odds ratios rather
+than log odds ratios, for example.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lab.NA</code></td>
+<td>
+<p>A character string to label missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight.study</code></td>
+<td>
+<p>A character string indicating weighting used to
+determine size of squares or diamonds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments for <code>forest.meta</code>
+function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A forest plot, also called confidence interval plot, is drawn in
+the active graphics window. For more information see help page of
+<code>forest.meta</code> function.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netcomparison</code>, <code>netcomb</code>,
+<code>discomb</code>, <code>forest.meta</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Linde2016)
+
+# Only consider studies including Face-to-face PST (to reduce
+# runtime of example)
+#
+face &lt;- subset(Linde2016, id %in% c(16, 24, 49, 118))
+
+# Conduct random effects network meta-analysis
+#
+net1 &lt;- netmeta(lnOR, selnOR, treat1, treat2, id,
+  data = face, ref = "placebo", sm = "OR", common = FALSE)
+
+# Additive model for treatment components (with placebo as inactive
+# treatment)
+#
+nc1 &lt;- netcomb(net1, inactive = "placebo")
+
+# Some comparisons
+#
+t1 &lt;- c("F + TCA", "F + Plac", "SSRI + Plac + TCA")
+t2 &lt;- c("UC", "Plac", "UC")
+#
+netcomparison(nc1, t1, t2)
+#
+forest(netcomparison(nc1, t1, t2))
+forest(netcomparison(nc1, t1, t2), nchar.comps = 4)
+forest(netcomparison(nc1, c("F", "TCA"), "UC"), nchar.comps = 4)
+
+</code></pre>
+
+
+</div>

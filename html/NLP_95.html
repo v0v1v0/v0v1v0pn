@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Tokenizer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Tokenizer objects</h2>
+
+<h3>Description</h3>
+
+<p>Create tokenizer objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Span_Tokenizer(f, meta = list())
+as.Span_Tokenizer(x, ...)
+
+Token_Tokenizer(f, meta = list())
+as.Token_Tokenizer(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>a tokenizer function taking the string to tokenize as
+argument, and returning either the tokens (for
+<code>Token_Tokenizer</code>) or their spans (for
+<code>Span_Tokenizer</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta</code></td>
+<td>
+<p>a named or empty list of tokenizer metadata tag-value
+pairs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Tokenization is the process of breaking a text string up into words,
+phrases, symbols, or other meaningful elements called tokens.  This
+can be accomplished by returning the sequence of tokens, or the
+corresponding spans (character start and end positions).
+We refer to tokenization resources of the respective kinds as
+“token tokenizers” and “span tokenizers”.
+</p>
+<p><code>Span_Tokenizer()</code> and <code>Token_Tokenizer()</code> return tokenizer
+objects which are functions with metadata and suitable class
+information, which in turn can be used for converting between the two
+kinds using <code>as.Span_Tokenizer()</code> or <code>as.Token_Tokenizer()</code>.
+It is also possible to coerce annotator (pipeline) objects to
+tokenizer objects, provided that the annotators provide suitable
+token annotations.  By default, word tokens are used; this can be
+controlled via the <code>type</code> argument of the coercion methods (e.g.,
+use <code>type = "sentence"</code> to extract sentence tokens).
+</p>
+<p>There are also <code>print()</code> and <code>format()</code> methods for
+tokenizer objects, which use the <code>description</code> element of the
+metadata if available.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Regexp_Tokenizer()</code> for creating regexp span tokenizers.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## A simple text.
+s &lt;- String("  First sentence.  Second sentence.  ")
+##           ****5****0****5****0****5****0****5**
+
+## Use a pre-built regexp (span) tokenizer:
+wordpunct_tokenizer
+wordpunct_tokenizer(s)
+## Turn into a token tokenizer:
+tt &lt;- as.Token_Tokenizer(wordpunct_tokenizer)
+tt
+tt(s)
+## Of course, in this case we could simply have done
+s[wordpunct_tokenizer(s)]
+## to obtain the tokens from the spans.
+## Conversion also works the other way round: package 'tm' provides
+## the following token tokenizer function:
+scan_tokenizer &lt;- function(x)
+    scan(text = as.character(x), what = "character", quote = "", 
+         quiet = TRUE)
+## Create a token tokenizer from this:
+tt &lt;- Token_Tokenizer(scan_tokenizer)
+tt(s)
+## Turn into a span tokenizer:
+st &lt;- as.Span_Tokenizer(tt)
+st(s)
+## Checking tokens from spans:
+s[st(s)]
+</code></pre>
+
+
+</div>

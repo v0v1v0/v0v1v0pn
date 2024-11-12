@@ -1,0 +1,203 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cpRho</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test for Change-Point Detection Based on Spearman's Rho</h2>
+
+<h3>Description</h3>
+
+<p>Nonparametric test for change-point detection particularly sensitive
+to changes in Spearman's rho in multivariate time series. The
+observations can be serially independent or dependent (strongly mixing).
+Approximate p-values for the test statistic are obtained by means of a
+<em>multiplier</em> approach or by estimating the asymptotic null
+distribution. Details can be found in first reference.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cpRho(x, method = c("mult", "asym.var"),
+      statistic = c("pairwise", "global"),
+      b = NULL, weights = c("parzen", "bartlett"),
+      N = 1000, init.seq = NULL, include.replicates = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data matrix whose rows are multivariate continuous
+observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a string specifying the method for computing the
+approximate p-value for the test statistic; can be either
+<code>"mult"</code> (the multiplier approach 'tilde' in the first
+reference) or <code>"asym.var"</code> (the approach based on the
+estimation of the asymptotic null distribution of the test statistic
+described in the first reference). The 'mult' approach appears to lead to
+better behaved tests.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>a string specifying the test statistic; can be either
+<code>"pairwise"</code> (the statistic <code class="reqn">S_{n,3}</code> in the first
+reference) or <code>"global"</code> (the statistic <code class="reqn">S_{n,1}</code>
+in the first reference).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>strictly positive integer specifying the value of the
+bandwidth parameter determining the serial dependence when
+generating dependent multiplier sequences using the 'moving average
+approach'; see Section 5 of the second reference. The value 1
+will create i.i.d. multiplier
+sequences suitable for serially independent observations. If set to
+<code>NULL</code>, <code>b</code> will be estimated from <code>x</code> using the
+procedure described in the first reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>a string specifying the kernel for creating the
+weights used in the generation of dependent multiplier sequences within the
+'moving average approach'; see Section 5 of the second reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>number of multiplier replications.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.seq</code></td>
+<td>
+<p>a sequence of independent standard normal variates of
+length <code>N * (nrow(x) + 2 * (b - 1))</code> used to generate dependent
+multiplier sequences.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.replicates</code></td>
+<td>
+<p>a logical specifying whether the
+object of <code>class</code> <code>htest</code> returned by the function
+(see below) will include the multiplier replicates, if generated.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When <code>method == "mult"</code>, the approximate p-value is computed as
+</p>
+<p style="text-align: center;"><code class="reqn">(0.5 +\sum_{i=1}^N\mathbf{1}_{\{S_i\ge S\}})/(N+1),</code>
+</p>
+
+<p>where <code class="reqn">S</code> and <code class="reqn">S_i</code> denote the test statistic and
+a multiplier replication, respectively. This ensures that the
+approximate p-value is a number strictly between 0 and 1, which is
+sometimes necessary for further treatments.
+</p>
+<p>When <code>method == "asym.var"</code>, the approximate p-value is computed
+from the estimated asymptotic null distribution, which involves the
+Kolmogorov distribution. The latter is dealt with reusing code from
+the <code>ks.test()</code> function; credit to RCore.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of <code>class</code> <code>htest</code> which is a list,
+some of the components of which are
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>value of the test statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>corresponding approximate p-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>the values of the <code>nrow(x)-1</code> intermediate
+change-point statistics; the test statistic is defined as
+the maximum of those.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>the value of parameter <code>b</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>These tests were derived under the assumption of continuous margins.
+</p>
+
+
+<h3>References</h3>
+
+<p>I. Kojadinovic, J-F. Quessy and T. Rohmer (2016),
+Testing the constancy of Spearman's rho in multivariate time series,
+<em>Annals of the Institute of Statistical Mathematics</em> <b>68:5</b>,
+pages 929-954, <a href="https://arxiv.org/abs/1407.1624">https://arxiv.org/abs/1407.1624</a>.
+</p>
+<p>A. Bücher and I. Kojadinovic (2016), A dependent multiplier
+bootstrap for the sequential empirical copula process under strong
+mixing, <em>Bernoulli</em> <b>22:2</b>, pages 927-968,
+<a href="https://arxiv.org/abs/1306.3930">https://arxiv.org/abs/1306.3930</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cpTau()</code> for a related test based on
+Kendall's tau, <code>cpDist()</code> for a related test
+based on the multivariate
+empirical d.f., <code>cpCopula()</code> for a related test based on
+the empirical copula.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+require(copula)
+n &lt;- 100
+k &lt;- 50 ## the true change-point
+u &lt;- rCopula(k,gumbelCopula(1.5))
+v &lt;- rCopula(n-k,gumbelCopula(3))
+x &lt;- rbind(u,v)
+cp &lt;- cpRho(x, b = 1)
+cp
+## Estimated change-point
+which(cp$rho == max(cp$rho))
+## End(Not run)
+</code></pre>
+
+
+</div>

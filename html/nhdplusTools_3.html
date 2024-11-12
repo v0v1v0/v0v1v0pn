@@ -1,0 +1,57 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculate_arbolate_sum</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Arbolate Sum</h2>
+
+<h3>Description</h3>
+
+<p>Calculates arbolate sum given a dendritic
+network and incremental lengths. Arbolate sum is the total length
+of all upstream flowlines.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculate_arbolate_sum(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>data.frame with ID, toID, and length columns.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>numeric with arbolate sum.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+source(system.file("extdata", "walker_data.R", package = "nhdplusTools"))
+catchment_length &lt;- select(walker_flowline, COMID, AreaSqKM) %&gt;%
+  right_join(prepare_nhdplus(walker_flowline, 0, 0,
+                            purge_non_dendritic = FALSE, warn = FALSE), by = "COMID") %&gt;%
+  select(ID = COMID, toID = toCOMID, length = LENGTHKM)
+
+arb_sum &lt;- calculate_arbolate_sum(catchment_length)
+
+catchment_length$arb_sum &lt;- arb_sum
+catchment_length$nhd_arb_sum &lt;- walker_flowline$ArbolateSu
+
+mean(abs(catchment_length$arb_sum - catchment_length$nhd_arb_sum))
+max(abs(catchment_length$arb_sum - catchment_length$nhd_arb_sum))
+
+</code></pre>
+
+
+</div>

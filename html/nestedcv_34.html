@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lm_filter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Linear model filter</h2>
+
+<h3>Description</h3>
+
+<p>Linear models are fitted on each predictor, with inclusion of variable names
+listed in <code>force_vars</code> in the model. Predictors are ranked by Akaike
+information criteria (AIC) value, or can be filtered by the p-value on the
+estimate of the coefficient for that predictor in its model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lm_filter(
+  y,
+  x,
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  rsq_method = "pearson",
+  type = c("index", "names", "full"),
+  keep_factors = TRUE,
+  method = 0L,
+  mc.cores = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Numeric or integer response vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Matrix of predictors. If <code>x</code> is a data.frame it will be turned into
+a matrix. But note that factors will be reduced to numeric values, but a
+full design matrix is not generated, so if factors have 3 or more levels,
+it is recommended to convert <code>x</code> into a design (model) matrix first.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_vars</code></td>
+<td>
+<p>Vector of column names <code>x</code> which are incorporated into the
+linear model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfilter</code></td>
+<td>
+<p>Number of predictors to return. If <code>NULL</code> all predictors with
+p-values &lt; <code>p_cutoff</code> are returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_cutoff</code></td>
+<td>
+<p>p-value cut-off. P-values are calculated by t-statistic on
+the estimated coefficient for the predictor being tested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rsq_cutoff</code></td>
+<td>
+<p>r^2 cutoff for removing predictors due to collinearity.
+Default <code>NULL</code> means no collinearity filtering. Predictors are ranked based
+on AIC from a linear model. If 2 or more predictors are collinear, the
+first ranked predictor by AIC is retained, while the other collinear
+predictors are removed. See <code>collinear()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rsq_method</code></td>
+<td>
+<p>character string indicating which correlation coefficient
+is to be computed. One of "pearson" (default), "kendall", or "spearman".
+See <code>collinear()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of vector returned. Default "index" returns indices, "names"
+returns predictor names, "full" returns a matrix of p values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_factors</code></td>
+<td>
+<p>Logical affecting factors with 3 or more levels.
+Dataframes are coerced to a matrix using data.matrix. Binary
+factors are converted to numeric values 0/1 and analysed as such. If
+<code>keep_factors</code> is <code>TRUE</code> (the default), factors with 3 or more levels are
+not filtered and are retained. If <code>keep_factors</code> is <code>FALSE</code>, they are
+removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Integer determining linear model method. See
+<code>RcppEigen::fastLmPure()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mc.cores</code></td>
+<td>
+<p>Number of cores for parallelisation using
+<code>parallel::mclapply()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This filter is based on the model <code>y ~ xvar + force_vars</code> where <code>y</code> is the
+response vector, <code>xvar</code> are variables in columns taken sequentially from <code>x</code>
+and <code>force_vars</code> are optional covariates extracted from <code>x</code>. It uses
+<code>RcppEigen::fastLmPure()</code> with <code>method = 0</code> as default since it is
+rank-revealing. <code>method = 3</code> is significantly faster but can give errors in
+estimation of p-value with variables of zero variance. The algorithm attempts
+to detect these and set their stats to <code>NA</code>. <code>NA</code> in <code>x</code> are not tolerated.
+</p>
+<p>Parallelisation is available via <code>mclapply()</code>. This is provided mainly for
+the use case of the filter being used as standalone. Nesting parallelisation
+inside of parallelised <code>nestcv.glmnet()</code> or <code>nestcv.train()</code> loops is not
+recommended.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Integer vector of indices of filtered parameters (<code>type = "index"</code>)
+or character vector of names (<code>type = "names"</code>) of filtered parameters in
+order of linear model AIC. Any variables in <code>force_vars</code> which are
+incorporated into all models are listed first. If <code>type = "full"</code> a matrix
+of AIC value, sigma (residual standard error, see summary.lm),
+coefficient, t-statistic and p-value for each tested predictor is returned.
+</p>
+
+
+</div>

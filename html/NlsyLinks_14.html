@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CreateSpatialNeighbours</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Distances between related family members, formatted for spatial analysis.</h2>
+
+<h3>Description</h3>
+
+<p>This helper function formats the LinksPair datasets so it can be used in some types of spatial analyses. The <span class="pkg">spdep</span> (Spatial Dependence) uses a sparse matrix (actually a base::data.frame) to represent neighbours.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CreateSpatialNeighbours(linksPairsDoubleEntered)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>linksPairsDoubleEntered</code></td>
+<td>
+<p>A base::data.frame containing the links, preferably created by a function like <code>CreatePairLinksDoubleEntered()</code>.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>There is one row per unique pair of subjects, <em>respecting order</em>.  This has twice as many rows as Links79Pair and Links79PairExpanded (which have one row per unique pair of subjects, <em>irrespective of order</em>).
+</p>
+<p><code>CreateSpatialNeighbours()</code> accepts any paired relationships in a base::data.frame, as long as it contains the columns <code>SubjectTag_S1</code>, <code>SubjectTag_S2</code>, and <code>R</code>.  See Links79Pair for more details about these columns.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An S3 <code>spdep::spatial.neighbours</code> object to work with functions in the <span class="pkg">spdep</span> package.
+</p>
+<p><code>SubjectTag_S1</code> is renamed '<code>from</code>'.
+</p>
+<p><code>SubjectTag_S2</code> is renamed '<code>to</code>'.
+</p>
+<p><code>R</code> is renamed '<code>weight</code>'.
+</p>
+<p>The attribute <code>region.id</code> specifies each unique SubjectTag.
+</p>
+<p>The attribute <code>n</code> specifies the number of unique subjects.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Notice the British variant of 'neighbo<em>u</em>rs' is used, to be consistent with the <code>spdep::spatial.neighbour</code> class.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Will Beasley and  David Bard
+</p>
+
+
+<h3>References</h3>
+
+<p>Bard, D.E., Beasley, W.H., Meredith, K., &amp; Rodgers, J.L. (2012). <a href="https://link.springer.com/article/10.1007/s10519-012-9566-6"><em>Biometric Analysis of Complex NLSY Pedigrees: Introducing a Conditional Autoregressive Biometric (CARB) Mixed Model</em></a>. Behavior Genetics Association 42nd Annual Meeting. <a href="https://r-forge.r-project.org/forum/forum.php?thread_id=4761&amp;forum_id=4266&amp;group_id=1330">Slides</a>.
+</p>
+<p>Bivand, R., Pebesma, E., &amp; Gomez-Rubio, V. (2013). <a href="https://link.springer.com/book/10.1007/978-1-4614-7618-4"><em>Applied Spatial Data Analysis with R.</em></a> New York: Springer. (Especially Chapter 9.)
+</p>
+<p>Banerjee, S., Carlin, B.P., &amp; Gelfand, A.E. (2004). <a href="http://books.google.com/books/about/Hierarchical_Modeling_and_Analysis_for_S.html?id=YqpZKTp-Wh0C"><em>Hierarchical Modeling and Analysis for Spatial Data</em></a>. Boca Raton: CRC Press.
+</p>
+<p>Lawson, A.B (2013). <a href="http://books.google.com/books?id=g7RJEZb1umwC"><em>Bayesian Disease Mapping: Hierarchical Modeling in Spatial Epidemiology, Second Edition</em></a>. Boca Raton: CRC Press.
+</p>
+<p>The <span class="pkg">spdep</span> package documentation: <a href="https://cran.r-project.org/package=spdep">spdep: Spatial dependence: weighting schemes, statistics and models</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dsLinksAll &lt;- Links79Pair
+dsLinksGen1Housemates &lt;- dsLinksAll[dsLinksAll$RelationshipPath == "Gen1Housemates", ]
+dsLinksGen2Siblings &lt;- dsLinksAll[dsLinksAll$RelationshipPath == "Gen2Siblings", ]
+
+spGen1 &lt;- CreateSpatialNeighbours(dsLinksGen1Housemates)
+spGen2 &lt;- CreateSpatialNeighbours(dsLinksGen2Siblings)
+
+head(spGen2)
+# Returns:
+#   from  to weight
+# 3  201 202   0.50
+# 6  301 302   0.50
+# 7  301 303   0.50
+# 9  302 303   0.50
+# 24  401 403   0.25
+# 28  801 802   0.50
+
+table(spGen2$weight)
+# Returns:
+# 0.25 0.375   0.5  0.75     1
+# 3442   610  6997    12    27
+</code></pre>
+
+
+</div>

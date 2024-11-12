@@ -1,0 +1,281 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_nfl</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate an NFL Season</h2>
+
+<h3>Description</h3>
+
+<p>This function simulates a given NFL season multiple times using custom functions
+to estimate and simulate game results and computes the outcome of the given
+season including playoffs and draft order.
+It is possible to run the function in parallel processes by calling the
+appropriate plan.
+Progress updates can be activated by calling handlers
+before the start of the simulations.
+Please see the below given section "Details" for further information.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_nfl(
+  nfl_season = NULL,
+  process_games = NULL,
+  ...,
+  playoff_seeds = ifelse(nfl_season &gt;= 2020, 7, 6),
+  if_ended_today = FALSE,
+  fresh_season = FALSE,
+  fresh_playoffs = FALSE,
+  tiebreaker_depth = 3,
+  test_week = NULL,
+  simulations = 1000,
+  sims_per_round = max(ceiling(simulations/future::availableCores() * 2), 100),
+  .debug = FALSE,
+  print_summary = FALSE,
+  sim_include = c("DRAFT", "REG", "POST")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nfl_season</code></td>
+<td>
+<p>Season to simulate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>process_games</code></td>
+<td>
+<p>A function to estimate and simulate the results of games. Uses team,
+schedule, and week number as arguments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters passed on to the function <code>process_games</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>playoff_seeds</code></td>
+<td>
+<p>Number of playoff teams per conference (increased
+in 2020 from 6 to 7).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>if_ended_today</code></td>
+<td>
+<p>Either <code>TRUE</code> or <code>FALSE</code>. If TRUE, ignore remaining regular
+season games and cut to playoffs based on current regular season data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fresh_season</code></td>
+<td>
+<p>Either <code>TRUE</code> or <code>FALSE</code>. Whether to blank out all game results
+and simulate the the season from scratch (TRUE) or take game results so far as a given
+and only simulate the rest (FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fresh_playoffs</code></td>
+<td>
+<p>Either <code>TRUE</code> or <code>FALSE</code>. Whether to blank out all playoff
+game results and simulate the postseason from scratch (TRUE) or take game results so far
+as a given and only simulate the rest (FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tiebreaker_depth</code></td>
+<td>
+<p>A single value equal to 1, 2, or 3. The default is 3. The
+value controls the depth of tiebreakers that shall be applied. The deepest
+currently implemented tiebreaker is strength of schedule. The following
+values are valid:
+</p>
+
+<dl>
+<dt>tiebreaker_depth = 1</dt>
+<dd>
+<p>Break all ties with a coinflip. Fastest variant.</p>
+</dd>
+<dt>tiebreaker_depth = 2</dt>
+<dd>
+<p>Apply head-to-head and division win percentage tiebreakers. Random if still tied.</p>
+</dd>
+<dt>tiebreaker_depth = 3</dt>
+<dd>
+<p>Apply all tiebreakers through strength of schedule. Random if still tied.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test_week</code></td>
+<td>
+<p>Aborts after the simulator reaches this week and returns the results
+from your process games call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simulations</code></td>
+<td>
+<p>Equals the number of times the given NFL season shall be simulated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sims_per_round</code></td>
+<td>
+<p>The number of <code>simulations</code> can be split into
+multiple rounds and be processed parallel. This parameter controls the number
+of simulations per round. The default value determines the number of
+locally available cores and calculates the number of simulations per round
+to be equal to half of the available cores (various benchmarks showed this
+results in optimal performance).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.debug</code></td>
+<td>
+<p>Either <code>TRUE</code> or <code>FALSE</code>. Controls whether additional
+messages are printed to the console showing what the tie-breaking algorithms
+are currently performing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print_summary</code></td>
+<td>
+<p>If <code>TRUE</code>, prints the summary statistics to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sim_include</code></td>
+<td>
+<p>One of <code>"REG"</code>, <code>"POST"</code>, <code>"DRAFT"</code> (the default).
+Simulation will behave as follows:
+</p>
+
+<dl>
+<dt>REG</dt>
+<dd>
+<p>Simulate the regular season and compute standings, division ranks, and playoff seeds</p>
+</dd>
+<dt>POST</dt>
+<dd>
+<p>Do REG + simulate the postseason</p>
+</dd>
+<dt>DRAFT</dt>
+<dd>
+<p>Do POST + compute draft order</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+
+<h4>More Speed Using Parallel Processing</h4>
+
+<p>We recommend choosing a default parallel processing method and saving it
+as an environment variable in the R user profile to make sure all futures
+will be resolved with the chosen method by default.
+This can be done by following the below given steps.
+</p>
+<p>First, run the following line and the user profile should be opened automatically.
+If you haven't saved any environment variables yet, this will be an empty file.
+</p>
+<div class="sourceCode"><pre>usethis::edit_r_environ()
+</pre></div>
+<p>In the opened file add the next line, then save the file and restart your R session.
+Please note that this example sets "multisession" as default. For most users
+this should be the appropriate plan but please make sure it truly is.
+</p>
+<div class="sourceCode"><pre>R_FUTURE_PLAN="multisession"
+</pre></div>
+<p>After the session is freshly restarted please check if the above method worked
+by running the next line. If the output is <code>FALSE</code> you successfully set up a
+default non-sequential <code>future::plan()</code>. If the output is <code>TRUE</code> all functions
+will behave like they were called with <code>purrr::map()</code> and NOT in multisession.
+</p>
+<div class="sourceCode"><pre>inherits(future::plan(), "sequential")
+</pre></div>
+<p>For more information on possible plans please see
+<a href="https://github.com/HenrikBengtsson/future/blob/develop/README.md">the future package Readme</a>.
+</p>
+
+
+
+<h4>Get Progress Updates while Functions are Running</h4>
+
+<p>Most nflfastR functions are able to show progress updates
+using <code>progressr::progressor()</code> if they are turned on before the function is
+called. There are at least two basic ways to do this by either activating
+progress updates globally (for the current session) with
+</p>
+<div class="sourceCode"><pre>progressr::handlers(global = TRUE)
+</pre></div>
+<p>or by piping the function call into <code>progressr::with_progress()</code>:
+</p>
+<div class="sourceCode"><pre>simulate_nfl(2020, fresh_season = TRUE) %&gt;%
+  progressr::with_progress()
+</pre></div>
+<p>For more information how to work with progress handlers please see progressr::progressr.
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>An <code>nflseedR_simulation</code> object containing a list of 6 data frames
+data frames with the results of all simulated games,
+the final standings in each simulated season (incl. playoffs and draft order),
+summary statistics across all simulated seasons, and the simulation parameters. For a full list,
+please see <a href="https://nflseedr.com/articles/articles/nflsim.html#simulation-output">the package website</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The examples <a href="https://nflseedr.com/articles/articles/nflsim.html">on the package website</a>
+</p>
+<p>The method <code>summary.nflseedR_simulation()</code> that creates a pretty html summary table.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(nflseedR)
+
+# Activate progress updates
+# progressr::handlers(global = TRUE)
+
+# Parallel processing can be activated via the following line
+# future::plan("multisession")
+
+try({#to avoid CRAN test problems
+# Simulate the season 4 times in 2 rounds
+sim &lt;- nflseedR::simulate_nfl(
+  nfl_season = 2020,
+  fresh_season = TRUE,
+  simulations = 4,
+  sims_per_round = 2
+)
+
+# Overview output
+dplyr::glimpse(sim)
+})
+
+</code></pre>
+
+
+</div>

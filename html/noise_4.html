@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>computeNoiseForSubset</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Select a random subset of data for noise estimation.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function randomly selects a subset of cells (rows) from the data set, computes multiple estimates of intrinsic and extrinsic noise, as well as their mean and standard deviation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">computeNoiseForSubset(data, sample.size, n.iter)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A numeric matrix of two columns.  Each row is a cell, and each column expression of a reporter gene.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample.size</code></td>
+<td>
+
+<p>An integer that specifies the number of cells in the subset.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.iter</code></td>
+<td>
+
+<p>An integer that specifies the number of iterations (for calcuation of mean and standard deviation).
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list that consists of the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>intrinsic</code></td>
+<td>
+<p>A numeric matrix of esimated intrinsic noise. 7 rows and n.iter columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extrinsic</code></td>
+<td>
+<p>A numeric matrix of esimated extrinsic noise. 4 rows and n.iter columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intrinsic.mean</code></td>
+<td>
+<p>A numeric vector of length 7 that contains the mean estimates of intrinsic noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intrinsic.sd</code></td>
+<td>
+<p>A numeric vector of length 7 that contains the standard deviation of the estimates of intrinsic noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extrinsic.mean</code></td>
+<td>
+<p>A numeric vector of length 7 that contains the mean estimates of extrinsic noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extrinsic.sd</code></td>
+<td>
+<p>A numeric vector of length 7 that contains the standard deviation of the estimates of extrinsic noise.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Audrey Q. Fu
+</p>
+
+
+<h3>References</h3>
+
+<p>Fu, A. Q. and Pachter, L. (2016). Estimating intrinsic and extrinsic noise from single-cell gene expression measurements.  arXiv:1601.03334.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>computeIntrinsicNoise</code>, <code>computeExtrinsicNoise</code>, <code>elowitz_data</code>, <code>yang_nl10</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(yang_nl10)
+
+# quantile normalization on log2 transformed data
+# install bioconductor package for quantile normalization
+# source('http://bioconductor.org/biocLite.R')
+# biocLite('preprocessCore')
+library(preprocessCore)
+
+# ignore a few values that are negative
+yang_nl10.pos &lt;- yang_nl10[-which (yang_nl10[,1]&lt;0),]
+yang_nl10.pos.log2.quant &lt;- normalize.quantiles (as.matrix (log2 (yang_nl10.pos[,c(1,3)])))
+
+# subset the data and compute noise estimates
+yang.50 &lt;- computeNoiseForSubset (yang_nl10.pos.log2.quant, sample.size=50, n.iter=1000)
+summary (yang.50)
+</code></pre>
+
+
+</div>

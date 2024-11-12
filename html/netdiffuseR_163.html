@@ -1,0 +1,240 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hazard_rate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Network Hazard Rate</h2>
+
+<h3>Description</h3>
+
+<p>The hazard rate is the instantaneous probability of adoption at each time
+representing the likelihood members will adopt at that time (Allison 1984).
+The shape of the hazard rate indicates the pattern of new adopters over time.
+Rapid diffusion with convex cumulative adoption curves will have hazard functions
+that peak early and decay over time whereas slow concave cumulative adoption
+curves will have hazard functions that are low early and rise over time.
+Smooth hazard curves indicate constant adoption whereas those that oscillate
+indicate variability in adoption behavior over time.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hazard_rate(obj, no.plot = FALSE, include.grid = TRUE, ...)
+
+plot_hazard(x, ...)
+
+## S3 method for class 'diffnet_hr'
+plot(
+  x,
+  y = NULL,
+  main = "Hazard Rate",
+  xlab = "Time",
+  ylab = "Hazard Rate",
+  type = "b",
+  include.grid = TRUE,
+  bg = "lightblue",
+  pch = 21,
+  add = FALSE,
+  ylim = c(0, 1),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>A <code class="reqn">n\times T</code> matrix (Cumulative adoption matrix obtained from
+<code>toa_mat</code>) or a <code>diffnet</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.plot</code></td>
+<td>
+<p>Logical scalar. When TRUE, suppress plotting (only returns hazard rates).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.grid</code></td>
+<td>
+<p>Logical scalar. When TRUE includes a grid on the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments to be passed to the method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>diffnet_hr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Character scalar. Title of the plot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Character scalar. x-axis label.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Character scalar. y-axis label.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Character scalar. See <code>par</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bg</code></td>
+<td>
+<p>Character scalar. Color of the points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch</code></td>
+<td>
+<p>Integer scalar. See <code>par</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>Logical scalar. When TRUE it adds the hazard rate to the current plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>Numeric vector. See <code>plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function computes hazard rate, plots it and returns the hazard rate vector
+invisible (so is not printed on the console). For <code class="reqn">t&gt;1</code>, hazard rate is calculated as
+</p>
+<p style="text-align: center;"><code class="reqn">\frac{q_t - q_{t-1}}{n - q_{t-1}}</code>
+</p>
+
+<p>where <code class="reqn">q_i</code> is the number of adopters in time <code class="reqn">t</code>, and <code class="reqn">n</code> is
+the number of vertices in the graph.
+</p>
+<p>In survival analysis, hazard rate is defined formally as
+</p>
+<p style="text-align: center;"><code class="reqn">%
+\lambda(t)=\lim_{h\to +0}\frac{F(t+h)-F(t)}{h}\frac{1}{1-F(t)} %
+</code>
+</p>
+
+<p>Then, by approximating <code class="reqn">h=1</code>, we can rewrite the equation as
+</p>
+<p style="text-align: center;"><code class="reqn">%
+\lambda(t)=\frac{F(t+1)-F(t)}{1-F(t)} %
+</code>
+</p>
+
+<p>Furthermore, we can estimate <code class="reqn">F(t)</code>, the probability of not having adopted
+the innovation in time <code class="reqn">t</code>, as the proportion of adopters in that time, this
+is <code class="reqn">F(t) \sim q_t/n</code>, so now we have
+</p>
+<p style="text-align: center;"><code class="reqn">%
+\lambda(t)=\frac{q_{t+1}/n-q_t/n}{1-q_t/n} = \frac{q_{t+1} - q_t}{n - q_t} %
+</code>
+</p>
+
+<p>As showed above.
+</p>
+<p>The <code>plot_hazard</code> function is an alias for the <code>plot.diffnet_hr</code> method.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A row vector of size <code class="reqn">T</code> with hazard rates for <code class="reqn">t&gt;1</code> of class <code>diffnet_hr</code>.
+The class of the object is only used by the S3 plot method.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon &amp; Thomas W. Valente
+</p>
+
+
+<h3>References</h3>
+
+<p>Allison, P. (1984). Event history analysis regression for longitudinal event
+data. Beverly Hills: Sage Publications.
+</p>
+<p>Wooldridge, J. M. (2010). Econometric Analysis of Cross Section and Panel Data
+(2nd ed.). Cambridge: MIT Press.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other statistics: 
+<code>bass</code>,
+<code>classify_adopters()</code>,
+<code>cumulative_adopt_count()</code>,
+<code>dgr()</code>,
+<code>ego_variance()</code>,
+<code>exposure()</code>,
+<code>infection()</code>,
+<code>moran()</code>,
+<code>struct_equiv()</code>,
+<code>threshold()</code>,
+<code>vertex_covariate_dist()</code>
+</p>
+<p>Other visualizations: 
+<code>dgr()</code>,
+<code>diffusionMap()</code>,
+<code>drawColorKey()</code>,
+<code>grid_distribution()</code>,
+<code>plot_adopters()</code>,
+<code>plot_diffnet2()</code>,
+<code>plot_diffnet()</code>,
+<code>plot_infectsuscep()</code>,
+<code>plot_threshold()</code>,
+<code>rescale_vertex_igraph()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Creating a random vector of times of adoption
+toa &lt;- sample(2000:2005, 20, TRUE)
+
+# Computing cumulative adoption matrix
+cumadopt &lt;- toa_mat(toa)$cumadopt
+
+# Visualizing the hazard rate
+hazard_rate(cumadopt)
+</code></pre>
+
+
+</div>

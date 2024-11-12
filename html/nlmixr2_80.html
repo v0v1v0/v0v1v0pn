@@ -1,0 +1,204 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tableControl</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Output table/data.frame options</h2>
+
+<h3>Description</h3>
+
+<p>Output table/data.frame options
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">tableControl(
+  npde = NULL,
+  cwres = NULL,
+  nsim = 300,
+  ties = TRUE,
+  censMethod = c("truncated-normal", "cdf", "ipred", "pred", "epred", "omit"),
+  seed = 1009,
+  cholSEtol = (.Machine$double.eps)^(1/3),
+  state = TRUE,
+  lhs = TRUE,
+  eta = TRUE,
+  covariates = TRUE,
+  addDosing = FALSE,
+  subsetNonmem = TRUE,
+  cores = NULL,
+  keep = NULL,
+  drop = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>npde</code></td>
+<td>
+<p>When TRUE, request npde regardless of the algorithm used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cwres</code></td>
+<td>
+<p>When TRUE, request CWRES and FOCEi likelihood
+regardless of the algorithm used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>represents the number of simulations.  For rxode2, if
+you supply single subject event tables (created with
+<code style="white-space: pre;">⁠[eventTable()]⁠</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ties</code></td>
+<td>
+<p>When 'TRUE' jitter prediction-discrepancy points to discourage ties in cdf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>censMethod</code></td>
+<td>
+<p>Handle censoring method:
+</p>
+<p>- '"truncated-normal"' Simulates from a truncated normal distribution under the assumption of the model and censoring.
+</p>
+<p>- '"cdf"' Use the cdf-method for censoring with npde and use this for any other residuals ('cwres' etc)
+</p>
+<p>- '"omit"' omit the residuals for censoring</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>an object specifying if and how the random number
+generator should be initialized</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cholSEtol</code></td>
+<td>
+<p>The tolerance for the 'rxode2::choleSE' function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>state</code></td>
+<td>
+<p>is a Boolean indicating if 'state' values will be included (default 'TRUE')</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lhs</code></td>
+<td>
+<p>is a Boolean indicating if remaining 'lhs' values will be included (default 'TRUE')</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>is a Boolean indicating if 'eta' values will be included (default 'TRUE')</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariates</code></td>
+<td>
+<p>is a Boolean indicating if covariates will be included (default 'TRUE')</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>addDosing</code></td>
+<td>
+<p>Boolean indicating if the solve should add rxode2
+EVID and related columns.  This will also include dosing
+information and estimates at the doses.  Be default, rxode2
+only includes estimates at the observations. (default
+<code>FALSE</code>). When <code>addDosing</code> is <code>NULL</code>, only
+include <code>EVID=0</code> on solve and exclude any model-times or
+<code>EVID=2</code>. If <code>addDosing</code> is <code>NA</code> the classic
+<code>rxode2</code> EVID events are returned. When <code>addDosing</code> is <code>TRUE</code>
+add the event information in NONMEM-style format; If
+<code>subsetNonmem=FALSE</code> rxode2 will also include extra event types
+(<code>EVID</code>) for ending infusion and modeled times:
+</p>
+
+<ul>
+<li> <p><code>EVID=-1</code> when the modeled rate infusions are turned
+off (matches <code>rate=-1</code>)
+</p>
+</li>
+<li> <p><code>EVID=-2</code> When the modeled duration infusions are
+turned off (matches <code>rate=-2</code>)
+</p>
+</li>
+<li> <p><code>EVID=-10</code> When the specified <code>rate</code> infusions are
+turned off (matches <code>rate&gt;0</code>)
+</p>
+</li>
+<li> <p><code>EVID=-20</code> When the specified <code>dur</code> infusions are
+turned off (matches <code>dur&gt;0</code>)
+</p>
+</li>
+<li> <p><code style="white-space: pre;">⁠EVID=101,102,103,...⁠</code> Modeled time where 101 is the
+first model time, 102 is the second etc.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsetNonmem</code></td>
+<td>
+<p>subset to NONMEM compatible EVIDs only.  By
+default <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Number of cores used in parallel ODE solving.  This
+is equivalent to calling <code>setRxThreads()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep</code></td>
+<td>
+<p>is the keep sent to the table</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop</code></td>
+<td>
+<p>is the dropped variables sent to the table</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If you ever want to add CWRES/FOCEi objective function you can use the <code>addCwres</code>
+</p>
+<p>If you ever want to add NPDE/EPRED columns you can use the <code>addNpde</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of table options for nlmixr2
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matthew L. Fidler
+</p>
+
+
+</div>

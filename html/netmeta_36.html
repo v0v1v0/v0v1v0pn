@@ -1,0 +1,234 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netbind</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Combine network meta-analysis objects</h2>
+
+<h3>Description</h3>
+
+<p>This function can be used to combine network meta-analysis objects
+which is especially useful to generate a forest plot with results
+of several network meta-analyses.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netbind(
+  ...,
+  name,
+  common,
+  random,
+  col.study = "black",
+  col.inside = "white",
+  col.square = "gray",
+  col.square.lines = col.square,
+  backtransf,
+  reference.group,
+  baseline.reference,
+  warn.deprecated = gs("warn.deprecated"),
+  fixed,
+  comb.fixed,
+  comb.random
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Any number of network meta-analysis objects or a
+single list with network meta-analyses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>An optional character vector providing descriptive
+names for network meta-analysis objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether results for the common
+effects model should be reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether results for the random
+effects model should be reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.study</code></td>
+<td>
+<p>The colour for network estimates and confidence
+limits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.inside</code></td>
+<td>
+<p>The colour for network estimates and confidence
+limits if confidence limits are completely within squares.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.square</code></td>
+<td>
+<p>The colour for squares.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.square.lines</code></td>
+<td>
+<p>The colour for the outer lines of squares.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether results should be
+back transformed. If <code>backtransf = TRUE</code> (default), results
+for <code>sm = "OR"</code> are printed as odds ratios rather than log
+odds ratios, for example.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference.group</code></td>
+<td>
+<p>Reference treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseline.reference</code></td>
+<td>
+<p>A logical indicating whether results
+should be expressed as comparisons of other treatments versus the
+reference treatment (default) or vice versa. This argument is
+only considered if <code>reference.group</code> has been specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p>Deprecated argument; replaced by <code>common</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb.fixed</code></td>
+<td>
+<p>Deprecated argument; replaced by <code>common</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb.random</code></td>
+<td>
+<p>Deprecated argument; replaced by <code>random</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>"netbind"</code> with corresponding
+<code>forest</code> function. The object is a list containing the
+following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A data frame with results for the common effects
+model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A data frame with results for the random effects
+model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sm</code></td>
+<td>
+<p>Summary measure used in network meta-analyses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level.ma</code></td>
+<td>
+<p>Level for confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference.group, baseline.reference</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>netcomb</code>,
+<code>discomb</code>, <code>forest.netbind</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Linde2016)
+
+# Only consider studies including Face-to-face PST (to reduce
+# runtime of example)
+#
+face &lt;- subset(Linde2016, id %in% c(16, 24, 49, 118))
+
+# Standard random effects NMA model (with placebo as reference
+# treatment)
+#
+net1 &lt;- netmeta(lnOR, selnOR, treat1, treat2, id,
+  data = face, reference.group = "placebo",
+  sm = "OR", common = FALSE)
+
+# Additive CNMA model with placebo as inactive component and
+# reference
+#
+nc1 &lt;- netcomb(net1, inactive = "placebo")
+
+# Combine results of standard NMA and CNMA
+#
+nb1 &lt;- netbind(nc1, net1,
+  name = c("Additive CNMA", "Standard NMA"),
+  col.study = c("red", "black"), col.square = c("red", "black"))
+forest(nb1,
+  col.by = "black", addrow.subgroups = FALSE,
+  fontsize = 10, spacing = 0.7, squaresize = 0.9,
+  label.left = "Favours Placebo",
+  label.right = "Favours other")
+
+</code></pre>
+
+
+</div>

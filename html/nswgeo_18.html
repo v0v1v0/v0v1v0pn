@@ -1,0 +1,72 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>poa_lhd_concordance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Concordance between postal areas and local health districts.</h2>
+
+<h3>Description</h3>
+
+<p>Contains the other administrative geometries which intersect with the local
+health district boundaries, along with the size of the intersection.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">poa_lhd_concordance
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>An object of class <code>data.frame</code> with 825 rows and 5 columns.
+</p>
+
+
+<h3>Details</h3>
+
+<p>For geographic regions used by the Australian Bureau of Statistics (ABS), the
+ABS publishes <a href="https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/correspondences">correspondence files</a>.
+These files compare how two different types of regions align with each other.
+The Australian Government Department of Health and Aged Care published
+analogous <a href="https://www.health.gov.au/resources/collections/primary-health-networks-phns-collection-of-concordance-files">concordance files</a>
+for primary health networks (PHNs).
+These are useful for mapping between different types of administrative
+districts.
+There does not appear to be a publicly available set of concordance files for
+New South Wales local health district geographies.
+</p>
+<p>The concordance was computed here by intersecting the ABS geometries with the
+local health district geometries. The fraction of the ABS geometry's area
+included in the intersection is reported in the column <code>FRAC_INCLUDED</code>.
+Any intersection with <code>FRAC_INCLUDED</code> at least 0.01% was retained.
+Area computations were performed in <code>crs_gda2020_albers()</code> (EPSG 9473 equal
+area Albers) coordinates at the original reolution of the source data.
+</p>
+<p>Note that <a href="https://www.abs.gov.au/ausstats/abs@.nsf/Lookup/by%20Subject/1270.0.55.003~July%202016~Main%20Features~Postal%20Areas%20(POA)~8">postal areas</a>
+are not precisely the same as postcodes used by Australia Post, however they
+are very similar.
+</p>
+
+
+<h3>Source</h3>
+
+<p>Computed using the same source datasets as <code>lhd</code> and <code>poa_nsw</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+
+# postcodes that overlap with Murrumbidgee LHD
+poa_lhd_concordance |&gt;
+  filter(lhd_name == "Murrumbidgee", FRAC_INCLUDED &gt; 0.005) |&gt;
+  arrange(desc(FRAC_INCLUDED)) |&gt;
+  pull(POA_NAME_2021)
+</code></pre>
+
+
+</div>

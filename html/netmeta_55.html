@@ -1,0 +1,243 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netmeasures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Measures for characterizing a network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>This function provides measures for quantifying the direct evidence
+proportion, the mean path length and the minimal parallelism (the
+latter on aggregated and study level) of mixed treatment
+comparisons (network estimates) as well as the evidence flow per
+design, see König et al. (2013).  These measures support the
+critical evaluation of the network meta-analysis results by
+rendering transparent the process of data pooling.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netmeasures(
+  x,
+  random = x$random | !missing(tau.preset),
+  tau.preset = x$tau.preset,
+  warn = TRUE,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netmeta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether random effects model
+should be used to calculate network measures.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.preset</code></td>
+<td>
+<p>An optional value for the square-root of the
+between-study variance <code class="reqn">\tau^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>A logical indicating whether warnings should be
+printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments (to catch deprecated arguments).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The direct evidence proportion gives the absolute contribution of
+direct effect estimates combined for two-arm and multi-arm studies
+to one network estimate.
+</p>
+<p>Concerning indirectness, comparisons with a mean path length beyond
+two should be interpreted with particular caution, as more than two
+direct comparisons have to be combined serially on average.
+</p>
+<p>Large indices of parallelism, either on study-level or on
+aggregated level, can be considered as supporting the validity of a
+network meta-analysis if there is only a small amount of
+heterogeneity.
+</p>
+<p>The network estimates for two treatments are linear combinations of
+direct effect estimates comparing these or other treatments. The
+linear coefficients can be seen as the generalization of weights
+known from classical meta-analysis. These coefficients are given in
+the projection matrix <code class="reqn">H</code> of the underlying model. For
+multi-arm studies, the coefficients depend on the choice of the
+study-specific baseline treatment, but the absolute flow of
+evidence can be made explicit for each design as shown in König et
+al. (2013) and is given in <code>H.tilde</code>.
+</p>
+<p>All measures are calculated based on the common effects
+meta-analysis by default. In the case that in function
+<code>netmeta</code> the argument <code>random = TRUE</code>, all measures
+are calculated for a random effects model. The value of the
+square-root of the between-study variance <code class="reqn">\tau^2</code> can also be
+prespecified by argument <code>tau.preset</code> in function
+<code>netmeta</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>random, tau.preset</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proportion</code></td>
+<td>
+<p>A named vector of the direct evidence proportion
+of each network estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meanpath</code></td>
+<td>
+<p>A named vector of the mean path length of each
+network estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minpar</code></td>
+<td>
+<p>A named vector of the minimal parallelism on
+aggregated level of each network estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minpar.study</code></td>
+<td>
+<p>A named vector of the minimal parallelism on
+study level of each network estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H.tilde </code></td>
+<td>
+<p>Design-based hat matrix with information on
+absolute evidence flow per design. The number of rows is equal to
+the number of possible pairwise treatment comparisons and the
+number of columns is equal to the number of designs.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ulrike Krahn <a href="mailto:ulrike.krahn@bayer.com">ulrike.krahn@bayer.com</a>, Jochem König
+<a href="mailto:koenigjo@uni-mainz.de">koenigjo@uni-mainz.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>König J, Krahn U, Binder H (2013):
+Visualizing the flow of evidence in network meta-analysis and
+characterizing mixed treatment comparisons.
+<em>Statistics in Medicine</em>,
+<b>32</b>, 5414–29
+</p>
+
+
+<h3>See Also</h3>
+
+<p>netmeta
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(smokingcessation)
+
+# Transform data from arm-based format to contrast-based format
+#
+p1 &lt;- pairwise(list(treat1, treat2, treat3),
+  event = list(event1, event2, event3), n = list(n1, n2, n3),
+  data = smokingcessation, sm = "OR")
+
+# Conduct network meta-analysis
+#
+net1 &lt;- netmeta(p1)
+
+# Calculate measures based on a common effects model
+#        
+nm1 &lt;- netmeasures(net1)
+
+# Plot of minimal parallelism versus mean path length
+#
+plot(nm1$meanpath, nm1$minpar, type = "n",
+  xlab = "Mean path length", ylab = "Minimal parallelism")
+text(nm1$meanpath, nm1$minpar, names(nm1$meanpath), cex = 0.8)
+
+## Not run: 
+data(Senn2013)
+
+# Conduct common effects network meta-analysis with reference
+# treatment 'plac', i.e. placebo
+#
+net2 &lt;- netmeta(TE, seTE, treat1, treat2, studlab,
+  data = Senn2013, sm = "MD", reference = "plac", random = FALSE)
+
+# Calculate measures based on a common effects model
+#        
+nm2 &lt;- netmeasures(net2)
+
+# Plot of minimal parallelism versus mean path length
+#
+plot(nm2$meanpath, nm2$minpar, type = "n",
+  xlab = "Mean path length", ylab = "Minimal parallelism")
+text(nm2$meanpath, nm2$minpar, names(nm2$meanpath), cex = 0.8)
+
+# Conduct random effects network meta-analysis with reference
+# treatment 'plac', i.e. placebo
+#
+net3 &lt;- netmeta(TE, seTE, treat1, treat2, studlab,
+  data = Senn2013, sm = "MD", reference = "plac", common = FALSE)
+
+# Calculate measures based on a random effects model
+#                          
+nm3 &lt;- netmeasures(net3)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

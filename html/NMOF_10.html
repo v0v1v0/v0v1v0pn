@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>callMerton</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Price of a European Call under Merton's Jump–Diffusion Model
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes the price of a European Call under Merton's jump–diffusion
+model (and the equivalent Black–Scholes–Merton volatility)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">callMerton(S, X, tau, r, q, v, lambda, muJ, vJ, N, implVol = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>current stock price</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>strike price</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>time to maturity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>risk-free rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>dividend rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>variance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>jump intensity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>muJ</code></td>
+<td>
+<p>mean jump-size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vJ</code></td>
+<td>
+<p>variance of log jump-size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The number of jumps.  See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>implVol</code></td>
+<td>
+<p>compute equivalent Black–Scholes–Merton volatility?
+Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function computes the value of a plain-vanilla European call under
+Merton's jump–diffusion model.  Put values can be computed through
+put–call-parity (see <code>putCallParity</code>).  If <code>implVol</code>
+is <code>TRUE</code>, the function also computes the implied volatility
+necessary to obtain the same price under Black–Scholes–Merton.  The
+implied volatility is computed with <code>uniroot</code> from the
+<span class="pkg">stats</span> package.
+</p>
+<p>Note that the function takes variances as inputs (not volatilities).
+</p>
+<p>The number of jumps <code>N</code> typically can be set 10 or 20. (Just try to
+increase <code>N</code> and see how the results change.)
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns the value of the call (numeric) or, if <code>implVol</code> is
+<code>TRUE</code>, a list of the value and the implied volatility.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Merton, R.C. (1976) Option Pricing when Underlying Stock Returns are
+Discontinuous. <em>Journal of Financial Economics</em> <strong>3</strong>(1–2),
+125–144.
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>callCF</code>, <code>EuropeanCall</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">S &lt;- 100; X &lt;- 100; tau &lt;- 1
+r &lt;- 0.0075; q &lt;- 0.00
+v &lt;- 0.2^2
+lambda &lt;- 1; muJ &lt;- -0.2; vJ &lt;- 0.6^2
+N &lt;- 20
+
+## jumps can make a difference
+callMerton(S, X, tau, r, q, v, lambda, muJ, vJ, N, implVol = TRUE)
+callCF(cf = cfMerton, S = S, X = X, tau = tau, r = r, q = q,
+       v = v, lambda = lambda, muJ = muJ, vJ = vJ, implVol = TRUE)
+vanillaOptionEuropean(S,X,tau,r,q,v, greeks = FALSE)
+
+lambda &lt;- 0 ## no jumps
+callMerton(S, X, tau, r, q, v, lambda, muJ, vJ, N, implVol = FALSE)
+vanillaOptionEuropean(S,X,tau,r,q,v, greeks = FALSE)
+
+lambda &lt;- 1; muJ &lt;- 0; vJ &lt;- 0.0^2  ## no jumps, either
+callMerton(S, X, tau, r, q, v, lambda, muJ, vJ, N, implVol = FALSE)
+vanillaOptionEuropean(S,X,tau,r,q,v, greeks = FALSE)
+
+</code></pre>
+
+
+</div>

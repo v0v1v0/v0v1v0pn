@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>autoplot.neuralGAM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Advanced <code>neuralGAM</code> visualization with ggplot2 library</h2>
+
+<h3>Description</h3>
+
+<p>Advanced <code>neuralGAM</code> visualization with ggplot2 library
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'neuralGAM'
+autoplot(object, select, xlab = NULL, ylab = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a fitted <code>neuralGAM</code> object as produced by <code>neuralGAM()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+<p>selects the term to be plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>A title for the <code>x</code> axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>A title for the <code>y</code> axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other graphics parameters to pass on to plotting commands.
+See details for ggplot2::geom_line options</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A ggplot object, so you can use common features from the ggplot2 package
+to manipulate the plot.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ines Ortega-Fernandez, Marta Sestelo.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+n &lt;- 24500
+
+seed &lt;- 42
+set.seed(seed)
+
+x1 &lt;- runif(n, -2.5, 2.5)
+x2 &lt;- runif(n, -2.5, 2.5)
+x3 &lt;- runif(n, -2.5, 2.5)
+
+f1 &lt;- x1 ** 2
+f2 &lt;- 2 * x2
+f3 &lt;- sin(x3)
+f1 &lt;- f1 - mean(f1)
+f2 &lt;- f2 - mean(f2)
+f3 &lt;- f3 - mean(f3)
+
+eta0 &lt;- 2 + f1 + f2 + f3
+epsilon &lt;- rnorm(n, 0.25)
+y &lt;- eta0 + epsilon
+train &lt;- data.frame(x1, x2, x3, y)
+
+library(neuralGAM)
+ngam &lt;- neuralGAM(y ~ s(x1) + x2 + s(x3), data = train,
+                 num_units = 1024, family = "gaussian",
+                 activation = "relu",
+                 learning_rate = 0.001, bf_threshold = 0.001,
+                 max_iter_backfitting = 10, max_iter_ls = 10,
+                 seed = seed
+                 )
+autoplot(ngam, select="x1")
+
+# add custom title
+autoplot(ngam, select="x1") + ggplot2::ggtitle("Main Title")
+# add labels
+autoplot(ngam, select="x1") + ggplot2::xlab("test") + ggplot2::ylab("my y lab")
+# plot multiple terms:
+plots &lt;- lapply(c("x1", "x2", "x3"), function(x) autoplot(ngam, select = x))
+gridExtra::grid.arrange(grobs = plots, ncol = 3, nrow = 1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

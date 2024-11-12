@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LLHRPlugInBand</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simple Plug in badnwidth selector</h2>
+
+<h3>Description</h3>
+
+<p>Provides  the asymptotic MISE optimal plug-in bandwidth for the local linear hazard rate estimator <code>LocLinEst</code>, defined in (4),  <a href="https://link.springer.com/article/10.1007/s10463-010-0277-6">Bagkavos (2011)</a>. This is the binned data version of the <code>PlugInBand</code> AMISE optimal bandwidth rule.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LLHRPlugInBand(BinCenters, h, kfun, Delta, xin, xout, IntKfun, ci, cens)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>BinCenters</code></td>
+<td>
+<p> A vector of data points, the centers of the bins resulting from the discretization of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p> Bandwidth for the estimate of the distribution function. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kfun</code></td>
+<td>
+<p> A kernel function. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Delta</code></td>
+<td>
+<p>A scalar. The length of the bins. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p> A vector of data points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xout</code></td>
+<td>
+<p> The point at which the estimates should be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IntKfun</code></td>
+<td>
+<p> The integrated kernel function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p> Crude hazard rate estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cens</code></td>
+<td>
+<p> Censoring Indicators.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The bandwidth selector requires binned data, i.e. data in the form <code class="reqn">(x_i, y_i)</code> where <code class="reqn">x_i</code> are the bin centers and <code class="reqn">y_i</code> are empirircal hazard rate estimates at each <code class="reqn">x_i</code>. This is achieved  via  the <code>DiscretizeData</code> function. As it can be seen from (4) in <a href="https://link.springer.com/article/10.1007/s10463-010-0277-6">Bagkavos (2011)</a>, the bandwidth selector also requires an estimate of the functional
+</p>
+<p style="text-align: center;"><code class="reqn">
+\int \left \{ \lambda^{(2)}(x) \right \}^2 \,dx
+</code>
+</p>
+
+<p>which is readily implemented in <code>PlugInBand</code>. It also requires an estimate of the constant
+</p>
+<p style="text-align: center;"><code class="reqn">
+\int \frac{\lambda(x)}{1-F(x)} \,dx
+</code>
+</p>
+
+<p>For this reason additionally the  plug in bandwidth rule is also used, as it is implemented in the  <code>bw.nrd</code> distribution function default bandwidth rule of <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-9469.2005.00472.x">Swanepoel and Van Graan (2005)</a>. The constants <code class="reqn">R(K)</code> and <code class="reqn">\mu_2^2(K)</code> are deterministic and specific to the kernel used in the implementation hence can be claculated precisely.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A scalar with the value of the suggested bandwidth.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://link.springer.com/article/10.1007/s10463-010-0277-6">Bagkavos (2011), Annals of the Institute of Statistical Mathematics, 63(5), 1019-1046.</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>PlugInBand </code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+SampleSize&lt;-100 #amount of data to be generated
+ti&lt;- rweibull(SampleSize, .6, 1) # draw a random sample
+ui&lt;-rexp(SampleSize, .2)         # censoring sample
+cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+x1&lt;-pmin(ti,ui)                  # observed data
+cen&lt;-rep.int(1, SampleSize)      # initialize censoring indicators
+cen[which(ti&gt;ui)]&lt;-0             # 0's correspond to censored indicators
+
+a.use&lt;-DiscretizeData(ti, x)     # discretize the data
+BinCenters&lt;-a.use$BinCenters     # get the data centers
+ci&lt;-a.use$ci                     # get empircal hazard rate estimates
+Delta=a.use$Delta                # Binning range
+h2&lt;-bw.nrd(ti)                   # Bandwidth to use in constant est. of the plug in rule
+h.use&lt;-h2                        # the first element is the band to use
+
+huse1&lt;- LLHRPlugInBand(BinCenters,h.use,Epanechnikov,Delta,ti,x,IntEpanechnikov,ci,cen)
+huse1
+
+
+</code></pre>
+
+
+</div>

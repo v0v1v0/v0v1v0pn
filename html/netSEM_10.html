@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netSEMp2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>network Structural Equation Modelling (netSEM) - Principle 2</h2>
+
+<h3>Description</h3>
+
+<p>This function builds an netSEM model using principle 2.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netSEMp2(
+  x,
+  exogenous = NULL,
+  endogenous = NULL,
+  str = FALSE,
+  criterion = "AIC"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A dataframe. By default it considers all columns as exogenous variables, except the first column which stores the system endogenous variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exogenous, </code></td>
+<td>
+<p>by default it consideres all columns as exogenous variables except column number 1, which is the main endogenous response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endogenous</code></td>
+<td>
+<p>A character string of the column name of the main endogenous OR a numeric number indexing the column of the main endogenous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>str</code></td>
+<td>
+<p>A boolean, whether or not this is a 'strength' type problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>By default uses AIC to identify best model. Alternative choice is BIC.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Principle 2 resembles the multiple regression principle in the way multiple predictors are considered simultaneously. Specifically, the first-level predictors to the system level variable, such as, Time and unit level variables, acted on the system level variable collectively by an additive model. This collective additive model can be found with a generalized stepwise variable selection (using the stepAIC() function in R, which performs variable selection on the basis of AIC or BIC) and this proceeds iteratively.
+</p>
+<p>Data is analysed first using Principle 1 to find the best models. If needed, transformations based on the best models are applied to the predictors. Starting from the system response variable, each variable is regressed on all other variables except for the system response in an additive multiple regression model, which is reduced by a stepwise selection using stepAIC(). Then, for each selected variable, fitted regression for 6 selected functional forms (8 if strength type problem) and pick the best.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of the following items:
+</p>
+
+<ul><li>
+<p> "res.print": A matrix. For each row, first column is the endogenous variable, second column is the exogenous variable, 
+the other columns show corresponding summary information.
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p>netSEMp1
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Using AIC criterion
+data(acrylic)
+ans &lt;- netSEMp2(acrylic, criterion = "AIC")
+
+# Using AIC criterion
+ans &lt;- netSEMp2(acrylic, criterion = "BIC")
+
+
+# Using simulated data
+ s &lt;- runif(100,0,2)
+m3 &lt;- 1+2.5*s+rnorm(100,0,0.5)
+m1 &lt;- runif(100,1,4)
+m2 &lt;- -1-m1+m3+rnorm(100,0,0.3)
+ y &lt;- 2+2*exp(m1/3)+(m2-1)^2-m3+rnorm(100,0,0.5)
+# Check the pairwise plot 
+sim &lt;- data.frame(cbind(y,s,m1,m2,m3))
+pairs(sim)
+ans &lt;- netSEMp2(sim)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

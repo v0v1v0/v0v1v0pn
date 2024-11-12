@@ -1,0 +1,215 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lpbwselect</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bandwidth Selection Procedures for Local Polynomial Regression Estimation and Inference</h2>
+
+<h3>Description</h3>
+
+<p><code>lpbwselect</code> implements bandwidth selectors for local polynomial regression point estimators and inference procedures developed in Calonico, Cattaneo and Farrell (2018). See also Calonico, Cattaneo and Farrell (2020) for related optimality results. 
+It also implements other bandwidth selectors available in the literature. See Wand and Jones (1995) and Fan and Gijbels (1996) for background references.
+</p>
+<p>Companion commands: <code>lprobust</code> for local polynomial point estimation and inference procedures.
+</p>
+<p>A detailed introduction to this command is given in Calonico, Cattaneo and Farrell (2019). For more details, and related Stata and R packages useful for empirical analysis, visit <a href="https://nppackages.github.io/">https://nppackages.github.io/</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lpbwselect(y, x, eval = NULL, neval = NULL, p = NULL, deriv = NULL,
+kernel = "epa", bwselect = "mse-dpi", bwcheck = 21, bwregul = 1, 
+imsegrid = 30, vce = "nn", cluster = NULL,
+nnmatch = 3, interior = FALSE, subset = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>dependent variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>independent variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p>vector of evaluation point(s). By default it uses 30 equally spaced points over to support of <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neval</code></td>
+<td>
+<p>number of quantile-spaced evaluation points on support of <code>x</code>. Default is <code>neval=30</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>polynomial order used to construct point estimator; default is <code>p = 1</code> (local linear regression).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deriv</code></td>
+<td>
+<p>derivative order of the regression function to be estimated. Default is <code>deriv=0</code> (regression function).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>kernel function used to construct local polynomial estimators. Options are <code>epa</code> for the epanechnikov kernel, <code>tri</code> for the triangular kernel, <code>uni</code> for the uniform kernel and <code>gau</code> for the gaussian kernel. Default is <code>kernel = epa</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bwselect</code></td>
+<td>
+<p>bandwidth selection procedure to be used. Options are:
+</p>
+<p><code>mse-dpi</code> second-generation DPI implementation of MSE-optimal bandwidth. Default option.
+</p>
+<p><code>mse-rot</code> ROT implementation of MSE-optimal bandwidth.
+</p>
+<p><code>imse-dpi</code> second-generation DPI implementation of IMSE-optimal bandwidth (computed using grid of evaluation points selected).
+</p>
+<p><code>imse-rot</code> ROT implementation of IMSE-optimal bandwidth (computed using grid of evaluation points selected).
+</p>
+<p><code>ce-dpi</code> second generation DPI implementation of CE-optimal bandwidth.
+</p>
+<p><code>ce-rot</code> ROT implementation of CE-optimal bandwidth.
+</p>
+<p><code>all</code> reports all available bandwidth selection procedures.
+</p>
+<p>Note: MSE = Mean Square Error; IMSE = Integrated Mean Squared Error; CE = Coverage Error; DPI = Direct Plug-in; ROT = Rule-of-Thumb. For details on implementation see Calonico, Cattaneo and Farrell (2019).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bwcheck</code></td>
+<td>
+<p>if a positive integer is provided, then the selected bandwidth is enlarged so that at least <code>bwcheck</code> effective observations are available at each evaluation point. Default is <code>bwcheck = 21</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bwregul</code></td>
+<td>
+<p>specifies scaling factor for the regularization term added to the denominator of bandwidth selectors. Setting <code>bwregul = 0</code> removes the regularization term from the bandwidth selectors. Default is <code>bwregul = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imsegrid</code></td>
+<td>
+<p>number of evaluations points used to compute the IMSE bandwidth selector. Default is <code>imsegrid = 30</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vce</code></td>
+<td>
+<p>procedure used to compute the variance-covariance matrix estimator. Options are:
+</p>
+<p><code>nn</code> heteroskedasticity-robust nearest neighbor variance estimator with <code>nnmatch</code> the (minimum) number of neighbors to be used. Default choice.
+</p>
+<p><code>hc0</code> heteroskedasticity-robust plug-in residuals variance estimator without weights.
+</p>
+<p><code>hc1</code> heteroskedasticity-robust plug-in residuals variance estimator with <code>hc1</code> weights.
+</p>
+<p><code>hc2</code> heteroskedasticity-robust plug-in residuals variance estimator with <code>hc2</code> weights.
+</p>
+<p><code>hc3</code> heteroskedasticity-robust plug-in residuals variance estimator with <code>hc3</code> weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>indicates the cluster ID variable used for cluster-robust variance estimation with degrees-of-freedom weights. By default it is combined with <code>vce=nn</code> for cluster-robust nearest neighbor variance estimation. Another option is plug-in residuals combined with <code>vce=hc1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nnmatch</code></td>
+<td>
+<p>to be combined with for <code>vce=nn</code> for heteroskedasticity-robust nearest neighbor variance estimator with <code>nnmatch</code> indicating the minimum number of neighbors to be used. Default is <code>nnmatch=3</code></p>
+</td>
+</tr>
+</table>
+<p>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>interior</code></td>
+<td>
+<p>if TRUE, all evaluation points are assumed to be interior points. This option affects only data-driven bandwidth selection via <code>lpbwselect</code>. Default is <code>interior = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>optional rule specifying a subset of observations to be used.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Estimate</code></td>
+<td>
+<p>A matrix containing <code>grid</code> (grid points), <code>h</code> and <code>b</code> (bandwidths), <code>N</code>
+(sample size)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>opt</code></td>
+<td>
+<p>A list containing options passed to the function.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Sebastian Calonico, Columbia University, New York, NY.  <a href="mailto:sebastian.calonico@columbia.edu">sebastian.calonico@columbia.edu</a>.
+</p>
+<p>Matias D. Cattaneo, Princeton University, Princeton, NJ.  <a href="mailto:cattaneo@princeton.edu">cattaneo@princeton.edu</a>.
+</p>
+<p>Max H. Farrell, University of Chicago, Chicago, IL. <a href="mailto:max.farrell@chicagobooth.edu">max.farrell@chicagobooth.edu</a>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Calonico, S., M. D. Cattaneo, and M. H. Farrell. 2018. <a href="https://nppackages.github.io/references/Calonico-Cattaneo-Farrell_2018_JASA.pdf">On the Effect of Bias Estimation on Coverage Accuracy in Nonparametric Inference</a>. Journal of the American Statistical Association, 113(522): 767-779. doi: <a href="https://doi.org/10.1080/01621459.2017.1285776">10.1080/01621459.2017.1285776</a>.
+</p>
+<p>Calonico, S., M. D. Cattaneo, and M. H. Farrell. 2019. <a href="https://nppackages.github.io/references/Calonico-Cattaneo-Farrell_2019_JSS.pdf">nprobust: Nonparametric Kernel-Based Estimation and Robust Bias-Corrected Inference</a>. Journal of Statistical Software, 91(8): 1-33. doi: <a href="https://doi.org/10.18637/jss.v091.i08">10.18637/jss.v091.i08</a>.
+</p>
+<p>Calonico, S., M. D. Cattaneo, and M. H. Farrell. 2020. <a href="https://nppackages.github.io/references/Calonico-Cattaneo-Farrell_2020_CEopt.pdf">Coverage Error Optimal Confidence Intervals for Local Polynomial Regression</a>. Working Paper.
+</p>
+<p>Fan, J., and Gijbels, I. 1996. Local polynomial modelling and its applications, London: Chapman and Hall.
+</p>
+<p>Wand, M., and Jones, M. 1995. Kernel Smoothing, Florida: Chapman &amp; Hall/CRC.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lprobust</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x   &lt;- runif(500)
+y   &lt;- sin(4*x) + rnorm(500)
+est &lt;- lpbwselect(y,x)
+summary(est)
+</code></pre>
+
+
+</div>

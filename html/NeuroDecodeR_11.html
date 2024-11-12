@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>create_binned_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert data from raster format to binned format</h2>
+
+<h3>Description</h3>
+
+<p>This function takes the name of a directory that contains files in raster
+format and averages the data within a specified bin width at specified
+sampling interval increments to create data in binned format used for
+decoding.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">create_binned_data(
+  raster_dir_name,
+  save_prefix_name,
+  bin_width,
+  sampling_interval,
+  start_time = NULL,
+  end_time = NULL,
+  files_contain = "",
+  num_parallel_cores = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>raster_dir_name</code></td>
+<td>
+<p>A string that contains the path to a directory that
+has files in raster format. These files will be combined into binned format
+data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save_prefix_name</code></td>
+<td>
+<p>A string with a prefix that will be used name of file
+that contains the saved binned format data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin_width</code></td>
+<td>
+<p>A number that has the number of data samples that data will
+be averaged over.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampling_interval</code></td>
+<td>
+<p>A number that has the specifies the sampling
+interval between successive binned data points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start_time</code></td>
+<td>
+<p>A number that specifies the time to start binning the data.
+This needs to be set to one of the start times in the raster data; i.e., if
+data columns are in the format time.XXX_YYY, then the start_time must be
+one of the XXX values. By default, the start_time is the first
+time in the raster data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end_time</code></td>
+<td>
+<p>A number that specifies the time to end the binning of the data.
+This needs to be set to one of the end times in the raster data; i.e., if
+data columns are in the format time.XXX_YYY, then the start_time must be
+one of the YYY values. By default, the end_time is the last
+time in the raster data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>files_contain</code></td>
+<td>
+<p>A string that specifies that only raster files that
+contain this string should be included in the binned format data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_parallel_cores</code></td>
+<td>
+<p>An integer specifying the number of parallel cores
+to use. The default (NULL) value is to use half of the cores detected on
+the system. If this value is set to a value of less than 1, then the code
+will be run serially.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a string with the name of the file that was created which has
+the data in binnned format.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># create binned data with 150 ms bin sizes sampled at 10 ms intervals
+raster_dir_name &lt;- file.path(
+  "..", "data-raw", "raster",
+  "Zhang_Desimone_7objects_raster_data_rda", ""
+)
+
+raster_dir_name &lt;- trimws(file.path(system.file("extdata", package = "NeuroDecodeR"), 
+                          "Zhang_Desimone_7object_raster_data_small_rda", " "))
+
+
+# The code could potentially run faster by using more parallel cores
+# (e.g., by not setting the num_parallel_cores argument, half the cores available
+#  will be used) 
+binned_file_name &lt;- create_binned_data(raster_dir_name, 
+                                      file.path(tempdir(), "ZD"), 
+                                      150, 50,
+                                      num_parallel_cores = 2)
+
+
+</code></pre>
+
+
+</div>

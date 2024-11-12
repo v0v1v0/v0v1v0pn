@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nzge</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>General Election Results 2002 and onwards</h2>
+
+<h3>Description</h3>
+
+<p>New Zealand general election results by voting place for 2002, 2005, 2008, 2011 and 2014
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nzge
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 728,602 rows and 9 variables.</p>
+
+
+<h3>Details</h3>
+
+
+<ul>
+<li> <p><code>approx_location</code>. Approximate location of voting place
+</p>
+</li>
+<li> <p><code>vorting_place</code>. Description of exact location of voting place
+</p>
+</li>
+<li> <p><code>party</code>. Party voted for (party vote) or party of candidate voted for
+(candidate vote)
+</p>
+</li>
+<li> <p><code>votes</code>. Number of votes
+</p>
+</li>
+<li> <p><code>electorate</code>. Electorate in which voters were enrolled.  Note that this 
+is not necessarily the physical location of the voting_place, so voting_place
+and electorate have a many to many relationship
+</p>
+</li>
+<li> <p><code>voting_type</code>. Party (proportional representation) or Candidate (first past 
+the vote).  In New Zealand each voter has to vote for both an individual
+candidate to represent their electorate, and a party vote for the overall makeup
+of Parliament.
+</p>
+</li>
+<li> <p><code>candidate</code>. If voting_type == "Candidate", the name of the candidate; 
+otherwise NA
+</p>
+</li>
+<li> <p><code>election_year</code>.  Year of the election.
+</p>
+</li>
+<li> <p><code>electorate_number</code>.  Number of the electorate.
+</p>
+</li>
+</ul>
+<h3>Source</h3>
+
+<p><a href="http://www.electionresults.govt.nz/electionresults_2014/e9/html/statistics.html">http://www.electionresults.govt.nz/electionresults_2014/e9/html/statistics.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>voting_places</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># the following matches the results published at
+# http://www.electionresults.govt.nz/electionresults_2014/e9/html/e9_part1.html
+library(tidyr)
+library(dplyr)
+nzge %&gt;%
+    mutate(voting_type = paste0(voting_type, " vote")) %&gt;%
+    group_by(party, voting_type, election_year) %&gt;%
+    summarise(votes = sum(votes)) %&gt;%
+    spread(voting_type, votes) %&gt;%
+    ungroup() %&gt;%
+    arrange(election_year, desc(`Party vote`))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,239 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>makeD</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create the dominance genetic relationship matrix</h2>
+
+<h3>Description</h3>
+
+<p>Given a pedigree, the matrix of coefficients of fraternity are returned -
+the D matrix for autosomes and the Sd matrix for sex chromosomes. Note,
+inbreeding is not directly incorporated into the calculation of the
+coefficients (see Details). Functions will return the inverses of the D and
+Sd matrices by default, otherwise this operation can be skipped if desired.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">makeD(
+  pedigree,
+  parallel = FALSE,
+  ncores = getOption("mc.cores", 2L),
+  invertD = TRUE,
+  returnA = FALSE,
+  det = TRUE,
+  verbose = TRUE
+)
+
+makeSd(
+  pedigree,
+  heterogametic,
+  DosageComp = c(NULL, "ngdc", "hori", "hedo", "hoha", "hopi"),
+  parallel = FALSE,
+  ncores = getOption("mc.cores", 2L),
+  invertSd = TRUE,
+  returnS = FALSE,
+  det = TRUE,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pedigree</code></td>
+<td>
+<p>A pedigree with columns organized: ID, Dam, Sire. For use
+with <code>makeSd</code>, a fourth column indicates the sex of each individual in
+the pedigree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Logical, indicating whether computation should be run on
+multiple processors at once. See details for considerations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Number of cores to use when parallel = TRUE.  Default is
+maximum available.  Otherwise, set with an integer. See details for
+considerations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>invertD, invertSd</code></td>
+<td>
+<p>A logical indicating whether or not to invert the D
+or S matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnA, returnS</code></td>
+<td>
+<p>Logical, indicating if the numerator relationship
+matrix (A or S) should be stored and returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>det</code></td>
+<td>
+<p>Logical, indicating if the determinant of the D or Sd matrix
+should be returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical, indicating if progress messages should be displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>heterogametic</code></td>
+<td>
+<p>Character indicating the label corresponding to the
+heterogametic sex used in the "Sex" column of the pedigree</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DosageComp</code></td>
+<td>
+<p>A character indicating which model of dosage compensation.
+If <code>NULL</code> then the “ngdc” model is assumed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Missing parents (e.g., base population) should be denoted by either 'NA',
+'0', or '*'.
+</p>
+<p>There exists no convenient method of obtaining the inverse of the dominance
+genetic relatedness matrix (or the D matrix itself) directly from a pedigree
+(such as for the inverse of A, i.e., Quaas (1995)). Therefore, these
+functions computes the coefficient of fraternity (Lynch and Walsh, 1998) for
+every individual in the pedigree with a non-zero additive genetic
+relatedness in the case of autosomes (<code>makeD</code>) or for the homogametic
+sex only in the case of sex chromosomes (<code>makeSd</code>, because the
+heterogametic sex has only one copy of the shared sex chromosome and
+therefore cannot express dominance allelic interactions).
+</p>
+<p>The coefficients of fraternity are only approximations that assume no
+inbreeding. The algorithm used here, however, incorporates inbreeding into
+the calculation of coefficients of coancestry (using 'makeA()') that are
+used to calculate coefficients of fraternity. Similarly, the diagonals of
+the D and Sd matrices are corrected for inbreeding. Meaning, the diagonals
+of D and Sd are (1-f) so that the overall dominance genetic variance is
+equal to (1-f)V_D, where f is the coefficient of inbreeding and V_D is
+dominance genetic variance. This is interpreted as the amount of dominance
+genetic variance that would be expected if the allele frequencies in the
+inbred population were representative of a non-inbred, randomly mating
+population (Shaw et al. 1998; Wolak and Keller 2014). Note, the construction
+of the D matrix is more computationally demanding (in computing time and
+space requirements) than is the construction of A. This is possibly also the
+case for construction of Sd in comparison to the S matrix.
+</p>
+<p>To overcome the computational difficulties, this function can enable
+parallel processing (see package <code>parallel</code> included in the R
+distribution) to speed up the execution. Note this is not be possible on
+Windows (See <code>parallel</code> documentation for further information),
+therefore <code>parallel</code> = TRUE should only be used on Linux or Mac
+operating systems (i.e., not Windows). The default is to use the maximum
+number of cpus available to the machine, but this can be restricted by
+indicating the number desired in the argument <code>ncores</code>. Setting up the
+multi-processing takes some overhead, so no real advantage is gained for
+small pedigrees. Also, since all processes are sharing a fixed amount of
+RAM, very large pedigrees using many processes in parallel may not be
+feasible due to RAM restrictions (i.e., if each process needs "n" amount of
+RAM to run, then <code>ncores</code> should be set to = total RAM/n). Otherwise
+the machine can become overworked.
+</p>
+<p>Note, for very large pedigrees <code>returnA</code> or <code>returnS</code> should be
+set to FALSE to avoid drastically increasing the memory requirements while
+making D or Sd, respectively. When this occurs, 'NULL' is returned for the
+element of 'A' in the output of <code>makeD</code> or for the element of 'S' in
+the output of <code>makeSd</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a <code>list</code>:
+</p>
+
+<dl>
+<dt>A,S </dt>
+<dd>
+<p>the A or S matrix in sparse matrix form</p>
+</dd>
+<dt>D,Sd </dt>
+<dd>
+<p>the D or Sd matrix in sparse matrix form</p>
+</dd>
+<dt>logDet </dt>
+<dd>
+<p>the log determinant of the D or Sd matrix</p>
+</dd> 
+<dt>Dinv,Sdinv </dt>
+<dd>
+<p>the inverse of the D or inverse of the Sd matrix in
+sparse matrix form</p>
+</dd>
+<dt>listDinv,listSdinv </dt>
+<dd>
+<p>the three column form of the non-zero 
+elements for the inverse of the D or the inverse of the Sd matrix</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p><a href="mailto:matthewwolak@gmail.com">matthewwolak@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Quaas, R.L. 1995. Fx algorithms. An unpublished note.
+</p>
+<p>Lynch M., &amp; Walsh, B. 1998. Genetics and Analysis of Quantitative Traits.
+Sinauer, Sunderland, Massachusetts.
+</p>
+<p>Shaw, R.G., D.L. Byers, and F.H. Shaw. 1998. Genetic components of variation
+in Nemophila menziesii undergoing inbreeding: Morphology and flowering time.
+Genetics. 150:1649-1661.
+</p>
+<p>Wolak, M.E. and L.F. Keller. 2014. Dominance genetic variance and inbreeding
+in natural populations. In Quantitative Genetics in the Wild, A.
+Charmantier, L.E.B. Kruuk, and D. Garant eds. Oxford University Press, pp.
+104-127.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>makeDsim</code>, <code>makeSdsim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  DinvMat &lt;- makeD(Mrode9, parallel = FALSE)$Dinv
+
+  SdinvMat &lt;- makeSd(FG90, heterogametic = "0", parallel = FALSE)$Sdinv
+  # Check to make sure getting correct elements
+  ## `simPedDFC()` for pedigree with 4 unique sex-linked dominance relatedness values
+  uSdx &lt;- unique(makeSd(simPedDFC(3), heterogametic = "M", returnS = FALSE)$Sd@x)
+  stopifnot(all(uSdx %in% c(1, 0.5, 3/16, 1/16))) #&lt;-- must match one of these 4
+
+</code></pre>
+
+
+</div>

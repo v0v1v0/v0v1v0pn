@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute_factor</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Impute a factor value into a vector with missing values</h2>
+
+<h3>Description</h3>
+
+<p>For imputing fixed factor levels. It adds the new imputed value to the end
+of the levels of the vector. We generally recommend to impute using other
+model based approaches. See the <code>simputation</code> package, for example
+<code>simputation::impute_lm()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute_factor(x, value)
+
+## Default S3 method:
+impute_factor(x, value)
+
+## S3 method for class 'factor'
+impute_factor(x, value)
+
+## S3 method for class 'character'
+impute_factor(x, value)
+
+## S3 method for class 'shade'
+impute_factor(x, value)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>factor to impute</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>vector with a factor values replaced
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+vec &lt;- factor(LETTERS[1:10])
+
+vec[sample(1:10, 3)] &lt;- NA
+
+vec
+
+impute_factor(vec, "wat")
+
+library(dplyr)
+
+dat &lt;- tibble(
+  num = rnorm(10),
+  int = rpois(10, 5),
+  fct = factor(LETTERS[1:10])
+) %&gt;%
+  mutate(
+    across(
+      everything(),
+      \(x) set_prop_miss(x, prop = 0.25)
+    )
+  )
+
+dat
+
+dat %&gt;%
+  nabular() %&gt;%
+  mutate(
+    num = impute_fixed(num, -9999),
+    int = impute_zero(int),
+    fct = impute_factor(fct, "out")
+  )
+
+</code></pre>
+
+
+</div>

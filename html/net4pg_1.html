@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cc_composition</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get peptides and peptide-to-protein mappings for each connected component</h2>
+
+<h3>Description</h3>
+
+<p>Get peptides and peptide-to-protein mappings for each connected component.
+For each connected component, first extract its protein members; then,
+extract all specific and shared peptides mapping on those protein; finally,
+extract the subset of incidence matrix representing peptide-to-protein
+mappings.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cc_composition(cc.proteins, incM)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cc.proteins</code></td>
+<td>
+<p>a <code>list</code> of <code>vectors</code> (one for each connected
+component), each enumerating the proteins members of a connected component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incM</code></td>
+<td>
+<p>a <code>logical</code> <code>matrix</code> containing the incidence matrix
+with its column and row names (respectively, protein and peptide identifiers)
+names and 0 or 1 values indicating whether or not the peptide maps on the
+corresponding protein.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>list</code> of two elements: i. a <code>list</code> of <code>vectors</code>
+(one for each connected component) enumerating peptides mapping on protein
+members of each connected component; ii. a <code>list</code> of <code>matrices</code> or
+<code>vectors</code> (one for each connected component) representing
+peptide-to-protein mappings for each connected component; matrices are used
+if multiple peptides identify protein members of that connected component,
+vectors if only a single peptide.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Laura Fancello
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Read the tab-delimited file containing the proteome incidence matrix
+incM_filename &lt;- system.file("extdata"
+                             , "incM_example"
+                             , package = "net4pg"
+                             , mustWork = TRUE)
+rownames_filename &lt;- system.file("extdata"
+                                  , "peptideIDs_incM_example"
+                                  , package = "net4pg"
+                                  , mustWork = TRUE)
+colnames_filename &lt;- system.file("extdata"
+                                 , "proteinIDs_incM_example"
+                                 , package = "net4pg"
+                                 , mustWork = TRUE)
+incM &lt;- read_inc_matrix(incM_filename = incM_filename
+                 , colnames_filename = colnames_filename
+                 , rownames_filename = rownames_filename)
+# Only retain proteins with at least one shared peptide and all peptides
+# mapping on such proteins.
+incM_reduced &lt;- reduce_inc_matrix(incM)
+# Generate adjacency matrix describing protein-to-protein mappings
+adjM &lt;- get_adj_matrix(incM_reduced)
+# Generate graph of protein-to-protein connections and calculate its
+# connected component
+multProteinCC &lt;- get_cc(adjM)
+# For each connected component, extract peptides mapping on its protein
+# members and the subset of the incidence matrix describing peptide-to-protein
+# mapping
+cc.peptides.incM &lt;- cc_composition(cc.proteins = multProteinCC$cc
+                                  , incM = incM)
+
+</code></pre>
+
+
+</div>

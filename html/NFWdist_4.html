@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nfw</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+The Standard Distribution Functions for the 3D NFW Profile
+</h2>
+
+<h3>Description</h3>
+
+<p>Density, distribution function, quantile function and random generation for the 3D NFW profile
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dnfw(x, con = 5, log = FALSE)
+pnfw(q, con = 5, log.p = FALSE)
+qnfw(p, con = 5, log.p = FALSE)
+rnfw(n, con = 5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x,q</code></td>
+<td>
+
+<p>Vector of quantiles. This is scaled such that <span class="option">x</span> and <span class="option">q</span> are equal to R/Rvir for NFW. This means the PDF is only defined between 0 and 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+
+<p>Vector of probabilities.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>Number of observations. If length(n) &gt; 1, the length is taken to be the number required.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>con</code></td>
+<td>
+
+<p>The NFW profile concentration parameter, where c=Rvir/Rs.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log, log.p</code></td>
+<td>
+
+<p>Logical; if TRUE, probabilities/densities p are returned as log(p).
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The novel part of this package is the general solution for the CDF inversion (i.e. qnfw). As far as I can see this has not been published anywhere, and it is a useful function for populating halos in something like an HOD.
+</p>
+<p>One of <code>lamW</code> (fastest) or <code>gsl</code> (easier to install) must be installed to use the <code>qnfw</code> and <code>rnfw</code> functions!. Try to install <code>lamW</code> first (since it is about four times faster), but if that is tricky due to <code>Rcpp</code> dependencies then use <code>gsl</code> instead.
+</p>
+
+
+<h3>Value</h3>
+
+<p>dnfw gives the density, pnfw gives the distribution function, qnfw gives the quantile function, and rnfw generates random deviates.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This seems to work at least as efficiently as accept reject, but it is ultimately much more elegant code in any case.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Aaron Robotham
+</p>
+
+
+<h3>References</h3>
+
+<p>Robotham &amp; Howlett, 2018, arXiv 1805.09550
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lambert_W0</code> (<code>gsl</code>) or <code>lambertW0</code> (<code>lamW</code>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Both the PDF (dnfw) integrated up to x, and CDF at q (pnfw) should be the same:
+#0.373, 0.562, 0.644, 0.712
+
+for(con in c(1,5,10,20)){
+  print(integrate(dnfw, lower=0, upper=0.5, con=con)$value)
+  print(pnfw(0.5, con=con))
+}
+
+#The qnfw should invert the pnfw, returning the input vector (1:9)/10:
+for(con in c(1,5,10,20)){
+  print(qnfw(p=pnfw(q=(1:9)/10,con=con), con=con))
+}
+
+#The sampling from rnfw should recreate the expected PDF from dnfw:
+
+for(con in c(1,5,10,20)){
+  plot(density(rnfw(1e6,con=con), bw=0.01))
+  lines(seq(0,1,len=1e3), dnfw(seq(0,1,len=1e3),con=con),col='red')
+  legend('topright',legend=paste('con =',con))
+}
+</code></pre>
+
+
+</div>

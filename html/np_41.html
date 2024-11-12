@@ -1,0 +1,321 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npcopula</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Copula Estimation with Mixed Data Types </h2>
+
+<h3>Description</h3>
+
+<p><code>npcopula</code> implements the nonparametric mixed data kernel copula
+approach of Racine (2015) for an arbitrary number of dimensions
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npcopula(bws,
+         data,
+         u = NULL,
+         n.quasi.inv = 1000,
+         er.quasi.inv = 1) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>an unconditional joint distribution (<code>npudistbw</code>) or joint
+density (<code>npudensbw</code>) bandwidth object (if <code>bws</code> is
+delivered via <code>npudistbw</code> the copula distribution is estimated,
+while if <code>bws</code> is delivered via <code>npudensbw</code> the copula
+density is estimated)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>a data frame containing variables used to construct <code>bws</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+
+<p>an optional matrix of real numbers lying in [0,1], each column of
+which corresponds to the vector of uth quantile values desired for
+each variable in the copula (otherwise the u values returned are
+those corresponding to the sample realizations)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.quasi.inv</code></td>
+<td>
+
+<p>number of grid points generated when <code>u</code> is provided in order to
+compute the quasi-inverse of each marginal distribution (see
+details)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>er.quasi.inv</code></td>
+<td>
+
+<p>number passed to <code>extendrange</code> when <code>u</code> is provided
+specifying the fraction by which the data range should be extended when
+constructing the grid used to compute the quasi-inverse (see details)
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npcopula</code> computes the nonparametric copula or copula density
+using inversion (Nelsen (2006), page 51). For the inversion approach,
+we exploit Sklar's theorem (Corollary 2.3.7, Nelsen (2006)) to produce
+copulas directly from the joint distribution function using
+<code class="reqn">C(u,v) = H(F^{-1}(u),G^{-1}(v))</code> rather than the typical approach
+that instead uses <code class="reqn">H(x,y) = C(F(x),G(y))</code>. Whereas the latter
+requires kernel density estimation on a d-dimensional unit hypercube
+which necessitates the use of boundary correction methods, the former
+does not.
+</p>
+<p>Note that if <code>u</code> is provided then <code>expand.grid</code> is
+called on <code>u</code>. As the dimension increases this can become
+unwieldy and potentially consume an enormous amount of memory unless
+the number of grid points is kept very small. Given that computing the
+copula on a grid is typically done for graphical purposes, providing
+<code>u</code> is typically done for two-dimensional problems only. Even
+here, however, providing a grid of length 100 will expand into a
+matrix of dimension 10000 by 2 which, though not memory intensive, may
+be computationally burdensome.
+</p>
+<p>The ‘quasi-inverse’ is computed via Definition 2.3.6 from
+Nelsen (2006). We compute an equi-quantile grid on the range of the
+data of length <code>n.quasi.inv/2</code>. We then extend the range of the
+data by the factor <code>er.quasi.inv</code> and compute an equi-spaced grid
+of points of length <code>n.quasi.inv/2</code> (e.g. using the default
+<code>er.quasi.inv=1</code> we go from the minimum data value minus
+<code class="reqn">1\times</code> the range to the maximum data value plus
+<code class="reqn">1\times</code> the range for each marginal). We then take these two
+grids, concatenate and sort, and these form the final grid of length
+<code>n.quasi.inv</code> for computing the quasi-inverse.
+</p>
+<p>Note that if <code>u</code> is provided and any elements of (the columns of)
+<code>u</code> are such that they lie beyond the respective values of
+<code>F</code> for the evaluation data for the respective marginal, such
+values are reset to the minimum/maximum values of <code>F</code> for the
+respective marginal. It is therefore prudent to inspect the values of
+<code>u</code> returned by <code>npcopula</code> when <code>u</code> is provided.
+</p>
+<p>Note that copula are only defined for data of type
+<code>numeric</code> or <code>ordered</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npcopula</code> returns an object of type <code>data.frame</code>
+with the following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>copula</code></td>
+<td>
+
+<p>the copula (bandwidth object obtained from <code>npudistbw</code>) or
+copula density (bandwidth object obtained from <code>npudensbw</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p> the matrix of marginal u values associated with the sample
+realizations (<code>u=NULL</code>) or those created via
+<code>expand.grid</code> when <code>u</code> is provided</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p> the matrix of marginal quantiles constructed when
+<code>u</code> is provided (<code>data</code> returned has the same names as
+<code>data</code> inputted)</p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>See the example below for proper usage.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Nelsen, R. B. (2006), <em>An Introduction to Copulas,</em> Second
+Edition, Springer-Verlag.
+</p>
+<p>Racine, J.S. (2015), “Mixed Data Kernel Copulas,” Empirical
+Economics, 48, 37-59.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>npudensbw,npudens,npudist
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Example 1: Bivariate Mixed Data
+
+require(MASS)
+
+set.seed(42)
+
+## Simulate correlated Gaussian data (rho(x,y)=0.99)
+
+n &lt;- 1000
+n.eval &lt;- 100
+rho &lt;- 0.99
+mu &lt;- c(0,0)
+Sigma &lt;- matrix(c(1,rho,rho,1),2,2)
+mydat &lt;- mvrnorm(n=n, mu, Sigma)
+mydat &lt;- data.frame(x=mydat[,1],
+                    y=ordered(as.integer(cut(mydat[,2],
+                      quantile(mydat[,2],seq(0,1,by=.1)),
+                      include.lowest=TRUE))-1))
+q.min &lt;- 0.0
+q.max &lt;- 1.0
+grid.seq &lt;- seq(q.min,q.max,length=n.eval)
+grid.dat &lt;- cbind(grid.seq,grid.seq)
+
+## Estimate the copula (bw object obtained from npudistbw())
+
+bw.cdf &lt;- npudistbw(~x+y,data=mydat)
+copula &lt;- npcopula(bws=bw.cdf,data=mydat,u=grid.dat)
+
+## Plot the copula
+
+
+contour(grid.seq,grid.seq,matrix(copula$copula,n.eval,n.eval),
+        xlab="u1",
+        ylab="u2",
+        main="Copula Contour")
+
+persp(grid.seq,grid.seq,matrix(copula$copula,n.eval,n.eval),
+      ticktype="detailed",
+      xlab="u1",
+      ylab="u2",
+      zlab="Copula",zlim=c(0,1))
+
+## Plot the empirical copula
+
+copula.emp &lt;- npcopula(bws=bw.cdf,data=mydat)
+
+plot(copula.emp$u1,copula.emp$u2,
+     xlab="u1",
+     ylab="u2",
+     cex=.25,
+     main="Empirical Copula")
+
+## Estimate the copula density (bw object obtained from npudensbw())
+
+bw.pdf &lt;- npudensbw(~x+y,data=mydat)
+copula &lt;- npcopula(bws=bw.pdf,data=mydat,u=grid.dat)
+
+## Plot the copula density
+
+persp(grid.seq,grid.seq,matrix(copula$copula,n.eval,n.eval),
+      ticktype="detailed",
+      xlab="u1",
+      ylab="u2",
+      zlab="Copula Density")
+
+## Example 2: Bivariate Continuous Data
+
+require(MASS)
+
+set.seed(42)
+
+## Simulate correlated Gaussian data (rho(x,y)=0.99)
+
+n &lt;- 1000
+n.eval &lt;- 100
+rho &lt;- 0.99
+mu &lt;- c(0,0)
+Sigma &lt;- matrix(c(1,rho,rho,1),2,2)
+mydat &lt;- mvrnorm(n=n, mu, Sigma)
+mydat &lt;- data.frame(x=mydat[,1],y=mydat[,2])
+
+q.min &lt;- 0.0
+q.max &lt;- 1.0
+grid.seq &lt;- seq(q.min,q.max,length=n.eval)
+grid.dat &lt;- cbind(grid.seq,grid.seq)
+
+## Estimate the copula (bw object obtained from npudistbw())
+
+bw.cdf &lt;- npudistbw(~x+y,data=mydat)
+copula &lt;- npcopula(bws=bw.cdf,data=mydat,u=grid.dat)
+
+## Plot the copula
+
+contour(grid.seq,grid.seq,matrix(copula$copula,n.eval,n.eval),
+        xlab="u1",
+        ylab="u2",
+        main="Copula Contour")
+
+persp(grid.seq,grid.seq,matrix(copula$copula,n.eval,n.eval),
+      ticktype="detailed",
+      xlab="u1",
+      ylab="u2",
+      zlab="Copula",
+      zlim=c(0,1))
+
+## Plot the empirical copula
+
+copula.emp &lt;- npcopula(bws=bw.cdf,data=mydat)
+
+plot(copula.emp$u1,copula.emp$u2,
+     xlab="u1",
+     ylab="u2",
+     cex=.25,
+     main="Empirical Copula")
+
+## Estimate the copula density (bw object obtained from npudensbw())
+
+bw.pdf &lt;- npudensbw(~x+y,data=mydat)
+copula &lt;- npcopula(bws=bw.pdf,data=mydat,u=grid.dat)
+
+## Plot the copula density
+
+persp(grid.seq,grid.seq,matrix(copula$copula,n.eval,n.eval),
+      ticktype="detailed",
+      xlab="u1",
+      ylab="u2",
+      zlab="Copula Density")
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

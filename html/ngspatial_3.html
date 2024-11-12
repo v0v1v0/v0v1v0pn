@@ -1,0 +1,368 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>autologistic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a centered autologistic model using maximum pseudolikelihood estimation or MCMC for Bayesian inference.</h2>
+
+<h3>Description</h3>
+
+<p>Fit a centered autologistic model using maximum pseudolikelihood estimation or MCMC for Bayesian inference.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">autologistic(formula, data, A, method = c("PL", "Bayes"), model = TRUE,
+  x = FALSE, y = FALSE, verbose = FALSE, control = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>an object of class <code>formula</code>: a symbolic description of the model to be fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an optional data frame, list, or environment (or object coercible by <code>as.data.frame</code> to a data frame) containing the variables in the model. If not found in <code>data</code>, the variables are taken from <code>environment(formula)</code>, typically the environment from which <code>autologistic</code> is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>the adjacency matrix for the underlying graph. The matrix need not be binary, but it must be numeric and symmetric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the method to use for inference. “<code>PL</code>” (the default) enables maximum pseudolikelihood estimation, and “<code>Bayes</code>” enables Bayesian inference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>a logical value indicating whether the model frame should be included as a component of the returned value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a logical value indicating whether the model matrix used in the fitting process should be returned as a component of the returned value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a logical value indicating whether the response vector used in the fitting process should be returned as a component of the returned value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>a logical value indicating whether to print various messages to the screen, including progress updates when <code>method</code> is “<code>Bayes</code>”. Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of the following control parameters.
+</p>
+
+<dl>
+<dt><code>confint</code></dt>
+<dd>
+<p> (PL) the method for computing confidence intervals. The possible values are “<code>sandwich</code>” (the default), “<code>bootstrap</code>”, and “<code>none</code>”.</p>
+</dd>
+<dt><code>sigma</code></dt>
+<dd>
+<p> (Bayes) the common standard deviation for <code class="reqn">\beta</code>'s prior distribution. Defaults to 1,000.</p>
+</dd>
+<dt><code>eta.max</code></dt>
+<dd>
+<p> (Bayes) the right endpoint for <code class="reqn">\eta</code>'s prior distribution. Defaults to 2.</p>
+</dd>
+<dt><code>bootit</code></dt>
+<dd>
+<p> (PL) the size of the bootstrap sample. This applies when <code>confint</code> is “<code>sandwich</code>” or “<code>bootstrap</code>”, since samples from the fitted model are needed in both cases. Defaults to 1,000.</p>
+</dd>
+<dt><code>trainit</code></dt>
+<dd>
+<p> (Bayes) the length of the training run. Defaults to 100,000.</p>
+</dd>
+<dt><code>minit</code></dt>
+<dd>
+<p> (Bayes) the minimum number of posterior samples. Defaults to 100,000.</p>
+</dd>
+<dt><code>maxit</code></dt>
+<dd>
+<p> (Bayes) the maximum number of posterior samples. Defaults to 1,000,000.</p>
+</dd>
+<dt><code>tol</code></dt>
+<dd>
+<p> (Bayes) the tolerance. Defaults to 0.01.</p>
+</dd>
+<dt><code>parallel</code></dt>
+<dd>
+<p> (PL) a logical value indicating whether to parallelize the bootstrap. This defaults to <code>TRUE</code> if the <span class="pkg">parallel</span> package is available.</p>
+</dd>
+<dt><code>type</code></dt>
+<dd>
+<p> (PL) the cluster type, one of “<code>FORK</code>”, “<code>MPI</code>”, “<code>NWS</code>”, “<code>PSOCK</code>”, or “<code>SOCK</code>” (default).</p>
+</dd>
+<dt><code>nodes</code></dt>
+<dd>
+<p> (PL) the number of slave nodes to create.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function fits the centered autologistic model of Caragea and Kaiser (2009) using maximum pseudolikelihood estimation or MCMC for Bayesian inference. 
+The joint distribution for the centered autologistic model is 
+</p>
+<p style="text-align: center;"><code class="reqn">\pi(Z\mid\theta)=c(\theta)^{-1}\exp\left(Z^\prime X\beta - \eta Z^\prime A\mu + \frac{\eta}{2}Z^\prime AZ\right),</code>
+</p>
+
+<p>where <code class="reqn">\theta = (\beta^\prime, \eta)^\prime</code> is the parameter vector, <code class="reqn">c(\theta)</code> is an intractable normalizing function, <code class="reqn">Z</code> is the response vector, <code class="reqn">X</code> is the design matrix, 
+<code class="reqn">\beta</code> is a <code class="reqn">(p-1)</code>-vector of regression coefficients, <code class="reqn">A</code> is the adjacency matrix for the underlying graph, <code class="reqn">\mu</code> is the vector of independence expectations, 
+and <code class="reqn">\eta</code> is the spatial dependence parameter. 
+<br><br>
+Maximum pseudolikelihood estimation sidesteps the intractability of <code class="reqn">c(\theta)</code> by maximizing the product of the conditional likelihoods.
+Confidence intervals are then obtained using a parametric bootstrap or a normal approximation, i.e., sandwich estimation. The bootstrap datasets are generated by perfect sampling (<code>rautologistic</code>).
+The bootstrap samples can be generated in parallel using the <span class="pkg">parallel</span> package.
+<br><br>
+Bayesian inference is obtained using the auxiliary variable algorithm of Moller et al. (2006).
+The auxiliary variables are generated by perfect sampling.
+<br><br>
+The prior distributions are (1) zero-mean normal with independent coordinates for <code class="reqn">\beta</code>, and (2) uniform for <code class="reqn">\eta</code>.
+The common standard deviation for the normal prior can be supplied by the user as control parameter <code>sigma</code>. The default is 1,000. The uniform prior has support [0, 2] by default, but the right endpoint can be supplied (as control parameter <code>eta.max</code>) by the user. 
+<br><br>
+The posterior covariance matrix of <code class="reqn">\theta</code> is estimated using samples obtained during a training run. The default number of iterations for the training run is 100,000, but this can be controlled by the user (via parameter <code>trainit</code>). The estimated covariance matrix is then used as the proposal variance for a Metropolis-Hastings random walk. The proposal distribution is normal. The posterior samples obtained during the second run are used for inference. The length of the run can be controlled by the user via parameters <code>minit</code>, <code>maxit</code>, and <code>tol</code>. The first determines the minimum number of iterations. If <code>minit</code> has been reached, the sampler will terminate when <code>maxit</code> is reached or all Monte Carlo standard errors are smaller than <code>tol</code>, whichever happens first. The default values for <code>minit</code>, <code>maxit</code>, and <code>tol</code> are 100,000; 1,000,000; and 0.01, respectively.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>autologistic</code> returns an object of class “<code>autologistic</code>”, which is a list containing the following components.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>the point estimate of <code class="reqn">\theta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.values</code></td>
+<td>
+<p>the fitted mean values, obtained by transforming the linear predictors by the inverse of the link function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linear.predictors</code></td>
+<td>
+<p>the linear fit on link scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>the response residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>the size of the bootstrap/posterior sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample</code></td>
+<td>
+<p>(where relevant) an <code>iter</code> by <code class="reqn">p</code> matrix containing the bootstrap/posterior samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mcse</code></td>
+<td>
+<p>(where relevant) a <code class="reqn">p</code>-vector of Monte Carlo standard errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>(where relevant) the estimated sandwich matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>accept</code></td>
+<td>
+<p>(Bayes) the acceptance rate for the MCMC sampler.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>if requested (the default), the <code>y</code> vector used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>if requested, the model matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>if requested (the default), the model frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the matched call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>the formula supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the method used for inference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convergence</code></td>
+<td>
+<p>the integer code returned by <code>optim</code> subsequent to optimizing the pseudolikelihood.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>message</code></td>
+<td>
+<p>a character string to go along with <code>convergence</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>the <code>terms</code> object used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the <code>data</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlevels</code></td>
+<td>
+<p>(where relevant) a record of the levels of the factors used in fitting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list containing the names and values of the control parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>the value of the negative log pseudolikelihood at its minimum.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Caragea, P. and Kaiser, M. (2009) Autologistic models with interpretable parameters. <em>Journal of Agricultural, Biological, and Environmental Statistics</em>, <b>14</b>(3), 281–300.
+</p>
+<p>Hughes, J., Haran, M. and Caragea, P. C. (2011) Autologistic models for binary data on a lattice. <em>Environmetrics</em>, <b>22</b>(7), 857–871.
+</p>
+<p>Moller, J., Pettitt, A., Berthelsen, K., and Reeves, R. (2006) An efficient Markov chain Monte Carlo method for distributions with intractable normalising constants. <em>Biometrika</em>, <b>93</b>(2), 451–458.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rautologistic</code>, <code>residuals.autologistic</code>, <code>summary.autologistic</code>, <code>vcov.autologistic</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Use the 20 x 20 square lattice as the underlying graph.
+
+n = 20
+A = adjacency.matrix(n)
+
+# Assign coordinates to each vertex such that the coordinates are restricted to the unit square
+# centered at the origin.
+
+x = rep(0:(n - 1) / (n - 1), times = n) - 0.5
+y = rep(0:(n - 1) / (n - 1), each = n) - 0.5
+X = cbind(x, y)                                 # Use the vertex locations as spatial covariates.
+beta = c(2, 2)                                  # These are the regression coefficients.
+col1 = "white"
+col2 = "black"
+colfunc = colorRampPalette(c(col1, col2))
+
+# Simulate a dataset with the above mentioned regression component and eta equal to 0.6. This
+# value of eta corresponds to dependence that is moderate in strength.
+
+theta = c(beta, eta = 0.6)
+set.seed(123456)
+Z = rautologistic(X, A, theta)
+
+# Find the MPLE, and do not compute confidence intervals.
+
+fit = autologistic(Z ~ X - 1, A = A, control = list(confint = "none"))
+summary(fit)
+
+# The following examples are not executed by default since the computation is time consuming.
+
+# Compute confidence intervals based on the normal approximation. Estimate the "filling" in the
+# sandwich matrix using a parallel parametric bootstrap, where the computation is distributed
+# across six cores on the host workstation.
+
+# set.seed(123456)
+# fit = autologistic(Z ~ X - 1, A = A, verbose = TRUE,
+#                   control = list(confint = "sandwich", nodes = 6))
+# summary(fit)
+
+# Compute confidence intervals based on a parallel parametric bootstrap. Use a bootstrap sample
+# of size 500, and distribute the computation across six cores on the host workstation.
+
+# set.seed(123456)
+# fit = autologistic(Z ~ X - 1, A = A, verbose = TRUE,
+#                   control = list(confint = "bootstrap", bootit = 500, nodes = 6))
+# summary(fit)
+
+# Do MCMC for Bayesian inference. The length of the training run will be 10,000, and
+# the length of the subsequent inferential run will be at least 10,000.
+
+# set.seed(123456)
+# fit = autologistic(Z ~ X - 1, A = A, verbose = TRUE, method = "Bayes",
+#                   control = list(trainit = 10000, minit = 10000, sigma = 1000))
+# summary(fit)
+</code></pre>
+
+
+</div>

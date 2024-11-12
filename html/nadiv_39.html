@@ -1,0 +1,241 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>makeDsim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create the dominance genetic relationship matrix through an iterative
+(simulation) process</h2>
+
+<h3>Description</h3>
+
+<p>Alleles are explicitly traced through a pedigree to obtain coefficients of
+fraternity between pairs of individuals (the probability of sharing both
+alleles identical by descent) - for either autosomes or sex chromosomes.
+This is accomplished in an iterative process to account for the various
+routes by which an allele will progress through a pedigree due to Mendelian
+sampling at either autosomes or sex chromosomes. The autosomal case is an
+implementation of the simulation approach of Ovaskainen et al. (2008).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">makeDsim(
+  pedigree,
+  N,
+  parallel = FALSE,
+  ncores = getOption("mc.cores", 2L),
+  invertD = TRUE,
+  calcSE = FALSE,
+  returnA = FALSE,
+  verbose = TRUE
+)
+
+makeSdsim(
+  pedigree,
+  heterogametic,
+  N,
+  DosageComp = c(NULL, "ngdc", "hori", "hedo", "hoha", "hopi"),
+  parallel = FALSE,
+  ncores = getOption("mc.cores", 2L),
+  invertSd = TRUE,
+  calcSE = FALSE,
+  returnS = FALSE,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pedigree</code></td>
+<td>
+<p>A pedigree with columns organized: ID, Dam, Sire. For use
+with <code>makeSdsim</code>, a fourth column indicates the sex of each individual
+in the pedigree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The number of times to iteratively trace alleles through the
+pedigree</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>A logical indicating whether or not to use parallel
+processing. Note, this may only be available for Mac and Linux operating
+systems.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>The number of cpus to use when constructing the dominance
+relatedness matrix. Default is all available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>invertD, invertSd</code></td>
+<td>
+<p>A logical indicating whether or not to invert the D
+or Sd matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calcSE</code></td>
+<td>
+<p>A logical indicating whether or not the standard errors for
+each coefficient of fraternity should be calculated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnA, returnS</code></td>
+<td>
+<p>Logical, indicating if the numerator relationship
+matrix (A or S) should be stored and returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical, indicating if progress messages should be displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>heterogametic</code></td>
+<td>
+<p>Character indicating the label corresponding to the
+heterogametic sex used in the "Sex" column of the pedigree</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DosageComp</code></td>
+<td>
+<p>A character indicating which model of dosage compensation.
+If <code>NULL</code> then the “ngdc” model is assumed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Missing parents (e.g., base population) should be denoted by either 'NA',
+'0', or '*'.
+</p>
+<p><code>parallel</code> = TRUE should only be used on Linux or Mac operating systems
+(i.e., not Windows).
+</p>
+<p>Ovaskainen et al. (2008) indicated that the method of calculating the D
+matrix (see <code>makeD</code>) is only an approximation.  They proposed a
+simulation method that is implemented here.  This should be more
+appropriate, especially when inbreeding occurs in the pedigree.
+</p>
+<p>The objects <code>listDsim</code> and <code>listSdsim</code> will list both the
+approximate values (returned from <code>makeD</code> or
+<code>makeSd</code>) as well as the simulated values.  If <code>calcSE</code> is
+TRUE, these values will be listed in <code>listDsim</code> or <code>listSdsim</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a <code>list</code>:
+</p>
+
+<dl>
+<dt>A,S </dt>
+<dd>
+<p>the A or S matrix in sparse matrix form</p>
+</dd>
+<dt>D,Sd </dt>
+<dd>
+<p>the approximate D or Sd matrix in sparse matrix form</p>
+</dd>
+<dt>logDetD,logDetSd </dt>
+<dd>
+<p>the log determinant of the D or Sd matrix</p>
+</dd>
+<dt>Dinv,Sdinv </dt>
+<dd>
+<p>the inverse of the approximate D or approximate Sd
+matrix in sparse matrix form</p>
+</dd>
+<dt>listDinv,listSdinv </dt>
+<dd>
+<p>the three column form of the non-zero elements 
+for the inverse of the approximate D matrix or the inverse of the
+approximate Sd matrix</p>
+</dd>
+<dt>Dsim,Sdsim </dt>
+<dd>
+<p>the simulated D or Sd matrix in sparse matrix form</p>
+</dd>
+<dt>logDetDsim,logDetSdsim </dt>
+<dd>
+<p>the log determinant of the simulated D or
+simulated Sd matrix</p>
+</dd>
+<dt>Dsiminv,Sdsiminv </dt>
+<dd>
+<p>the inverse of the simulated D or simulated Sd
+matrix in sparse matrix form</p>
+</dd>
+<dt>listDsim,listSdsim </dt>
+<dd>
+<p>the three column form of the non-zero and
+non-self elements for the simulated D or simulated Sd matrix</p>
+</dd>
+<dt>listDsiminv,listSdsiminv </dt>
+<dd>
+<p>the three column form of the non-zero
+elements for the inverse of the simulated D or the inverse of the 
+simulated Sd matrix</p>
+</dd>
+</dl>
+<h3>Note</h3>
+
+<p>This simulation can take a long time for large pedigrees (a few
+thousand and higher) and large values of <code>N</code> (one thousand and 
+higher). If unsure, it is advisable to start with a lower <code>N</code> and 
+gradually increase to obtain a sense of the time required to execute a 
+desired <code>N</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p><a href="mailto:matthewwolak@gmail.com">matthewwolak@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Ovaskainen, O., Cano, J.M., &amp; Merila, J. 2008. A Bayesian
+framework for comparative quantitative genetics. Proceedings of the Royal
+Society B 275, 669-678.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>makeD</code>, <code>makeSd</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  simD &lt;- makeDsim(Mrode9, N = 1000, parallel = FALSE,
+		invertD = TRUE, calcSE = TRUE)$listDsim
+
+  simSd &lt;- makeSdsim(FG90, heterogametic = "0", N = 1000, parallel = FALSE,
+		invertSd = TRUE, calcSE = TRUE)$listSdsim
+</code></pre>
+
+
+</div>

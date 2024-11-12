@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pop_pchaz</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate survival for piecewise constant hazards with change after random time and mixture of subpopulations</h2>
+
+<h3>Description</h3>
+
+<p>Calculates hazard, cumulative hazard, survival and distribution function
+based on hazards that are constant over pre-specified time-intervals
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pop_pchaz(
+  Tint,
+  lambdaMat1,
+  lambdaMat2,
+  lambdaProgMat,
+  p,
+  timezero = FALSE,
+  int_control = list(rel.tol = .Machine$double.eps^0.4, abs.tol = 1e-09),
+  discrete_approximation = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Tint</code></td>
+<td>
+<p>vector of length <code class="reqn">k+1</code>, for the boundaries of <code class="reqn">k</code> time intervals (presumably in days) with piecewise constant hazard. The boundaries should be increasing and the first one should
+be <code>0</code>, the last one should be larger than the assumed trial duration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaMat1</code></td>
+<td>
+<p>matrix of dimension <code class="reqn">m</code>-by-<code class="reqn">k</code>, each row contains the vector of piecewise constant hazards for one subpopulation before the changeing event happens, for the intervals speciefied via <code>Tint</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaMat2</code></td>
+<td>
+<p>matrix of dimension <code class="reqn">m</code>-by-<code class="reqn">k</code>, each row contains the vector piecewise constant hazards for one subpopulation after the changeing event has happened, for the intervals speciefied via <code>Tint</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaProgMat</code></td>
+<td>
+<p>matrix of dimension <code class="reqn">m</code>-by-<code class="reqn">k</code>, each row contains the vector of piecewise constant hazards for one subpopulation for the changeing event, for the intervals speciefied via <code>Tint</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>vector of length <code class="reqn">m</code> for relative sizes (proportions) of the subpopulations. They should sum up to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timezero</code></td>
+<td>
+<p>logical, indicating whether after the changing event the timecount, governing which interval in <code>Tint</code> and which according value in
+<code>lambda2</code> is used, should restart at zero. This argument is either of length 1 (applying the same to all subgroups) or the same length as the number of subgroups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>int_control</code></td>
+<td>
+<p>A list with additional paramaters to be passed to the  <code>integrate</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discrete_approximation</code></td>
+<td>
+<p>if TRUE, the function uses an approximation based on discretizing the time, instead of integrating. This speeds up the calculations</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Given <code class="reqn">m</code> subgroups with relative sizes <code class="reqn">p_1, \dots, p_m</code> and
+subgroup-specific survival functions <code class="reqn">S{l}(t)</code>,
+the marginal survival function is the mixture <code class="reqn">S(t)=\sum_{l=1}^m p_l S_{l}(t)</code>.
+Note that the respective hazard function is not a linear combination of the
+subgroup-specific hazard functions.
+It may be calculated by the general relation <code class="reqn">\lambda(t)=-\frac{dS(t)}{dt}\frac{1}{S(t)}</code>.
+In each subgroup, the hazard is modelled as a piecewise constant hazard, with
+the possibility to also model disease progression.
+Therefore, each row of the hazard rates is used in <code>subpop_pchaz</code>.
+See <code>pchaz</code> and <code>subpop_pchaz</code>
+for more details.
+The output includes the function values calculated for all integer time points
+between 0 and the maximum of <code>Tint</code>.
+</p>
+<p>Note: this function may be very slow in cases where many time points need to be calculated. If this happens, use
+<code>discrete_approximation = TRUE</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with class <code>mixpch</code> containing the following components:
+</p>
+
+<dl>
+<dt><code>haz</code></dt>
+<dd>
+<p>Values of the hazard function.</p>
+</dd>
+<dt><code>cumhaz</code></dt>
+<dd>
+<p>Values of the cumulative hazard function.</p>
+</dd>
+<dt><code>S</code></dt>
+<dd>
+<p>Values of the survival function.</p>
+</dd>
+<dt><code>F</code></dt>
+<dd>
+<p>Values of the distribution function.</p>
+</dd>
+<dt><code>t</code></dt>
+<dd>
+<p>Time points for which the values of the different functions are calculated.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Robin Ristl, <a href="mailto:robin.ristl@meduniwien.ac.at">robin.ristl@meduniwien.ac.at</a>, Nicolas Ballarini
+</p>
+
+
+<h3>References</h3>
+
+<p>Robin Ristl, Nicolas Ballarini, Heiko Götte, Armin Schüler, Martin Posch, Franz König. Delayed treatment effects, treatment switching and
+heterogeneous patient populations: How to design and analyze RCTs in oncology. Pharmaceutical statistics. 2021; 20(1):129-145.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pchaz</code>, <code>subpop_pchaz</code>, <code>plot.mixpch</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">pop_pchaz(Tint = c(0, 40, 100),
+  lambdaMat1 = matrix(c(0.2, 0.1, 0.4, 0.1), 2, 2),
+ lambdaMat2 = matrix(c(0.5, 0.2, 0.6, 0.2), 2, 2),
+ lambdaProg = matrix(c(0.5, 0.5, 0.4, 0.4), 2, 2),
+ p = c(0.8, 0.2),
+ timezero = FALSE, discrete_approximation = TRUE)
+</code></pre>
+
+
+</div>

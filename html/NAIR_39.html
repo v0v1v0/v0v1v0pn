@@ -1,0 +1,232 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>saveNetwork</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Save List of Network Objects
+</h2>
+
+<h3>Description</h3>
+
+<p>Given a list of network objects such as that returned by
+<code>buildRepSeqNetwork()</code> or <code>generateNetworkObjects</code>,
+saves its contents according to the specified file format scheme.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">saveNetwork(
+  net,
+  output_dir,
+  output_type = "rds",
+  output_name = "MyRepSeqNetwork",
+  pdf_width = 12,
+  pdf_height = 10,
+  verbose = FALSE,
+  output_filename = deprecated()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+
+<p>A list of network objects returned by
+<code>buildRepSeqNetwork()</code> or
+<code>generateNetworkObjects()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_dir</code></td>
+<td>
+
+<p>A file path specifying the directory in which to write the file(s).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_type</code></td>
+<td>
+
+<p>A character string specifying the file format scheme to use when writing output
+to file. Valid options are <code>"individual"</code>, <code>"rds"</code> and <code>"rda"</code>.
+See detials.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_name</code></td>
+<td>
+
+<p>A character string. All files saved will have file names beginning with this value.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_width</code></td>
+<td>
+
+<p>If the list contains plots, this controls the width of each plot when writing
+to pdf. Passed to the <code>width</code> argument of the <code>pdf</code>
+function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_height</code></td>
+<td>
+
+<p>If the list contains plots, this controls the height of each plot when writing
+to pdf. Passed to the <code>height</code> argument of the <code>pdf</code>
+function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_filename</code></td>
+<td>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a>
+Equivalent to <code>output_name</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The list <code>net</code> must contain the named elements
+<code>igraph</code> (of class <code>igraph</code>),
+<code>adjacency_matrix</code> (a <code>matrix</code> or
+<code>dgCMatrix</code> encoding edge connections),
+and <code>node_data</code> (a <code>data.frame</code> containing node metadata),
+all corresponding to the same network. The list returned by
+<code>buildRepSeqNetwork()</code> and
+<code>generateNetworkObjects()</code>
+is an example of a valid input for the <code>net</code> argument.
+</p>
+<p>The additional elements <code>cluster_data</code> (a <code>data.frame</code>) and
+<code>plots</code> (a list containing objects of class
+<code>ggraph</code>
+and possibly one <code>matrix</code> named <code>graph_layout</code>)
+will also be saved, if present.
+</p>
+<p>By default, the list <code>net</code> is saved to a compressed data file in the
+RDS format, while any plots present are printed to a single pdf containing
+one plot per page.
+</p>
+<p>The name of each saved file begins with the value of <code>output_name</code>.
+When <code>output_type</code> is one of <code>"rds"</code> or <code>"rda"</code>,
+only two files are saved (the rds/rda and the pdf); for each file,
+<code>output_name</code> is followed by the appropriate file extension.
+</p>
+<p>When <code>output_type = "individual"</code>, each element of <code>net</code> is saved
+as a separate file, where <code>output_name</code> is followed by:
+</p>
+
+<ul>
+<li> <p><code>_NodeMetadata.csv</code> for <code>node_data</code>
+</p>
+</li>
+<li> <p><code>_ClusterMetadata.csv</code> for <code>cluster_data</code>
+</p>
+</li>
+<li> <p><code>_EdgeList.txt</code> for <code>igraph</code>
+</p>
+</li>
+<li> <p><code>_AdjacencyMatrix.mtx</code> for <code>adjacency_matrix</code>
+</p>
+</li>
+<li> <p><code>_Plots.rda</code> for <code>plots</code>
+</p>
+</li>
+<li> <p><code>_GraphLayout.txt</code> for <code>plots$graph_layout</code>
+</p>
+</li>
+<li> <p><code>_Details.rds</code> for <code>details</code>
+</p>
+</li>
+</ul>
+<p><code>node_data</code> and <code>cluster_data</code> are saved using
+<code>write.csv()</code>,
+with <code>row.names</code> being <code>TRUE</code> for <code>node_data</code>
+and <code>FALSE</code> for <code>cluster_data</code>.
+The <code>igraph</code> is saved using
+<code>write_graph()</code> with <code>format = "edgelist"</code>.
+The adjacency matrix is saved using <code>writeMM()</code>.
+The graph layout is saved using <code>write()</code> with
+<code>ncolumns = 2</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns <code>TRUE</code> if output is saved, otherwise returns <code>FALSE</code> (with a warning if <code>output_dir</code> is non-null and the specified directory does not exist and could not be created).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+net &lt;- buildRepSeqNetwork(
+  toy_data,
+  seq_col = "CloneSeq",
+  node_stats = TRUE,
+  cluster_stats = TRUE,
+  color_nodes_by = c("transitivity", "SampleID")
+)
+
+# save as single RDS file
+saveNetwork(
+  net,
+  output_dir = tempdir(),
+  verbose = TRUE
+)
+
+saveNetwork(
+  net,
+  output_dir = tempdir(),
+  output_type = "individual",
+  verbose = TRUE
+)
+
+
+</code></pre>
+
+
+</div>

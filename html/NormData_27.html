@@ -1,0 +1,285 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot Stage.1</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Check the model assumptions for a fitted Stage 1 model graphically.</h2>
+
+<h3>Description</h3>
+
+<p>This function provides several plots that are useful to evaluate model assumptions. When the <code>plot()</code> function is applied to a fitted <code>Stage.1</code> object, three panels are generated. These panels show plots that can be used (i) to evaluate the homoscedasticity assumption, (ii) to evaluate the normality assumption, and (iii) to evaluate the presence of outliers. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'Stage.1'
+plot(x, Homoscedasticity=TRUE, Normality=TRUE, 
+Outliers=TRUE, Assume.Homoscedasticity, Add.Jitter=0, Seed=123, 
+Confidence.QQ.Normality=.99, Plots.Together=TRUE, 
+Y.Lim.ResVarFunction, Group.Spec.Densities.Delta=FALSE, Main.Homosced.1,
+Main.Homosced.2, Main.Norm.1, Main.Norm.2, Main.Norm.3, Main.Outliers, 
+cex.axis.homo=1, cex.main.homo=1, cex.lab.homo=1,  
+cex.axis.norm=1.6, cex.main.norm=1.5, cex.lab.norm=1.5,  
+cex.axis.outl=1, cex.main.outl=1, cex.lab.outl=1,  
+Color="red", Loess.Span=0.75, verbose=TRUE, ...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A fitted object of class <code>Stage.1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Homoscedasticity</code></td>
+<td>
+<p>Logical. Should plots to evaluate homoscedasticity be shown? <br>  Default <code>Homoscedasticity=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Normality</code></td>
+<td>
+<p>Logical. Should plots to evaluate the normality assumption be shown? The normality plots are based on the standardized residuals in the normative dataset, which are computed as explained in the <code>Assume.Homoscedasticity=</code> argument documentation below. Default <code>Normality=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Outliers</code></td>
+<td>
+<p>Logical. Should plots to evaluate outliers be shown? The outlier plot is based on the standardized residuals in the normative dataset, which are computed as explained in the <code>Assume.Homoscedasticity=</code> argument documentation below. Default <code>Outliers=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Homoscedasticity</code></td>
+<td>
+
+<p>By default, the standardized residuals <code class="reqn">\widehat{\delta}_i</code>  that are shown in the normality and outlier plots are computed based on the overall residual standard error when the homoscedasticity assumption is valid (i.e., as <code class="reqn">\widehat{\delta}_i = \frac{\widehat{\varepsilon}_i}{\widehat{\sigma}^2_{\varepsilon}}</code>, with  <code class="reqn">\widehat{\sigma}^2_{\varepsilon}</code> corresponding to the overall residual standard error), or based on prediction-specific residual standard errors when the homoscedasticity assumption is invalid (i.e., as <code class="reqn">\widehat{\delta}_i = \frac{\widehat{\varepsilon}_i}{\widehat{\sigma}^2_{\varepsilon_i}}</code>, with  <code class="reqn">\widehat{\sigma}^2_{\varepsilon_i}</code> corresponding to e.g., a cubic polynomial variance prediction function <code class="reqn">\widehat{\sigma}^2_{\varepsilon_i} = \widehat{\gamma}_0 + \widehat{\gamma}_1 \: \widehat{Y} + \widehat{\gamma}_2 \: \widehat{Y}^2 + {\gamma}_3 \: \widehat{Y}^3</code> when the mean structure of the model contains quantitiative independent variables). The default behaviour of the <code>plot()</code> function can be overruled using the <code>Assume.Homoscedasticity</code> argument. For example, when adding the argument <code>Assume.Homoscedasticity=TRUE</code> to the function call, the standardized residuals that are plotted will be computed based on the overall residual standard error (irrespective of the result of the Levene or Breusch-Pagan test).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Add.Jitter</code></td>
+<td>
+<p>The amount of jitter (random noise) that should be added to the X-axis of the  homoscedasticity plots (which show the model-predicted mean values). Adding a bit of jitter is useful to show the data more clearly (especially when there are only a few unique predicted values, e.g., when a binary or non-binary qualitative independent variable is considered in the mean structure of the model), i.e., to avoid overlapping data points. The specified value <code>Add.Jitter=</code> in the function call determines the amount of jitter (range of values) that is added. For example, when <code>Add.Jitter=0.1</code>, a random value between -0.1 and 0.1 (sampled from a uniform) is added to the predicted values in the homoscedasticity plots (shown on the X-axis). Default <code>Add.Jitter=0</code>, i.e., no jitter added to the predicted values in the homoscedasticity plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Seed</code></td>
+<td>
+<p>The seed that is used when adding jitter. Default <code>Seed=123</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Confidence.QQ.Normality</code></td>
+<td>
+<p>Specifies the desired confidence-level for the confidence band arond the line of perfect agreement/normality in the QQ-plot that is used to evaluate normality. Default <code>Confidence.QQ.Normality=0.95</code>. Use <code>Confidence.QQ.Normality= FALSE</code> if no confidence band is needed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Plots.Together</code></td>
+<td>
+<p>The different homoscedasticity and normality plots are grouped together in a panel by default. For example, the three normality plots are shown together in one panel. If it is preferred to have the different plots in separate panels (rather than grouped to- gether), the argument <code>Plots.Together=FALSE</code> can be used. Default <code>Plots.Together=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y.Lim.ResVarFunction</code></td>
+<td>
+<p>The min, max limits of the Y-axis that should be used for the variance function plot. By default, the limit of the Y-axis is set between <code class="reqn">0</code> and the maximum value of estimated variances multiplied by <code class="reqn">2</code>. This can be changed using the <code>Y.Lim.ResVarFunction</code> argument. For example, adding the argument <code>Y.Lim.ResVarFunction=c(0, 500)</code> sets the range of the Y-axis of the variance function plot from 0 to 500.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Group.Spec.Densities.Delta</code></td>
+<td>
+<p>Logical. Should a plot with the group-specific densities of the standardized residuals be shown? Default <code>Group.Spec.Densities.Delta=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Main.Homosced.1</code></td>
+<td>
+<p>The title of the first panel of the homoscedasticity plot (i.e., the scatterplot of the residuals against the predicted scores).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Main.Homosced.2</code></td>
+<td>
+<p>The title of second panel of the homoscedasticity plot (i.e., the variance function plot).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Main.Norm.1</code></td>
+<td>
+<p>The title of the first panel of the normality plot (i.e., the histogram of the standardized residuals).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Main.Norm.2</code></td>
+<td>
+<p>The title of the second panel of the normality plot (i.e., the density of the standardized residuals and standard normal distribution).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Main.Norm.3</code></td>
+<td>
+<p>The title of the third panel of the normality plot (i.e., the QQ-plot).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Main.Outliers</code></td>
+<td>
+<p>The title of the outlier plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.axis.homo</code></td>
+<td>
+<p>The magnification to be used for axis annotation of the homoscedasticity plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.main.homo</code></td>
+<td>
+<p>The magnification to be used for the main label of the homoscedasticity plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.lab.homo</code></td>
+<td>
+<p>The magnification to be used for the X- and Y-axis labels of the homoscedasticity plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.axis.norm</code></td>
+<td>
+<p>The magnification to be used for axis annotation of the normality plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.main.norm</code></td>
+<td>
+<p>The magnification to be used for the main label of the normality plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.lab.norm</code></td>
+<td>
+<p>The magnification to be used for X and Y labels of the normality plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.axis.outl</code></td>
+<td>
+<p>The magnification to be used for axis annotation of the outlier plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.main.outl</code></td>
+<td>
+<p>The magnification to be used for the main label of the outlier plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.lab.outl</code></td>
+<td>
+<p>The magnification to be used for X- and Y-axis labels of the outlier plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Color</code></td>
+<td>
+<p>The color to be used for the Empirical Variance Function (EVF) and the standard normal distribution in the variance function plot and the normality plot that show the densities of the standardized residuals and the normal distribution, respectively. Default <code>Color="red"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Loess.Span</code></td>
+<td>
+<p>The parameter <code class="reqn">\alpha</code> that determines the degree of smoothing of the EVF that is shown in the variance function plot. Default <code>Loess.Span=0.75</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical value indicating whether verbose output should be generated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments to be passed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>No return value, called for side effects.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Wim Van der Elst
+</p>
+
+
+<h3>References</h3>
+
+<p>Van der Elst, W. (2024). <em>Regression-based normative data for psychological assessment: A hands-on approach using R.</em> Springer Nature. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Replicate the Stage 1 results that were obtained in 
+# Case study 1 of Chapter 4 in Van der Elst (2023)
+# ---------------------------------------------------
+library(NormData)   # load the NormData package
+data(GCSE)          # load the GCSE dataset
+
+# Conduct the Stage 1 analysis
+Model.1.GCSE &lt;- Stage.1(Dataset=GCSE, 
+  Model=Science.Exam~Gender)
+
+summary(Model.1.GCSE)
+plot(Model.1.GCSE, Add.Jitter = .2)
+
+# Use blue color for EVF and density normal distribution
+plot(Model.1.GCSE, Add.Jitter = .2, Color="blue")
+
+# Change the title of the variance function plot into
+# "Variance function plot, residuals Science exam"
+plot(Model.1.GCSE, Add.Jitter = .2, 
+  Main.Homosced.2 = "Variance function plot, residuals Science exam")
+
+# Use a 95 percent CI around the line of perfect agreement in the
+# QQ plot of normality
+plot(Model.1.GCSE, Add.Jitter = .2, 
+     Confidence.QQ.Normality = .9)
+
+
+# Replicate the Stage 1 results that were obtained in 
+# Case study 1 of Chapter 7 in Van der Elst (2023)
+# ---------------------------------------------------
+library(NormData)   # load the NormData package
+data(Substitution)  # load the Substitution dataset
+
+# Add the variable Age.C (= Age centered) to the Substitution dataset
+Substitution$Age.C &lt;- Substitution$Age - 50
+
+# Fit the final Stage 1 model
+Substitution.Model.9 &lt;- Stage.1(Dataset=Substitution, 
+   Alpha=0.005, Model=LDST~Age.C+LE,
+   Order.Poly.Var=1) # Order.Poly.Var=1 specifies a linear polynomial
+                     # for the variance prediction function
+
+# Final Stage 1 model
+summary(Substitution.Model.9)
+plot(Substitution.Model.9) 
+
+# Request a variance function plot that assumes that 
+# the homoscedasticity assumption is valid
+plot(Substitution.Model.9, Assume.Homoscedasticity = TRUE) 
+</code></pre>
+
+
+</div>

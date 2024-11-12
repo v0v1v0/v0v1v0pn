@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>updateRock</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Update Rock</h2>
+
+<h3>Description</h3>
+
+<p>Start rock animation and stop spinning. Works on an existing NGLVieweR object in Shinymode.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">updateRock(NGLVieweR_proxy, rock = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>NGLVieweR_proxy</code></td>
+<td>
+<p>A NGLVieweR object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rock</code></td>
+<td>
+<p>If <code>TRUE</code> (default), start rocking and stop spinning.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>API call containing <code>NGLVieweR</code> <code>id</code> and list of message parameters.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>setRock()</code>
+</p>
+</li>
+<li> <p><code>NGLVieweR_example()</code> See example "updateAnimation".
+</p>
+</li>
+</ul>
+<p>Other animations: 
+<code>setRock()</code>,
+<code>setSpin()</code>,
+<code>updateSpin()</code>,
+<code>updateZoomMove()</code>,
+<code>zoomMove()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+NGLVieweR_proxy("structure") %&gt;% updateRock(TRUE)
+
+## End(Not run)
+
+if (interactive()) {
+library(shiny)
+
+ui = fluidPage(
+  titlePanel("Viewer with API inputs"),
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("animate", label = "Animation",
+      choices = c("None", "Spin", "Rock"), selected = "None")
+    ),
+    mainPanel(
+      NGLVieweROutput("structure")
+    )
+  )
+)
+server = function(input, output) {
+  output$structure &lt;- renderNGLVieweR({
+    NGLVieweR("7CID") %&gt;%
+      addRepresentation("cartoon", 
+      param = list(name = "cartoon", color="red"))
+  })
+
+  observeEvent(input$animate,{
+    if(input$animate == "Rock"){
+      NGLVieweR_proxy("structure") %&gt;% 
+      updateRock(TRUE)
+    } else if(input$animate == "Spin") {
+      NGLVieweR_proxy("structure") %&gt;% 
+      updateSpin(TRUE)
+    } else{
+      NGLVieweR_proxy("structure") %&gt;% 
+      updateRock(FALSE) %&gt;% 
+      updateSpin(FALSE)
+    }
+  })
+ }
+shinyApp(ui, server)
+}
+</code></pre>
+
+
+</div>

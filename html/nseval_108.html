@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>unwrap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Unwrap variable references.</h2>
+
+<h3>Description</h3>
+
+<p>Given an unforced quotation whose expression is a bare variable
+name, <code>unwrap</code> follows the variable reference, and returns a
+quotation. When the argument is forced or has a nontrivial
+expression <code>unwrap</code> has no effect.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">unwrap(x, recursive = FALSE)
+
+## S3 method for class 'dots'
+unwrap(x, recursive = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a quotation to unwrap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recursive</code></td>
+<td>
+<p>Default <code>FALSE</code> unwraps exactly once. If
+<code>TRUE</code>, unwrap as far as possible (until a forced promise or
+nontrivial expression is found.)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>There are two good use cases for <code>unwrap(x, recursive=TRUE)</code>. One
+is to derive plot labels (the most inoccuous use of
+metaprogramming). Another is to check for missingness (this is what
+R's missing and does as well).
+</p>
+<p>Using <code>unwrap(x, recursive=TRUE)</code> in other situations can get you
+into confusing situations – effectively you are changing the
+behavior of a parent function that may be an unknown number of
+levels up the stack, possibly turning a standard-evaluating
+function into nonstandard-evaluating function. So recursive
+unerapping is not the default behavior.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The quotation method returns a quotation.
+</p>
+<p>The dots method returns a dots object with each quotation unwrapped.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># different levels of unwrapping:
+f &lt;- function(x) { g(x) }
+g &lt;- function(y) { h(y) }
+h &lt;- function(z) {
+  print(arg(z))
+  print(unwrap(quo(z)))
+  print(unwrap(unwrap(quo(z))))
+  print(unwrap(quo(z), recursive=TRUE))
+}
+
+w &lt;- 5
+f(w)
+</code></pre>
+
+
+</div>

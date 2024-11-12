@@ -1,0 +1,343 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LSopt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Stochastic Local Search
+</h2>
+
+<h3>Description</h3>
+
+<p>Performs a simple stochastic Local Search.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LSopt(OF, algo = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>OF</code></td>
+<td>
+
+<p>The objective function, to be minimised. Its first argument needs to
+be a solution; <code>...</code> arguments are also passed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algo</code></td>
+<td>
+
+<p>List of settings. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Other variables to be passed to the objective function and to the
+neighbourhood function. See Details.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Local Search (<abbr><span class="acronym">LS</span></abbr>) changes an initial solution for a number
+of times, accepting only such changes that lead to an improvement in
+solution quality (as measured by the objective function <code>OF</code>).
+More specifically, in each iteration, a current solution <code>xc</code> is
+changed through a function <code>algo$neighbour</code>. This function takes
+<code>xc</code> as an argument and returns a new solution <code>xn</code>. If
+<code>xn</code> is not worse than <code>xc</code>, ie, if
+<code>OF(xn,...)&lt;=OF(xc,...)</code>, then <code>xn</code> replaces <code>xc</code>.
+</p>
+<p>The list <code>algo</code> contains the following items:
+</p>
+
+<dl>
+<dt><code>nS</code></dt>
+<dd>
+<p>The number of steps. The default is 1000; but this
+setting depends very much on the problem.</p>
+</dd>
+<dt><code>nI</code></dt>
+<dd>
+<p>Total number of iterations, with default
+<code>NULL</code>. If specified, it will override
+<code>nS</code>. The option is provided to makes it
+easier to compare and switch between functions
+<code>LSopt</code>, <code>TAopt</code> and
+<code>SAopt</code>.
+</p>
+</dd>
+<dt><code>x0</code></dt>
+<dd>
+<p>The initial solution. This can be a function; it
+will then be called once without arguments to compute an initial
+solution, ie, <code>x0 &lt;- algo$x0()</code>. This can be useful when
+<code>LSopt</code> is called in a loop of restarts and each restart is
+to have its own starting value.</p>
+</dd>
+<dt><code>neighbour</code></dt>
+<dd>
+<p>The neighbourhood function, called as
+<code>neighbour(x, ...)</code>. Its first argument must be a solution
+<code>x</code>; it must return a changed solution.</p>
+</dd>
+<dt><code>printDetail</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), information
+is printed. If an integer <code>i</code> greater then one, information
+is printed at very <code>i</code>th step.</p>
+</dd>
+<dt><code>printBar</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the
+default), a <code>txtProgressBar</code> (from package
+<span class="pkg">utils</span>) is printed).  The progress bar is
+not shown if <code>printDetail</code> is an integer
+greater than 1.</p>
+</dd>
+<dt><code>storeF</code></dt>
+<dd>
+<p>if <code>TRUE</code> (the default), the objective
+function values for every solution in every generation are stored
+and returned as matrix <code>Fmat</code>.</p>
+</dd>
+<dt><code>storeSolutions</code></dt>
+<dd>
+<p>default is <code>FALSE</code>. If
+<code>TRUE</code>, the solutions (ie, decision variables) in every
+generation are stored and returned in list
+<code>xlist</code> (see Value section below). To check, for instance,
+the current solution at the end of the <code>i</code>th generation, retrieve
+<code>xlist[[c(2L, i)]]</code>.</p>
+</dd>
+<dt><code>OF.target</code></dt>
+<dd>
+<p>Numeric; when specified, the algorithm will
+stop when an objective-function value as low as <code>OF.target</code> (or
+lower) is achieved. This is useful when an optimal
+objective-function value is known: the algorithm will then stop and
+not waste time searching for a better solution.</p>
+</dd>
+</dl>
+<p>At the minimum, <code>algo</code> needs to contain an initial solution
+<code>x0</code> and a <code>neighbour</code> function.
+</p>
+<p><abbr><span class="acronym">LS</span></abbr> works on solutions through the functions <code>neighbour</code>
+and <code>OF</code>, which are specified by the user. Thus, a solution need
+not be a numeric vector, but can be any other data structure as well
+(eg, a list or a matrix).
+</p>
+<p>To run silently (except for warnings and errors),
+<code>algo$printDetail</code> and <code>algo$printBar</code> must be <code>FALSE</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xbest</code></td>
+<td>
+<p>best solution found.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OFvalue</code></td>
+<td>
+<p>objective function value associated with best
+solution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fmat</code></td>
+<td>
+<p>a matrix with two columns. <code>Fmat[ ,1L]</code>
+contains the proposed solution over all iterations; <code>Fmat[
+    ,2L]</code> contains the accepted solutions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlist</code></td>
+<td>
+<p>if <code>algo$storeSolutions</code> is <code>TRUE</code>, a
+list; else <code>NA</code>. Contains the neighbour solutions at a given
+iteration (<code>xn</code>) and the current solutions
+(<code>xc</code>). Example: <code>Fmat[i, 2L]</code> is the objective function
+value associated with <code>xlist[[c(2L, i)]]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.state</code></td>
+<td>
+<p>the value of <code>.Random.seed</code>
+when the function was called.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>TAopt</code>, <code>restartOpt</code>.
+Package <span class="pkg">neighbours</span> (also on CRAN) offers helpers
+for creating neighbourhood functions.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Aim: find the columns of X that, when summed, give y
+
+## random data set
+nc &lt;- 25L          ## number of columns in data set
+nr &lt;- 5L           ## number of rows in data set
+howManyCols &lt;- 5L  ## length of true solution
+X &lt;- array(runif(nr*nc), dim = c(nr, nc))
+xTRUE &lt;- sample(1L:nc, howManyCols)
+Xt &lt;- X[ , xTRUE, drop = FALSE]
+y &lt;- rowSums(Xt)
+
+## a random solution x0 ...
+makeRandomSol &lt;- function(nc) {
+    ii &lt;- sample.int(nc, sample.int(nc, 1L))
+    x0 &lt;- logical(nc); x0[ii] &lt;- TRUE
+    x0
+}
+x0 &lt;- makeRandomSol(nc)
+
+## ... but probably not a good one
+sum(y - rowSums(X[ , xTRUE, drop = FALSE])) ## should be 0
+sum(y - rowSums(X[ , x0, drop = FALSE]))
+
+## a neighbourhood function: switch n elements in solution
+neighbour &lt;- function(xc, Data) {
+    xn &lt;- xc
+    p &lt;- sample.int(Data$nc, Data$n)
+    xn[p] &lt;- !xn[p]
+    if (sum(xn) &lt; 1L)
+        xn &lt;- xc
+    xn
+}
+
+## a greedy neighbourhood function
+neighbourG &lt;- function(xc, Data) {
+    of &lt;- function(x)
+        abs(sum(Data$y - rowSums(Data$X[ ,x, drop = FALSE])))
+    xbest &lt;- xc
+    Fxbest &lt;- of(xbest)
+    for (i in 1L:Data$nc) {
+        xn &lt;- xc; p &lt;- i
+        xn[p] &lt;- !xn[p]
+        if (sum(xn) &gt;= 1L) {
+            Fxn &lt;- of(xn)
+            if (Fxn &lt; Fxbest) {
+                xbest &lt;- xn
+                Fxbest &lt;- Fxn
+            }
+        }
+    }
+    xbest
+}
+
+## an objective function
+OF &lt;- function(xn, Data)
+    abs(sum(Data$y - rowSums(Data$X[ ,xn, drop = FALSE])))
+
+
+## (1) GREEDY SEARCH
+## note: this could be done in a simpler fashion, but the
+##       redundancies/overhead here are small, and the example is to
+##       show how LSopt can be used for such a search
+Data &lt;- list(X = X, y = y, nc = nc, nr = nr, n = 1L)
+algo &lt;- list(nS = 500L, neighbour = neighbourG, x0 = x0,
+             printBar = FALSE, printDetail = FALSE)
+solG &lt;- LSopt(OF, algo = algo, Data = Data)
+
+## after how many iterations did we stop?
+iterG &lt;- min(which(solG$Fmat[ ,2L] == solG$OFvalue))
+solG$OFvalue  ## the true solution has OF-value 0
+
+## (2) LOCAL SEARCH
+algo$neighbour &lt;- neighbour
+solLS &lt;- LSopt(OF, algo = algo, Data = Data)
+iterLS &lt;- min(which(solLS$Fmat[ ,2L] == solLS$OFvalue))
+solLS$OFvalue  ## the true solution has OF-value 0
+
+## (3) *Threshold Accepting*
+algo$nT &lt;- 10L
+algo$nS &lt;- ceiling(algo$nS/algo$nT)
+algo$q &lt;- 0.99
+solTA &lt;- TAopt(OF, algo = algo, Data = Data)
+iterTA &lt;- min(which(solTA$Fmat[ ,2L] == solTA$OFvalue))
+solTA$OFvalue  ## the true solution has OF-value 0
+
+## look at the solution
+all &lt;- sort(unique(c(which(solTA$xbest),
+                     which(solLS$xbest),
+                     which(solG$xbest),
+                     xTRUE)))
+ta &lt;- ls &lt;- greedy &lt;- true &lt;- character(length(all))
+true[  match(xTRUE, all)] &lt;- "o"
+greedy[match(which(solG$xbest),  all)] &lt;- "o"
+ls[    match(which(solLS$xbest), all)] &lt;- "o"
+ta[    match(which(solTA$xbest), all)] &lt;- "o"
+data.frame(true = true, greedy = greedy, LS = ls , TA = ta,
+           row.names=all)
+
+## plot results
+par(ylog = TRUE, mar = c(5,5,1,6), las = 1)
+plot(solTA$Fmat[seq_len(iterTA) ,2L],type = "l", log = "y",
+     ylim = c(1e-4,
+              max(pretty(c(solG$Fmat,solLS$Fmat,solTA$Fmat)))),
+     xlab = "iterations", ylab = "OF value", col = grey(0.5))
+lines(cummin(solTA$Fmat[seq_len(iterTA), 2L]), type = "l")
+lines(solG$Fmat[ seq_len(iterG),  2L], type = "p", col = "blue")
+lines(solLS$Fmat[seq_len(iterLS), 2L], type = "l", col = "goldenrod3")
+legend(x = "bottomleft",
+       legend = c("TA best solution", "TA current solution",
+                  "Greedy", "LS current/best solution"),
+       lty = c(1,1,0,1),
+       col = c("black",grey(0.5),"blue","goldenrod2"),
+       pch = c(NA,NA,21,NA))
+axis(4, at = c(solG$OFvalue, solLS$OFvalue, solTA$OFvalue),
+        labels = NULL, las = 1)
+lines(x = c(iterG, par()$usr[2L]), y = rep(solG$OFvalue,2),
+      col = "blue", lty = 3)
+lines(x = c(iterTA, par()$usr[2L]), y = rep(solTA$OFvalue,2),
+      col = "black", lty = 3)
+lines(x = c(iterLS, par()$usr[2L]), y = rep(solLS$OFvalue,2),
+      col = "goldenrod3", lty = 3)
+</code></pre>
+
+
+</div>

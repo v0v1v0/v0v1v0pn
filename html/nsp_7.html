@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nsp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Narrowest Significance Pursuit algorithm with general covariates and user-specified threshold</h2>
+
+<h3>Description</h3>
+
+<p>This function runs the bare-bones Narrowest Significance Pursuit (NSP) algorithm on data sequence <code>y</code> and design matrix <code>x</code>
+to obtain localised regions (intervals) of the domain in which the parameters of the linear regression model y_t = beta(t) x_t + z_t significantly
+depart from constancy (e.g. by containing change-points). For any interval considered by the algorithm,
+significance is achieved if the multiscale supremum-type
+deviation measure (see Details for the literature reference) exceeds <code>lambda</code>. This function is
+mainly to be used by the higher-level functions <code>nsp_poly</code>, <code>nsp_poly_ar</code> and <code>nsp_tvreg</code>
+(which estimate a suitable <code>lambda</code> so that a given global significance level is guaranteed), and human users may prefer to use those functions
+instead; however, <code>nsp</code> can also be run directly, if desired.
+The function works best when the errors z_t in the linear regression formulation y_t = beta(t) x_t + z_t are independent and
+identically distributed Gaussians.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nsp(y, x, M, lambda, overlap = FALSE, buffer = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A vector containing the data sequence being the response in the linear model y_t = beta(t) x_t + z_t.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The design matrix in the regression model above, with the regressors as columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>The minimum number of intervals considered at each recursive stage, unless the number of all intervals is smaller, in which case all intervals
+are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>The threshold parameter for measuring the significance of non-constancy (of the linear regression parameters), for use with the multiscale
+supremum-type deviation measure described in the paper.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlap</code></td>
+<td>
+<p>If <code>FALSE</code>, then on discovering a significant interval, the search continues recursively to the left and to the right of that
+interval. If <code>TRUE</code>, then the search continues to the left and to the right of the midpoint of that interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>A non-negative integer specifying how many observations to leave out immediately to the left and to the right of a detected interval of
+significance before recursively continuing the search
+for the next interval.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The NSP algorithm is described in P. Fryzlewicz (2021) "Narrowest Significance Pursuit: inference for multiple change-points in linear
+models", preprint.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>intervals</code></td>
+<td>
+<p>A data frame containing the estimated intervals of significance: <code>starts</code> and <code>ends</code> is where the intervals start and end,
+respectively; <code>values</code> are the values of the deviation measure on each given interval; <code>midpoints</code> are the midpoints of the intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold.used</code></td>
+<td>
+<p>The threshold <code>lambda</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Piotr Fryzlewicz, <a href="mailto:p.fryzlewicz@lse.ac.uk">p.fryzlewicz@lse.ac.uk</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nsp_poly</code>, <code>nsp_poly_ar</code>, <code>nsp_tvreg</code>, <code>nsp_selfnorm</code>, <code>nsp_poly_selfnorm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+f &lt;- c(1:100, 100:1, 1:100)
+y &lt;- f + stats::rnorm(300) * 15
+x &lt;- matrix(0, 300, 2)
+x[,1] &lt;- 1
+x[,2] &lt;- seq(from = 0, to = 1, length = 300)
+nsp(y, x, 100, 15 * thresh_kab(300, .1))
+</code></pre>
+
+
+</div>

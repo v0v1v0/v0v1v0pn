@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>quality</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perception of food quality</h2>
+
+<h3>Description</h3>
+
+<p>These data were collected after a study on the perception of food quality.
+Participants were given 9 French logos; they had to rate, on a scale from 0 (not at all) to 10 (absolutely), how much a product bearing them aligned with their own perception of quality.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">quality
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 55 rows and 9 columns. Here is the list of logos:
+</p>
+
+<ul>
+<li>
+<p> AB: organic;
+</p>
+</li>
+<li>
+<p> Label Rouge: superior quality (from the taste, process, packaging...);
+</p>
+</li>
+<li>
+<p> FairTrade: decent wages and working conditions for the producers;
+</p>
+</li>
+<li>
+<p> Bleu Blanc Coeur: diverse and balanced diet for the livestock;
+</p>
+</li>
+<li>
+<p> AOC: controlled designation of origin;
+</p>
+</li>
+<li>
+<p> Produit en Bretagne: processed in Brittany;
+</p>
+</li>
+<li>
+<p> Viandes de France: livestock bred, grown and slaughtered in France, with respectful living conditions;
+</p>
+</li>
+<li>
+<p> Nourri sans OGM: no GMOs in livestock food;
+</p>
+</li>
+<li>
+<p> Médailles Agro: a prize won at a yearly contest based on taste.
+</p>
+</li>
+</ul>
+<h3>Source</h3>
+
+<p>Sébastien Lê, applied mathematics department, Institut Agro Rennes-Angers
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+library(NaileR)
+data(quality)
+
+colnames(quality) &lt;- c("Agriculture biologique",
+"Label Rouge",
+"FairTrade",
+"Bleu Blanc Coeur",
+"Appelation d'origine contrôlée",
+"Produit en Bretagne",
+"Viandes de France",
+"Nourri sans OGM",
+"Médailles Agro")
+
+res_pca_quality &lt;- FactoMineR::PCA(quality, graph = FALSE)
+quali_work &lt;- res_pca_quality$ind$coord |&gt; as.data.frame()
+quali_work &lt;- quali_work[,1] |&gt; cbind(quality)
+
+intro_quali &lt;- "These data were collected after a study
+on the perception of food quality.
+Participants were given 9 French logos;
+they had to rate, on a scale from 0 (not at all)
+to 10 (absolutely), how much a product bearing them
+aligned with their own perception of quality."
+intro_quali &lt;- gsub('\n', ' ', intro_quali) |&gt;
+stringr::str_squish()
+
+res_quality &lt;- nail_condes(quali_work, num.var = 1,
+quanti.cat = c('Higher quality', 'Lower quality', 'Neutral'),
+introduction = intro_quali, generate = FALSE)
+
+ppt &lt;- gsub('characteristics', 'opinions', res_quality$prompt)
+
+res_quality &lt;- ollamar::generate('llama3', ppt, output = 'df')
+
+cat(res_quality$response)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

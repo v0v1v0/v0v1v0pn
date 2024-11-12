@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Qrefine</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Refine the Q-matrix by minimizing the residual sum of square (RSS)</h2>
+
+<h3>Description</h3>
+
+<p>Refine the Q-matrix by minimizing the residual sum of square (RSS) betweenn the real responses and ideal responses. Examinee attribute profiles are estimated using the nonparametric method (plain Hamming) implemented by <code>AlphaNP</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Qrefine(Y, Q, gate=c("AND", "OR"), max.ite = 50)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>A matrix of binary responses. Rows represent persons and columns represent items. 1=correct, 0=incorrect.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>The Q-matrix of the test. Rows represent items and columns represent attributes. 1=attribute required by the item, 0=attribute not required by the item.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gate</code></td>
+<td>
+<p><code>"AND"</code>: the examinee needs to possess all attributes required by an item in order to answer it correctly; <code>"OR"</code>: the examinee needs to possess only one of the attributes required by an item in order to answer it correctly.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.ite</code></td>
+<td>
+<p>The maximum number of iterations allowed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>patterns</code></td>
+<td>
+<p>All possible attribute profiles. Rows represent different patterns of attribute profiles and columns represent attributes. 1=examinee masters the attribute, 0=examinee does not master the attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.Q</code></td>
+<td>
+<p>The initial Q-matrix. Rows represent items and columns represent attributes. 1=attribute required by the item, 0=attribute not required by the item. This is the preliminary Q-matrix to be refined.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.class</code></td>
+<td>
+<p>The row indices of <code>patterns</code> in the initial estimation of examinee attribute profiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terminal.class</code></td>
+<td>
+<p>The The row indices on <code>patterns</code> in the terminal estimation of examinee attribute profiles after the Q-matrix has been refined.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modified.Q</code></td>
+<td>
+<p>The modified Q-matrix. Rows represent items and columns represent attributes. 1=attribute required by the item, 0=attribute not required by the item.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modified.entries</code></td>
+<td>
+<p>The modified q-entries. Column 1 is the item ID of the modified entry; column 2 is the attribute ID of the modified entry.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Chiu, C. Y. (2013). Statistical Refinement of the Q-matrix in Cognitive Diagnosis. <em>Applied Psychological Measurement, 37</em>(8), 598-618. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>AlphaNP</code>, <code>print.Qrefine</code>, <code>plot.Qrefine</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate item and examinee profiles
+
+natt &lt;- 3
+nitem &lt;- 4
+nperson &lt;- 16
+Q &lt;- rbind(c(1, 0, 0), c(0, 1, 0), c(0, 0, 1), c(1, 1, 1))
+alpha &lt;- rbind(c(0, 0, 0), c(1, 0, 0), c(0, 1, 0), c(0, 0, 1), 
+  c(1, 1, 0), c(1, 0, 1), c(0, 1, 1), c(1, 1, 1))
+alpha &lt;- rbind(alpha, alpha)
+
+# Generate DINA model-based response data
+
+slip &lt;- c(0.1, 0.15, 0.2, 0.25)
+guess &lt;- c(0.1, 0.15, 0.2, 0.25)
+my.par &lt;- list(slip=slip, guess=guess)
+
+data &lt;- matrix(NA, nperson, nitem)
+eta &lt;- matrix(NA, nperson, nitem)
+
+for (i in 1:nperson) {
+  for (j in 1:nitem) {
+  eta[i, j] &lt;- prod(alpha[i,] ^ Q[j, ])
+  P &lt;- (1 - slip[j]) ^ eta[i, j] * guess[j] ^ (1 - eta[i, j])
+  u &lt;- runif(1)
+  data[i, j] &lt;- as.numeric(u &lt; P)
+  }
+}
+
+# Generate misspecified Q-matrix
+
+Q_mis &lt;- Q
+Q_mis[c(1,2), 1] &lt;- 1 - Q_mis[c(1,2), 1]
+
+# Run Qrefine and create diagnostic plots
+
+Qrefine.out &lt;- Qrefine(data, Q_mis, gate="AND", max.ite=50)
+print(Qrefine.out)
+plot(Qrefine.out)
+</code></pre>
+
+
+</div>

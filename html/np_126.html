@@ -1,0 +1,456 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npudist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Distribution Estimation with Mixed Data Types </h2>
+
+<h3>Description</h3>
+
+<p><code>npudist</code> computes kernel unconditional cumulative distribution
+estimates on evaluation data, given a set of training data and a
+bandwidth specification (a <code>dbandwidth</code> object or a bandwidth
+vector, bandwidth type, and kernel type) using the method of Li, Li
+and Racine (2017).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npudist(bws, ...)
+
+## S3 method for class 'formula'
+npudist(bws, data = NULL, newdata = NULL, ...)
+
+## S3 method for class 'dbandwidth'
+npudist(bws,
+        tdat = stop("invoked without training data 'tdat'"),
+        edat,
+        ...)
+
+## S3 method for class 'call'
+npudist(bws, ...)
+
+## Default S3 method:
+npudist(bws, tdat, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a <code>dbandwidth</code> specification. This can be set as a <code>dbandwidth</code>
+object returned from an invocation of <code>npudistbw</code>, or as a
+<code class="reqn">p</code>-vector of bandwidths, with an element for each variable in the
+training data. If specified as a vector, then additional arguments
+will need to be supplied as necessary to change them from the
+defaults to specify the bandwidth type, kernel types, training data,
+and so on.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the training data, the
+bandwidth type, kernel types, and so on.  This is necessary if you
+specify bws as a <code class="reqn">p</code>-vector and not a <code>dbandwidth</code> object,
+and you do not desire the default behaviours. To do this, you may
+specify any of <code>bwscaling</code>, <code>bwtype</code>, <code>ckertype</code>,
+<code>ckerorder</code>, <code>okertype</code>, as described in
+<code>npudistbw</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of sample realizations (training data)
+used to estimate the cumulative distribution. Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of cumulative distribution evaluation points. By default,
+evaluation takes place on the data provided by <code>tdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(bws)</code>, typically the environment from which
+<code>npudistbw</code> was called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, the training data are used.  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Typical usages are (see below for a complete list of options and also
+the examples at the end of this help file)
+</p>
+<pre>
+    Usage 1: first compute the bandwidth object via npudistbw and then
+    compute the cumulative distribution:
+    
+    bw &lt;- npudistbw(~y)
+    Fhat &lt;- npudist(bw)
+    
+    Usage 2: alternatively, compute the bandwidth object indirectly:
+    
+    Fhat &lt;- npudist(~y)
+    
+    Usage 3: modify the default kernel and order:
+    
+    Fhat &lt;- npudist(~y, ckertype="epanechnikov", ckerorder=4)
+
+    Usage 4: use the data frame interface rather than the formula
+    interface:
+
+    Fhat &lt;- npudist(tdat = y, ckertype="epanechnikov", ckerorder=4)
+  </pre>
+<p><code>npudist</code> implements a variety of methods for estimating
+multivariate cumulative distributions (<code class="reqn">p</code>-variate) defined over a
+set of possibly continuous and/or discrete (ordered) data. The
+approach is based on Li and Racine (2003) who employ
+‘generalized product kernels’ that admit a mix of continuous
+and discrete data types.
+</p>
+<p>Three classes of kernel estimators for the continuous data types are
+available: fixed, adaptive nearest-neighbor, and generalized
+nearest-neighbor. Adaptive nearest-neighbor bandwidths change with
+each sample realization in the set, <code class="reqn">x_i</code>, when estimating
+the cumulative distribution at the point <code class="reqn">x</code>. Generalized nearest-neighbor
+bandwidths change with the point at which the cumulative distribution is estimated,
+<code class="reqn">x</code>. Fixed bandwidths are constant over the support of <code class="reqn">x</code>.
+</p>
+<p>Data contained in the data frame <code>tdat</code> (and also <code>edat</code>)
+may be a mix of continuous (default) and ordered discrete (to be
+specified in the data frame <code>tdat</code> using the
+<code>ordered</code> command). Data can be entered in an arbitrary
+order and data types will be detected automatically by the routine
+(see <code>np</code> for details).
+</p>
+<p>A variety of kernels may be specified by the user. Kernels implemented
+for continuous data types include the second, fourth, sixth, and
+eighth-order Gaussian and Epanechnikov kernels, and the uniform
+kernel. Ordered data types use a variation of the Wang and van Ryzin
+(1981) kernel.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npudist</code> returns a <code>npdistribution</code> object. The
+generic accessor functions <code>fitted</code> and <code>se</code>
+extract estimated values and asymptotic standard errors on estimates,
+respectively, from the returned object. Furthermore, the functions
+<code>predict</code>, <code>summary</code> and <code>plot</code>
+support objects of both classes. The returned objects have the
+following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p> the evaluation points. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p> estimate of the cumulative distribution at the evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>derr</code></td>
+<td>
+<p> standard errors of the cumulative distribution estimates </p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “ Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics: Theory
+and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2003), “Nonparametric estimation of
+distributions with categorical and continuous data,” Journal
+of Multivariate Analysis, 86, 266-292.
+</p>
+<p>Li, C. and H. Li and J.S. Racine (2017), “Cross-Validated Mixed
+Datatype Bandwidth Selection for Nonparametric Cumulative
+Distribution/Survivor Functions,” Econometric Reviews, <b>36</b>,
+970-987.
+</p>
+<p>Ouyang, D. and Q. Li and J.S. Racine (2006), “Cross-validation
+and the estimation of probability distributions with categorical
+data,” Journal of Nonparametric Statistics, 18, 69-100.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em> Cambridge
+University Press. 
+</p>
+<p>Scott, D.W. (1992), <em>Multivariate Density Estimation. Theory,
+Practice and Visualization,</em> New York: Wiley.
+</p>
+<p>Silverman, B.W. (1986), <em>Density Estimation,</em> London: Chapman and
+Hall.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth estimators
+for discrete distributions,”  Biometrika, 68, 301-309.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>npudistbw</code> , <code>density</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA): For this example, we load Giovanni
+# Baiocchi's Italian GDP panel (see Italy for details), then create a
+# data frame in which year is an ordered factor, GDP is continuous,
+# compute bandwidths using cross-validation, then create a grid of data
+# on which the cumulative distribution will be evaluated for plotting
+# purposes.
+
+data("Italy")
+attach(Italy)
+
+# Compute bandwidths using cross-validation (default).
+
+bw &lt;- npudistbw(formula=~ordered(year)+gdp)
+
+# At this stage you could use npudist() to do a variety of things. Here
+# we compute the npudist() object and place it in Fhat.
+
+Fhat &lt;- npudist(bws=bw)
+
+# Note that simply typing the name of the object returns some useful
+# information. For more info, one can call summary:
+
+summary(Fhat)
+
+# Next, we illustrate how to create a grid of `evaluation data' and feed
+# it to the perspective plotting routines in R, among others.
+
+# Create an evaluation data matrix
+
+year.seq &lt;- sort(unique(year))
+gdp.seq &lt;- seq(1,36,length=50)
+data.eval &lt;- expand.grid(year=year.seq,gdp=gdp.seq)
+
+# Generate the estimated cumulative distribution computed for the
+# evaluation data
+
+Fhat &lt;- fitted(npudist(bws=bw, newdata=data.eval))
+
+# Coerce the data into a matrix for plotting with persp()
+
+F &lt;- matrix(Fhat, length(unique(year)), 50)
+
+# Next, create a 3D perspective plot of the CDF F, and a 2D
+# contour plot.
+
+persp(as.integer(levels(year.seq)), gdp.seq, F, col="lightblue",
+      ticktype="detailed", ylab="GDP", xlab="Year", zlab="Density",
+      theta=300, phi=50)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+contour(as.integer(levels(year.seq)), 
+        gdp.seq, 
+        F, 
+        xlab="Year", 
+        ylab="GDP", 
+        main = "Cumulative Distribution Contour Plot", 
+        col=topo.colors(100))
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Alternatively, you could use the plot() command (&lt;ctrl&gt;-C will
+# interrupt on *NIX systems, &lt;esc&gt; will interrupt on MS Windows
+# systems).
+
+plot(bw)
+
+detach(Italy)
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): For this example, we load Giovanni
+# Baiocchi's Italian GDP panel (see Italy for details), then create a
+# data frame in which year is an ordered factor, GDP is continuous,
+# compute bandwidths using cross-validation, then create a grid of data
+# on which the cumulative distribution will be evaluated for plotting
+# purposes.
+
+data("Italy")
+attach(Italy)
+
+data &lt;- data.frame(year=ordered(year), gdp)
+
+# Compute bandwidths using cross-validation (default).
+
+bw &lt;- npudistbw(dat=data)
+
+# At this stage you could use npudist() to do a variety of
+# things. Here we compute the npudist() object and place it in Fhat.
+
+Fhat &lt;- npudist(bws=bw)
+
+# Note that simply typing the name of the object returns some useful
+# information. For more info, one can call summary:
+
+summary(Fhat)
+
+# Next, we illustrate how to create a grid of `evaluation data' and feed
+# it to the perspective plotting routines in R, among others.
+
+# Create an evaluation data matrix
+
+year.seq &lt;- sort(unique(year))
+gdp.seq &lt;- seq(1,36,length=50)
+data.eval &lt;- expand.grid(year=year.seq,gdp=gdp.seq)
+
+# Generate the estimated cumulative distribution computed for the
+# evaluation data
+
+Fhat &lt;- fitted(npudist(edat = data.eval, bws=bw))
+
+# Coerce the data into a matrix for plotting with persp()
+
+F &lt;- matrix(Fhat, length(unique(year)), 50)
+
+# Next, create a 3D perspective plot of the CDF F, and a 2D
+# contour plot.
+
+persp(as.integer(levels(year.seq)), gdp.seq, F, col="lightblue",
+      ticktype="detailed", ylab="GDP", xlab="Year",
+      zlab="Cumulative Distribution",
+      theta=300, phi=50)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+contour(as.integer(levels(year.seq)),
+        gdp.seq, 
+        F, 
+        xlab="Year", 
+        ylab="GDP", 
+        main = "Cumulative Distribution Contour Plot", 
+        col=topo.colors(100))
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Alternatively, you could use the plot() command (&lt;ctrl&gt;-C will
+# interrupt on *NIX systems, &lt;esc&gt; will interrupt on MS Windows
+# systems).
+
+plot(bw)
+
+detach(Italy)
+
+# EXAMPLE 2 (INTERFACE=FORMULA): For this example, we load the old
+# faithful geyser data and compute the cumulative distribution function.
+
+library("datasets")
+data("faithful")
+attach(faithful)
+
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+bw &lt;- npudistbw(formula=~eruptions+waiting)
+
+summary(bw)
+
+# Plot the cumulative distribution function (&lt;ctrl&gt;-C will interrupt on
+# *NIX systems, &lt;esc&gt; will interrupt on MS Windows systems). Note that
+# we use xtrim = -0.2 to extend the plot outside the support of the data
+# (i.e., extend the tails of the estimate to meet the horizontal axis).
+
+plot(bw, xtrim=-0.2)
+
+detach(faithful)
+
+# EXAMPLE 2 (INTERFACE=DATA FRAME): For this example, we load the old
+# faithful geyser data and compute the cumulative distribution function.
+
+library("datasets")
+data("faithful")
+attach(faithful)
+
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+bw &lt;- npudistbw(dat=faithful)
+
+summary(bw)
+
+# Plot the cumulative distribution function (&lt;ctrl&gt;-C will interrupt on
+# *NIX systems, &lt;esc&gt; will interrupt on MS Windows systems). Note that
+# we use xtrim = -0.2 to extend the plot outside the support of the data
+# (i.e., extend the tails of the estimate to meet the horizontal axis).
+
+plot(bw, xtrim=-0.2)
+
+detach(faithful)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

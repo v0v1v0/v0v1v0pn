@@ -1,0 +1,213 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ndlClassify</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Classification using naive discriminative learning.
+</h2>
+
+<h3>Description</h3>
+
+<p><code>ndlClassify</code> uses the equilibrium equations of Danks (2003)
+for the Rescorla-Wagner model (1972) to estimate association
+strengths (weights) for cues (typically levels of factorial
+predictors) to outcomes (typically a binary or polytomous response
+variable).  Given the association strengths, the probability of a
+response level is obtained by summation over the weights on active
+incoming links.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ndlClassify(formula, data, frequency=NA, variable.value.separator="", ...)
+
+## S3 method for class 'ndlClassify'
+print(x, max.print=10, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>An object of class <code>formula</code> (or one that can be coerced to
+that class): a symbolic description of the model to be fitted.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+ 
+<p>A data frame containing the variables in the model.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frequency</code></td>
+<td>
+ 
+<p>A numeric vector (or the name of a column in the input data frame)
+with the frequencies of the exemplars.  If absent, each exemplar
+is assigned a frequency equal to 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>An object of the class <code>"ndlClassify"</code> fitted with <code>ndlClassify</code>
+to be printed with <code>print.ndlClassify</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.print</code></td>
+<td>
+
+<p>The maximum number of rows of the <code>weightMatrix</code> to be output
+when printing with <code>print.ndlClassify</code>; by default equal to
+10; if set to <code>NA</code> all rows will be output.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable.value.separator</code></td>
+<td>
+ 
+<p>A character string which will separate variable names from
+variable values in their combination as cue values; by default an
+empty character string (<code>=""</code>). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+ 
+<p>Control arguments to be passed along to
+<code>ndlCuesOutcomes</code>, <code>estimateWeights</code>,
+<code>estimateActivations</code>, and/or <code>print.ndlClassify</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Classification by naive discriminative learning.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of the class <code>"ndlClassify"</code> with the following components:
+</p>
+
+<dl>
+<dt><code>activationMatrix</code></dt>
+<dd>
+<p>A matrix specifying for each row of the
+input data frame the activations (probabilities) of the levels of the
+response variable  (<code>nrow</code> observations by <code>nlevels</code> of response variable).</p>
+</dd>
+<dt><code>weightMatrix</code></dt>
+<dd>
+<p> A matrix specifying for each cue (predictor value)
+the association strength (weight) to each outcome (level of the response
+variable)  (number of distinct predictor values by number of response levels).</p>
+</dd>
+<dt><code>cuesOutcomes</code></dt>
+<dd>
+<p> The input data structure for naive
+discriminative learning created by <code>ndlCuesOutcomes</code> based on
+the <code>data</code> argument (number of observations by 3: <code>Frequency,
+   Cues, Outcomes</code>).</p>
+</dd>
+<dt><code>call</code></dt>
+<dd>
+<p>The call matched to fit the resulting <code>"ndlClassify"</code> object.</p>
+</dd>
+<dt><code>formula</code></dt>
+<dd>
+<p>The formula specified for fitting the
+resulting <code>"ndlClassify"</code> object.</p>
+</dd>
+<dt><code>data</code></dt>
+<dd>
+<p>The supplied <code>data</code> argument, excluding all
+elements not specified for the modeling task in <code>formula</code> and
+<code>frequency</code>.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>R. H. Baayen and Antti Arppe
+</p>
+
+
+<h3>References</h3>
+
+<p>Baayen, R. H. and Milin, P.  and Filipovic Durdevic, D. and Hendrix,
+P. and Marelli, M., An amorphous model for morphological processing in
+visual comprehension based on naive discriminative learning.
+Psychological Review, 118, 438-482.
+</p>
+<p>Danks, D. (2003). Equilibria of the Rescorla-Wagner model. Journal of
+Mathematical Psychology, 47 (2), 109-121.
+</p>
+<p>Rescorla, R. A., &amp; Wagner, A. R. (1972). A theory of Pavlovian
+conditioning: Variations in the effectiveness of reinforcement and
+nonreinforcement. In Black, A. H., &amp; Prokasy, W. F. (Eds.),
+Classical conditioning II: Current research and theory (pp. 64-99).
+New York: Appleton-Century-Crofts.
+</p>
+<p>Arppe, A. and Baayen, R. H. (in prep.) Statistical classification and
+principles of human learning.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>summary.ndlClassify, plot.ndlClassify, anova.ndlClassify, predict.ndlClassify, ndlCuesOutcomes, estimateWeights, cueCoding</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(think)
+set.seed(314)
+think &lt;- think[sample(1:nrow(think),500),]
+think.ndl &lt;- ndlClassify(Lexeme ~ (Person * Number * Agent) + Register,
+   data=think)
+summary(think.ndl)
+
+## Not run: 
+think.ndl.SA &lt;- ndlClassify(Lexeme ~ (Polarity + Voice + Mood + Person +
+  Number + Covert + ClauseEquivalent + Agent + Patient + Manner + Time +
+  Modality1 + Modality2 + Source + Goal + Quantity + Location +
+  Duration + Frequency + MetaComment + ReasonPurpose + Condition +
+  CoordinatedVerb)^2 + Author + Section, data=think)
+summary(think.ndl.SA)
+
+## End(Not run)
+
+## Not run: 
+data(dative)
+out &lt;- which(is.element(colnames(dative), c("Speaker","Verb")))
+dative &lt;- dative[-out]
+dative.ndl &lt;- ndlClassify(RealizationOfRecipient ~ ., data=dative)
+summary(dative.ndl)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

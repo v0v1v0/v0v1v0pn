@@ -1,0 +1,164 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>registerDistributions</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add user-supplied distributions for use in NIMBLE BUGS models</h2>
+
+<h3>Description</h3>
+
+<p>Register distributional information so that NIMBLE can process
+user-supplied distributions in BUGS model code
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">registerDistributions(
+  distributionsInput,
+  userEnv = parent.frame(),
+  verbose = nimbleOptions("verbose")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>distributionsInput</code></td>
+<td>
+<p>either a list or character vector specifying the user-supplied distributions. If a list, it should be a named list of lists in the form of that shown in <code>nimble:::distributionsInputList</code> with each list having required field <code>BUGSdist</code> and optional fields <code>Rdist</code>, <code>altParams</code>, <code>discrete</code>, <code>pqAvail</code>, <code>types</code>, and with the name of the list the same as that of the density function. Alternatively, simply a character vector providing the names of the density functions for the user-supplied distributions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>userEnv</code></td>
+<td>
+<p>environment in which to look for the nimbleFunctions that provide the distribution; this will generally not need to be set by the user as it will default to the environment from which this function was called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical indicating whether to print additional logging information</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When <code>distributionsInput</code> is a list of lists, see below for more information on the structure of the list. When <code>distributionsInput</code> is a character vector, the distribution is assumed to be of standard form, with parameters assumed to be the arguments provided in the density nimbleFunction, no alternative parameterizations, and the distribution assumed to be continuous with range from minus infinity to infinity. The availability of distribution and quantile functions is inferred from whether appropriately-named functions exist in the global environment.
+</p>
+<p>One usually does not need to explicitly call <code>registerDistributions</code> as it will be called automatically when the user-supplied distribution is used for the first time in BUGS code. However, if one wishes to provide alternative parameterizations, to provide a range, or to indicate a distribution is discrete, then one still must explicitly register the distribution using <code>registerDistributions</code> with the argument in the list format.
+</p>
+<p>Format of the component lists when <code>distributionsInput</code> is a list of lists:
+</p>
+
+<ul>
+<li> <p><code>BUGSdist</code>. A character string in the form of the density name (starting with 'd') followed by the names of the parameters in parentheses. When alternative parameterizations are given in <code>Rdist</code>, this should be an exhaustive list of the unique parameter names from all possible parameterizations, with the default parameters specified first.
+</p>
+</li>
+<li> <p><code>Rdist</code>. An optional character vector with one or more alternative specifications of the density; each alternative specification can be an alternative name for the density, a different ordering of the parameters, different parameter name(s), or an alternative parameterization. In the latter case, the character string in parentheses should provide a given reparameterization as comma-separated name = value pairs, one for each default parameter, where name is the name of the default parameter and value is a mathematical expression relating the default parameter to the alternative parameters or other default parameters. The default parameters should correspond to the input arguments of the nimbleFunctions provided as the density and random generation functions. The mathematical expression can use any of the math functions allowed in NIMBLE (see the <a href="https://r-nimble.org/html_manual/cha-welcome-nimble.html">User Manual</a>) as well as user-supplied nimbleFunctions (which must have no setup code). The names of your nimbleFunctions for the distribution functions must match the function name in the <code>Rdist</code> entry (or if missing, the function name in the <code>BUGSdist</code> entry.
+</p>
+</li>
+<li> <p><code>discrete</code>. An optional logical indicating if the distribution is that of a discrete random variable. If not supplied, distribution is assumed to be for a continuous random variable.
+</p>
+</li>
+<li> <p><code>pqAvail</code>. An optional logical indicating if distribution (CDF) and quantile (inverse CDF) functions are provided as nimbleFunctions. These are required for one to be able to use truncated versions of the distribution. Only applicable for univariate distributions. If not supplied, assumed to be FALSE.
+</p>
+</li>
+<li> <p><code>altParams</code>. A character vector of comma-separated 'name = value' pairs that provide the mathematical expressions relating non-canonical parameters to canonical parameters (canonical parameters are those passed as arguments to your distribution functions). These inverse functions are used for MCMC conjugacy calculations when a conjugate relationship is expressed in terms of non-default parameters (such as the precision for normal-normal conjugacy). If not supplied, the system will still function but with a possible loss of efficiency in certain algorithms.
+</p>
+</li>
+<li> <p><code>types</code>. A character vector of comma-separated 'name = input' pairs indicating the type and dimension of the random variable and parameters (including default and alternative parameters). 'input' should take the form 'double(d)' or 'integer(d)', where 'd' is 0 for scalars, 1 for vectors, 2 for matrices. Note that since NIMBLE uses doubles for numerical calculations and the default type  is <code>double(0)</code>, one should generally use 'double' and one need only specify the type for non-scalars. 'name' should be either 'value' to indicate the random variable itself or the parameter name to indicate a given parameter.  
+</p>
+</li>
+<li> <p><code>range</code>. A vector of two values giving the range of the distribution for possible use in future algorithms (not used currently). When the lower or upper limit involves a strict inequality (e.g., $x&gt;0$), you should simply treat it as a non-strict inequality ($x&gt;=0$, and set the lower value to 0). Also we do not handle ranges that are functions of parameters, so simply use the smallest/largest possible values given the possible parameter values. If not supplied this is taken to be <code>(-Inf, Inf)</code>.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Christopher Paciorek
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dmyexp &lt;- nimbleFunction(
+   run = function(x = double(0), rate = double(0), log = integer(0)) {
+       returnType(double(0))
+       logProb &lt;- log(rate) - x*rate
+       if(log) {
+           return(logProb)
+       } else {
+           return(exp(logProb))
+       }
+   })
+rmyexp &lt;- nimbleFunction(
+   run = function(n = integer(0), rate = double(0)) {
+       returnType(double(0))
+       if(n != 1) nimPrint("rmyexp only allows n = 1; using n = 1.")
+       dev &lt;- runif(1, 0, 1)
+       return(-log(1-dev) / rate)
+   }
+   )
+registerDistributions(list(
+    dmyexp = list(
+              BUGSdist = "dmyexp(rate, scale)",
+              Rdist = "dmyexp(rate = 1/scale)",
+              altParams = "scale = 1/rate",
+              pqAvail = FALSE)))
+code &lt;- nimbleCode({
+    y ~ dmyexp(rate = r)
+    r ~ dunif(0, 100)
+})
+m &lt;- nimbleModel(code, inits = list(r = 1), data = list(y = 2))
+m$calculate('y')
+m$r &lt;- 2
+m$calculate('y')
+m$resetData()
+m$simulate('y')
+m$y
+
+# alternatively, simply specify a character vector with the
+# name of one or more 'd' functions
+deregisterDistributions('dmyexp')
+registerDistributions('dmyexp')
+
+# or simply use in BUGS code without registration
+deregisterDistributions('dmyexp')
+m &lt;- nimbleModel(code, inits = list(r = 1), data = list(y = 2))
+
+# example of Dirichlet-multinomial registration to illustrate
+# use of 'types' (note that registration is not actually needed
+# in this case)
+ddirchmulti &lt;- nimbleFunction(
+    run = function(x = double(1), alpha = double(1), size = double(0), 
+                   log = integer(0, default = 0)) {
+        returnType(double(0))
+        logProb &lt;- lgamma(size) - sum(lgamma(x)) + lgamma(sum(alpha)) - 
+            sum(lgamma(alpha)) + sum(lgamma(alpha + x)) - lgamma(sum(alpha) + 
+                                                                 size)
+        if(log) return(logProb)
+        else return(exp(logProb))
+    })
+
+rdirchmulti &lt;- nimbleFunction(
+    run = function(n = integer(0), alpha = double(1), size = double(0)) {
+        returnType(double(1))
+        if(n != 1) print("rdirchmulti only allows n = 1; using n = 1.")
+        p &lt;- rdirch(1, alpha)
+        return(rmulti(1, size = size, prob = p))
+    })
+
+registerDistributions(list(
+    ddirchmulti = list(
+        BUGSdist = "ddirchmulti(alpha, size)",
+        types = c('value = double(1)', 'alpha = double(1)')
+        )
+    ))
+</code></pre>
+
+
+</div>

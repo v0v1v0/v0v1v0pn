@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MarronWand</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Marron-Wand Densities as 'norMix' Objects</h2>
+
+<h3>Description</h3>
+
+<p>The fifteen density examples used in Marron and Wand (1992)'s
+simulation study have been used in quite a few subsequent studies,
+can all be written as normal mixtures and are provided here for
+convenience and didactical examples of normal mixtures.
+Number 16 has been added by Jansen et al.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> MW.nm1	 # Gaussian
+ MW.nm2	 # Skewed
+ MW.nm2.old # Skewed(old)
+ MW.nm3	 # Str Skew
+ MW.nm4	 # Kurtotic
+ MW.nm5	 # Outlier
+ MW.nm6	 # Bimodal
+ MW.nm7	 # Separated (bimodal)
+ MW.nm8	 # Asymmetric Bimodal
+ MW.nm9	 # Trimodal
+ MW.nm10 # Claw
+ MW.nm11 # Double Claw
+ MW.nm12 # Asymmetric Claw
+ MW.nm13 # Asymm. Double Claw
+ MW.nm14 # Smooth   Comb
+ MW.nm15 # Discrete Comb
+ MW.nm16 # Distant Bimodal
+</code></pre>
+
+
+<h3>Author(s)</h3>
+
+<p>Martin Maechler</p>
+
+
+<h3>Source</h3>
+
+<p>They have been translated from Steve Marron's Matlab code,
+
+now at
+
+<a href="https://marronwebfiles.sites.oasis.unc.edu/OldResearch/parameters/nmpar.m">https://marronwebfiles.sites.oasis.unc.edu/OldResearch/parameters/nmpar.m</a>,
+however for number 2, the Matlab code had <code>MW.nm2.old</code>; and I've
+defined <code>MW.nm2</code> as from the Annals paper; see also the last
+example below.
+</p>
+
+
+<h3>References</h3>
+
+<p>Marron, S. and Wand, M. (1992)
+Exact Mean Integrated Squared Error;
+<em>Annals of Statistcs</em> <b>20</b>, 712–736.
+</p>
+<p>For number 16,<br>
+P. Janssen, J. S. Marron, N. Veraverbeke and W. Sarle (1995)
+Scale measures for bandwidth selection;
+<em>Journal of Nonparametric Statistics</em> <b>5</b>, 359–380.
+<a href="https://doi.org/10.1080/10485259508832654">doi:10.1080/10485259508832654</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">MW.nm10
+plot(MW.nm14)
+
+## These are defined as norMix() calls in  ../R/zMarrWand-dens.R
+nms &lt;- ls(pattern = "^MW.nm", "package:nor1mix")
+nms &lt;- nms[order(as.numeric(substring(nms,6)))] # w/ warning for "2.old"
+for(n in nms) {
+   cat("\n",n,":\n"); print(get(n, "package:nor1mix"))
+}
+
+## Plot all of them:
+op &lt;- par(mfrow=c(4,4), mgp = c(1.2, 0.5, 0), tcl = -0.2,
+          mar = .1 + c(2,2,2,1), oma = c(0,0,3,0))
+for(n in nms[-17]) plot(get(n, "package:nor1mix"))
+mtext("The Marron-Wand Densities", outer= TRUE, font= 2, cex= 1.6)
+
+## and their Q-Q-plots (not really fast):
+prob &lt;- ppoints(N &lt;- 100)
+for(n in nms[-17]) # qnorMix() using monotone spline inversion ==&gt; warning
+   qqnorm(qnorMix(prob, get(n, "package:nor1mix")), main = n)
+mtext("QQ-plots of Marron-Wand Densities", outer = TRUE,
+      font = 2, cex = 1.6)
+par(op)
+
+## "object" overview:
+cbind(sapply(nms, function(n) { o &lt;- get(n)
+      sprintf("%-18s: K =%2d; rng = [%3.1f, %2.1f]",
+              attr(o, "name"), nrow(o),
+              min(o[,"mu"] - 3*o[,"sigma"]),
+              max(o[,"mu"] + 3*o[,"sigma"]) )
+             }))
+
+
+## Note that Marron-Wand (1992), p.720  give #2 as
+MW.nm2
+## the parameters of which at first look quite different from
+MW.nm2.old
+## which has been the definition in the above "Source" Matlab code.
+## It's easy to see that mu_{nm2} = -.3 + 1.2   * mu_{paper},
+## and correspondigly,   s2_{nm2} =       1.2^2 * s2_{paper}
+## such that they are "identical" apart from scale and location:
+op. &lt;- par(mfrow=2:1, mgp= c(1.2,0.5,0), tcl= -0.2, mar=.1+c(2,2,2,1))
+plot(MW.nm2)
+plot(MW.nm2.old)
+par(op.)
+</code></pre>
+
+
+</div>

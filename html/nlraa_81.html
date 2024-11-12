@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_nls</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate fitted values from an object of class <code>nls</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Simulate values from an object of class nls.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_nls(
+  object,
+  nsim = 1,
+  psim = 1,
+  resid.type = c("none", "resample", "normal", "wild"),
+  value = c("matrix", "data.frame"),
+  data = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>nls</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of simulations to perform</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psim</code></td>
+<td>
+<p>parameter simulation level, 0: for fitted values, 1: for simulation from 
+fixed parameters (assuming a fixed vcov matrix), 2: simulation from sampling
+both from the parameters and the residuals, 3: for simulation considering the 
+uncertainty in the residual standard error only (sigma) and fixing the
+parameter estimates at their original value; this will result in simulations 
+similar to the observed values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid.type</code></td>
+<td>
+<p>either ‘none’, “resample”, “normal” or “wild”.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>either ‘matrix’ or ‘data.frame’</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data argument is needed when using this function inside user defined functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (it is possible to supply a newdata this way)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is based on <code>predict.gnls</code> function
+</p>
+<p>It uses function <code>mvrnorm</code> to generate new values for the coefficients
+of the model using the Variance-Covariance matrix <code>vcov</code>. This variance-covariance matrix 
+refers to the one for the parameters ‘beta’, not the one for the residuals.
+</p>
+
+
+<h3>Value</h3>
+
+<p>It returns a vector with simulated values with length equal to the number of rows 
+in the original data
+</p>
+
+
+<h3>Note</h3>
+
+<p>The default behavior is that simulations are perfomed for the mean function only.
+When ‘psim = 2’ this function will silently choose ‘resample’ as the 
+‘resid.type’. This is not ideal design for this function, but I made this choice for 
+compatibility with other types of simulation originating from <code>glm</code> and
+<code>gam</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.gnls</code>, <code>predict_nls</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(barley, package = "nlraa")
+
+fit &lt;- nls(yield ~ SSlinp(NF, a, b, xs), data = barley)
+
+sim &lt;- simulate_nls(fit, nsim = 100)
+
+</code></pre>
+
+
+</div>

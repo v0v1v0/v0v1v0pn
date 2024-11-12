@@ -1,0 +1,264 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mentor_matching</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Optimal Leader/Mentor Matching</h2>
+
+<h3>Description</h3>
+
+<p>Implementes the algorithm described in Valente and Davis (1999)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mentor_matching(
+  graph,
+  n,
+  cmode = "indegree",
+  lead.ties.method = "average",
+  geodist.args = list()
+)
+
+leader_matching(
+  graph,
+  n,
+  cmode = "indegree",
+  lead.ties.method = "average",
+  geodist.args = list()
+)
+
+## S3 method for class 'diffnet_mentor'
+plot(
+  x,
+  y = NULL,
+  vertex.size = "degree",
+  minmax.relative.size = getOption("diffnet.minmax.relative.size", c(0.01, 0.04)),
+  lead.cols = grDevices::topo.colors(attr(x, "nleaders")),
+  vshapes = c(Leader = "square", Follower = "circle"),
+  add.legend = TRUE,
+  main = "Mentoring Network",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>Any class of accepted graph format (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of leaders</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cmode</code></td>
+<td>
+<p>Passed to <code>dgr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lead.ties.method</code></td>
+<td>
+<p>Passed to <code>rank</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geodist.args</code></td>
+<td>
+<p>Passed to <code>approx_geodesic</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>diffnet_mentor</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.size</code></td>
+<td>
+<p>Either a numeric scalar or vector of size <code class="reqn">n</code>, or any
+of the following values: "indegree", "degree", or "outdegree" (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minmax.relative.size</code></td>
+<td>
+<p>Passed to <code>rescale_vertex_igraph</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lead.cols</code></td>
+<td>
+<p>Character vector of length <code>attr(x,"nleaders")</code>. Colors
+to be applied to each group. (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vshapes</code></td>
+<td>
+<p>Character scalar of length 2. Shapes to identify leaders (mentors)
+and followers respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.legend</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> generates a legend to distinguish
+between leaders and followers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Character scalar. Passed to <code>title</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to <code>plot.igraph</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The algorithm works as follows:
+</p>
+
+<ol>
+<li>
+<p> Find the top <code>n</code> individuals ranking them by <code>dgr(graph, cmode)</code>.
+The rank is computed by the function <code>rank</code>. Denote this set <code>M</code>.
+</p>
+</li>
+<li>
+<p> Compute the geodesic matrix.
+</p>
+</li>
+<li>
+<p> For each <code>v in V</code> do:
+</p>
+
+<ol>
+<li>
+<p> Find the mentor <code>m in M</code> such that is closest to <code>v</code>
+</p>
+</li>
+<li>
+<p> Were there a tie, choose the mentor that minimizes the average
+path length from <code>v</code>'s direct neighbors to <code>m</code>.
+</p>
+</li>
+<li>
+<p> If there are no paths to any member of <code>M</code>, or all have the
+same average path length to <code>v</code>'s neighbors, then assign one
+randomly.
+</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>Plotting is done via the function <code>plot.igraph</code>.
+</p>
+<p>When <code>vertex.size</code> is either of <code>"degree"</code>, <code>"indegree"</code>, or
+<code>"outdegree"</code>, <code>vertex.size</code> will be replace with <code>dgr(.,cmode = )</code>
+so that the vertex size reflects the desired degree.
+</p>
+<p>The argument <code>minmax.relative.size</code> is passed to <code>rescale_vertex_igraph</code>
+which adjusts <code>vertex.size</code> so that the largest and smallest vertices
+have a relative size of <code>minmax.relative.size[2]</code> and
+<code>minmax.relative.size[1]</code> respectively with respect to the x-axis.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>diffnet_mentor</code> and <code>data.frame</code> with the following columns:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Character. Labels of the vertices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>degree</code></td>
+<td>
+<p>Numeric. Degree of each vertex in the graph</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iselader</code></td>
+<td>
+<p>Logical. <code>TRUE</code> when the vertex was picked as a leader.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>match</code></td>
+<td>
+<p>Character. The corresponding matched leader.</p>
+</td>
+</tr>
+</table>
+<p>The object also contains the following attributes:
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>nleaders</code></td>
+<td>
+<p>Integer scalar. The resulting number of leaders (could be greater than <code>n</code>)</p>
+</td>
+</tr></table>
+<p>.
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>The original graph used to run the algorithm.</p>
+</td>
+</tr></table>
+<h3>References</h3>
+
+<p>Valente, T. W., &amp; Davis, R. L. (1999). Accelerating the Diffusion of
+Innovations Using Opinion Leaders. The ANNALS of the American Academy of
+Political and Social Science, 566(1), 55–67.
+<a href="https://doi.org/10.1177/000271629956600105">doi:10.1177/000271629956600105</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># A simple example ----------------------------------------------------------
+set.seed(1231)
+graph &lt;- rgraph_ws(n=50, k = 4, p = .5)
+
+# Looking for 3 mentors
+ans &lt;- mentor_matching(graph, n = 3)
+
+head(ans)
+table(ans$match) # We actually got 9 b/c of ties
+
+# Visualizing the mentor network
+plot(ans)
+
+</code></pre>
+
+
+</div>

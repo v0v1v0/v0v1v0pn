@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>addRepresentation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add representation</h2>
+
+<h3>Description</h3>
+
+<p>Add a representation and its parameters.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">addRepresentation(NGLVieweR, type, param = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>NGLVieweR</code></td>
+<td>
+<p>A NGLVieweR object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of representation. Most common options are "cartoon", "ball+stick", "line", "surface", "ribbon" and "label".
+For a full list of options, see the "structureRepresentation" method in the official <a href="http://nglviewer.org/ngl/api/">NGL.js</a> manual.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>Options for the different types of representations. Most common options are <code>name</code>, <code>opacity</code>, <code>colorScheme</code>, <code>sele</code>, <code>colorValue</code> and <code>visibility</code>.
+For a full list of options, see the general "RepresentationParameters" method and type specific Label-, Structure- and Surface- RepresentationParameters in the official <a href="http://nglviewer.org/ngl/api/">NGL.js</a> manual.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of representation parameters to <code>NGLVieweR</code> <code>htmlwidgets</code> object.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>addSelection()</code>
+</p>
+</li>
+<li> <p><code>NGLVieweR_example()</code> See example "basic".
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">NGLVieweR("7CID") %&gt;%
+  stageParameters(backgroundColor = "black") %&gt;%
+  addRepresentation("cartoon", param = list(name = "cartoon", colorValue = "blue")) %&gt;%
+  addRepresentation("ball+stick", param = list(
+    name = "ball+stick", sele = "241",
+    colorScheme = "element", colorValue = "yellow"
+  )) %&gt;%
+  addRepresentation("label",
+    param = list(
+      name = "label",
+      showBackground = TRUE,
+      labelType = "res",
+      color = "black",
+      backgroundColor = "white",
+      backgroundOpacity = 0.8,
+      sele = ":A and 241 and .CG"
+    )
+  )
+
+# Shiny context
+if (interactive()) {
+  library(shiny)
+  ui &lt;- fluidPage(NGLVieweROutput("structure"))
+  server &lt;- function(input, output) {
+    output$structure &lt;- renderNGLVieweR({
+      NGLVieweR("7CID") %&gt;%
+        stageParameters(backgroundColor = "black") %&gt;%
+        addRepresentation("cartoon",
+          param = list(name = "cartoon", colorValue = "blue")
+        ) %&gt;%
+        addRepresentation("ball+stick",
+          param = list(
+            name = "ball+stick", sele = "241",
+            colorScheme = "element"
+          )
+        ) %&gt;%
+        addRepresentation("label",
+          param = list(
+            name = "label",
+            showBackground = TRUE,
+            labelType = "res",
+            colorValue = "black",
+            backgroundColor = "white",
+            backgroundOpacity = 0.8,
+            sele = ":A and 241 and .CG"
+          )
+        )
+    })
+  }
+  shinyApp(ui, server)
+}
+</code></pre>
+
+
+</div>

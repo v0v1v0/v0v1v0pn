@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>niche.Model.Build</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Ecological niche model building using the randomForest classifier</h2>
+
+<h3>Description</h3>
+
+<p>Build a niche model for a given species according to its
+distribution data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">niche.Model.Build(
+  prese = NULL,
+  absen = NULL,
+  prese.env = NULL,
+  absen.env = NULL,
+  model = "RF",
+  en.vir = NULL,
+  bak.vir = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>prese</code></td>
+<td>
+<p>Data frame, longitude and latitude of the present data of a
+species (can be absent when providing prese.env parameter).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>absen</code></td>
+<td>
+<p>Data frame, longitude and latitude of the absent data of a
+species.(can be absent when providing absen.env or back parameter).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prese.env</code></td>
+<td>
+<p>Data frame, bioclimate variables of present data.
+(can be absent when providing prese parameter).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>absen.env</code></td>
+<td>
+<p>Data frame, bioclimate variables of absent data.
+(can be absent when providing absen or back parameter).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Character, string indicating which niche model will be used.
+Must be one of "RF" (default) or "MAXENT". "MAXENT" can only be applied when
+the java program paste(system.file(package="dismo"), "/java/maxent.jar",
+sep=”) exists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>en.vir</code></td>
+<td>
+<p>RasterBrick, the global bioclimate data output from
+"raster::getData" function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bak.vir</code></td>
+<td>
+<p>Matrix, bioclimate variables of random background points.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>randomForest/MaxEnt, a trained niche model object.
+</p>
+<p>A vector including the specificity, sensitivity and threshold of the
+trained model.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Cai-qing YANG (Email: yangcq_ivy(at)163.com) and Ai-bing ZHANG
+(Email:zhangab2008(at)cnu.edu.cn), Capital Normal University (CNU), Beijing,
+CHINA.
+</p>
+
+
+<h3>References</h3>
+
+<p>Breiman, L. 2001. Random forests. Machine Learning 45(1):5-32.
+</p>
+<p>Liaw, A. and M. Wiener. 2002. Clasification and regression by
+randomForest. R News, 2/3:18-22.
+</p>
+<p>Hijmans, R.J., S.E. Cameron, J.L. Parra, P.G. Jones and A. Jarvis.
+2005. Very high resolution interpolated climate surfaces for global land areas.
+International Journal of Climatology, 25(15):1965-1978.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(en.vir)
+data(bak.vir)
+#envir&lt;-raster::getData("worldclim",download=FALSE,var="bio",res=2.5)
+#en.vir&lt;-raster::brick(envir)
+#back&lt;-dismo::randomPoints(mask=en.vir,n=5000,ext=NULL,extf=1.1,
+#                          excludep=TRUE,prob=FALSE,
+#                          cellnumbers=FALSE,tryf=3,warn=2,
+#                          lonlatCorrection=TRUE)
+#bak.vir&lt;-raster::extract(en.vir,back)
+
+data&lt;-data.frame(species=rep("Acosmeryx anceus",3),
+                 Lon=c(145.380,145.270,135.461),
+                 Lat=c(-16.4800,-5.2500,-16.0810))
+present.points&lt;-pseudo.present.points(data,10,2,1,en.vir)
+NMB.out&lt;-niche.Model.Build(prese=present.points,absen=NULL,
+                           prese.env=NULL,absen.env=NULL,
+                           model="RF",
+                           en.vir=en.vir,bak.vir=bak.vir)
+NMB.out
+
+
+prese.env&lt;-raster::extract(en.vir,present.points[,2:3])
+prese.env&lt;-as.data.frame(prese.env)
+NMB.out2&lt;-niche.Model.Build(prese=NULL,absen=NULL,
+                            prese.env=prese.env,absen.env=NULL,
+                            model="RF",
+                            en.vir=en.vir,bak.vir=bak.vir)
+NMB.out2
+</code></pre>
+
+
+</div>

@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>randomsample</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Oversampling and undersampling</h2>
+
+<h3>Description</h3>
+
+<p>Random oversampling of the minority group(s) or undersampling of the majority
+group to compensate for class imbalance in datasets.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">randomsample(y, x, minor = NULL, major = 1, yminor = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Vector of response outcome as a factor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Matrix of predictors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minor</code></td>
+<td>
+<p>Amount of oversampling of the minority class. If set to <code>NULL</code>
+then all classes will be oversampled up to the number of samples in the
+majority class. To turn off oversampling set <code>minor = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>major</code></td>
+<td>
+<p>Amount of undersampling of the majority class</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yminor</code></td>
+<td>
+<p>Optional character value specifying the level in <code>y</code> which is
+to be oversampled. If <code>NULL</code>, this is set automatically to the class with
+the smallest sample size.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>minor</code> &lt; 1 and <code>major</code> &gt; 1 are ignored.
+</p>
+
+
+<h3>Value</h3>
+
+<p>List containing extended matrix <code>x</code> of synthesised data and extended
+response vector <code>y</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Imbalanced dataset
+set.seed(1, "L'Ecuyer-CMRG")
+x &lt;- matrix(rnorm(150 * 2e+04), 150, 2e+04)  #' predictors
+y &lt;- factor(rbinom(150, 1, 0.2))  #' imbalanced binary response
+table(y)
+
+## first 30 parameters are weak predictors
+x[, 1:30] &lt;- rnorm(150 * 30, 0, 1) + as.numeric(y)*0.5
+
+## Balance x &amp; y outside of CV loop by random oversampling minority group
+out &lt;- randomsample(y, x)
+y2 &lt;- out$y
+x2 &lt;- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by random oversampling on
+## whole dataset
+fit1 &lt;- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      filterFUN = ttest_filter)
+fit1$summary
+
+## Balance x &amp; y outside of CV loop by random oversampling minority group
+out &lt;- randomsample(y, x, minor=1, major=0.4)
+y2 &lt;- out$y
+x2 &lt;- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by random undersampling on
+## whole dataset
+fit1b &lt;- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                       cv.cores=2,
+                       filterFUN = ttest_filter)
+fit1b$summary
+
+## Balance x &amp; y outside of CV loop by SMOTE
+out &lt;- smote(y, x)
+y2 &lt;- out$y
+x2 &lt;- out$x
+table(y2)
+
+## Nested CV glmnet with unnested balancing by SMOTE on whole dataset
+fit2 &lt;- nestcv.glmnet(y2, x2, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      filterFUN = ttest_filter)
+fit2$summary
+
+## Nested CV glmnet with nested balancing by random oversampling
+fit3 &lt;- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1,
+                      cv.cores=2,
+                      balance = "randomsample",
+                      filterFUN = ttest_filter)
+fit3$summary
+class_balance(fit3)
+
+## Plot ROC curves
+plot(fit1$roc, col='green')
+lines(fit1b$roc, col='red')
+lines(fit2$roc, col='blue')
+lines(fit3$roc)
+legend('bottomright', legend = c("Unnested random oversampling", 
+                                 "Unnested SMOTE",
+                                 "Unnested random undersampling",
+                                 "Nested balancing"), 
+       col = c("green", "blue", "red", "black"), lty=1, lwd=2)
+
+
+</code></pre>
+
+
+</div>

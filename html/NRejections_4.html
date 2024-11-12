@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>corr_tests</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Global evidence strength across correlated tests</h2>
+
+<h3>Description</h3>
+
+<p>This is the main wrapper function for the user to call. For an arbitrary number of outcome variables, regresses the outcome
+on an exposure of interest (<code>X</code>) and adjusted covariates (<code>C</code>). Returns the results of the original sample
+(statistics and inference corresponding to X for each model, along with the observed number of rejections),
+a 100*(1 - <code>alpha.fam</code>) percent null interval for the
+number of rejections in samples generated under the global null, the excess hits
+(the difference between the observed number of rejections and the upper null interval limit), 
+and results of a test of the global null hypothesis at <code>alpha.fam</code> of the global null. The global test 
+can be conducted based on the number of rejections or based on various FWER-control methods (see References).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">corr_tests(
+  d,
+  X,
+  C = NA,
+  Ys,
+  B = 2000,
+  cores,
+  alpha = 0.05,
+  alpha.fam = 0.05,
+  method = "nreject"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Dataframe</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Single quoted name of covariate of interest</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>Vector of quoted covariate names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ys</code></td>
+<td>
+<p>Vector of quoted outcome names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>Number of resamples to generate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Number of cores to use for parallelization. Defaults to number available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Alpha level for individual hypothesis tests</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.fam</code></td>
+<td>
+<p>Alpha level for global test and null interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Which methods to report (ours, Westfall's two methods, Bonferroni, Holm, Romano)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>samp.res</code> is a list containing the number of observed rejections (<code>rej</code>), 
+the coefficient estimates of interest for each outcome model (<code>bhats</code>), their t-values
+(<code>tvals</code>), their uncorrected p-values at level <code>alpha</code> (<code>pvals</code>), and an N X W matrix of 
+residuals for each model (<code>resid</code>).
+</p>
+<p><code>nrej.bt</code> contains the number of rejections in each bootstrap resample. 
+</p>
+<p><code>tvals.bt</code> is a W X B matrix containing t-values for the resamples.
+</p>
+<p><code>pvals.bt</code> is a W X B matrix containing p-values for the resamples.
+</p>
+<p><code>null.int</code> contains the lower and upper limits of a 100*(1 - <code>alpha.fam</code>) percent null interval.
+</p>
+<p><code>excess.hits</code> is the difference between the observed rejections and the upper limit of the null interval.
+</p>
+<p><code>global.test</code> is a dataframe containing global test results for each user-specified method, including
+an indicator for whether the test rejects the global null at <code>alpha.fam</code> (<code>reject</code>), the p-value
+of the global test where possible (<code>reject</code>), and the critical value of the global test based on the number
+of rejections (<code>crit</code>).
+</p>
+
+
+<h3>References</h3>
+
+<p>Mathur, M.B., &amp; VanderWeele, T.J. (in preparation). New metrics for multiple testing with correlated
+outcomes.
+</p>
+<p>Romano, J. P., &amp; Wolf, M. (2007). Control of generalized error rates in multiple testing. The
+Annals of Statistics, 1378-1408.
+</p>
+<p>Westfall, P. H., &amp; Young, S. S. (1993). Resampling-based multiple testing: Examples and
+methods for p-value adjustment. Taylor &amp; Francis Group.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+##### Example 1 #####
+data(rock)
+
+res = corr_tests( d = rock,
+                 X = c("area"),
+                 C = NA,
+                 Ys = c("perm", "peri", "shape"),
+                 method = "nreject" )
+
+# mean rejections in resamples
+# should be close to 0.05 * 3 = 0.15
+mean( as.numeric(res$nrej.bt) ) 
+
+
+##### Example 1 #####
+cor = make_corr_mat( nX = 10,
+nY = 20,
+rho.XX = 0.10,
+rho.YY = 0.5,
+rho.XY = 0.1,
+prop.corr = .4 )
+
+d = sim_data( n = 300, cor = cor )
+
+# X1 is the covariate of interest, and all other X variables are adjusted
+all.covars = names(d)[ grep( "X", names(d) ) ]
+C = all.covars[ !all.covars == "X1" ]
+
+# may take 10 min to run
+res = corr_tests( d,
+                 X = "X1",
+                 C = C,
+                 Ys = names(d)[ grep( "Y", names(d) ) ],
+                 method = "nreject" )
+
+# look at the main results
+res$null.int
+res$excess.hits
+res$global.test
+
+</code></pre>
+
+
+</div>

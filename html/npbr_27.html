@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rho_pwm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Probability-weighted moment frontier estimator
+</h2>
+
+<h3>Description</h3>
+
+<p>This function is an implementation of the Probability-weighted moment frontier estimator developed by Daouia, Florens and Simar (2012).    
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rho_pwm(xtab, ytab, x, a=2, lrho=1, urho=Inf)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>a smoothing parameter (integer) larger than or equal to 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lrho</code></td>
+<td>
+<p>a scalar, minimum rho threshold value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>urho</code></td>
+<td>
+<p>a scalar, maximum rho threshold value.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function computes the probability-weighted moment (PWM) estimator <code class="reqn">\bar\rho_x</code> utilized in the frontier estimate 
+<code class="reqn">\tilde\varphi_{pwm}(x)</code>[see <code>dfs_pwm</code>]. 
+This estimator depends on the smoothing parameters <code class="reqn">a</code> and <code class="reqn">m</code>. A simple selection rule of thumb that Daouia et al. (2012) have employed is 
+<code class="reqn">a=2</code> 
+[default option in the 4th argument of the function] 
+and <code class="reqn">m=coefm \times N^{1/3}_x</code>, where <code class="reqn">N_x=\sum_{i=1}^n1_{\{x_i\le x\}}</code> 
+and the integer <code>coefm</code> is to be tuned by the user. 
+To choose this parameter in an optimal way for each <code class="reqn">x</code>, we adapt the automated threshold selection method of Daouia et al. (2010) as follows:  
+We first evaluate the estimator <code class="reqn">\bar\rho_x</code> over a grid of values of <code>coefm</code> given by 
+<code class="reqn">c = 1, \cdots, 150</code>. 
+Then, we select the <code class="reqn">c</code> where the variation of the results is the smallest. This is achieved by computing the standard deviation of  the estimates <code class="reqn">\bar\rho_x</code> over a “window” of 
+<code class="reqn">\max([\sqrt{150}],3)</code> successive values of <code class="reqn">c</code>. The value of <code class="reqn">c</code> where this standard deviation is minimal defines the value of <code>coefm</code>.
+The user can also appreciably improve the estimation of the extreme-value index <code class="reqn">\rho_x</code> and the frontier function <code class="reqn">\varphi_x</code> itself by tuning the choice of the lower limit 
+(default option <code>lrho=1</code>) and upper limit (default option <code>urho=Inf</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The computational burden here is demanding, so be forewarned. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Abdelaati Daouia and Thibault Laurent. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Daouia, A., Florens, J.-P. and Simar, L. (2010). Frontier estimation and extreme value theory. <em>Bernoulli</em>, 16, 1039-1063.
+</p>
+<p>Daouia, A., Florens, J.-P. and Simar, L. (2012). Regularization of Nonparametric Frontier Estimators. <em>Journal of Econometrics</em>, 168, 285-299.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dfs_pwm</code>, <code>mopt_pwm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("post")
+x.post&lt;- seq(post$xinput[100],max(post$xinput), 
+ length.out=100) 
+## Not run: 
+# When rho[x] is unknown and dependent of x, 
+# its estimate hat(rho[x]) is obtained via:
+rho_pwm &lt;- rho_pwm(post$xinput, post$yprod, x.post,  a=20)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

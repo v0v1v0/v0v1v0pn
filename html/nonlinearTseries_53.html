@@ -1,0 +1,436 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>corrDim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Correlation sum, correlation dimension and generalized correlation dimension 
+(order q &gt;1).</h2>
+
+<h3>Description</h3>
+
+<p>Functions for estimating the correlation sum and the correlation dimension 
+of a dynamical system from 1-dimensional time series using Takens' vectors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">corrDim(
+  time.series,
+  min.embedding.dim = 2,
+  max.embedding.dim = 5,
+  time.lag = 1,
+  min.radius,
+  max.radius,
+  corr.order = 2,
+  n.points.radius = 5,
+  theiler.window = 100,
+  do.plot = TRUE,
+  number.boxes = NULL,
+  ...
+)
+
+## S3 method for class 'corrDim'
+nlOrder(x)
+
+## S3 method for class 'corrDim'
+corrMatrix(x)
+
+## S3 method for class 'corrDim'
+radius(x)
+
+## S3 method for class 'corrDim'
+embeddingDims(x)
+
+## S3 method for class 'corrDim'
+plot(
+  x,
+  main = "Correlation Sum C(r)",
+  xlab = NULL,
+  ylab = "C(r)",
+  type = "b",
+  log = "xy",
+  ylim = NULL,
+  col = NULL,
+  pch = NULL,
+  localScalingExp = T,
+  add.legend = T,
+  cex.legend = 1,
+  ...
+)
+
+## S3 method for class 'corrDim'
+plotLocalScalingExp(
+  x,
+  main = "Correlation Dimension C(r)",
+  xlab = NULL,
+  ylab = "Local scaling exponents",
+  type = "b",
+  log = "x",
+  ylim = NULL,
+  col = NULL,
+  pch = NULL,
+  add.legend = T,
+  ...
+)
+
+## S3 method for class 'corrDim'
+estimate(
+  x,
+  regression.range = NULL,
+  do.plot = FALSE,
+  use.embeddings = NULL,
+  col = NULL,
+  pch = NULL,
+  fit.col = NULL,
+  fit.lty = 2,
+  fit.lwd = 2,
+  add.legend = T,
+  lty = 1,
+  lwd = 1,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>time.series</code></td>
+<td>
+<p>The original time series from which the correlation sum 
+will be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.embedding.dim</code></td>
+<td>
+<p>Integer denoting the minimum dimension in which we 
+shall embed the time.series (see buildTakens).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.embedding.dim</code></td>
+<td>
+<p>Integer denoting the maximum dimension in which we 
+shall embed the time.series (see buildTakens).Thus,
+we shall estimate the correlation dimension between <em>min.embedding.dim</em> 
+and <em>max.embedding.dim</em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.lag</code></td>
+<td>
+<p>Integer denoting the number of time steps that will be use 
+to construct the Takens' vectors (see buildTakens).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.radius</code></td>
+<td>
+<p>Minimum distance used to compute the correlation sum C(r).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.radius</code></td>
+<td>
+<p>Maximum distance used to compute the correlation sum C(r).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corr.order</code></td>
+<td>
+<p>Order of the generalized correlation Dimension q. It must 
+be greater than 1 (corr.order&gt;1). Default, corr.order=2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.points.radius</code></td>
+<td>
+<p>The number of different radius where we shall estimate.
+C(r). Thus,  we will estimate C(r) in n.points.radius between min.radius and 
+max.radius.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theiler.window</code></td>
+<td>
+<p>Integer denoting the Theiler window:  Two Takens' 
+vectors must be separated by more than theiler.window time steps in order to 
+be considered neighbours. By using a Theiler window, we exclude temporally 
+correlated vectors from our estimations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.plot</code></td>
+<td>
+<p>Logical value. If TRUE (default value), a plot of the 
+correlation sum is shown.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number.boxes</code></td>
+<td>
+<p>Number of boxes that will be used in the box assisted 
+algorithm (see neighbourSearch). If the user does not specify it, the 
+function uses a proper number of boxes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional plotting parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <em>corrDim</em> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>A title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>A title for the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>A title for the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of plot (see <code>?plot</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>A character string which contains "x" if the x axis is to be 
+logarithmic, "y" if the y axis is to be logarithmic and "xy" or "yx" if both 
+axes are to be logarithmic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>Numeric vector of length 2, giving the y coordinates range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Vector of colors for each of the dimensions of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch</code></td>
+<td>
+<p>Vector of symbols for each of the dimensions of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>localScalingExp</code></td>
+<td>
+<p>add a plot of the local scaling exponents of the 
+correlation sum.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.legend</code></td>
+<td>
+<p>add a legend to the plot?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.legend</code></td>
+<td>
+<p>Magnification value for the legend.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regression.range</code></td>
+<td>
+<p>Vector with 2 components denoting the range where 
+the function will perform linear regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.embeddings</code></td>
+<td>
+<p>A numeric vector specifying which embedding dimensions 
+should the <em>estimate</em> function use to compute the correlation dimension.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.col</code></td>
+<td>
+<p>A vector of colors to plot the regression lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.lty</code></td>
+<td>
+<p>The type of line to plot the regression lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.lwd</code></td>
+<td>
+<p>The width of the line for the regression lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty</code></td>
+<td>
+<p>The line type of the correlation sums.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>The line width of the correlation sums.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The correlation dimension is the most common measure of the fractal 
+dimensionality of a geometrical object embedded in a phase space. In 
+order to estimate the correlation dimension, the correlation sum is defined 
+over the points from the phase space:
+</p>
+<p style="text-align: center;"><code class="reqn">C(r) = \{(number\;of\;points\;(x_i,x_j)\;verifying\;that\;distance\;(x_i,x_j)&lt;r\})/N^2</code>
+</p>
+
+<p>However, this estimator is biased when the pairs in the sum are not 
+statistically independent. For example, Taken's vectors that are close in 
+time, are usually close in the phase space due to the non-zero 
+autocorrelation of the original time series. This is solved by using the 
+so-called Theiler window: two Takens' vectors must be separated by, at least, 
+the time steps specified with this window in order to be considered 
+neighbours. By using a Theiler window, we exclude temporally correlated 
+vectors from our estimations. 
+</p>
+<p>The correlation dimension is estimated using the slope obtained by 
+performing a linear regression of 
+<code class="reqn">\log10(C(r))\;Vs.\;\log10(r)</code>. Since this 
+dimension is supposed to be an invariant of the system, it should not
+depend on the dimension of the Taken's vectors used to estimate it. Thus, 
+the user should plot <code class="reqn">\log10(C(r))\;Vs.\;\log10(r)</code> for several embedding
+dimensions when looking for the correlation dimension and, if for some range
+<code class="reqn">\log10(C(r))</code> shows a similar linear behaviour in 
+different embedding dimensions (i.e. parallel slopes), these slopes are an 
+estimate of the correlation dimension. The <em>estimate</em> routine 
+allows the user to get always an estimate of the correlation dimension, but 
+the user must check that there is a linear region in the correlation sum 
+over different dimensions. If such a region does not exist, the estimation
+should be discarded.
+</p>
+<p>Note that the correlation sum  C(r) may be interpreted as:
+<code class="reqn">C(r) = &lt;p(r)&gt;,</code>
+that is: the mean probability of finding a neighbour in a ball of radius r 
+surrounding a point in the phase space. Thus, it is possible to define a 
+generalization of the correlation dimension by writing:
+</p>
+<p style="text-align: center;"><code class="reqn">C_q(r) = &lt;p(r)^{(q-1)}&gt;</code>
+</p>
+
+<p>Note that the correlation sum </p>
+<p style="text-align: center;"><code class="reqn">C(r) = C_2(r)</code>
+</p>
+
+<p>It is possible to determine generalized dimensions Dq using the slope 
+obtained by performing a linear regression of 
+<code class="reqn">log10(Cq(r))\;Vs.\;(q-1)log10(r)</code>. The case q=1 leads to the 
+information dimension, that is treated separately in this package 
+(infDim). The considerations discussed for the correlation dimension 
+estimate are also valid for these generalized dimensions.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <em>corrDim</em> object that consist of a list with four 
+components named <em>radius</em>, <em>embedding.dims</em>, <em>order</em> and 
+<em>corr.matrix</em>. <em>radius</em> is a vector containing the different radius 
+where we have evaluated C(r). <em>embedding.dims</em> is a vector containing
+all the embedding dimensions in which we have estimated C(r). <em>order</em> 
+stores the order of the generalized correlation dimension
+that has been used. Finally, <em>corr.matrix</em> stores all the correlation
+sums that have been computed. Each row stores the correlation sum for a 
+concrete embedding dimension whereas each colum stores the correlation sum 
+for a specific radius.
+</p>
+<p>The <em>nlOrder</em> function returns the order of the correlation sum.
+</p>
+<p>The <em>corrMatrix</em> function returns the correlations matrix 
+storing the correlation sums that have been computed for all the embedding 
+dimensions.
+</p>
+<p>The <em>radius</em> function returns the radius on which the 
+correlation sum function has been evaluated.
+</p>
+<p>The <em>embeddingDims</em> function returns the embedding dimensions 
+on which the correlation sum function has been evaluated.
+</p>
+<p>The <em>plot</em> function plots the correlation sum. It is possible to
+plot the the correlation sum Vs the radius and also the local scaling 
+exponents of the correlation  sum Vs radius.
+</p>
+<p>The <em>plotLocalScalingExp</em> function plots the local scaling 
+exponents of  the  correlation sum.
+</p>
+<p>The <em>estimate</em> function estimates the correlation dimension of 
+the <em>corr.dim</em> object by averaging the slopes of the embedding 
+dimensions specified in the <em>use.embeddings</em> parameter. The slopes 
+are determined by performing a linear regression over the radius' range 
+specified in <em>regression.range</em>.If <em>do.plot</em> is TRUE, a graphic of 
+the regression over the data is shown.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Constantino A. Garcia
+</p>
+
+
+<h3>References</h3>
+
+<p>H. Kantz  and T. Schreiber: Nonlinear Time series Analysis 
+(Cambridge university press)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+x=lorenz(sigma=10, rho = 28, beta =8/3, start = c(-10, -11, 47),
+time =  seq(0, 70, by = 0.01), do.plot = FALSE)$x
+cd=corrDim(time.series=x,min.embedding.dim=3,max.embedding.dim=6,
+           time.lag=10,min.radius=1e-3,max.radius=50,
+           n.points.radius=100,theiler.window=100,
+           number.boxes=100,do.plot=F)
+
+plot(cd,type="l")
+plotLocalScalingExp(cd,cex=0.5,xlim=c(1e-1,5))
+cd.est = estimate(cd,regression.range=c(0.2,2))
+cat("expected: 2.05  --- estimate: ",cd.est,"\n")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

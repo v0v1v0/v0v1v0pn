@@ -1,0 +1,174 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ros</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Regression on Order Statistics</h2>
+
+<h3>Description</h3>
+
+<p><code>ros</code> is an implementation of a Regression on Order Statistics
+(ROS) designed for multiply censored analytical chemistry data.
+</p>
+<p>The method assumes data contains zero to many left censored (less-than)
+values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> ros(obs, censored, forwardT="log", reverseT="exp", na.action)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+
+<p>A numeric vector of observations.  This includes both censored
+and uncensored observations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>censored</code></td>
+<td>
+
+<p>A logical vector indicating TRUE where an observation in
+<code>obs</code> is censored (a less-than value) and FALSE otherwise.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>forwardT</code></td>
+<td>
+
+<p>A name of a function to use for transformation prior to performing
+the ROS fit.  Defaults to <code>log</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reverseT</code></td>
+<td>
+
+<p>A name of a function to use for reversing the transformation
+after performing the ROS fit. Defaults to <code>exp</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+
+<p>A function which indicates what should happen
+when the data contain <code>NA</code>s.  The default is set by
+the <code>na.action</code> setting of <code>options</code>, and is
+<code>na.omit</code> if that is unset.  
+Another possible value is <code>NULL</code>, no action. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By default, <code>ros</code> performs a log transformation prior to, and after
+operations over the data.  This can be changed by specifying a forward and
+reverse transformation function using the <code>forwardT</code> and
+<code>reverseT</code> parameters.  No transformation will be performed if either
+<code>forwardT</code> or <code>reverseT</code> are set to <code>NULL</code>. 
+</p>
+<p>The procedure first computes the Weibull-type plotting positions of
+the combined uncensored and censored observations using a formula
+designed for multiply-censored data (see <code>hc.ppoints</code>).
+A linear regression is formed using the plotting positions of the
+uncensored observations and their normal quantiles.  This model is
+then used to estimate the concentration of the censored observations
+as a function of their normal quantiles.  Finally, the observed
+uncensored values are combined with modeled censored values to
+corporately estimate summary statistics of the entire population. By
+combining the uncensored values with modeled censored values, this
+method is more resistant of any non-normality of errors, and reduces
+any transformation errors that may be incurred.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ros</code> returns an object of class c("ros", "lm").
+</p>
+<p><code>print</code> displays a simple summary of the ROS model.
+<code>as.data.frame</code> converts the modeled data in a ROS model to
+a data frame. Note that this discards all linear-model information
+from the object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>R. Lopaka Lee &lt;rclee@usgs.gov&gt;
+</p>
+<p>Dennis Helsel &lt;dhelsel@practicalstats.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Lee and Helsel (2005) Statistical analysis of environmental data
+containing multiple detection limits: S-language software for
+regression on order statistics, Computers in Geoscience vol. 31,
+pp. 1241-1248.
+</p>
+<p>Lee and Helsel (2005) Baseline models of trace elements in major
+aquifers of the United States. Applied Geochemistry vol. 20,
+pp. 1560-1570.
+</p>
+<p>Dennis R. Helsel (2005), Nondetects And Data Analysis:
+John Wiley and Sons, New York.
+</p>
+<p>Dennis R. Helsel (1990), Less Than Obvious: Statistical Methods for,
+Environmental Science and Technology,
+vol.24, no. 12, pp. 1767-1774
+</p>
+<p>Dennis R. Helsel and Timothy A. Cohn (1988), Estimation of descriptive
+statistics for multiply censored water quality data, Water Resources
+Research vol. 24, no. 12, pp.1997-2004 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>splitQual</code>, 
+<code>predict</code>, 
+<code>plot</code>, 
+<code>ros-class</code>, 
+<code>ros-methods</code>,
+<code>plot-methods</code>,
+<code>mean-methods</code>,
+<code>sd-methods</code>,
+<code>quantile-methods</code>,
+<code>median-methods</code>,
+<code>predict-methods</code>,
+<code>summary-methods</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">    obs      = c(0.5,    0.5,   1.0,  1.5,   5.0,    10,   100)
+    censored = c(TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE)
+
+    myros = ros(obs, censored) 
+
+    plot(myros)
+    summary(myros)
+    mean(myros); sd(myros)
+    quantile(myros); median(myros)
+    as.data.frame(myros)
+</code></pre>
+
+
+</div>

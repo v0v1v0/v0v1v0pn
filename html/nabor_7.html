@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>WKNNF-class</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Wrapper classes for k-NN searches enabling repeated queries of the same tree</h2>
+
+<h3>Description</h3>
+
+<p><code>WKNNF</code> and <code>WKNND</code> are reference classes that wrap 
+C++ classes of the same name that include a space-efficient k-d tree along 
+with the target data points. They have <code>query</code> methods with exactly 
+the same interface as the <code>knn</code> function. One important point compared
+with <code>knn</code> - they must be intialised with floating point data and you 
+are responsible for this - see <code>storage.mode</code>) and the example 
+below.
+</p>
+
+
+<h3>Details</h3>
+
+<p><code>WKNNF</code> expects and returns matrices in R's standard (double, 8
+bytes) data type but uses floats internally. <code>WKNND</code> uses doubles 
+throughout. When retaining large numbers of points, the <code>WKNNF</code> 
+objects will have a small memory saving, especially if tree building is 
+delayed.
+</p>
+<p>The constructor for WKNN objects includes a logical flag indicating whether
+to build the tree immediately (default: <code>TRUE</code>) or (when <code>FALSE</code>)
+to delay building the tree until a query is made (this happens 
+automatically when required).
+</p>
+
+
+<h3>Performance</h3>
+
+<p>The use of <code>WKNN</code> objects will incur a performance
+penalty for single queries of trees with &lt; ~1000 data points. This is 
+because of the overhead associated with the R wrapper class. It therefore 
+makes sense to use <code>knn</code> in these circumstances.
+</p>
+<p>If you wish to make repeated queries of the same target data, then using 
+<code>WKNN</code> objects can give significant advantages. If you are going to 
+make repeated queries with the same set of query points (presumably against
+different target data), you can obtain benefits in some cases by converting
+the query points into WKNNF objects without building the trees.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>knn</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Basic usage
+# load sample data consisting of list of 3 separate 3d pointets
+data(kcpoints)
+# build a tree and query it with two different sets of points
+w1 &lt;- WKNNF(kcpoints[[1]])
+w1q2 &lt;- w1$query(kcpoints[[2]], k=5, eps=0, radius=0)
+str(w1q2)
+w1q3 &lt;- w1$query(kcpoints[[3]], k=5, eps=0, radius=0)
+# note that there will be small difference between WKNNF and knn due to loss 
+# of precision in the double to float conversion when a WKNNF tree is 
+# built and queried.
+stopifnot(all.equal(
+ knn(data=kcpoints[[1]], query=kcpoints[[2]], k=5, eps=0, radius=0),
+ w1q2, tolerance=1e-6))
+ 
+## storage mode: must be double
+m=matrix(1:24, ncol=3)
+storage.mode(m)
+# this will generate an error unless we change to a double
+w=tools::assertCondition(WKNND(m), "error")
+storage.mode(m)="double"
+w=WKNND(matrix(m, ncol=3))
+
+## construct wrapper objects but delay tree construction
+w1 &lt;- WKNNF(kcpoints[[1]], FALSE)
+# query triggers tree construction
+w1q2 &lt;- w1$query(kcpoints[[2]], k=5, eps=0, radius=0)
+str(w1q2)
+
+## queries using wrapper objects
+wkcpoints &lt;-lapply(kcpoints, WKNNF, FALSE)
+# query all 3 point sets against first
+# this will trigger tree construction only for pointset 1
+qall &lt;- lapply(wkcpoints, 
+  function(x) wkcpoints[[1]]$queryWKNN(x$.CppObject, k=5, eps=0, radius=0))
+str(qall)
+</code></pre>
+
+
+</div>

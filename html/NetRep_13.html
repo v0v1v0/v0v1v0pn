@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>disk.matrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The 'disk.matrix' class</h2>
+
+<h3>Description</h3>
+
+<p>A <code>'disk.matrix'</code> contains a file path to a matrix stored on disk,
+along with meta data for how to read that file. This allows <span class="pkg">NetRep</span>
+to load datasets into RAM only when required, i.e. one at a time. This 
+significantly reduces the memory usage of R when analysing large datasets.
+<code>'disk.matrix'</code> objects may be supplied instead of <code>'matrix'</code> 
+objects in the input list arguments <code>'network'</code>, <code>'data'</code>, and 
+<code>'correlation'</code>, which are common to most of <span class="pkg">NetRep</span>'s functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">attach.disk.matrix(file, serialized = TRUE, ...)
+
+serialize.table(file, ...)
+
+is.disk.matrix(x)
+
+as.disk.matrix(x, file, serialize = TRUE)
+
+## S4 method for signature 'disk.matrix'
+as.disk.matrix(x, file, serialize = TRUE)
+
+## S4 method for signature 'matrix'
+as.disk.matrix(x, file, serialize = TRUE)
+
+## S4 method for signature 'ANY'
+as.disk.matrix(x, file, serialize = TRUE)
+
+## S4 method for signature 'disk.matrix'
+as.matrix(x)
+
+## S4 method for signature 'disk.matrix'
+show(object)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>for <code>attach.disk.matrix</code> the file name of a matrix on disk. 
+For <code>as.disk.matrix</code> the file name to save the matrix to. For 
+<code>serialize.table</code> the file name of a matrix in table format on disk.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>serialized</code></td>
+<td>
+<p>determines how the matrix will be loaded from disk into R
+by <code>as.matrix</code>. If <code>TRUE</code>, the <code>readRDS</code> function 
+will be used. If <code>FALSE</code>, the <code>read.table</code> function will 
+be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments to be used by <code>read.table</code> when reading in matrix 
+data from a file in table format.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>for <code>as.matrix</code> a <code>disk.matrix</code> object to load into R. 
+For <code>as.disk.matrix</code> an object to convert to a <code>disk.matrix</code>. For 
+<code>is.disk.matrix</code> an object to check if its a <code>disk.matrix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>serialize</code></td>
+<td>
+<p>determines how the matrix is saved to disk by 
+<code>as.disk.matrix</code>. If <code>TRUE</code> it will be stored as a serialized R 
+object using <code>saveRDS</code>. If <code>FALSE</code> it will be stored as a 
+tab-separated file using <code>write.table</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a <code>'disk.matrix'</code> object.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Matrices may either be stored as regular table files that can be read by
+<code>read.table</code>, or as serialized R objects that can be read by
+<code>readRDS</code>. Serialized objects are much faster to load, but 
+cannot be read by other programs. 
+</p>
+<p>The <code>attach.disk.matrix</code> function creates a <code>disk.matrix</code> object
+from a file path. The <code>as.matrix</code> function will load the data from disk
+into the R session as a regular <code>matrix</code> object.
+</p>
+<p>The <code>as.disk.matrix</code> function converts a matrix into a 
+<code>disk.matrix</code> by saving its contents to the specified <code>file</code>. The
+<code>serialize</code> argument determines whether the data is stored as a 
+serialized R object or as a tab-separated file (i.e. <code>sep="\t"</code>). We
+recommend storing the matrix as a serialized R object unless disk space is
+a concern. More control over the storage format can be obtained by using
+<code>saveRDS</code> or <code>write.table</code> directly.
+</p>
+<p>The <code>serialize.matrix</code> function converts a file in table format to a
+serialized R object with the same file name, but with the ".rds" extension.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>disk.matrix</code> object (<code>attach.disk.matrix</code>, <code>as.disk.matrix</code>),
+a <code>matrix</code> (<code>as.matrix</code>), the file path to a serialized matrix
+(<code>serialize.table</code>), or a <code>TRUE</code> or <code>FALSE</code> indicating 
+whether an object is a <code>disk.matrix</code> (<code>is.disk.matrix</code>).
+</p>
+
+
+<h3>Slots</h3>
+
+
+<dl>
+<dt><code>file</code></dt>
+<dd>
+<p>the name of the file where the matrix is saved.</p>
+</dd>
+<dt><code>read.func</code></dt>
+<dd>
+<p>either <code>"read.table"</code> or <code>"readRDS"</code>.</p>
+</dd>
+<dt><code>func.args</code></dt>
+<dd>
+<p>a list of arguments to be supplied to the <code>'read.func'</code>.</p>
+</dd>
+</dl>
+<h3>Warning</h3>
+
+<p><code>attach.disk.matrix</code> does not check whether the specified file can be
+read into R. <code>as.matrix</code> will fail and throw an error if this is the
+case.
+</p>
+
+
+</div>

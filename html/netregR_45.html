@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vnet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Variance computation for linear regression of network response</h2>
+
+<h3>Description</h3>
+
+<p>Stand-alone estimation of exchangeable variance matrix based on residuals and design matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">vnet(e = NULL, X = NULL, directed = TRUE, nodes = NULL,
+  type = "exchangeable", tmax = 1, fit = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+<p>Optional vector of residuals, of length <code class="reqn">d</code>. Column-wise unfolding of adjacency matrix without diagonal entries (self-loops).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Optional matrix of covariates from regression, must have <code class="reqn">d</code> rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>Optional logical indicator of whether input data is for a directed network, default is <code>TRUE</code>. Undirected data format is lower triangle of adjacencey matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>Optional <code class="reqn">d \times 2</code> matrix indicating the (directed) relation pairs to which each entry in <code class="reqn">e</code> and each row in <code class="reqn">X</code> corresponds. If not input, complete network observation is assumed and the size <code class="reqn">d</code> and <code>directed</code> must correspond to an appropriate network of size <code class="reqn">n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Optional string indicating whether the ‘meat’ in the sandwich variance estimator is estimated using exchangeable theory (see Marrs et. al. (2017)) or using dyadic clustering (Fafchamps and Gubert (2007)).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tmax</code></td>
+<td>
+<p>Optional numeric of third dimension of relational data array, default is <code>1</code>, i.e. a relational matrix. Currently only accepts <code>tmax = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>Optional fitted model object. One of either <code>fit</code> or the pair <code>(e, X)</code> must be specified. Defaults to <code>fit</code> if both entered. Designed around ‘lmnet’ class but may work for others, such as ‘lm’</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function takes <code class="reqn">X</code> and <code class="reqn">e</code> values computes the variance-covariance matrix of <code class="reqn">\hat{\beta}</code> that resulted in the residuals <code class="reqn">e = Y - X \hat{\beta}</code> assuming that the errors are exchangeable, as based on Marrs et. al. (2017) when <code>type = "exchangeable"</code>. When <code>type = "dyadic clustering"</code>, the theory from Fafchamps and Gubert (2007) is implemented.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A an object of class <code>vhat</code> containing summary information:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>vhat</code></td>
+<td>
+<p>Estimated variance-covariance matrix of cofficient estimates <code class="reqn">\hat{\beta}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi</code></td>
+<td>
+<p>Vector of variance-covariance parameter estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corrected</code></td>
+<td>
+<p>Logical of whether variance-covariance matrix was corrected from negative definite to positive semi-definite.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>See inputs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tmax</code></td>
+<td>
+<p>See inputs.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Marrs, F. W., Fosdick, B. K., &amp; McCormick, T. H.,  (2017). Standard errors for regression on relational data with exchangeable errors. arXiv preprint arXiv:1701.05530.
+</p>
+<p>Fafchamps, M., &amp; Gubert, F. (2007). Risk sharing and network formation. American Economic Review, 97(2), 75-79.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lmnet</code>, <code>inputs_lmnet</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+n &lt;- 10
+d &lt;- n*(n-1)
+X &lt;- cbind(1, rnorm(d), sample(c(0,1), d, replace=TRUE))
+e &lt;- rnorm(d)
+vnet(e=e,X=X)
+
+</code></pre>
+
+
+</div>

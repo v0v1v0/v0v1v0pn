@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>optimise_window_length</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Optimise the elements per window for the count matrix approach</h2>
+
+<h3>Description</h3>
+
+<p>This function optimises the number of elements per window
+that is used in <code>calculate_expression_similarity_counts</code>, by requiring
+the distribution of correlations/distances to stabilise to a
+uniform distribution. The Jensen-Shannon divergence is used to assess
+the stability.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">optimise_window_length(
+  expression.matrix,
+  similarity.measure = "correlation_pearson",
+  window.length.min = NULL,
+  window.length.max = NULL,
+  window.length.by = NULL,
+  n.step.fraction = 0.05,
+  iteration.number = 50,
+  minimum.similar.windows = 3,
+  save.plot = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>expression.matrix</code></td>
+<td>
+<p>expression matrix, can be normalized or not</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>similarity.measure</code></td>
+<td>
+<p>one of the correlation or distance metrics to be used,
+defaults to pearson correlation; list of all methods in
+<code>get_methods_correlation_distance</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>window.length.min, window.length.max, window.length.by</code></td>
+<td>
+<p>definition of the parameter search space;
+default is between 1% and 33% of the number of rows in the expression matrix,
+incremented by 1%</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.step.fraction</code></td>
+<td>
+<p>step size to slide across, as a fraction of
+the window length; default is 5%</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iteration.number</code></td>
+<td>
+<p>number of iterations for the subsampling and calculation of JSE;
+subsampling is needed because shorter windows have fewer points; default is 100</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minimum.similar.windows</code></td>
+<td>
+<p>number of windows that a window needs to be similar to (including itself)
+in order to be accepted as optimal; default is 3, but can be reduced to 2 if no optimum is found</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save.plot</code></td>
+<td>
+<p>name of the pdf in which to print the output plot
+showing the distribution of JSE by window; output to the console by default</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A single value of the optimal number of elements per window.
+If no optimal value was found, this function returns NULL.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">optimise_window_length(
+  matrix(1:100+runif(100), ncol=5, byrow=TRUE),
+  window.length.min=3, window.length.max=5, iteration.number=5
+)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>matrix_compare</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-zero element-wise comparison between two sparse matrices</h2>
+
+<h3>Description</h3>
+
+<p>Taking advantage of matrix sparseness, the function only evaluates
+<code>fun</code> between pairs of elements of <code>A</code> and <code>B</code> where
+either <code>A</code> or <code>B</code> have non-zero values. This can be helpful
+to implement other binary operators between sparse matrices that may
+not be implemented in the <span class="pkg">Matrix</span> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">matrix_compare(A, B, fun)
+
+compare_matrix(A, B, fun)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>A matrix of size <code>n*m</code> of class <code>dgCMatrix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>A matrix of size <code>n*m</code> of class <code>dgCMatrix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>A function that receives 2 arguments and returns a scalar.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Instead of comparing element by element, the function
+loops through each matrix non-zero elements to make the comparisons, which
+in the case of sparse matrices can be more efficient (faster). Algorithmically
+it can be described as follows:
+</p>
+<pre>
+# Matrix initialization
+init ans[n,m];
+
+# Looping through non-zero elements of A
+for e_A in E_A:
+  ans[e_A] = fun(A[e_A], B[e_A])
+
+# Looping through non-zero elements of B and applying the function
+# in e_B only if it was not applied while looping in E_A.
+for e_B in E_B:
+  if (ans[e_B] == Empty)
+    ans[e_B] = fun(A[e_B], B[e_B])
+
+</pre>
+<p><code>compare_matrix</code> is just an alias for <code>matrix_compare</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>dgCMatrix</code> of size <code>n*m</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other dyadic-level comparison functions: 
+<code>vertex_covariate_compare()</code>,
+<code>vertex_covariate_dist()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># These two should yield the same results -----------------------------------
+
+# Creating two random matrices
+set.seed(89)
+A &lt;- rgraph_ba(t = 9, m = 4)
+B &lt;- rgraph_ba(t = 9, m = 4)
+A;B
+
+# Comparing
+ans0 &lt;- matrix_compare(A,B, function(a,b) (a+b)/2)
+
+ans1 &lt;- matrix(0, ncol=10, nrow=10)
+for (i in 1:10)
+  for (j in 1:10)
+    ans1[i,j] &lt;- mean(c(A[i,j], B[i,j]))
+
+# Are these equal?
+all(ans0[] == ans1[]) # Should yield TRUE
+
+</code></pre>
+
+
+</div>

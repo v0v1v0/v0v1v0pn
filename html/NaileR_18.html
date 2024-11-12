@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nail_qda</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Interpret QDA data</h2>
+
+<h3>Description</h3>
+
+<p>Generate an LLM response to analyze QDA data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nail_qda(
+  dataset,
+  formul,
+  firstvar,
+  lastvar = length(colnames(dataset)),
+  introduction = "",
+  request = NULL,
+  model = "llama3",
+  isolate.groups = FALSE,
+  drop.negative = FALSE,
+  proba = 0.05,
+  generate = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>a data frame made up of at least two categorical variables (product, panelist) and a set of quantitative variables (sensory attributes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formul</code></td>
+<td>
+<p>the analyis of variance model to be evaluated for each sensory attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>firstvar</code></td>
+<td>
+<p>the index of the first sensory attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lastvar</code></td>
+<td>
+<p>the index of the last sensory attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>introduction</code></td>
+<td>
+<p>the introduction for the LLM prompt.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>request</code></td>
+<td>
+<p>the request for the LLM prompt.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the model name ('llama3' by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isolate.groups</code></td>
+<td>
+<p>a boolean that indicates whether to give the LLM a single prompt, or one prompt per product.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop.negative</code></td>
+<td>
+<p>a boolean that indicates whether to drop negative v.test values for interpretation (keeping only positive v.tests).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proba</code></td>
+<td>
+<p>the significance threshold considered to characterize the products (by default 0.05).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>generate</code></td>
+<td>
+<p>a boolean that indicates whether to generate the LLM response. If FALSE, the function only returns the prompt.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function directly sends a prompt to an LLM. Therefore, to get a consistent answer, we highly recommend to customize the parameters introduction and request and add all relevant information on your data for the LLM. We also recommend renaming the columns with clear, unshortened and unambiguous names.
+</p>
+<p>Additionally, if isolate.groups = TRUE, you will need an introduction and a request that take into account the fact that only one group is analyzed at a time.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame, or a list of data frames, containing the LLM's prompt and response (if generate = TRUE).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+### Example 1: QDA data on chocolates  ###
+library(NaileR)
+library(SensoMineR)
+data(chocolates)
+
+intro_sensochoc &lt;- "Six chocolates were measured according
+to sensory attributes by a trained panel.
+I will give you the results from this study.
+You will have to identify what sets these chocolates apart."
+intro_sensochoc &lt;- gsub('\n', ' ', intro_sensochoc) |&gt;
+stringr::str_squish()
+
+req_sensochoc &lt;- "Please explain what makes each chocolate distinct
+and provide a sensory profile of each chocolate."
+req_sensochoc &lt;- gsub('\n', ' ', req_sensochoc) |&gt;
+stringr::str_squish()
+
+res_nail_qda &lt;- nail_qda(sensochoc,
+                         formul="~Product+Panelist",
+                         firstvar = 5,
+                         introduction = intro_sensochoc,
+                         request = NULL,
+                         model = 'llama3',
+                         isolate.groups = FALSE,
+                         drop.negative = FALSE,
+                         proba = 0.05,
+                         generate = TRUE)
+
+cat(res_nail_qda$response)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

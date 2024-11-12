@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>capture_first_df</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Capture first match in columns of a data frame</h2>
+
+<h3>Description</h3>
+
+<p>Capture first matching text from one or more character columns of
+a data frame, using a different regular expression for each
+column.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">capture_first_df(..., 
+    nomatch.error = getOption("nc.nomatch.error", 
+        TRUE), existing.error = getOption("nc.existing.error", 
+        TRUE), engine = getOption("nc.engine", 
+        "PCRE"))</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>subject data frame, colName1=list(groupName1=pattern1, fun1, etc),
+colName2=list(etc), etc. First argument must be a data frame with
+one or more character columns of subjects for matching. If the
+first argument is a data table then it will be modified using
+<code>set</code> (for memory efficiency, to avoid copying the whole
+data table); otherwise the input data frame will be copied to a
+new data table. Each other argument must be named using a column
+name of the subject data frame, e.g. colName1, colName2. Each
+other argument value must be a list that specifies the
+regex/conversion to use (in string/function/list format as
+documented in <code>capture_first_vec</code>, which is used on each named
+column), and possibly a column-specific <code>engine</code> to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nomatch.error</code></td>
+<td>
+<p>if TRUE (default), stop with an error if any subject does not
+match; otherwise subjects that do not match are reported as
+missing/NA rows of the result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>existing.error</code></td>
+<td>
+<p>if TRUE (default to avoid data loss), stop with an error if any
+capture groups have the same name as an existing column of
+subject.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>engine</code></td>
+<td>
+<p>character string, one of PCRE, ICU, RE2. This <code>engine</code> will be used
+for each column, unless another <code>engine</code> is specified for that
+column in <code>...</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data.table with same number of rows as subject, with an additional
+column for each named capture <code>group</code> specified in <code>...</code></p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre]</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## The JobID column can be match with a complicated regular
+## expression, that we will build up from small sub-pattern list
+## variables that are easy to understand independently.
+(sacct.df &lt;- data.frame(
+  JobID = c(
+    "13937810_25", "13937810_25.batch",
+    "13937810_25.extern", "14022192_[1-3]", "14022204_[4]"),
+  Elapsed = c(
+    "07:04:42", "07:04:42", "07:04:49",
+    "00:00:00", "00:00:00"),
+  stringsAsFactors=FALSE))
+
+## Just match the end of the range.
+int.pattern &lt;- list("[0-9]+", as.integer)
+end.pattern &lt;- list(
+  "-",
+  task.end=int.pattern)
+nc::capture_first_df(sacct.df, JobID=list(
+  end.pattern, nomatch.error=FALSE))
+
+## Match the whole range inside square brackets.
+range.pattern &lt;- list(
+  "[[]",
+  task.start=int.pattern,
+  end.pattern, "?", #end is optional.
+  "[]]")
+nc::capture_first_df(sacct.df, JobID=list(
+  range.pattern, nomatch.error=FALSE))
+
+## Match either a single task ID or a range, after an underscore.
+task.pattern &lt;- list(
+  "_",
+  list(
+    task.id=int.pattern,
+    "|",#either one task(above) or range(below)
+    range.pattern))
+nc::capture_first_df(sacct.df, JobID=task.pattern)
+
+## Match type suffix alone.
+type.pattern &lt;- list(
+  "[.]",
+  type=".*")
+nc::capture_first_df(sacct.df, JobID=list(
+  type.pattern, nomatch.error=FALSE))
+
+## Match task and optional type suffix.
+task.type.pattern &lt;- list(
+  task.pattern,
+  type.pattern, "?")
+nc::capture_first_df(sacct.df, JobID=task.type.pattern)
+
+## Match full JobID and Elapsed columns.
+nc::capture_first_df(
+  sacct.df,
+  JobID=list(
+    job=int.pattern,
+    task.type.pattern),
+  Elapsed=list(
+    hours=int.pattern,
+    ":",
+    minutes=int.pattern,
+    ":",
+    seconds=int.pattern))
+
+## If input is data table then it is modified for memory efficiency,
+## to avoid copying entire table.
+sacct.DT &lt;- data.table::as.data.table(sacct.df)
+nc::capture_first_df(sacct.df, JobID=task.pattern)
+sacct.df #not modified.
+nc::capture_first_df(sacct.DT, JobID=task.pattern)
+sacct.DT #modified!
+
+</code></pre>
+
+
+</div>

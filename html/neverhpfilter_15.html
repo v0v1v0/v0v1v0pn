@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>yth_filter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Filtered xts object</h2>
+
+<h3>Description</h3>
+
+<p><code>yth_filter</code> returns an <code>xts</code> object containing user defined
+combinations of the original, trend, cycle, and random walk series.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">yth_filter(x, h = 8, p = 4, output = c("x", "trend", "cycle", "random"), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A univariate <code>xts</code> object of any <code>zoo</code> index class,
+such as <code>Date</code>, <code>yearmon</code>, or <code>yearqtr</code>.
+For converting objects of type <code>timeSeries, ts, irts, fts, matrix, data.frame</code>
+or <code>zoo</code>, please read <code>as.xts</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>An <code>integer</code>, defining the lookahead period.
+Defaults to <code>h = 8</code>. The default assumes economic data of quarterly 
+periodicity with a lookahead period of 2 years. This function is not limited 
+by the default parameter, and Econometricians may change it as required.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>An <code>integer</code>, indicating the number of lags. A Default of 
+<code>p = 4</code>, assumes data is of quarterly periodicity. If data is of monthly 
+periodicity, one may choose <code>p = 12</code> or aggregate the series to quarterly 
+periodicity and maintain the default. Econometricians should use this parameter 
+to accommodate the Seasonality of their data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>A <code>character</code> vector. Defaults to <code>output = c("x","trend", "cycle", "random")</code>, which returns the original time series 
+(<code>x</code>), yth_glm <code>fitted.values</code> (<code>"trend"</code>), yth_glm <code>residuals</code>
+(<code>"cycle"</code>), and a random walk series defined by differencing <code class="reqn">y_{t+h}</code> 
+and <code class="reqn">y_t</code> (<code>"random"</code>). Arguments <code>"x"</code>, <code>"trend"</code>, <code>"cycle"</code>, and 
+<code>"random"</code> extract their corresponding univariate series and can be merged in any combination.
+For example <code>c("x", "trend")</code> returns both the original series "x" and the "trend" components. 
+<code>c("cycle", "random")</code> will return both the "cycle" and "random" components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments passed to the function <code>glm</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For time series of quarterly periodicity, Hamilton suggests parameters of
+h = 8 and p = 4, or an <code class="reqn">AR(4)</code> process, additionally lagged by <code class="reqn">8</code>
+lookahead periods. Econometricians may explore variations of h. However, p 
+is designed to correspond with the seasonality of a given periodicity and 
+should be matched accordingly.
+</p>
+<p style="text-align: center;"><code class="reqn">y_{t+h} = \beta_0 + \beta_1 y_t + \beta_2 y_{t-1} + \beta_3 y_{t-2} + \beta_4 y_{t-3} + v_{t+h}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\hat{v}_{t+h} = y_{t+h} - \hat{\beta}_0 + \hat{\beta}_1 y_t + \hat{\beta}_2 y_{t-1} + \hat{\beta}_3 y_{t-2} + \hat{\beta}_4 y_{t-3}</code>
+</p>
+
+<p>Which can be rewritten as:
+</p>
+<p style="text-align: center;"><code class="reqn">y_{t} = \beta_0 + \beta_1 y_{t-8} + \beta_2 y_{t-9} + \beta_3 y_{t-10} + \beta_4 y_{t-11} + v_{t}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\hat{v}_{t} = y_{t} - \hat{\beta}_0 + \hat{\beta}_1 y_{t-8} + \hat{\beta}_2 y_{t-9} + \hat{\beta}_3 y_{t-10} + \hat{\beta}_4 y_{t-11}</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>An <code>xts</code> object defined by the <code>output</code> parameter.
+</p>
+
+
+<h3>References</h3>
+
+<p>James D. Hamilton. <a href="http://econweb.ucsd.edu/~jhamilto/hp.pdf">Why You Should Never Use the Hodrick-Prescott Filter</a>.
+NBER Working Paper No. 23429, Issued in May 2017.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>yth_glm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(GDPC1)
+
+gdp_filter &lt;- yth_filter(100*log(GDPC1), h = 8, p = 4)
+
+knitr::kable(head(gdp_filter, 15), align = 'l')
+
+#---------------------------------------------------------------------------#
+
+data(PAYEMS)
+
+log_Employment &lt;- 100*log(xts::to.quarterly(PAYEMS["1947/2016-6"], OHLC = FALSE))
+
+employ_trend &lt;- yth_filter(log_Employment, h = 8, p = 4, output = c("x", "trend"))
+
+plot(employ_trend, grid.col = "white", legend.loc = "topleft", 
+         main = "Log of Employment and trend")
+
+#----------------------------------------------------------------------------#
+
+quarterly_data &lt;- 100*log(merge(GDPC1, PCECC96, GPDIC1, EXPGSC1, IMPGSC1, GCEC1, GDPDEF))
+
+cycle &lt;- do.call(merge, lapply(quarterly_data, yth_filter, output = "cycle"))
+random &lt;- do.call(merge, lapply(quarterly_data, yth_filter, output = "random"))
+
+cycle.sd &lt;- t(data.frame(lapply(cycle, sd, na.rm = TRUE)))
+GDP.cor &lt;- t(data.frame(lapply(cycle, cor, cycle[,1], use = "complete.obs")))
+random.sd &lt;- t(data.frame(lapply(random, sd, na.rm = TRUE)))
+random.cor &lt;- t(data.frame(lapply(random, cor, random[,1], use = "complete.obs")))
+
+my_table_2 &lt;- round(data.frame(cbind(cycle.sd, GDP.cor, random.sd, random.cor)), 2)
+names(my_table_2) &lt;- names(Hamilton_table_2)[1:4]
+
+knitr::kable(my_table_2, align = 'l')
+</code></pre>
+
+
+</div>

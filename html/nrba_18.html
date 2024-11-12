@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>t_test_of_weight_adjustment</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>t-test of differences in estimated means/percentages from two different sets of replicate weights.</h2>
+
+<h3>Description</h3>
+
+<p>Tests whether estimates of means/percentages differ systematically between two sets of replicate weights:
+an original set of weights, and the weights after adjustment (e.g. post-stratification or nonresponse adjustments) and possibly subsetting (e.g. subsetting to only include respondents).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">t_test_of_weight_adjustment(
+  orig_design,
+  updated_design,
+  y_vars,
+  na.rm = TRUE,
+  null_difference = 0,
+  alternative = "unequal",
+  degrees_of_freedom = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>orig_design</code></td>
+<td>
+<p>A replicate design object created with the <code>survey</code> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>updated_design</code></td>
+<td>
+<p>A potentially updated version of <code>orig_design</code>,
+for example where weights have been adjusted for nonresponse or updated using post-stratification.
+The type and number of sets of replicate weights must match that of <code>orig_design</code>.
+The number of rows may differ (e.g. if <code>orig_design</code> includes the full sample but <code>updated_design</code> only includes respondents).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_vars</code></td>
+<td>
+<p>Names of dependent variables for tests. For categorical variables, percentages of each category are tested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>Whether to drop cases with missing values for a given dependent variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null_difference</code></td>
+<td>
+<p>The difference between the two means/percentages under the null hypothesis. Default is <code>0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>Can be one of the following: <br></p>
+
+<ul>
+<li> <p><code>'unequal'</code> (the default): two-sided test of whether difference in means is equal to <code>null_difference</code> <br></p>
+</li>
+<li> <p><code>'less'</code>: one-sided test of whether difference is less than <code>null_difference</code> <br></p>
+</li>
+<li> <p><code>'greater'</code>: one-sided test of whether difference is greater than <code>null_difference</code>
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>degrees_of_freedom</code></td>
+<td>
+<p>The degrees of freedom to use for the test's reference distribution.
+Unless specified otherwise, the default is the design degrees of freedom minus one,
+where the design degrees of freedom are estimated using the <code>survey</code> package's <code>degf</code> method
+applied to the 'stacked' design formed by combining <code>orig_design</code> and <code>updated_design</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame describing the results of the t-tests, one row per dependent variable.
+</p>
+
+
+<h3>Statistical Details</h3>
+
+<p>The t-statistic used for the test has as its numerator the difference in means/percentages between the two samples, minus the <code>null_difference</code>.
+The denominator for the t-statistic is the estimated standard error of the difference in means.
+Because the two means are based on overlapping groups and thus have correlated sampling errors, special care is taken to estimate the covariance of the two estimates.
+For designs which use sets of replicate weights for variance estimation, the two means and their difference are estimated using each set of replicate weights;
+the estimated differences from the sets of replicate weights are then used to estimate sampling error with a formula appropriate to the replication method (JKn, BRR, etc.). <br><br>
+This analysis is not implemented for designs which use linearization methods for variance estimation.
+<br>
+Unless specified otherwise using the <code>degrees_of_freedom</code> parameter, the degrees of freedom for the test are set to the design degrees of freedom minus one.
+Design degrees of freedom are estimated using the <code>survey</code> package's <code>degf</code> method. <br><br>
+See Van de Kerckhove et al. (2009) for an example of this type of nonresponse bias analysis (among others).
+See Lohr and Riddles (2016) for the statistical details of this test.
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Lohr, S., Riddles, M. (2016). <em>Tests for Evaluating Nonresponse Bias in Surveys</em>. Survey Methodology 42(2): 195-218. https://www150.statcan.gc.ca/n1/pub/12-001-x/2016002/article/14677-eng.pdf
+</p>
+</li>
+<li>
+<p> Van de Kerckhove, W., Krenzke, T., and Mohadjer, L. (2009). <em>Adult Literacy and Lifeskills Survey (ALL) 2003: U.S. Nonresponse Bias Analysis (NCES 2009-063)</em>. National Center for Education Statistics, Institute of Education Sciences, U.S. Department of Education. Washington, DC.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(survey)
+
+# Create a survey design ----
+
+data(involvement_survey_srs, package = 'nrba')
+
+survey_design &lt;- svydesign(weights = ~ BASE_WEIGHT,
+                           id = ~ UNIQUE_ID,
+                           fpc = ~ N_STUDENTS,
+                           data = involvement_survey_srs)
+
+# Create replicate weights for the design ----
+rep_svy_design &lt;- as.svrepdesign(survey_design, type = "subbootstrap",
+                                 replicates = 500)
+
+# Subset to only respondents (always subset *after* creating replicate weights)
+
+rep_svy_respondents &lt;- subset(rep_svy_design,
+                              RESPONSE_STATUS == "Respondent")
+
+# Apply raking adjustment ----
+
+raked_rep_svy_respondents &lt;- rake_to_benchmarks(
+  survey_design = rep_svy_respondents,
+  group_vars = c("PARENT_HAS_EMAIL", "STUDENT_RACE"),
+  group_benchmark_vars = c("PARENT_HAS_EMAIL_BENCHMARK",
+                           "STUDENT_RACE_BENCHMARK"),
+)
+
+# Compare estimates from respondents in original vs. adjusted design ----
+
+t_test_of_weight_adjustment(orig_design = rep_svy_respondents,
+                            updated_design = raked_rep_svy_respondents,
+                            y_vars = c('STUDENT_AGE', 'STUDENT_SEX'))
+
+t_test_of_weight_adjustment(orig_design = rep_svy_respondents,
+                            updated_design = raked_rep_svy_respondents,
+                            y_vars = c('WHETHER_PARENT_AGREES'))
+
+# Compare estimates to true population values ----
+
+data('involvement_survey_pop', package = 'nrba')
+
+mean(involvement_survey_pop$STUDENT_AGE)
+
+prop.table(table(involvement_survey_pop$STUDENT_SEX))
+
+</code></pre>
+
+
+</div>

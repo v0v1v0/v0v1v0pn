@@ -1,0 +1,205 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summary.ncvreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summary method for ncvreg objects</h2>
+
+<h3>Description</h3>
+
+<p>Inferential summaries for <code>ncvreg</code> and <code>ncvsurv</code> objects based on local marginal false discovery rates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ncvreg'
+summary(object, lambda, which, number, cutoff, sort = TRUE, sigma, ...)
+
+## S3 method for class 'summary.ncvreg'
+print(x, digits, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An <code>ncvreg</code> or <code>ncvsurv</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>The regularization parameter value at which inference should be
+reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+<p>Alternatively, <code>lambda</code> may be specified by index; <code>which=10</code>
+means: report inference for the 10th value of <code>lambda</code> along the
+regularization path.  If both <code>lambda</code> and <code>which</code> are specified, <code>lambda</code>
+takes precedence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number</code></td>
+<td>
+<p>By default, <code>summary</code> will provide an inferential summary for
+each variable that has been selected (i.e.,  each variable with a nonzero
+coefficient). Specifying <code>number=5</code>, for example, means that the summary
+table will include the 5 features with the lowest mfdr values, regardless
+of whether they were selected.  To see all features, <code>number=Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff</code></td>
+<td>
+<p>Alternatively, specifying for example <code>cutoff=0.3</code> will report
+inference for all features with mfdr under 30%. If both <code>number</code> and
+<code>cutoff</code> are specified, the intersection between both sets of features is
+reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sort</code></td>
+<td>
+<p>Should the results be sorted by <code>mfdr</code>? (default: TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>For linear regression models, users can supply an estimate of
+the residual standard deviation. The default is to use RSS / DF, where
+degrees of freedom are approximated using the number of nonzero
+coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments; in particular, if you have set <code>returnX=FALSE</code>,
+you will need to supply <code>X</code> and <code>y</code> in order to calculate local mFDRs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>summary.ncvreg</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Number of digits past the decimal point to print out. Can be a vector specifying different display digits for
+each of the five non-integer printed values.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object with S3 class <code>summary.ncvreg</code>. The class has its own
+print method and contains the following list elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>The penalty used by <code>ncvreg</code> or <code>ncvsurv</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Either <code>"linear"</code>, <code>"logistic"</code>, or <code>"Cox"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of instances.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Number of regression coefficients (not including the intercept).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>The <code>lambda</code> value at which inference is being reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nvars</code></td>
+<td>
+<p>The number of nonzero coefficients (again, not including the intercept) at that value of <code>lambda</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>table</code></td>
+<td>
+<p>A table containing estimates, normalized test statistics (z), and an estimate of the local mfdr for each coefficient. The mfdr may be loosely interpreted, in an empirical Bayes sense, as the probability that the given feature is null.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unpen.table</code></td>
+<td>
+<p>If there are any unpenalized coefficients, a separate inferential summary is given for them.  Currently, this is based on <code>lm</code>/<code>glm</code>/<code>coxph</code> using the penalized coefficients to provide an offset. This is useful and more or less accurate, but not ideal; we hope to improve the inferential methods for unpenalized variables in the future.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Patrick Breheny <a href="mailto:patrick-breheny@uiowa.edu">patrick-breheny@uiowa.edu</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ncvreg()</code>, <code>cv.ncvreg()</code>, <code>plot.cv.ncvreg()</code>, <code>local_mfdr()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Linear regression --------------------------------------------------
+data(Prostate)
+fit &lt;- ncvreg(Prostate$X, Prostate$y)
+summary(fit, lambda=0.08)
+
+# Logistic regression ------------------------------------------------
+data(Heart)
+fit &lt;- ncvreg(Heart$X, Heart$y, family="binomial")
+summary(fit, lambda=0.05)
+
+# Cox regression -----------------------------------------------------
+data(Lung)
+fit &lt;- ncvsurv(Lung$X, Lung$y)
+summary(fit, lambda=0.1)
+
+# Options ------------------------------------------------------------
+fit &lt;- ncvreg(Heart$X, Heart$y, family="binomial")
+summary(fit, lambda=0.08, number=3)
+summary(fit, lambda=0.08, number=Inf)
+summary(fit, lambda=0.08, cutoff=0.5)
+summary(fit, lambda=0.08, number=3, cutoff=0.5)
+summary(fit, lambda=0.08, number=5, cutoff=0.1)
+summary(fit, lambda=0.08, number=Inf, sort=FALSE)
+summary(fit, lambda=0.08, number=3, cutoff=0.5, sort=FALSE)
+
+# If X and y are not returned with the fit, they must be supplied
+fit &lt;- ncvreg(Heart$X, Heart$y, family="binomial", returnX=FALSE)
+summary(fit, X=Heart$X, y=Heart$y, lambda=0.08)
+</code></pre>
+
+
+</div>

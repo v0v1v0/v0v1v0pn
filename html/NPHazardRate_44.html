@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PlugInBand</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simple Plug in badnwidth selector</h2>
+
+<h3>Description</h3>
+
+<p>Provides  the asymptotic MISE optimal plug-in bandwidth for the hazard rate estimator <code>HazardRateEst</code>, see <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/anzs.12224">Hua, Patil and Bagkavos (2018).</a>  The bandwidth is also suitable for use   as a pilot bandwidth in  <code>TransHazRateEst </code> and <code>VarBandHazEst</code>.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PlugInBand(xin, xout,   cens, kfun ) </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p> A vector of data points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xout</code></td>
+<td>
+<p> The point at which the estimates should be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cens</code></td>
+<td>
+<p> Censoring Indicators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kfun</code></td>
+<td>
+<p> A kernel function. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The asymptotic MISE optimal plug-in bandwidth selector for <code>HazardRateEst</code> is defined by
+</p>
+<p style="text-align: center;"><code class="reqn">h_{ opt} = \left[\frac{R(K)}{nR(\lambda_T'')\mu_{2,K}^2}\int \frac{\lambda_T(x)}{1-F(x)}\,dx \right]^{1/5} </code>
+</p>
+
+<p>see (9) in <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/anzs.12224">Hua, Patil and Bagkavos (2018)</a>. The   estimate of <code class="reqn">R(\lambda_T'')</code> to be used in <code class="reqn">h_{opt}</code> is
+</p>
+<p style="text-align: center;"><code class="reqn">
+R(\hat \lambda_T'') = \int_0^\xi \left (\hat \lambda_T''(x|\hat b_n^\ast) \right )^2\,dx.
+ </code>
+</p>
+
+<p>Also,
+</p>
+<p style="text-align: center;"><code class="reqn"> \int_0^T \frac{\lambda_T(x)}{1-F(x)}\,dx </code>
+</p>
+
+<p>is estimated by applying the extended Simpson's numerical integration rule, <code>SimpsonInt</code>, on
+</p>
+<p style="text-align: center;"><code class="reqn">
+ \frac{\hat \lambda_T(x|\hat b_n^\ast)  }{1-F(x)}
+ </code>
+</p>
+
+<p>where <code class="reqn">1-F(x)</code> is estimated by <code>KMest</code>. The estimation is implemented in the <code>NP.M.Estimate</code> function.
+</p>
+<p>Currently <code class="reqn">b_n^\ast</code> is estimated by <code>bw.nrd</code>. However according to (11) in <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/anzs.12224">Hua, Patil and Bagkavos (2018).</a>, in future versions this package will support
+</p>
+<p style="text-align: center;"><code class="reqn">
+b_n^\ast = \left \{ \frac{5R(K'')}{n \mu_{2,K}^2 R(\lambda_T^{(4)})} \int \frac{\lambda_T(x)}{1-F(x)}\,dx  \right \}^{1/9}.</code>
+</p>
+
+<p>where
+</p>
+<p style="text-align: center;"><code class="reqn">
+R(\hat  \lambda_T^{(4)}) =  \frac{(\hat a(\hat a-1)(\hat a-2)(\hat a-3)(\hat a-4))^2}{(2\hat a-9){\hat{b}}^{2\hat a} } (\xi^{2\hat a-9} - {p_\alpha}^{2\hat a-9}), \hat a\neq 9/2
+</code>
+</p>
+
+<p>and <code class="reqn">\hat M</code> is already estimated by <code>NP.M.Estimate</code> as expalined above (it will be much more stable than using a Weibull reference model).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A scalar with the value of the suggested bandwidth.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://onlinelibrary.wiley.com/doi/full/10.1111/anzs.12224">Hua, Patil and Bagkavos, An $L_1$ analysis of a kernel-based hazard rate estimator, Australian and New Zealand J. Statist., (60), 43-64, (2018).</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>HazardRateEst, LLHRPlugInBand </code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+SampleSize&lt;-100 #amount of data to be generated
+ti&lt;- rweibull(SampleSize, .6, 1) # draw a random sample
+ui&lt;-rexp(SampleSize, .2)         # censoring sample
+cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+x1&lt;-pmin(ti,ui)                  # observed data
+cen&lt;-rep.int(1, SampleSize)      # initialize censoring indicators
+cen[which(ti&gt;ui)]&lt;-0             # 0's correspond to censored indicators
+
+huse1&lt;- PlugInBand(x1, x, cen, Biweight)
+huse1
+
+
+</code></pre>
+
+
+</div>

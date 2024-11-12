@@ -1,0 +1,538 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tsvs2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Variable selection with NFT BART models.</h2>
+
+<h3>Description</h3>
+
+<p>The <code>tsvs2()/tsvs()</code> function is for Thompson sampling
+variable selection with NFT BART. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">tsvs2(
+               ## data
+               xftrain, xstrain, times, delta=NULL, 
+               rm.const=TRUE, rm.dupe=TRUE,
+               ##tsvs args
+               K=20, a.=1, b.=0.5, C=0.5,
+               rds.file='tsvs2.rds', pdf.file='tsvs2.pdf',
+               ## multi-threading
+               tc=getOption("mc.cores", 1), ##OpenMP thread count
+               ##MCMC
+               nskip=1000, ndpost=2000, 
+               nadapt=1000, adaptevery=100, 
+               chvf=NULL, chvs=NULL,
+               method="spearman", use="pairwise.complete.obs",
+               pbd=c(0.7, 0.7), pb=c(0.5, 0.5),
+               stepwpert=c(0.1, 0.1), probchv=c(0.1, 0.1),
+               minnumbot=c(5, 5),
+               ## BART and HBART prior parameters
+               ntree=c(10, 2), numcut=100,
+               xifcuts=NULL, xiscuts=NULL,
+               power=c(2, 2), base=c(0.95, 0.95),
+               ## f function
+               fmu=NA, k=5, tau=NA, dist='weibull', 
+               ## s function
+               total.lambda=NA, total.nu=10, mask=0.95,
+               ## survival analysis 
+               ##K=100, events=NULL, 
+               ## DPM LIO
+               drawDPM=1L, 
+               alpha=1, alpha.a=1, alpha.b=0.1, alpha.draw=1,
+               neal.m=2, constrain=1, 
+               m0=0, k0.a=1.5, k0.b=7.5, k0=1, k0.draw=1,
+               a0=3, b0.a=2, b0.b=1, b0=1, b0.draw=1,
+               ## misc
+               na.rm=FALSE, probs=c(0.025, 0.975), printevery=100,
+               transposed=FALSE
+)
+
+tsvs(
+               ## data
+               x.train, times, delta=NULL, 
+               rm.const=TRUE, rm.dupe=TRUE,
+               ##tsvs args
+               K=20, a.=1, b.=0.5, C=0.5,
+               rds.file='tsvs.rds', pdf.file='tsvs.pdf',
+               ## multi-threading
+               tc=getOption("mc.cores", 1), ##OpenMP thread count
+               ##MCMC
+               nskip=1000, ndpost=2000, 
+               nadapt=1000, adaptevery=100, 
+               chv=NULL,
+               method="spearman", use="pairwise.complete.obs",
+               pbd=c(0.7, 0.7), pb=c(0.5, 0.5),
+               stepwpert=c(0.1, 0.1), probchv=c(0.1, 0.1),
+               minnumbot=c(5, 5),
+               ## BART and HBART prior parameters
+               ntree=c(10, 2), numcut=100, xicuts=NULL,
+               power=c(2, 2), base=c(0.95, 0.95),
+               ## f function
+               fmu=NA, k=5, tau=NA, dist='weibull', 
+               ## s function
+               total.lambda=NA, total.nu=10, mask=0.95,
+               ## survival analysis 
+               ##K=100, events=NULL, 
+               ## DPM LIO
+               drawDPM=1L, 
+               alpha=1, alpha.a=1, alpha.b=0.1, alpha.draw=1,
+               neal.m=2, constrain=1, 
+               m0=0, k0.a=1.5, k0.b=7.5, k0=1, k0.draw=1,
+               a0=3, b0.a=2, b0.b=1, b0=1, b0.draw=1,
+               ## misc
+               na.rm=FALSE, probs=c(0.025, 0.975), printevery=100,
+               transposed=FALSE
+)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xftrain</code></td>
+<td>
+<p>n x pf matrix of predictor variables for the training data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xstrain</code></td>
+<td>
+<p>n x ps matrix of predictor variables for the training data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.train</code></td>
+<td>
+<p>n x ps matrix of predictor variables for the training data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times</code></td>
+<td>
+<p>nx1 vector of the observed times for the training data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>nx1 vector of the time type for the training data:
+0, for right-censoring; 1, for an event; and, 2, for
+left-censoring.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm.const</code></td>
+<td>
+<p>To remove constant variables or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm.dupe</code></td>
+<td>
+<p>To remove duplicate variables or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>The number of Thompson sampling steps to take.
+Not to be confused with the size of the time grid for survival
+distribution estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a.</code></td>
+<td>
+<p>The prior parameter for successes of a Beta distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.</code></td>
+<td>
+<p>The prior parameter for failures of a Beta distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>The probability cut-off for variable selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rds.file</code></td>
+<td>
+<p>File name to store RDS object containing Thompson
+sampling parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf.file</code></td>
+<td>
+<p>File name to store PDF graphic of variables selected.</p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>tc</code></td>
+<td>
+<p>Number of OpenMP threads to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nskip</code></td>
+<td>
+<p>Number of MCMC iterations to burn-in and discard.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ndpost</code></td>
+<td>
+<p>Number of MCMC iterations kept after burn-in.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nadapt</code></td>
+<td>
+<p>Number of MCMC iterations for adaptation prior to burn-in.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adaptevery</code></td>
+<td>
+<p>Adapt MCMC proposal distributions every <code>adaptevery</code> iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chvf,chvs,chv</code></td>
+<td>
+<p>Predictor correlation matrix used as a pre-conditioner for MCMC change-of-variable proposals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method,use</code></td>
+<td>
+<p>Correlation options for change-of-variable proposal
+pre-conditioner.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pbd</code></td>
+<td>
+<p>Probability of performing a birth/death proposal, otherwise perform a rotate proposal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pb</code></td>
+<td>
+<p>Probability of performing a birth proposal given that we choose to perform a birth/death proposal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stepwpert</code></td>
+<td>
+<p>Initial width of proposal distribution for peturbing cut-points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probchv</code></td>
+<td>
+<p>Probability of performing a change-of-variable proposal.  Otherwise, only do a perturb proposal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minnumbot</code></td>
+<td>
+<p>Minimum number of observations required in leaf (terminal) nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntree</code></td>
+<td>
+<p>Vector of length two for the number of trees used for the mean
+model and the number of trees used for the variance model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numcut</code></td>
+<td>
+<p>Number of cutpoints to use for each predictor variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xifcuts,xiscuts,xicuts</code></td>
+<td>
+<p>More detailed construction of cut-points can be specified
+by the <code>xicuts</code> function and provided here.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>power</code></td>
+<td>
+<p>Power parameter in the tree depth penalizing prior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base</code></td>
+<td>
+<p>Base parameter in the tree depth penalizing prior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fmu</code></td>
+<td>
+<p>Prior parameter for the center of the mean model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Prior parameter for the mean model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>Desired <code>SD/ntree</code> for f function leaf prior if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>Distribution to be passed to intercept-only AFT model to center <code>y.train</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>total.lambda</code></td>
+<td>
+<p>A rudimentary estimate of the process standard deviation. Used in calibrating the variance prior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>total.nu</code></td>
+<td>
+<p>Shape parameter for the variance prior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask</code></td>
+<td>
+<p>If a proportion is provided, then said quantile
+of <code>max.i sd(x.i)</code> is used to mask non-stationary
+departures (with respect to convergence) above this threshold.</p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>drawDPM</code></td>
+<td>
+<p>Whether to utilize DPM or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Initial value of DPM concentration parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.a</code></td>
+<td>
+<p>Gamma prior parameter setting for DPM concentration parameter
+where E[<code>alpha</code>]=<code>alpha.a</code>/<code>alpha.b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.b</code></td>
+<td>
+<p>See <code>alpha.a</code> above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.draw</code></td>
+<td>
+<p>Whether to draw <code>alpha</code> or it is fixed at the initial value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neal.m</code></td>
+<td>
+<p>The number of additional atoms for Neal 2000 DPM algorithm 8.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constrain</code></td>
+<td>
+<p>Whether to perform constained DPM or unconstrained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0</code></td>
+<td>
+<p>Center of the error distribution: defaults to zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k0.a</code></td>
+<td>
+<p>First Gamma prior argument for <code>k0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k0.b</code></td>
+<td>
+<p>Second Gamma prior argument for <code>k0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k0</code></td>
+<td>
+<p>Initial value of <code>k0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k0.draw</code></td>
+<td>
+<p>Whether to fix k0 or draw it if from the DPM LIO prior
+hierarchy: <code>k0~Gamma(k0.a, k0.b)</code>, i.e., <code>E[k0]=k0.a/k0.b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a0</code></td>
+<td>
+<p>First Gamma prior argument for <code class="reqn">tau</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0.a</code></td>
+<td>
+<p>First Gamma prior argument for <code>b0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0.b</code></td>
+<td>
+<p>Second Gamma prior argument for <code>b0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0</code></td>
+<td>
+<p>Initial value of <code>b0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0.draw</code></td>
+<td>
+<p>Whether to fix b0 or draw it from the DPM LIO prior 
+hierarchy: <code>b0~Gamma(b0.a, b0.b)</code>, i.e.,
+<code>E[b0]=b0.a/b0.b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>Value to be passed to the <code>predict</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>Value to be passed to the <code>predict</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>printevery</code></td>
+<td>
+<p>Outputs MCMC algorithm status every printevery
+iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transposed</code></td>
+<td>
+<p><code>tsvs</code> handles all of the pre-processing
+for <code>x.train/x.test</code> (including
+tranposing) computational efficiency.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>tsvs2()/tsvs()</code> is the function to perform variable selection.
+
+
+
+
+
+
+
+
+The <code>tsvs2()/tsvs()</code> function returns a fit object of S3 class type
+<code>list</code> as well as storing it in <code>rds.file</code> for
+sampling in progress.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Rodney Sparapani: <a href="mailto:rsparapa@mcw.edu">rsparapa@mcw.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Sparapani R., Logan B., Maiers M., Laud P., McCulloch R. (2023)
+Nonparametric Failure Time: Time-to-event Machine Learning with
+Heteroskedastic Bayesian Additive Regression Trees and 
+Low Information Omnibus Dirichlet Process Mixtures
+<em>Biometrics (ahead of print)</em> &lt;doi:10.1111/biom.13857&gt;.
+</p>
+<p>Liu Y., Rockova V. (2021)
+Variable selection via Thompson sampling.
+<em>Journal of the American Statistical Association. Jun 29:1-8.</em>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>tsvs</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+##library(nftbart)
+data(lung)
+N=length(lung$status)
+
+##lung$status: 1=censored, 2=dead
+##delta: 0=censored, 1=dead
+delta=lung$status-1
+
+## this study reports time in days rather than weeks or months
+times=lung$time
+times=times/7  ## weeks
+
+## matrix of covariates
+x.train=cbind(lung[ , -(1:3)])
+## lung$sex:        Male=1 Female=2
+
+
+##vars=tsvs2(x.train, x.train, times, delta)
+vars=tsvs2(x.train, x.train, times, delta, K=0) ## K=0 just returns 0
+
+</code></pre>
+
+
+</div>

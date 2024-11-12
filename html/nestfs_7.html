@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nested.fs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nested cross-validated forward selection</h2>
+
+<h3>Description</h3>
+
+<p>Run nested forward selection starting from a set of variables or a model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nested.fs(formula, data, family, folds, ...)
+
+nested.forward.selection(x, y, init.model, family, folds, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>An object of class <code>formula</code> (or one that can be coerced to
+that class) that describes the baseline model to be fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data frame or matrix containing outcome variable and predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>Type of model fitted: either <code>gaussian()</code> for linear regression
+or <code>binomial()</code> for logistic regression. This can be specified also as
+a function name (<code>gaussian</code>) or as a string (<code>"gaussian"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>folds</code></td>
+<td>
+<p>List of cross-validation folds, where each element contains
+the indices of the observations to be withdrawn in that fold.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments to <code>fs()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Dataframe of predictors: this should include all variables in
+the initial set and the variables that are allowed to enter the
+selected panel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Outcome variable. If <code>family=binomial</code>, it can only contain
+two classes of values that can be coerced to 0-1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.model</code></td>
+<td>
+<p>Either a formula or a vector of names of the initial set
+of variables that define the model from which the forward selection
+should start.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function allows to obtain an unbiased estimate of the performance
+of the selected panels on withdrawn data by running forward selection on
+a predetermined set of folds.
+</p>
+<p><code>nested.forward.selection</code> provides the legacy interface used up to version
+0.9.2. It is considered discontinued, and in the future it will be deprecated
+and eventually removed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>nestfs</code> of length equal to <code>length(folds)</code>, where each
+element is an object of class <code>fs</code> containing the following additional fields:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>Predicted values for the withdrawn observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+<p>Observed values for the withdrawn observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test.idx</code></td>
+<td>
+<p>Indices of the the withdrawn observations for this fold.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Summary of the model built using the selected panel.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>fs()</code>, <code>summary.nestfs()</code> and <code>nested.performance()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(diabetes)
+folds &lt;- create.folds(2, nrow(diabetes), seed=1)
+nestfs.res &lt;- nested.fs(Y ~ age + sex, diabetes, gaussian(), folds,
+                        choose.from=1:10, num.inner.folds=5, max.iters=3)
+summary(nestfs.res)
+
+
+</code></pre>
+
+
+</div>

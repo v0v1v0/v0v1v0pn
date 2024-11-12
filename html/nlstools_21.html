@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlsResiduals</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>NLS residuals</h2>
+
+<h3>Description</h3>
+
+<p>Provides several plots and tests for the analysis of residuals</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  nlsResiduals (nls)
+  ## S3 method for class 'nlsResiduals'
+ plot(x, which = 0, ...)
+  test.nlsResiduals (x)
+  ## S3 method for class 'nlsResiduals'
+ print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nls</code></td>
+<td>
+<p>an object of class 'nls'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class 'nlsResiduals'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+<p>an integer: <br>
+0 = 4 graphs of residuals (types 1, 2, 4 and 6) <br>
+1 = non-transformed residuals against fitted values <br> 
+2 = standardized residuals against fitted values <br>
+3 = sqrt of absolute value of standardized residuals against fitted values <br> 
+4 = auto-correlation residuals (i+1th residual against ith residual) <br> 
+5 = histogram of the residuals  <br>
+6 = qq-plot of the residuals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Several plots and tests are proposed to check the validity of the assumptions of the error model based on the analysis of residuals.<br>
+The function <code>plot.nlsResiduals</code> proposes several plots of residuals from the nonlinear fit: plot of non-transformed residuals against fitted values, plot of standardized residuals against fitted values, plot of square root of absolute value of standardized residuals against fitted values, auto-correlation plot of residuals (i+1th residual against ith residual), histogram of the non-transformed residuals and normal Q-Q plot of standardized residuals.<br><code>test.nlsResiduals</code> tests the normality of the residuals with the Shapiro-Wilk test (shapiro.test in package stats) and the randomness of residuals  with the runs test (Siegel and Castellan, 1988). The runs.test function used in <code>nlstools</code> is the one implemented in the package <code>tseries</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>nlsResiduals</code> returns a list of five objects:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>std95</code></td>
+<td>
+<p>the Student value for alpha=0.05 (bilateral) and the degree of freedom of the model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resi1</code></td>
+<td>
+<p>a matrix with fitted values vs. non-transformed residuals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resi2</code></td>
+<td>
+<p>a matrix with fitted values vs. standardized residuals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resi3</code></td>
+<td>
+<p>a matrix with fitted values vs. sqrt(abs(standardized residuals))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resi4</code></td>
+<td>
+<p>a matrix with ith residuals vs. i+1th residuals</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Florent Baty, Marie-Laure Delignette-Muller</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Bates DM and Watts DG (1988) Nonlinear regression analysis and its applications. Wiley, Chichester, UK.<br><br>
+Siegel S and Castellan NJ (1988) Non parametric statistics for behavioral sciences. McGraw-Hill international, New York.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Plots of residuals
+formulaExp &lt;- as.formula(VO2 ~ (t &lt;= 5.883) * VO2rest + (t &gt; 5.883) * 
+                        (VO2rest + (VO2peak - VO2rest) * 
+                        (1 - exp(-(t - 5.883) / mu))))
+O2K.nls1 &lt;- nls(formulaExp, start = list(VO2rest = 400, VO2peak = 1600, mu = 1), 
+               data = O2K)
+O2K.res1 &lt;- nlsResiduals(O2K.nls1)
+plot(O2K.res1, which = 0)
+
+# Histogram and qq-plot
+plot(O2K.res1, which = 5)
+plot(O2K.res1, which = 6)
+	
+# Tests
+test.nlsResiduals(O2K.res1)
+</code></pre>
+
+
+</div>

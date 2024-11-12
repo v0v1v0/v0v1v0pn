@@ -1,0 +1,106 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>updateStage</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Update Stage</h2>
+
+<h3>Description</h3>
+
+<p>Update an existing NGLVieweR stage in Shinymode.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">updateStage(NGLVieweR_proxy, param = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>NGLVieweR_proxy</code></td>
+<td>
+<p>A NGLVieweR object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>Of type list. Most common options are <code>backgroundColor</code>, <code>rotateSpeed</code>, <code>zoomSpeed</code>,
+<code>hoverTimeout</code> and <code>lightIntensity</code>. For a full list of options, see the "StageParameters" method in the official <a href="http://nglviewer.org/ngl/api/">NGL.js</a> manual.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>API call containing <code>NGLVieweR</code> <code>id</code> and list of message parameters.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>stageParameters()</code>
+</p>
+</li>
+<li> <p><code>NGLVieweR_example()</code> See example "updateStage".
+</p>
+</li>
+</ul>
+<p>Other updates: 
+<code>updateColor()</code>,
+<code>updateRepresentation()</code>,
+<code>updateVisibility()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+NGLVieweR("7CID") %&gt;%
+ addRepresentation("cartoon", 
+                   param = list(name = "cartoon", color="red")) %&gt;%
+ stageParameters(backgroundColor = "black")
+
+## End(Not run)
+
+if (interactive()) {
+library(shiny)
+
+ui = fluidPage(
+  titlePanel("Viewer with API inputs"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("background", "Background", c("black", "white", "blue")),
+      actionButton("update", "Update"),
+    ),
+    mainPanel(
+      NGLVieweROutput("structure")
+    )
+  )
+)
+server &lt;- function(input, output) {
+  output$structure &lt;- renderNGLVieweR({
+    NGLVieweR("7CID") %&gt;%
+      addRepresentation("cartoon",
+        param = list(name = "cartoon", color = "red")
+      ) %&gt;%
+      stageParameters(backgroundColor = "black")
+  })
+  observeEvent(input$update, {
+    NGLVieweR_proxy("structure") %&gt;%
+      updateStage(
+      param = list("backgroundColor" = isolate(input$background)))
+  })
+}
+shinyApp(ui, server)
+}
+</code></pre>
+
+
+</div>

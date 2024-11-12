@@ -1,0 +1,191 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>opt_nearfar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Finds optimal near-far match</h2>
+
+<h3>Description</h3>
+
+<p>Discovers optimal near-far matches using the partial F statistic (for
+continuous treatments) or partial deviance (for binary and treatments)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">opt_nearfar(dta, trt, covs, iv, trt.type = "cont", imp.var = NA,
+tol.var = NA, adjust.IV = TRUE, sink.range = c(0, 0.5), cutp.range = NA,
+max.time.seconds = 300)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dta</code></td>
+<td>
+<p>The name of the data frame on which matching was performed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trt</code></td>
+<td>
+<p>The name of the treatment variable, e.g., “educ”</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iv</code></td>
+<td>
+<p>The name of the instrumental variable, e.g., iv="QOB"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covs</code></td>
+<td>
+<p>A vector of the names of the covariates to make “near”,
+e.g., covs=c("age", "sex", "race")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trt.type</code></td>
+<td>
+<p>Treatment variable type: “cont” for continuous, or
+“bin” for binary</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imp.var</code></td>
+<td>
+<p>A list of (up to 5) named variables to prioritize in
+the “near” matching</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol.var</code></td>
+<td>
+<p>A list of (up to 5) tolerances attached to the
+prioritized variables where 0 is highest penalty for mismatch</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjust.IV</code></td>
+<td>
+<p>if TRUE, include measured confounders in treatment~IV
+model that is optimized; if FALSE, exclude</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sink.range</code></td>
+<td>
+<p>A two element vector of (min, max) for range of
+sinks over which to optimize in the near-far match; default (0, 0.5)
+such that maximally 50% of observations can be removed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutp.range</code></td>
+<td>
+<p>a two element vector of (min, max) for range of
+cutpoints (how far apart the IV will become) over which to optimize
+in the near-far match; default is (one SD of IV, range of IV)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.time.seconds</code></td>
+<td>
+<p>How long to let the optimization algorithm
+run; default is 300 seconds = 5 minutes</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n.calls</code></td>
+<td>
+<p>Number of calls made to the objective function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sink.range</code></td>
+<td>
+<p>A two element vector of (min, max) for range of
+sinks over which to optimize in the near-far match; default
+(0, 0.5) such that maximally 50% of observations can be removed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutp.range</code></td>
+<td>
+<p>a two element vector of (min, max) for range of
+cutpoints (how far apart the IV will become) over which to optimize
+in the near-far match; default is (one SD of IV, range of IV)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pct.sink</code></td>
+<td>
+<p>Optimal percent sinks</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutp</code></td>
+<td>
+<p>Optimal cutpoint</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxF</code></td>
+<td>
+<p>Highest value of partial F-statistic (continuous treatment)
+or residual deviance (binary treatment) found by simulated annealing
+optimizer</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>match</code></td>
+<td>
+<p>A two column matrix where the first column is the index
+of an “encouraged” individual and the second column is the index
+of the corresponding “discouraged” individual from the pair matching</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summ</code></td>
+<td>
+<p>A table of mean variable values for both the
+“encouraged” and “discouraged” groups across all variables
+plus absolute standardized differences for each variable</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Joseph Rigdon <a href="mailto:jrigdon@wakehealth.edu">jrigdon@wakehealth.edu</a></p>
+
+
+<h3>References</h3>
+
+<p>Lu B, Greevy R, Xu X, Beck C (2011). Optimal nonbipartite matching and
+its statistical applications. The American Statistician, 65(1), 21-30.
+</p>
+<p>Xiang Y, Gubian S, Suomela B, Hoeng J (2013). Generalized Simulated
+Annealing for Efficient Global Optimization: the GenSA Package for R.
+The R Journal, 5(1). URL http://journal.r-project.org/.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">k = opt_nearfar(dta=mtcars, trt="drat", covs=c("cyl", "disp"),
+    trt.type="cont", iv="carb", imp.var=NA, tol.var=NA, adjust.IV=TRUE,
+    max.time.seconds=2)
+summary(k)
+</code></pre>
+
+
+</div>

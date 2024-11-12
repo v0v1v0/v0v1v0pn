@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tournamentSelection</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Tournament Selection
+</h2>
+
+<h3>Description</h3>
+
+<p>Tournaments are played among several solutions. The best one is chosen according to their nondomination levels and crowding distances. And it is placed in the mating pool.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">tournamentSelection(pop, pool_size, tour_size)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pop</code></td>
+<td>
+<p>Population matrix with nondomination rank and crowding distance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pool_size</code></td>
+<td>
+<p>Size of mating pool, usually same as the population size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tour_size</code></td>
+<td>
+<p>Size of tournament, the selection pressure can be adjusted by varying the tournament size</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return the mating pool with decision variables, objective functions, nondomination level, and crowding distance
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ching-Shih (Vince) Tsou <a href="mailto:cstsou@mail.ntcb.edu.tw">cstsou@mail.ntcb.edu.tw</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Deb, K., Pratap, A., Agarwal, S., and Meyarivan, T. (2002), " A fast and elitist multiobjective genetic algorithm: NSGA-II", <em>IEEE Transactions on Evolutionary Computation</em>, <b>6(2)</b>, 182-197.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(mco)
+tourSize &lt;- popSize &lt;- 10
+lowerBounds &lt;- rep(0,30)
+upperBounds &lt;- rep(1,30)
+varNo &lt;- length(lowerBounds)
+objDim &lt;- 2
+set.seed(1234)
+population &lt;- t(sapply(1:popSize, function(u) array(runif(length(lowerBounds),
+  lowerBounds,upperBounds))))
+population &lt;- cbind(population, t(apply(population,1,zdt3)))
+ranking &lt;- fastNonDominatedSorting(population[,(varNo+1):(varNo+objDim)])
+rnkIndex &lt;- integer(popSize)
+i &lt;- 1
+while (i &lt;= length(ranking)) {
+  rnkIndex[ranking[[i]]] &lt;- i
+  i &lt;- i + 1
+} 
+population &lt;- cbind(population,rnkIndex);
+objRange &lt;- apply(population[,(varNo+1):(varNo+objDim)], 2, max) -
+  apply(population[,(varNo+1):(varNo+objDim)], 2, min);
+cd &lt;- crowdingDist4frnt(population,ranking,objRange)
+population &lt;- cbind(population,apply(cd,1,sum))
+matingPool &lt;- tournamentSelection(population,popSize,tourSize)
+matingPool
+</code></pre>
+
+
+</div>

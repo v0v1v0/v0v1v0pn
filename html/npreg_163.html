@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>weights</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Extract Smooth Model Weights
+</h2>
+
+<h3>Description</h3>
+
+<p>Extracts prior weights from a fit smoothing spline (fit by <code>ss</code>), smooth model (fit by <code>sm</code>), or generalized smooth model (fit by <code>gsm</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ss'
+weights(object, ...)
+
+## S3 method for class 'sm'
+weights(object, ...)
+
+## S3 method for class 'gsm'
+weights(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class "gsm" output by the <code>gsm</code> function, "sm" output by the <code>sm</code> function, or "ss" output by the <code>ss</code> function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>other arugments (currently ignored)  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Returns the "prior weights", which are user-specified via the <code>w</code> argument (of the <code>ss</code> function) or the <code>weights</code> argument (of the <code>sm</code> and <code>gsm</code> functions). If no prior weights were supplied, returns the (default) unit weights, i.e., <code>rep(1, nobs)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Prior weights extracted from <code>object</code>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Chambers, J. M. and Hastie, T. J. (1992) <em>Statistical Models in S</em>. Wadsworth &amp; Brooks/Cole.
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), SAGE Research Methods Foundations. <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ss</code>, <code>sm</code>, <code>gsm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate weighted data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+w &lt;- rep(5:15, length.out = n)
+fx &lt;- 2 + 3 * x + sin(2 * pi * x)
+y &lt;- fx + rnorm(n, sd = 0.5 / sqrt(w))
+
+# smoothing spline
+mod.ss &lt;- ss(x, y, w, nknots = 10)
+w.ss &lt;- weights(mod.ss)
+
+# smooth model
+mod.sm &lt;- sm(y ~ x, weights = w, knots = 10)
+w.sm &lt;- weights(mod.sm)
+
+# generalized smooth model (family = gaussian)
+mod.gsm &lt;- gsm(y ~ x, weights = w, knots = 10)
+w.gsm &lt;- weights(mod.gsm)
+
+# note: weights are internally rescaled such as 
+w0 &lt;- w / mean(w)
+max(abs(w0 - w.ss))
+max(abs(w0 - w.sm))
+max(abs(w0 - w.gsm))
+
+</code></pre>
+
+
+</div>

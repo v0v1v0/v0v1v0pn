@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Dependency</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Direct and indirect dependency analysis
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates for each component in a flow network the direct+indirect
+dependency on the other components.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Dependency(Flow = NULL, Tij = t(Flow), 
+           Import = NULL, Export = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Flow </code></td>
+<td>
+<p>network matrix with Flow[i,j] the flow from i (row) to j
+(column); component positions in rows and columns must be the same;
+if present, rownames or columnnames denote the compartment names.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tij </code></td>
+<td>
+<p>network matrix where connectance is from column j to row i;
+component positions in rows and columns must be the same ;
+if present, rownames or columnnames denote the compartment names.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Import </code></td>
+<td>
+<p>vector with either the *indices* or the *names* of
+<em>external</em> compartmens from where flow enters the network;
+the indices point to the <b>column</b> positions in <code>Tij</code>
+(and the row positions in Flow).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Export </code></td>
+<td>
+<p>vector with either the *indices* or the *names* of
+<em>external</em> compartmens to where flow leaves the network;
+the indices point to the <b>row</b> positions in <code>Tij</code> (and
+the column positions in Flow).
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A matrix with dependency of component i on component j
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Karline Soetaert &lt;karline.soetaert@nioz.nl&gt;,
+Julius Kipyegon Kones&lt;jkones@uonbi.ac.ke&gt;</p>
+
+
+<h3>References</h3>
+
+<p>Kones, J.K., Soetaert, K., van Oevelen, D. and J.Owino (2009).
+Are network indices robust indicators of food web functioning? a
+Monte Carlo approach.  Ecological Modelling, 220, 370-382.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># The takapoto atoll network
+Dependency(Takapoto, Import = "CO2",
+           Export = c("CO2", "Sedimentation", "Grazing"))
+
+# making "Bacteria" a "primary food source"  
+TAK &lt;- Takapoto
+TAK[,"Bacteria"] &lt;- c(0, 0, 0, 0, 0, 0, 1, 0)
+
+# first two columns
+DD &lt;- Dependency(TAK, Import = c("CO2", "DOC"),
+                 Export = c("CO2", "DOC", "Sedimentation", "Grazing"))
+DD
+
+barplot(t (DD[3:nrow(DD), 1:2]), beside = TRUE, ylab = "-",
+       legend = c("Phytoplankton","Bacteria"),
+       main = "dependency on (primary) food sources")
+</code></pre>
+
+
+</div>

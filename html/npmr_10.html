@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.npmr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Visualize the regression coefficient matrix fit by cross-validated NPMR
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots features (in orange) by their weights on the first two latent variables
+in the singular value decomposition of the regression coefficient matrix. Plots
+response classes (as blue arrows) by their loadings on the first two latent
+variables. Does this for the regression coefficient matrix fit with the
+value of lambda closest among all those tried to the value of <code>lambda</code>
+specified.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'npmr'
+plot(x, lambda, feature.names = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>an object of class <code>npmr</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+
+<p>a single regularization parameter value
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>feature.names</code></td>
+<td>
+
+<p>logical. Should the names of the covariates be used in the plot? If FALSE,
+use standard plotting symbol (<code>pch=1</code>) instead.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments to be passed to <code>plot</code>
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Scott Powers, Trevor Hastie, Rob Tibshirani
+</p>
+
+
+<h3>References</h3>
+
+<p>Scott Powers, Trevor Hastie and Rob Tibshirani (2016). “Nuclear penalized
+multinomial regression with an application to predicting at bat outcomes in
+baseball.” In prep.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npmr</code>, <code>plot.cv.npmr</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#   Fit NPMR to simulated data
+
+K = 5
+n = 1000
+m = 10000
+p = 10
+r = 2
+
+# Simulated training data
+set.seed(8369)
+A = matrix(rnorm(p*r), p, r)
+C = matrix(rnorm(K*r), K, r)
+B = tcrossprod(A, C)            # low-rank coefficient matrix
+X = matrix(rnorm(n*p), n, p)    # covariate matrix with iid Gaussian entries
+eta = X 
+P = exp(eta)/rowSums(exp(eta))
+Y = t(apply(P, 1, rmultinom, n = 1, size = 1))
+
+# Simulate test data
+Xtest = matrix(rnorm(m*p), m, p)
+etatest = Xtest 
+Ptest = exp(etatest)/rowSums(exp(etatest))
+Ytest = t(apply(Ptest, 1, rmultinom, n = 1, size = 1))
+
+# Fit NPMR for a sequence of lambda values without CV:
+fit2 = npmr(X, Y, lambda = exp(seq(7, -2)))
+
+# Produce a biplot:
+plot(fit2, lambda = 20)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,192 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NetGSA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Network-based Gene Set Analysis</h2>
+
+<h3>Description</h3>
+
+<p>Tests the significance of pre-defined sets of genes (pathways) with respect to an outcome variable, such as the condition indicator (e.g. cancer vs. normal, etc.), based on the underlying biological networks.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NetGSA(A, x, group, pathways, lklMethod = "REHE", 
+       sampling=FALSE, sample_n = NULL, sample_p = NULL, minsize=5, 
+       eta = 0.1, lim4kappa = 500)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>A list of weighted adjacency matrices. Typically returned from <code>prepareAdjMat</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The <code class="reqn">p \times n</code> data matrix with rows referring to genes and columns to samples. It is very important that the adjacency matrices <code>A</code> share the same rownames as the data matrix <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>Vector of class indicators of length <code class="reqn">n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pathways</code></td>
+<td>
+<p>The npath by <code class="reqn">p</code> indicator matrix for pathways.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lklMethod</code></td>
+<td>
+<p>Method used for variance component calculation: options are <code>ML</code> (maximum likelihood), <code>REML</code> (restricted maximum likelihood), <code>HE</code> (Haseman-Elston regression) or <code>REHE</code> (restricted Haseman-Elston regression). See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampling</code></td>
+<td>
+<p>(Logical) whether to subsample the observations and/or variables. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_n</code></td>
+<td>
+<p>The ratio for subsampling the observations if <code>sampling=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_p</code></td>
+<td>
+<p>The ratio for subsampling the variables if <code>sampling=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minsize</code></td>
+<td>
+<p>Minimum number of genes in pathways to be considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>Approximation limit for the Influence matrix. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lim4kappa</code></td>
+<td>
+<p>Limit for condition number (used to adjust <code>eta</code>). See 'Details'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>NetGSA</code> carries out a Network-based Gene Set Analysis, using the method described in Shojaie and Michailidis (2009) and Shojaie and Michailidis (2010). It can be used for gene set (pathway) enrichment analysis where the data come from <code class="reqn">K</code> heterogeneous conditions, where <code class="reqn">K</code>, or more. NetGSA differs from Gene Set Analysis (Efron and Tibshirani, 2007) in that it incorporates the underlying biological networks. Therefore, when the networks encoded in <code>A</code> are empty, one should instead consider alternative approaches such as Gene Set Analysis (Efron and Tibshirani, 2007).
+</p>
+<p>The NetGSA method is formulated in terms of a mixed linear model. Let <code class="reqn">X</code> represent the rearrangement of data <code>x</code> into an <code class="reqn">np \times 1</code> column vector.  
+</p>
+<p style="text-align: center;"><code class="reqn">X=\Psi \beta + \Pi \gamma + \epsilon</code>
+</p>
+
+<p>where <code class="reqn">\beta</code> is the vector of fixed effects, <code class="reqn">\gamma</code> and <code class="reqn">\epsilon</code> are random effects and random errors, respectively. The underlying biological networks are encoded in the weighted adjacency matrices, which determine the influence matrix under each condition. The influence matrices further determine the design matrices <code class="reqn">\Psi</code> and <code class="reqn">\Pi</code> in the mixed linear model. Formally, the influence matrix under each condition represents the effect of each gene on all the other genes in the network and is calculated from the adjacency matrix (<code>A[[k]]</code> for the <code class="reqn">k</code>-th condition). A small value of <code>eta</code> is used to make sure that the influence matrices are well-conditioned (i.e. their condition numbers are bounded by <code>lim4kappa</code>.)
+</p>
+<p>The problem is then to test the null hypothesis <code class="reqn">\ell\beta = 0</code> against the alternative <code class="reqn">\ell\beta \neq 0</code>, where <code class="reqn">\ell</code> is a contrast vector, optimally defined through the underlying networks. 
+For a one-sample or two-sample test, the test statistic <code class="reqn">T</code> for each gene set has approximately a t-distribution under the null, whose degrees of freedom are estimated using the Satterthwaite approximation method. When analyzing complex experiments involving multiple conditions, often multiple contrast vectors of interest are considered for a specific subnetwork. Alternatively, one can combine the contrast vectors into a contrast matrix <code class="reqn">L</code>. A different test statistic <code class="reqn">F</code> will be used. Under the null, <code class="reqn">F</code> has an F-distribution, whose degrees of freedom are calculated based on the contrast matrix <code class="reqn">L</code> as well as variances of <code class="reqn">\gamma</code> and <code class="reqn">\epsilon</code>. The fixed effects <code class="reqn">\beta</code> are estimated by generalized least squares, and the estimate depends on estimated variance components of <code class="reqn">\gamma</code> and <code class="reqn">\epsilon</code>. 
+</p>
+<p>Estimation of the variance components (<code class="reqn">\sigma^2_{\epsilon}</code> and <code class="reqn">\sigma^2_{\gamma}</code>) can be done in several different ways after profiling out <code class="reqn">\sigma^2_{\epsilon}</code>, including <code>REML/ML</code> which uses Newton's method or <code>HE/REHE</code> which is based on the Haseman-Elston regression method. The latter notes the fact that <code class="reqn">Var(X)=\sigma^2_{\gamma}\Pi*\Pi' + \sigma^2_{\epsilon}I</code>, and uses an ordinary least squares to solve for the unknown coefficients after vectorizing both sides. In particular, <code>REHE</code> uses nonnegative least squares for the regression and therefore ensures nonnegative estimate of the variance components. Due to the simple formulation, <code>HE/REHE</code> also allows subsampling with respect to both the samples and the variables, and is recommended especially when the problem is large (i.e. large <code class="reqn">p</code> and/or large <code class="reqn">n</code>).
+</p>
+<p>The pathway membership information is stored in <code>pathways</code>, which should be a matrix of <code class="reqn">npath</code> x <code class="reqn">p</code>. See <code>prepareAdjMat</code> for details on how to prepare a suitable pathway membership object.
+</p>
+<p>This function can deal with both directed and undirected networks, which are specified via the option <code>directed</code>. Note <code>NetGSA</code> uses slightly different procedures to calculate the influence matrices for directed and undirected networks. 
+In either case, the user can still apply <code>NetGSA</code> if only partial information on the adjacency matrices is available. The functions <code>netEst.undir</code> and <code>netEst.dir</code> provide details on how to estimate the weighted adjacency matrices from data based on available network information. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>results</code></td>
+<td>
+<p>A data frame with pathway names, pathway sizes, p-values and false discovery rate corrected q-values, and test statistic for all pathways.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>Vector of fixed effects of length <code class="reqn">kp</code>, the first k elements corresponds to condition 1, the second k to condition 2, etc</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s2.epsilon</code></td>
+<td>
+<p>Variance of the random errors <code class="reqn">\epsilon</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s2.gamma</code></td>
+<td>
+<p>Variance of the random effects <code class="reqn">\gamma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>List of components needed in <code>plot.NetGSA</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ali Shojaie and Jing Ma
+</p>
+
+
+<h3>References</h3>
+
+<p>Ma, J., Shojaie, A. &amp; Michailidis, G. (2016) Network-based pathway enrichment analysis with incomplete network information. Bioinformatics 32(20):165–3174. <a href="https://doi.org/10.1093/bioinformatics/btw410">doi:10.1093/bioinformatics/btw410</a>
+</p>
+<p>Shojaie, A., &amp; Michailidis, G. (2010). Network enrichment analysis in complex experiments. Statistical applications in genetics and molecular biology, 9(1), Article 22. <a href="https://pubmed.ncbi.nlm.nih.gov/20597848/">https://pubmed.ncbi.nlm.nih.gov/20597848/</a>.
+</p>
+<p>Shojaie, A., &amp; Michailidis, G. (2009). Analysis of gene sets based on the underlying regulatory network. Journal of Computational Biology, 16(3), 407-426. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3131840/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3131840/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>prepareAdjMat</code>, <code>netEst.dir</code>, <code>netEst.undir</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## load the data
+data("breastcancer2012_subset")
+
+## consider genes from just 2 pathways
+genenames    &lt;- unique(c(pathways[["Adipocytokine signaling pathway"]], 
+                         pathways[["Adrenergic signaling in cardiomyocytes"]]))
+sx           &lt;- x[match(rownames(x), genenames, nomatch = 0L) &gt; 0L,]
+
+db_edges       &lt;- obtainEdgeList(rownames(sx), databases = c("kegg", "reactome"))
+adj_cluster    &lt;- prepareAdjMat(sx, group, databases = db_edges, cluster = TRUE)
+out_cluster    &lt;- NetGSA(adj_cluster[["Adj"]], sx, group, 
+                         pathways_mat[c(1,2), rownames(sx)], lklMethod = "REHE", sampling = FALSE)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,211 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generateNetworkObjects</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Generate Basic Output for an Immune Repertoire Network
+</h2>
+
+<h3>Description</h3>
+
+<p>Given Adaptive Immune Receptor Repertoire Sequencing (AIRR-Seq) data, builds
+the network graph for the immune repertoire based on sequence similarity.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generateNetworkObjects(
+  data,
+  seq_col,
+  dist_type = "hamming",
+  dist_cutoff = 1,
+  drop_isolated_nodes = TRUE,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A data frame containing the AIRR-Seq data, with variables indexed by column
+and observations (e.g., clones or cells) indexed by row.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq_col</code></td>
+<td>
+
+<p>Specifies the column(s) of <code>data</code> containing
+the receptor sequences to be used as the basis of similarity between rows.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+Also accepts a vector of length 2 specifying distinct sequence columns
+(e.g., alpha chain and beta chain), in which case
+similarity between rows depends on similarity in both sequence columns
+(see details).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_type</code></td>
+<td>
+
+<p>Specifies the function used to measure the similarity between sequences.
+The similarity between two sequences determines the pairwise distance between
+their respective nodes in the network graph. Valid options are <code>"hamming"</code>
+(the default), which
+uses <code>hamDistBounded()</code>,
+and <code>"levenshtein"</code>, which uses
+<code>levDistBounded()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_cutoff</code></td>
+<td>
+
+<p>A nonnegative scalar. Specifies the maximum pairwise distance (based on
+<code>dist_type</code>) for an edge connection to exist between two nodes. Pairs
+of nodes whose distance is less than or equal to this value will be joined
+by an edge connection in the network graph. Controls the stringency of the
+network construction and affects the number and density of edges in the network.
+A lower cutoff value requires greater similarity between sequences in order for
+their respective nodes to be joined by an edge connection. A value of <code>0</code>
+requires two sequences to be identical in order for their nodes to be joined
+by an edge.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_isolated_nodes</code></td>
+<td>
+
+<p>A logical scalar. When <code>TRUE</code>, removes each node that is not joined by
+an edge connection to any other node in the network graph.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To construct the immune repertoire network, each TCR/BCR clone (bulk data)
+or cell (single-cell data) is modeled as a node in the network graph,
+corresponding to a single row of the AIRR-Seq data. For each node, the
+corresponding receptor sequence is considered. Both nucleotide and amino acid
+sequences are supported for this purpose. The receptor sequence is used as the
+basis of similarity and distance between nodes in the network.
+</p>
+<p>Similarity between sequences is measured using either the Hamming distance
+or Levenshtein (edit) distance. The similarity determines the pairwise distance
+between nodes in the network graph. The more similar two sequences are, the
+shorter the distance between their respective nodes. Two nodes are joined by
+an edge if their receptor sequences are sufficiently similar, i.e., if the
+distance between the nodes is sufficiently small.
+</p>
+<p>For single-cell data, edge connections between nodes can be based on similarity
+in both the alpha chain and beta chain sequences.
+This is done by providing a vector of length 2 to <code>seq_cols</code>
+specifying the two sequence columns in <code>data</code>.
+The distance between two nodes is then the greater of the two distances between
+sequences in corresponding chains.
+Two nodes will be joined by an edge if their alpha chain sequences are sufficiently
+similar and their beta chain sequences are sufficiently similar.
+</p>
+<p>See the
+<a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/buildRepSeqNetwork.html">buildRepSeqNetwork</a>
+package vignette for more details. The vignette can be accessed offline using
+<code>vignette("buildRepSeqNetwork")</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If the constructed network contains no nodes, the function will return
+<code>NULL</code>, invisibly, with a warning. Otherwise, the function invisibly
+returns a list containing the following items:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>igraph</code></td>
+<td>
+
+<p>An object of class <code>igraph</code> containing the list of nodes
+and edges for the network graph.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjacency_matrix</code></td>
+<td>
+
+<p>The network graph adjacency matrix, stored as a sparse matrix of class
+<code>dgCMatrix</code> from the <code>Matrix</code> package. See
+<code>dgCMatrix-class</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>node_data</code></td>
+<td>
+
+<p>A data frame containing containing metadata for the network nodes, where each
+row corresponds to a node in the network graph. This data frame contains all
+variables from <code>data</code> (unless otherwise specified via <code>subset_cols</code>)
+in addition to the computed node-level network properties if
+<code>node_stats = TRUE</code>. Each row's name is the name of the corresponding
+row from <code>data</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/buildRepSeqNetwork.html">buildRepSeqNetwork vignette</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+net &lt;-
+  generateNetworkObjects(
+    toy_data,
+    "CloneSeq"
+  )
+</code></pre>
+
+
+</div>

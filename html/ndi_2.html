@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>anthopolos</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Racial Isolation Index based on Anthopolos <em>et al.</em> (2011)</h2>
+
+<h3>Description</h3>
+
+<p>Compute the spatial Racial Isolation Index (Anthopolos) of selected subgroup(s).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">anthopolos(geo = "tract", year = 2020, subgroup, quiet = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>geo</code></td>
+<td>
+<p>Character string specifying the geography of the data either census tracts <code>geo = "tract"</code> (the default) or counties <code>geo = "county"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>Numeric. The year to compute the estimate. The default is 2020, and the years 2009 onward are currently available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subgroup</code></td>
+<td>
+<p>Character string specifying the racial/ethnic subgroup(s). See Details for available choices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Logical. If TRUE, will display messages about potential missing census information. The default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to <code>get_acs</code> to select state, county, and other arguments for census characteristics</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function will compute the spatial Racial Isolation Index (RI) of U.S. census tracts or counties for a specified geographical extent (e.g., the entire U.S. or a single state) based on Anthopolos <em>et al.</em> (2011) <a href="https://doi.org/10.1016/j.sste.2011.06.002">doi:10.1016/j.sste.2011.06.002</a> who originally designed the metric for the racial isolation of non-Hispanic Black individuals. This function provides the computation of RI for any of the U.S. Census Bureau race/ethnicity subgroups (including Hispanic and non-Hispanic individuals).
+</p>
+<p>The function uses the <code>get_acs</code> function to obtain U.S. Census Bureau 5-year American Community Survey characteristics used for the geospatial computation. The yearly estimates are available for 2009 onward when ACS-5 data are available but are available from other U.S. Census Bureau surveys. The twenty racial/ethnic subgroups (U.S. Census Bureau definitions) are:
+</p>
+
+<ul>
+<li> <p><strong>B03002_002</strong>: not Hispanic or Latino <code>"NHoL"</code>
+</p>
+</li>
+<li> <p><strong>B03002_003</strong>: not Hispanic or Latino, white alone<code>"NHoLW"</code>
+</p>
+</li>
+<li> <p><strong>B03002_004</strong>: not Hispanic or Latino, Black or African American alone <code>"NHoLB"</code>
+</p>
+</li>
+<li> <p><strong>B03002_005</strong>: not Hispanic or Latino, American Indian and Alaska Native alone <code>"NHoLAIAN"</code>
+</p>
+</li>
+<li> <p><strong>B03002_006</strong>: not Hispanic or Latino, Asian alone <code>"NHoLA"</code>
+</p>
+</li>
+<li> <p><strong>B03002_007</strong>: not Hispanic or Latino, Native Hawaiian and Other Pacific Islander alone <code>"NHoLNHOPI"</code>
+</p>
+</li>
+<li> <p><strong>B03002_008</strong>: not Hispanic or Latino, Some other race alone <code>"NHoLSOR"</code>
+</p>
+</li>
+<li> <p><strong>B03002_009</strong>: not Hispanic or Latino, Two or more races <code>"NHoLTOMR"</code>
+</p>
+</li>
+<li> <p><strong>B03002_010</strong>: not Hispanic or Latino, Two races including Some other race <code>"NHoLTRiSOR"</code>
+</p>
+</li>
+<li> <p><strong>B03002_011</strong>: not Hispanic or Latino, Two races excluding Some other race, and three or more races <code>"NHoLTReSOR"</code>
+</p>
+</li>
+<li> <p><strong>B03002_012</strong>: Hispanic or Latino <code>"HoL"</code>
+</p>
+</li>
+<li> <p><strong>B03002_013</strong>: Hispanic or Latino, white alone <code>"HoLW"</code>
+</p>
+</li>
+<li> <p><strong>B03002_014</strong>: Hispanic or Latino, Black or African American alone <code>"HoLB"</code>
+</p>
+</li>
+<li> <p><strong>B03002_015</strong>: Hispanic or Latino, American Indian and Alaska Native alone <code>"HoLAIAN"</code>
+</p>
+</li>
+<li> <p><strong>B03002_016</strong>: Hispanic or Latino, Asian alone <code>"HoLA"</code>
+</p>
+</li>
+<li> <p><strong>B03002_017</strong>: Hispanic or Latino, Native Hawaiian and Other Pacific Islander alone <code>"HoLNHOPI"</code>
+</p>
+</li>
+<li> <p><strong>B03002_018</strong>: Hispanic or Latino, Some other race alone <code>"HoLSOR"</code>
+</p>
+</li>
+<li> <p><strong>B03002_019</strong>: Hispanic or Latino, Two or more races <code>"HoLTOMR"</code>
+</p>
+</li>
+<li> <p><strong>B03002_020</strong>: Hispanic or Latino, Two races including Some other race <code>"HoLTRiSOR"</code>
+</p>
+</li>
+<li> <p><strong>B03002_021</strong>: Hispanic or Latino, Two races excluding Some other race, and three or more races <code>"HoLTReSOR"</code>
+</p>
+</li>
+</ul>
+<p>Use the internal <code>state</code> and <code>county</code> arguments within the <code>get_acs</code> function to specify geographic extent of the data output. NOTE: Current version does not correct for edge effects (e.g., census geographies along the specified spatial extent border, coastline, or U.S.-Mexico / U.S.-Canada border) may have few neighboring census geographies, and RI values in these census geographies may be unstable. A stop-gap solution for the former source of edge effect is to compute the RI for neighboring census geographies (i.e., the states bordering a study area of interest) and then use the estimates of the study area of interest.
+</p>
+<p>A census geography (and its neighbors) that has nearly all of its population who identify with the specified race/ethnicity subgroup(s) (e.g., non-Hispanic or Latino, Black or African American alone) will have an RI value close to 1. In contrast, a census geography (and its neighbors) that has nearly none of its population who identify with the specified race/ethnicity subgroup(s) (e.g., not non-Hispanic or Latino, Black or African American alone) will have an RI value close to 0.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class 'list'. This is a named list with the following components:
+</p>
+
+<dl>
+<dt><code>ri</code></dt>
+<dd>
+<p>An object of class 'tbl' for the GEOID, name, RI, and raw census values of specified census geographies.</p>
+</dd>
+<dt><code>missing</code></dt>
+<dd>
+<p>An object of class 'tbl' of the count and proportion of missingness for each census variable used to compute RI.</p>
+</dd>
+</dl>
+<h3>See Also</h3>
+
+<p><code>get_acs</code> for additional arguments for geographic extent selection (i.e., <code>state</code> and <code>county</code>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Wrapped in \dontrun{} because these examples require a Census API key.
+  
+  # Tract-level metric (2020)
+  anthopolos(geo = "tract", state = "GA", 
+             year = 2020, subgroup = c("NHoLB", "HoLB"))
+  
+  # County-level metric (2020)
+  anthopolos(geo = "county", state = "GA", 
+             year = 2020, subgroup = c("NHoLB", "HoLB"))
+  
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

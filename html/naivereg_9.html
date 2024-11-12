@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>naive.gel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimete the parameters with gel after IV selecting</h2>
+
+<h3>Description</h3>
+
+<p>Hybrid gel estimator after selecting IVs in the reduced form equation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">naive.gel(
+  g,
+  x,
+  z,
+  max.degree = 10,
+  criterion = c("BIC", "AIC", "GCV", "AICc", "EBIC"),
+  df.method = c("default", "active"),
+  penalty = c("grLasso", "grMCP", "grSCAD", "gel", "cMCP"),
+  endogenous.index = c(),
+  IV.intercept = FALSE,
+  family = c("gaussian", "binomial", "poisson"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>A function of the form <code class="reqn">g(\theta,x)</code> and which returns a <code class="reqn">n \times q</code> matrix with typical element <code class="reqn">g_i(\theta,x_t)</code> for <code class="reqn">i=1,...q</code> and <code class="reqn">t=1,...,n</code>. This matrix is then used to build the q sample moment conditions. It can also be a formula if the model is linear  (see details gel).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The design matrix, without an intercept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>The instrument variables matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.degree</code></td>
+<td>
+<p>The upper limit value of degree of B-splines when using BIC/AIC to choose the tuning parameters, default is BIC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>The criterion by which to select the regularization parameter. One of "AIC", "BIC","EBIC", "GCV", "AICc"; default is "BIC".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.method</code></td>
+<td>
+<p>How should effective model parameters be calculated? One of: "active", which counts the number of nonzero coefficients; or "default", which uses the calculated df returned by grpreg. default is "default".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>The penalty to be applied to the model. For group selection, one of grLasso, grMCP, or grSCAD. For bi-level selection, one of gel or cMCP. Default is " grLasso".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endogenous.index</code></td>
+<td>
+<p>Specify which variables in design matrix are endogenous variables, the  variable corresponds to the value 1 is endogenous variables, the variable corresponds to the value 0  is exogenous variable, the default is all endogenous variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IV.intercept</code></td>
+<td>
+<p>Intercept of instrument variables, default is “FALSE”.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>Either "gaussian" or "binomial", depending on the response, default is "gaussian".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to gel (such as type,kernel...,detail see gel).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See naivereg and gel
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of type <code>naive.gel</code> which is a list with the following
+components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>degree</code></td>
+<td>
+<p>Degree of B-splines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>The criterion by which to select the regularization parameter. One of "AIC", "BIC", "GCV", "AICc","EBIC"; default is "BIC".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind</code></td>
+<td>
+<p>The index of selected instrument variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.b</code></td>
+<td>
+<p>The index of selected instrument variables after B-splines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gel</code></td>
+<td>
+<p>Gel object, detail see gel.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Qingliang Fan, KongYu He, Wei Zhong
+</p>
+
+
+<h3>References</h3>
+
+<p>Q. Fan and W. Zhong (2018), “Nonparametric Additive Instrumental Variable Estimator: A Group Shrinkage Estimation Perspective,” Journal of Business &amp; Economic Statistics, doi: 10.1080/07350015.2016.1180991.
+</p>
+<p>Caner, M. and Fan, Q. (2015), Hybrid GEL Estimators: Instrument Selection with Adaptive Lasso, Journal of Econometrics, Volume 187, 256–274.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># gel estimation after IV selection
+n = 200
+phi&lt;-c(.2,.7)
+thet &lt;- 0.2
+sd &lt;- .2
+set.seed(123)
+x &lt;- matrix(arima.sim(n = n, list(order = c(2,0,1), ar = phi, ma = thet, sd = sd)), ncol = 1)
+y &lt;- x[7:n]
+ym1 &lt;- x[6:(n-1)]
+ym2 &lt;- x[5:(n-2)]
+H &lt;- cbind(x[4:(n-3)], x[3:(n-4)], x[2:(n-5)], x[1:(n-6)])
+g &lt;- y ~ ym1 + ym2
+x &lt;- H
+naive.gel(g, cbind(ym1,ym2),x, tet0 =c(0,.3,.6))
+</code></pre>
+
+
+</div>

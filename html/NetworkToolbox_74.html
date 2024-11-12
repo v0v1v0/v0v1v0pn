@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>threshold</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Threshold Network Estimation Methods</h2>
+
+<h3>Description</h3>
+
+<p>Filters the network based on an r-value, alpha, adaptive alpha,
+bonferroni, false-discovery rate (FDR), or proportional density (fixed number of edges) value
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">threshold(
+  data,
+  a,
+  thresh = c("alpha", "adaptive", "bonferroni", "FDR", "proportional"),
+  normal = FALSE,
+  na.data = c("pairwise", "listwise", "fiml", "none"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Can be a dataset or a correlation matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>When <code>thresh = "alpha"</code>, <code>"adaptive"</code>, and <code>"bonferroni"</code>
+an <code class="reqn">\alpha</code> threshold is applied (defaults to <code>.05</code>).
+For <code>"adaptive"</code>, beta (Type II error) is set to <code class="reqn">\alpha*5</code> for a medium effect size (<em>r</em> = .3).
+When <code>thresh = "FDR"</code>, a q-value threshold is applied (defaults to <code>.10</code>).
+When <code>thresh = "proportional"</code>, a density threshold is applied (defaults to <code>.15</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>Sets threshold. Defaults to <code>"alpha"</code>.
+Set to any value 0&gt; <em>r</em> &gt;1 to retain values greater than set value,
+<code>"adaptive"</code> for an <code>adapt.a</code> based on sample size (Perez &amp; Pericchi, 2014),
+<code>"bonferroni"</code> for the bonferroni correction on alpha,
+<code>"FDR"</code> for local false discovery rate,
+and <code>"proportional"</code> for a fixed density of edges (keeps strongest correlations within density)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normal</code></td>
+<td>
+<p>Should data be transformed to a normal distribution?
+Defaults to FALSE.
+Data is not transformed to be normal.
+Set to TRUE if data should be transformed to be normal
+(computes correlations using the cor_auto function)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.data</code></td>
+<td>
+<p>How should missing data be handled?
+For <code>"listwise"</code> deletion the <code>na.omit</code> function is applied.
+Set to <code>"fiml"</code> for Full Information Maximum Likelihood (<code>corFiml</code>).
+Full Information Maximum Likelihood is <strong>recommended</strong> but time consuming</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments for <code>fdrtool</code> and <code>adapt.a</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a list containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>The filtered adjacency matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.cv</code></td>
+<td>
+<p>The critical correlation value used to filter the network</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Alexander Christensen &lt;alexpaulchristensen@gmail.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Strimmer, K. (2008).
+fdrtool: A versatile R package for estimating local and tail area-based false discovery rates.
+<em>Bioinformatics</em>, <em>24</em>, 1461-1462.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">threshnet&lt;-threshold(neoOpen)
+
+alphanet&lt;-threshold(neoOpen, thresh = "alpha", a = .05)
+
+bonnet&lt;-threshold(neoOpen, thresh = "bonferroni", a = .05)
+
+FDRnet&lt;-threshold(neoOpen, thresh = "FDR", a = .10)
+
+propnet&lt;-threshold(neoOpen, thresh = "proportional", a = .15)
+</code></pre>
+
+
+</div>

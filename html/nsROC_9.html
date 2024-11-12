@@ -1,0 +1,266 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gROC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>ROC curve estimation (generalization included)
+</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates the Receiver Operating Characteristic curve and returns a 'groc' object. This object can be <code>printed</code> or <code>plotted</code>. It is the main function of the package and it includes the ROC curve generalization for non-monotone relationships (see <em>References</em> below).</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gROC(X, D, ...)
+## Default S3 method:
+gROC(X, D, side=c("right", "left", "both", "both2", "auto"),
+          Ni = NULL,  plot.roc = FALSE, plot.density = FALSE,
+          pval.auc = FALSE, B = 500, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X </code></td>
+<td>
+
+<p>vector of (bio)marker values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D </code></td>
+<td>
+
+<p>vector of response values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>side </code></td>
+<td>
+
+<p>type of ROC curve. One of "right", "left", "both", "both2" or "auto". If the user does not specify the method, "right" is considered, i.e., the right-sided ROC curve is estimated. If "auto", one of "right" or "left" is assigned automatically according to the Wilcoxon statistic. If the estimate is lower than <code class="reqn">\frac{number \; of \; controls \times number \; of \; cases}{2}</code>, the right-sided ROC curve is computed, otherwise the left one is considered. If "both", the gROC curve is estimated in the usual way (controls inside the interval) and if "both2", the opposite direction is considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ni </code></td>
+<td>
+
+<p>number of subintervals of the unit interval (FPR values) considered to calculate the curve. Default: NULL (in this case the fast algorithm considering as many FPR values as number of controls is considered).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.roc </code></td>
+<td>
+
+<p>if TRUE, ROC curve estimate considered is displayed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.density </code></td>
+<td>
+
+<p>if TRUE, density estimates for the (bio)marker in the positive and negative subjects are displayed in the same plot.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.auc </code></td>
+<td>
+
+<p>if TRUE, a permutation test to test if the AUC differs from $0.5$ is performed. Available if Ni is NULL. Default: FALSE.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B </code></td>
+<td>
+
+<p>number of permutations used for testing. Default: 500.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>... </code></td>
+<td>
+
+<p>additional arguments for <code>gROC</code>. Ignored.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>First of all, the data introduced is checked by the <code>ROCcheck</code> function.
+</p>
+<p>If <code>side</code> is not specified, one of "right" or "left" options is considered according to the comparison of the Wilcoxon test estimate and <code class="reqn">\frac{number \; of \; controls \times number \; of \; cases}{2}</code>. In this case, Wilcoxon rank test is performed in order to test the alternative hypothesis <code class="reqn">median(controls)&lt;median(cases)</code> and the resulting p-value is shown but side selection is just based in the aforementioned comparison, without taking into account the p-value of the test.
+</p>
+<p>If <code>Ni</code> is <code>NULL</code>, the general ROC curve, <code class="reqn">R_g(.)</code> is estimated considering every different pair (t, <code class="reqn">\gamma</code> <code class="reqn">\cdot</code> t) available on data. Otherwise it is estimated using {0, 1e-3, 2e-3, ..., 1} as a grid for <code class="reqn">\gamma</code> in the unit interval.
+</p>
+<p>If both <code>plot.density</code> and <code>plot.roc</code> are <code>TRUE</code> they are displayed in the same window.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class "groc" with the following content:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>levels </code></td>
+<td>
+<p>levels in <code>D</code>. The two first ones are the labels of <code>D</code> considered controls and cases, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>controls </code></td>
+<td>
+<p>marker values for controls.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cases </code></td>
+<td>
+<p>marker values for cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>side </code></td>
+<td>
+<p>direction of the comparison between controls and cases. One of "right", "left", "both" or "both2". If <code>side</code> is <code>auto</code> in input arguments, the output will be the one considered by the function (according to the comparison specified above).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvalue.wilcox </code></td>
+<td>
+<p>p-value of Wilcoxon test performed to compare cases and controls. Alternative hypothesis: <code class="reqn">median(controls)&lt;median(cases)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t </code></td>
+<td>
+<p>vector of values of t: {0, 1/<code>Ni</code>, 2/<code>Ni</code>, ..., 1}.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>roc </code></td>
+<td>
+<p>vector of values of <code class="reqn">R(t)</code> for each <code class="reqn">t</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auc </code></td>
+<td>
+<p>area under the ROC curve estimate by trapezoidal rule.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.auc </code></td>
+<td>
+<p>p-value of the permutation test over the AUC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Paucs </code></td>
+<td>
+<p>different permutation AUCs displayed if the hypothesis test is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points.coordinates </code></td>
+<td>
+<p>coordinates of the points (FPR, TPR) where the ROC curve estimate has a step in case of right or left-sided curves. The first column corresponds to the values of the <code>points</code> vector providing these coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pairpoints.coordinates </code></td>
+<td>
+<p>coordinates of the points (FPR, TPR) where the ROC curve estimate has a step in case of general curves. The first and second columns correspond to the values of the <code>pairpoints</code> matrix providing these coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param </code></td>
+<td>
+<p>a logical value indicating if the estimation procedure whether parametric or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ni </code></td>
+<td>
+<p>number of subintervals of the unit interval considered to build the curve.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points </code></td>
+<td>
+<p>if <code>Ni</code> != <code>NULL</code>, vector of cut-off points of the (bio)marker considered to estimate left or right-sided ROC curves. It corresponds to the sorted marker-values, including <code class="reqn">-\infty</code> and <code class="reqn">\infty</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pairpoints </code></td>
+<td>
+<p>if <code>Ni</code> != <code>NULL</code>, matrix whose rows correspond to each pair of cut-off points (xl,xu) such that xl&lt;xu of the (bio)marker considered to estimate general ROC curves.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>specificities </code></td>
+<td>
+<p>if <code>Ni</code> != <code>NULL</code>, vector of specificities associated to <code>points</code> if left or right-sided ROC curves are considered and those ones corresponding to <code>pairpoints</code> in case of general ROC curves. It could contain repeated values in both cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensitivities </code></td>
+<td>
+<p>if <code>Ni</code> != <code>NULL</code>, vector of sensitivities associated to <code>points</code> if left or right-sided ROC curves are considered and those ones corresponding to <code>pairpoints</code> in case of general ROC curves. It could contain repeated values in both cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coordinates </code></td>
+<td>
+<p>if <code>Ni</code> != <code>NULL</code>, matrix whose first column is constituted by the unique values of FPR (1-<code>specificities</code>) and its second column is formed by the corresponding values of TPR (<code>sensitivities</code>). In the case of general ROC curves, several TPR values could be associated with the same FPR value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index </code></td>
+<td>
+<p>if <code>Ni</code> != <code>NULL</code>, in general ROC curves, a vector displaying which row(s) of the <code>pairpoints</code> matrix correspond(s) to <code>pairpoints.coordinates</code>.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Martinez-Camblor P., Corral N., Rey C., Pascual J., Cernuda-Morollon E., 2014, ROC curve generalization for non-monotone relationships, <em>Statistical Methods in Medical Research</em>, <b>26</b>(1), 113-123.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Basic example (side="auto") -&gt; Output side is "right"
+set.seed(123)
+X &lt;- c(rnorm(45), rnorm(30,2,1.5))
+D &lt;- c(rep(0,45), rep(1,30))
+gROC(X,D)
+
+# Basic example (side="auto") -&gt; Output side is "left"
+X &lt;- c(rnorm(45), rnorm(30,-2,1.5))
+D &lt;- c(rep(0,45), rep(1,30))
+gROC(X,D)
+
+# General ROC curve example
+X &lt;- c(rnorm(45), rnorm(30,1,4))
+D &lt;- c(rep(0,45), rep(1,30))
+gROC(X, D, side="both")
+
+# Plot density estimates and ROC curve in the same plot
+X &lt;- c(rnorm(45), rnorm(30,2,1.5))
+D &lt;- c(rep(0,45), rep(1,30))
+gROC(X, D, plot.roc=TRUE, plot.density=TRUE)
+</code></pre>
+
+
+</div>

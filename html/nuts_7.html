@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nuts_classify</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Classify version of NUTS codes</h2>
+
+<h3>Description</h3>
+
+<p><code>nuts_classify()</code> can identify the NUTS version year and level from a variable containing NUTS codes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nuts_classify(
+  data,
+  nuts_code,
+  group_vars = NULL,
+  ties = c("most_recent", "oldest")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame or tibble that contains a variable with NUTS <code>1</code>, <code>2</code> or <code>3</code> codes and possibly other variables.
+NUTS codes must be of the same level and need to be unique, unless additional grouping variables are specified. No
+duplicate NUTS codes within groups allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nuts_code</code></td>
+<td>
+<p>Variable name containing NUTS codes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_vars</code></td>
+<td>
+<p>Variable name(s) for classification within groups. <code>nuts_classify()</code> always computes overlap within country. Hence, country variables should not be specified. <code>NULL</code> by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ties</code></td>
+<td>
+<p>Picks <code>'most_recent'</code> or <code>'oldest'</code> version when overlap is identical across multiple NUTS versions. <code>'most_recent'</code>
+by default.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Console messages can be controlled with <code>rlang::local_options(nuts.verbose = "quiet")</code> to silence messages and
+<code>nuts.verbose = "verbose"</code> to switch messages back on.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of three tibbles. The first tibble contains the original data with the classified NUTS version, level, and country.
+The second tibble lists the group-specific overlap with each NUTS version. The third tibble shows missing NUTS codes
+for each group.
+</p>
+<p>The output can be passed to <code>nuts_convert_version()</code> to convert data across NUTS versions and <code>nuts_aggregate()</code> to aggregate across NUTS levels.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+
+# Load EUROSTAT data of manure storage deposits
+data(manure)
+
+# Data varies at the NUTS level x indicator x year x country x NUTS code level
+head(manure)
+
+# Classify version of NUTS 2 codes in Germany
+manure %&gt;%
+ filter(nchar(geo) == 4) %&gt;%
+ filter(indic_ag == 'I07A_EQ_Y') %&gt;%
+ filter(grepl('^DE', geo)) %&gt;%
+ filter(time == 2003) %&gt;%
+ select(-indic_ag, -time) %&gt;%
+ # Data varies at the NUTS code level
+ nuts_classify(nuts_code = 'geo')
+
+# Classify version of NUTS 3 codes within country and year
+manure %&gt;%
+  filter(nchar(geo) == 5) %&gt;%
+  filter(indic_ag == 'I07A_EQ_Y') %&gt;%
+  select(-indic_ag) %&gt;%
+  # Data varies at the year x country x NUTS code level. The country grouping
+  # is always used by default.
+  nuts_classify(nuts_code = 'geo', group_vars = 'time')
+
+
+</code></pre>
+
+
+</div>

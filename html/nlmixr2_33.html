@@ -1,0 +1,611 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>n1qn1Control</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Control for n1qn1 estimation method in nlmixr2</h2>
+
+<h3>Description</h3>
+
+<p>Control for n1qn1 estimation method in nlmixr2
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">n1qn1Control(
+  epsilon = (.Machine$double.eps)^0.25,
+  max_iterations = 10000,
+  nsim = 10000,
+  imp = 0,
+  print.functions = FALSE,
+  returnN1qn1 = FALSE,
+  stickyRecalcN = 4,
+  maxOdeRecalc = 5,
+  odeRecalcFactor = 10^(0.5),
+  useColor = crayon::has_color(),
+  printNcol = floor((getOption("width") - 23)/12),
+  print = 1L,
+  normType = c("rescale2", "mean", "rescale", "std", "len", "constant"),
+  scaleType = c("nlmixr2", "norm", "mult", "multAdd"),
+  scaleCmax = 1e+05,
+  scaleCmin = 1e-05,
+  scaleC = NULL,
+  scaleTo = 1,
+  gradTo = 1,
+  rxControl = NULL,
+  optExpression = TRUE,
+  sumProd = FALSE,
+  literalFix = TRUE,
+  addProp = c("combined2", "combined1"),
+  calcTables = TRUE,
+  compress = TRUE,
+  covMethod = c("r", "n1qn1", ""),
+  adjObf = TRUE,
+  ci = 0.95,
+  sigdig = 4,
+  sigdigTable = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>Precision of estimate for n1qn1 optimization.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iterations</code></td>
+<td>
+<p>Number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Number of function evaluations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imp</code></td>
+<td>
+<p>Verbosity of messages.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.functions</code></td>
+<td>
+<p>Boolean to control if the function value
+and parameter estimates are echoed every time a function is
+called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnN1qn1</code></td>
+<td>
+<p>return the n1qn1 output instead of the nlmixr2
+fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stickyRecalcN</code></td>
+<td>
+<p>The number of bad ODE solves before reducing
+the atol/rtol for the rest of the problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxOdeRecalc</code></td>
+<td>
+<p>Maximum number of times to reduce the ODE
+tolerances and try to resolve the system if there was a bad
+ODE solve.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>odeRecalcFactor</code></td>
+<td>
+<p>The ODE recalculation factor when ODE
+solving goes bad, this is the factor the rtol/atol is reduced</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useColor</code></td>
+<td>
+<p>Boolean indicating if focei can use ASCII color codes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>printNcol</code></td>
+<td>
+<p>Number of columns to printout before wrapping
+parameter estimates/gradient</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print</code></td>
+<td>
+<p>Integer representing when the outer step is
+printed. When this is 0 or do not print the iterations.  1 is
+print every function evaluation (default), 5 is print every 5
+evaluations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normType</code></td>
+<td>
+<p>This is the type of parameter
+normalization/scaling used to get the scaled initial values
+for nlmixr2.  These are used with <code>scaleType</code> of.
+</p>
+<p>With the exception of <code>rescale2</code>, these come
+from
+<a href="https://en.wikipedia.org/wiki/Feature_scaling">Feature
+Scaling</a>. The <code>rescale2</code> The rescaling is the same type
+described in the
+<a href="http://apmonitor.com/me575/uploads/Main/optimization_book.pdf">OptdesX</a>
+software manual.
+</p>
+<p>In general, all all scaling formula can be described by:
+</p>
+<p style="text-align: center;"><code class="reqn">v_{scaled}</code>
+</p>
+<p> = (</p>
+<p style="text-align: center;"><code class="reqn">v_{unscaled}-C_{1}</code>
+</p>
+<p>)/</p>
+<p style="text-align: center;"><code class="reqn">C_{2}</code>
+</p>
+
+<p>Where
+</p>
+<p>The other data normalization approaches follow the following formula
+</p>
+<p style="text-align: center;"><code class="reqn">v_{scaled}</code>
+</p>
+<p> = (</p>
+<p style="text-align: center;"><code class="reqn">v_{unscaled}-C_{1}</code>
+</p>
+<p>)/</p>
+<p style="text-align: center;"><code class="reqn">C_{2}</code>
+</p>
+
+
+<ul>
+<li> <p><code>rescale2</code> This scales all parameters from (-1 to 1).
+The relative differences between the parameters are preserved
+with this approach and the constants are:
+</p>
+<p style="text-align: center;"><code class="reqn">C_{1}</code>
+</p>
+<p> = (max(all unscaled values)+min(all unscaled values))/2
+</p>
+<p style="text-align: center;"><code class="reqn">C_{2}</code>
+</p>
+<p> = (max(all unscaled values) - min(all unscaled values))/2
+</p>
+</li>
+<li> <p><code>rescale</code> or min-max normalization. This rescales all
+parameters from (0 to 1).  As in the <code>rescale2</code> the
+relative differences are preserved.  In this approach:
+</p>
+<p style="text-align: center;"><code class="reqn">C_{1}</code>
+</p>
+<p> = min(all unscaled values)
+</p>
+<p style="text-align: center;"><code class="reqn">C_{2}</code>
+</p>
+<p> = max(all unscaled values) - min(all unscaled values)
+</p>
+</li>
+<li> <p><code>mean</code> or mean normalization.  This rescales to center
+the parameters around the mean but the parameters are from 0
+to 1.  In this approach:
+</p>
+<p style="text-align: center;"><code class="reqn">C_{1}</code>
+</p>
+<p> = mean(all unscaled values)
+</p>
+<p style="text-align: center;"><code class="reqn">C_{2}</code>
+</p>
+<p> = max(all unscaled values) - min(all unscaled values)
+</p>
+</li>
+<li> <p><code>std</code> or standardization.  This standardizes by the mean
+and standard deviation.  In this approach:
+</p>
+<p style="text-align: center;"><code class="reqn">C_{1}</code>
+</p>
+<p> = mean(all unscaled values)
+</p>
+<p style="text-align: center;"><code class="reqn">C_{2}</code>
+</p>
+<p> = sd(all unscaled values)
+</p>
+</li>
+<li> <p><code>len</code> or unit length scaling.  This scales the
+parameters to the unit length.  For this approach we use the Euclidean length, that
+is:
+</p>
+<p style="text-align: center;"><code class="reqn">C_{1}</code>
+</p>
+<p> = 0
+</p>
+<p style="text-align: center;"><code class="reqn">C_{2}</code>
+</p>
+<p> = </p>
+<p style="text-align: center;"><code class="reqn">\sqrt(v_1^2 + v_2^2 + \cdots + v_n^2)</code>
+</p>
+
+</li>
+<li> <p><code>constant</code> which does not perform data normalization. That is
+</p>
+<p style="text-align: center;"><code class="reqn">C_{1}</code>
+</p>
+<p> = 0
+</p>
+<p style="text-align: center;"><code class="reqn">C_{2}</code>
+</p>
+<p> = 1
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleType</code></td>
+<td>
+<p>The scaling scheme for nlmixr2.  The supported types are:
+</p>
+
+<ul>
+<li> <p><code>nlmixr2</code>  In this approach the scaling is performed by the following equation:
+</p>
+<p style="text-align: center;"><code class="reqn">v_{scaled}</code>
+</p>
+<p> = (</p>
+<p style="text-align: center;"><code class="reqn">v_{current} - v_{init}</code>
+</p>
+<p>)*scaleC[i] + scaleTo
+</p>
+<p>The <code>scaleTo</code> parameter is specified by the <code>normType</code>,
+and the scales are specified by <code>scaleC</code>.
+</p>
+</li>
+<li> <p><code>norm</code> This approach uses the simple scaling provided
+by the <code>normType</code> argument.
+</p>
+</li>
+<li> <p><code>mult</code> This approach does not use the data
+normalization provided by <code>normType</code>, but rather uses
+multiplicative scaling to a constant provided by the <code>scaleTo</code>
+argument.
+</p>
+<p>In this case:
+</p>
+<p style="text-align: center;"><code class="reqn">v_{scaled}</code>
+</p>
+<p> = </p>
+<p style="text-align: center;"><code class="reqn">v_{current}</code>
+</p>
+<p>/</p>
+<p style="text-align: center;"><code class="reqn">v_{init}</code>
+</p>
+<p>*scaleTo
+</p>
+</li>
+<li> <p><code>multAdd</code> This approach changes the scaling based on
+the parameter being specified.  If a parameter is defined in an
+exponential block (ie exp(theta)), then it is scaled on a
+linearly, that is:
+</p>
+<p style="text-align: center;"><code class="reqn">v_{scaled}</code>
+</p>
+<p> = (</p>
+<p style="text-align: center;"><code class="reqn">v_{current}-v_{init}</code>
+</p>
+<p>) + scaleTo
+</p>
+<p>Otherwise the parameter is scaled multiplicatively.
+</p>
+<p style="text-align: center;"><code class="reqn">v_{scaled}</code>
+</p>
+<p> = </p>
+<p style="text-align: center;"><code class="reqn">v_{current}</code>
+</p>
+<p>/</p>
+<p style="text-align: center;"><code class="reqn">v_{init}</code>
+</p>
+<p>*scaleTo
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleCmax</code></td>
+<td>
+<p>Maximum value of the scaleC to prevent overflow.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleCmin</code></td>
+<td>
+<p>Minimum value of the scaleC to prevent underflow.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleC</code></td>
+<td>
+<p>The scaling constant used with
+<code>scaleType=nlmixr2</code>.  When not specified, it is based on
+the type of parameter that is estimated.  The idea is to keep
+the derivatives similar on a log scale to have similar
+gradient sizes.  Hence parameters like log(exp(theta)) would
+have a scaling factor of 1 and log(theta) would have a scaling
+factor of ini_value (to scale by 1/value; ie
+d/dt(log(ini_value)) = 1/ini_value or scaleC=ini_value)
+</p>
+
+<ul>
+<li>
+<p> For parameters in an exponential (ie exp(theta)) or
+parameters specifying powers, boxCox or yeoJohnson
+transformations , this is 1.
+</p>
+</li>
+<li>
+<p> For additive, proportional, lognormal error structures,
+these are given by 0.5*abs(initial_estimate)
+</p>
+</li>
+<li>
+<p> Factorials are scaled by abs(1/digamma(initial_estimate+1))
+</p>
+</li>
+<li>
+<p> parameters in a log scale (ie log(theta)) are transformed
+by log(abs(initial_estimate))*abs(initial_estimate)
+</p>
+</li>
+</ul>
+<p>These parameter scaling coefficients are chose to try to keep
+similar slopes among parameters.  That is they all follow the
+slopes approximately on a log-scale.
+</p>
+<p>While these are chosen in a logical manner, they may not always
+apply.  You can specify each parameters scaling factor by this
+parameter if you wish.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleTo</code></td>
+<td>
+<p>Scale the initial parameter estimate to this value.
+By default this is 1.  When zero or below, no scaling is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradTo</code></td>
+<td>
+<p>this is the factor that the gradient is scaled to
+before optimizing.  This only works with
+scaleType="nlmixr2".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rxControl</code></td>
+<td>
+<p>'rxode2' ODE solving options during fitting, created with 'rxControl()'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optExpression</code></td>
+<td>
+<p>Optimize the rxode2 expression to speed up
+calculation. By default this is turned on.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sumProd</code></td>
+<td>
+<p>Is a boolean indicating if the model should change
+multiplication to high precision multiplication and sums to
+high precision sums using the PreciseSums package.  By default
+this is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>literalFix</code></td>
+<td>
+<p>boolean, substitute fixed population values as
+literals and re-adjust ui and parameter estimates after
+optimization; Default is 'TRUE'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>addProp</code></td>
+<td>
+<p>specifies the type of additive plus proportional
+errors, the one where standard deviations add (combined1) or the
+type where the variances add (combined2).
+</p>
+<p>The combined1 error type can be described by the following equation:
+</p>
+<p style="text-align: center;"><code class="reqn">y = f + (a + b\times f^c) \times \varepsilon</code>
+</p>
+
+<p>The combined2 error model can be described by the following equation:
+</p>
+<p style="text-align: center;"><code class="reqn">y = f + \sqrt{a^2 + b^2\times f^{2\times c}} \times \varepsilon</code>
+</p>
+
+<p>Where:
+</p>
+<p>- y represents the observed value
+</p>
+<p>- f represents the predicted value
+</p>
+<p>- a  is the additive standard deviation
+</p>
+<p>- b is the proportional/power standard deviation
+</p>
+<p>- c is the power exponent (in the proportional case c=1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calcTables</code></td>
+<td>
+<p>This boolean is to determine if the foceiFit
+will calculate tables. By default this is <code>TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compress</code></td>
+<td>
+<p>Should the object have compressed items</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covMethod</code></td>
+<td>
+<p>Method for calculating covariance.  In this
+discussion, R is the Hessian matrix of the objective
+function. The S matrix is the sum of individual
+gradient cross-product (evaluated at the individual empirical
+Bayes estimates).
+</p>
+
+<ul>
+<li>
+<p> "<code>r,s</code>" Uses the sandwich matrix to calculate the
+covariance, that is: <code>solve(R) %*% S %*% solve(R)</code>
+</p>
+</li>
+<li>
+<p> "<code>r</code>" Uses the Hessian matrix to calculate the
+covariance as <code>2 %*% solve(R)</code>
+</p>
+</li>
+<li>
+<p> "<code>s</code>" Uses the cross-product matrix to calculate the
+covariance as <code>4 %*% solve(S)</code>
+</p>
+</li>
+<li>
+<p> "" Does not calculate the covariance step.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjObf</code></td>
+<td>
+<p>is a boolean to indicate if the objective function
+should be adjusted to be closer to NONMEM's default objective
+function.  By default this is <code>TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>Confidence level for some tables.  By default this is
+0.95 or 95% confidence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigdig</code></td>
+<td>
+<p>Optimization significant digits. This controls:
+</p>
+
+<ul>
+<li>
+<p> The tolerance of the inner and outer optimization is <code>10^-sigdig</code>
+</p>
+</li>
+<li>
+<p> The tolerance of the ODE solvers is
+<code>0.5*10^(-sigdig-2)</code>; For the sensitivity equations and
+steady-state solutions the default is <code>0.5*10^(-sigdig-1.5)</code>
+(sensitivity changes only applicable for liblsoda)
+</p>
+</li>
+<li>
+<p> The tolerance of the boundary check is <code>5 * 10 ^ (-sigdig + 1)</code>
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigdigTable</code></td>
+<td>
+<p>Significant digits in the final output table.
+If not specified, then it matches the significant digits in the
+'sigdig' optimization algorithm.  If 'sigdig' is NULL, use 3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed to <code>nlmixr2est::n1qn1Control()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>bobqya control structure
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matthew L. Fidler
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# A logit regression example with emax model
+
+dsn &lt;- data.frame(i=1:1000)
+dsn$time &lt;- exp(rnorm(1000))
+dsn$DV=rbinom(1000,1,exp(-1+dsn$time)/(1+exp(-1+dsn$time)))
+
+mod &lt;- function() {
+ ini({
+   E0 &lt;- 0.5
+   Em &lt;- 0.5
+   E50 &lt;- 2
+   g &lt;- fix(2)
+ })
+ model({
+   v &lt;- E0+Em*time^g/(E50^g+time^g)
+   ll(bin) ~ DV * v - log(1 + exp(v))
+ })
+}
+
+fit2 &lt;- nlmixr(mod, dsn, est="n1qn1")
+
+print(fit2)
+
+# you can also get the nlm output with fit2$n1qn1
+
+fit2$n1qn1
+
+# The nlm control has been modified slightly to include
+# extra components and name the parameters
+
+</code></pre>
+
+
+</div>

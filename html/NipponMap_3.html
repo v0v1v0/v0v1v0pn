@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>JapanPrefMap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A simple choropleth map of Japan</h2>
+
+<h3>Description</h3>
+
+<p>Draw a very simple choropleth map of Japan with prefecture boundaries
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">JapanPrefMap(col = NULL, inset = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+
+<p>A character vector. RGB or named colors in order of JISCODE to fill a
+polygon of 47 prefectures.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inset</code></td>
+<td>
+<p>logical. if TRUE, Okinawa Prefecture is shown in a inset
+map. The default value is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>any other options passed to plot method of Simple features class.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>JapanPrefMap</code> draws a simple choropleth map of
+Japan in prefecture level with or without inset of Okinawa
+Prefecture. This feature is most frequently desired by Japanese R users
+but has been difficult to draw with R functions, for example,
+<code>map('japan')</code> in <span class="pkg">mapdata</span> package.  What is important is that
+this function receives a color vector in order of JIS code of
+prefectures. Since most official statistics by prefecture is in order of
+the JIS code, users simply create a color sequence for a choropleth map
+without any rearranging the order. Users are now freed from a trouble in
+applying <code>order</code> or <code>merge</code> functions to their data set.
+</p>
+<p>Population set was retrieved from 2010 Population Census of Japan.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix. The coordinates of a label point in each prefecture.
+</p>
+
+
+<h3>Note</h3>
+
+<p>For the sake of simple visualization, prefecture boundaries are lacking
+accuracy; assisted by Quantum GIS (<a href="http://www.qgis.org/">http://www.qgis.org/</a>), the
+author drew by hand the boundaries omitting minor islands. Therefore,
+users should not use the map for calculating area or measuring a distance.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Susumu Tanimura <a href="mailto:aruminat@gmail.com">aruminat@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>cshp</code> in <span class="pkg">cshapes</span> package,
+<code>japan</code> in <span class="pkg">mapdata</span> package.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">JapanPrefMap()
+
+if (requireNamespace("RColorBrewer", quietly = TRUE)) {
+  cols &lt;- rev(RColorBrewer::brewer.pal(8,"Set2"))
+}else{
+  cols &lt;- sample(colours(), 47)
+}
+JapanPrefMap(col = cols, border = gray(.8), axes = TRUE)
+
+if (requireNamespace("foreign", quietly = TRUE)) {
+dat &lt;- foreign::read.dbf(system.file("shapes/jpn.dbf", package="NipponMap"))
+op &lt;- par(bg = "skyblue")
+p &lt;- JapanPrefMap(col = "ivory")
+col &lt;- c("olivedrab4", "olivedrab1")
+pop &lt;- dat$population / 1e+7
+symbols(p, circles = sqrt(pop / (2 * pi)), inches = FALSE,
+    fg = col[1], bg = col[2], add = TRUE)
+idx &lt;- c(1e+6, 5e+6, 1e+7)
+pos &lt;- legend("bottomright", legend = format(idx, scientific = 10, big.mark = ","),
+    title = "Population (2010)", bg = "white", x.intersp = 2, y.intersp = 1.5)
+symbols(pos$text$x - 1, pos$text$y, circles = sqrt(idx / 1e+7 / (2 * pi)),
+    inches = FALSE, fg = col[1], bg = col[2], add = TRUE)
+par(op)
+}
+</code></pre>
+
+
+</div>

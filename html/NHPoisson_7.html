@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stepAICmle.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Choose  the best PP model by AIC in a stepwise algorithm</h2>
+
+<h3>Description</h3>
+
+<p>Performs stepwise model selection by AIC for Poisson proces models 
+estimated by maximum likelihood. 
+</p>
+<p>It calls the auxiliary function <code>checkdim</code> (not intended
+for the users).</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stepAICmle.fun(ImlePP, covariatesAdd = NULL, startAdd = NULL, 
+direction = "forward", ...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ImlePP</code></td>
+<td>
+<p>A <code>mlePP</code>-class object; usually the output from <code>fitPP.fun</code>. 
+It defines the initial model of the stepwise algorithm.  The fitted model cannot include fixed parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariatesAdd</code></td>
+<td>
+<p>Matrix   of the potential covariates to be added to the model; each column  must 
+contain a covariate. In the 'forward'  and the 'both' directions, it is compulsory to assign a matrix to this argument.  
+It is advisable to give names to the columns of 
+this matrix (using <code>dimnames</code>) since,   they will be used  in the output. 
+Otherwise the default names 'New Covariate i' are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>startAdd</code></td>
+<td>
+<p>Optional. The vector of initial values  for the estimation  of  the coefficients 
+of each potential covariate. If it  is NULL,  initial values  equal to 0 are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direction</code></td>
+<td>
+<p>Label indicating the direction of the algortihm: 'forward' (the default), 'backward' or 'both'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to pass to <code>addAIC.fun</code> and <code>dropAIC.fun</code>, 
+for example the constant k for the AIC calculation</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Three directions, forward, backward and both, are implemented. The initial model is given by 
+<code>ImlePP</code> and the algorithm stops 
+when none of the covariates eliminated from the model 
+or  added from the potential covariates set (argument <code>covariatesAdd</code> ) improves the model 
+fitted in the  previous step, according to the AIC.  For the  'both'  and 'forward' directions, the argument <code>covariatesADD</code>
+is compulsary, and the default NULL leads to an error.
+</p>
+<p>In the 'both' direction,   'forward' and 'backward' steps are carried out alternatively. In the 'forward' direction, 
+the initial model usually contains only the intercept.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>mlePP</code>-class object,  the fit of the final PP model selectecd by the algorithm.</p>
+
+
+<h3>References</h3>
+
+<p>Casella, G. and Berger, R.L., (2002). <em>Statistical inference.</em> Brooks/Cole.
+</p>
+<p>Cebrian, A.C., Abaurrea, J. and Asin, J. (2015). NHPoisson: An R Package for 
+Fitting and Validating Nonhomogeneous Poisson Processes. 
+<em>Journal of Statistical Software</em>, 64(6), 1-24.
+</p>
+<p>Venables, W. N. and Ripley, B. D. (2002). <em>Modern Applied Statistics with S.</em> Fourth edition. Springer.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>addAIC.fun</code>, <code>dropAIC.fun</code>, <code>testlik.fun</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+data(BarTxTn)
+
+BarEv&lt;-POTevents.fun(T=BarTxTn$Tx,thres=318, 
+	date=cbind(BarTxTn$ano,BarTxTn$mes,BarTxTn$dia))
+
+#The initial model contains only the inercept
+ mod1Bind&lt;-fitPP.fun(covariates=NULL, posE=BarEv$Px, inddat=BarEv$inddat,
+	tit='BAR  Intercept ', 	start=list(b0=1))
+#the potential covariates
+covB&lt;-cbind(cos(2*pi*BarTxTn$dia/365), sin(2*pi*BarTxTn$dia/365), 
+	BarTxTn$TTx,BarTxTn$Txm31,BarTxTn$Txm31**2)
+dimnames(covB)&lt;-list(NULL,c('cos','sin','TTx','Txm31', 'Txm31**2'))
+
+bb&lt;-stepAICmle.fun(ImlePP=mod1Bind, covariates=covB, startAdd=c(1,-1,0,0,0), 
+direction='both')
+
+</code></pre>
+
+
+</div>

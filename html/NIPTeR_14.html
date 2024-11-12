@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bin_bam_sample</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Load and bin BAM file</h2>
+
+<h3>Description</h3>
+
+<p>Load a BAM file and count reads in bins of size 50.000 base pairs
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bin_bam_sample(bam_filepath, do_sort = FALSE, separate_strands = FALSE,
+  custom_name = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bam_filepath</code></td>
+<td>
+<p>Character The location and filename on the file system where the bam file is stored</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do_sort</code></td>
+<td>
+<p>Boolean Sort the bam file? If the bam is unsorted set to true, 
+but the use of pre-sorted bam files is recommended.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>separate_strands</code></td>
+<td>
+<p>Boolean If set to true, reads from forward and reverse strands are counted and stored separately. 
+This option should be used if you are planning on using regression, since this doubles the number of 
+predictors (F+R) and distributes predictive power more equally over prediction sets since F and R 
+strand from the same chromosome cannot be both in one prediction set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>custom_name</code></td>
+<td>
+<p>String The name of sample. Default samplename is the filename of the bam 
+file without the .bam suffix and filepath prefix.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function returns an object of class NIPTSample, the main 'currency' of this package.
+It is a list with 5 items:
+</p>
+
+<ul>
+<li>
+<p> List <strong>autosomal_chromosome_reads</strong> Autosomal reads are stored in
+a matrix where the columns are the bins and rows (22) represent the autosomal
+chromosomes. The length of this list is either 1 or 2, depending if the 
+forward and reverse reads are counted separately.
+</p>
+</li>
+<li>
+<p> Character <strong>correction_status_autosomal_chromosomes</strong> The correction
+status of the autosomal reads. The status can either be <em>Uncorrected</em> or
+<em>GC Corrected</em> and/or <em>Chi Corrected</em>
+</p>
+</li>
+<li>
+<p> List <strong>sex_chromosome_reads</strong> Sex chromosome reads are stored in a 
+similar matrix(es) as the autosomal chromosome reads, now with 2 (X and Y) rows.
+</p>
+</li>
+<li>
+<p> Character <strong>correction_status_autosomal_chromosomes</strong> The status can 
+either be <em>Uncorrected</em> or <em>GC Corrected</em> and/or <em>Chi Corrected</em>.
+</p>
+</li>
+<li>
+<p> Character <strong>sample_name</strong> Sample name 
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>Object NIPTSample
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+##To process a single sample
+binned_sample &lt;- bin_bam_sample(bam_filepath = "/path/to/file.bam", 
+                                separate_strands = T)
+
+##To create a control group out of a set of bam files
+bam_filepaths &lt;- list.files(path = "/Path/to/bamfiles/", 
+                            pattern = ".bam", full.names = T)
+
+control_group  &lt;- as_control_group(nipt_samples = lapply(X = bam_filepaths, 
+                                   bin_bam_sample, do_sort = F, 
+                                   separate_strands = T))
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,323 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DPMGibbsN_parallel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Slice Sampling of the Dirichlet Process Mixture Model
+with a prior on alpha</h2>
+
+<h3>Description</h3>
+
+<p>Slice Sampling of the Dirichlet Process Mixture Model
+with a prior on alpha
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DPMGibbsN_parallel(
+  Ncpus,
+  type_connec,
+  z,
+  hyperG0,
+  a = 1e-04,
+  b = 1e-04,
+  N,
+  doPlot = TRUE,
+  nbclust_init = 30,
+  plotevery = N/10,
+  diagVar = TRUE,
+  use_variance_hyperprior = TRUE,
+  verbose = TRUE,
+  monitorfile = "",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Ncpus</code></td>
+<td>
+<p>the number of processors available</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type_connec</code></td>
+<td>
+<p>The type of connection between the processors. Supported
+cluster types are <code>"SOCK"</code>, <code>"FORK"</code>, <code>"MPI"</code>, and
+<code>"NWS"</code>. See also <code>makeCluster</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>data matrix <code>d x n</code> with <code>d</code> dimensions in rows
+and <code>n</code> observations in columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyperG0</code></td>
+<td>
+<p>prior mixing distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>shape hyperparameter of the Gamma prior
+on the concentration parameter of the Dirichlet Process. Default is <code>0.0001</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>scale hyperparameter of the Gamma prior
+on the concentration parameter of the Dirichlet Process. Default is <code>0.0001</code>. If <code>0</code>, 
+then the concentration is fixed set to <code>a</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>number of MCMC iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doPlot</code></td>
+<td>
+<p>logical flag indicating whether to plot MCMC iteration or not.
+Default to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbclust_init</code></td>
+<td>
+<p>number of clusters at initialization.
+Default to 30 (or less if there are less than 30 observations).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotevery</code></td>
+<td>
+<p>an integer indicating the interval between plotted iterations when <code>doPlot</code>
+is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diagVar</code></td>
+<td>
+<p>logical flag indicating whether the variance of each cluster is
+estimated as a diagonal matrix, or as a full matrix.
+Default is <code>TRUE</code> (diagonal variance).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use_variance_hyperprior</code></td>
+<td>
+<p>logical flag indicating whether a hyperprior is added 
+for the variance parameter. Default is <code>TRUE</code> which decrease the impact of the variance prior
+on the posterior. <code>FALSE</code> is useful for using an informative prior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical flag indicating whether partition info is
+written in the console at each MCMC iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>monitorfile</code></td>
+<td>
+<p>a writable connections or a character string naming a file to write into,
+to monitor the progress of the analysis.
+Default is <code>""</code> which is no monitoring.  See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to be passed to <code>plot_DPM</code>.
+Only used if <code>doPlot</code> is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a object of class <code>DPMclust</code> with the following attributes:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td>
+<code>mcmc_partitions</code>:</td>
+<td>
+<p> a list of length <code>N</code>. Each
+element <code>mcmc_partitions[n]</code> is a vector of length
+<code>n</code> giving the partition of the <code>n</code> observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>alpha</code>:</td>
+<td>
+<p>a vector of length <code>N</code>. <code>cost[j]</code> is the cost
+associated to partition <code>c[[j]]</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>listU_mu</code>:</td>
+<td>
+<p>a list of length <code>N</code> containing the matrices of
+mean vectors for all the mixture components at each MCMC iteration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>listU_Sigma</code>:</td>
+<td>
+<p>a list of length <code>N</code> containing the arrays of
+covariances matrices for all the mixture components at each MCMC iteration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>U_SS_list</code>:</td>
+<td>
+<p>a list of length <code>N</code> containing the lists of
+sufficient statistics for all the mixture components at each MCMC iteration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>weights_list</code>:</td>
+<td>
+<p>a list of length <code>N</code> containing the logposterior values
+at each MCMC iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>logposterior_list</code>:</td>
+<td>
+<p>a list of length <code>N</code> containing the logposterior values
+at each MCMC iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>data</code>:</td>
+<td>
+<p>the data matrix <code>d x n</code> with <code>d</code> dimensions in rows
+and <code>n</code> observations in columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>nb_mcmcit</code>:</td>
+<td>
+<p> the number of MCMC iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>clust_distrib</code>:</td>
+<td>
+<p>the parametric distribution of the mixture component - <code>"gaussian"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>hyperG0</code>:</td>
+<td>
+<p>the prior on the cluster location</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Boris Hejblum
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>DPMGibbsN</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Scaling up: ----
+rm(list=ls())
+#Number of data
+n &lt;- 2000
+set.seed(1234)
+
+# Sample data
+d &lt;- 3
+nclust &lt;- 5
+m &lt;- matrix(nrow=d, ncol=nclust, runif(d*nclust)*8)
+# p: cluster probabilities
+p &lt;- runif(nclust)
+p &lt;- p/sum(p)
+
+# Covariance matrix of the clusters
+sdev &lt;- array(dim=c(d, d, nclust))
+for (j in 1:nclust){
+    sdev[, ,j] &lt;- matrix(NA, nrow=d, ncol=d)
+    diag(sdev[, ,j]) &lt;- abs(rnorm(n=d, mean=0.3, sd=0.1))
+    sdev[, ,j][lower.tri(sdev[, ,j], diag = FALSE)] &lt;- rnorm(n=d*(d-1)/2,
+    mean=0, sd=0.05)
+    sdev[, ,j][upper.tri(sdev[, ,j], diag = FALSE)] &lt;- (sdev[, ,j][
+                                                        lower.tri(sdev[, ,j], diag = FALSE)])
+}
+c &lt;- rep(0,n)
+z &lt;- matrix(0, nrow=d, ncol=n)
+for(k in 1:n){
+    c[k] = which(rmultinom(n=1, size=1, prob=p)!=0)
+    z[,k] &lt;- m[, c[k]] + sdev[, , c[k]]%*%matrix(rnorm(d, mean = 0, sd = 1), nrow=d, ncol=1)
+    #cat(k, "/", n, " observations simulated\n", sep="")
+}
+
+# hyperprior on the Scale parameter of DPM
+a &lt;- 0.001
+b &lt;- 0.001
+
+# Number of iterations
+N &lt;- 25
+
+# do some plots
+doPlot &lt;- TRUE
+
+# Set parameters of G0
+hyperG0 &lt;- list()
+hyperG0[["mu"]] &lt;- rep(0, d)
+hyperG0[["kappa"]] &lt;- 0.01
+hyperG0[["nu"]] &lt;- d + 2
+hyperG0[["lambda"]] &lt;- diag(d)/10
+
+
+nbclust_init &lt;- 30
+
+if(interactive()){
+ library(doParallel)
+ MCMCsample &lt;- DPMGibbsN_parallel(Ncpus=2, type_connec="FORK", z, hyperG0, a, b, 
+                                  N=1000, doPlot=FALSE, nbclust_init=30, 
+                                  plotevery=100, gg.add=list(ggplot2::theme_bw(),
+                                  ggplot2::guides(shape = 
+                                    ggplot2::guide_legend(override.aes = list(fill="grey45")))),
+                                  diagVar=FALSE)
+}
+
+
+</code></pre>
+
+
+</div>

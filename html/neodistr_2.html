@@ -1,0 +1,73 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>brms_custom_family</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Neonormal as custom distribution family in brms</h2>
+
+<h3>Description</h3>
+
+<p>Neonormal as custom distribution family in brms
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">brms_custom_family(family = "msnburr", vectorize = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>distribution neo-normal option: "msnburr", "msnburr2a", "gmsnburr", and "jfst"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vectorize</code></td>
+<td>
+<p>logical; if TRUE,  Stan code of family distribution is vectorize 
+The default value of this parameter is TRUE</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>custom_family is an object of class custom family of brms and stanvars_family is stanvars object (the Stan code of function of neo-normal distributions (lpdf,cdf,lcdf,lccdf,quantile and rng))
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Achmad Syahrul Choir
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  library(brms)
+  library(neodistr)
+  x&lt;-runif(100)
+  e&lt;-rmsnburr(100,0,1,0.8)
+  y&lt;-0.5+0.8*x+e
+  data&lt;-data.frame(y,x)
+  msnburr&lt;-brms_custom_family("msnburr")
+  fit &lt;- brm(
+    y ~ x, data = data,
+    family = msnburr$custom_family, stanvars = msnburr$stanvars_family,
+    prior=c(set_prior("cauchy(0,5)",class="alpha"),set_prior("cauchy(0,1)",class="sigma"))
+  )
+  summary(fit)
+  pp &lt;- posterior_predict(fit)
+  ppe &lt;- posterior_epred(fit)
+  loo(fit)
+  
+</code></pre>
+
+
+</div>

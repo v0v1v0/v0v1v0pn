@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroPreprocess</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Data cleaning and standardization
+</h2>
+
+<h3>Description</h3>
+
+<p>Convert to numerical values, remove unusable rows and columns, and
+standardize scale of each variable.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroPreprocess(data, method = "standard", clip = 5.0,
+    resolution = 100, trim = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A matrix or a data frame. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Method for standardizing scale and location, see details below.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clip</code></td>
+<td>
+
+<p>Range for clipping extreme values in multiples of standard deviations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution</code></td>
+<td>
+
+<p>Maximum number of sampling points to capture distribution shape.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trim</code></td>
+<td>
+
+<p>if TRUE, empty rows and columns are removed.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Standardization methods include empty string for no action, "standard"
+for centering by mean and division by standard deviation, "uniform" for
+normalized ranks between -1 and 1, "tapered" for a version of the
+rank-based method that puts more samples around zero and "normal"
+for quantile-based mapping to standard normal distribution.
+</p>
+<p>The standard method also checks if the distribution is skewed and
+applies logarithm if it makes the distribution closer to the normal curve.
+</p>
+<p>Clipping is not applied if the method is rank-based or if the threshold
+is set to NULL.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix of numerical values. A value mapping model is stored in the
+attribute 'mapping'. The names of binary columns are stored in the
+attribute 'binary'.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ville-Petteri Makinen
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Show original data characteristics.
+print(summary(dataset))
+
+# Detect binary columns.
+ds &lt;- nroPreprocess(dataset, method = "")
+print(attr(ds,"binary"))
+
+# Centering and scaling cholesterol.
+ds &lt;- nroPreprocess(dataset$CHOL)
+print(summary(ds))
+
+# Centering and scaling.
+ds &lt;- nroPreprocess(dataset)
+print(summary(ds))
+
+# Tapered ranks.
+ds &lt;- nroPreprocess(dataset, method = "tapered")
+print(summary(ds))
+
+# Standard normal ranks.
+ds &lt;- nroPreprocess(dataset, method = "normal")
+print(summary(ds))
+</code></pre>
+
+
+</div>

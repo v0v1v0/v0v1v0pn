@@ -1,0 +1,258 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>globaltest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Testing the equality of the <em>M</em> curves specific to each level</h2>
+
+<h3>Description</h3>
+
+<p>This function can be used to test the equality of the 
+<code class="reqn">M</code> curves specific to each level.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">globaltest(
+  formula,
+  data,
+  na.action = "na.omit",
+  der,
+  smooth = "kernel",
+  weights = NULL,
+  nboot = 500,
+  h0 = -1,
+  h = -1,
+  nh = 30,
+  kernel = "epanech",
+  p = 3,
+  kbin = 100,
+  seed = NULL,
+  cluster = TRUE,
+  ncores = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>An object of class <code>formula</code>: a sympbolic 
+description of the model to be fitted. The details of model 
+specification are given under 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame, matrix or list required by 
+the formula. If not found in data, the variables are taken from 
+<code>environment(formula)</code>, typically the environment from which
+<code>globaltest</code> is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>A function which indicates what should happen when the 
+data contain 'NA's. The default is 'na.omit'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>der</code></td>
+<td>
+<p>Number which determines any inference process. 
+By default <code>der</code> is <code>NULL</code>. If this term is <code>0</code>, 
+the testing procedures is applied for the estimate. If it is <code>1</code> or
+<code>2</code>, it is designed for the first or second derivative, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth</code></td>
+<td>
+<p>Type smoother used: <code>smooth = "kernel"</code> for local polynomial
+kernel smoothers and <code>smooth = "splines"</code> for splines using the 
+<code>mgcv</code> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Prior weights on the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>Number of bootstrap repeats.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h0</code></td>
+<td>
+<p>The kernel bandwidth smoothing parameter for the global effect (see
+references for more details at the estimation). Large values of the bandwidth lead
+to smoothed estimates; smaller values of the bandwidth lead lo undersmoothed estimates. 
+By default, cross validation is used to obtain the bandwidth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>The kernel bandwidth smoothing parameter for the partial effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nh</code></td>
+<td>
+<p>Integer number of equally-spaced bandwidth on which the
+<code>h</code> is discretised, to speed up computation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>A character string specifying the desired kernel. 
+Defaults to <code>kernel = "epanech"</code>, where the Epanechnikov
+density function kernel will be used. Also, several types of kernel funcitons 
+can be used:  triangular and Gaussian density function, 
+with <code>"triang"</code> and <code>"gaussian"</code> term, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Degree of polynomial to be used. Its value must be the value of
+derivative + 1. The default value is 3 due to the function
+returns the estimation, first and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kbin</code></td>
+<td>
+<p>Number of binning nodes over which the function 
+is to be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Seed to be used in the bootstrap procedure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>A logical value. If  <code>TRUE</code> (default), the
+bootstrap procedure is  parallelized (only for <code>smooth = "splines"</code>.
+Note that there are cases 
+(e.g., a low number of bootstrap repetitions) that R will gain in
+performance through serial computation. R takes time to distribute tasks
+across the processors also it will need time for binding them all together
+later on. Therefore, if the time for distributing and gathering pieces
+together is greater than the time need for single-thread computing, it does
+not worth parallelize.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>An integer value specifying the number of cores to be used
+in the parallelized procedure. If <code>NULL</code> (default), the number of cores 
+to be used is equal to the number of cores of the machine - 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other options.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>globaltest</code>  can be used to test the equality of the <code class="reqn">M</code> 
+curves specific to each level. This bootstrap based test assumes the  
+following null hypothesis:
+</p>
+<p style="text-align: center;"><code class="reqn">H_0^r: m_1^r(\cdot) = \ldots = m_M^r(\cdot)</code>
+</p>
+
+<p>versus the general alternative
+</p>
+<p style="text-align: center;"><code class="reqn">H_1^r: m_i^r (\cdot)  \ne m_j^r (\cdot) \quad  \rm{for} \quad \rm{some}
+ \quad i, j \in \{ 1, \ldots, M\}. </code>
+</p>
+
+<p>Note that, if <code class="reqn">H_0</code> is not rejected, then the equality of critical points
+will also accepted. 
+</p>
+<p>To test the null hypothesis, it is used a test statistic, 
+<code class="reqn">T</code>, based on direct nonparametric estimates of the curves. 
+</p>
+<p>If the null hypothesis is true, the <code class="reqn">T</code> value should be close to zero 
+but is generally greater. The test rule based on <code class="reqn">T</code> consists of 
+rejecting the null hypothesis if <code class="reqn">T &gt; T^{1- \alpha}</code>, where <code class="reqn">T^p</code> 
+is the empirical <code class="reqn">p</code>-percentile of <code class="reqn">T</code> under the null hypothesis. To
+obtain this percentile, we have used bootstrap techniques. See details in 
+references.
+</p>
+<p>Note that the models fitted by <code>globaltest</code> function are specified 
+in a compact symbolic form. The ~ operator is basic in the formation 
+of such models. An expression of the form <code>y ~ model</code>  is interpreted as 
+a specification that the response <code>y</code> is modelled by a predictor 
+specified symbolically by <code>model</code>. The possible terms consist of a 
+variable name or a variable name and a factor name separated by : operator. 
+Such a term is interpreted as the interaction of the continuous variable and 
+the factor. However, if <code>smooth = "splines"</code>, the formula is based on the function
+formula.gam of the mgcv package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The <code class="reqn">T</code> value and the <code class="reqn">p</code>-value  are returned. Additionally, 
+it is shown the decision, accepted or rejected, of the global test. 
+The null hypothesis is rejected if the <code class="reqn">p</code>-value<code class="reqn">&lt; 0.05</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Marta Sestelo, Nora M. Villanueva and Javier Roca-Pardinas.
+</p>
+
+
+<h3>References</h3>
+
+<p>Sestelo, M. (2013). Development and computational implementation of 
+estimation and inference methods in flexible regression models. 
+Applications in Biology, Engineering and Environment. PhD Thesis, Department
+of Statistics and O.R. University of Vigo.
+</p>
+<p>Sestelo, M., Villanueva, N.M., Meira-Machado, L., Roca-Pardinas, J. (2017). 
+npregfast: An R Package for Nonparametric Estimation and Inference in Life 
+Sciences. Journal of Statistical Software, 82(12), 1-27.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(npregfast)
+data(barnacle)
+globaltest(DW ~ RC : F, data = barnacle, der = 1, seed = 130853, nboot = 100)
+
+# globaltest(height ~ s(age, by = sex), data = children, 
+# seed = 130853, der = 0, smooth = "splines")
+
+
+</code></pre>
+
+
+</div>

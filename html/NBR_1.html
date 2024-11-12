@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>edge_lm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Edgewise Linear Model</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the specified linear model (LM) for each edge in the network,
+and calculates the multiple testing p-value based on the p.adjust function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">edge_lm(net, nnodes, idata, mod, diag = FALSE, padj,
+       cores = NULL, expList = NULL, verbose = TRUE,
+       ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+<p>3D volume (2D matrices for each observation) or 2D matrix of edges as columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nnodes</code></td>
+<td>
+<p>Number of network nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idata</code></td>
+<td>
+<p>Matrix or data.frame including independent variables of interest of the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod</code></td>
+<td>
+<p>Model, specify as a string, e.g., "~Group + Age".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diag</code></td>
+<td>
+<p>Logical indicating if matrix diagonal is to be included in the analysis (default: FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>padj</code></td>
+<td>
+<p>Character string that indicates the p.adjust method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Number of selected cores for parallel computing (default: NULL).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expList</code></td>
+<td>
+<p>Character string adding variable names to the varlist of 'clusterExport' (default: NULL).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical indicating if messages should be printed (default: TRUE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to the low level 'lm' function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It's VERY IMPORTANT when giving <em>net</em> as a 2D matrix or data.frame, to be
+completely sure that column distribution fits that of the upper triangle indices of an
+<em>nnodes</em> * <em>nnodes</em> matrix. This may be verified through the edge indices, e.g.,
+"which(upper.tri(matrix(nrow = nnodes, ncol = nnodes)), arr.ind = T)" (see vignette NBR-LME
+for more details).
+</p>
+<p>To know more about <em>padj</em> methods, check help for the <code>p.adjust</code> function. It is
+noticeable that this multiple comparison approach can be much more faster than the permutations run by
+the Network-Based Statistics framework, however this is a much more conservative approach
+(see Zalesky et al. (2010) doi: <a href="https://doi.org/10.1016/j.neuroimage.2010.06.041">10.1016/j.neuroimage.2010.06.041</a> for more detail).
+</p>
+
+
+<h3>Value</h3>
+
+<p><em>data.frame</em> containing the edge labels, observed statistics,
+their corresponding p-value, and their adjusted p-values.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(frontal2D)
+
+edge_result &lt;- edge_lm(net = frontal2D[,-(1:3)], nnodes = 28,
+  idata = frontal2D[,1:3], mod = "~ Group + Sex * Age",
+  padj = "fdr")
+head(edge_result)
+if(any(edge_result[,5]&lt;0.05)){
+  show(edge_result[which(edge_result[,5]&lt;0.05),1:5])
+}
+
+
+</code></pre>
+
+
+</div>

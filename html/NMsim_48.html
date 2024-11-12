@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>readParsWide</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Parameter data from csv</h2>
+
+<h3>Description</h3>
+
+<p>Reads output table from simpar and returns a long format
+data.table. This is the same format as returned by NMreadExt()
+which can be used by NMsim.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">readParsWide(
+  data,
+  col.model = NULL,
+  strings.par.type = c(THETA = "^T.*", OMEGA = "^O.*", SIGMA = "^S."),
+  as.fun
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data.frame or a path to a delimited file to be read
+using 'data.table::fread'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.model</code></td>
+<td>
+<p>Name of the model counter, default is "model". If
+the provided name is not found in data, it will be created as
+a row counter. Why needed? Each row in data represents a set
+of parameters, i.e. a model. In the long format result, each
+model will have multiple rows. Hence, a model identifier is
+needed to distinguish between models in results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strings.par.type</code></td>
+<td>
+<p>Defines how column names get associated
+with THETA, OMEGA, and SIGMA. Default is to look for "T", "O",
+or "S" as starting letter. If customizing, make sure each no
+column name will be matched by more than one criterion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>The default is to return data as a data.frame. Pass
+a function (say <code>tibble::as_tibble</code>) in as.fun to convert to
+something else. If data.tables are wanted, use
+as.fun="data.table". The default can be configured using
+NMdataConf.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The wide data format read by 'readParsWide' is not a Nonmem
+format. It is used to bridge output from other tools such as
+simpar, and potentially PSN. 
+</p>
+<p>This function reads a data that is "wide" in parameters - it has a
+column for each parameter, and one row per parameter set or
+"model". It returns a data set that is "long" in model and
+parameters. The long format contains
+</p>
+
+<ul>
+<li>
+<p> id.model.par The unique model-parameter identifier. The row-identifier.
+</p>
+</li>
+<li>
+<p> model Model identifier. 
+</p>
+</li>
+<li>
+<p> par.type ("THETA", "OMEGA", "SIGMA")
+</p>
+</li>
+<li>
+<p> i and j indexes for the parameters (j is NA for par.type=="THETA").
+</p>
+</li>
+<li>
+<p> value The parameter value 
+</p>
+</li>
+<li>
+<p> parameter Nonmem-style parameter names. THETA1, OMEGA(1,1) etc. Notice the inconsistent naming of THETA vs others.
+</p>
+</li>
+<li>
+<p> name.wide The column name in the wide data where this value was taken
+</p>
+</li>
+</ul>
+<p>The columns or "measure variables" from which to read values  are
+specified as three regular expressions, called THETA, OMEGA, and SIGMA. The default three regular expressions will associate a column name starting with "T" with THETAs, while "O" or "S" followed by anything means "OMEGA" or "SIGMA".
+</p>
+<p>readParsWide extracts i and j indexes from sequences of digits in the column names. TH.1 would be TETA1, SG1.1 is SIGMA(1,1).
+</p>
+
+
+<h3>Value</h3>
+
+<p>a long-format data.frame of model parameters
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+tab.ext &lt;- readParsCsv("simpartab.csv")
+## or
+tab.simpar &lt;- fread("simpartab.csv")
+tab.ext &lt;- readParsCsv(tab.simpar)
+NMsim(...,method.sim=NMsim_VarCov,tab.ext=tab.ext)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

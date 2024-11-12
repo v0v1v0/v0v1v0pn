@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generic Sequential Monte Carlo Method</h2>
+
+<h3>Description</h3>
+
+<p>Function of generic sequential Monte Carlo method with delay weighting not using full information proposal distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SMC(
+  Sstep,
+  nobs,
+  yy,
+  mm,
+  par,
+  xx.init,
+  xdim,
+  ydim,
+  resample.sch,
+  delay = 0,
+  funH = identity
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Sstep</code></td>
+<td>
+<p>a function that performs one step propagation using a proposal distribution.
+Its input includes <code>(mm,xx,logww,yyy,par,xdim,ydim)</code>, where
+<code>xx</code> and <code>logww</code> are the last iteration samples and log weight. <code>yyy</code> is the
+observation at current time step. It should return <code>xx</code> (the samples xt) and
+<code>logww</code> (their corresponding log weight).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nobs</code></td>
+<td>
+<p>the number of observations <code>T</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yy</code></td>
+<td>
+<p>the observations with <code>T</code> columns and <code>ydim</code> rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mm</code></td>
+<td>
+<p>the Monte Carlo sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par</code></td>
+<td>
+<p>a list of parameter values to pass to <code>Sstep</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xx.init</code></td>
+<td>
+<p>the initial samples of <code>x_0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xdim</code></td>
+<td>
+<p>the dimension of the state variable <code>x_t</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ydim</code></td>
+<td>
+<p>the dimension of the observation <code>y_t</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resample.sch</code></td>
+<td>
+<p>a binary vector of length <code>nobs</code>, reflecting the resampling schedule. resample.sch[i]= 1 indicating resample should be carried out at step <code>i</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delay</code></td>
+<td>
+<p>the maximum delay lag for delayed weighting estimation. Default is zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>funH</code></td>
+<td>
+<p>a user supplied function <code>h()</code> for estimation <code>E(h(x_t) | y_t+d</code>). Default
+is identity for estimating the mean. The function should be able to take vector or matrix as input and operates on each element of the input.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function returns <code>xhat</code>, an array with dimensions <code>(xdim; nobs; delay+1)</code>,
+and the scaled log-likelihood value <code>loglike</code>. If <code>loglike</code> is needed, the log weight
+calculation in the <code>Sstep</code> function should retain all constants that are related to
+the parameters involved. Otherwise, <code>Sstep</code> function may remove all constants
+that are common to all the Monte Carlo samples. It needs a utility function
+<code>circular2ordinal</code>, also included in the <code>NTS</code> package, for efficient memory management.
+</p>
+
+
+<h3>References</h3>
+
+<p>Tsay, R. and Chen, R. (2018). Nonlinear Time Series Analysis. John Wiley &amp; Sons, New Jersey.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">nobs= 100; pd= 0.95; ssw= 0.1; ssv= 0.5;
+xx0= 0; ss0= 0.1; nyy= 50;
+yrange= c(-80,80); xdim= 2; ydim= nyy;
+mm= 10000
+yr=yrange[2]-yrange[1]
+par=list(ssw=ssw,ssv=ssv,nyy=nyy,pd=pd,yr=yr)
+simu=simuTargetClutter(nobs,pd,ssw,ssv,xx0,ss0,nyy,yrange)
+xx.init=matrix(nrow=2,ncol=mm)
+xx.init[1,]=yrange[1]+runif(mm)*yr
+xx.init[2,]=rep(0.1,mm)
+resample.sch=rep.int(1,nobs)
+out= SMC(Sstep.Clutter,nobs,simu$yy,mm,par,xx.init,xdim,ydim,resample.sch)
+</code></pre>
+
+
+</div>

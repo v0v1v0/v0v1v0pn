@@ -1,0 +1,268 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>noisyCE2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-Entropy Optimisation of Noisy Functions</h2>
+
+<h3>Description</h3>
+
+<p>Unconstraint optimisation of noisy functions through the cross-entropy
+algorithm.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">noisyCE2(
+  f,
+  domain,
+  ...,
+  rho = 0.05,
+  N = 1000,
+  smooth = NULL,
+  stopwindow = tail(gam, (n &gt; 20) * n/2),
+  stoprule = ts_change(x),
+  maxiter = 1000,
+  maximise = TRUE,
+  verbose = "v"
+)
+
+## S3 method for class 'noisyCE2'
+print(x, ...)
+
+## S3 method for class 'noisyCE2'
+summary(object, ...)
+
+## S3 method for class 'noisyCE2'
+plot(x, what = c("x", "gam", "param"), start = NULL, end = NULL, ...)
+
+## S3 method for class 'noisyCE2'
+coef(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>objective function which takes the vector of optimisation variables
+as first argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>domain</code></td>
+<td>
+<p>a <code>list</code> (or other coercible objects) where each component
+specifies the domain of each variable of the objective function <code>f</code>.
+The components of the list may be either objects of <code>typevar</code> class (see
+type_variable) or strings identifying one of type_variable functions
+(for example <code>"real"</code> for function <code>type_real()</code>). See § Examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments to be passed to <code>f</code> or to other methods (for
+<code>print</code> and <code>plot</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>parameter <code class="reqn">\rho</code> of the Cross-Entropy algorithm. This argument
+may be passed either as a numeric value in <code class="reqn">(0,1)</code> or as an unevaluated
+expression which may include the number of current iteration <code>n</code>, or the
+argument <code>N</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>parameter <code class="reqn">N</code> of the Cross-Entropy algorithm. This argument
+may be passed either as a positive integer or as an unevaluated expression
+which may include the number of current iteration <code>n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth</code></td>
+<td>
+<p>list of unevaluated expressions to be used as smoothing rules
+for the parameters of the sampling probability distributions of <strong>all
+variables</strong>. If not <code>NULL</code>, all default or set smoothing rules of all
+variables will be overwritten. See type_variable for details and examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stopwindow</code></td>
+<td>
+<p>unevaluated expression returning the object to be passed to
+the stopping rule. Symbol <code>gam</code> permits the time series <code class="reqn">\gamma_t</code> to
+be used (as a <code>numeric</code> vector).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stoprule</code></td>
+<td>
+<p>stopping rule passed as an unevaluated expression including
+<code>x</code> as the object returned by evaluation of argument <code>stopwindow</code>. The
+algorithm is stopped when zero is returned by the evaluation of <code>stoprule</code>.
+If returned object has attribute <code>mess</code>, this is used as a message.
+Currently, built-in stopping rules are <code>ts_change()</code> and <code>geweke()</code>, others
+may be defined by user.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>maximum number of iteration. When it is reached, algorithm is
+stopped whether or not the stopping criterion is satisfied. If the maximum
+number of iteration is reached, the <code>code</code> and the <code>message</code> components of
+<code>noisyCE</code> object are overwritten.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maximise</code></td>
+<td>
+<p>if <code>TRUE</code> (default) <code>f</code> is maximised, otherwise a
+minimisation of <code>f</code> is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>algorithm verbosity (values <code>v</code>, <code>vv</code> and <code>vvv</code> are admitted).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x, object</code></td>
+<td>
+<p>object of class <code>noisyCE2</code>, as returned by <code>noisyCE2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+<p>type of plot should be drawn. If <code>what = "x"</code> (default), values
+of the variables are plotted as time series; if <code>what = "gam"</code>, time series
+of statistics <code class="reqn">\gamma</code> is plotted; if <code>what = "param"</code>, time series of
+parameters of the sampling distributions are plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start, end</code></td>
+<td>
+<p>first and last value to be plotted. If <code>NULL</code>, all values
+are plotted.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>noisyCE2</code> structured as a list with the following
+components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>argument <code>f</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fobj</code></td>
+<td>
+<p>objective function <code>f</code> where possible arguments passed through
+argument <code>...</code> have been substituted. Thus, the value of the objective
+function maximised by <code>noisyCE</code> in <code>x0</code> can be computed as <code>fobj(x0)</code>. If
+a minimisation has been performed, <code>fobj</code> returns <code>f</code> with sign inverted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xopt</code></td>
+<td>
+<p><code>numeric</code> vector with solution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hxopt</code></td>
+<td>
+<p>matrix of <code>niter</code> rows and <code>length(xopt)</code> columns with values of
+variables generated by the optimisation algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p><code>list</code> of <code>length(xopt)</code> components where time series of
+parameters (vectors <code class="reqn">v_t</code>) are stored for each variable as <code>data.frame</code>
+objects with <code>niter+1</code> rows (the first rows are the starting values set
+through function <code>noisyCEcontrol</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gam</code></td>
+<td>
+<p>vector of values <code class="reqn">\gamma_t</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>niter</code></td>
+<td>
+<p>number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>code</code></td>
+<td>
+<p>convergence code of the algorithm. Value <code>0</code> means that algorithm
+has converged; other values are defined according to the stopping rule.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convMess</code></td>
+<td>
+<p>textual message associated to the convergence code (if any).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compTimes</code></td>
+<td>
+<p>named vector computation times of each phase.</p>
+</td>
+</tr>
+</table>
+<h3>Methods (by generic)</h3>
+
+
+<ul>
+<li> <p><code>print</code>: display synthetic information about a <code>noisyCE2</code> object
+</p>
+</li>
+<li> <p><code>summary</code>: display summary information about a <code>noisyCE2</code> object
+</p>
+</li>
+<li> <p><code>plot</code>: plot various components of a <code>noisyCE2</code> object
+</p>
+</li>
+<li> <p><code>coef</code>: get the solution of the optimisation
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(magrittr)
+# Optimisation of the 4-dimensional function:
+# f(x1,x2,x3,x4)=-(x1-1)^2-(x2-2)^2-(x3-3)^2-(x4-4)^2
+sol &lt;- noisyCE2(function(x) -sum((x - (1:4))^2), domain = rep('real', 4))
+# Representation of the convergence process:
+plot(sol, what = 'x')
+plot(sol, what = 'gam')
+
+</code></pre>
+
+
+</div>

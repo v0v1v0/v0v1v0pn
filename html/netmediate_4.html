@@ -1,0 +1,787 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MEMS</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Function to estimate the micro effect on macro structure (MEMS).</h2>
+
+<h3>Description</h3>
+
+<p><code>MEMS</code> implements parametric and nonparametric estimation routines to estimate the
+micro effect on macro structure when using a generative network model (i.e., a model
+where the dyad, dyad-time period, or dyad-group is the unit of analysis). The MEMS is defined in postestimation as a function of the possibly endogenous micro process <code class="reqn">X</code>, which is assumed to be a predictor in the micro model of the form <code class="reqn">A=f(\theta X + \gamma ^TZ)</code>, where <code class="reqn">Z</code> is a matrix of possibly endogenous controls and <code class="reqn">A</code> is the network of interest. The MEMS when <code class="reqn">\theta</code> changes from 0 to 1 is given by </p>
+<p style="text-align: center;"><code class="reqn">MEMS=\sum_i \frac{M(\theta, X, \gamma, Z)_i-M(\gamma, Z)_i}{n}</code>
+</p>
+<p>, for <code class="reqn">n</code> observations. Tuning parameters can be assigned to toggle the strength of <code class="reqn">\theta</code> in model-implied estimates of <code class="reqn">MEMS</code>. <code>MEMS</code> currently accepts <code>glm</code>, <code>glmer</code>, <code>ergm</code>, <code>btergm</code>, <code>sienaFit</code>, <code>rem.dyad</code>, and <code>netlogit</code> objects and implements both parametric and nonparametric estimation. Pooled estimation for multiple network models is also implemented for <code>ergm</code> and <code>sienaFit</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MEMS(model,
+      micro_process,
+      macro_function,
+      object_type=NULL,
+      interval=c(0,1),
+      nsim=500,
+      algorithm="parametric",
+      silent=FALSE,
+      full_output=FALSE,
+      SAOM_data=NULL,
+      SAOM_var=NULL,
+      time_interval=NULL,
+      covar_list=NULL,
+      edgelist=NULL,
+      net_logit_y=NULL,
+      net_logit_x=NULL,
+      group_id=NULL,
+      node_numbers=NULL,
+      mediator=NULL,
+      link_id=NULL,
+      controls=NULL,
+      control_functions=NULL)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the micro-model to be analyzed. Currently accepts <code>glm</code>, <code>glmer</code>, <code>ergm</code>, <code>btergm</code>, <code>sienaFit</code>, <code>rem.dyad</code>, and <code>netlogit</code> objects. Pooled estimation for multiple network models is also implemented for <code>ergm</code> and <code>sienaFit</code> objects. To implement pooled estimation, <code>model</code> should be provided as a list of <code>ergm</code> or <code>sienaFit</code> objects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>micro_process</code></td>
+<td>
+<p>a character string containing the name of the micro process of interest. The character string should exactly match coefficient names in <code>model</code> output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>macro_function</code></td>
+<td>
+<p>a <code>function</code> that calculates the macro statistic of interest. Currently accepts user defined functions as well as functions inherent in the <code>igraph</code> and <code>statnet</code> packages for <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object_type</code></td>
+<td>
+<p>A character string that tells netmediate the type of object to apply the
+<code>macro_function</code> to. Currently accepts <code>igraph</code> and <code>network</code> objects. If left <code>NULL</code>, <code>network</code> objects are assumed. Can be over-ridden to use other object types with a user-function by defining a function that accepts either a <code>network</code> or <code>igraph</code> object and returns a numeric value or vector of numeric values (see examples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>The value of tuning parameters to assign to <code class="reqn">\theta</code>. Should be provided as a vector of numeric values with 2 entries.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>The number of simulations or bootstrap samples to use during estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>The estimation algorithm to be used. Currently accepts <code>"parametric"</code> and <code>"nonparametric"</code>. If <code>"parametric"</code>, estimation is obtained with Monte Carlo sampling. If <code>"nonparametric"</code>, estimation uses bootstrap resampling.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>logical parameter. Whether to provide updates on the progress of the simulation or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full_output</code></td>
+<td>
+<p>logical parameter. If set to <code>TRUE</code>, the entire distribution of simulated statistics will be provided as part of the model output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SAOM_data</code></td>
+<td>
+<p>required when the model is a <code>sienaFit</code> object; ignored otherwise. If a <code>sienaFit</code> object is provided, <code>SAOM_data</code> should be the <code>siena</code> object that contains the data for SAOM estimation. If using pooled estimation on multiple <code>sienaFit</code> objects (i.e., providing a list of <code>sienaFit</code> objects), then <code>SAOM_data</code> should be provided as an ordered list with each entry containing the <code>siena</code> object corresponding to list of <code>sienaFit</code> objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SAOM_var</code></td>
+<td>
+<p>optional parameter when the model is a <code>sienaFit</code> object. <code>SAOM_var</code> is a list of of the <code>varCovar</code> and <code>varDyadCovar</code> objects used to assign time varying node and dyad covariates when calling <code>sienaDataCreate</code>. If provided, <code>netmediate</code> assigns the varying node covariates and dyad covariates to each simulated network. This parameter is required when <code>macro_function</code> computes a statistic that varies as a function of time varying node or dyad covariates (i.e., network segregation, assorativity). Time invariant characteristics (<code>coCovar</code> and <code>coDyadCovar</code>) are handled internally by <code>MEMS</code> and should not be provided. When providing a list of <code>sienaFit</code> objects for pooled estimation, <code>SAOM_var</code> should be provided as a list of lists, where each entry in the list contains a list of <code>varCovar</code> and <code>varDyadCovar</code> objects associated with corresponding <code>sienaFit</code> object. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_interval</code></td>
+<td>
+<p>an optional parameter to be used with <code>rem.dyad</code> objects. May be provided as a numeric vector or the character string <code>"aggregate"</code>. If a numeric vector is provided unique network snapshots at each interval. For example, <code>time_interval=c(0,2,3)</code> would induce two networks, one for the 0 - 2 time period and one for the 2 - 3 time period. If specified as <code>"aggregate"</code>, the MEMS is calculated by creating an aggregated cross-sectional representation of the entire event sequence. If left <code>NULL</code>, defaults to |<code>"aggregate"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covar_list</code></td>
+<td>
+<p>an optional list of sender/receiver covariates used in <code>rem.dyad</code> estimation. Only required for <code>rem.dyad</code> objects when covariates are included. The list format should correspond to the format required by <code>rem.dyad</code></p>
+</td>
+</tr>
+</table>
+<p>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>edgelist</code></td>
+<td>
+<p>an optional three column edgelist providing the sender, receiver, and time of event occurrence when using rem.<code>rem.dyad</code>. Only required when <code>time_interval</code> is set to <code>NULL</code> or <code>"aggregate"</code>. Ignored for other types of models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_logit_y</code></td>
+<td>
+<p>the dependent variable for <code>netlogit</code> objects. Should be provided as a vector. Only required when model is a <code>netlogit</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_logit_x</code></td>
+<td>
+<p>the matrix of independent variables for <code>netlogit</code> type objects. Only required when model is a <code>netlogit</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_id</code></td>
+<td>
+<p>optional vector of group identifiers to use when estimating a <code>glm</code> or <code>glmer</code> on grouped data (i.e., multiple time periods, multiple networks). When specified,  <code>MEMS</code> will induce unique networks for each grouping factor. If left unspecified, all groups/time periods are pooled. If using <code>glmer</code>, the grouping factor does not have to be provided as part of the model or used as a random effect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>node_numbers</code></td>
+<td>
+<p>a numeric vector containing the number of nodes in each group_id when using <code>glm</code> or <code>glmer</code>. If estimating MEMS aggregated over all networks (i.e., <code>group_id=NULL</code>), this shoud be the total number of nodes in all networks. Required when using <code>glm</code> or <code>glmer</code>, ignored otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mediator</code></td>
+<td>
+<p>a character string detailing the mediator of interest. Intended for internal use with the <code>AMME</code> function; not intended for end users.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link_id</code></td>
+<td>
+<p>a vector or list of vectors corresponding to unique identifiers. Intended for internal use with the <code>AMME</code> function; not intended for end users. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>controls</code></td>
+<td>
+<p>a vector of character strings listing the controls to be calculated when using <code>AMME</code>. Intended for internal use with the <code>AMME</code> function; not intended for end users. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control_functions</code></td>
+<td>
+<p>a list of functions to calculate the macro control variables provided in controls. Intended for internal use with the <code>AMME</code> function; not intended for end users. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Estimates the MEMS over the provided intervals. If the macro statistic is calculated on the node or subgraph levels or on multiple network observations, the aMEMS is provided instead. Standard errors and confidence intervals are based on the sampling distribution of simulated values, which are calculated either parametrically or nonparametrically according to <code>algorithm</code>. Parametric estimation is typically faster, but cannot be used for nonparametric network models (e.g., quadratic assignment procedure).
+</p>
+<p><code>macro_function</code> is the workhorse component of MEMS. The function should calculate the macro statistic of interest. <code>netmediate</code> currently supports functions calculated on <code>igraph</code> and <code>network</code> objects, which should be specified as using the <code>object_type</code> argument. These may be functions inherent to the <code>statnet</code> and <code>igraph</code> software package or they may be functions from other packages that accept <code>network</code>/<code>igraph</code> objects. They may also be user-defined functions that accept <code>network</code> or <code>igraph</code> objects as input and return a numeric value or vector of numeric values as output. It is also possible to over-ride the <code>network</code> and <code>igraph</code> object requirements within a user function. To do so, set the <code>object_type</code> argument to either <code>network</code> or <code>igraph</code> and then define a user-function that accepts a <code>network</code> or <code>igraph</code> object as its input, converts the object to the desired data structure, calculates the statistic of interest, and finally returns a numeric value or vector of numeric values. See examples below for an illustration.
+</p>
+<p>By default, the MEMS is provided by averaging over the distribution of simulated values. If <code>full_output</code> is set to <code>TRUE</code>, the entire distribution of simualted statistics is returned. This may be useful when the median or mode of the simulated distribution is required or if the researcher wants to inspect the distributional shape of simulated values.
+</p>
+<p><code>MEMS</code> also supports pooled estimation for multiple <code>ergm</code> or <code>sienaFit</code> objects. To use pooled estimation, the model parameter should be specified as a list of <code>ergm</code> or <code>sienaFit</code> objects. If using <code>sienaFit</code>, the <code>SAOM_data</code> argument will also need to be specified as an ordered list with elements corresponding to entries in the list of <code>sienaFit</code> objects. Similarly, the <code>SAOM_var</code> parameter will need to be specified as a list of lists, where each entry in the list is, itself, a list containing all <code>varCovar</code> and <code>varDyadCovar</code> objects used to calculate macro statistics of interest. Note that <code>SAOM_var</code> should not be provided if the macro statistic of interest is not a function of the variables contained in <code>varCovar</code> and <code>varDyadCovar</code>.
+</p>
+<p>When estimating a relational event model with a <code>rem.dyad</code> object, <code>time_interval</code> can be specified to provide exact time intervals over which to induce unique networks. This utility is often useful when combining <code>rem.dyad</code> estimation with <code>AMME</code> when the <code>macro_model</code> is panel data with coarse timing information. The same behavior can be obtained when estimating a relational event model using <code>glm</code> or <code>glmer</code> by assigning the desired time intervals in the model matrix and then providing the vector of time intervals to the <code>group_id</code> parameter when calling <code>MEMS</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>full_output=FALSE</code>, then a table is returned with the MEMS, its standard error, confidence interval, and p-value.
+</p>
+<p>If <code>full_output=TRUE</code>, then a list is returned with the following three elements.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>summary_dat</code></td>
+<td>
+<p>is the table of summary output containing the MEMS, its standard error, confidence interval, and p-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_data</code></td>
+<td>
+<p>is a matrix where each row is a simulated draw of the MEMS (or a simulation draw for a specific network in the case of temporal data or pooled estimation) and each column corresponds to a unique value provided in the interval argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mems_samples</code></td>
+<td>
+<p>is vector matrix corresponding where each row is a simulated draw of the MEM (or a simulation draw for a specific network in the case of temporal data or pooled estimation) and each column represents the differences in MEMS/aMEMS when subtracting the value of a macro statistic at one interval level from the next highest interval level.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Duxbury, Scott W. Associate Professor, University of North Carolina–Chapel Hill, Department of Sociology.
+</p>
+
+
+<h3>References</h3>
+
+<p>Duxbury, Scott W. 2024. "Micro Effects on Macro Structure in Social Networks." Sociological Methodology.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>AMME</code>
+<code>ergm.mma</code>
+<code>mediate</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+
+########################################
+# ERGM examples and basic utilities
+#######################################
+
+
+####start with a simple model
+library(statnet)
+
+data("faux.mesa.high")
+
+model1&lt;-ergm(faux.mesa.high~edges+
+               nodecov("Grade")+
+               nodefactor("Race")+
+               nodefactor("Sex")+
+               nodematch("Race")+
+               nodematch("Sex")+
+               absdiff("Grade"))
+
+
+
+##calculate the MEMS when the absolute difference in grade is changed from an interval of 0 to 1
+  #with default specifications for gtrans
+MEMS(model1,
+     micro_process="absdiff.Grade",
+     macro_function = gtrans,
+     object_type = "network",
+     nsim=100,
+     interval=c(0,1),
+     silent=FALSE,
+     algorithm = "parametric")
+
+#call an argument from gtrans by specifying it as a function
+  #use nonparametric estimation
+MEMS(model1,
+     micro_process="absdiff.Grade",
+     macro_function = function(x){gtrans(x,measure="strongcensus")},
+     object_type = "network",
+     nsim=100,
+     interval=c(0,1),
+     silent=FALSE,
+     algorithm = "nonparametric")
+
+
+
+
+####calculate the MEMS using igraph
+MEMS(model1,
+     micro_process="absdiff.Grade",
+     macro_function = function(x){igraph::transitivity(x,type="local")},
+     object_type = "igraph",
+     nsim=100,
+     interval=c(0,1),
+     silent=FALSE,
+     algorithm = "parametric")
+
+
+
+##specify a user function that counts the number of communities
+community_counts&lt;-function(x){
+  walktrap&lt;-igraph::walktrap.community(x) #use walktrap community detection
+  return(length(unique(walktrap$membership))) #return the number of communities
+}
+
+MEMS(model1,
+     micro_process="absdiff.Grade",
+     macro_function = community_counts,
+     object_type = "igraph",
+     nsim=100,
+     interval=c(0,1),
+     silent=FALSE,
+     algorithm = "parametric")
+
+
+
+##calculate a function using exogenous node attributes
+assortativity_grade&lt;-function(x){
+  require(igraph)
+  return(assortativity_nominal(x,V(x)$Grade))
+}
+
+MEMS(model1,
+     micro_process="absdiff.Grade",
+     macro_function = assortativity_grade,
+     object_type = "igraph",
+     nsim=100,
+     interval=c(0,1),
+     silent=FALSE,
+     algorithm = "parametric")
+
+##specify a user function that does not depend on either igraph or statnet
+  #assuming a network input object, we have
+manual_user_function&lt;-function(x){
+  x&lt;-as.sociomatrix(x)
+  return(colSums(x))
+}
+
+MEMS(model1,
+     micro_process="absdiff.Grade",
+     macro_function = manual_user_function,
+     object_type = "network",
+     nsim=100,
+     interval=c(0,1),
+     silent=FALSE,
+     algorithm = "parametric")
+
+
+
+
+
+
+
+####estimation for POOLED ERGM
+data("faux.magnolia.high")
+
+model2&lt;-ergm(faux.magnolia.high~edges+
+               nodecov("Grade")+
+               nodefactor("Race")+
+               nodefactor("Sex")+
+               nodematch("Race")+
+               nodematch("Sex")+
+               absdiff("Grade"))
+
+
+
+MEMS(list(model1,model2),
+     micro_process="absdiff.Grade",
+     macro_function = assortativity_grade,
+     object_type = "igraph",
+     nsim=50,
+     interval=c(0,1),
+     silent=FALSE,
+     algorithm = "parametric")
+
+
+
+#################################
+#   Estimation with GLM and GLMER
+#################################
+library(btergm)
+
+#use models 1 and 2 from examples above
+glm_dat&lt;-edgeprob(model1)
+glm_dat2&lt;-edgeprob(model2)
+glm_dat2&lt;-glm_dat2[,-c(4)]
+
+
+##create stacked dataset for the purposes of grouped estimation
+glm_dat$net_id&lt;-"mesa" #specify ID for each network
+glm_dat2$net_id&lt;-"magnolia"
+glm_dat&lt;-rbind(glm_dat,glm_dat2)
+
+
+##estimate as a linear probability model
+net_glm&lt;-glm(tie~nodecov.Grade+
+               nodefactor.Race.Hisp+
+               nodefactor.Race.NatAm+
+               nodefactor.Race.Other+
+               nodefactor.Sex.M+
+               nodematch.Race+
+               nodematch.Sex+
+               absdiff.Grade,
+             data=glm_dat)
+
+
+
+MEMS(net_glm,
+     micro_process="nodematch.Race", #should be written as in netlogit output
+     macro_function = function(x){gtrans(x)},
+     object_type = "network",
+     nsim=100,
+     interval=c(0,.5),
+     silent=FALSE,
+     full_output = FALSE,
+     algorithm = "parametric",
+     group_id=glm_dat$net_id, #provide network ID for estimation
+     node_numbers =c(network.size(faux.mesa.high), #provide the number of nodes in each network
+                      network.size(faux.magnolia.high)))
+
+
+##estimate as a multilevel model
+library(lme4)
+net_glmer&lt;-glmer(tie~nodecov.Grade+
+               nodefactor.Race.Hisp+
+               nodefactor.Race.NatAm+
+               nodefactor.Race.Other+
+               nodefactor.Sex.M+
+               nodematch.Race+
+               nodematch.Sex+
+               absdiff.Grade+
+                 (1|net_id),
+             data=glm_dat,
+             family=gaussian)
+
+
+
+MEMS(net_glmer,
+     micro_process="nodematch.Race", #should be written as in netlogit output
+     macro_function = function(x){gtrans(x)},
+     object_type = "network",
+     nsim=50,
+     interval=c(0,.5),
+     silent=FALSE,
+     full_output = FALSE,
+     algorithm = "parametric",
+     group_id=glm_dat$net_id,
+     node_numbers =c(203,974))
+
+
+
+
+##############################################
+##nonparametric estimation for bootstrap TERGM
+##############################################
+
+library(btergm)
+data(alliances)
+ally_data&lt;-list(LSP[[1]],
+                LSP[[2]],
+                LSP[[3]])
+
+bt_model&lt;-btergm(ally_data~edges+
+                   gwesp(.7,fixed=T)+
+                   mutual,R=200)
+
+
+
+MEMS(bt_model,
+     micro_process="gwesp.OTP.fixed.0.7",
+     macro_function = gtrans,
+     object_type = "network",
+     nsim=50,
+     interval=c(0,1),
+     silent=FALSE,
+     algorithm = "nonparametric")
+
+
+
+
+
+################################
+# Parametric estimation using SAOM
+##################################
+library(RSiena)
+#specify 3 wave network panel data as DV
+network_list&lt;-array(c(s501,s502,s503),dim = c(50,50,3))
+
+Network&lt;-sienaDependent(network_list)
+Smoking&lt;-varCovar(s50s)
+Alcohol&lt;-varCovar(s50a)
+SAOM.Data&lt;-sienaDataCreate(Network=Network,Smoking,Alcohol)
+
+#specify
+SAOM.terms&lt;-getEffects(SAOM.Data)
+SAOM.terms&lt;-includeEffects(SAOM.terms,egoX,altX,sameX,interaction1="Alcohol")
+SAOM.terms&lt;-includeEffects(SAOM.terms,egoX,altX,sameX,interaction1="Smoking")
+SAOM.terms&lt;-includeEffects(SAOM.terms,transTies,inPop)
+
+
+create.model&lt;-sienaAlgorithmCreate(projname="netmediate",
+                                   nsub=5,
+                                   n3=2000)
+
+
+##estimate the model using siena07
+SAOM_model&lt;-siena07(create.model,
+                        data=SAOM.Data,
+                        effects=SAOM.terms,
+                        verbose=TRUE)
+
+
+SAOM_model
+
+
+
+
+##basic specification for reciprocity effects on outdegree distribution
+MEMS(SAOM_model,
+     micro_process="reciprocity", #should be written as in SIENA output
+     macro_function = function(x){igraph::degree(x,mode="out")},
+     object_type = "igraph",
+     interval=c(0,.5),
+     SAOM_data=SAOM.Data,
+     silent=FALSE,
+     algorithm = "parametric")
+
+
+
+##include user functions on time varying covariates
+assortativity_smoking&lt;-function(x){
+  return(assortativity_nominal(x,V(x)$Smoking))
+}
+
+
+MEMS(SAOM_model,
+     micro_process="reciprocity",
+     macro_function = assortativity_smoking,
+     object_type = "igraph",
+     interval=c(0,.5),
+     SAOM_data=SAOM.Data,
+     SAOM_var=list(Smoking=Smoking,Alcohol=Alcohol), #Smoking and Alcohol are varCovar objects
+     silent=FALSE,
+     full_output = FALSE,
+     algorithm = "parametric")
+
+
+
+
+###Pooled SAOM
+MEMS(list(SAOM_model,SAOM_model),
+     micro_process="reciprocity",
+     macro_function = gtrans,
+     object_type = "network",
+     interval=c(0,.5),
+     SAOM_data=list(SAOM.Data,SAOM.Data),
+     silent=FALSE,
+     full_output = FALSE,
+     nsim=100,
+     algorithm = "parametric")
+
+
+#Pooled SAOM with user functions and time varying attributes
+assortativity_smoking&lt;-function(x){
+  return(assortativity_nominal(x,V(x)$Smoking))
+}
+
+
+
+MEMS(list(SAOM_model,SAOM_model),
+     micro_process="reciprocity",
+     macro_function = assortativity_smoking,
+     object_type = "igraph",
+     interval=c(0,.5),
+     SAOM_data=list(SAOM.Data,SAOM.Data),
+     SAOM_var=list(list(Smoking=Smoking,Alcohol=Alcohol),
+                    list(Smoking=Smoking,Alcohol=Alcohol)),
+     silent=FALSE,
+     full_output = FALSE,
+     nsim=100,
+     algorithm = "parametric")
+
+
+
+
+
+
+
+
+################################################
+## Selection and Influence in SAOM when analyzing
+## co-evolution of networks and behavior
+################################################
+
+
+##Example Moran decomposition
+library(RSiena)
+
+###run the model--taken from RSiena scripts
+
+# prepare first two waves of s50 data for RSiena analysis:
+(thedata &lt;- sienaDataCreate(
+  friendship = sienaDependent(array(
+    c(s501,s502),dim=c(50,50,2))),
+  drinking = sienaDependent(s50a[,1:2])
+))
+
+# specify a model with (generalised) selection and influence:
+themodel &lt;- getEffects(thedata)
+themodel &lt;- includeEffects(themodel,name='friendship',gwespFF)
+themodel &lt;- includeEffects(themodel,name='friendship',simX,interaction1='drinking')
+themodel &lt;- includeEffects(themodel,name='drinking',avSim,interaction1='friendship')
+themodel
+
+
+
+# estimate this model:
+estimation.options &lt;- sienaAlgorithmCreate(projname='results',cond=FALSE,seed=1234567)
+(theresults &lt;- siena07(estimation.options,data=thedata,effects=themodel))
+
+
+
+##calculate MEMS for selection effect
+  #Uses Moran_dv--a function internally called by netmediate
+  #to calculate change in amount of network autocorrelation
+  #as a function of both endogenous behavior and network dependent
+  #variables
+
+MEMS(theresults,
+     micro_process="drinking similarity",
+     macro_function =Moran_dv,
+     object_type = "network",
+     SAOM_data = thedata,
+     silent=FALSE,
+     nsim=50)
+
+#just influence
+MEMS(theresults,
+     micro_process="drinking average similarity",
+     macro_function =Moran_dv,
+     object_type = "network",
+     SAOM_data = thedata,
+     silent=FALSE,
+     nsim=50)
+
+##joint effect of selection and influence
+MEMS(theresults,
+     micro_process=c("drinking similarity","drinking average similarity"),
+     macro_function =Moran_dv,
+     object_type = "network",
+     SAOM_data = thedata,
+     silent=FALSE,
+     nsim=500)
+
+
+
+
+
+
+
+#######################################
+# Relational event models using relevent
+#######################################
+set.seed(21093)
+library(relevent)
+##generate a network with 15 discrete time periods
+  #example based on relevent rem.dyad example
+library(relevent)
+roweff&lt;-rnorm(10) #Build rate matrix
+roweff&lt;-roweff-roweff[1] #Adjust for later convenience
+coleff&lt;-rnorm(10)
+coleff&lt;-coleff-coleff[1]
+lambda&lt;-exp(outer(roweff,coleff,"+"))
+diag(lambda)&lt;-0
+ratesum&lt;-sum(lambda)
+esnd&lt;-as.vector(row(lambda)) #List of senders/receivers
+erec&lt;-as.vector(col(lambda))
+time&lt;-0
+edgelist&lt;-vector()
+while(time&lt;15){ # Observe the system for 15 time units
+  drawsr&lt;-sample(1:100,1,prob=as.vector(lambda)) #Draw from model
+  time&lt;-time+rexp(1,ratesum)
+  if(time&lt;=15) #Censor at 15
+    edgelist&lt;-rbind(edgelist,c(time,esnd[drawsr],erec[drawsr]))
+  else
+    edgelist&lt;-rbind(edgelist,c(15,NA,NA))
+}
+effects&lt;-c("CovSnd","FERec")
+
+
+
+##estimate model
+fit.time&lt;-rem.dyad(edgelist,10,effects=effects,
+                   covar=list(CovSnd=roweff),
+                   ordinal=FALSE,hessian=TRUE)
+
+
+###aggregate estimation
+MEMS(fit.time,
+     micro_process="CovSnd.1", #should be written as in relevent output
+     macro_function = function(x){sna::degree(x)},
+     object_type = "network",
+     nsim=10,
+     interval=c(0,.5),
+     silent=FALSE,
+     covar_list=list(CovSnd=roweff), #covariate effects
+     time_interval="aggregate", ##aggregated estimation
+     edgelist=edgelist,
+     algorithm = "parametric")
+
+
+##time interval estimation
+##estimation with time intervals
+MEMS(fit.time,
+     micro_process="CovSnd.1",
+     macro_function = function(x){igraph::degree(x)},
+     object_type = "igraph",
+     nsim=10,
+     interval=c(0,.1),
+     silent=TRUE,
+     covar_list=list(CovSnd=roweff),
+     time_interval=c(0,5,10,15), #specify three time intervals, 0 - 5, 5 - 10, and 10 - 15
+     algorithm = "parametric")
+
+
+
+
+
+
+
+########################################################
+# Network regression with quadratic assignment procedure
+########################################################
+library(sna)
+##generate network data
+set.seed(21093)
+x&lt;-rgraph(20,4)
+y.l&lt;-x[1,,]+4*x[2,,]+2*x[3,,]
+y.p&lt;-apply(y.l,c(1,2),function(a){1/(1+exp(-a))})
+y&lt;-rgraph(20,tprob=y.p)
+
+nl&lt;-netlogit(y,x,reps=100)
+summary(nl)
+
+
+
+MEMS(nl,
+     micro_process="x2", #should be written as in netlogit output
+     macro_function = function(x){degree(x)},
+     object_type = "igraph",
+     nsim=20,
+     interval=c(0,1),
+     silent=FALSE,
+     full_output = FALSE,
+     net_logit_y=y,
+     net_logit_x=x,
+     algorithm = "nonparametric")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</code></pre>
+
+
+</div>

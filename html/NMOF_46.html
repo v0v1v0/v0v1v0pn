@@ -1,0 +1,191 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>minvar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Minimum-Variance Portfolios
+</h2>
+
+<h3>Description</h3>
+
+<p>Compute minimum-variance portfolios, subject to lower and upper bounds
+on weights.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">minvar(var, wmin = 0, wmax = 1, method = "qp",
+       groups = NULL, groups.wmin = NULL, groups.wmax = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+
+<p>the covariance matrix: a numeric (real), symmetric matrix
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wmin</code></td>
+<td>
+
+<p>numeric: a lower bound on weights. May also be a vector that holds
+specific bounds for each asset.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wmax</code></td>
+<td>
+
+<p>numeric: an upper bound on weights. May also be a vector that holds
+specific bounds for each asset.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>character. Currently, only <code>"qp"</code> is supported.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+
+<p>a list of group definitions
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups.wmin</code></td>
+<td>
+
+<p>a numeric vector
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups.wmax</code></td>
+<td>
+
+<p>a numeric vector
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For method <code>"qp"</code>, the function uses
+<code>solve.QP</code> from package
+<span class="pkg">quadprog</span>. Because of the algorithm that
+<code>solve.QP</code> uses, <code>var</code> has to be positive
+definite (i.e. must be of full rank).
+</p>
+
+
+<h3>Value</h3>
+
+<p>a numeric vector (the portfolio weights) with an attribute
+<code>variance</code> (the portfolio's variance)
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+<p>Schumann, E. (2012) Computing the global minimum-variance
+portfolio. <a href="http://enricoschumann.net/R/minvar.htm">http://enricoschumann.net/R/minvar.htm</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>TAopt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## variance-covariance matrix from daily returns, 1 Jan 2014 -- 31 Dec 2013, of
+## cleaned data set at http://enricoschumann.net/data/gilli_accuracy.html
+
+if (requireNamespace("quadprog")) {
+
+    var &lt;- structure(c(0.000988087100677907, -0.0000179669410403153, 0.000368923882626859,
+                       0.000208303611101873, 0.000262742052359594, -0.0000179669410403153,
+                       0.00171852167358765, 0.0000857467457561209, 0.0000215059246610556,
+                       0.0000283532159921211, 0.000368923882626859, 0.0000857467457561209,
+                       0.00075871953281751, 0.000194002299424151, 0.000188824454515841,
+                       0.000208303611101873, 0.0000215059246610556, 0.000194002299424151,
+                       0.000265780633005374, 0.000132611196599808, 0.000262742052359594,
+                       0.0000283532159921211, 0.000188824454515841, 0.000132611196599808,
+                       0.00025948420130626),
+                     .Dim = c(5L, 5L),
+                     .Dimnames = list(c("CBK.DE", "VOW.DE", "CON.DE", "LIN.DE", "MUV2.DE"),
+                                      c("CBK.DE", "VOW.DE", "CON.DE", "LIN.DE", "MUV2.DE")))
+
+    ##            CBK.DE     VOW.DE    CON.DE    LIN.DE   MUV2.DE
+    ## CBK.DE   0.000988 -0.0000180 0.0003689 0.0002083 0.0002627
+    ## VOW.DE  -0.000018  0.0017185 0.0000857 0.0000215 0.0000284
+    ## CON.DE   0.000369  0.0000857 0.0007587 0.0001940 0.0001888
+    ## LIN.DE   0.000208  0.0000215 0.0001940 0.0002658 0.0001326
+    ## MUV2.DE  0.000263  0.0000284 0.0001888 0.0001326 0.0002595
+    ##
+
+    minvar(var, wmin = 0, wmax = 0.5)
+
+    minvar(var,
+           wmin = c(0.1,0,0,0,0), ## enforce at least 10% weight in CBK.DE
+           wmax = 0.5)
+
+    minvar(var, wmin = -Inf, wmax = Inf)   ## no bounds
+    ## [1] -0.0467  0.0900  0.0117  0.4534  0.4916
+
+    minvar(var, wmin = -Inf, wmax = 0.45)  ## no lower bounds
+    ## [1] -0.0284  0.0977  0.0307  0.4500  0.4500
+
+    minvar(var, wmin =  0.1, wmax = Inf)   ## no upper bounds
+    ## [1] 0.100 0.100 0.100 0.363 0.337
+
+    ## group constraints:
+    ##   group 1 consists of asset 1 only,   and must have weight [0.25,0.30]
+    ##   group 2 consists of assets 4 and 5, and must have weight [0.10,0.20]
+
+    ##   =&gt; unconstrained
+    minvar(var, wmin = 0, wmax = 0.40)
+    ## [1] 0.0097 0.1149 0.0754 0.4000 0.4000
+
+    ##   =&gt; with group constraints
+    minvar(var, wmin = 0, wmax = 0.40,
+           groups = list(1, 4:5),
+           groups.wmin = c(0.25, 0.1),
+           groups.wmax = c(0.30, 0.2))
+    ## [1] 0.250 0.217 0.333 0.149 0.051
+}
+</code></pre>
+
+
+</div>

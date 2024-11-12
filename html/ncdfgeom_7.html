@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>write_geometry</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Write geometries and attributes to NetCDF-CF</h2>
+
+<h3>Description</h3>
+
+<p>Creates a file with point, line or polygon instance data ready for the 
+extended NetCDF-CF timeSeries featuretype format.
+</p>
+<p>Will also add attributes if provided data has them.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">write_geometry(
+  nc_file,
+  geom_data,
+  instance_dim_name = NULL,
+  variables = list()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nc_file</code></td>
+<td>
+<p><code>character</code> file path to the nc file to be created.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geom_data</code></td>
+<td>
+<p>sf <code>data.frame</code> with POINT, LINESTRING, MULTILINESTRING, 
+POLYGON, or MULTIPOLYGON geometries. Note that three dimensional geometries 
+are not supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>instance_dim_name</code></td>
+<td>
+<p><code>character</code> Not required if adding geometry to a 
+NetCDF-CF Discrete Sampling Geometries timeSeries file. For a new file, will 
+use package default – "instance" – if not supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p><code>character</code> If a an existing netCDF files is provided, this 
+list of variables that should be related to the geometries.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+
+<ol><li> <p><a href="http://cfconventions.org/cf-conventions/cf-conventions.html">http://cfconventions.org/cf-conventions/cf-conventions.html</a>
+</p>
+</li></ol>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+hucPolygons &lt;- sf::read_sf(system.file('extdata','example_huc_eta.json', package = 'ncdfgeom'))
+
+hucPolygons_nc &lt;- ncdfgeom::write_geometry(nc_file=tempfile(), 
+                                           geom_data = hucPolygons)
+try({
+  ncdump &lt;- system(paste("ncdump -h", hucPolygons_nc), intern = TRUE)
+  cat(ncdump ,sep = "\n")
+}, silent = TRUE)
+
+</code></pre>
+
+
+</div>

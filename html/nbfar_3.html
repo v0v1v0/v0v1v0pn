@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nbfar_sim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulated data for testing NBFAR and NBRRR model</h2>
+
+<h3>Description</h3>
+
+<p>Simulate response and covariates for multivariate negative binomial regression with a low-rank and sparse coefficient matrix. Coefficient matrix is expressed in terms of U (left singular vector), D (singular values) and V (right singular vector).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nbfar_sim(U, D, V, n, Xsigma, C0, disp, depth)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>U</code></td>
+<td>
+<p>specified value of U</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>specified value of D</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>V</code></td>
+<td>
+<p>specified value of V</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>sample size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xsigma</code></td>
+<td>
+<p>covariance matrix used to generate predictors in X</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C0</code></td>
+<td>
+<p>intercept value in the coefficient matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>disp</code></td>
+<td>
+<p>dispersion parameter of the generative model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>depth</code></td>
+<td>
+<p>log of the sequencing depth of the microbiome data (used as an offset in the simulated multivariate negative binomial regression model)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Generated response matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Generated predictor matrix</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Mishra, A., Müller, C. (2022) <em>Negative binomial factor regression models with application to microbiome data analysis.  https://doi.org/10.1101/2021.11.29.470304</em>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Model specification:
+SD &lt;- 123
+set.seed(SD)
+p &lt;- 100; n &lt;- 200
+pz &lt;- 0
+nrank &lt;- 3                # true rank
+rank.est &lt;- 5             # estimated rank
+nlam &lt;- 20                # number of tuning parameter
+s  = 0.5
+q &lt;- 30
+control &lt;- nbfar_control()  # control parameters
+#
+#
+## Generate data
+D &lt;- rep(0, nrank)
+V &lt;- matrix(0, ncol = nrank, nrow = q)
+U &lt;- matrix(0, ncol = nrank, nrow = p)
+#
+U[, 1] &lt;- c(sample(c(1, -1), 8, replace = TRUE), rep(0, p - 8))
+U[, 2] &lt;- c(rep(0, 5), sample(c(1, -1), 9, replace = TRUE), rep(0, p - 14))
+U[, 3] &lt;- c(rep(0, 11), sample(c(1, -1), 9, replace = TRUE), rep(0, p - 20))
+#
+  # for similar type response type setting
+  V[, 1] &lt;- c(rep(0, 8), sample(c(1, -1), 8,
+    replace =
+      TRUE
+  ) * runif(8, 0.3, 1), rep(0, q - 16))
+  V[, 2] &lt;- c(rep(0, 20), sample(c(1, -1), 8,
+    replace =
+      TRUE
+  ) * runif(8, 0.3, 1), rep(0, q - 28))
+  V[, 3] &lt;- c(
+    sample(c(1, -1), 5, replace = TRUE) * runif(5, 0.3, 1), rep(0, 23),
+    sample(c(1, -1), 2, replace = TRUE) * runif(2, 0.3, 1), rep(0, q - 30)
+  )
+U[, 1:3] &lt;- apply(U[, 1:3], 2, function(x) x / sqrt(sum(x^2)))
+V[, 1:3] &lt;- apply(V[, 1:3], 2, function(x) x / sqrt(sum(x^2)))
+#
+D &lt;- s * c(4, 6, 5) # signal strength varries as per the value of s
+or &lt;- order(D, decreasing = TRUE)
+U &lt;- U[, or]
+V &lt;- V[, or]
+D &lt;- D[or]
+C &lt;- U %*% (D * t(V)) # simulated coefficient matrix
+intercept &lt;- rep(0.5, q) # specifying intercept to the model:
+C0 &lt;- rbind(intercept, C)
+#
+Xsigma &lt;- 0.5^abs(outer(1:p, 1:p, FUN = "-"))
+# Simulated data
+sim.sample &lt;- nbfar_sim(U, D, V, n, Xsigma, C0,disp = 3, depth = 10)  # Simulated sample
+# Dispersion parameter
+X &lt;- sim.sample$X[1:n, ]
+Y &lt;- sim.sample$Y[1:n, ]
+
+</code></pre>
+
+
+</div>

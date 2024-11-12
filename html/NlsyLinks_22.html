@@ -1,0 +1,236 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Links79Pair</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kinship linking file for pairs of relatives in the NLSY79 and NLSY79 Children and Young Adults</h2>
+
+<h3>Description</h3>
+
+<p>This dataset specifies the relatedness coefficient (ie, '<code>R</code>') between
+subjects in the same extended family.  Each row represents a unique
+relationship pair.
+</p>
+<p>NOTE: Two variable names changed in November 2013. <code>Subject1Tag</code> and <code>Subject2Tag</code> became <code>SubjectTag_S1</code> and <code>SubjectTag_S2</code>.
+</p>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 42,773 observations on the following 5 variables.
+There is one row per unique pair of subjects, irrespective of order.
+</p>
+
+<ul>
+<li> <p><strong>ExtendedID</strong> Identity of the extended family of the pair; it corresponds to the HHID in the NLSY79.  See References below.
+</p>
+</li>
+<li> <p><strong>SubjectTag_S1</strong> Identity of the pair's first subject.  See Details below.
+</p>
+</li>
+<li> <p><strong>SubjectTag_S2</strong> Identity of the pair's second subject.  See Details below.
+</p>
+</li>
+<li> <p><strong>R</strong> The pair's Relatedness coefficient.  See Details below.
+</p>
+</li>
+<li> <p><strong>RelationshipPath</strong> Specifies the relationship category of the pair.  This variable is a factor, with levels <code>Gen1Housemates</code>=1, <code>Gen2Siblings</code>=2, <code>Gen2Cousins</code>=3, <code>ParentChild</code>=4, <code>AuntNiece</code>=5.
+</p>
+</li>
+</ul>
+<h3>Details</h3>
+
+<p>The dataset contains Gen1 and Gen2 subjects.  "Gen1" refers to subjects in
+the original NLSY79 sample (https://www.nlsinfo.org/content/cohorts/nlsy79).
+"Gen2" subjects are the biological children of the Gen1 females -ie, those
+in the NLSY79 Children and Young Adults sample
+(https://www.nlsinfo.org/content/cohorts/nlsy79-children).
+</p>
+<p>Subjects will be in the same extended family if either:
+</p>
+
+<ol>
+<li>
+<p> they are Gen1 housemates,
+</p>
+</li>
+<li>
+<p> they are Gen2 siblings,
+</p>
+</li>
+<li>
+<p> they are Gen2 cousins (ie, they have mothers who are Gen1 sisters in the NLSY79,
+</p>
+</li>
+<li>
+<p> they are mother and child (in Gen1 and Gen2, respectively), or
+</p>
+</li>
+<li>
+<p> they are aunt|uncle and niece|nephew (in Gen1 and Gen2, respectively).
+</p>
+</li>
+</ol>
+<p>The variables <code>SubjectTag_S1</code> and <code>SubjectTag_S2</code> uniquely identify
+subjects.  For Gen2 subjects, the SubjectTag is identical to their CID (ie,
+C00001.00 -the SubjectID assigned in the NLSY79-Children files).  However
+for Gen1 subjects, the SubjectTag is their CaseID (ie, R00001.00), with
+"00" appended.  This manipulation is necessary to identify subjects
+uniquely in inter-generational datasets.  A Gen1 subject with an ID of 43
+has a <code>SubjectTag</code> of 4300.  The SubjectTags of her four children
+remain 4301, 4302, 4303, and 4304.
+</p>
+<p>Level 5 of <code>RelationshipPath</code> (ie, AuntNiece) is gender neutral.  The
+relationship could be either Aunt-Niece, Aunt-Nephew, Uncle-Niece, or
+Uncle-Nephew.  If there's a widely-accepted gender-neutral term, please
+tell me.
+</p>
+<p>An extended family with <code class="reqn">k</code> subjects will have
+<code class="reqn">k</code>(<code class="reqn">k</code>-1)/2 rows.  Typically, Subject1 is older while Subject2 is
+younger.
+</p>
+<p>MZ twins have <em>R</em>=1.  DZ twins and full-siblings have <em>R</em>=.5.
+Half-siblings have <em>R</em>=.25. Typical first cousins have <em>R</em>=.125.
+Unrelated subjects have <em>R</em>=0 (this occasionally happens for
+<code>Gen1Housemates</code>, but never for the other paths).
+Other <em>R</em> coefficients are possible.
+</p>
+<p>There are several other uncommon possibilities, such as half-cousins (<em>R</em>=.0625) and
+ambiguous aunt-nieces (<em>R</em>=.125, which is an average of 1/4 and 0/4).
+The variable coding for genetic relatedness,<code>R</code>, in <code>Links79Pair</code> contains
+only the common values of <em>R</em> whose groups are likely to have stable estimates.
+However the variable <code>RFull</code> in <code>Links79PairExpanded</code> contains all <em>R</em> values.
+We strongly recommend using <code>R</code> in this base::data.frame.  Move to
+<code>RFull</code> (or some combination) only if you have a good reason, and are willing
+to carefully monitor a variety of validity checks.  Some of these
+excluded groups are too small to be estimated reliably.
+</p>
+<p>Furthermore, some of these groups have members who are more strongly genetically related than their
+items would indicate. For instance, there are 41 Gen1 pairs who explicitly claim they are not biologically related
+(<em>ie</em>, <code>RExplicit</code>=0), yet their correlation for Adult Height is <em>r</em>=0.24.  This is
+much higher than would be expected for two people sampled randomly; it is nearly identical to
+the <em>r</em>=0.26 we observed among the 268 Gen1 half-sibling pairs who claim they share exactly 1
+biological parent.
+</p>
+<p>The <code>LinksPair79</code> dataset contains columns necessary for a
+basic BG analysis.  The <code>Links79PairExpanded</code> dataset contains
+further information that might be useful in more complicated BG analyses.
+</p>
+<p>A tutorial that produces a similar dataset is
+http://www.nlsinfo.org/childya/nlsdocs/tutorials/linking_mothers_and_children/linking_mothers_and_children_tutorial.html.
+It provides examples in SAS, SPSS, and STATA.
+</p>
+<p><code>RelationshipPath</code> variable.  Code written using this dataset should
+NOT assume it contains only Gen2 sibling pairs.  See below for an example of
+filtering the relationship category in the in <code>Links79Pair</code>
+documentation.
+</p>
+<p>The specific steps to determine the <em>R</em> coefficient will be described
+in an upcoming publication.  The following information may influence the
+decisions of an applied researcher.
+</p>
+<p>A distinction is made between <code>Explicit</code> and <code>Implicit</code> information.
+Explicit information comes from survey items that directly address the
+subject's relationships.  For instance in 2006, surveys asked if the
+sibling pair share the same biological father (eg, Y19940.00 and
+T00020.00).  Implicit information comes from items where the subject
+typically isn't aware that their responses may be used to determine genetic
+relatedness.  For instance, if two siblings have biological fathers with
+the same month of death (eg, R37722.00 and R37723.00), it may be reasonable
+to assume they share the same biological father.
+</p>
+<p><code>Interpolation</code> is our lingo when other siblings are used to leverage
+insight into the current pair.  For example, assume Subject 101, 102, and
+103 have the same mother.  Further assume 101 and 102 report they share a
+biological father, and that 101 and 103 share one too.  Finally, assume
+that we don't have information about the relationship between 102 and 103.
+If we are comfortable with our level of uncertainty of these
+determinations, then we can interpolate/infer that 102 and 103 are
+full-siblings as well.
+</p>
+<p>The math and height scores are duplicated from
+ExtraOutcomes79, but are included here to make some examples
+more concise and accessible.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Will Beasley
+</p>
+
+
+<h3>Source</h3>
+
+<p>Gen1 information comes from the Summer 2013 release of the
+<a href="https://www.nlsinfo.org/content/cohorts/nlsy79">NLSY79 sample</a>.  Gen2 information
+comes from the Summer 2013 release of the
+<a href="https://www.nlsinfo.org/content/cohorts/nlsy79-children">NLSY79 Children and Young Adults</a>.
+Data were extracted with the NLS Investigator
+(https://www.nlsinfo.org/investigator/).
+</p>
+<p>The internal version for the links is <code>Links2011V84</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>The NLSY79 variable HHID (ie, R00001.49) is the source for the
+<code>ExtendedID</code> variable.  This is discussed at
+http://www.nlsinfo.org/nlsy79/docs/79html/79text/hhcomp.htm.
+</p>
+<p>For more information on <em>R</em> (<em>ie</em>, the Relatedness coefficient), please see
+Rodgers, Joseph Lee, &amp; Kohler, Hans-Peter (2005).
+<a href="https://pubmed.ncbi.nlm.nih.gov/15685433/">Reformulating and simplifying the DF analysis model.</a>
+<em>Behavior Genetics, 35</em> (2), 211-217.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The <code>LinksPair79</code> dataset contains columns necessary for a
+basic BG analysis.  The Links79PairExpanded dataset contains
+further information that might be useful in more complicated BG analyses.
+</p>
+<p>A tutorial that produces a similar dataset is
+http://www.nlsinfo.org/childya/nlsdocs/tutorials/linking_mothers_and_children/linking_mothers_and_children_tutorial.html.
+It provides examples in SAS, SPSS, and STATA.
+</p>
+<p>The current dataset (ie, <code>Links79Pair</code>) can be saved as a CSV file
+(comma-separated file) and imported into in other programs and languages.
+In the R console, type the following two lines of code:
+</p>
+<p><code>library(NlsyLinks)</code>
+</p>
+<p><code>write.csv(Links79Pair, "C:/BGDirectory/Links79Pair.csv")</code>
+</p>
+<p>where <code>"C:/BGDirectory/"</code> is replaced by your preferred directory.
+Remember to use forward slashes instead of backslashes; for instance, the
+path <code>"C:\BGDirectory\Links79Pair.csv"</code> can be misinterpreted.
+</p>
+<p><strong>Download CSV</strong>
+If you're using the NlsyLinks package in R, the dataset is automatically available.
+To use it in a different environment,
+<a href="https://github.com/nlsy-links/NlsyLinks/blob/master/outside-data/nlsy-79/links-2017-79.csv?raw=true">download the csv</a>,
+which is readable by all statistical software.
+<a href="https://github.com/nlsy-links/NlsyLinks/blob/master/outside-data/nlsy-79/links-metadata-2017-79.yml">links-metadata-2017-79.yml</a>
+documents the dataset version information.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NlsyLinks) # Load the package into the current R session.
+summary(Links79Pair) # Summarize the five variables.
+hist(Links79Pair$R) # Display a histogram of the Relatedness coefficients.
+table(Links79Pair$R) # Create a table of the Relatedness coefficients for the whole sample.
+
+# Create a dataset of only Gen2 sibs, and display the distribution of R.
+gen2Siblings &lt;- subset(Links79Pair, RelationshipPath == "Gen2Siblings")
+table(gen2Siblings$R) # Create a table of the Relatedness coefficients for the Gen2 sibs.
+
+</code></pre>
+
+
+</div>

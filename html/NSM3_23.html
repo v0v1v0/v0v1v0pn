@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cHollBivSym</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Hollander Bivariate Symmetry
+</h2>
+
+<h3>Description</h3>
+
+<p>Quantile function for the Hollander A distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cHollBivSym(alpha,d.mat,method=NA, n.mc=10000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+
+<p>A numeric value between 0 and 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d.mat</code></td>
+<td>
+
+<p>The d matrix, explained below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p> Either "Exact", "Monte Carlo" or "Asymptotic", indicating the desired distribution. When method=NA, "Exact" will be used if the number of permutations is 10,000 or less. Otherwise, "Monte Carlo" will be used. As Kepner and Randles (1984) and Hilton and Gee (1997) have found the large sample approximation to perform poorly, method="Asymptotic" will be treated as method=NA.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.mc</code></td>
+<td>
+
+<p>If method="Monte Carlo", the number of Monte Carlo samples used to estimate the distribution. Otherwise, not used.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The d matrix, d.mat, will be an n*n matrix of ones and zeroes, where the (i,j)th element is 1 if min(Xj,Yj)&lt;max(Xi,Yi)&lt;=max(Xj,Yj) and min(Xi,Yi)&lt;=min(Xj,Yj), 0 otherwise. An illustration may be found in the example section of this document and Section 3.10 of Hollander, Wolfe, and Chicken - NSM3.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list with "NSM3Ch5c" class containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>number of observations in the first data group (X)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of observations in the second data group (Y) (equal to m, but included for standardization with other procedures)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff.U</code></td>
+<td>
+<p>upper tail cutoff at or below user-specified alpha</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>true.alpha.U</code></td>
+<td>
+<p>true alpha level corresponding to cutoff.U</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Grant Schneider
+</p>
+
+
+<h3>References</h3>
+
+<p>Kepner, James L., and Ronald H. Randies. "Comparison of tests for bivariate symmetry versus location and/or scale alternatives." Communications in Statistics-Theory and Methods 13.8 (1984): 915-930.
+</p>
+<p>Hilton, Joan F., and Lauren Gee. "The size and power of the exact bivariate symmetry test." Computational statistics &amp; data analysis 26.1 (1997): 53-69.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##Hollander-Wolfe-Chicken Example 3.11 Insulin Clearance in Kidney Transplants
+x&lt;-c(61.4,63.3,63.7,80,77.3,84,105)
+y&lt;-c(70.8,89.2,65.8,67.1,87.3,85.1,88.1)
+obs.data&lt;-cbind(x,y)
+a.vec&lt;-apply(obs.data,1,min)
+b.vec&lt;-apply(obs.data,1,max)
+test&lt;-function(r,c) {as.numeric((a.vec[c]&lt;b.vec[r])&amp;&amp;(b.vec[r]&lt;=b.vec[c])&amp;&amp;(a.vec[r]&lt;=a.vec[c]))}
+myVecFun &lt;- Vectorize(test,vectorize.args = c('r','c')) 
+
+d.mat&lt;-outer(1:length(x), 1:length(x), FUN=myVecFun) 
+
+##Cutoff based on the exact distribution
+cHollBivSym(.10,d.mat)
+
+</code></pre>
+
+
+</div>

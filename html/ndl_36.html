@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>serbianLex</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Serbian lexicon with 1187 prime-target pairs.
+</h2>
+
+<h3>Description</h3>
+
+<p>The 1187 prime-target pairs and their lexical properties used in the
+simulation study of Experiment 1 of Baayen et al. (2011).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data(serbianLex)</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 1187 observations on the following 14 variables:
+</p>
+
+<dl>
+<dt><code>Target</code></dt>
+<dd>
+<p>A factor specifying the target noun form</p>
+</dd>
+<dt><code>Prime</code></dt>
+<dd>
+<p>A factor specifying the prime noun form</p>
+</dd>
+<dt><code>PrimeLemma</code></dt>
+<dd>
+<p>A factor specifying the lemma of the prime</p>
+</dd>
+<dt><code>TargetLemma</code></dt>
+<dd>
+<p>A factor specifying the target lemma</p>
+</dd>
+<dt><code>Length</code></dt>
+<dd>
+<p>A numeric vector with the length in letters of the target</p>
+</dd>
+<dt><code>WeightedRE</code></dt>
+<dd>
+<p>A numeric vector with the weighted relative entropy of the prime and target inflectional paradigms</p>
+</dd>
+<dt><code>NormLevenshteinDist</code></dt>
+<dd>
+<p>A numeric vector with the normalized 
+Levenshtein distance of prime and target forms</p>
+</dd>
+<dt><code>TargetLemmaFreq</code></dt>
+<dd>
+<p>A numeric vector with log frequency of 
+the target lemma</p>
+</dd>
+<dt><code>PrimeSurfFreq</code></dt>
+<dd>
+<p>A numeric vector with log frequency of the prime form</p>
+</dd>
+<dt><code>PrimeCondition</code></dt>
+<dd>
+<p>A factor with prime conditions, levels: <code>DD</code>, <code>DSSD</code>, <code>SS</code></p>
+</dd>
+<dt><code>CosineSim</code></dt>
+<dd>
+<p>A numeric vector with the cosine similarity of prime and target vector space semantics</p>
+</dd>
+<dt><code>IsMasc</code></dt>
+<dd>
+<p>A vector of logicals, <code>TRUE</code> if the noun is masculine.</p>
+</dd>
+<dt><code>TargetGender</code></dt>
+<dd>
+<p>A factor with the gender of the target, levels: <code>f</code>, <code>m</code>, and <code>n</code></p>
+</dd>
+<dt><code>TargetCase</code></dt>
+<dd>
+<p>A factor specifying the case of the target noun, levels: <code>acc</code>, <code>dat</code>, <code>nom</code></p>
+</dd>
+<dt><code>MeanLogObsRT</code></dt>
+<dd>
+<p>Mean log-transformed observed reaction time</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Baayen, R. H., Milin, P., Filipovic Durdevic, D., Hendrix, P. and
+Marelli, M. (2011), An amorphous model for morphological processing in
+visual comprehension based on naive discriminative
+learning. Psychological Review, 118, 438-482.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># calculate the weight matrix for the full set of Serbian nouns
+data(serbian)
+serbian$Cues &lt;- orthoCoding(serbian$WordForm, grams=2)
+serbian$Outcomes &lt;- serbian$LemmaCase
+sw &lt;- estimateWeights(cuesOutcomes=serbian)
+
+# calculate the meaning activations for all unique word forms
+
+desiredItems &lt;- unique(serbian["Cues"])
+desiredItems$Outcomes &lt;- ""
+activations &lt;- estimateActivations(desiredItems, sw)$activationMatrix
+rownames(activations) &lt;- unique(serbian[["WordForm"]])
+activations &lt;- activations + abs(min(activations))
+activations[1:5,1:6]
+
+# calculate simulated latencies for the experimental materials
+
+data(serbianLex)
+syntax &lt;- c("acc", "dat", "gen", "ins", "loc", "nom", "Pl", "Sg")
+we &lt;- 0.4 # compound cue weight
+strengths &lt;- rep(0, nrow(serbianLex))
+for(i in 1:nrow(serbianLex)) {
+   target &lt;- serbianLex$Target[i]
+   prime &lt;- serbianLex$Prime[i]
+   targetLemma &lt;- as.character(serbianLex$TargetLemma[i])
+   primeLemma &lt;- as.character(serbianLex$PrimeLemma[i])
+   targetOutcomes &lt;- c(targetLemma, primeLemma, syntax)
+   primeOutcomes &lt;- c(targetLemma, primeLemma, syntax)
+   p &lt;- activations[target, targetOutcomes]
+   q &lt;- activations[prime, primeOutcomes]
+   strengths[i] &lt;- sum((q^we)*(p^(1-we)))
+}
+serbianLex$SimRT &lt;- -strengths
+lengthPenalty &lt;- 0.3
+serbianLex$SimRT2 &lt;- serbianLex$SimRT + 
+  (lengthPenalty * (serbianLex$Length&gt;5))
+
+cor.test(serbianLex$SimRT, serbianLex$MeanLogObsRT)
+cor.test(serbianLex$SimRT2, serbianLex$MeanLogObsRT)
+
+serbianLex.lm &lt;- lm(SimRT2 ~ Length +  WeightedRE*IsMasc + 
+      NormLevenshteinDist + TargetLemmaFreq + 
+      PrimeSurfFreq + PrimeCondition, data=serbianLex)
+summary(serbianLex.lm)
+</code></pre>
+
+
+</div>

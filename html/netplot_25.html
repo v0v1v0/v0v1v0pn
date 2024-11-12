@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nplot_legend</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add legend to a netplot object</h2>
+
+<h3>Description</h3>
+
+<p>Legends in grid graphics is a bit more complicated than in base graphics.
+The function <code>nplot_legend</code> is a wrapper of <code>grid::legendGrob()</code> that makes
+the process easier. Besides <code>labels</code>, the main visual arguments for the
+figure ar passed through the <code>gp</code> argument (see examples).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nplot_legend(
+  g,
+  labels,
+  pch,
+  gp = grid::gpar(),
+  ...,
+  packgrob.args = list(side = "left")
+)
+
+## S3 method for class 'netplot_legend'
+print(x, y = NULL, newpage = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>An object of class netplot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+<p>Character vector of labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch</code></td>
+<td>
+<p>See <code>graphics::points()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gp</code></td>
+<td>
+<p>An object of class <code>grid::gpar()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to <code>grid::legendGrob()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>packgrob.args</code></td>
+<td>
+<p>List of arguments passed to <code>grid::packGrob()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netplot_legend</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newpage</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> it calls <code>grid::grid.newpage()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A frame grob.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(igraph)
+library(netplot)
+set.seed(1)
+x &lt;- sample_smallworld(1, 200, 5, 0.03)
+V(x)$nsides &lt;- sample(c(10, 4), 200, replace = TRUE)
+
+g &lt;- nplot(
+  x,
+  vertex.nsides = V(x)$nsides,
+  vertex.color  = ifelse(V(x)$nsides == 4, "red", "steelblue"),
+  edge.line.breaks = 5
+  )
+
+nplot_legend(
+  g,
+  labels = c("circle", "diamond", "edge"),
+  pch    = c(21, 23, NA),
+  gp     = gpar(
+    fill = c("steelblue", "red", NA),
+    lwd  = c(NA, NA, 1),
+    col  = c(NA, NA, "purple")
+    )
+  )
+grid.text("Legend to the left (default)", y = unit(.95, "npc"), just = "bottom")
+
+nplot_legend(
+  g,
+  labels = c("circle", "diamond", "edge"),
+  pch    = c(21, 23, NA),
+  gp     = gpar(
+    fill = c("steelblue", "red", NA),
+    lwd  = c(NA, NA, 1),
+    col  = c(NA, NA, "purple")
+    ),
+  # These two extra options set the legend to the bottom
+  packgrob.args = list(side = "bottom"),
+  ncol = 3
+  )
+grid.text("Legend bottom", y = unit(.95, "npc"), just = "bottom")
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,332 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>HOMTESTS</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Homogeneity tests</h2>
+
+<h3>Description</h3>
+
+<p>Homogeneity tests for Regional Frequency Analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> ADbootstrap.test (x, cod, Nsim=500, index=2)
+ HW.tests (x, cod, Nsim=500)
+ DK.test (x, cod)
+ discordancy (x, cod)
+ criticalD ()
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector representing data from many samples defined with <code>cod</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cod</code></td>
+<td>
+<p>array that defines the data subdivision among sites</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Nsim</code></td>
+<td>
+<p>number of regions simulated with the bootstrap of the original region</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p>if <code>index</code>=1 samples are divided by their average value;
+if <code>index</code>=2 (default) samples are divided by their median value</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>The Hosking and Wallis heterogeneity measures</b>
+</p>
+<p>The idea underlying Hosking and Wallis (1993) heterogeneity
+statistics is to measure the sample variability of the L-moment
+ratios and compare it to the variation that would be expected in a
+homogeneous region. The latter is estimated through repeated
+simulations of homogeneous regions with samples drawn from a four
+parameter kappa distribution (see e.g., Hosking and Wallis,
+1997, pp. 202-204). 
+More in detail, the steps are the following:
+with regards to the <code class="reqn">k</code> samples belonging to the region under analysis, find
+the sample L-moment ratios (see, Hosking and Wallis, 1997)
+pertaining to the <code class="reqn">i</code>-th site: these are the
+L-coefficient of variation (L-CV),
+</p>
+<p style="text-align: center;"><code class="reqn">t^{(i)}=\frac{\frac{1}{n_i}\sum_{j=1}^{n_i}\left(\frac{2(j-1)}{(n_i-1)}-1\right)Y_{i,j}}{\frac{1}{n_i}\sum_{j=1}^{n_i}Y_{i,j}}</code>
+</p>
+
+<p>the coefficient of L-skewness,
+</p>
+<p style="text-align: center;"><code class="reqn">t_3^{(i)}=\frac{\frac{1}{n_i}\sum_{j=1}^{n_i}\left(\frac{6(j-1)(j-2)}{(n_i-1)(n_i-2)}-\frac{6(j-1)}{(n_i-1)}+1\right)Y_{i,j}}{\frac{1}{n_i}\sum_{j=1}^{n_i}\left(\frac{2(j-1)}{(n_i-1)}-1\right)Y_{i,j}}</code>
+</p>
+
+<p>and the coefficient of L-kurtosis
+</p>
+<p style="text-align: center;"><code class="reqn">t_4^{(i)}=\frac{\frac{1}{n_i}\sum_{j=1}^{n_i}\left(\frac{20(j-1)(j-2)(j-3)}{(n_i-1)(n_i-2)(n_i-3)}-\frac{30(j-1)(j-2)}{(n_i-1)(n_i-2)}+\frac{12(j-1)}{(n_i-1)}-1\right)Y_{i,j}}{\frac{1}{n_i}\sum_{j=1}^{n_i}\left(\frac{2(j-1)}{(n_i-1)}-1\right)Y_{i,j}}</code>
+</p>
+
+<p>Note that the L-moment ratios are not affected by the
+normalization by the index value, i.e. it is the same to use
+<code class="reqn">X_{i,j}</code> or <code class="reqn">Y_{i,j}</code> in Equations.
+</p>
+<p>Define the regional averaged L-CV, L-skewness and
+L-kurtosis coefficients,
+</p>
+<p style="text-align: center;"><code class="reqn">t^R = \frac{\sum_{i=1}^k n_i t^{(i)}}{ \sum_{i=1}^k n_i}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">t_3^R =\frac{ \sum_{i=1}^k n_i t_3^{(i)}}{ \sum_{i=1}^k n_i}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">t_4^R =\frac{ \sum_{i=1}^k n_i t_4^{(i)}}{\sum_{i=1}^k n_i}</code>
+</p>
+
+<p>and compute the statistic
+</p>
+<p style="text-align: center;"><code class="reqn">V = \left\{ \sum_{i=1}^k n_i (t^{(i)} - t^R )^2 / \sum_{i=1}^k n_i\right\} ^{1/2}</code>
+</p>
+
+<p>Fit the parameters of a
+four-parameters kappa distribution to the regional averaged L-moment ratios
+<code class="reqn">t^R</code>, <code class="reqn">t_3^R</code> and <code class="reqn">t_4^R</code>, and then generate a large number
+<code class="reqn">N_{sim}</code> of realizations of sets of <code class="reqn">k</code> samples. The <code class="reqn">i</code>-th site sample in each set 
+has a kappa distribution as its parent and
+record length equal to <code class="reqn">n_i</code>. For each simulated
+homogeneous set, calculate the statistic <code class="reqn">V</code>, obtaining <code class="reqn">N_{sim}</code> values. 
+On this vector of <code class="reqn">V</code> values determine the mean <code class="reqn">\mu_V</code> and standard
+deviation <code class="reqn">\sigma_V</code> that relate to the hypothesis of homogeneity
+(actually, under the composite hypothesis of homogeneity and kappa
+parent distribution).
+</p>
+<p>An heterogeneity measure, which is called here
+<code class="reqn">HW_1</code>, is finally found as
+</p>
+<p style="text-align: center;"><code class="reqn">\theta_{HW_1} = \frac{V - \mu_V}{\sigma_V}</code>
+</p>
+
+<p><code class="reqn">\theta_{HW_1}</code>  can be approximated by a normal distributed with zero
+mean and unit variance: following Hosking and Wallis (1997),
+the region under analysis can therefore be regarded as
+‘acceptably homogeneous’ if <code class="reqn">\theta_{HW_1}&lt;1</code>, ‘possibly
+heterogeneous’ if <code class="reqn">1 \leq \theta_{HW_1} &lt; 2</code>, and ‘definitely
+heterogeneous’ if <code class="reqn">\theta_{HW_1}\geq2</code>. Hosking and Wallis
+(1997) suggest that these limits should be treated as useful
+guidelines. Even if the <code class="reqn">\theta_{HW_1}</code> statistic is constructed
+like a significance test, significance levels obtained from such a
+test would in fact be accurate only under special assumptions: to have
+independent data both serially and between sites, and the true
+regional distribution being kappa.
+</p>
+<p>Hosking and Wallis (1993) also give alternative heterogeneity measures
+(that we call <code class="reqn">HW_2</code> and <code class="reqn">HW_3</code>), in which <code class="reqn">V</code> is
+replaced by:
+</p>
+<p style="text-align: center;"><code class="reqn">V_2 = \sum_{i=1}^k n_i \left\{ (t^{(i)} - t^R)^2 + (t_3^{(i)} - t_3^R)^2\right\}^{1/2} / \sum_{i=1}^k n_i</code>
+</p>
+
+<p>or
+</p>
+<p style="text-align: center;"><code class="reqn">V_3 = \sum_{i=1}^k n_i \left\{ (t_3^{(i)} - t_3^R)^2 + (t_4^{(i)} - t_4^R)^2\right\}^{1/2} / \sum_{i=1}^k n_i</code>
+</p>
+
+<p>The test statistic in this case becomes
+</p>
+<p style="text-align: center;"><code class="reqn">\theta_{HW_2} = \frac{V_2 - \mu_{V_2}}{\sigma_{V_2}}</code>
+</p>
+
+<p>or
+</p>
+<p style="text-align: center;"><code class="reqn">\theta_{HW_3} = \frac{V_3 - \mu_{V_3}}{\sigma_{V_3}}</code>
+</p>
+
+<p>with similar acceptability limits as the <code class="reqn">HW_1</code> statistic. 
+Hosking and Wallis (1997) judge <code class="reqn">\theta_{HW_2}</code> and <code class="reqn">\theta_{HW_3}</code> to be inferior to
+<code class="reqn">\theta_{HW_1}</code> and say that it rarely yields values larger than 2 even for grossly heterogeneous regions.
+</p>
+<p><b>The bootstrap Anderson-Darling test</b>
+</p>
+<p>A test that does not make any assumption on the parent distribution is the
+Anderson-Darling (<code class="reqn">AD</code>) rank test (Scholz and Stephens, 1987).
+The <code class="reqn">AD</code> test is the generalization of the classical
+Anderson-Darling goodness of fit test (e.g., D'Agostino and
+Stephens, 1986), and it is used to test the hypothesis that <code class="reqn">k</code>
+independent samples belong to the same population without
+specifying their common distribution function.
+</p>
+<p>The test is based on the comparison between local and regional
+empirical distribution functions. The empirical distribution
+function, or sample distribution function, is defined by
+<code class="reqn">F(x)=\frac{j}{\eta}, x_{(j)}\leq x &lt; x_{(j+1)}</code>, where <code class="reqn">\eta</code> is
+the size of the sample and <code class="reqn">x_{(j)}</code> are the order statistics,
+i.e. the observations arranged in ascending order. Denote the
+empirical distribution function of the <code class="reqn">i</code>-th sample (local) by <code class="reqn">\hat{F}_i(x)</code>, and that of the pooled sample of all <code class="reqn">N = n_1 + ... + n_k</code>
+observations (regional) by <code class="reqn">H_N (x)</code>. The <code class="reqn">k</code>-sample Anderson-Darling test
+statistic is then defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\theta_{AD} = \sum_{i=1}^k n_i \int _{{\rm all}\ x} \frac{[\hat{F}_i (x) - H_N (x) ]^2}{H_N (x) [ 1 - H_N (x) ] } dH_N (x)</code>
+</p>
+
+<p>If the pooled ordered sample is <code class="reqn">Z_1 &lt; ... &lt; Z_N</code>, the
+computational formula to evaluate <code class="reqn">\theta_{AD}</code> is:
+</p>
+<p style="text-align: center;"><code class="reqn">\theta_{AD} = \frac{1}{N} \sum_{i=1}^k \frac{1}{n_i}\sum_{j=1}^{N-1} \frac{(N M_{ij} - j n_i)^2 }{j (N-j)}</code>
+</p>
+
+<p>where <code class="reqn">M_{ij}</code> is the number of observations in the <code class="reqn">i</code>-th sample
+that are not greater than <code class="reqn">Z_j</code>. The homogeneity test can be
+carried out by comparing the obtained <code class="reqn">\theta_{AD}</code> value to the
+tabulated percentage points reported by Scholz and Stephens
+(1987) for different significance levels.
+</p>
+<p>The statistic <code class="reqn">\theta_{AD}</code> depends on the sample values only
+through their ranks. This guarantees that the test statistic
+remains unchanged when the samples undergo monotonic
+transformations, an important stability property not possessed by
+<code class="reqn">HW</code> heterogeneity measures. However, problems arise in applying this test in a
+common index value procedure. In fact, the index
+value procedure corresponds to dividing each site sample by a different
+value, thus modifying the ranks in the pooled sample. In
+particular, this has the effect of making the
+local empirical distribution functions much more similar to the
+other, providing an impression of homogeneity even when the
+samples are highly heterogeneous. The effect is analogous to that
+encountered when applying goodness-of-fit tests to distributions
+whose parameters are estimated from the same sample used for the
+test (e.g., D'Agostino and Stephens, 1986; Laio,
+2004). In both cases, the percentage points for the test should be
+opportunely redetermined. This can be done with a nonparametric bootstrap approach
+presenting the following steps:
+build up the pooled sample <code class="reqn">\cal S</code> of the observed
+non-dimensional data.
+Sample with replacement from <code class="reqn">\cal S</code> and generate <code class="reqn">k</code>
+artificial local samples, of size <code class="reqn">n_1, \dots ,n_k</code>.
+Divide each sample for its index value, and calculate
+<code class="reqn">\theta^{(1)}_{AD}</code>.
+Repeat the procedure for <code class="reqn">N_{sim}</code> times and obtain a sample
+of <code class="reqn">\theta^{(j)}_{AD}</code>, <code class="reqn">j=1,\dots , N_{sim}</code> values, whose
+empirical distribution function can be used as an approximation of
+<code class="reqn">G_{H_0}(\theta_{AD})</code>, the distribution of <code class="reqn">\theta_{AD}</code> under
+the null hypothesis of homogeneity.
+The acceptance limits for the test, corresponding to any
+significance level <code class="reqn">\alpha</code>, are then easily determined as the
+quantiles of <code class="reqn">G_{H_0}(\theta_{AD})</code> corresponding to a probability
+<code class="reqn">(1-\alpha)</code>.
+</p>
+<p>We will call the test obtained with the above procedure the bootstrap Anderson-Darling test, hereafter referred to as <code class="reqn">AD</code>.
+</p>
+<p><b>Durbin and Knott test</b>
+</p>
+<p>The last considered homogeneity test derives from a
+goodness-of-fit statistic originally proposed by Durbin and
+Knott (1971). The test is formulated to measure discrepancies in
+the dispersion of the samples, without accounting for the possible
+presence of discrepancies in the mean or skewness of the data.
+Under this aspect, the test is similar to the <code class="reqn">HW_1</code> test, while it
+is analogous to the <code class="reqn">AD</code> test for the fact that it is a rank test.
+The original goodness-of-fit test is very simple: suppose to have
+a sample <code class="reqn">X_i</code>, <code class="reqn">i = 1, ..., n</code>, with hypothetical
+distribution <code class="reqn">F(x)</code>; under the null hypothesis the random variable
+<code class="reqn">F(X_i)</code> has a uniform distribution in the <code class="reqn">(0,1)</code> interval, and
+the statistic <code class="reqn">D = \sum_{i=1}^n \cos[2 \pi F(X_i)]</code> is
+approximately normally distributed with mean 0 and variance 1
+(Durbin and Knott, 1971). <code class="reqn">D</code> serves the purpose of
+detecting discrepancy in data dispersion: if the variance of <code class="reqn">X_i</code>
+is greater than that of the hypothetical distribution <code class="reqn">F(x)</code>, <code class="reqn">D</code> is significantly greater than
+0, while <code class="reqn">D</code> is significantly below 0 in the reverse case.
+Differences between the mean (or the median) of <code class="reqn">X_i</code> and <code class="reqn">F(x)</code>
+are instead not detected by <code class="reqn">D</code>, which guarantees that the
+normalization by the index value does not affect the test.
+</p>
+<p>The extension to homogeneity testing of the  Durbin and
+Knott (<code class="reqn">DK</code>) statistic is straightforward: we substitute the empirical
+distribution function obtained with the pooled observed data,
+<code class="reqn">H_N(x)</code>, for <code class="reqn">F(x)</code> in <code class="reqn">D</code>, obtaining at each site a statistic
+</p>
+<p style="text-align: center;"><code class="reqn">D_i = \sum_{j=1}^{n_i} \cos[2 \pi H_N(X_j)]</code>
+</p>
+
+<p>which is normal under the hypothesis of homogeneity. The statistic
+<code class="reqn">\theta_{DK} = \sum_{i=1}^k D_i^2</code> has then a chi-squared
+distribution with <code class="reqn">k-1</code> degrees of freedom, which allows one to
+determine the acceptability limits for the test, corresponding to
+any significance level <code class="reqn">\alpha</code>. 
+</p>
+<p><b>Comparison among tests</b>
+</p>
+<p>The comparison (Viglione et al, 2007) shows that the Hosking and Wallis heterogeneity measure <code class="reqn">HW_1</code> (only based on L-CV) is preferable when skewness is low, while the bootstrap Anderson-Darling test should be used for more skewed regions.
+As for <code class="reqn">HW_2</code>, the Hosking and Wallis heterogeneity measure based on L-CV and L-CA, it is shown once more how much it lacks power.
+</p>
+<p>Our suggestion is to guide the choice of the test according to a compromise between power and Type I error of the <code class="reqn">HW_1</code> and <code class="reqn">AD</code> tests.
+The L-moment space is divided into two regions: 
+if the <code class="reqn">t_3^R</code> coefficient for the region under analysis is lower than 0.23, we propose to use the Hosking and Wallis heterogeneity measure <code class="reqn">HW_1</code>;
+if <code class="reqn">t_3^R &gt; 0.23</code>, the bootstrap Anderson-Darling test is preferable.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ADbootstrap.test</code> and <code>DK.test</code> test gives its test statistic and its distribution value <code class="reqn">P</code>.
+If <code class="reqn">P</code> is, for example, 0.92, samples shouldn't be considered heterogeneous with significance level minor of 8%.
+</p>
+<p><code>HW.tests</code> gives the two Hosking and Wallis heterogeneity measures <code class="reqn">H_1</code> and <code class="reqn">H_2</code>; following Hosking and Wallis (1997), the region under analysis can therefore be regarded as ‘acceptably homogeneous’ if <code class="reqn">H_1&lt;1</code>, ‘possibly heterogeneous’ if <code class="reqn">1 \leq H_1 &lt; 2</code>, and ‘definitely heterogeneous’ if <code class="reqn">H \geq 2</code>.
+</p>
+<p><code>discordancy</code> returns the discordancy measure <code class="reqn">D</code> of Hosking and Wallis for all sites. 
+Hosking and Wallis suggest to consider a site discordant if <code class="reqn">D \geq 3</code> if <code class="reqn">N \geq 15</code> (where <code class="reqn">N</code> is the number of sites considered in the region). For <code class="reqn">N&lt;15</code> the critical values of <code class="reqn">D</code> can be listed with <code>criticalD</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>For information on the package and the Author, and for all the references, see <code>nsRFA</code>.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>traceWminim</code>, <code>roi</code>, <code>KAPPA</code>, <code>HW.original</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(hydroSIMN)
+annualflows
+summary(annualflows)
+x &lt;- annualflows["dato"][,]
+cod &lt;- annualflows["cod"][,]
+split(x,cod)
+
+#ADbootstrap.test(x,cod,Nsim=100)   # it takes some time
+#HW.tests(x,cod)                    # it takes some time
+DK.test(x,cod)
+
+fac &lt;- factor(annualflows["cod"][,],levels=c(34:38))
+x2 &lt;- annualflows[!is.na(fac),"dato"]
+cod2 &lt;- annualflows[!is.na(fac),"cod"]
+
+ADbootstrap.test(x2,cod2,Nsim=100)
+ADbootstrap.test(x2,cod2,index=1,Nsim=200)
+HW.tests(x2,cod2,Nsim=100)
+DK.test(x2,cod2)
+
+discordancy(x,cod)
+
+criticalD()
+</code></pre>
+
+
+</div>

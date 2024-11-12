@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>preview</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Output variable states within functions during testing/debugging</h2>
+
+<h3>Description</h3>
+
+<p>A versatile function to compactly display most common R objects. Will
+return the object name, type, dimension, and a compact representation of
+object contents, for instance using prv.large() to display matrices,
+so as to not overload the console for large objects. Useful for debugging,
+can be placed inside loops and functions to track values, dimensions, and data types.
+Particularly when debugging complex code, the automatic display of the variable name
+prevents confusion versus using regular print statements.
+By listing variables to track as character(), provides 'cat()' output 
+of compact and informative variable state information, e.g, variable name, value,
+datatype and dimension. Can also specify array or list elements, or custom labels.
+prv() is the same as preview() except it can take objects without using double quotes
+and has no 'labels' command (and doesn't need one).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">preview(
+  varlist,
+  labels = NULL,
+  counts = NULL,
+  assume.char = FALSE,
+  prv.call = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>varlist</code></td>
+<td>
+<p>character vector, the list of variable(s) to report, which will trigger
+automatic labelling of the variable name, otherwise if entered as the variable value (ie.
+without quotes, then will by default be displayed as 'unknown variable')</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels, </code></td>
+<td>
+<p>will label 'unknown variables' (see above) if entered as variables without quotes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>counts</code></td>
+<td>
+<p>a list of array index values; so if calling during a counting loop, the
+value can be reported each iteration, also printing the count index; if the list is
+named the name will also appear, e.g, variable[count=1]. This list must be the same
+length as varlist (and labels if not NULL), and each element [[i]] must contain as many values
+as the original corresponding varlist[i] has dimensions. The dimensions must result in a 1x1 scalar</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>assume.char</code></td>
+<td>
+<p>usually 'varlist' is a character vector of variable names, but in the case
+that it is actually a character variable, using assume.char=TRUE will ensure that it will be assumed
+the character variable is the object to preview, rather than a list of variable names. So long
+as none of the values are found to be variable names in the global environment. preview() can
+also find variables in local environments, and if this is where the target variable lies, it is
+best to use assume.char=FALSE, otherwise the search for alternative environments might not happen.
+Note that in most cases the automatic detection of the input should understand what you want, regardless
+of the value of assume.char.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prv.call</code></td>
+<td>
+<p>It is recommended to always leave this argument as FALSE when calling preview()
+directly. If set to TRUE, it will first search 2 generations back for the parent frame, instead 
+of one, as it will assume that the variable(s) to preview are not directly called by preview(),
+but through a wrapper for preview, such as prv().</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>Dim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># create variables of different types to show output styles #
+testvar1 &lt;- 193
+testvar2 &lt;- "Atol"
+testvar3 &lt;- c(1:10)
+testvar4 &lt;- matrix(rnorm(100),nrow=25)
+testvar5 &lt;- list(first="test",second=testvar4,third=100:110)
+preview("testvar1")
+preview("testvar4")
+preview(paste("testvar",1:5,sep=""))
+preview(testvar1,"myvarname")
+preview(testvar1)
+# examples with loops and multiple dimensions / lists
+for (cc in 1:4) {
+ for (dd in 1:4) { preview("testvar4",counts=list(cc,dd)) }}
+
+for (dd in 1:3) { preview("testvar5",counts=list(dd=dd)) }
+</code></pre>
+
+
+</div>

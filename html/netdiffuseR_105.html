@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isolated</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find and remove isolated vertices</h2>
+
+<h3>Description</h3>
+
+<p>Find and remove unconnected vertices from the graph.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isolated(
+  graph,
+  undirected = getOption("diffnet.undirected", FALSE),
+  self = getOption("diffnet.self", FALSE)
+)
+
+drop_isolated(
+  graph,
+  undirected = getOption("diffnet.undirected", FALSE),
+  self = getOption("diffnet.self", FALSE)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>Any class of accepted graph format (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>undirected</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> only the lower triangle of the adjacency matrix will considered (faster).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>self</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> autolinks (loops, self edges) are allowed (see details).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>When <code>graph</code> is an adjacency matrix:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>isolated</code></td>
+<td>
+<p>an matrix of size <code class="reqn">n\times 1</code> with 1's where a node is isolated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_isolated</code></td>
+<td>
+<p>a modified graph excluding isolated vertices.</p>
+</td>
+</tr>
+</table>
+<p>Otherwise, when <code>graph</code> is a list
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>isolated</code></td>
+<td>
+<p>an matrix of size <code class="reqn">n\times T</code> with 1's where a node is isolated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_isolated</code></td>
+<td>
+<p>a modified graph excluding isolated vertices.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other data management functions: 
+<code>diffnet-class</code>,
+<code>edgelist_to_adjmat()</code>,
+<code>egonet_attrs()</code>,
+<code>survey_to_diffnet()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generating random graph
+set.seed(123)
+adjmat &lt;- rgraph_er()
+
+# Making nodes 1 and 4 isolated
+adjmat[c(1,4),] &lt;- 0
+adjmat[,c(1,4)] &lt;- 0
+adjmat
+
+# Finding isolated nodes
+iso &lt;- isolated(adjmat)
+iso
+
+# Removing isolated nodes
+drop_isolated(adjmat)
+
+
+# Now with a dynamic graph
+graph &lt;- rgraph_er(n=10, t=3)
+
+# Making 1 and 5 isolated
+graph &lt;- lapply(graph, "[&lt;-", i=c(1,5), j=1:10, value=0)
+graph &lt;- lapply(graph, "[&lt;-", i=1:10, j=c(1,5), value=0)
+graph
+
+isolated(graph)
+drop_isolated(graph)
+</code></pre>
+
+
+</div>

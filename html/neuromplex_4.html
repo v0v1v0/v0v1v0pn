@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mplex.preprocess</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Preprocessing Neural Multiplexing Data</h2>
+
+<h3>Description</h3>
+
+<p>Preprocess nueral spike train recording to preapre binned spike counts suitable for DAPP analysis</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> 
+mplex.preprocess(spiketimes, start.time=0, end.time=1e3, bw=50,
+    remove.zeros=FALSE, visualize=TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>spiketimes</code></td>
+<td>
+<p>a list with 3 elements giving the 3 sets of spiketimes associated with experimental conditions A, B and AB</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.time</code></td>
+<td>
+<p>starting time for the observation window. See details below</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end.time</code></td>
+<td>
+<p>ending time of the observations window. See details below</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw</code></td>
+<td>
+<p>bin width (in ms) used for binning. A single bin is used when bw equals or exceeds the length of the observation period (end.time - start.time). Single bin analysis is same as total spike count analysis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove.zeros</code></td>
+<td>
+<p>logical indicating if trials with zero spike counts should be removed from the analysis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visualize</code></td>
+<td>
+<p>logical indicating if a graphical summary should be produced to visualize the three sets of trials</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional commands to be passed on to grid.arrange() for plotting. For example, adding 'top="PLOT TITLE"' will add a title at the top of the combined plot. See <code>grid.arrange</code> for more details.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a list containting the following items.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Acounts</code></td>
+<td>
+<p>binned spike counts under condition A presented as a matrix. Rows are bins, columns are replicates (trials). In case of single bin analysis, i.e., with bw equal or larger than total observation window length, a vector of counts is returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Bcount</code></td>
+<td>
+<p>binned spike counts under condition B</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ABcounts</code></td>
+<td>
+<p>binned spike counts under condition AB</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin.mids</code></td>
+<td>
+<p>an array giving the mid-points of the time bins</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin.width</code></td>
+<td>
+<p>a scalar giving the bin width</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.horizon</code></td>
+<td>
+<p>a vector of length 2 giving the start and the end times of the observation period</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## generate 25 A and 30 B trials with rate functions
+##    lambda.A(t) = 160*exp(-2*t/1000) + 40*exp(-0.2*t/1000)
+##    lambda.B(t) = 40*exp(-2*t/1000)
+## where time t is measured in ms. Then, generate 40 AB trials,
+## roughly half with flat weight curves with a constant intensity
+## either close to A, or close to B or close to the 50-50 mark,
+## (equally likely). The remaining curves are sinusoidal
+## that snake between 0.01 and 0.99 with a period randomly
+## drawn between 400 and 1000
+
+ntrials &lt;- c(nA=25, nB=30, nAB=40)
+flat.range &lt;- list(A=c(0.85, 0.95),
+                   B=c(0.05, 0.15),
+                   mid=c(0.45,0.55))
+flat.mix &lt;- c(A=1/3, B=1/3, mid=1/3)
+wavy.span &lt;- c(0.01, 0.99)
+wavy.period &lt;- c(400, 1000)
+
+T.horiz &lt;- 1000
+rateB &lt;- 40 * exp(-2*(1:T.horiz)/T.horiz)
+rateA &lt;- 4*rateB + 40 * exp(-0.2*(1:T.horiz)/T.horiz)
+
+synth.data &lt;- synthesis.dapp(ntrials = ntrials, pr.flat = 0.5,
+                             intervals = flat.range, wts = flat.mix,
+                             span = wavy.span, period.range = wavy.period,
+                             lambda.A=rateA, lambda.B=rateB)
+
+## Visualize data and generate binned spike counts
+spike.counts &lt;- mplex.preprocess(synth.data$spiketimes, visualize=TRUE, 
+top="Synthetic data: bin size=50ms")
+
+## Not run: 
+## Visualize total spike counts data
+spike.counts &lt;- mplex.preprocess(synth.data$spiketimes, bw=Inf, visualize=TRUE, 
+top="Synthetic data: total spike counts")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

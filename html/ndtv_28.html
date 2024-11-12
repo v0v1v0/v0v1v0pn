@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compute.animation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute a sequence of vertex layouts over time suitable for rendering an animation. 
+</h2>
+
+<h3>Description</h3>
+
+<p>Steps through a networkDynamic object and applies layout algorithms at specified intervals, storing the calculated coordinates in the network for later use by the render.animation function. Generally the layout are done in a sequence with each using the previously calculated positions as initial seed coordinates in order to smooth out the resulting movie. Not all network layout algorithms give good results. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compute.animation(net, slice.par = NULL, animation.mode = "kamadakawai", 
+                  seed.coords = NULL, layout.par = list(), 
+                  default.dist = NULL, weight.attr = NULL, weight.dist=FALSE,
+                  chain.direction=c('forward','reverse'),
+                  verbose = TRUE,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+
+<p>A networkDynamic network object describing the temporal evolution of a network.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slice.par</code></td>
+<td>
+
+<p>A list of parameters which specify the time steps and aggregation that should be used when moving through the network. Example: 
+<code>slice.par=list(start=0,end=100,interval=1,
+  aggregate.dur=1,rule='latest')</code>
+</p>
+<p>The parameters are:
+</p>
+
+<ul>
+<li> <p><code>start</code>  The time point at which the sequence of layouts should begin
+</p>
+</li>
+<li> <p><code>end</code>  The time point at which the sequence of layouts should finish 
+</p>
+</li>
+<li> <p><code>interval</code>   The amount of time between successive layouts
+</p>
+</li>
+<li> <p><code>aggregate.dur</code>   The duration of time over which the network should be aggregated to derive the network for each layout
+</p>
+</li>
+<li> <p><code>rule</code>  The aggregation rule to be used when collapsing the network.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>animation.mode</code></td>
+<td>
+
+<p>The name of the network animation layout to be used. These layouts are name network.layout.animate.something but will be matched using the final part of the name.  Current useful values are:
+</p>
+
+<ul>
+<li> <p><code>network.layout.animate.kamadakawai</code> essentially wrapper for the Kamadakawai layout included in the network package.
+</p>
+</li>
+<li> <p><code>network.layout.animate.MDSJ</code> a wrapper to do a Stress Majorization optimized MDS layout using the Multi Dimensional Scaling for Java package. Note, due to license restrictions, this algorithm is for non-commercial use only)
+</p>
+</li>
+<li> <p><code>network.layout.animate.useAttribute</code> applies coordinates stored in a user-generated dynamic network attribute
+</p>
+</li>
+<li> <p><code>network.layout.animate.Graphviz</code> a wrapper for the Graphviz software library –if the library is installed on your system.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed.coords</code></td>
+<td>
+
+<p>(optional) an array of initial positions to be used for the very first layout in the sequence
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layout.par</code></td>
+<td>
+
+<p>A list of parameters to be passed to the layout algorithm.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>default.dist</code></td>
+<td>
+
+<p>The default distance to be used to separate nodes (or disconnected network components). Default to <code>sqrt(network.size(net))</code>. See <code>layout.distance</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight.attr</code></td>
+<td>
+<p>charater providing the name of a (possibly dynamic) numeric edge attribute defining weights for the edges in each time slice. The values <code>activity.duration</code> or <code>activity.count</code> can be used to weight edges by the duration or count of the edge's activity spells in the time slice. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight.dist</code></td>
+<td>
+<p>logical, defaults to <code>FALSE</code>, meaning that the edge weight values provided by <code>weight.attr</code> will be treated as similarities (larger values means closer). A value of <code>TRUE</code> means that weights should be intrepreted as distances. See <code>layout.distance</code> for more information. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chain.direction</code></td>
+<td>
+
+<p>a value of <code>'forward'</code> indicates the chain of layouts should be computes in forward temporal order. A value <code>'reverse'</code> runs the chain backwards. For some layouts, reverse-chaining means that isolated vertices are more likely to have positions close to the partners they will be tied to.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>If true, additional information about the layout process and progress will be returned to console. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>possible additional arguments to be passed to sub processes
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is under active development so implementation and parameters will continue to change.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Invisibly returns original network argument (which is also modified in-place), with the addition of a network variable <code>slice.par</code> storing the slice parameters used, and dynamic node attributes <code>animation.x</code> and <code>animation.y</code> storing the coordinates calculated for each time point. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Skye Bender-deMoll, and the statnet team.
+</p>
+
+
+<h3>References</h3>
+
+<p>See docs for specific layout functions. 
+</p>
+<p>Bender-deMoll, S., Morris, M. and Moody, J. (2008) Prototype Packages for Managing and Animating Longitudinal Network Data: dynamicnetwork and rSoNIA <em>Journal of Statistical Software</em> 24:7.
+</p>
+<p>Krivitsky P and Handcock M (2012).
+<em>Fit, Simulate and Diagnose Models for Network Evoluation based on Exponential-Family Random Graph Models</em>.
+Version 3.0-999.  Project home page at <a href="https://statnet.org">https://statnet.org</a>, <a href="https://cran.r-project.org/package=tergm">https://cran.r-project.org/package=tergm</a>.
+</p>
+<p>Butts CT (2008). network: A Package for Managing Relational Data in R.  <em>Journal of Statistical Software</em>, 24(2). <a href="https://doi.org/10.18637/jss.v024.i02">doi:10.18637/jss.v024.i02</a>. 
+</p>
+<p>Skye Bender-deMoll and McFarland, Daniel A. (2006)  The Art and Science of Dynamic Network Visualization. <em>Journal of Social Structure. Volume 7, Number 2</em> <a href="https://www.cmu.edu/joss/content/articles/volume7/deMollMcFarland/">https://www.cmu.edu/joss/content/articles/volume7/deMollMcFarland/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See also <code>layout.distance</code>, <code>render.animation</code>, <code>network.layout.animate.MDSJ</code>,ndtv, package vignette (<code>vignette('ndtv')</code>) for examples.
+</p>
+
+
+</div>

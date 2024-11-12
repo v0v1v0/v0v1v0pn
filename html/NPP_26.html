@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PoiOMNPP_MCMC1</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MCMC Sampling for Poisson Population of multiple ordered historical data using Normalized Power Prior</h2>
+
+<h3>Description</h3>
+
+<p>Multiple ordered historical data are incorporated together.
+Conduct posterior sampling for Poisson population with normalized power prior.
+For the power parameter <code class="reqn">\gamma</code>, a Metropolis-Hastings algorithm with independence proposal is used.
+For the model parameter <code class="reqn">\lambda</code>, Gibbs sampling is used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PoiOMNPP_MCMC1(n0,n,prior_gamma,prior_lambda, gamma_ind_prop,
+               gamma_ini,nsample,burnin,thin)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n0</code></td>
+<td>
+<p>a natural number vector : number of successes in historical data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>a natural number : number of successes in the current data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_gamma</code></td>
+<td>
+<p>a vector of the hyperparameters in the prior distribution <code class="reqn">Dirichlet(\alpha_1, \alpha_2, ... ,\alpha_K)</code> for <code class="reqn">\gamma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_lambda</code></td>
+<td>
+<p>a vector of the hyperparameters in the prior distribution <code class="reqn">Gamma(\alpha, \beta)</code> for <code class="reqn">\lambda</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma_ind_prop</code></td>
+<td>
+<p>a vector of the hyperparameters in the proposal distribution <code class="reqn">Dirichlet(\alpha_1, \alpha_2, ... ,\alpha_K)</code> for <code class="reqn">\gamma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma_ini</code></td>
+<td>
+<p>the initial value of <code class="reqn">\gamma</code> in MCMC sampling.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsample</code></td>
+<td>
+<p>specifies the number of posterior samples in the output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+<p>the number of burn-ins. The output will only show MCMC samples after bunrin.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+<p>the thinning parameter in MCMC sampling.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The outputs include posteriors of the model parameter(s) and power parameter, acceptance rate in sampling <code class="reqn">\gamma</code>.
+The normalized power prior distribution is
+</p>
+<p style="text-align: center;"><code class="reqn">\frac{\pi_0(\gamma)\pi_0(\lambda)\prod_{k=1}^{K}L(\lambda|D_{0k})^{(\sum_{i=1}^{k}\gamma_i)}}{\int \pi_0(\lambda)\prod_{k=1}^{K}L(\lambda|D_{0k})^{(\sum_{i=1}^{k}\gamma_i)}d\lambda }.</code>
+</p>
+
+<p>Here <code class="reqn">\pi_0(\gamma)</code> and <code class="reqn">\pi_0(\lambda)</code> are the initial prior distributions of <code class="reqn">\gamma</code> and <code class="reqn">\lambda</code>, respectively. <code class="reqn">L(\lambda|D_{0k})</code> is the likelihood function of historical data <code class="reqn">D_{0k}</code>, and <code class="reqn">\sum_{i=1}^{k}\gamma_i</code> is the corresponding power parameter.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class "NPP" with three elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>acceptrate</code></td>
+<td>
+<p>the acceptance rate in MCMC sampling for <code class="reqn">\gamma</code> using Metropolis-Hastings algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>posterior of the model parameter <code class="reqn">\lambda</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>posterior of the power parameter <code class="reqn">\delta</code>. It is equal to the cumulative sum of <code class="reqn">\gamma</code></p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Qiang Zhang <a href="mailto:zqzjf0408@163.com">zqzjf0408@163.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Ibrahim, J.G., Chen, M.-H., Gwon, Y. and Chen, F. (2015).
+The Power Prior: Theory and Applications.
+<em>Statistics in Medicine  34:3724-3749.</em>
+</p>
+<p>Duan, Y., Ye, K. and Smith, E.P. (2006).
+Evaluating Water Quality: Using Power Priors to Incorporate Historical Information.
+<em>Environmetrics  17:95-106.</em>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>PoiMNPP_MCMC1</code>;
+<code>PoiMNPP_MCMC2</code>;
+<code>PoiOMNPP_MCMC2</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">PoiOMNPP_MCMC1(n0=c(0,3,5),n=3,prior_gamma=c(1/2,1/2,1/2,1/2), prior_lambda=c(1,1/10),
+               gamma_ind_prop=rep(1,4),gamma_ini=NULL, nsample = 2000, burnin = 500, thin = 2)
+</code></pre>
+
+
+</div>

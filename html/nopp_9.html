@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>set.data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Prepares data for Nash equilibrium
+</h2>
+
+<h3>Description</h3>
+
+<p>Prepares data for Nash equilibrium
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">set.data(data, shape="wide", choice, varying, sep="_")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data set</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>either <code>wide</code> or long. Default <code>wide</code>. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>choice</code></td>
+<td>
+<p>the variable indicating the choice made: it can be either a logical vector, a numerical vector with 0 where the alternative is not chosen, a factor with level 'yes' when the alternative is chosen.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varying</code></td>
+<td>
+<p>the indexes of the variables that are alternative specific. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>the seperator of the variable name and the alternative name (only relevant for a wide data.frame). See Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For general examples see the vignette. The arguments <code>shape</code>, <code>choice</code>, <code>varying</code> and <code>sep</code> as as in the <code>mlogit.data</code> function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>mlogit.data</code> object, which is a <code>data.frame</code> in long format, i.e. one line for each alternative. It has a index attribute, which is a data.frame that contains the index of the choice made ('chid'), the index of the alternative ('alt') and, if any, the index of the individual ('id'). The choice variable is a boolean which indicates the choice made. This function use reshape if the data.frame is in wide format. It also has the attribute <code>call</code> for further data manipulation in the bootstrap task of <code>equilibrium</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>See the vignette for detailed explanations and other working examples.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Luigi Curini, Stefano M. Iacus
+</p>
+
+
+<h3>References</h3>
+
+<p>Curini, L., and Iacus, S.M. (2017) Nash Optimal Party Positions: The nopp R Package, Journal of Statistical Software, 81(11), 1–25
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data(italy2006)
+
+str(italy2006)
+italy2006[1:2,1:14]
+
+election &lt;- set.data(italy2006 , shape="wide", choice="vote",
+varying=c(5:14), sep="_")
+str(election)
+
+m &lt;- mlogit(vote~prox+partyID | gov_perf+sex+age+education, 
+election, reflevel = "UL")
+summary(m)
+
+true.pos &lt;- list(FI=7.59, UL=3.50, RC=1.95, AN=8.08, UDC=5.66)
+true.votes &lt;- list(FI=.24, UL=.40, RC=.10, AN=.18, UDC=.08)
+# model: comparison against true votes and party positions
+nash.eq &lt;- equilibrium(model=m, data=election, pos=true.pos, 
+ votes=true.votes)
+nash.eq
+
+## End(Not run)
+</code></pre>
+
+
+</div>

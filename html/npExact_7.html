@@ -1,0 +1,251 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npMeanSingle</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A test for the mean of a bounded random variable based on a single sample
+of iid observations.</h2>
+
+<h3>Description</h3>
+
+<p>This test requires that the user knows upper and lower bounds before
+gathering the data such that the properties of the data generating process
+imply that all observations will be within these bounds. The data input
+consists of a sequence of observations, each being an independent
+realization of the random variable. No further distributional assumptions
+are made.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npMeanSingle(x, mu, lower = 0, upper = 1, alternative = "two.sided",
+  iterations = 5000, alpha = 0.05, epsilon = 1 * 10^(-6),
+  ignoreNA = FALSE, max.iterations = 100000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a (non-empty) numeric vector of data values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>threshold value for the null hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower, upper</code></td>
+<td>
+<p>the theoretical lower and upper bounds on the data
+outcomes known ex-ante before gathering the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>a character string describing the alternative
+hypothesis, can take values "greater", "less" or "two.sided".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>the number of iterations used, should not be changed if
+the exact solution should be derived</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the type I error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>the tolerance in terms of probability of the Monte Carlo
+simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ignoreNA</code></td>
+<td>
+<p>if <code>TRUE</code>, NA values will be omitted. Default:
+<code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.iterations</code></td>
+<td>
+<p>the maximum number of iterations that should be
+carried out. This number could be increased to achieve greater accuracy in
+cases where the difference between the threshold probability and theta is
+small. Default: <code>10000</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For any <code class="reqn">\mu</code> that lies between the two bounds, under alternative =
+"greater", it is a test of the null hypothesis <code class="reqn">H_0 : E(X) \le \mu</code>
+against the alternative hypothesis <code class="reqn">H_1 : E(X) &gt; \mu</code>.
+</p>
+<p>Using the known bounds, the data is transformed to lie in [0, 1] using an
+affine transformation. Then the data is randomly transformed into a new
+data set that has values 0, <code>mu</code> and 1 using a mean preserving
+transformation. The exact randomized binomial test is then used to
+calculate the rejection probability of this under new data when level is
+<code>theta</code>*<code>alpha</code>. This random transformation is repeated
+<code>iterations</code> times. If the average rejection probability is greater
+than theta, one can reject the null hypothesis. If however the average
+rejection probability is too close to theta then the iterations are
+continued. The values of <code>theta</code> and a value of <code>mu</code> in the
+alternative hypothesis is found in an optimization procedure to maximize
+the set of parameters in the alternative hypothesis under which the type II
+error probability is below 0.5. Please see the cited paper below for
+further information.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with class "nphtest" containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p> a character string indicating the name and type of the test
+that was performed.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p> a character string giving the
+name(s) of the data.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p> a character string describing
+the alternative hypothesis.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimate</code></td>
+<td>
+<p> the estimated mean or
+difference in means depending on whether it was a one-sample test or a
+two-sample test.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probrej</code></td>
+<td>
+<p> numerical estimate of the rejection
+probability of the randomized test, derived by taking an average of
+<code>iterations</code> realizations of the rejection probability.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bounds</code></td>
+<td>
+<p> the lower and upper bounds of the variables.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.value</code></td>
+<td>
+<p> the specified hypothesized value of the correlation
+between the variables.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p> the type I error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+
+<p>the parameter that minimizes the type II error.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pseudoalpha</code></td>
+<td>
+
+<p><code>theta</code>*<code>alpha</code>, this is the level used when calculating the
+average rejection probability during the iterations.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rejection</code></td>
+<td>
+
+<p>logical indicator for whether or not the null hypothesis can be rejected.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p> the number of iterations that were performed.  </p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Karl Schlag, Peter Saffert and Oliver Reiter
+</p>
+
+
+<h3>References</h3>
+
+<p>Schlag, Karl H. 2008, A New Method for Constructing Exact Tests
+without Making any Assumptions, Department of Economics and Business
+Working Paper 1109, Universitat Pompeu Fabra. Available at
+<a href="https://ideas.repec.org/p/upf/upfgen/1109.html">https://ideas.repec.org/p/upf/upfgen/1109.html</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><a href="https://homepage.univie.ac.at/karl.schlag/statistics.php">https://homepage.univie.ac.at/karl.schlag/statistics.php</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## test whether Americans gave more than 5 dollars in a round of
+## the Ultimatum game
+data(bargaining)
+us_offers &lt;- bargaining$US
+npMeanSingle(us_offers, mu = 5, lower = 0, upper = 10, alternative =
+"greater", ignoreNA = TRUE) ## no rejection
+
+## test if the decrease in pain before and after the surgery is smaller
+## than 50
+data(pain)
+pain$decrease &lt;- with(pain, before - after)
+without_pc &lt;- pain[pain$pc == 0, "decrease"]
+npMeanSingle(without_pc, mu = 50, lower = 0, upper = 100,
+alternative = "less")
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,313 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimateSI</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimates the generation/serial interval distribution</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>estimateSI</code> uses the relative transmission probabilities to estimate
+the generation/serial interval distribution assuming a gamma distribution.
+It uses the PEM algorithm developed by Hens et al. 2012 extending their method to include
+restricting analysis to the top cluster of possible infectors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimateSI(
+  df,
+  indIDVar,
+  timeDiffVar,
+  pVar,
+  clustMethod = c("none", "n", "kd", "hc_absolute", "hc_relative"),
+  cutoffs = NULL,
+  initialPars,
+  shift = 0,
+  epsilon = 1e-05,
+  bootSamples = 0,
+  alpha = 0.05,
+  progressBar = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>The name of the dateset with transmission probabilities (column <code>pVar</code>),
+individual IDs (columns <code>&lt;indIDVar&gt;.1</code> and <code>&lt;indIDVar&gt;.2</code>), and difference
+in time between the pair of cases (column <code>timeDiffVar</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indIDVar</code></td>
+<td>
+<p>The name (in quotes) of the individual ID columns
+(data frame <code>df</code> must have variables called <code>&lt;indIDVar&gt;.1</code>
+and <code>&lt;indIDVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeDiffVar</code></td>
+<td>
+<p>The name (in quotes) of the column with the difference
+in time between infection (generation interval) or symptom onset (serial interval) for the
+pair of cases. The units of this variable (hours, days, years) defines the units of the 
+resulting distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pVar</code></td>
+<td>
+<p>The column name (in quotes) of the transmission probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clustMethod</code></td>
+<td>
+<p>The method used to cluster the infectors; one of 
+<code>"none", "n", "kd", "hc_absolute", "hc_relative"</code> where <code>"none"</code> or
+not specifying a value means use all pairs with no clustering
+(see <code>clusterInfectors</code> for detials on clustering methods).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoffs</code></td>
+<td>
+<p>A vector of cutoffs for clustering (see <code>clusterInfectors</code>).
+If more than one cutoff is provided, a pooled estimate will also be provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initialPars</code></td>
+<td>
+<p>A vector of length two with the shape and scale 
+to initialize the gamma distribution parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shift</code></td>
+<td>
+<p>A value in the same units as <code>timeDiffVar</code> that the
+gamma distribution should be shifted. The default value of 0 is an 
+unmodifed gamma distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>The difference between successive estimates of the shape and
+scale parameters that indicates convergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootSamples</code></td>
+<td>
+<p>The number of bootstrap samples; if 0, then no confidence intervals
+are calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The alpha level for the confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progressBar</code></td>
+<td>
+<p>A logical indicating if a progress bar should be printed (default is TRUE).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The PEM algorithm uses the prior probability that each pair is connected by direct
+transmission to estimate the generation/serial interval using estimation maximization.
+This code will provide an estimate of the generation interval if <code>timeDiffVar</code> represents the
+difference in infection dates and the serial interval if it represents the difference in symptom onset dates.
+The current generation/serial interval distribution parameters are used to update the probabilities
+which are then used to update the generation/serial interval distribution parameters. The process
+continues until the parameters converge (indicated by a change of less than <code>epsilon</code>)
+between iterations. <em>Note: time difference between pairs should not be used to 
+estimate the probabilities</em>
+</p>
+<p>This function acts as a wrapper around <code>performPEM</code> which integrates
+estimation of the generation/serial interval distribution with clustering the infectors and calculates
+derived parameters (mean, median, sd) of the distribution. Generally, this function
+should be called instead of <code>performPEM</code> directly.
+</p>
+<p>All pairs of cases can be used in the estimation process by setting
+<code>clustMethod = "none"</code>. However, if the probabilities are from a algorithm such as
+<code>nbProbabilities</code>, then it is recommeneded to use a clustering method
+and only include the top cluster of infectors for infectees which have such a cluster.
+This can be specified by using the <code>clustMethod</code> and <code>cutoff</code> arguments which
+are passed into <code>clusterInfectors</code>. See the details of this function for
+a description of the different clustering methods.
+</p>
+<p>The method can be performed with any generation/serial interval distribution,
+but this version of this function assumes that the generation/serial interval has a gamma distribution.
+The function does allow for a shifted gamma distribution. The <code>shift</code> argument
+defines how much the gamma distribution should be shifted. Any observed generation/serial intervals
+that are less than this shift will have probability 0. This parameter should be used if 
+there is a clinical lower bound for the possible generation/serial interval. If this argument
+is not specified then an unmodified gamma function is used. The units of the
+estimated gamma distribution will be defined by the units of the provided
+<code>&lt;timeDiffVar&gt;</code> column. The value of the <code>shift</code> should be in the same units.
+</p>
+<p>The algorithm requires initial parameters which should be specified as a vector: 
+<code>c(&lt;shape&gt;, &lt;scale&gt;)</code>. These parameters should result in a gamma distribution
+that is on the desired scale, set by the <code>&lt;timeDiffVar&gt;</code> column.
+</p>
+<p>If <code>bootSamples &gt; 0</code>, bootstrap confidence intervals will be estimated for
+both the shape and scale parameters as well as the mean, median, and mode of the
+distribution using cluster bootstrapping.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with one row and the following columns:
+</p>
+
+<ul>
+<li> <p><code>nIndividuals</code> - the number of infectees who have intervals included in the estimate.
+</p>
+</li>
+<li> <p><code>pCluster</code> - the proportion of cases who have intervals included in the estimate.
+</p>
+</li>
+<li> <p><code>nInfectors</code> - the average number of infectors in the top cluster.
+</p>
+</li>
+<li> <p><code>shape</code> - the shape of the estimated gamma distribution for the interval
+</p>
+</li>
+<li> <p><code>scale</code> - the scale of the estimated gamma distribution for the interval
+</p>
+</li>
+<li> <p><code>meanSI</code> - the mean of the estimated gamma distribution for the interval 
+(<code>shape * scale + shift</code>)
+</p>
+</li>
+<li> <p><code>medianSI</code> - the median of the estimated gamma distribution for the interval
+(<code>qgamma(0.5, shape, scale) + shift)</code>)
+</p>
+</li>
+<li> <p><code>sdSI</code> - the standard deviation of the estimated gamma distribution for
+the interval (<code>shape * scale ^ 2</code>)
+</p>
+</li>
+</ul>
+<p>If bootSamples &gt; 0, then the data frame also includes the following columns:
+</p>
+
+<ul>
+<li> <p><code>shapeCILB</code> and <code>shapeCIUB</code> - lower bound and upper bounds
+of the bootstrap confidence interval for the shape parameter
+</p>
+</li>
+<li> <p><code>scaleCILB</code> and <code>scaleCIUB</code> - lower bound and upper bounds
+of the bootstrap confidence interval for the scale parameter
+</p>
+</li>
+<li> <p><code>meanCILB</code> and <code>meanCIUB</code> - lower bound and upper bounds
+of the bootstrap confidence interval for the mean of the interval distribution
+</p>
+</li>
+<li> <p><code>medianCILB</code> and <code>medianCIUB</code> - lower bound and upper bounds
+of the bootstrap confidence interval for the median of the interval distribution
+</p>
+</li>
+<li> <p><code>sdCILB</code> and <code>sdCIUB</code> - lower bound and upper bounds
+of the bootstrap confidence interval for the sd of the interval distribution
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Hens N, Calatayud L, Kurkela S, Tamme T, Wallinga J. Robust reconstruction and
+analysis of outbreak data: influenza A (H1N1) v transmission in a school-based 
+population. <em>American Journal of Epidemiology</em>. 2012 Jul 12;176(3):196-203.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nbProbabilities</code> <code>clusterInfectors</code>
+<code>performPEM</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## First, run the algorithm without including time as a covariate.
+orderedPair &lt;- pairData[pairData$infectionDiffY &gt; 0, ]
+
+## Create a variable called snpClose that will define probable links
+# (&lt;3 SNPs) and nonlinks (&gt;12 SNPs) all pairs with between 2-12 SNPs
+# will not be used to train.
+orderedPair$snpClose &lt;- ifelse(orderedPair$snpDist &lt; 3, TRUE,
+                        ifelse(orderedPair$snpDist &gt; 12, FALSE, NA))
+table(orderedPair$snpClose)
+
+## Running the algorithm
+# NOTE should run with nReps &gt; 1.
+resGen &lt;- nbProbabilities(orderedPair = orderedPair,
+                            indIDVar = "individualID",
+                            pairIDVar = "pairID",
+                            goldStdVar = "snpClose",
+                            covariates = c("Z1", "Z2", "Z3", "Z4"),
+                            label = "SNPs", l = 1,
+                            n = 10, m = 1, nReps = 1)
+                            
+## Merging the probabilities back with the pair-level data
+nbResultsNoT &lt;- merge(resGen[[1]], orderedPair, by = "pairID", all = TRUE)
+
+## Estimating the serial interval
+
+# Using hierarchical clustering with a 0.05 absolute difference cutoff
+estimateSI(nbResultsNoT, indIDVar = "individualID",
+             timeDiffVar = "infectionDiffY", pVar = "pScaled",
+             clustMethod = "hc_absolute", cutoff = 0.05, initialPars = c(2, 2))
+             
+
+# Using all pairs
+estimateSI(nbResultsNoT, indIDVar = "individualID",
+              timeDiffVar = "infectionDiffY", pVar = "pScaled",
+              clustMethod = "none", initialPars = c(2, 2))
+
+
+# # Using a shifted gamma distribution:
+# # not allowing serial intervals of less than 3 months (0.25 years)
+estimateSI(nbResultsNoT, indIDVar = "individualID",
+              timeDiffVar = "infectionDiffY", pVar = "pScaled",
+              clustMethod = "hc_absolute", cutoff = 0.05,
+              initialPars = c(2, 2), shift = 0.25)
+
+
+# # Using multiple cutoffs
+estimateSI(nbResultsNoT, indIDVar = "individualID",
+              timeDiffVar = "infectionDiffY", pVar = "pScaled",
+              clustMethod = "hc_absolute", cutoff = c(0.025, 0.05), initialPars = c(2, 2))
+
+
+
+## Adding confidence intervals
+# NOTE should run with bootSamples &gt; 2.
+estimateSI(nbResultsNoT, indIDVar = "individualID",
+             timeDiffVar = "infectionDiffY", pVar = "pScaled",
+             clustMethod = "hc_absolute", cutoff = 0.05,
+             initialPars = c(2, 2), shift = 0.25, bootSamples = 2)
+
+</code></pre>
+
+
+</div>

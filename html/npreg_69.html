@@ -1,0 +1,207 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>smooth.influence</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonparametric Regression Diagnostics
+</h2>
+
+<h3>Description</h3>
+
+<p>These functions provide the basic quantities that are used to form a variety of diagnostics for checking the quality of a fit smoothing spline (fit by <code>ss</code>), smooth model (fit by <code>sm</code>), or generalized smooth model (fit by <code>gsm</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ss'
+influence(model, do.coef = TRUE, ...)
+## S3 method for class 'sm'
+influence(model, do.coef = TRUE, ...)
+## S3 method for class 'gsm'
+influence(model, do.coef = TRUE, ...)
+
+smooth.influence(model, do.coef = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>an object of class "gsm" output by the <code>gsm</code> function, "sm" output by the <code>sm</code> function, or "ss" output by the <code>ss</code> function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.coef</code></td>
+<td>
+
+<p>logical indicating if the changed <code>coefficients</code> are desired (see Details).   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments (currently ignored)  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Inspired by <code>influence</code> and <code>lm.influence</code> functions in R's <b>stats</b> package.
+</p>
+<p>The functions documented in <code>smooth.influence.measures</code> provide a more user-friendly way of computing a variety of regression diagnostics.
+</p>
+<p>For non-Gaussian <code>gsm</code> objects, these regression diagnostics are based on one-step approximations, which may be inadequate if a case has high influence. 
+</p>
+<p>For all models, the diagostics are computed assuming that the smoothing parameters are fixed at the given values. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>hat </code></td>
+<td>
+<p>a vector containing the leverages, i.e., the diagonals of the smoothing matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coefficients </code></td>
+<td>
+<p>if <code>do.coef</code> is true, a matrix whose i-th row contains the change in the estimated coefficients which results when the i-th case is excluded from the fitting. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deviance </code></td>
+<td>
+<p> a vector whose i-th entry contains the deviance which results when the i-th case is excluded from the fitting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df </code></td>
+<td>
+<p> a vector whose i-th entry contains the effective degrees-of-freedom which results when the i-th case is excluded from the fitting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma </code></td>
+<td>
+<p>a vector whose i-th element contains the estimate of the residual standard deviation obtained when the i-th case is excluded from the fitting. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wt.res </code></td>
+<td>
+<p>a vector of <em>weighted</em> (or for class <code>gsm</code> rather <em>deviance</em>) residuals.</p>
+</td>
+</tr>
+</table>
+<h3>Warning </h3>
+
+<p>The approximations used for <code>gsm</code> objects can result in <code>sigma</code> estimates being <code>NaN</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The <code>coefficients</code> returned by <code>smooth.influence</code> (and the corresponding functions S3 <code>influence</code> methods) are the <em>change</em> in the coefficients which result from dropping each case, i.e., <code class="reqn">\theta - \theta_i</code>, where <code class="reqn">\theta</code> are the original coefficients obtained from the full sample of <code class="reqn">n</code> observations and <code class="reqn">\theta_i</code> are the coefficients that result from dropping the i-th case.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>See the list in the documentation for <code>influence.measures</code>
+</p>
+<p>Chambers, J. M. (1992) <em>Linear models.</em> Chapter 4 of <em>Statistical Models in S</em> eds J. M. Chambers and T. J. Hastie, Wadsworth &amp; Brooks/Cole.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ss</code>, <code>sm</code>, <code>gsm</code> for modeling functions
+</p>
+<p><code>smooth.influence.measures</code> for convenient summary
+</p>
+<p><code>diagnostic.plots</code> for regression diagnostic plots
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+fx &lt;- 2 + 3 * x + sin(2 * pi * x)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# fit models
+mod.ss &lt;- ss(x, y, nknots = 10)
+mod.sm &lt;- sm(y ~ x, knots = 10)
+mod.gsm &lt;- gsm(y ~ x, knots = 10)
+
+# calculate influence
+infl.ss &lt;- influence(mod.ss)
+infl.sm &lt;- influence(mod.sm)
+infl.gsm &lt;- influence(mod.gsm)
+
+# compare hat
+mean((infl.ss$hat - infl.sm$hat)^2)
+mean((infl.ss$hat - infl.gsm$hat)^2)
+mean((infl.sm$hat - infl.gsm$hat)^2)
+
+# compare deviance
+mean((infl.ss$deviance - infl.sm$deviance)^2)
+mean((infl.ss$deviance - infl.gsm$deviance)^2)
+mean((infl.sm$deviance - infl.gsm$deviance)^2)
+
+# compare df
+mean((infl.ss$df - infl.sm$df)^2)
+mean((infl.ss$df - infl.gsm$df)^2)
+mean((infl.sm$df - infl.gsm$df)^2)
+
+# compare sigma
+mean((infl.ss$sigma - infl.sm$sigma)^2)
+mean((infl.ss$sigma - infl.gsm$sigma)^2)
+mean((infl.sm$sigma - infl.gsm$sigma)^2)
+
+# compare residuals
+mean((infl.ss$wt.res - infl.sm$wt.res)^2)
+mean((infl.ss$wt.res - infl.gsm$dev.res)^2)
+mean((infl.sm$wt.res - infl.gsm$dev.res)^2)
+
+# NOTE: ss() coef only comparable to sm() and gsm() after rescaling
+scale.sm &lt;- rep(c(1, mod.sm$specs$thetas), times = c(2, 10))
+scale.gsm &lt;- rep(c(1, mod.gsm$specs$thetas), times = c(2, 10))
+mean((coef(mod.ss) / scale.sm - coef(mod.sm))^2)
+mean((coef(mod.ss) / scale.gsm - coef(mod.gsm))^2)
+mean((coef(mod.sm) - coef(mod.gsm))^2)
+
+# infl.ss$coefficients are *not* comparable to others
+mean((infl.ss$coefficients - infl.sm$coefficients)^2)
+mean((infl.ss$coefficients - infl.gsm$coefficients)^2)
+mean((infl.sm$coefficients - infl.gsm$coefficients)^2)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>chmAddReducedDim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add reduced dimension coordinates to an NG-CHM.</h2>
+
+<h3>Description</h3>
+
+<p>Add (reduced) dimension coordinates from an object obj
+as hidden covariate bars to an axis of an NG-CHM.  Depending on the object type, dimName and dimAxis
+can be used to specify the name of the dimension of interest in obj.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">chmAddReducedDim(hm, axis, obj, dimName, maxDim, basename, dimAxis)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>hm</code></td>
+<td>
+<p>The NGCHM to add the coordinates to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>axis</code></td>
+<td>
+<p>The NGCHM axis ("row" or "column") to add the coordinates to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>An object containing the (reduced) dimension.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dimName</code></td>
+<td>
+<p>The name of the (reduced) dimension to create covariate bars for.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxDim</code></td>
+<td>
+<p>The maximum number of coordinates to add (default all).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>basename</code></td>
+<td>
+<p>The prefix to use for the coordinate names (defaults to dimName).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dimAxis</code></td>
+<td>
+<p>The axis on obj containing the named dimension, if applicable.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>One hidden covariate bar is added for each coordinate obtained from <code>obj</code>.
+If specified, maxDim limits the maximum number of covariate bars added to the chm.
+</p>
+<p>Coordinates have names 'BASENAME.coordinate.N', where BASENAME is specified by the parameter
+basename (defaults to dimName if omitted) and N ranges from 1 to the number of added covariate bars.
+</p>
+<p><code>obj</code> can be a numeric matrix, each column of which is a (reduced) dimension.  In this case, dimName and dimAxis
+are not used for obtaining the reduced dimension.  The number of rows of the matrix must equal the size of the specified
+NGCHM axis and each row of the matrix must be uniquely named using the names from that axis of the NG-CHM.
+</p>
+<p><code>obj</code> can also be an instance of class className if there exists an S3 method getDimensions.className.
+The method takes the object as its first parameter and up to two optional parameters, dimName and dimAxis,
+that can be used to specify the desired dimension.  The method's return value is a matrix similar to
+the one described in the preceding paragraph.  This package defines methods for classes <code>prcomp</code> and <code>umap</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The NGCHM with added coordinates.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>chmAddPCA()</code>
+</p>
+<p><code>chmAddTSNE()</code>
+</p>
+<p><code>chmAddUMAP()</code>
+</p>
+<p><code>chmAddUWOT()</code>
+</p>
+<p><code>getDimensions()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Examples using `chmNew()` require git to be installed.
+## Not run: 
+  if (requireNamespace("NGCHMDemoData", quietly = TRUE)) {
+    data(TCGA.GBM.EXPR, package = "NGCHMDemoData")
+    mat &lt;- TCGA.GBM.EXPR[1:10, 1:10]
+    prc &lt;- prcomp(mat)
+    hm &lt;- chmNew("Demo reduced dimension coordinates", mat)
+    hm &lt;- chmAddReducedDim(hm, "column", prc, "PCA", 3, "PC")
+    umc &lt;- umap::umap(t(mat), n_neighbors = 8)
+    hm &lt;- chmAddReducedDim(hm, "column", umc, "UMAP")
+  }
+  # Small example not requiring NGCHMDemoData
+  matrix &lt;- matrix(rnorm(100),
+    nrow = 10, ncol = 10,
+    dimnames = list(paste0("r", 1:10), paste0("c", 1:10))
+  )
+  prc &lt;- prcomp(matrix)
+  hm &lt;- chmNew("Demo reduced dimension coordinates", matrix)
+  hm &lt;- chmAddReducedDim(hm, "column", prc, "PCA", 3, "PC")
+  umc &lt;- umap::umap(t(matrix), n_neighbors = 8)
+  hm &lt;- chmAddReducedDim(hm, "column", umc, "UMAP")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

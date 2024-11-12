@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gatherCVs4Matrices</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>gatherCVs4Matrices</h2>
+
+<h3>Description</h3>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gatherCVs4Matrices(..., raw_matrix, nonzeroRatio , cvNorm , cvResolution = 0.005)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>raw_matrix</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonzeroRatio</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvNorm</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvResolution</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (..., raw_matrix, nonzeroRatio = NULL, cvNorm = TRUE,
+    cvResolution = 0.005)
+{
+    if (is.null(nonzeroRatio)) {
+        stop("Please provide nonzeroRatio!")
+    }
+    matrices &lt;- list(...)
+    matrices_name &lt;- names(matrices)
+    numMethod &lt;- length(matrices)
+    method_range_tmp &lt;- seq(1, numMethod, 1)
+    cv_range_tmp &lt;- seq(0, 1, cvResolution)
+    method_range_times &lt;- length(cv_range_tmp)
+    cv_range_times &lt;- length(method_range_tmp)
+    method_range &lt;- rep(method_range_tmp, each = round(method_range_times))
+    cv_range &lt;- rep(cv_range_tmp, times = round(cv_range_times))
+    nozeroIndex &lt;- filteredZero(raw_matrix, nonzeroRatio = nonzeroRatio)
+    for (j in method_range_tmp) {
+        dataUse2CV &lt;- matrices[[j]][nozeroIndex, ]
+        cv.result &lt;- getCV(dataUse2CV, cvNorm = cvNorm)
+        assign(paste(matrices_name[j], ".cv", sep = ""), cv.result)
+    }
+    cv_uniform &lt;- NULL
+    cv_uniform_all &lt;- mapply(function(i, j) {
+        cv.result &lt;- paste(matrices_name[j], ".cv", sep = "")
+        gene_number &lt;- length(which(get(cv.result) &lt;= i))
+        cv_uniform_row &lt;- c(i, gene_number, matrices_name[j])
+        rbind(cv_uniform, cv_uniform_row)
+    }, cv_range, method_range)
+    cv_uniform_all &lt;- t(cv_uniform_all)
+    colnames(cv_uniform_all) &lt;- c("Cutoff", "Counts", "Methods")
+    return(cv_uniform_all)
+  }
+</code></pre>
+
+
+</div>

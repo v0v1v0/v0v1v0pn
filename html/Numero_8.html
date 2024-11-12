@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroPermute</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Permutation analysis of map layout
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimate the dynamic range and statistical significance for
+regional patterns on a self-organizing maps using permutations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroPermute(map, districts, data, n = 1000, message = NULL,
+           zbase = NULL, seed = 0.0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>map</code></td>
+<td>
+
+<p>A list object in the format from <code>nroTrain()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>districts</code></td>
+<td>
+
+<p>An integer vector of M best matching districts.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A numeric vector of M values or an M x N matrix (or data frame), where
+M is the number of data points and N is the number of variables.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>Maximum number of permutations per variable.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>message</code></td>
+<td>
+
+<p>If positive, progress information is printed at the specified
+interval in seconds.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zbase</code></td>
+<td>
+
+<p>Reference Z-score for determining color amplitudes.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+
+<p>Seed value for random number generator.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The input argument <code>map</code> must contain the map topology and the
+centroid profiles as returned by the functions <code>nroKmeans()</code>,
+<code>nroKohonen()</code>, or <code>nroTrain()</code>.
+</p>
+<p>The input argument <code>districts</code> must contain integers between 1 and K,
+where K is the number map units. Any other values will be ignored.
+</p>
+<p>Training variables and data points are detected by the column names of
+<code>map$centroids</code>, the attribute "variables" in <code>districts</code> and
+the names of elements in <code>districts</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with eight columns: P.z is a parametric estimate for statistical
+significance, P.freq is the frequency-based estimate for statistical
+signicance, and Z is the estimated z-score of how far the
+observed map plane is from the average randomly generated layout.
+N.data indicates how many data values were used and N.cycles tells the
+number of completed permutations. AMPLITUDE is a dynamic range modifier
+for colors that can be used in <code>nroColorize()</code>.
+</p>
+<p>The output also contains the attribute 'zbase' that indicates the
+normalization factor for the color amplitudes.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Set row names.
+rownames(dataset) &lt;- paste("r", 1:nrow(dataset), sep="")
+
+# Prepare training data.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- scale.default(dataset[,trvars])
+
+# K-means clustering.
+km &lt;- nroKmeans(data = trdata)
+
+# Self-organizing map.
+sm &lt;- nroKohonen(seeds = km)
+sm &lt;- nroTrain(map = sm, data = trdata)
+
+# Assign data points into districts.
+matches &lt;- nroMatch(centroids = sm, data = trdata)
+
+# Estimate statistics for cholesterol
+chol &lt;- nroPermute(map = sm, districts = matches, data = dataset$CHOL)
+print(chol[,c("TRAINING", "Z", "P.z", "P.freq")])
+
+# Estimate statistics.
+stats &lt;- nroPermute(map = sm, districts = matches, data = dataset)
+print(stats[,c("TRAINING", "Z", "P.z", "P.freq")])
+</code></pre>
+
+
+</div>

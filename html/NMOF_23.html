@@ -1,0 +1,353 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DEopt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Optimisation with Differential Evolution
+</h2>
+
+<h3>Description</h3>
+
+<p>The function implements the standard Differential Evolution algorithm.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DEopt(OF, algo = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>OF</code></td>
+<td>
+<p>The objective function, to be minimised. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algo</code></td>
+<td>
+<p>A list with the settings for algorithm. See Details and Examples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other pieces of data required to evaluate the objective function. See Details and Examples.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function implements the standard Differential Evolution (no
+jittering or other features). Differential Evolution (<abbr><span class="acronym">DE</span></abbr>) is
+a population-based optimisation heuristic proposed by Storn and Price
+(1997). <abbr><span class="acronym">DE</span></abbr> evolves several solutions (collected in the
+‘population’) over a number of iterations
+(‘generations’). In a given generation, new solutions are
+created and evaluated; better solutions replace inferior ones in the
+population. Finally, the best solution of the population is
+returned. See the references for more details on the mechanisms.
+</p>
+<p>To allow for constraints, the evaluation works as follows: after a new
+solution is created, it is (i) repaired, (ii) evaluated through the
+objective function, (iii) penalised. Step (ii) is done by a call to
+<code>OF</code>; steps (i) and (iii) by calls to <code>algo$repair</code> and
+<code>algo$pen</code>. Step (i) and (iii) are optional, so the respective
+functions default to <code>NULL</code>. A penalty is a positive number added
+to the ‘clean’ objective function value, so it can also be
+directly written in the <code>OF</code>. Writing a separate penalty function
+is often clearer; it can be more efficient if either only the objective
+function or only the penalty function can be vectorised.  (Constraints
+can also be added without these mechanisms. Solutions that violate
+constraints can, for instance, be mapped to feasible solutions, but
+without actually changing them. See Maringer and Oyewumi, 2007, for an
+example.)
+</p>
+<p>Conceptually, <abbr><span class="acronym">DE</span></abbr> consists of two loops: one loop across the
+generations and, in any given generation, one loop across the solutions.
+<code>DEopt</code> indeed uses, as the default, two loops. But it does not
+matter in what order the solutions are evaluated (or repaired or
+penalised), so the second loop can be vectorised. This is controlled by
+the variables <code>algo$loopOF</code>, <code>algo$loopRepair</code> and
+<code>algo$loopPen</code>, which all default to <code>TRUE</code>. Examples are
+given in the vignettes and in the book. The respective
+<code>algo$loopFun</code> must then be set to <code>FALSE</code>.
+</p>
+<p>All objects that are passed through <code>...</code> will be passed to the
+objective function, to the repair function and to the penalty function.
+</p>
+<p>The list <code>algo</code> collects the the settings for the
+algorithm. Strictly necessary are only <code>min</code> and <code>max</code> (to
+initialise the population). Here are all possible arguments:
+</p>
+
+<dl>
+<dt><code>CR</code></dt>
+<dd>
+<p>probability for crossover. Defaults to 0.9. Using
+default settings may not be a good idea.</p>
+</dd>
+<dt><code>F</code></dt>
+<dd>
+<p>The step size. Typically a numeric vector of length
+one; default is 0.5. Using default settings may not be a good
+idea. (<code>F</code> can also be a vector with different values for
+each decision variable.)</p>
+</dd>
+<dt><code>nP</code></dt>
+<dd>
+<p>population size. Defaults to 50. Using default
+settings may not be a good idea.</p>
+</dd>
+<dt><code>nG</code></dt>
+<dd>
+<p>number of generations. Defaults to 300. Using
+default settings may not be a good idea.</p>
+</dd>
+<dt>
+<code>min</code>, <code>max</code>
+</dt>
+<dd>
+<p>vectors of minimum and maximum
+parameter values. The vectors <code>min</code> and <code>max</code> are used
+to determine the dimension of the problem and to randomly
+initialise the population. Per default, they are no constraints: a
+solution may well be outside these limits. Only if
+<code>algo$minmaxConstr</code> is <code>TRUE</code> will the algorithm repair
+solutions outside the <code>min</code> and <code>max</code> range.</p>
+</dd>
+<dt><code>minmaxConstr</code></dt>
+<dd>
+<p>if <code>TRUE</code>, <code>algo$min</code> and
+<code>algo$max</code> are considered constraints. Default is
+<code>FALSE</code>.</p>
+</dd>
+<dt><code>pen</code></dt>
+<dd>
+<p>a penalty function. Default is <code>NULL</code> (no penalty).</p>
+</dd>
+<dt><code>initP</code></dt>
+<dd>
+<p>optional: the initial population. A matrix of size
+<code>length(algo$min)</code> times <code>algo$nP</code>, or a function that
+creates such a matrix. If a function, it should take no arguments.</p>
+</dd>
+<dt><code>repair</code></dt>
+<dd>
+<p>a repair function. Default is <code>NULL</code> (no
+repairing).</p>
+</dd>
+<dt><code>loopOF</code></dt>
+<dd>
+<p>logical. Should the <code>OF</code> be evaluated
+through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>loopPen</code></dt>
+<dd>
+<p>logical. Should the penalty function (if
+specified) be evaluated through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>loopRepair</code></dt>
+<dd>
+<p>logical. Should the repair function (if
+specified) be evaluated through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>printDetail</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), information
+is printed. If an integer <code>i</code> greater then one, information
+is printed at very <code>i</code>th generation.</p>
+</dd>
+<dt><code>printBar</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), a
+<code>txtProgressBar</code> is printed.</p>
+</dd>
+<dt><code>storeF</code></dt>
+<dd>
+<p>if <code>TRUE</code> (the default), the objective
+function values for every solution in every generation are stored
+and returned as matrix <code>Fmat</code>.</p>
+</dd>
+<dt><code>storeSolutions</code></dt>
+<dd>
+<p>default is <code>FALSE</code>. If
+<code>TRUE</code>, the solutions (ie, decision variables) in every
+generation are stored and returned as a list <code>P</code> in list
+<code>xlist</code> (see Value section below). To check, for instance,
+the solutions at the end of the <code>i</code>th generation, retrieve
+<code>xlist[[c(1L, i)]]</code>. This will be a matrix of size
+<code>length(algo$min)</code> times <code>algo$nP</code>.  (To be consistent
+with other functions, <code>xlist</code> is itself a list. In the case
+of <code>DEopt</code>, it contains just one element.)</p>
+</dd>
+<dt><code>classify</code></dt>
+<dd>
+<p>Logical; default is <code>FALSE</code>. If
+<code>TRUE</code>, the result will have a class attribute <code>TAopt</code>
+attached. This feature is <strong>experimental</strong>: the supported
+methods may change without warning.</p>
+</dd>
+<dt><code>drop</code></dt>
+<dd>
+<p>If <code>FALSE</code> (the default), the dimension is
+not dropped from a single solution when it is
+passed to a function. (That is, the function will
+receive a single-column matrix.)
+</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>A list:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xbest</code></td>
+<td>
+<p>the solution (the best member of the population), which is
+a numeric vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OFvalue</code></td>
+<td>
+<p>objective function value of best solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>popF</code></td>
+<td>
+<p>a vector. The objective function values in the final population.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fmat</code></td>
+<td>
+<p>if <code>algo$storeF</code> is <code>TRUE</code>, a matrix of size
+<code>algo$nG</code> times <code>algo$nP</code> containing the objective function
+values of all solutions over the generations; else <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlist</code></td>
+<td>
+<p>if <code>algo$storeSolutions</code> is <code>TRUE</code>, a list that
+contains a list <code>P</code> of matrices and a matrix <code>initP</code> (the
+initial solution); else <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.state</code></td>
+<td>
+<p>the value of <code>.Random.seed</code>
+when the function was called.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Maringer, D. and Oyewumi, O. (2007). Index Tracking with Constrained
+Portfolios. <em>Intelligent Systems in Accounting, Finance and Management</em>,
+<b>15</b>(1), pp. 57–71.
+</p>
+<p>Schumann, E. (2012) Remarks on 'A comparison of some
+heuristic optimization methods'.
+<a href="http://enricoschumann.net/R/remarks.htm">http://enricoschumann.net/R/remarks.htm</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+<p>Storn, R., and Price, K. (1997) Differential Evolution – a Simple and
+Efficient Heuristic for Global Optimization over Continuous Spaces.
+<em>Journal of Global Optimization</em>, <b>11</b>(4), pp. 341–359.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>GAopt</code>, <code>PSopt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Example 1: Trefethen's 100-digit challenge (problem 4)
+## http://people.maths.ox.ac.uk/trefethen/hundred.html
+
+OF &lt;- tfTrefethen               ### see ?testFunctions
+algo &lt;- list(nP = 50L,          ### population size
+             nG = 300L,         ### number of generations
+              F = 0.6,          ### step size
+             CR = 0.9,          ### prob of crossover
+            min = c(-10, -10),  ### range for initial population
+            max = c( 10,  10))
+
+sol &lt;- DEopt(OF = OF, algo = algo)
+## correct answer: -3.30686864747523
+format(sol$OFvalue, digits = 12)
+## check convergence of population
+sd(sol$popF)
+ts.plot(sol$Fmat, xlab = "generations", ylab = "OF")
+
+
+## Example 2: vectorising the evaluation of the population
+OF &lt;- tfRosenbrock     ### see ?testFunctions
+size &lt;- 3L             ### define dimension
+x &lt;- rep.int(1, size)  ### the known solution ...
+OF(x)                  ### ... should give zero
+
+algo &lt;- list(printBar = FALSE,
+                   nP = 30L,
+                   nG = 300L,
+                    F = 0.6,
+                   CR = 0.9,
+                  min = rep(-100, size),
+                  max = rep( 100, size))
+
+## run DEopt
+(t1 &lt;- system.time(sol &lt;- DEopt(OF = OF, algo = algo)))
+sol$xbest
+sol$OFvalue  ### should be zero (with luck)
+
+## a vectorised Rosenbrock function: works only with a *matrix* x
+OF2 &lt;- function(x) {
+    n &lt;- dim(x)[1L]
+    xi &lt;- x[seq_len(n - 1L), ]
+    colSums(100 * (x[2L:n, ] - xi * xi)^2 + (1 - xi)^2)
+}
+
+## random solutions (every column of 'x' is one solution)
+x &lt;- matrix(rnorm(size * algo$nP), size, algo$nP)
+all.equal(OF2(x)[1:3],
+          c(OF(x[ ,1L]), OF(x[ ,2L]), OF(x[ ,3L])))
+
+## run DEopt and compare computing time
+algo$loopOF &lt;- FALSE
+(t2 &lt;- system.time(sol2 &lt;- DEopt(OF = OF2, algo = algo)))
+sol2$xbest
+sol2$OFvalue       ### should be zero (with luck)
+t1[[3L]]/t2[[3L]]  ### speedup
+</code></pre>
+
+
+</div>

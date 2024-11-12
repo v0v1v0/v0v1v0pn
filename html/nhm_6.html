@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nhm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a non-homogeneous Markov model using maximum likelihood</h2>
+
+<h3>Description</h3>
+
+<p>Fit a continuous-time Markov or hidden Markov multi-state model
+by maximum likelihood. Observations of the process
+can be made at arbitrary times, or the exact times of
+transition between states can be known.
+Covariates can be fitted to the Markov chain transition intensities or
+to the hidden Markov observation process.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nhm(model_object, initial=NULL, gen_inits=FALSE,
+control, score_test=FALSE, fixedpar=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model_object</code></td>
+<td>
+<p>Model object created using <code>model.nhm</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial</code></td>
+<td>
+<p>Vector of initial parameter values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gen_inits</code></td>
+<td>
+<p>If <code>TRUE</code>, then initial values for the
+transition intensities are generated automatically using the method
+in <code>crudeinits.msm</code> from the <span class="pkg">msm</span> package.  This is not available for models with misclassified states.
+If <code>FALSE</code> a BHHH algorithm implemented using <span class="pkg">maxLik</span> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>Object of class <code>nhm.control</code> specifying various settings for the solution of the KFEs and the optimization. See <code>nhm.control</code> for default settings.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score_test</code></td>
+<td>
+<p>If <code>TRUE</code> just the gradient and Fisher information at the supplied values will be computed to allow score tests to be performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixedpar</code></td>
+<td>
+<p>Numerical vector indicating which parameters are taken as fixed at the value specified by <code>initial</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For more details about the methodology behind the <span class="pkg">nhm</span> package, see Titman (2011) and the package vignette.
+</p>
+
+
+<h3>Value</h3>
+
+<p>By default returns an object of class <code>nhm</code> containing model output data such as the estimated parameters, maximized likelihood value, information matrix etc. The object can be used with <code>print</code>, <code>predict</code>, <code>plot</code> and <code>anova</code>.
+</p>
+<p>If <code>score.test=TRUE</code> then returns an object of class <code>nhm_score</code>. See <code>print.nhm_score</code> for more details.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Andrew Titman <a href="mailto:a.titman@lancaster.ac.uk">a.titman@lancaster.ac.uk</a></p>
+
+
+<h3>References</h3>
+
+<p>Titman AC. Flexible Nonhomogeneous Markov Models for Panel Observed Data. <em>Biometrics</em>, 2011. 67, 780-787.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>model.nhm</code>, <code>nhm.control</code>, <code>plot.nhm</code>, <code>predict.nhm</code>, <code>print.nhm_score</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Example dataset
+### For further examples, see the vignette
+trans &lt;- rbind(c(0,1,0,0),c(0,0,2,0),c(0,0,0,3),rep(0,4))
+nonh &lt;- rbind(c(0,1,0,0),c(0,0,2,0),c(0,0,0,3),rep(0,4))
+gomp_model &lt;- model.nhm(state~time, data=example_data1, subject = id,
+                        type="gompertz",trans=trans,nonh=nonh)
+initial_val &lt;- c(-0.65,-0.45,-0.55,0,0,0)
+gomp_fit &lt;- nhm(gomp_model,initial=initial_val,control=nhm.control(obsinfo=FALSE))
+gomp_fit
+plot(gomp_fit)
+plot(gomp_fit,what="intensities")
+</code></pre>
+
+
+</div>

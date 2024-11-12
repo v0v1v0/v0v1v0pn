@@ -1,0 +1,88 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroDestratify</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mitigate data stratification</h2>
+
+<h3>Description</h3>
+
+<p>Removes differences in value distribution within
+subsets of data points.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroDestratify(data, labels)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A matrix or a data frame with M rows.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+
+<p>A vector of M subset labels.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Only non-binary numerical columns are processed, the rest will be
+excluded from the results.
+</p>
+<p>The de-stratification algorithm is based on ranked data: the distribution
+of each subset will be mapped to the pooled distribution over all subsets
+by matching subset-specific ranking with ranking of all values.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix of de-stratified values. The output also includes the attribute
+'incomplete' that lists those columns where (some of) the values were set
+to missing due to processing failures.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Remove sex differences for creatinine.
+creat &lt;- nroDestratify(dataset$CREAT, dataset$MALE)
+
+# Compare creatinine distributions.
+men &lt;- which(dataset$MALE == 1)
+women &lt;- which(dataset$MALE == 0)
+print(summary(dataset[men,"CREAT"]))
+print(summary(dataset[women,"CREAT"]))
+print(summary(creat[men]))
+print(summary(creat[women]))
+
+# Remove sex differences (produces warnings for binary traits).
+ds &lt;- nroDestratify(dataset, dataset$MALE)
+
+# Compare HDL2C distributions.
+print(summary(dataset[men,"HDL2C"]))
+print(summary(dataset[women,"HDL2C"]))
+print(summary(ds[men,"HDL2C"]))
+print(summary(ds[women,"HDL2C"]))
+</code></pre>
+
+
+</div>

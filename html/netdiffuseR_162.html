@@ -1,0 +1,258 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_diffnet2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Another way of visualizing diffusion</h2>
+
+<h3>Description</h3>
+
+<p>Another way of visualizing diffusion
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_diffnet2(graph, ...)
+
+## S3 method for class 'diffnet'
+plot_diffnet2(graph, toa, slice = nslices(graph), ...)
+
+## Default S3 method:
+plot_diffnet2(
+  graph,
+  toa,
+  pers = min(toa, na.rm = TRUE):max(toa, na.rm = TRUE),
+  color.ramp = grDevices::colorRamp(viridisLite::magma(20)),
+  layout = NULL,
+  key.width = 0.1,
+  key.args = list(),
+  main = "Diffusion dynamics",
+  add.map = NULL,
+  diffmap.args = list(kde2d.args = list(n = 100)),
+  diffmap.alpha = 0.5,
+  include.white = "first",
+  vertex.size = "degree",
+  minmax.relative.size = getOption("diffnet.minmax.relative.size", c(0.01, 0.04)),
+  no.graph = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>Any class of accepted graph format (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to <code>plot.igraph</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>toa</code></td>
+<td>
+<p>Integer vector of length <code class="reqn">n</code> with the times of adoption.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slice</code></td>
+<td>
+<p>Integer scalar. Number of slice to use as baseline for drawing the graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pers</code></td>
+<td>
+<p>Integer vector of length <code class="reqn">T</code> indicating the time periods of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color.ramp</code></td>
+<td>
+<p>A function as returned by <code>colorRamp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layout</code></td>
+<td>
+<p>Passed to <code>plot.igraph</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>key.width</code></td>
+<td>
+<p>Numeric scalar. Sets the proportion of the plot (x-axis) that the key uses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>key.args</code></td>
+<td>
+<p>List. Further arguments to be passed to <code>drawColorKey</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Character scalar. Title of the graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.map</code></td>
+<td>
+<p>Character scalar. When <code>"first"</code> plots a <code>diffusionMap</code> before the
+graph itself. If <code>"last"</code> then it adds it at the end. When <code>NULL</code> adds nothing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffmap.args</code></td>
+<td>
+<p>List. If <code>add.map=TRUE</code>, arguments passed to <code>diffusionMap</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffmap.alpha</code></td>
+<td>
+<p>Numeric scalar between [0,1]. Alpha level for the map.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.white</code></td>
+<td>
+<p>Character scalar. Includes white in the color palette used in the map.
+When <code>include.white=NULL</code> then it won't include it.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.size</code></td>
+<td>
+<p>Either a numeric scalar or vector of size <code class="reqn">n</code>, or any
+of the following values: "indegree", "degree", or "outdegree" (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minmax.relative.size</code></td>
+<td>
+<p>Passed to <code>rescale_vertex_igraph</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.graph</code></td>
+<td>
+<p>Logical scala. When <code>TRUE</code> the graph is not drawn. This only makes
+sense when the option <code>add.map</code> is active.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Plotting is done via the function <code>plot.igraph</code>.
+</p>
+<p>When <code>vertex.size</code> is either of <code>"degree"</code>, <code>"indegree"</code>, or
+<code>"outdegree"</code>, <code>vertex.size</code> will be replace with <code>dgr(.,cmode = )</code>
+so that the vertex size reflects the desired degree.
+</p>
+<p>The argument <code>minmax.relative.size</code> is passed to <code>rescale_vertex_igraph</code>
+which adjusts <code>vertex.size</code> so that the largest and smallest vertices
+have a relative size of <code>minmax.relative.size[2]</code> and
+<code>minmax.relative.size[1]</code> respectively with respect to the x-axis.
+</p>
+<p>If <code>key.width&lt;=0</code> then no key is created.
+</p>
+<p>By defult, the function passes the following values to <code>plot.igraph</code>:
+</p>
+
+<ul>
+<li>
+<p><code>vertex.label</code> equals to <code>""</code>
+</p>
+</li>
+<li>
+<p><code>vertex.frame.color</code> equals to <code>"white"</code>
+</p>
+</li>
+<li>
+<p><code>add</code> equals to <code>TRUE</code>
+</p>
+</li>
+<li>
+<p><code>rescale</code> equals to <code>FALSE</code>
+</p>
+</li>
+<li>
+<p><code>vertex.size</code> equals to <code>rescale.fun(vertex.size)</code>
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A list with the following elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>layout</code></td>
+<td>
+<p>A numeric matrix with vertex coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.color</code></td>
+<td>
+<p>A character vector with computed colors for each vertex.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.label</code></td>
+<td>
+<p>The value passed to <code>plot_diffnet2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.shape</code></td>
+<td>
+<p>A character vector with assigned shapes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.size</code></td>
+<td>
+<p>A numeric vector with vertices sizes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffmap</code></td>
+<td>
+<p>If <code>add.map=TRUE</code>, the returned values from <code>diffmap</code></p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other visualizations: 
+<code>dgr()</code>,
+<code>diffusionMap()</code>,
+<code>drawColorKey()</code>,
+<code>grid_distribution()</code>,
+<code>hazard_rate()</code>,
+<code>plot_adopters()</code>,
+<code>plot_diffnet()</code>,
+<code>plot_infectsuscep()</code>,
+<code>plot_threshold()</code>,
+<code>rescale_vertex_igraph()</code>
+</p>
+
+
+</div>

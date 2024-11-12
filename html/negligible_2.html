@@ -1,0 +1,174 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neg.cfi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Equivalence Tests for CFI</h2>
+
+<h3>Description</h3>
+
+<p>Function performs one of six equivalence tests for CFI fit index.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neg.cfi(
+  mod,
+  alpha = 0.05,
+  eq.bound,
+  modif.eq.bound = FALSE,
+  ci.method = "equiv",
+  nbootpd = 50,
+  nboot = 250L,
+  round = 3,
+  plot = TRUE,
+  saveplot = TRUE
+)
+
+## S3 method for class 'neg.cfi'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mod</code></td>
+<td>
+<p>lavaan model object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>desired alpha level (default = .05)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eq.bound</code></td>
+<td>
+<p>lower end of equivalence interval for comparison; must be .99, .95, .92 or .90 if modif.eq.bound = TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modif.eq.bound</code></td>
+<td>
+<p>should the lower end of the equivalence interval be modified (default = FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci.method</code></td>
+<td>
+<p>method used to calculate confidence interval; options are "yuan", "equiv" or "yhy.boot"; "yuan" corresponds to (1-alpha) percent CI, "equiv" corresponds to (1-2alpha) percent CI, "yhy.boot" corresponds to (1-2alpha) percent boot CI (default = "equiv")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbootpd</code></td>
+<td>
+<p>number of bootstrap samples by "yhy.boot" for pd function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>number of bootstrap samples if "yhy.boot" is selected as ci.method (default = 250L)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round</code></td>
+<td>
+<p>number of digits to round equivalence bound and confidence interval bounds (default = 3)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical, plotting the results (default = TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>saveplot</code></td>
+<td>
+<p>saving plots (default = FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>neg.cfi</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>extra arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>#'
+The user specifies the lavaan fitted model object, the desired equivalence bound, and method of confidence interval computation. By default, the function does not modify the equivalence bounds according to Yuan et al. (2016). The user can also choose to instead run an equivalence test using a modified equivalence bound if the equivalence bound to be modified is .01, .05, .08, or .10. Alpha level can also be modified.
+</p>
+<p>For information on modified equivalence bounds see Yuan, K. H., Chan, W., Marcoulides, G. A., &amp; Bentler, P. M. (2016). Assessing structural equation models by equivalence testing with adjusted fit indexes. Structural Equation Modeling: A Multidisciplinary Journal, 23(3), 319-330. doi: https://doi.org/10.1080/10705511.2015.1065414.
+</p>
+<p>The proportional distance quantifies the proportional distance from 0 to the nearest negligible effect (equivalence) interval (here, eiU). As values get farther from 0 the relationship becomes more substantial, with values greater than 1 indicating that the effect falls outside of the negligible effect (equivalence) interval.
+</p>
+
+
+<h3>Value</h3>
+
+<p>returns a <code>list</code> containing analysis and respective statistics
+and decision.
+</p>
+
+<ul>
+<li> <p><code>title1</code> The title of the CFI equivalence test. The appropriate title of the test will be displayed depending on the ci.method chosen and whether modif.eq.bound is TRUE or FALSE.
+</p>
+</li>
+<li> <p><code>cfi_index</code> The CFI index.
+</p>
+</li>
+<li> <p><code>ci.method</code> The method for confidence interval calculation.
+</p>
+</li>
+<li> <p><code>cfi_eq</code> The lower end of the confidence interval for the CFI index.
+</p>
+</li>
+<li> <p><code>eq.bound</code> The equivalence bound.
+</p>
+</li>
+<li> <p><code>PD</code> Proportional distance (PD).
+</p>
+</li>
+<li> <p><code>cilpd</code> Lower bound of the 1-alpha CI for the PD.
+</p>
+</li>
+<li> <p><code>ciupd</code> Upper bound of the 1-alpha CI for the PD.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Rob Cribbie <a href="mailto:cribbie@yorku.ca">cribbie@yorku.ca</a> and
+Nataly Beribisky <a href="mailto:natalyb1@yorku.ca">natalyb1@yorku.ca</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">d &lt;- lavaan::HolzingerSwineford1939
+hs.mod &lt;- 'visual =~ x1 + x2 + x3
+textual =~ x4 + x5 + x6
+speed =~ x7 + x8 + x9'
+fit1 &lt;- lavaan::cfa(hs.mod, data = d)
+neg.cfi(mod = fit1, alpha = .05, eq.bound = .95,  modif.eq.bound = FALSE, ci.method = "equiv",
+round = 3, plot = TRUE)
+
+</code></pre>
+
+
+</div>

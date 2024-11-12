@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.glmmNPML</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prediction from objects of class glmmNPML or glmmGQ </h2>
+
+<h3>Description</h3>
+
+<p>The functions <code>alldist</code> and <code>allvc</code> produce objects of type <code>glmmGQ</code>,
+if Gaussian quadrature (Hinde, 1982, <code>random.distribution="gq"</code> ) 
+was applied for computation, and objects of class <code>glmmNPML</code>, if 
+parameter estimation was carried out by nonparametric maximum likelihood 
+(Aitkin, 1996a, <code>random.distribution="np"</code> ). The functions presented here
+give predictions from those objects.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'glmmNPML'
+predict(object, newdata, type = "link", ...)
+## S3 method for class 'glmmGQ'
+predict(object, newdata, type = "link", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a fitted object of class <code>glmmNPML</code> or <code>glmmGQ</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>a data frame with covariates from which prediction is desired. 
+If omitted, empirical Bayes predictions for the original data will be given.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>if set to <code>link</code>, the prediction is given on the linear predictor scale.
+If set to <code>response</code>, prediction is given on the scale of the responses. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments which will mostly not have any effect (and are 
+included only to ensure compatibility 
+with the generic <code>predict()</code>- function.)  </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The predicted values are obtained by 
+</p>
+
+<ul>
+<li>
+<p> Empirical Bayes (Aitkin, 1996b), if <code>newdata</code> has not been specified.
+That is, the prediction on the linear predictor scale is given by 
+<code class="reqn">\sum{\eta_{ik}w_{ik}} </code>, 
+whereby <code class="reqn">\eta_{ik}</code> are the fitted linear predictors, 
+<code class="reqn">w_{ik}</code> are the weights in the final iteration of the EM algorithm
+(corresponding to the posterior probability for observation <code class="reqn">i</code> 
+to come from component <code class="reqn">k</code> ), and the sum is taken over the number
+of components <code class="reqn">k</code> for fixed <code class="reqn">i</code>. 
+</p>
+</li>
+<li>
+<p> the marginal model, if object is of class <code>glmmNPML</code> and 
+<code>newdata</code> has been specified. That is, computation is identical as above, but
+with <code class="reqn">w_{ik}</code> replaced by the masses <code class="reqn">\pi_k</code> of the fitted model. 
+</p>
+</li>
+<li>
+<p> the analytical expression for the marginal mean of the responses, 
+if object is of class <code>glmmGQ</code> and <code>newdata</code> has been specified. 
+See Aitkin et al. (2009), p. 481, for the formula. This method is only
+supported for the logarithmic link function, as otherwise no analytical
+expression for the marginal mean of the responses exists.  
+</p>
+</li>
+</ul>
+<p>It is sufficient to call <code>predict</code> instead of <code>predict.glmmNPML</code> or 
+<code>predict.glmmGQ</code>, since the generic predict function provided in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> automatically selects the right 
+model class.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of predicted values.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The results of the generic <code>fitted()</code> method 
+correspond to <code>predict(object, type="response")</code>.  Note that, as we are 
+working with random effects, fitted values are never really ‘fitted’ but rather 
+‘predicted’.    
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jochen Einbeck and John Hinde (2007).</p>
+
+
+<h3>References</h3>
+
+<p>Aitkin, M. (1996a). A general maximum likelihood analysis of overdispersion in generalized linear models. Statistics and Computing 6, 251-262. 
+</p>
+<p>Aitkin, M. (1996b). Empirical Bayes shrinkage using posterior random effect means from nonparametric maximum likelihood estimation in general random effect models. Statistical Modelling: Proceedings of the 11th IWSM 1996, 87-94. 
+</p>
+<p>Aitkin, M., Francis, B. and Hinde, J. (2009). Statistical Modelling in R. Oxford Statistical Science Series, Oxford, UK. 
+</p>
+<p>Hinde, J. (1982). Compound Poisson regression models. Lecture Notes in Statistics 14, 109-121. 
+</p>
+
+
+<h3>See Also</h3>
+
+ 
+<p><code>alldist</code>, <code>allvc</code>, <code>predict</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> # Toxoplasmosis data:
+    data(rainfall)
+    rainfall$x&lt;-rainfall$Rain/1000
+    toxo.0.3x&lt;- alldist(cbind(Cases,Total-Cases)~1, random=~x,
+          data=rainfall, k=3, family=binomial(link=logit))
+    toxo.1.3x&lt;- alldist(cbind(Cases,Total-Cases)~x, random=~x, 
+          data=rainfall, k=3, family=binomial(link=logit))
+    predict(toxo.0.3x, type="response", newdata=data.frame(x=2))
+    # [1] 0.4608
+    predict(toxo.1.3x, type="response", newdata=data.frame(x=2))
+    # [1] 0.4608
+    # gives the same result, as both models are equivalent and only differ
+    # by a  parameter transformation.
+
+# Fabric faults data:
+    data(fabric)
+    names(fabric) 
+    # [1] "leng" "y"    "x"    
+    faults.g2&lt;- alldist(y ~ x, family=poisson(link=log), random=~1, 
+        data= fabric,k=2, random.distribution="gq") 
+    predict(faults.g2, type="response",newdata=fabric[1:6,])
+    # [1]  8.715805 10.354556 13.341242  5.856821 11.407828 13.938013
+    # is not the same as
+    predict(faults.g2, type="response")[1:6]
+    # [1]  6.557786  7.046213 17.020242  7.288989 13.992591  9.533823
+    # since in the first case prediction is done using the analytical 
+    # mean of the marginal distribution, and in the second case  using the
+    # individual posterior probabilities in an  empirical Bayes approach. 
+
+
+</code></pre>
+
+
+</div>

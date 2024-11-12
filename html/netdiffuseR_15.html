@@ -1,0 +1,271 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>classify_adopters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Classify adopters accordingly to Time of Adoption and Threshold levels.</h2>
+
+<h3>Description</h3>
+
+<p>Adopters are classified as in Valente (1995). In general, this is done
+depending on the distance in terms of standard deviations from the mean of
+Time of Adoption and Threshold.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">classify_adopters(...)
+
+classify(...)
+
+## S3 method for class 'diffnet'
+classify_adopters(graph, include_censored = FALSE, ...)
+
+## Default S3 method:
+classify_adopters(
+  graph,
+  toa,
+  t0 = NULL,
+  t1 = NULL,
+  expo = NULL,
+  include_censored = FALSE,
+  ...
+)
+
+## S3 method for class 'diffnet_adopters'
+ftable(x, as.pcent = TRUE, digits = 2, ...)
+
+## S3 method for class 'diffnet_adopters'
+as.data.frame(x, row.names = NULL, optional = FALSE, ...)
+
+## S3 method for class 'diffnet_adopters'
+plot(x, y = NULL, ftable.args = list(), table.args = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to the method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>A dynamic graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_censored</code></td>
+<td>
+<p>Logical scalar, passed to <code>threshold</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>toa</code></td>
+<td>
+<p>Integer vector of length <code class="reqn">n</code> with times of adoption.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t0</code></td>
+<td>
+<p>Integer scalar passed to <code>threshold</code> and <code>toa_mat</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t1</code></td>
+<td>
+<p>Integer scalar passed to <code>toa_mat</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expo</code></td>
+<td>
+<p>Numeric matrix of size <code class="reqn">n\times T</code> with network exposures.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>diffnet_adopters</code> class object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.pcent</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> returns a table with percentages
+instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Integer scalar. Passed to <code>round</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>row.names</code></td>
+<td>
+<p>Passed to <code>as.data.frame</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optional</code></td>
+<td>
+<p>Passed to <code>as.data.frame</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ftable.args</code></td>
+<td>
+<p>List of arguments passed to <code>ftable</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>table.args</code></td>
+<td>
+<p>List of arguments passed to <code>table</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Classifies (only) adopters according to time of adoption and threshold as
+described in Valente (1995). In particular, the categories are defined as follow:
+</p>
+<p>For Time of Adoption, with <code>toa</code> as the vector of times of adoption:
+</p>
+
+<ul>
+<li> <p><em>Early Adopters</em>: <code>toa[i] &lt;= mean(toa) - sd(toa)</code>,
+</p>
+</li>
+<li> <p><em>Early Majority</em>: <code>mean(toa) - sd(toa) &lt; toa[i] &lt;= mean(toa) </code>,
+</p>
+</li>
+<li> <p><em>Late Majority</em>: <code>mean(toa) &lt; toa[i] &lt;= mean(toa) + sd(toa) </code>, and
+</p>
+</li>
+<li> <p><em>Laggards</em>: <code>mean(toa) + sd(toa) &lt; toa[i] </code>.
+</p>
+</li>
+</ul>
+<p>For Threshold levels, with <code>thr</code> as the vector of threshold levels:
+</p>
+
+<ul>
+<li> <p><em>Very Low Thresh.</em>: <code>thr[i] &lt;= mean(thr) - sd(thr)</code>,
+</p>
+</li>
+<li> <p><em>Low Thresh.</em>: <code>mean(thr) - sd(thr) &lt; thr[i] &lt;= mean(thr) </code>,
+</p>
+</li>
+<li> <p><em>High Thresh.</em>: <code>mean(thr) &lt; thr[i] &lt;= mean(thr) + sd(thr) </code>, and
+</p>
+</li>
+<li> <p><em>Very High. Thresh.</em>: <code>mean(thr) + sd(thr) &lt; thr[i] </code>.
+</p>
+</li>
+</ul>
+<p>By default threshold levels are not computed for left censored data. These
+will have a <code>NA</code> value in the <code>thr</code> vector.
+</p>
+<p>The plot method, <code>plot.diffnet_adopters</code>, is a wrapper for the
+<code>plot.table</code> method. This generates a
+<code>mosaicplot</code> plot.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class <code>diffnet_adopters</code> with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>toa</code></td>
+<td>
+<p>A factor vector of length <code class="reqn">n</code> with 4 levels:
+"Early Adopters", "Early Majority", "Late Majority", and "Laggards"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thr</code></td>
+<td>
+<p>A factor vector of length <code class="reqn">n</code> with 4 levels:
+"Very Low Thresh.", "Low Thresh.", "High Thresh.", and "Very High Thresh."</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>References</h3>
+
+<p>Valente, T. W. (1995). "Network models of the diffusion of innovations"
+(2nd ed.). Cresskill N.J.: Hampton Press.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other statistics: 
+<code>bass</code>,
+<code>cumulative_adopt_count()</code>,
+<code>dgr()</code>,
+<code>ego_variance()</code>,
+<code>exposure()</code>,
+<code>hazard_rate()</code>,
+<code>infection()</code>,
+<code>moran()</code>,
+<code>struct_equiv()</code>,
+<code>threshold()</code>,
+<code>vertex_covariate_dist()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Classifying brfarmers -----------------------------------------------------
+
+x &lt;- brfarmersDiffNet
+diffnet.toa(x)[x$toa==max(x$toa, na.rm = TRUE)] &lt;- NA
+out &lt;- classify_adopters(x)
+
+# This is one way
+round(
+with(out, ftable(toa, thr, dnn=c("Time of Adoption", "Threshold")))/
+  nnodes(x[!is.na(x$toa)])*100, digits=2)
+
+# This is other
+ftable(out)
+
+# Can be coerced into a data.frame, e.g. ------------------------------------
+ str(classify(brfarmersDiffNet))
+ ans &lt;- cbind(
+ as.data.frame(classify(brfarmersDiffNet)), brfarmersDiffNet$toa
+ )
+ head(ans)
+
+# Creating a mosaic plot with the medical innovations -----------------------
+x &lt;- classify(medInnovationsDiffNet)
+plot(x)
+
+</code></pre>
+
+
+</div>

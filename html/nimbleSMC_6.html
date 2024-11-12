@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SMCsamplers</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Particle Filtering MCMC Sampling Algorithms</h2>
+
+<h3>Description</h3>
+
+<p>Details of the particle filtering MCMC sampling algorithms provided in nimbleSMC.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sampler_RW_PF(model, mvSaved, target, control)
+
+sampler_RW_PF_block(model, mvSaved, target, control)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>(uncompiled) model on which the MCMC is to be run</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mvSaved</code></td>
+<td>
+<p><code>modelValues</code> object to be used to store MCMC samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>node(s) on which the sampler will be used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>named list that controls the precise behavior of the sampler, with elements specific to <code>samplertype</code>.  The default values for control list are specified in the setup code of each sampling algorithm.  Descriptions of each sampling algorithm, and the possible customizations for each sampler (using the <code>control</code> argument) appear below.</p>
+</td>
+</tr>
+</table>
+<h3>RW_PF sampler</h3>
+
+<p>The particle filter sampler allows the user to perform particle MCMC (PMCMC) (Andrieu et al., 2010), primarily for state-space or hidden Markov models of time-series data. This method uses Metropolis-Hastings samplers for top-level parameters but uses the likelihood approximation of a particle filter (sequential Monte Carlo) to integrate over latent nodes in the time-series.  The <code>RW_PF</code> sampler uses an adaptive Metropolis-Hastings algorithm with a univariate normal proposal distribution for a scalar parameter.  Note that samples of the latent states can be retained as well, but the top-level parameter being sampled must be a scalar.   A bootstrap, auxiliary, or user defined particle filter can be used to integrate over latent states.
+</p>
+<p>For more information about user-defined samplers within a PMCMC sampler, see the NIMBLE User Manual.
+</p>
+<p>The <code>RW_PF</code> sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the scale (proposal standard deviation) throughout the course of MCMC execution to achieve a theoretically desirable acceptance rate. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation.  Every adaptInterval MCMC iterations (prior to thinning), the RW sampler will perform its adaptation procedure.  This updates the scale variable, based upon the sampler's achieved acceptance rate over the past adaptInterval iterations. (default = 200)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the normal proposal standard deviation.  If <code>adaptive = FALSE</code>, scale will never change. (default = 1)
+</p>
+</li>
+<li>
+<p> pfNparticles.  The number of particles to use in the approximation to the log likelihood of the data (default = 1000).
+</p>
+</li>
+<li>
+<p> latents.  Character vector specifying the nodes that are latent states over which the particle filter will operate to approximate the log-likelihood function.
+</p>
+</li>
+<li>
+<p> pfType.  Character argument specifying the type of particle filter that should be used for likelihood approximation.  Choose from <code>"bootstrap"</code> and <code>"auxiliary"</code>.  Defaults to <code>"bootstrap"</code>.
+</p>
+</li>
+<li>
+<p> pfControl.  A control list that is passed to the particle filter function.  For details on control lists for bootstrap or auxiliary particle filters, see <code>buildBootstrapFilter</code> or <code>buildAuxiliaryFilter</code> respectively.  Additionally, this can be used to pass custom arguments into a user-defined particle filter.
+</p>
+</li>
+<li>
+<p> pfOptimizeNparticles.  A logical argument, specifying whether to use an experimental procedure to automatically determine the optimal number of particles to use, based on Pitt and Shephard (2011).  This will override any value of <code>pfNparticles</code> specified above.
+</p>
+</li>
+<li>
+<p> pf.  A user-defined particle filter object, if a bootstrap or auxiliary particle filter is not adequate.
+</p>
+</li>
+</ul>
+<h3>RW_PF_block sampler</h3>
+
+<p>The particle filter block sampler allows the user to perform particle MCMC (PMCMC) (Andrieu et al., 2010) for multiple parameters jointly, primarily for state-space or hidden Markov models of time-series data.  This method uses Metropolis-Hastings block samplers for top-level parameters but uses the likelihood approximation of a particle filter (sequential Monte Carlo) to integrate over latent nodes in the time-series.  The <code>RW_PF</code> sampler uses an adaptive Metropolis-Hastings algorithm with a multivariate normal proposal distribution.  Note that samples of the latent states can be retained as well, but the top-level parameter being sampled must be a scalar.   A bootstrap, auxiliary, or user defined particle filter can be used to integrate over latent states.
+</p>
+<p>For more information about user-defined samplers within a PMCMC sampler, see the NIMBLE User Manual.
+</p>
+<p>The <code>RW_PF_block</code> sampler accepts the following control list elements:
+</p>
+
+<ul>
+<li>
+<p> adaptive. A logical argument, specifying whether the sampler should adapt the proposal covariance throughout the course of MCMC execution. (default = TRUE)
+</p>
+</li>
+<li>
+<p> adaptScaleOnly. A logical argument, specifying whether adaptation should be done only for <code>scale</code> (TRUE) or also for <code>provCov</code> (FALSE).  This argument is only relevant when <code>adaptive = TRUE</code>.  When <code>adaptScaleOnly = FALSE</code>, both <code>scale</code> and <code>propCov</code> undergo adaptation; the sampler tunes the scaling to achieve a theoretically good acceptance rate, and the proposal covariance to mimic that of the empirical samples.  When <code>adaptScaleOnly = TRUE</code>, only the proposal scale is adapted. (default = FALSE)
+</p>
+</li>
+<li>
+<p> adaptInterval. The interval on which to perform adaptation. (default = 200)
+</p>
+</li>
+<li>
+<p> scale. The initial value of the scalar multiplier for <code>propCov</code>.  If <code>adaptive = FALSE</code>, <code>scale</code> will never change. (default = 1)
+</p>
+</li>
+<li>
+<p> adaptFactorExponent. Exponent controling the rate of decay of the scale adaptation factor.  See Shaby and Wells, 2011, for details. (default = 0.8)
+</p>
+</li>
+<li>
+<p> propCov. The initial covariance matrix for the multivariate normal proposal distribution.  This element may be equal to the <code>'identity'</code>, in which case the identity matrix of the appropriate dimension will be used for the initial proposal covariance matrix. (default is <code>'identity'</code>)
+</p>
+</li>
+<li>
+<p> pfNparticles.  The number of particles to use in the approximation to the log likelihood of the data (default = 1000).
+</p>
+</li>
+<li>
+<p> latents.  Character vector specifying the nodes that are latent states over which the particle filter will operate to approximate the log-likelihood function.
+</p>
+</li>
+<li>
+<p> pfType.  Character argument specifying the type of particle filter that should be used for likelihood approximation.  Choose from <code>"bootstrap"</code> and <code>"auxiliary"</code>.  Defaults to <code>"bootstrap"</code>.
+</p>
+</li>
+<li>
+<p> pfControl.  A control list that is passed to the particle filter function.  For details on control lists for bootstrap or auxiliary particle filters, see <code>buildBootstrapFilter</code> or <code>buildAuxiliaryFilter</code> respectively.  Additionally, this can be used to pass custom arguments into a user defined particle filter.
+</p>
+</li>
+<li>
+<p> pfOptimizeNparticles.  A logical argument, specifying whether to automatically determine the optimal number of particles to use, based on Pitt and Shephard (2011).  This will override any value of <code>pfNparticles</code> specified above.
+</p>
+</li>
+<li>
+<p> pf.  A user-defined particle filter object, if a bootstrap or auxiliary particle filter is not adequate.
+</p>
+</li>
+</ul>
+</div>

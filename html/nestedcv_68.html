@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pred_nestcv_glmnet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prediction wrappers to use fastshap with nestedcv</h2>
+
+<h3>Description</h3>
+
+<p>Prediction wrapper functions to enable the use of the <code>fastshap</code> package for
+generating SHAP values from <code>nestedcv</code> trained models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pred_nestcv_glmnet(x, newdata)
+
+pred_nestcv_glmnet_class1(x, newdata)
+
+pred_nestcv_glmnet_class2(x, newdata)
+
+pred_nestcv_glmnet_class3(x, newdata)
+
+pred_train(x, newdata)
+
+pred_train_class1(x, newdata)
+
+pred_train_class2(x, newdata)
+
+pred_train_class3(x, newdata)
+
+pred_SuperLearner(x, newdata)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a <code>nestcv.glmnet</code> or <code>nestcv.train</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>a matrix of new data</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>These prediction wrapper functions are designed to be used with the
+<code>fastshap</code> package. The functions <code>pred_nestcv_glmnet</code> and <code>pred_train</code> work
+for <code>nestcv.glmnet</code> and <code>nestcv.train</code> models respectively for either binary
+classification or regression.
+</p>
+<p>For multiclass classification use <code>pred_nestcv_glmnet_class1</code>, <code>2</code> and <code>3</code>
+for the first 3 classes. Similarly <code>pred_train_class1</code> etc for nestcv.train
+objects. These functions can be inspected and easily modified to analyse
+further classes.
+</p>
+
+
+<h3>Value</h3>
+
+<p>prediction wrapper function designed for use with
+<code>fastshap::explain()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(fastshap)
+
+# Boston housing dataset
+library(mlbench)
+data(BostonHousing2)
+dat &lt;- BostonHousing2
+y &lt;- dat$cmedv
+x &lt;- subset(dat, select = -c(cmedv, medv, town, chas))
+
+# Fit a glmnet model using nested CV
+# Only 3 outer CV folds and 1 alpha value for speed
+fit &lt;- nestcv.glmnet(y, x, family = "gaussian", n_outer_folds = 3, alphaSet = 1)
+
+# Generate SHAP values using fastshap::explain
+# Only using 5 repeats here for speed, but recommend higher values of nsim
+sh &lt;- explain(fit, X=x, pred_wrapper = pred_nestcv_glmnet, nsim = 1)
+
+# Plot overall variable importance
+plot_shap_bar(sh, x)
+
+# Plot beeswarm plot
+plot_shap_beeswarm(sh, x, size = 1)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>autotune_VIM_kNN</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>K nearest neighbor imputation using VIM package.</h2>
+
+<h3>Description</h3>
+
+<p>Function perform kNN function from VIM packge.
+</p>
+<p>@details  Function don't perform any inside param tuning. Users can change important param for kNN like number or nearest or aggregation functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">autotune_VIM_kNN(
+  df,
+  percent_of_missing = NULL,
+  k = 5,
+  numFun = stats::median,
+  catFun = VIM::maxCat,
+  col_0_1 = FALSE,
+  out_file = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data.frame. Df to impute with column names and without  target column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percent_of_missing</code></td>
+<td>
+<p>numeric vector. Vector contatining percent of missing data in columns for example  c(0,1,0,0,11.3,..)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Value of k use if optimize=FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numFun</code></td>
+<td>
+<p>function for aggregating the k Nearest Neighbours in the case of a numerical variable. Default median.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>catFun</code></td>
+<td>
+<p>function for aggregating the k Nearest Neighbours in the case of a categorical variable. Default mode.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_0_1</code></td>
+<td>
+<p>decide if add bonus column informing where imputation been done. 0 - value was in dataset, 1 - value was imputed. Default False.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out_file</code></td>
+<td>
+<p>Output log file location if file already exists log message will be added. If NULL no log will be produced.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p> Alexander Kowarik, Matthias Templ (2016) <a href="https://doi.org/10.18637/jss.v074.i07">doi:10.18637/jss.v074.i07</a>x
+</p>
+
+
+<h3>References</h3>
+
+<p>Alexander Kowarik, Matthias Templ (2016). Imputation with the R Package VIM. Journal of Statistical Software, 74(7), 1-16. doi:10.18637/jss.v074.i07
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">{
+  raw_data &lt;- data.frame(
+    a = as.factor(sample(c("red", "yellow", "blue", NA), 1000, replace = TRUE)),
+    b = as.integer(1:1000),
+    c = as.factor(sample(c("YES", "NO", NA), 1000, replace = TRUE)),
+    d = runif(1000, 1, 10),
+    e = as.factor(sample(c("YES", "NO"), 1000, replace = TRUE)),
+    f = as.factor(sample(c("male", "female", "trans", "other", NA), 1000, replace = TRUE)))
+
+  # Prepering col_type
+  col_type &lt;- c("factor", "integer", "factor", "numeric", "factor", "factor")
+
+  percent_of_missing &lt;- 1:6
+  for (i in percent_of_missing) {
+    percent_of_missing[i] &lt;- 100 * (sum(is.na(raw_data[, i])) / nrow(raw_data))
+  }
+
+
+  imp_data &lt;- autotune_VIM_kNN(raw_data, percent_of_missing)
+
+  # Check if all missing value was imputed
+  sum(is.na(imp_data)) == 0
+  # TRUE
+}
+</code></pre>
+
+
+</div>

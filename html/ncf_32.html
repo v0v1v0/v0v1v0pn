@@ -1,0 +1,267 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>spline.correlog</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Uni- and multivariate spline correlograms</h2>
+
+<h3>Description</h3>
+
+<p><code>spline.correlog</code> is the function to estimate the spline (cross-)correlogram from spatial data. Either univariate or multivariate (time seres) for each site can be used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">spline.correlog(
+  x,
+  y,
+  z,
+  w = NULL,
+  df = NULL,
+  type = "boot",
+  resamp = 1000,
+  npoints = 300,
+  save = FALSE,
+  filter = FALSE,
+  fw = 0,
+  max.it = 25,
+  xmax = FALSE,
+  latlon = FALSE,
+  na.rm = FALSE,
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of length n representing the x coordinates (or longitude; see latlon).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>vector of length n representing the y coordinates (or latitude).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>vector of length n or matrix of dimension n x p representing p observation at each location.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>an optional second variable with identical dimension to z (to estimate cross-correlograms).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>degrees of freedom for the spline. Default is sqrt(n).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>takes the value "boot" (default) to generate a bootstrap distribution or "perm" to generate a null distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resamp</code></td>
+<td>
+<p>the number of resamples for the bootstrap or the null distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npoints</code></td>
+<td>
+<p>the number of points at which to save the value for the spline function (and confidence envelope / null distribution).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save</code></td>
+<td>
+<p>If TRUE, the whole matrix of output from the resampling is saved (a resamp x npoints dimensional matrix).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter</code></td>
+<td>
+<p>If TRUE, the Fourier filter method of Hall and coworkers is applied to ensure positive semidefiniteness of the estimator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fw</code></td>
+<td>
+<p>If filter is TRUE, it may be useful to truncate the function at some distance fw sets the truncation distance. When set to zero, no truncation is done.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.it</code></td>
+<td>
+<p>the maximum iteration for the Newton method used to estimate the intercepts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xmax</code></td>
+<td>
+<p>If FALSE, the max observed in the data is used. Otherwise all distances greater than xmax is omitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latlon</code></td>
+<td>
+<p>If TRUE, coordinates are latitude and longitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>If TRUE, NA's will be dealt with through pairwise deletion of missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>If TRUE, the counter is suppressed during execution.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If observations are univariate the spline (cross-)correlogram represents the generalization of the spatial (cross-)correlogram; if observations are multivariate the spline (cross-)correlogram represents the generalization of the Mantel (cross-)correlogram.
+</p>
+<p>The spline (cross-)correlogram differs from the spatial correlogram (and Mantel correlogram) in that it estimated spatial dependence as a continuous functions of distance (rather than binning into distance classes). The spline correlogram differs from the nonparametric (cross-)correlation function in that the zero-correlation reference line in the former corresponds to the region-wide correlation reference line in the latter. The x-intercept in the spline correlogram is the distance at which object are no more similar than that expected by-chance-alone across the region. 
+</p>
+<p>Missing values are allowed – values are assumed missing at random.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "spline.correlog" is returned, consisting of the following components: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>real</code></td>
+<td>
+<p>the list of estimates from the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$x.intercept</code></td>
+<td>
+<p>the lowest value at which the function is = 0. If correlation is initially negative, the distance is given as negative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$e.intercept</code></td>
+<td>
+<p>the lowest value at which the function 1/e.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$y.intercept</code></td>
+<td>
+<p>the extrapolated value at x=0 (nugget).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$predicted$x</code></td>
+<td>
+<p>the x-axes for the fitted covariance function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$predcited$y</code></td>
+<td>
+<p>the values for the covariance function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot</code></td>
+<td>
+<p>a list with the analogous output from the bootstrap or null distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$summary</code></td>
+<td>
+<p>gives the full vector of output for the x.intercept, y.intercept, e.intercept, and a quantile summary for the resampling distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$boot</code></td>
+<td>
+<p>If save=TRUE, the full raw matrices from the resampling is saved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.distance</code></td>
+<td>
+<p>the maximum spatial distance considered.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ottar N. Bjornstad <a href="mailto:onb1@psu.edu">onb1@psu.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bjornstad, O.N. &amp; Falck, W. (2001) Nonparametric spatial covariance functions: estimation and testing. Environmental and Ecological Statistics, 8:53-70. &lt;doi:10.1023/A:1009601932481&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>summary.spline.correlog</code>, <code>plot.spline.correlog</code>, <code>Sncf</code>, <code>spline.correlog2D</code>, <code>correlog</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># first generate some sample data
+x &lt;- expand.grid(1:20, 1:5)[, 1]
+y &lt;- expand.grid(1:20, 1:5)[, 2]
+
+# z data from an exponential random field
+z &lt;- cbind(
+  rmvn.spa(x = x, y = y, p = 2, method = "exp"), 
+  rmvn.spa(x = x, y = y, p = 2, method = "exp")
+  )
+
+# w data from a gaussian random field
+w &lt;- cbind(
+  rmvn.spa(x = x, y = y, p = 2, method = "gaus"), 
+  rmvn.spa(x = x, y = y, p = 2, method = "gaus")
+  )
+
+# univariate spline correlogram
+fit1 &lt;- spline.correlog(x = x, y = y, z = z[, 1], resamp = 100)
+## Not run: plot.spline.correlog(fit1)
+summary(fit1)
+
+# multivariate spline correlogram
+fit2 &lt;- spline.correlog(x = x, y = y, z = z, resamp = 100)
+## Not run: plot.spline.correlog(fit2)
+summary(fit2)
+
+# multivariate spline cross-correlogram
+fit3 &lt;- spline.correlog(x = x, y = y, z = z, w = w, resamp = 100)
+## Not run: plot.spline.correlog(fit3)
+summary(fit3)
+</code></pre>
+
+
+</div>

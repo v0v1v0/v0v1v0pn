@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.not</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate signal for a 'not' object.</h2>
+
+<h3>Description</h3>
+
+<p>Estimates signal in <code>object$x</code> with change-points at <code>cpt</code>. The type of the signal depends on 
+on the value of <code>contrast</code> that has been passed to <code>not</code> (see details below).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'not'
+predict(object, cpt, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of class 'not', returned by <code>not</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cpt</code></td>
+<td>
+<p>An integer vector with locations of the change-points.
+If missing, the <code>features</code> is called internally to extract the change-points from <code>object</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further parameters that can be passed to <code>predict.not</code> and <code>features</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The data points provided in <code>object$x</code> are assumed to follow
+</p>
+<p style="text-align: center;"><code class="reqn">Y_{t} = f_{t}+\sigma_{t}\varepsilon_{t},</code>
+</p>
+
+<p>for <code class="reqn">t=1,\ldots,n</code>, where <code class="reqn">n</code> is the number of observations in <code>object$x</code>, the signal <code class="reqn">f_{t}</code> and the standard deviation <code class="reqn">\sigma_{t}</code> 
+are non-stochastic with change-points at locations given in <code>cpt</code> and <code class="reqn">\varepsilon_{t}</code> is a white-noise. Denote by <code class="reqn">\tau_{1}, \ldots, \tau_{q}</code> 
+the elements in <code>cpt</code> and set <code class="reqn">\tau_{0}=0</code> and <code class="reqn">\tau_{q+1}=T</code>. Depending on the value of <code>contrast</code> that has been passed to <code>not</code> to construct <code>object</code>,  the returned value is calculated as follows.
+</p>
+
+<ul>
+<li>
+<p> For <code>contrast="pcwsConstantMean"</code> and <code>contrast="pcwsConstantMeanHT"</code>, in each  segment  <code class="reqn">(\tau_{j}+1, \tau_{j+1})</code>,
+<code class="reqn">f_{t}</code> for <code class="reqn">t\in(\tau_{j}+1, \tau_{j+1})</code> is approximated by the mean of <code class="reqn">Y_{t}</code> calculated over <code class="reqn">t\in(\tau_{j}+1, \tau_{j+1})</code>. 
+</p>
+</li>
+<li>
+<p> For <code>contrast="pcwsLinContMean"</code>, <code class="reqn">f_{t}</code> is approximated by the linear spline fit with knots at <code class="reqn">\tau_{1}, \ldots, \tau_{q}</code> minimising the l2 distance between the fit and the data.
+</p>
+</li>
+<li>
+<p> For <code>contrast="pcwsLinMean"</code> in each  segment  <code class="reqn">(\tau_{j}+1, \tau_{j+1})</code>, the signal
+<code class="reqn">f_{t}</code> for <code class="reqn">t\in(\tau_{j}+1, \tau_{j+1})</code> is approximated by the line <code class="reqn">\alpha_{j} + \beta_{j} t</code>, where the regression coefficients are 
+found using the least squares method.
+</p>
+</li>
+<li>
+<p> For <code>contrast="pcwsQuad"</code>, the signal
+<code class="reqn">f_{t}</code> for <code class="reqn">t\in(\tau_{j}+1, \tau_{j+1})</code> is approximated by the curve <code class="reqn">\alpha_{j} + \beta_{j} t + \gamma_{j} t^2</code>, where the regression coefficients are 
+found using the least squares method.
+</p>
+</li>
+<li>
+<p> For <code>contrast="pcwsConstMeanVar"</code>,  in each  segment  <code class="reqn">(\tau_{j}+1, \tau_{j+1})</code>, 
+<code class="reqn">f_{t}</code> and <code class="reqn">\sigma_{t}</code> for <code class="reqn">t\in(\tau_{j}+1, \tau_{j+1})</code> are approximated by, respectively, the mean and the standard deviation of <code class="reqn">Y_{t}</code>, both calculated over <code class="reqn">t\in(\tau_{j}+1, \tau_{j+1})</code>.     
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A vector wit the estimated signal or a two-column matrix with the estimated estimated signal and standard deviation if <code>contrast="pcwsConstMeanVar"</code> was used to construct <code>object</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>not</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># **** Piecewisce-constant mean with Gaussian noise.
+x &lt;- c(rep(0, 100), rep(1,100)) + rnorm(100)
+# *** identify potential locations of the change-points
+w &lt;- not(x, contrast = "pcwsConstMean")
+# *** when 'cpt' is omitted, 'features' function is used internally 
+# to choose change-points locations
+signal.est &lt;- predict(w)
+# *** estimate the signal specifying the location of the change-point
+signal.est.known.cpt &lt;- predict(w, cpt=100)
+# *** pass arguments of the 'features' function through 'predict'.
+signal.est.aic &lt;- predict(w, penalty.type="aic")
+
+# **** Piecewisce-constant mean and variance with Gaussian noise.
+x &lt;- c(rep(0, 100), rep(1,100)) + c(rep(2, 100), rep(1,100)) * rnorm(100)
+# *** identify potential locations of the change-points
+w &lt;- not(x, contrast = "pcwsConstMeanVar")
+# *** here signal is two-dimensional
+signal.est &lt;- predict(w)
+</code></pre>
+
+
+</div>

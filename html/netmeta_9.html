@@ -1,0 +1,945 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>discomb</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Additive network meta-analysis for combinations of treatments
+(disconnected networks)</h2>
+
+<h3>Description</h3>
+
+<p>Some treatments in a network meta-analysis may be combinations of
+other treatments or have common components. The influence of
+individual components can be evaluated in an additive network
+meta-analysis model assuming that the effect of treatment
+combinations is the sum of the effects of its components. This
+function implements this additive model in a frequentist way and is
+particularly intended for disconnected networks.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">discomb(
+  TE,
+  seTE,
+  treat1,
+  treat2,
+  studlab,
+  data = NULL,
+  subset = NULL,
+  inactive = NULL,
+  sep.comps = "+",
+  C.matrix,
+  sm,
+  level = gs("level"),
+  level.ma = gs("level.ma"),
+  common = gs("common"),
+  random = gs("random") | !is.null(tau.preset),
+  reference.group,
+  baseline.reference = TRUE,
+  seq = NULL,
+  tau.preset = NULL,
+  tol.multiarm = 0.001,
+  tol.multiarm.se = NULL,
+  details.chkmultiarm = FALSE,
+  details.chkident = FALSE,
+  sep.trts = ":",
+  nchar.comps = 666,
+  func.inverse = invmat,
+  backtransf = gs("backtransf"),
+  title = "",
+  warn = TRUE,
+  warn.deprecated = gs("warn.deprecated"),
+  nchar.trts = nchar.comps,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>TE</code></td>
+<td>
+<p>Estimate of treatment effect, i.e. difference between
+first and second treatment (e.g. log odds ratio, mean difference,
+or log hazard ratio). Or an R object created with
+<code>pairwise</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE</code></td>
+<td>
+<p>Standard error of treatment estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat1</code></td>
+<td>
+<p>Label/Number for first treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat2</code></td>
+<td>
+<p>Label/Number for second treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studlab</code></td>
+<td>
+<p>An optional - but important! - vector with study
+labels (see <code>netmeta</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame containing the study
+information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional vector specifying a subset of studies to
+be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inactive</code></td>
+<td>
+<p>A character string defining the inactive treatment
+component (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep.comps</code></td>
+<td>
+<p>A single character to define separator between
+treatment components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C.matrix</code></td>
+<td>
+<p>C matrix (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sm</code></td>
+<td>
+<p>A character string indicating underlying summary measure,
+e.g., <code>"RD"</code>, <code>"RR"</code>, <code>"OR"</code>, <code>"ASD"</code>,
+<code>"HR"</code>, <code>"MD"</code>, <code>"SMD"</code>, or <code>"ROM"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>The level used to calculate confidence intervals for
+individual comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level.ma</code></td>
+<td>
+<p>The level used to calculate confidence intervals
+for network estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether a common effects /
+common effects network meta-analysis should be conducted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether a random effects network
+meta-analysis should be conducted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference.group</code></td>
+<td>
+<p>Reference treatment (first treatment is used
+if argument is missing).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseline.reference</code></td>
+<td>
+<p>A logical indicating whether results
+should be expressed as comparisons of other treatments versus the
+reference treatment (default) or vice versa. This argument is
+only considered if <code>reference.group</code> has been specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq</code></td>
+<td>
+<p>A character or numerical vector specifying the sequence
+of treatments in printouts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.preset</code></td>
+<td>
+<p>An optional value for the square-root of the
+between-study variance <code class="reqn">\tau^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol.multiarm</code></td>
+<td>
+<p>A numeric for the tolerance for consistency of
+treatment estimates in multi-arm studies which are consistent by
+design.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol.multiarm.se</code></td>
+<td>
+<p>A numeric for the tolerance for consistency
+of standard errors in multi-arm studies which are consistent by
+design. This check is not conducted if the argument is
+<code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details.chkmultiarm</code></td>
+<td>
+<p>A logical indicating whether treatment
+estimates and / or variances of multi-arm studies with
+inconsistent results or negative multi-arm variances should be
+printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details.chkident</code></td>
+<td>
+<p>A logical indicating whether details on
+unidentifiable components should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep.trts</code></td>
+<td>
+<p>A character used in comparison names as separator
+between treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.comps</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique names for components (see
+Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>func.inverse</code></td>
+<td>
+<p>R function used to calculate the pseudoinverse
+of the Laplacian matrix L (see <code>netmeta</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether results should be
+back transformed in printouts and forest plots. If
+<code>backtransf = TRUE</code>, results for <code>sm = "OR"</code> are
+presented as odds ratios rather than log odds ratios, for
+example.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Title of meta-analysis / systematic review.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>A logical indicating whether warnings should be printed
+(e.g., if studies are excluded from meta-analysis due to zero
+standard errors).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.trts</code></td>
+<td>
+<p>Deprecated argument (replaced by
+<code>nchar.comps</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments (to catch deprecated arguments).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Treatments in network meta-analysis (NMA) can be complex
+interventions. Some treatments may be combinations of others or
+have common components. The standard analysis provided by
+<code>netmeta</code> is a NMA where all existing (single or
+combined) treatments are considered as different nodes in the
+network. Exploiting the fact that some treatments are combinations
+of common components, an additive component network meta-analysis
+(CNMA) model can be used to evaluate the influence of individual
+components. This model assumes that the effect of a treatment
+combination is the sum of the effects of its components which
+implies that common components cancel out in comparisons.
+</p>
+<p>This R function can be used for disconnected networks. Use
+<code>netmeta</code> and <code>netcomb</code> for connected
+networks.
+</p>
+<p>The additive CNMA model has been implemented using Bayesian methods
+(Mills et al., 2012; Welton et al., 2013). This function implements
+the additive model in a frequentist way (Rücker et al., 2020).
+</p>
+<p>The underlying multivariate model is given by
+</p>
+<p style="text-align: center;"><code class="reqn">\bold{\delta} = \bold{B} \bold{\theta}, \bold{\theta} =
+\bold{C} \bold{\beta}</code>
+</p>
+
+<p>with
+</p>
+
+<dl>
+<dt><code class="reqn">\bold{\delta}</code></dt>
+<dd>
+<p>vector of true treatment effects
+(differences) from individual studies,</p>
+</dd>
+<dt><code class="reqn">\bold{B}</code></dt>
+<dd>
+<p>design matrix describing the structure of the
+network,</p>
+</dd>
+<dt><code class="reqn">\bold{\theta}</code></dt>
+<dd>
+<p>parameter vector that represents the
+existing combined treatments,</p>
+</dd>
+<dt><code class="reqn">\bold{C}</code></dt>
+<dd>
+<p>matrix describing how the treatments are
+composed,</p>
+</dd>
+<dt><code class="reqn">\bold{\beta}</code></dt>
+<dd>
+<p>parameter vector representing the
+treatment components.</p>
+</dd>
+</dl>
+<p>All parameters are estimated using weighted least squares
+regression.
+</p>
+<p>Argument <code>inactive</code> can be used to specify a single component
+that does not have any therapeutic value. Accordingly, it is
+assumed that the treatment effect of the combination of this
+component with an additional treatment component is equal to the
+treatment effect of the additional component alone.
+</p>
+<p>Argument <code>sep.comps</code> can be used to specify the separator
+between individual components. By default, the matrix <strong>C</strong> is
+calculated internally from treatment names. However, it is possible
+to specify a different matrix using argument <code>C.matrix</code>.
+</p>
+<p>By default, component names are not abbreviated in
+printouts. However, in order to get more concise printouts,
+argument <code>nchar.comps</code> can be used to define the minimum
+number of characters for abbreviated component names (see
+<code>abbreviate</code>, argument <code>minlength</code>). R function
+<code>treats</code> is utilised internally to create abbreviated
+component names.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of classes <code>discomb</code> and <code>netcomb</code> with
+corresponding <code>print</code>, <code>summary</code>, and <code>forest</code>
+functions. The object is a list containing the following
+components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>studlab</code></td>
+<td>
+<p>Study labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat1</code></td>
+<td>
+<p>Label/Number for first treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat2</code></td>
+<td>
+<p>Label/Number for second treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE</code></td>
+<td>
+<p>Estimate of treatment effect, i.e. difference between
+first and second treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE</code></td>
+<td>
+<p>Standard error of treatment estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.adj.common, seTE.adj.random</code></td>
+<td>
+<p>Standard error of treatment
+estimate, adjusted for multi-arm studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event1</code></td>
+<td>
+<p>Number of events in first treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event2</code></td>
+<td>
+<p>Number of events in second treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n1</code></td>
+<td>
+<p>Number of observations in first treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n2</code></td>
+<td>
+<p>Number of observations in second treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Total number of studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>Total number of pairwise comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Total number of treatments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Total number of designs (corresponding to the unique set
+of treatments compared within studies).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>Total number of components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trts</code></td>
+<td>
+<p>Treatments included in network meta-analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comps</code></td>
+<td>
+<p>Unique list of components present in the network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE.cnma.common, TE.cnma.random</code></td>
+<td>
+<p>A vector of length <em>m</em> of
+consistent treatment effects estimated by the additive (common and
+random effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.cnma.common, seTE.cnma.random</code></td>
+<td>
+<p>A vector of length
+<em>m</em> with standard errors estimated by the additive (common
+and random effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.cnma.common, lower.cnma.random</code></td>
+<td>
+<p>A vector of length
+<em>m</em> of lower confidence interval limits for consistent
+treatment effects estimated by the additive (common and random
+effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.cnma.common, upper.cnma.random</code></td>
+<td>
+<p>A vector of length
+<em>m</em> of upper confidence interval limits for consistent
+treatment effects estimated by the additive (common and random
+effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.cnma.common, statistic.cnma.random</code></td>
+<td>
+<p>A vector of
+length <em>m</em> of z-values for the test of an overall effect
+estimated by the additive (common and random effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.cnma.common, pval.cnma.random</code></td>
+<td>
+<p>A vector of length
+<em>m</em> of p-values for the test of an overall effect estimated
+by the additive (common and random effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE.common, TE.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix with overall
+treatment effects estimated by the additive (common and random
+effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.common, seTE.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix with
+standard errors estimated by the additive (common and random
+effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.common, upper.common, lower.random,
+upper.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with lower and upper
+confidence interval limits estimated by the additive (common and
+random effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.common, pval.common, statistic.random,
+pval.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with z-values and
+p-values for test of overall effect estimated by the additive
+(common and random effects) model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Comp.common, Comp.random</code></td>
+<td>
+<p>A vector of component effects (common
+and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seComp.common, seComp.random</code></td>
+<td>
+<p>A vector with corresponding
+standard errors (common and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.Comp.common, lower.Comp.random</code></td>
+<td>
+<p>A vector with lower
+confidence limits for components (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.Comp.common, upper.Comp.random</code></td>
+<td>
+<p>A vector with upper
+confidence limits for components (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.Comp.common, statistic.Comp.random</code></td>
+<td>
+<p>A vector with
+z-values for the overall effect of components (common and random
+effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Comp.common, pval.Comp.random</code></td>
+<td>
+<p>A vector with p-values for
+the overall effect of components (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Comb.common, Comb.random</code></td>
+<td>
+<p>A vector of combination effects (common
+and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seComb.common, seComb.random</code></td>
+<td>
+<p>A vector with corresponding
+standard errors (common and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.Comb.common, lower.Comb.random</code></td>
+<td>
+<p>A vector with lower
+confidence limits for combinations (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.Comb.common, upper.Comb.random</code></td>
+<td>
+<p>A vector with upper
+confidence limits for combinations (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.Comb.common, statistic.Comb.random</code></td>
+<td>
+<p>A vector with
+z-values for the overall effect of combinations (common and random
+effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Comb.common, pval.Comb.random</code></td>
+<td>
+<p>A vector with p-values for
+the overall effect of combinations (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q.additive</code></td>
+<td>
+<p>Overall heterogeneity / inconsistency statistic
+(additive model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.Q.additive</code></td>
+<td>
+<p>Degrees of freedom for test of heterogeneity /
+inconsistency (additive model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Q.additive</code></td>
+<td>
+<p>P-value for test of heterogeneity /
+inconsistency (additive model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>Square-root of between-study variance (additive model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I2</code></td>
+<td>
+<p>I-squared (additive model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q.standard</code></td>
+<td>
+<p>Overall heterogeneity / inconsistency statistic
+(standard model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.Q.standard</code></td>
+<td>
+<p>Degrees of freedom for test of heterogeneity /
+inconsistency (standard model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Q.standard</code></td>
+<td>
+<p>P-value for test of heterogeneity /
+inconsistency (standard model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q.diff</code></td>
+<td>
+<p>Test statistic for difference in goodness of fit
+between standard and additive model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.Q.diff</code></td>
+<td>
+<p>Degrees of freedom for difference in goodness of
+fit between standard and additive model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Q.diff</code></td>
+<td>
+<p>P-value for difference in goodness of fit
+between standard and additive model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X.matrix</code></td>
+<td>
+<p>Design matrix (<em>m</em>x<em>n</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B.matrix</code></td>
+<td>
+<p>Edge-vertex incidence matrix (<em>m</em>x<em>n</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C.matrix</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sm</code></td>
+<td>
+<p>Summary measure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level.ma</code></td>
+<td>
+<p>Level for confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common, random, tau.preset</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep.trts</code></td>
+<td>
+<p>A character used in comparison names as separator
+between treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.comps</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique component names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inactive, sep.comps</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether results should be
+back transformed in printouts and forest plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Title of meta-analysis / systematic review.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+<p>Version of R package netmeta used to create
+object.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>This function calculates effects for individual components and
+complex interventions present in the network.
+</p>
+<p>R function <code>netcomplex</code> can be used to calculate the
+effect for arbitrary complex interventions in a component network
+meta-analysis. Furthermore, R function <code>netcomparison</code>
+can be used to calculate the effect for comparisons of two
+arbitrary complex intervention in a component network
+meta-analysis.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gerta Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>, Guido
+Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>König J, Krahn U, Binder H (2013):
+Visualizing the flow of evidence in network meta-analysis and
+characterizing mixed treatment comparisons.
+<em>Statistics in Medicine</em>,
+<b>32</b>, 5414–29
+</p>
+<p>Mills EJ, Thorlund K, Ioannidis JP (2012):
+Calculating additive treatment effects from multiple randomized
+trials provides useful estimates of combination therapies.
+<em>Journal of Clinical Epidemiology</em>,
+<b>65</b>, 1282–8
+</p>
+<p>Rücker G, Petropoulou M, Schwarzer G (2020):
+Network meta-analysis of multicomponent interventions.
+<em>Biometrical Journal</em>,
+<b>62</b>, 808–21
+</p>
+<p>Welton NJ, Caldwell DM, Adamopoulos E, Vedhara K (2009):
+Mixed treatment comparison meta-analysis of complex interventions:
+psychological interventions in coronary heart disease.
+<em>American Journal of Epidemiology</em>,
+<b>169</b>: 1158–65
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netcomb</code>, <code>forest.netcomb</code>,
+<code>summary.netcomb</code>, <code>netmeta</code>,
+<code>netconnection</code>, <code>netcomplex</code>,
+<code>netcomparison</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Artificial dataset
+#
+t1 &lt;- c("A + B", "A + C", "A"    , "A"    , "D", "D", "E")
+t2 &lt;- c("C"    , "B"    , "B + C", "A + D", "E", "F", "F")
+#
+mean    &lt;- c(4.1, 2.05, 0, 0, 0.1, 0.1, 0.05)
+se.mean &lt;- rep(0.1, 7)
+#
+study &lt;- paste("study", c(1:4, 5, 5, 5))
+#
+dat &lt;- data.frame(mean, se.mean, t1, t2, study,
+  stringsAsFactors = FALSE)
+#
+trts &lt;- c("A", "A + B", "A + C", "A + D",
+  "B", "B + C", "C", "D", "E", "F")
+#
+comps &lt;- LETTERS[1:6]
+
+# Use netconnection() to display network information
+#
+netconnection(t1, t2, study)
+
+dc1 &lt;- discomb(mean, se.mean, t1, t2, study, seq = trts)
+dc1
+
+forest(dc1, ref = "F")
+
+# Define C matrix manually (which will produce the same results)
+#
+C &lt;- rbind(c(1, 0, 0, 0, 0, 0),  # A
+  c(1, 1, 0, 0, 0, 0),  # A + B
+  c(1, 0, 1, 0, 0, 0),  # A + C
+  c(1, 0, 0, 1, 0, 0),  # A + D
+  c(0, 1, 0, 0, 0, 0),  # B
+  c(0, 1, 1, 0, 0, 0),  # B + C
+  c(0, 0, 1, 0, 0, 0),  # C
+  c(0, 0, 0, 1, 0, 0),  # D
+  c(0, 0, 0, 0, 1, 0),  # E
+  c(0, 0, 0, 0, 0, 1))  # F
+#                  
+colnames(C) &lt;- comps
+rownames(C) &lt;- trts
+#
+dc2 &lt;- discomb(mean, se.mean, t1, t2, study, seq = trts,
+  C.matrix = C)
+#
+# Compare C matrices
+#
+all.equal(dc1$C.matrix, dc2$C.matrix)
+
+</code></pre>
+
+
+</div>

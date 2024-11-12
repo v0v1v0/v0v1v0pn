@@ -1,0 +1,202 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>elm.fast</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>ELM (fast) neural network.</h2>
+
+<h3>Description</h3>
+
+<p>Fit ELM (fast) neural network. This is an ELM implementation that does not rely on neuralnets package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">elm.fast(
+  y,
+  x,
+  hd = NULL,
+  type = c("lasso", "ridge", "step", "ls"),
+  reps = 20,
+  comb = c("median", "mean", "mode"),
+  direct = c(FALSE, TRUE),
+  linscale = c(TRUE, FALSE),
+  output = c("linear", "logistic"),
+  core = c("FALSE", "TRUE"),
+  ortho = c(FALSE, TRUE)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Target variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Explanatory variables. Each column is a variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hd</code></td>
+<td>
+<p>Starting number of hidden nodes (scalar). Use NULL to automatically specify.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Estimation type for output layer weights. Can be "lasso" (lasso with CV), "ridge" (ridge regression with CV), "step" (stepwise regression with AIC) or "lm" (linear regression).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+<p>Number of networks to train.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb</code></td>
+<td>
+<p>Combination operator for forecasts when reps &gt; 1. Can be "median", "mode" (based on KDE estimation) and "mean".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direct</code></td>
+<td>
+<p>Use direct input-output connections to model strictly linear effects. Can be TRUE or FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linscale</code></td>
+<td>
+<p>Scale inputs linearly between -0.8 to 0.8. If output == "logistic" then scaling is between 0 and 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>Type of output layer. It can be "linear" or "logistic". If "logistic" then type must be set to "lasso".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>core</code></td>
+<td>
+<p>If TRUE skips calculation of final fitted values and MSE. Called internally by <code>"elm"</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ortho</code></td>
+<td>
+<p>If TRUE then the initial weights between the input and hidden layers are orthogonal (only when number of input variable &lt;= sample size).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class "<code>elm.fast</code>".
+The function <code>plot</code> produces a plot the network fit.
+An object of class <code>"elm.fast"</code> is a list containing the following elements:
+</p>
+
+<ul>
+<li> <p><code>hd</code> - Number of hidden nodes. This is a vector with a different number for each training repetition.
+</p>
+</li>
+<li> <p><code>W.in</code> - Input weights for each training repetition.
+</p>
+</li>
+<li> <p><code>W</code> - Output layer weights for each repetition.
+</p>
+</li>
+<li> <p><code>b</code> - Output node bias for each training repetition.
+</p>
+</li>
+<li> <p><code>W.dct</code> - Direct connection weights argument if direct == TRUE for each training repetition. Otherwuse NULL.
+</p>
+</li>
+<li> <p><code>fitted.all</code> - Fitted values for each training repetition.
+</p>
+</li>
+<li> <p><code>fitted</code> - Ensemble fitted values.
+</p>
+</li>
+<li> <p><code>y</code> - Target variable.
+</p>
+</li>
+<li> <p><code>type</code> - Estimation used for output layer weights.
+</p>
+</li>
+<li> <p><code>comb</code> - Combination operator used.
+</p>
+</li>
+<li> <p><code>direct</code> - Presence of direct input-output connections.
+</p>
+</li>
+<li> <p><code>minmax</code> - If scaling is used this contains the scaling information for the target variable.
+</p>
+</li>
+<li> <p><code>minmax.x</code> - If scaling is used this contains the scaling information for the input variables.
+</p>
+</li>
+<li> <p><code>MSE</code> - In-sample Mean Squared Error.
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>This implementation of ELM is more appropriate when the number of inputs is several hundreds. For time series modelling use <code>elm</code> instead.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nikolaos Kourentzes, <a href="mailto:nikolaos@kourentzes.com">nikolaos@kourentzes.com</a>
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> For combination operators see: Kourentzes N., Barrow B.K., Crone S.F. (2014) <a href="https://kourentzes.com/forecasting/2014/04/19/neural-network-ensemble-operators-for-time-series-forecasting/">Neural network ensemble operators for time series forecasting</a>. <em>Expert Systems with Applications</em>, <b>41</b>(<b>9</b>), 4235-4244.
+</p>
+</li>
+<li>
+<p> For ELMs see: Huang G.B., Zhou H., Ding X. (2006) Extreme learning machine: theory and applications. <em>Neurocomputing</em>, <b>70</b>(<b>1</b>), 489-501.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>elm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+ p &lt;- 2000
+ n &lt;- 150
+ X &lt;- matrix(rnorm(p*n),nrow=n)
+ b &lt;- cbind(rnorm(p))
+ Y &lt;- X %*% b
+ fit &lt;- elm.fast(Y,X)
+ print(fit)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

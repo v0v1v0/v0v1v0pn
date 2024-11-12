@@ -1,0 +1,210 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MAP_sNiW_mmEM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>EM MAP for mixture of sNiW</h2>
+
+<h3>Description</h3>
+
+<p>Maximum A Posteriori (MAP) estimation of mixture of
+Normal inverse Wishart distributed observations with an EM algorithm
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MAP_sNiW_mmEM(
+  xi_list,
+  psi_list,
+  S_list,
+  hyperG0,
+  init = NULL,
+  K,
+  maxit = 100,
+  tol = 0.1,
+  doPlot = TRUE,
+  verbose = TRUE
+)
+
+MAP_sNiW_mmEM_weighted(
+  xi_list,
+  psi_list,
+  S_list,
+  obsweight_list,
+  hyperG0,
+  K,
+  maxit = 100,
+  tol = 0.1,
+  doPlot = TRUE,
+  verbose = TRUE
+)
+
+MAP_sNiW_mmEM_vague(
+  xi_list,
+  psi_list,
+  S_list,
+  hyperG0,
+  K = 10,
+  maxit = 100,
+  tol = 0.1,
+  doPlot = TRUE,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xi_list</code></td>
+<td>
+<p>a list of length <code>n</code>, each element is a vector of size <code>d</code>
+containing the argument <code>xi</code> of the corresponding allocated cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi_list</code></td>
+<td>
+<p>a list of length <code>n</code>, each element is a vector of size <code>d</code>
+containing the argument <code>psi</code> of the corresponding allocated cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S_list</code></td>
+<td>
+<p>a list of length <code>n</code>, each element is a matrix of size <code>d x d</code>
+containing the argument <code>S</code> of the corresponding allocated cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyperG0</code></td>
+<td>
+<p>prior mixing distribution used if <code>init</code> is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>a list for initializing the algorithm with the following elements: <code>b_xi</code>,
+<code>b_psi</code>, <code>lambda</code>, <code>B</code>, <code>nu</code>. Default is <code>NULL</code> in which case
+the initialization of the algorithm is random.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>integer giving the number of mixture components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>integer giving the maximum number of iteration for the EM algorithm.
+Default is <code>100</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>real number giving the tolerance for the stopping of the EM algorithm.
+Default is <code>0.1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doPlot</code></td>
+<td>
+<p>a logical flag indicating whether the algorithm progression should be plotted.
+Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical flag indicating whether plot should be drawn. Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obsweight_list</code></td>
+<td>
+<p>a list of length <code>n</code> where each element is a vector of weights for
+each sampled cluster at each MCMC iterations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>MAP_sNiW_mmEM</code> provides an estimation for the MAP of mixtures of
+Normal inverse Wishart distributed observations. <code>MAP_sNiW_mmEM_vague</code> provides
+an estimates incorporating a vague component in the mixture.
+<code>MAP_sNiW_mmEM_weighted</code> provides a weighted version of the algorithm.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Boris Hejblum, Chariff Alkhassim
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1234)
+hyperG0 &lt;- list()
+hyperG0$b_xi &lt;- c(0.3, -1.5)
+hyperG0$b_psi &lt;- c(0, 0)
+hyperG0$kappa &lt;- 0.001
+hyperG0$D_xi &lt;- 100
+hyperG0$D_psi &lt;- 100
+hyperG0$nu &lt;- 20
+hyperG0$lambda &lt;- diag(c(0.25,0.35))
+
+hyperG0 &lt;- list()
+hyperG0$b_xi &lt;- c(1, -1.5)
+hyperG0$b_psi &lt;- c(0, 0)
+hyperG0$kappa &lt;- 0.1
+hyperG0$D_xi &lt;- 1
+hyperG0$D_psi &lt;- 1
+hyperG0$nu &lt;- 2
+hyperG0$lambda &lt;- diag(c(0.25,0.35))
+
+xi_list &lt;- list()
+psi_list &lt;- list()
+S_list &lt;- list()
+w_list &lt;- list()
+
+for(k in 1:200){
+ NNiW &lt;- rNNiW(hyperG0, diagVar=FALSE)
+ xi_list[[k]] &lt;- NNiW[["xi"]]
+ psi_list[[k]] &lt;- NNiW[["psi"]]
+ S_list[[k]] &lt;- NNiW[["S"]]
+ w_list [[k]] &lt;- 0.75
+}
+
+
+hyperG02 &lt;- list()
+hyperG02$b_xi &lt;- c(-1, 2)
+hyperG02$b_psi &lt;- c(-0.1, 0.5)
+hyperG02$kappa &lt;- 0.1
+hyperG02$D_xi &lt;- 1
+hyperG02$D_psi &lt;- 1
+hyperG02$nu &lt;- 4
+hyperG02$lambda &lt;- 0.5*diag(2)
+
+for(k in 201:400){
+ NNiW &lt;- rNNiW(hyperG02, diagVar=FALSE)
+ xi_list[[k]] &lt;- NNiW[["xi"]]
+ psi_list[[k]] &lt;- NNiW[["psi"]]
+ S_list[[k]] &lt;- NNiW[["S"]]
+ w_list [[k]] &lt;- 0.25
+
+}
+
+map &lt;- MAP_sNiW_mmEM(xi_list, psi_list, S_list, hyperG0, K=2, tol=0.1)
+
+</code></pre>
+
+
+</div>

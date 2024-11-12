@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>buildEnsembleKF</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an Ensemble Kalman filter algorithm to sample from latent states.</h2>
+
+<h3>Description</h3>
+
+<p>Create an Ensemble Kalman filter algorithm for a given NIMBLE state space model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">buildEnsembleKF(model, nodes, control = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A NIMBLE model object, typically representing a state space model or a hidden Markov model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>A character vector specifying the stochastic latent model nodes 
+the Ensemble Kalman Filter will estimate. All provided nodes must be stochastic.
+Can be one of three forms: a variable name, in which case all elements in the variable
+are taken to be latent (e.g., 'x'); an indexed variable, in which case all indexed elements are taken
+to be latent (e.g., 'x[1:100]' or 'x[1:100, 1:2]'); or a vector of multiple nodes, one per time point,
+in increasing time order (e.g., c("x[1:2, 1]", "x[1:2, 2]", "x[1:2, 3]", "x[1:2, 4]")).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list specifying different control options for the particle filter.  Options are described in the details section below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>control()</code> list option is described in detail below:
+</p>
+
+<dl>
+<dt>saveAll</dt>
+<dd>
+<p>Indicates whether to save state samples for all time points (TRUE), or only for the most recent time point (FALSE)</p>
+</dd>
+<dt>timeIndex</dt>
+<dd>
+<p>An integer used to manually specify which dimension of the latent state variable indexes time.  
+Only needs to be set if the number of time points is less than or equal to the size of the latent state at each time point.</p>
+</dd>
+<dt>initModel</dt>
+<dd>
+<p>A logical value indicating whether to initialize the model before running the filtering algorithm.  Defaults to TRUE.</p>
+</dd>
+</dl>
+<p>Runs an Ensemble Kalman filter to estimate a latent state given observations at each time point.  The ensemble Kalman filter
+is a Monte Carlo approximation to a Kalman filter that can be used when the model's transition euqations do not follow a normal distribution.  
+Latent states (x[t]) and observations (y[t]) can be scalars or vectors at each time point, 
+and sizes of observations can vary from time point to time point.
+In the BUGS model, the observations (y[t]) must be equal to some (possibly nonlinear) deterministic function
+of the latent state (x[t]) plus an additive error term.  Currently only normal and multivariate normal
+error terms are supported.
+The transition from x[t] to x[t+1] does not have to be normal or linear.  Output from the posterior distribution of the latent
+states is stored in <code>mvSamples</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nicholas Michaud
+</p>
+
+
+<h3>References</h3>
+
+<p>Houtekamer, P.L., and H.L. Mitchell. (1998). Data assimilation using an ensemble Kalman filter technique. <em>Monthly Weather Review</em>, 126(3), 796-811.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other particle filtering methods: 
+<code>buildAuxiliaryFilter</code>,
+<code>buildBootstrapFilter</code>,
+<code>buildIteratedFilter2()</code>,
+<code>buildLiuWestFilter</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## For illustration only.
+exampleCode &lt;- nimbleCode({
+  x0 ~ dnorm(0, var = 1)
+  x[1] ~ dnorm(.8 * x0, var = 1)
+  y[1] ~ dnorm(x[1], var = .5)
+  for(t in 2:10){
+    x[t] ~ dnorm(.8 * x[t-1], var = 1)
+    y[t] ~ dnorm(x[t], var = .5)
+  }
+})
+
+model &lt;- nimbleModel(code = exampleCode, data = list(y = rnorm(10)),
+                     inits = list(x0 = 0, x = rnorm(10)))
+my_enKF &lt;- buildEnsembleKF(model, 'x',
+                control = list(saveAll = TRUE, thresh = 1))
+## Now compile and run, e.g.,
+## Cmodel &lt;- compileNimble(model)
+## Cmy_enKF &lt;- compileNimble(my_enKF, project = model)
+## Cmy_enKF$run(m = 1000)
+## enKF_X &lt;- as.matrix(Cmy_enKF$mvSamples, 'x')
+</code></pre>
+
+
+</div>

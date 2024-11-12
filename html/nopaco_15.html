@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>concordance.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform a nonparametric concordance test.</h2>
+
+<h3>Description</h3>
+
+<p><code>concordance.test</code> performs a test for a random concordance (if a single matrix is given) or tests for equal concordance between two matrices.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">concordance.test(x, y = NULL, alternative = NULL, alpha = 0.05, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric matrix, subjects in the rows, repeated measurements in the columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>(optional) a numeric matrix of equal size as argument <code>x</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>"less", "greater" or "two.sided". Only used when <code>y</code> is given.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>significance level (default = 0.05)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>see details</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ul>
+<li>
+<p> Testing the deviation from random concordance: if only one matrix is given (i.e. argument <code>x</code>), its concordance will be tested against the alternative hypothesis of finding a higher concordance under random sampling conditions. For small matrices (depending on number of replicate measurements) an exact method will be used to determine a p-value. In case of larger matrices, where the exact approach in not feasible, either the revised-beta approach (default), a beta approximation, or a normal approximation is used. To enforce the use of either one method, the <code>method</code> argument can be used with value "exact","Rbeta","beta" or "normal".
+</p>
+</li>
+<li>
+<p> Testing for a difference between concordances: if both arguments <code>x</code> and <code>y</code> have been given, the equality of concordances of both matrices is tested. The default alternative hypothesis is 'two.sided'. Both matrices must be of equal size and have corresponding missing entries (<code>NA</code> values). In case of missing data in one matrix, the same entries in the other matrix will also be set to missing. This method involves bootstrapping to estimate variance and confidence estimates, with adjustable options via the global R options "nopaco.nCPU" (default=2), "nopaco.nDraws.CI" (default=1e4) and "nopaco.seed" (default = 1). 
+</p>
+</li>
+</ul>
+<p>Unbalanced data due to randomly missing data or an unequal number of repeated measurements per subject is allowed. In that case, missing or unknown values must be set to <code>NA</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of <code>ConcordanceTest-class</code>
+</p>
+
+
+<h3>References</h3>
+
+<p>P.Rothery (1979) Biometrika 66(3):629-639
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other concordance functions: 
+<code>coef()</code>,
+<code>getPsi()</code>,
+<code>rfromPsi()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(MASS) ##to use the 'mvrnorm' function
+
+#Generate a matrix without concordance
+# for three observers in two samples
+matRandom &lt;- matrix(rnorm(3*20),20,3)
+concordance.test(matRandom) 
+
+#Generate a corresponding matrix with strong concordance
+sigma&lt;-matrix(0.8,3,3)
+diag(sigma)&lt;-1
+matConcordant &lt;- mvrnorm(20,mu=rep(0,3),Sigma=sigma)
+concordance.test(matConcordant)
+
+#Test concordances between the two matrices
+aTest &lt;- concordance.test(matConcordant, matRandom)
+
+getPsi(aTest)
+coef(aTest)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,350 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dbinomLocal_normalPlateau</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Local evaluation of a binomial SCR observation process</h2>
+
+<h3>Description</h3>
+
+<p>The <code>dbinomLocal_normalPlateau</code> distribution is a NIMBLE custom distribution which can be used to model 
+and simulate binomial observations (x) of a single individual over a set of traps defined by their coordinates <em>trapCoords</em>
+the distribution assumes that an individual’s detection probability at any trap follows a half-normal plateau function of the distance between 
+the individual's activity center (s) and the trap location. With the half-normal plateau function, detection probability remains constant with value 
+p0 for a plateau of width w before declining with scale sigma.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dbinomLocal_normalPlateau(
+  x,
+  detNums = -999,
+  detIndices,
+  size,
+  p0 = -999,
+  p0Traps,
+  sigma,
+  w = 2,
+  s,
+  trapCoords,
+  localTrapsIndices,
+  localTrapsNum,
+  resizeFactor = 1,
+  habitatGrid,
+  indicator,
+  lengthYCombined = 0,
+  log = 0
+)
+
+rbinomLocal_normalPlateau(
+  n = 1,
+  detNums = -999,
+  detIndices,
+  size,
+  p0 = -999,
+  p0Traps,
+  sigma,
+  w = 2,
+  s,
+  trapCoords,
+  localTrapsIndices,
+  localTrapsNum,
+  resizeFactor = 1,
+  habitatGrid,
+  indicator,
+  lengthYCombined = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector of individual detection frequencies. This argument can be provided in two formats: (i) with the <em>y</em> object as returned by <code>getSparseY</code>; (ii) with the
+<em>yCombined</em> object as returned by <code>getSparseY</code> Note that when the random generation functionality is used (rbinomLocal_normal), only the yCombined format can be used. 
+The  <em>yCombined</em>  object combines <em>detNums</em>, <em>x</em>, and <em>detIndices</em> (in that order). When such consolidated 
+representation of the detection data x is used, <em>detIndices</em> and <em>detNums</em> arguments should not be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detNums</code></td>
+<td>
+<p>Number of traps with at least one detection recorded in <em>x</em>; from the <em>detNums</em> object returned by the <code>getSparseY</code> function. 
+This argument should not be specified when the <em>yCombined</em> object (returned by <code>getSparseY</code>) is provided as <em>x</em> and when detection data are simulated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detIndices</code></td>
+<td>
+<p>Vector of indices of traps where the detections in <em>x</em> were recorded; from the <em>detIndices</em> object returned by the <code>getSparseY</code> function. 
+This argument should not be specified when x is provided as the  <em>yCombined</em> object (returned by <code>getSparseY</code> ) and when detection data are simulated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>Vector of the number of trials (zero or more) for each trap (<em>trapCoords</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p0</code></td>
+<td>
+<p>Baseline detection probability (scalar) used in the half-normal detection function. For trap-specific baseline detection probabilities use argument <em>p0Traps</em> (vector) instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p0Traps</code></td>
+<td>
+<p>Vector of baseline detection probabilities for each trap used in the half-normal detection function. When <em>p0Traps</em> is used, <em>p0</em> should not be provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>Scale parameter of the half-normal detection function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Length of plateau of the half-normal plateau detection function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>Individual activity center x- and y-coordinates scaled to the habitat (see (<code>scaleCoordsToHabitatGrid</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trapCoords</code></td>
+<td>
+<p>Matrix of x- and y-coordinates of all traps scaled to the habitat (see (<code>scaleCoordsToHabitatGrid</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>localTrapsIndices</code></td>
+<td>
+<p>Matrix of indices of local traps around each habitat grid cell, as returned by the <code>getLocalObjects</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>localTrapsNum</code></td>
+<td>
+<p>Vector of numbers of local traps around all habitat grid cells, as returned by the <code>getLocalObjects</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resizeFactor</code></td>
+<td>
+<p>Aggregation factor used in the <code>getLocalObjects</code> function to reduce the number of habitat grid cells to retrieve local traps for.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>habitatGrid</code></td>
+<td>
+<p>Matrix of local habitat grid cell indices, from <em>habitatGrid</em> returned by the <code>getLocalObjects</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indicator</code></td>
+<td>
+<p>Binary argument specifying whether the individual is available for detection (indicator = 1) or not (indicator = 0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lengthYCombined</code></td>
+<td>
+<p>The length of the x argument when the (<em>yCombined</em>) format of the detection data is provided;  from the <em>lengthYCombined</em> object returned by <code>getSparseY</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical argument, specifying whether to return the log-probability of the distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Integer specifying the number of realizations to generate.  Only n = 1 is supported.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All coordinates (<code>s</code> and <code>trapCoords</code>) should be scaled to the habitat (see <code>scaleCoordsToHabitatGrid</code>)
+</p>
+<p>The <code>dbinomLocal_normalPlateau</code> distribution incorporates three features to increase computation efficiency (see Turek et al., 2021 &lt;doi.org/10.1002/ecs2.3385&gt;  for more details):
+</p>
+
+<ol>
+<li>
+<p> A local evaluation of the detection probability calculation (see Milleret et al., 2019 &lt;doi:10.1002/ece3.4751&gt; for more details)
+</p>
+</li>
+<li>
+<p> A sparse matrix representation (<em>x</em>, <em>detIndices</em> and <em>detNums</em>) of the observation data to reduce the size of objects to be processed.
+</p>
+</li>
+<li>
+<p> An indicator (<em>indicator</em>) to shortcut calculations for individuals unavailable for detection.
+</p>
+</li>
+</ol>
+<p>The <code>dbinomLocal_normalPlateau</code> distribution requires x- and y- detector coordinates (<em>trapCoords</em>) to be scaled to the habitat grid (<em>habitatGrid</em>) using the (<code>scaleCoordsToHabitatGrid</code> function.)
+</p>
+<p>When the aim is to simulate detection data: 
+</p>
+
+<ol>
+<li> <p><em>x</em> should be provided using the <em>yCombined</em> object as returned by <code>getSparseY</code>, 
+</p>
+</li>
+<li>
+<p> arguments <em>detIndices</em> and <em>detNums</em> should not be provided, 
+</p>
+</li>
+<li>
+<p> argument <em>lengthYCombined</em> should be provided using the <em>lengthYCombined</em> object as returned by  <code>getSparseY</code>.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>The log-likelihood value associated with the vector of detections, given the location of the activity center (s),
+and the half-normal plateau detection function : <code class="reqn">p = p0</code> when <em>d &lt; w</em> and <code class="reqn">p = p0 * exp(-(d-w)^2 / \sigma^2)</code> when <em>d &gt;= w</em>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Soumen Dey
+</p>
+
+
+<h3>References</h3>
+
+<p>Dey, S., Bischof, R., Dupont, P. P. A., &amp; Milleret, C. (2022). Does the punishment fit the crime? Consequences and diagnosis of misspecified detection functions in Bayesian spatial capture–recapture modeling. Ecology and Evolution, 12, e8600. https://doi.org/10.1002/ece3.8600
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># A user friendly vignette is also available on github: 
+# https://github.com/nimble-dev/nimbleSCR/blob/master/nimbleSCR/vignettes/
+# Vignette name: Fit_with_dbinomLocal_normalPlateau_and_HomeRangeAreaComputation.rmd
+
+# I. DATA SET UP 
+coordsHabitatGridCenter &lt;- matrix(c(0.5, 3.5,
+                                    1.5, 3.5,
+                                    2.5, 3.5,
+                                    3.5, 3.5,
+                                    0.5, 2.5,
+                                    1.5, 2.5,
+                                    2.5, 2.5,
+                                    3.5, 2.5,
+                                    0.5, 1.5,
+                                    1.5, 1.5,
+                                    2.5, 1.5,
+                                    3.5, 1.5,
+                                    0.5, 0.5,
+                                    1.5, 0.5,
+                                    2.5, 0.5,
+                                    3.5, 0.5), ncol=2,byrow = TRUE)
+colnames(coordsHabitatGridCenter) &lt;- c("x","y")
+# CREATE OBSERVATION WINDOWS
+trapCoords &lt;- matrix(c(1.5, 1.5, 2.5, 1.5, 1.5, 2.5, 2.5, 2.5), nrow = 4, byrow = TRUE)
+colnames(trapCoords) &lt;- c("x","y")
+# PLOT CHECK
+plot(coordsHabitatGridCenter[,"y"]~coordsHabitatGridCenter[,"x"],pch=16) 
+points(trapCoords[,"y"]~trapCoords[,"x"],col="red",pch=16) 
+
+# PARAMETERS
+p0 &lt;- 0.25
+sigma &lt;- 1
+w &lt;- 1.5
+indicator &lt;- 1 
+# WE CONSIDER 2 INDIVIDUALS
+y &lt;- matrix(c(0, 1, 1, 0,
+              0, 1, 0, 1),ncol=4,nrow=2)
+s &lt;- matrix(c(0.5, 1,
+              1.6, 2.3),ncol=2,nrow=2)
+
+# RESCALE COORDINATES 
+ScaledtrapCoords &lt;- scaleCoordsToHabitatGrid(coordsData =  trapCoords,
+                                             coordsHabitatGridCenter = coordsHabitatGridCenter)
+ScaledtrapCoords&lt;- ScaledtrapCoords$coordsDataScaled
+habitatMask &lt;- matrix(1, nrow = 4, ncol=4, byrow = TRUE)
+
+
+# CREATE LOCAL OBJECTS 
+TrapLocal &lt;- getLocalObjects(habitatMask = habitatMask,
+                                   coords = ScaledtrapCoords,
+                                   dmax=2.5,
+                                   resizeFactor = 1,
+                                   plot.check = TRUE
+)
+
+# GET SPARSE MATRIX 
+SparseY &lt;- getSparseY(y)
+
+# II. USING THE DENSITY FUNCTION 
+ # WE TAKE THE FIRST INDIVIDUAL
+i=1
+  # OPTION 1: USING THE RANDOM GENERATION FUNCTIONNALITY 
+dbinomLocal_normalPlateau(x=SparseY$y[i,,1],
+                   detNums=SparseY$detNums[i],
+                   detIndices=SparseY$detIndices[i,,1],
+                   size=rep(1,4),
+                   p0 = p0,
+                   sigma= sigma, 
+                   w = w,
+                   s=s[i,1:2],
+                   trapCoords=ScaledtrapCoords,
+                   localTrapsIndices=TrapLocal$localIndices,
+                   localTrapsNum=TrapLocal$numLocalIndices,
+                   resizeFactor=TrapLocal$resizeFactor,
+                   habitatGrid=TrapLocal$habitatGrid,
+                   indicator=indicator)
+                                                                
+  # OPTION 2: USING RANDOM GENERATION FUNCTIONNALITY 
+  # WE DO NOT PROVIDE THE detNums AND detIndices ARGUMENTS
+dbinomLocal_normalPlateau(x=SparseY$yCombined[i,,1],
+                   size=rep(1,4),
+                   p0 = p0,
+                   sigma= sigma, 
+                   w = w,
+                   s=s[i,1:2],
+                   trapCoords=ScaledtrapCoords,
+                   localTrapsIndices=TrapLocal$localIndices,
+                   localTrapsNum=TrapLocal$numLocalIndices,
+                   resizeFactor=TrapLocal$resizeFactor,
+                   habitatGrid=TrapLocal$habitatGrid,
+                   indicator=indicator,
+                   lengthYCombined = SparseY$lengthYCombined)
+
+# III. USING THE RANDOM GENERATION FUNCTION 
+rbinomLocal_normalPlateau(n=1,
+                   size=rep(1,4),
+                   p0 = p0,
+                   sigma= sigma, 
+                   w = w,
+                   s=s[i,1:2],
+                   trapCoords=ScaledtrapCoords,
+                   localTrapsIndices=TrapLocal$localIndices,
+                   localTrapsNum=TrapLocal$numLocalIndices,
+                   resizeFactor=TrapLocal$resizeFactor,
+                   habitatGrid=TrapLocal$habitatGrid,
+                   indicator=indicator,
+                   lengthYCombined = SparseY$lengthYCombined)
+
+</code></pre>
+
+
+</div>

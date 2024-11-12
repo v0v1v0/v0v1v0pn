@@ -1,0 +1,186 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlmixr2Gill83</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get the optimal forward difference interval by Gill83 method</h2>
+
+<h3>Description</h3>
+
+<p>Get the optimal forward difference interval by Gill83 method
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlmixr2Gill83(
+  what,
+  args,
+  envir = parent.frame(),
+  which,
+  gillRtol = sqrt(.Machine$double.eps),
+  gillK = 10L,
+  gillStep = 2,
+  gillFtol = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+<p>either a function or a non-empty character string naming the
+function to be called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args</code></td>
+<td>
+<p>a <em>list</em> of arguments to the function call.  The
+<code>names</code> attribute of <code>args</code> gives the argument names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>envir</code></td>
+<td>
+<p>an environment within which to evaluate the call.  This
+will be most useful if <code>what</code> is a character string and
+the arguments are symbols or quoted expressions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+<p>Which parameters to calculate the forward difference
+and optimal forward difference interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gillRtol</code></td>
+<td>
+<p>The relative tolerance used for Gill 1983
+determination of optimal step size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gillK</code></td>
+<td>
+<p>The total number of possible steps to determine the
+optimal forward/central difference step size per parameter (by
+the Gill 1983 method).  If 0, no optimal step size is
+determined.  Otherwise this is the optimal step size
+determined.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gillStep</code></td>
+<td>
+<p>When looking for the optimal forward difference
+step size, this is This is the step size to increase the
+initial estimate by.  So each iteration the new step size =
+(prior step size)*gillStep</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gillFtol</code></td>
+<td>
+<p>The gillFtol is the gradient error tolerance that
+is acceptable before issuing a warning/error about the gradient estimates.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame with the following columns:
+</p>
+<p>- info Gradient evaluation/forward difference information
+</p>
+<p>- hf Forward difference final estimate
+</p>
+<p>- df Derivative estimate
+</p>
+<p>- df2 2nd Derivative Estimate
+</p>
+<p>- err Error of the final estimate derivative
+</p>
+<p>- aEps Absolute difference for forward numerical differences
+</p>
+<p>- rEps Relative Difference for backward numerical differences
+</p>
+<p>- aEpsC Absolute difference for central numerical differences
+</p>
+<p>- rEpsC Relative difference for central numerical differences
+</p>
+<p>The <code>info</code> returns one of the following:
+</p>
+<p>- "Not Assessed" Gradient wasn't assessed
+</p>
+<p>- "Good Success" in Estimating optimal forward difference interval
+</p>
+<p>- "High Grad Error" Large error; Derivative estimate error <code>fTol</code> or more of the derivative
+</p>
+<p>- "Constant Grad" Function constant or nearly constant for this parameter
+</p>
+<p>- "Odd/Linear Grad" Function odd or nearly linear, df = K, df2 ~ 0
+</p>
+<p>- "Grad changes quickly" df2 increases rapidly as h decreases
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matthew Fidler
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## These are taken from the numDeriv::grad examples to show how
+## simple gradients are assessed with nlmixr2Gill83
+
+nlmixr2Gill83(sin, pi)
+
+nlmixr2Gill83(sin, (0:10)*2*pi/10)
+
+func0 &lt;- function(x){ sum(sin(x))  }
+nlmixr2Gill83(func0 , (0:10)*2*pi/10)
+
+func1 &lt;- function(x){ sin(10*x) - exp(-x) }
+curve(func1,from=0,to=5)
+
+x &lt;- 2.04
+numd1 &lt;- nlmixr2Gill83(func1, x)
+exact &lt;- 10*cos(10*x) + exp(-x)
+c(numd1$df, exact, (numd1$df - exact)/exact)
+
+x &lt;- c(1:10)
+numd1 &lt;- nlmixr2Gill83(func1, x)
+exact &lt;- 10*cos(10*x) + exp(-x)
+cbind(numd1=numd1$df, exact, err=(numd1$df - exact)/exact)
+
+sc2.f &lt;- function(x){
+  n &lt;- length(x)
+   sum((1:n) * (exp(x) - x)) / n
+}
+
+sc2.g &lt;- function(x){
+  n &lt;- length(x)
+  (1:n) * (exp(x) - 1) / n
+}
+
+x0 &lt;- rnorm(100)
+exact &lt;- sc2.g(x0)
+
+g &lt;- nlmixr2Gill83(sc2.f, x0)
+
+max(abs(exact - g$df)/(1 + abs(exact)))
+
+</code></pre>
+
+
+</div>

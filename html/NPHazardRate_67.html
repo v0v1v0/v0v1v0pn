@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>TutzPritscher</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Discrete non parametric kernel hazard rate estimator</h2>
+
+<h3>Description</h3>
+
+<p>Implementation of the kernel discrete hazard rate estimator of <a href="https://doi.org/10.1007/BF00128979">Tutz and Pritscher (1996)</a> based on the discrete <code>Habbema</code> kernel. The estimate is used for comparison with the semiparametric estimate deveoped in <a href="https://doi.org/10.1007/BF00128979">Tutz and Pritscher (1996)</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> TutzPritscher(xin, cens, xout)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p>A vector of data points.  Missing values not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cens</code></td>
+<td>
+<p>Censoring indicators as a vector of 1s and zeros, 1's indicate uncensored observations, 0's correspond to censored obs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xout</code></td>
+<td>
+<p>The grid points where the estimates will be calculated.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The discrete kernel estimate of <a href="https://doi.org/10.1007/BF00128979">Tutz and Pritscher (1996)</a> is defined by
+</p>
+<p style="text-align: center;"><code class="reqn">\hat \lambda(t_m|v) = \sum_{s=1}^q \sum_{i=1}^{m_s} w_m \left ( (t,x), (s, x_{is}) \right )\tilde \lambda(s|x_{is})</code>
+</p>
+
+<p>where <code class="reqn">w_m</code> is the discrete Habbema kernel.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a vector with the values of the hazard rate estimates at <code class="reqn">x=xout</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://doi.org/10.1007/BF00128979">Tutz, G. and Pritscher, L. Nonparametric Estimation of Discrete Hazard Functions, Lifetime Data Anal, 2, 291-308 (1996)</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>SemiparamEst
+</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">options(echo=FALSE)
+xin&lt;-c(7,34,42,63,64, 74, 83, 84, 91, 108, 112,129, 133,133,139,140,140,146,
+      149,154,157,160,160,165,173,176,185, 218,225,241, 248,273,277,279,297,
+      319,405,417,420,440, 523,523,583, 594, 1101, 1116, 1146, 1226, 1349,
+      1412, 1417)
+cens&lt;-c(1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,
+        0,1,0,1,1,1,1,1,0,1,1,1,0,1)
+xin&lt;-xin/30.438    #Adjust the data
+storage.mode(xin)&lt;-"integer"  # turn the data to integers
+xout&lt;-seq(1,47, by=1)  # define the grid points to evaluate the estimate
+arg&lt;-TutzPritscher(xin,cens,xout)   #Discrete kernel estimate
+plot(xout, arg, type="l", ylim=c(0, .35), lty=2,  col=6) # plot the estimate
+argSM&lt;-lambdahat(xin, cens, xout)  #crude nonparametric estimate
+lines(xout, argSM, lty=3, col=5) # plot the crude estimate
+</code></pre>
+
+
+</div>

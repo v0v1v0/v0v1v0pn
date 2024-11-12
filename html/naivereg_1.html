@@ -1,0 +1,198 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DSIV</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Double-Selection Plus Instrumental Variable Estimator</h2>
+
+<h3>Description</h3>
+
+<p>A three-step approach to estimate the endogenous treatment effect using high-dimensional instruments and double selection. It is applicable in the following scenarios: first, there is a known endogeneity problem for the treatment variable. Second, the treatment effect model has a large number of control variables, such as the large micro survey data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DSIV(
+  y,
+  x,
+  z,
+  D,
+  family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
+  criterion = c("BIC", "EBIC"),
+  alpha = 1,
+  nlambda = 100,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Response variable, an N x 1 vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Control variables, an N x p1 matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>Instrumental variables, an N x p2 matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>Endogenous treatment variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>Quantitative for family="gaussian", or family="poisson" (non-negative counts). For family="binomial" should be either a factor with two levels, or a two-column matrix of counts or proportions (the second column is treated as the target class; for a factor, the last level in alphabetical order is the target class). For family="multinomial", can be a nc&gt;=2 level factor, or a matrix with nc columns of counts or proportions. For either "binomial" or "multinomial", if y is presented as a vector, it will be coerced into a factor. For family="cox", y should be a two-column matrix with columns named 'time' and 'status'. The latter is a binary variable, with '1' indicating death, and '0' indicating right censored. The function Surv() in package survival produces such a matrix. For family="mgaussian", y is a matrix of quantitative responses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>The criterion by which to select the regularization parameter. One of "BIC", "EBIC", default is "BIC".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The elasticnet mixing parameter, with 0&lt;=alpha&lt;= 1. alpha=1 is the lasso penalty, and alpha=0 the ridge penalty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlambda</code></td>
+<td>
+<p>The number of lambda values, default is 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments, see help(glmnet).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The DS-IV algorithm consists of the following three steps: In the first step,
+regress the outcome variable y on control variables x using the
+regularization method, estimate the coefficients beta and select the important control
+variables set denoted by c1. In the second step, regress the treatment variable
+d on instrumental variables w and control variables x, estimate the
+optimal instrument d and obtain the second important control variables set
+denoted by cx. In the third step, obtain the DS-IV estimator of the endogenous
+of the endogenous treatment effect based on the estimated optimal instrument d
+and the union (c3) of the selected control variables.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of type <code>DSIV</code> which is a list with the following
+components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>yhat</code></td>
+<td>
+<p>The estimated value of y.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betaD</code></td>
+<td>
+<p>The coefficient of endogenous variable D.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betaX</code></td>
+<td>
+<p>The coefficient of control variables x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c1</code></td>
+<td>
+<p>Variable indication of the selected in the first step (control variables x).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cx</code></td>
+<td>
+<p>Variable indication of selected control variables in the second step.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cz</code></td>
+<td>
+<p>Variable indication of selected instrumental variables in the second step.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c2</code></td>
+<td>
+<p>Variable indication of the selected in the second step. The number less than or equal to p1 is an indication of control variables, the number greater than p1 and less than or equal to (p1 + p2) is an indication of instrument variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c3</code></td>
+<td>
+<p>Union of c1 and cx on control variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>Same as above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>Same as above.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Qingliang Fan, KongYu He, Wei Zhong
+</p>
+
+
+<h3>References</h3>
+
+<p>Wei Zhong, Yang Gao, Wei Zhou and Qingliang Fan (2020), “Endogenous Treatment Effect Estimation Using High-Dimensional Instruments and Double Selection”, working paper
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(naivereg)
+data("DSIVdata")
+y=DSIVdata[,1]
+x=DSIVdata[,2:51]
+z=DSIVdata[,52:71]
+D=DSIVdata[,72]
+res = DSIV(y,x,z,D,family='gaussian', criterion='EBIC')
+res$c1 #Variable indication of the selected in the first step (control variables x).
+res$cx #Variable indication of selected control variables in the second step.
+res$cz #Variable indication of selected instrumental variables in the second step.
+res$c3 #Union of c1 and cx on control variables
+</code></pre>
+
+
+</div>

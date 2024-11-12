@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nuts_aggregate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Aggregate to higher order NUTS levels</h2>
+
+<h3>Description</h3>
+
+<p><code>nuts_aggregate()</code> transforms regional NUTS data between NUTS levels.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nuts_aggregate(
+  data,
+  to_level,
+  variables,
+  weight = NULL,
+  missing_rm = FALSE,
+  missing_weights_pct = FALSE,
+  multiple_versions = c("error", "most_frequent")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A nuts.classified object returned by <code>nuts_classify()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>to_level</code></td>
+<td>
+<p>Number corresponding to the desired NUTS level to be aggregated to: <code>1</code> or <code>2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>Named character specifying variable names and variable type (<code>'absolute'</code> or <code>'relative'</code>), e.g. <code>c('var_name' = 'absolute')</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>String with name of the weight used for conversion. Can be area size <code>'areaKm'</code> (default),
+population in 2011 <code>'pop11'</code> or 2018 <code>'pop18'</code>, or artificial surfaces in 2012 <code>'artif_surf12'</code> and 2018 <code>'artif_surf18'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing_rm</code></td>
+<td>
+<p>Boolean that is FALSE by default. TRUE removes regional flows that depart from missing NUTS codes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing_weights_pct</code></td>
+<td>
+<p>Boolean that is FALSE by default. TRUE computes the percentage of missing weights due to missing departing NUTS regions for each variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiple_versions</code></td>
+<td>
+<p>By default equal to <code>'error'</code>, when providing multiple NUTS versions within groups.
+If set to <code>'most_frequent'</code> data is converted using the best-matching NUTS version.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Console messages can be controlled with <code>rlang::local_options(nuts.verbose = "quiet")</code> to silence messages and
+<code>nuts.verbose = "verbose"</code> to switch messages back on.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A tibble containing NUTS codes, aggregated variable values, and possibly grouping variables.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+
+# Load EUROSTAT data of manure storage deposits
+data(manure)
+
+# Data varies at the NUTS level x indicator x year x country x NUTS code level
+head(manure)
+
+# Aggregate from NUTS 3 to 2 by indicator x year
+manure %&gt;%
+  filter(nchar(geo) == 5) %&gt;%
+  nuts_classify(nuts_code = "geo",
+                group_vars = c('indic_ag','time')) %&gt;%
+  # Group vars are automatically passed on
+  nuts_aggregate(to_level = 2,
+                 variables = c('values'= 'absolute'),
+                 weight = 'pop18')
+
+</code></pre>
+
+
+</div>

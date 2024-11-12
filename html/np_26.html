@@ -1,0 +1,446 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npcdist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kernel Conditional Distribution Estimation with Mixed Data Types</h2>
+
+<h3>Description</h3>
+
+<p><code>npcdist</code> computes kernel cumulative conditional distribution
+estimates on <code class="reqn">p+q</code>-variate evaluation data, given a set of
+training data (both explanatory and dependent) and a bandwidth
+specification (a <code>condbandwidth</code> object or a bandwidth vector,
+bandwidth type, and kernel type) using the method of Li and Racine
+(2008) and Li, Lin, and Racine (2013).  The data may be continuous,
+discrete (unordered and ordered factors), or some combination thereof.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npcdist(bws, ...)
+
+## S3 method for class 'formula'
+npcdist(bws, data = NULL, newdata = NULL, ...)
+
+## S3 method for class 'call'
+npcdist(bws, ...)
+
+## S3 method for class 'condbandwidth'
+npcdist(bws,
+        txdat = stop("invoked without training data 'txdat'"),
+        tydat = stop("invoked without training data 'tydat'"),
+        exdat,
+        eydat,
+        gradients = FALSE,
+        ...)
+
+## Default S3 method:
+npcdist(bws, txdat, tydat, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as a <code>condbandwidth</code>
+object returned from a previous invocation of
+<code>npcdistbw</code>, or as a <code class="reqn">p+q</code>-vector of bandwidths,
+with each element <code class="reqn">i</code> up to <code class="reqn">i=q</code> corresponding to the
+bandwidth for column <code class="reqn">i</code> in <code>tydat</code>, and each element
+<code class="reqn">i</code> from <code class="reqn">i=q+1</code> to <code class="reqn">i=p+q</code> corresponding to the
+bandwidth for column <code class="reqn">i-q</code> in <code>txdat</code>. If specified as a
+vector, then additional arguments will need to be supplied as
+necessary to specify the bandwidth type, kernel types, training
+data, and so on.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradients</code></td>
+<td>
+
+<p>a logical value specifying whether to return estimates of the
+gradients at the evaluation points. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the bandwidth type, kernel
+types, and so on.  This is necessary if you specify bws as a
+<code class="reqn">p+q</code>-vector and not a <code>condbandwidth</code> object, and you do
+not desire the default behaviours. To do this, you may specify any
+of <code>bwmethod</code>, <code>bwscaling</code>, <code>bwtype</code>,
+<code>cxkertype</code>, <code>cxkerorder</code>, <code>cykertype</code>,
+<code>cykerorder</code>, <code>uxkertype</code>, <code>oxkertype</code>,
+<code>oykertype</code>, as described in <code>npcdistbw</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object coercible to
+a data frame by <code>as.data.frame</code>) containing the
+variables in the model. If not found in data, the variables are
+taken from <code>environment(bws)</code>, typically the environment from
+which <code>npcdistbw</code> was called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, the training data are used.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>txdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of sample realizations of explanatory
+data (training data). Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tydat</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of sample realizations of dependent
+data (training data). Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data on
+which cumulative conditional distributions will be evaluated. By
+default, evaluation takes place on the data provided by
+<code>txdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eydat</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of dependent data on which
+cumulative conditional distributions will be evaluated. By default,
+evaluation takes place on the data provided by <code>tydat</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npcdist</code> implements a variety of methods for estimating
+multivariate conditional cumulative distributions (<code class="reqn">p+q</code>-variate)
+defined over a set of possibly continuous and/or discrete (unordered,
+ordered) data. The approach is based on Li and Racine (2004) who
+employ ‘generalized product kernels’ that admit a mix of
+continuous and discrete data types.
+</p>
+<p>Three classes of kernel estimators for the continuous data types are
+available: fixed, adaptive nearest-neighbor, and generalized
+nearest-neighbor. Adaptive nearest-neighbor bandwidths change with
+each sample realization in the set, <code class="reqn">x_i</code>, when estimating
+the cumulative conditional distribution at the point
+<code class="reqn">x</code>. Generalized nearest-neighbor bandwidths change with the point
+at which the cumulative conditional distribution is estimated,
+<code class="reqn">x</code>. Fixed bandwidths are constant over the support of <code class="reqn">x</code>.
+</p>
+<p>Training and evaluation input data  may be a
+mix of continuous (default), unordered discrete (to be specified in
+the data frames using <code>factor</code>), and ordered discrete (to be
+specified in the data frames using <code>ordered</code>). Data can be
+entered in an arbitrary order and data types will be detected
+automatically by the routine (see <code>np</code> for details).
+</p>
+<p>A variety of kernels may be specified by the user. Kernels implemented
+for continuous data types include the second, fourth, sixth, and eighth
+order Gaussian and Epanechnikov kernels, and the uniform
+kernel. Unordered discrete data types use a variation on Aitchison and
+Aitken's (1976) kernel, while ordered data types use a variation of the
+Wang and van Ryzin (1981) kernel.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npcdist</code> returns a <code>condistribution</code> object. The generic
+accessor functions <code>fitted</code>, <code>se</code>, and
+<code>gradients</code>, extract estimated values, asymptotic standard
+errors on estimates, and gradients, respectively, from
+the returned object. Furthermore, the functions <code>predict</code>,
+<code>summary</code>
+and <code>plot</code> support objects of both classes. The returned objects
+have the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xbw</code></td>
+<td>
+<p> bandwidth(s), scale factor(s) or nearest neighbours for the
+explanatory data, <code>txdat</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ybw</code></td>
+<td>
+<p> bandwidth(s), scale factor(s) or nearest neighbours for the
+dependent data, <code>tydat</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xeval</code></td>
+<td>
+<p> the evaluation points of the explanatory data </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yeval</code></td>
+<td>
+<p> the evaluation points of the dependent data </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>condist</code></td>
+<td>
+<p> estimates of the conditional cumulative
+distribution at the evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conderr</code></td>
+<td>
+<p> standard errors of the cumulative conditional distribution
+estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>congrad</code></td>
+<td>
+<p> if invoked with <code>gradients = TRUE</code>, estimates of
+the gradients at the evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>congerr</code></td>
+<td>
+<p> if invoked with <code>gradients = TRUE</code>, standard
+errors of the gradients at the evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log_likelihood</code></td>
+<td>
+<p> log likelihood of the cumulative conditional distribution estimate </p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>    
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Hall, P. and J.S. Racine and Q. Li (2004), “Cross-validation and the
+estimation of conditional probability densities,” Journal of the
+American Statistical Association, 99, 1015-1026.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics: Theory
+and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2008), “Nonparametric estimation of
+conditional CDF and quantile functions with mixed categorical and
+continuous data,” Journal of Business and Economic Statistics, 26,
+423-434.
+</p>
+<p>Li, Q. and J. Lin and J.S. Racine (2013), “Optimal bandwidth
+selection for nonparametric conditional distribution and quantile
+functions”, Journal of Business and Economic Statistics, 31, 57-65.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em> Cambridge
+University Press. 
+</p>
+<p>Scott, D.W. (1992), <em>Multivariate Density Estimation. Theory,
+Practice and Visualization,</em> New York: Wiley.
+</p>
+<p>Silverman, B.W. (1986), <em>Density Estimation,</em> London: Chapman and
+Hall.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth estimators
+for discrete distributions,”  Biometrika, 68, 301-309.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npudens</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA): For this example, we load Giovanni
+# Baiocchi's Italian GDP panel (see Italy for details), and compute the
+# cross-validated bandwidths (default) using a second-order Gaussian
+# kernel (default). Note - this may take a minute or two depending on
+# the speed of your computer.
+
+data("Italy")
+attach(Italy)
+
+# First, compute the bandwidths.
+
+bw &lt;- npcdistbw(formula=gdp~ordered(year))
+
+# Next, compute the condistribution object...
+
+Fhat &lt;- npcdist(bws=bw)
+
+# The object Fhat now contains results such as the estimated cumulative
+# conditional distribution function (Fhat$condist) and so on...
+
+summary(Fhat)
+
+# Call the plot() function to visualize the results (&lt;ctrl&gt;-C will
+# interrupt on *NIX systems, &lt;esc&gt; will interrupt on MS Windows
+# systems).
+
+plot(bw)
+
+detach(Italy)
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): For this example, we load Giovanni
+# Baiocchi's Italian GDP panel (see Italy for details), and compute the
+# cross-validated bandwidths (default) using a second-order Gaussian
+# kernel (default). Note - this may take a minute or two depending on
+# the speed of your computer.
+
+data("Italy")
+attach(Italy)
+
+# First, compute the bandwidths.
+
+# Note - we cast `X' and `y' as data frames so that plot() can
+# automatically grab names (this looks like overkill, but in
+# multivariate settings you would do this anyway, so may as well get in
+# the habit).
+
+X &lt;- data.frame(year=ordered(year))
+y &lt;- data.frame(gdp)
+
+bw &lt;- npcdistbw(xdat=X, ydat=y)
+
+# Next, compute the condistribution object...
+
+Fhat &lt;- npcdist(bws=bw)
+
+# The object Fhat now contains results such as the estimated cumulative
+# conditional distribution function (Fhat$condist) and so on...
+
+summary(Fhat)
+
+# Call the plot() function to visualize the results (&lt;ctrl&gt;-C will
+# interrupt on *NIX systems, &lt;esc&gt; will interrupt on MS Windows systems).
+
+plot(bw)
+
+detach(Italy)
+
+# EXAMPLE 2 (INTERFACE=FORMULA): For this example, we load the old
+# faithful geyser data from the R `datasets' library and compute the
+# conditional distribution function.
+
+library("datasets")
+data("faithful")
+attach(faithful)
+
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+bw &lt;- npcdistbw(formula=eruptions~waiting)
+
+summary(bw)
+
+# Plot the conditional cumulative distribution function (&lt;ctrl&gt;-C will
+# interrupt on *NIX systems, &lt;esc&gt; will interrupt on MS Windows
+# systems).
+
+plot(bw)
+
+detach(faithful)
+
+# EXAMPLE 2 (INTERFACE=DATA FRAME): For this example, we load the old
+# faithful geyser data from the R `datasets' library and compute the
+# cumulative conditional distribution function.
+
+library("datasets")
+data("faithful")
+attach(faithful)
+
+# Note - this may take a few minutes depending on the speed of your
+# computer...
+
+# Note - we cast `X' and `y' as data frames so that plot() can
+# automatically grab names (this looks like overkill, but in
+# multivariate settings you would do this anyway, so may as well get in
+# the habit).
+
+X &lt;- data.frame(waiting)
+y &lt;- data.frame(eruptions)
+
+bw &lt;- npcdistbw(xdat=X, ydat=y)
+
+summary(bw)
+
+# Plot the conditional cumulative distribution function (&lt;ctrl&gt;-C will
+# interrupt on *NIX systems, &lt;esc&gt; will interrupt on MS Windows systems)
+
+plot(bw)
+
+detach(faithful)
+
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

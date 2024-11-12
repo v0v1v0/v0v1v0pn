@@ -1,0 +1,193 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlasso_cv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-validation for natural lasso</h2>
+
+<h3>Description</h3>
+
+<p>Provide natural lasso estimate (of the error standard deviation) using cross-validation to select the tuning parameter value
+The output also includes the cross-validation result of the naive estimate and the degree of freedom adjusted estimate of the error standard deviation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlasso_cv(x, y, lambda = NULL, intercept = TRUE, nlam = 100,
+  flmin = 0.01, nfold = 5, foldid = NULL, thresh = 1e-08,
+  glmnet_output = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An <code>n</code> by <code>p</code> design matrix. Each row is an observation of <code>p</code> features.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A response vector of size <code>n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>A user specified list of tuning parameter. Default to be NULL, and the program will compute its own <code>lambda</code> path based on <code>nlam</code> and <code>flmin</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>Indicator of whether intercept should be fitted. Default to be <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlam</code></td>
+<td>
+<p>The number of <code>lambda</code> values. Default value is <code>100</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flmin</code></td>
+<td>
+<p>The ratio of the smallest and the largest values in <code>lambda</code>. The largest value in <code>lambda</code> is usually the smallest value for which all coefficients are set to zero. Default to be <code>1e-2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfold</code></td>
+<td>
+<p>Number of folds in cross-validation. Default value is 5. If each fold gets too view observation, a warning is thrown and the minimal <code>nfold = 3</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>foldid</code></td>
+<td>
+<p>A vector of length <code>n</code> representing which fold each observation belongs to. Default to be <code>NULL</code>, and the program will generate its own randomly.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>Threshold value for underlying optimization algorithm to claim convergence. Default to be <code>1e-8</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>glmnet_output</code></td>
+<td>
+<p>Should the estimate be computed using a user-specified output from <code>cv.glmnet</code>. If not <code>NULL</code>, it should be the output from <code>cv.glmnet</code> call with <code>standardize = TRUE</code> and <code>keep = TRUE</code>, and then the arguments <code>lambda</code>, <code>intercept</code>, <code>nlam</code>, <code>flmin</code>, <code>nfold</code>, <code>foldid</code>, and <code>thresh</code>  will be ignored. Default to be <code>NULL</code>, in which case the function will call <code>cv.glmnet</code> internally.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list object containing: </p>
+
+<dl>
+<dt>
+<code>n</code> and <code>p</code>: </dt>
+<dd>
+<p>The dimension of the problem.</p>
+</dd>
+<dt>
+<code>lambda</code>: </dt>
+<dd>
+<p>The path of tuning parameter used.</p>
+</dd>
+<dt>
+<code>beta</code>: </dt>
+<dd>
+<p>Estimate of the regression coefficients, in the original scale, corresponding to the tuning parameter selected by cross-validation.</p>
+</dd>
+<dt>
+<code>a0</code>: </dt>
+<dd>
+<p>Estimate of intercept</p>
+</dd>
+<dt>
+<code>mat_mse</code>: </dt>
+<dd>
+<p>The estimated prediction error on the test sets in cross-validation. A matrix of size <code>nlam</code> by <code>nfold</code>. If <code>glmnet_output</code> is not <code>NULL</code>, then <code>mat_mse</code> will be NULL.</p>
+</dd>
+<dt>
+<code>cvm</code>: </dt>
+<dd>
+<p>The averaged estimated prediction error on the test sets over K folds.</p>
+</dd>
+<dt>
+<code>cvse</code>: </dt>
+<dd>
+<p>The standard error of the estimated prediction error on the test sets over K folds.</p>
+</dd>
+<dt>
+<code>ibest</code>: </dt>
+<dd>
+<p>The index in <code>lambda</code> that attains the minimal mean cross-validated error.</p>
+</dd>
+<dt>
+<code>foldid</code>: </dt>
+<dd>
+<p>Fold assignment. A vector of length <code>n</code>.</p>
+</dd>
+<dt>
+<code>nfold</code>: </dt>
+<dd>
+<p>The number of folds used in cross-validation.</p>
+</dd>
+<dt>
+<code>sig_obj</code>: </dt>
+<dd>
+<p>Natural lasso estimate of standard deviation of the error, with the optimal tuning parameter selected by cross-validation.</p>
+</dd>
+<dt>
+<code>sig_obj_path</code>: </dt>
+<dd>
+<p>Natural lasso estimates of standard deviation of the error. A vector of length <code>nlam</code>.</p>
+</dd>
+<dt>
+<code>sig_naive</code>: </dt>
+<dd>
+<p>Naive estimates of the error standard deviation based on lasso regression, i.e., <code class="reqn">||y - X \hat{\beta}||_2 / \sqrt n</code>, selected by cross-validation.</p>
+</dd>
+<dt>
+<code>sig_naive_path</code>: </dt>
+<dd>
+<p>Naive estimate of standard deviation of the error based on lasso regression. A vector of length <code>nlam</code>.</p>
+</dd>
+<dt>
+<code>sig_df</code>: </dt>
+<dd>
+<p>Degree-of-freedom adjusted estimate of standard deviation of the error, selected by cross-validation. See Reid, et, al (2016).</p>
+</dd>
+<dt>
+<code>sig_df_path</code>: </dt>
+<dd>
+<p>Degree-of-freedom adjusted estimate of standard deviation of the error. A vector of length <code>nlam</code>.</p>
+</dd>
+<dt>
+<code>type</code>: </dt>
+<dd>
+<p>whether the output is of a natural or an organic lasso.</p>
+</dd>
+</dl>
+<h3>See Also</h3>
+
+<p><code>nlasso_path</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123)
+sim &lt;- make_sparse_model(n = 50, p = 200, alpha = 0.6, rho = 0.6, snr = 2, nsim = 1)
+nl_cv &lt;- nlasso_cv(x = sim$x, y = sim$y[, 1])
+</code></pre>
+
+
+</div>

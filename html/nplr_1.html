@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>convertToProp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Function to Convert a Vector Into Proportions.
+</h2>
+
+<h3>Description</h3>
+
+<p>Convert a vector of values to proportions, given a minimun and a maximun value (optional).
+See <code>Details</code> and <code>Examples</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">convertToProp(y, T0 = NULL, Ctrl = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p> : a vector of values (responses to x).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T0</code></td>
+<td>
+<p> : the minimal value to consider. If NULL (default), <code>min(y, na.rm=TRUE)</code> will be used. See <code>Details</code> and <code>Warning</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ctrl</code></td>
+<td>
+<p> : the maximal value to consider. If NULL (default), <code>max(y, na.rm=TRUE)</code> will be used. See <code>Details</code> and <code>Warning</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In typical cell viability experiments, responses to drug concentrations (inhibition rate) may be estimated with respect to a <code>time zero (T0)</code> and an untreated condition values <code>(Ctrl)</code>, as described in [1]:
+</p>
+
+<p>If none of the T0 and Ctrl values are provided, <code>min(y, na.rm=TRUE)</code> and <code>max(y, na.rm=TRUE)</code> will be used, respectively. See <code>Warning</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a vector of values.
+</p>
+
+
+<h3>Warning</h3>
+
+<p>Note that, for drug response analyses, rescaling the responses between 0 to 1 using to the min and max of y, would lead to estimate a EC50 (the half effect between the maximum and the minimum of the observed effects), rather than a IC50.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The data used as examples come from the NCI-60 Growth Inhibition Data:
+<a href="https://wiki.nci.nih.gov/display/NCIDTPdata/NCI-60+Growth+Inhibition+Data">https://wiki.nci.nih.gov/display/NCIDTPdata/NCI-60+Growth+Inhibition+Data</a>,
+except for multicell.tsv which are simulated data.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Frederic Commo, Brian M. Bot
+</p>
+
+
+<h3>References</h3>
+
+<p>1 - https://dtp.nci.nih.gov/branches/btb/ivclsp.html
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nplr</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Using the MDA-N data
+  op &lt;- par(no.readonly=TRUE)         # save default parameters
+
+  require(nplr)
+  path &lt;- system.file("extdata", "mdan.txt", package = "nplr")
+  mdan &lt;- read.delim(path)
+  
+# fit a model on the original responses (proportions of control):
+  conc &lt;- mdan$CONC
+  y0 &lt;- mdan$GIPROP
+  model0 &lt;- nplr(conc, y0)
+
+# Adjust the data between 0 to 1, then fit a new model:
+  y1 &lt;- convertToProp(y0)
+  model1 &lt;- nplr(conc, y1)
+  
+  par(mfrow=c(1, 2))
+  plot(model0, ylim = range(0, 1), main = "Original y values")
+  plot(model1, ylim = range(0, 1), main = "Rescaled y values")
+  par(op)
+</code></pre>
+
+
+</div>

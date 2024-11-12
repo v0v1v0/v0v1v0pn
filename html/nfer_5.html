@@ -1,0 +1,72 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reads an nfer event file into an R dataframe.</h2>
+
+<h3>Description</h3>
+
+<p>The nfer event format is not read easily into R.  This function
+essentially simplifies sharing event traces between the nfer
+command-line tool and the R package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read(event_file)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>event_file</code></td>
+<td>
+<p>The name of the file containing nfer formatted events.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>Nfer event files are formatted as follows:
+Each row is a pipe-separated list of either 2 or 4 values represents one event.
+The first column is the event name.  The second is the event timestamp (integer).
+The third and fourth columns are used when the event carries data.
+The third column is a semicolon separated list of data keys.
+The fourth column is a semicolon separate list of data values in the same order
+as the keys.
+</p>
+<p>Example event file contents: </p>
+<pre>
+foo|123|x|2
+bar|987|x;y|3;true
+</pre>
+<p>The result of reading such a file with this function is a dataframe where the
+first column contains event names, the second contains event timestamps, and
+subsequent columns contain data.  The data is formatted with one column per name.
+Events that don't carry some data key will have an NA value for that column.
+</p>
+<p>Resulting dataframe of event: </p>
+<pre>
+| name | timestamp | x |    y |
+-------------------------------
+| foo  | 123       | 2 | NA   |
+| bar  | 987       | 3 | TRUE |
+</pre>
+
+
+<h3>Value</h3>
+
+<p>A dataframe containing the events.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">events &lt;- nfer::read(system.file("extdata", "ops.events", package = "nfer"))
+</code></pre>
+
+
+</div>

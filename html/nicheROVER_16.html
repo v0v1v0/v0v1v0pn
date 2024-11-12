@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>overlap.unif</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Overlap calculation for uniform niche regions.</h2>
+
+<h3>Description</h3>
+
+<p>Overlap calculation for uniform niche regions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">overlap.unif(muA, SigmaA, muB, SigmaB, alphaA = 0.95, alphaB = 0.95, nprob)
+
+overlap.sphere(muA, sigmaA, muB, sigmaB, alphaA = 0.95, alphaB = 0.95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>muA, muB</code></td>
+<td>
+<p>Mean of niche regions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SigmaA, SigmaB</code></td>
+<td>
+<p>Variance matrix of elliptical niche regions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alphaA, alphaB</code></td>
+<td>
+<p>Probabilistic size of niche regions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nprob</code></td>
+<td>
+<p>Number of uniform draws from niche region <code>A</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmaA, sigmaB</code></td>
+<td>
+<p>standard deviations (scalars) of spherical niche regions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The overlap between niche regions <code class="reqn">A</code> and <code class="reqn">B</code> is defined as <code class="reqn">vol(A \cap B)/vol(A \cup B)</code>, where the hypervolume of an <code class="reqn">n</code>-dimensional region <code class="reqn">S</code> is <code class="reqn">vol(S) = \int_S dx</code>.  For elliptical niche regions, there are simple formulas for <code class="reqn">vol(A)</code> and <code class="reqn">vol(B)</code>.  Thus, we need only determine the volume of the intersection <code class="reqn">vol(A \cap B)</code>, as the volume of the union is given by the formula <code class="reqn">vol(A \cup B) = vol(A) + vol(B) - vol(A \cap B)</code>.
+</p>
+<p>For spherical niche regions, <code class="reqn">vol(A \cap B)</code> has a closed-form expression (see 'References').  For elliptical regions, no such formula exists and a Monte Carlo method is used instead.  That is, <code class="reqn">vol(A \cap B)</code> is calculated by sampling uniformly from <code class="reqn">A</code>, then multiplying <code class="reqn">vol(A)</code> by the fraction of sampled points which fall into <code class="reqn">B</code>.
+</p>
+<p>While the uniform overlap metric is invariant to permutation of niche regions <code class="reqn">A</code> and <code class="reqn">B</code>, the accuracy of the Monte Carlo calculation of <code class="reqn">vol(A \cap B)</code> is not: higher accuracy is obtained when a higher fraction of sampled points are in the opposite niche region.  <code>overlap.unif()</code> does not attempt to determine for which region this is the case, though the choice can be informed by plotting the niche regions, e.g., with <code>niche.plot()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A Monte Carlo estimate of the niche overlap for <code>overlap.unif()</code>, and an analytic calculation for <code>overlap.sphere()</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Li, S. "Concise formulas for the area and volume of a hyperspherical cap." <em>Asian Journal of Mathematics &amp; Statistics</em> 4.1 (2011): 66-70. <a href="https://doi.org/10.3923/ajms.2011.66.70">doi:10.3923/ajms.2011.66.70</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># spherical case: compare Monte Carlo method to analytic formula
+
+d &lt;- 2 # 2D example
+mA &lt;- rnorm(d)
+mB &lt;- rnorm(d)
+sigA &lt;- rexp(1)
+SigA &lt;- sigA^2 * diag(d)
+sigB &lt;- rexp(1)
+SigB &lt;- sigB^2 * diag(d)
+
+# plot circles
+ellA &lt;- ellipse(mA, SigA)
+ellB &lt;- ellipse(mB, SigB)
+plot(0, type = "n",
+     xlim = range(ellA[,1], ellB[,1]),
+     ylim = range(ellA[,2], ellB[,2]), xlab = "x", ylab = "y")
+lines(ellA, col = "red")
+lines(ellB, col = "blue")
+legend("topright", legend = c("niche A", "niche B"),
+       fill = c("red", "blue"), bg = "white")
+
+# compare niche calculations
+overlap.sphere(mA, sigA, mB, sigB)
+overlap.unif(mA, SigA, mB, SigB, nprob = 1e5)
+</code></pre>
+
+
+</div>

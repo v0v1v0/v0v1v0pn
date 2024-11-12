@@ -1,0 +1,255 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>normalise</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>(re)Normalise a "nacho" object</h2>
+
+<h3>Description</h3>
+
+<p>This function creates a list in which your settings, the raw counts and normalised counts are stored,
+using the result from a call to <code>load_rcc()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">normalise(
+  nacho_object,
+  housekeeping_genes = nacho_object[["housekeeping_genes"]],
+  housekeeping_predict = nacho_object[["housekeeping_predict"]],
+  housekeeping_norm = nacho_object[["housekeeping_norm"]],
+  normalisation_method = nacho_object[["normalisation_method"]],
+  n_comp = nacho_object[["n_comp"]],
+  remove_outliers = nacho_object[["remove_outliers"]],
+  outliers_thresholds = nacho_object[["outliers_thresholds"]]
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nacho_object</code></td>
+<td>
+<p>[list] A list object of class <code>"nacho"</code> obtained
+from <code>load_rcc()</code> or <code>normalise()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>housekeeping_genes</code></td>
+<td>
+<p>[character] A vector of names of the miRNAs/mRNAs
+that should be used as housekeeping genes. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>housekeeping_predict</code></td>
+<td>
+<p>[logical] Boolean to indicate whether the housekeeping genes
+should be predicted (<code>TRUE</code>) or not (<code>FALSE</code>). Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>housekeeping_norm</code></td>
+<td>
+<p>[logical] Boolean to indicate whether the housekeeping normalisation
+should be performed. Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalisation_method</code></td>
+<td>
+<p>[character] Either <code>"GEO"</code> or <code>"GLM"</code>.
+Character string to indicate normalisation using the geometric mean (<code>"GEO"</code>)
+or a generalized linear model (<code>"GLM"</code>). Default is <code>"GEO"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_comp</code></td>
+<td>
+<p>[numeric] Number indicating the number of principal components to compute.
+Cannot be more than n-1 samples. Default is <code>10</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove_outliers</code></td>
+<td>
+<p>[logical] A boolean to indicate if outliers should be excluded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outliers_thresholds</code></td>
+<td>
+<p>[list] List of thresholds to exclude outliers.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Outliers definition (<code>remove_outliers = TRUE</code>):
+</p>
+
+<ul>
+<li>
+<p> Binding Density (<code>BD</code>) &lt; 0.1
+</p>
+</li>
+<li>
+<p> Binding Density (<code>BD</code>) &gt; 2.25
+</p>
+</li>
+<li>
+<p> Field of View (<code>FoV</code>) &lt; 75
+</p>
+</li>
+<li>
+<p> Positive Control Linearity (<code>PCL</code>) &lt; 0.95
+</p>
+</li>
+<li>
+<p> Limit of Detection (<code>LoD</code>) &lt; 2
+</p>
+</li>
+<li>
+<p> Positive normalisation factor (<code>Positive_factor</code>) &lt; 0.25
+</p>
+</li>
+<li>
+<p> Positive normalisation factor (<code>Positive_factor</code>) &gt; 4
+</p>
+</li>
+<li>
+<p> Housekeeping normalisation factor (<code>house_factor</code>) &lt; 1/11
+</p>
+</li>
+<li>
+<p> Housekeeping normalisation factor (<code>house_factor</code>) &gt; 11
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>[list] A list containing parameters and data.
+</p>
+
+<dl>
+<dt><code>access</code></dt>
+<dd>
+<p>[character] Value passed to <code>load_rcc()</code> in <code>id_colname</code>.</p>
+</dd>
+<dt><code>housekeeping_genes</code></dt>
+<dd>
+<p>[character] Value passed to <code>load_rcc()</code> or <code>normalise()</code>.</p>
+</dd>
+<dt><code>housekeeping_predict</code></dt>
+<dd>
+<p>[logical] Value passed to <code>load_rcc()</code>.</p>
+</dd>
+<dt><code>housekeeping_norm</code></dt>
+<dd>
+<p>[logical] Value passed to <code>load_rcc()</code> or <code>normalise()</code>.</p>
+</dd>
+<dt><code>normalisation_method</code></dt>
+<dd>
+<p>[character] Value passed to <code>load_rcc()</code> or <code>normalise()</code>.</p>
+</dd>
+<dt><code>remove_outliers</code></dt>
+<dd>
+<p>[logical] Value passed to <code>normalise()</code>.</p>
+</dd>
+<dt><code>n_comp</code></dt>
+<dd>
+<p>[numeric] Value passed to <code>load_rcc()</code>.</p>
+</dd>
+<dt><code>data_directory</code></dt>
+<dd>
+<p>[character] Value passed to <code>load_rcc()</code>.</p>
+</dd>
+<dt><code>pc_sum</code></dt>
+<dd>
+<p>[data.frame] A <code>data.frame</code> with <code>n_comp</code> rows and four columns:
+"Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".</p>
+</dd>
+<dt><code>nacho</code></dt>
+<dd>
+<p>[data.frame] A <code>data.frame</code> with all columns from the sample sheet <code>ssheet_csv</code>
+and all computed columns, <em>i.e.</em>, quality-control metrics and counts, with one sample per row.</p>
+</dd>
+<dt><code>outliers_thresholds</code></dt>
+<dd>
+<p>[list] A <code>list</code> of the quality-control thresholds used.</p>
+</dd>
+<dt><code>raw_counts</code></dt>
+<dd>
+<p>[data.frame] Raw counts with probes as rows and samples as columns.
+With <code>"CodeClass"</code> (first column), the type of the probes and
+<code>"Name"</code> (second column), the Name of the probes.</p>
+</dd>
+<dt><code>normalised_counts</code></dt>
+<dd>
+<p>[data.frame] Normalised counts with probes as rows and samples as columns.
+With <code>"CodeClass"</code> (first column)), the type of the probes and
+<code>"Name"</code> (second column), the name of the probes.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(GSE74821)
+GSE74821_norm &lt;- normalise(
+  nacho_object = GSE74821,
+  housekeeping_norm = TRUE,
+  normalisation_method = "GEO",
+  remove_outliers = TRUE
+)
+
+if (interactive()) {
+  library(GEOquery)
+  library(NACHO)
+
+  # Import data from GEO
+  gse &lt;- GEOquery::getGEO(GEO = "GSE74821")
+  targets &lt;- Biobase::pData(Biobase::phenoData(gse[[1]]))
+  GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
+  utils::untar(
+    tarfile = file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
+    exdir = file.path(tempdir(), "GSE74821")
+  )
+  targets$IDFILE &lt;- list.files(
+    path = file.path(tempdir(), "GSE74821"),
+    pattern = ".RCC.gz$"
+  )
+  targets[] &lt;- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
+  utils::write.csv(
+    x = targets,
+    file = file.path(tempdir(), "GSE74821", "Samplesheet.csv")
+  )
+
+  # Read RCC files and format
+  nacho &lt;- load_rcc(
+    data_directory = file.path(tempdir(), "GSE74821"),
+    ssheet_csv = file.path(tempdir(), "GSE74821", "Samplesheet.csv"),
+    id_colname = "IDFILE"
+  )
+
+  # (re)Normalise data by removing outliers
+  nacho_norm &lt;- normalise(
+    nacho_object = nacho,
+    remove_outliers = TRUE
+  )
+
+  # (re)Normalise data with "GLM" method and removing outliers
+  nacho_norm &lt;- normalise(
+    nacho_object = nacho,
+    normalisation_method = "GLM",
+    remove_outliers = TRUE
+  )
+}
+
+</code></pre>
+
+
+</div>

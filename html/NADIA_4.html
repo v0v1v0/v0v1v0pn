@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>autotune_missRanger</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform imputation using missRenger form missRegnger package.</h2>
+
+<h3>Description</h3>
+
+<p>Function use missRenger package for data imputation. Function use OBBerror (more in missForest documentation) to perform random search.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">autotune_missRanger(
+  df,
+  percent_of_missing = NULL,
+  maxiter = 10,
+  random.seed = 123,
+  mtry = NULL,
+  num.trees = 500,
+  verbose = FALSE,
+  col_0_1 = FALSE,
+  out_file = NULL,
+  pmm.k = 5,
+  optimize = TRUE,
+  iter = 10
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data.frame. Df to impute with column names and without target column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percent_of_missing</code></td>
+<td>
+<p>numeric vector. Vector contatining percent of missing data in columns for example  c(0,1,0,0,11.3,..)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>maximum number of iteration for missRanger algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+<p>random seed use in imputation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mtry</code></td>
+<td>
+<p>sample fraction use by missRanger. This param isn't optimized automatically. If NULL default value from ranger package will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.trees</code></td>
+<td>
+<p>number of trees. If optimize == TRUE. Param set seq(10,num.trees,iter) will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If FALSE function doesn't print on console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_0_1</code></td>
+<td>
+<p>decide if add bonus column informing where imputation been done. 0 - value was in dataset, 1 - value was imputed. Default False.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out_file</code></td>
+<td>
+<p>Output log file location if file already exists log message will be added. If NULL no log will be produced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmm.k</code></td>
+<td>
+<p>Number of candidate non-missing values to sample from in the predictive meanmatching step. 0 to avoid this step. If optimize == TRUE param set sample(1:pmm.k,iter) will be used. If pmm.k==0 missRanger == missForest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optimize</code></td>
+<td>
+<p>If TRUE inside optimization will be performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Number of iteration for a random search.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return data.frame with imputed values.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michael Mayer (2019).
+</p>
+
+
+<h3>References</h3>
+
+<p>Michael Mayer (2019). missRanger: Fast Imputation of Missing Values. R package version 2.1.0. https://CRAN.R-project.org/package=missRanger
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  raw_data &lt;- data.frame(
+    a = as.factor(sample(c("red", "yellow", "blue", NA), 1000, replace = TRUE)),
+    b = as.integer(1:1000),
+    c = as.factor(sample(c("YES", "NO", NA), 1000, replace = TRUE)),
+    d = runif(1000, 1, 10),
+    e = as.factor(sample(c("YES", "NO"), 1000, replace = TRUE)),
+    f = as.factor(sample(c("male", "female", "trans", "other", NA), 1000, replace = TRUE)))
+
+  # Prepering col_type
+  col_type &lt;- c("factor", "integer", "factor", "numeric", "factor", "factor")
+
+  percent_of_missing &lt;- 1:6
+  for (i in percent_of_missing) {
+    percent_of_missing[i] &lt;- 100 * (sum(is.na(raw_data[, i])) / nrow(raw_data))
+  }
+
+
+  imp_data &lt;- autotune_missRanger(raw_data[1:100,], percent_of_missing, optimize = FALSE)
+
+  # Check if all missing value was imputed
+  sum(is.na(imp_data)) == 0
+  # TRUE
+
+</code></pre>
+
+
+</div>

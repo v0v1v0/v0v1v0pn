@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>igraph_to_networkD3</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function to convert igraph graph to a list suitable for networkD3</h2>
+
+<h3>Description</h3>
+
+<p>Function to convert igraph graph to a list suitable for networkD3
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">igraph_to_networkD3(g, group, what = "both")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>an <code>igraph</code> class graph object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>an object that contains node group values, for example, those
+created with igraph's <code>membership</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+<p>a character string specifying what to return. If
+<code>what = 'links'</code> or <code>what = 'nodes'</code> only the links or nodes are
+returned as data frames, respectively. If <code>what = 'both'</code> then both
+data frames will be return in a list.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of link and node data frames or only the link or node data
+frames.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load igraph
+library(igraph)
+
+# Use igraph to make the graph and find membership
+karate &lt;- make_graph("Zachary")
+wc &lt;- cluster_walktrap(karate)
+members &lt;- membership(wc)
+
+# Convert to object suitable for networkD3
+karate_d3 &lt;- igraph_to_networkD3(karate, group = members)
+
+# Create force directed network plot
+forceNetwork(Links = karate_d3$links, Nodes = karate_d3$nodes,
+             Source = 'source', Target = 'target', NodeID = 'name',
+             Group = 'group')
+
+## Not run: 
+# Example with data from data frame
+# Load data
+## Original data from http://results.ref.ac.uk/DownloadSubmissions/ByUoa/21
+data('SchoolsJournals')
+
+# Convert to igraph
+SchoolsJournals &lt;- graph.data.frame(SchoolsJournals, directed = FALSE)
+
+# Remove duplicate edges
+SchoolsJournals &lt;- simplify(SchoolsJournals)
+
+# Find group membership
+wt &lt;- cluster_walktrap(SchoolsJournals, steps = 6)
+members &lt;- membership(wt)
+
+# Convert igraph to list for networkD3
+sj_list &lt;- igraph_to_networkD3(SchoolsJournals, group = members)
+
+# Plot as a forceDirected Network
+forceNetwork(Links = sj_list$links, Nodes = sj_list$nodes, Source = 'source',
+             Target = 'target', NodeID = 'name', Group = 'group',
+             zoom = TRUE, linkDistance = 200)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

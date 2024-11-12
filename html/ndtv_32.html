@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>toy_epi_sim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Toy Epidemic Simulation Output from the EpiModel package
+</h2>
+
+<h3>Description</h3>
+
+<p>An example network of a trivial simulated disease process spreading over a simulated dynamic contact network among 100 individuals for 25 discrete time steps. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data("toy_epi_sim")</code></pre>
+
+
+<h3>Format</h3>
+
+<p>The format is a <code>networkDynamic</code> object with attached attributes for <code>vertex.pid</code> (persistand ids), and dynamic attributes for <code>ndtvcol</code> (color corresponding to infection status) and <code>testatus</code> (infection status of vertices)
+</p>
+
+
+<h3>Details</h3>
+
+<p>The <code>toy_epi_sim</code> network is example output from a basic dynamic network STERGM simulation and trivial "SI" infection simulation generated using the EpiModel package. The model had random ("edges only") edge formation and dissolution effects, with rates calculated to lead to mean edge durations of 10 time units.  The infection simulation had an infection probability of 0.8. 
+</p>
+<p>The simulation was generated with the following code: 
+</p>
+<pre>
+library(EpiModel)
+
+## Network Estimation (using a tergm model)
+nw &lt;- network.initialize(n = 100, directed = FALSE)
+formation &lt;- ~ edges
+target.stats &lt;- 50
+dissolution &lt;- ~ offset(edges)
+coef.diss &lt;- dissolution_coefs(dissolution, duration = 10)
+est &lt;- netest(nw,
+              formation,
+              dissolution,
+              target.stats,
+              coef.diss,
+              verbose = FALSE)
+
+## Epidemic simulation
+param &lt;- param.net(inf.prob = 0.8)
+init &lt;- init.net(i.num = 5)
+control &lt;- control.net(type = "SI", nsteps = 25, nsims = 1, verbose =
+                         FALSE)
+sim &lt;- netsim(est, param, init, control)
+
+## Use some of EpiModel's default coloring functions to cache colors
+toy_epi_sim &lt;- get_network(sim)
+toy_epi_sim &lt;- color_tea(toy_epi_sim)
+</pre>
+
+
+<h3>References</h3>
+
+<p>Samuel Jenness, Steven M. Goodreau and Martina Morris (2015). EpiModel: Mathematical Modeling of Infectious
+Disease. R package version 1.1.4. <a href="https://CRAN.R-project.org/package=EpiModel">https://CRAN.R-project.org/package=EpiModel</a>
+</p>
+<p>Statnet EpiModel Tutorial <a href="https://www.epimodel.org/">https://www.epimodel.org/</a>  
+</p>
+
+
+<h3>See Also</h3>
+
+ 
+<p>See also <code>short.stergm.sim</code> for another basic Stergm simulation output, and <code>msm.sim</code> for a larger and more complex simulation without an infection process.  
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(toy_epi_sim)
+timeline(toy_epi_sim)
+## Not run: 
+
+
+# set up layout to draw plots under timeline
+layout(matrix(c(1,1,1,2,3,4),nrow=2,ncol=3,byrow=TRUE))
+# plot a proximity.timeline illustrating infection spread
+proximity.timeline(toy_epi_sim,vertex.col = 'ndtvcol',
+                  spline.style='color.attribute',
+                  mode = 'sammon',default.dist=100,
+                  chain.direction='reverse')
+# plot 3 static cross-sectional networks 
+# (beginning, middle and end) underneath for comparison
+plot(network.collapse(toy_epi_sim,at=1),vertex.col='ndtvcol',
+       main='toy_epi_sim network at t=1')
+plot(network.collapse(toy_epi_sim,at=17),vertex.col='ndtvcol',
+       main='toy_epi_sim network at=17')
+plot(network.collapse(toy_epi_sim,at=25),vertex.col='ndtvcol',
+       main='toy_epi_sim network at t=25')
+layout(1) # reset the layout
+
+
+# render an animation of the network
+render.animation(toy_epi_sim,vertex.col='ndtvcol',displaylabels=FALSE)
+ani.replay()
+
+## End(Not run)
+
+
+</code></pre>
+
+
+</div>

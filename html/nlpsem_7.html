@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getLatentKappa</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute Latent Kappa Coefficient for Agreement between Two Latent Label Sets</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the latent kappa, a measure of agreement between two sets of latent categorical
+labels. It also computes the confidence interval and provides a qualitative interpretation of the agreement level.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getLatentKappa(label1, label2, conf.level = 0.95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>label1</code></td>
+<td>
+<p>A factor vector representing the first set of latent categorical labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label2</code></td>
+<td>
+<p>A factor vector representing the second set of latent categorical labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level</code></td>
+<td>
+<p>A numeric value representing the confidence level for the confidence interval of the kappa statistic.
+The default value is <code>0.95</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>KappaOutput</code> with the following slots:
+</p>
+
+<ul>
+<li> <p><code>kappa_value</code>: A string representing the kappa statistic along with its confidence interval.
+</p>
+</li>
+<li> <p><code>judgment</code>: A string describing the level of agreement, such as "Perfect Agreement", "Slight Agreement", etc.
+</p>
+</li>
+</ul>
+<p>The content of these slots can be printed using the <code>printTable()</code> method for S4 objects.
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li> <p>Dumenci, L. (2011). The Psychometric Latent Agreement Model (PLAM) for Discrete Latent Variables Measured by Multiple
+Items. Organizational Research Methods, 14(1), 91-115. SAGE Publications.
+<a href="https://doi.org/10.1177/1094428110374649">doi:10.1177/1094428110374649</a>
+</p>
+</li>
+<li> <p>Landis, J., &amp; Koch, G. (1977). The Measurement of Observer Agreement for Categorical Data. Biometrics, 33(1), 159-174.
+<a href="https://doi.org/10.2307/2529310">doi:10.2307/2529310</a>
+</p>
+</li>
+<li> <p>Agresti, A. (2012). Models for Matched Pairs. In Categorical Data Analysis (pp. 413-454). Wiley.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+data("RMS_dat")
+RMS_dat0 &lt;- RMS_dat
+# Re-baseline the data so that the estimated initial status is for the starting point of the study
+baseT &lt;- RMS_dat0$T1
+RMS_dat0$T1 &lt;- RMS_dat0$T1 - baseT
+RMS_dat0$T2 &lt;- RMS_dat0$T2 - baseT
+RMS_dat0$T3 &lt;- RMS_dat0$T3 - baseT
+RMS_dat0$T4 &lt;- RMS_dat0$T4 - baseT
+RMS_dat0$T5 &lt;- RMS_dat0$T5 - baseT
+RMS_dat0$T6 &lt;- RMS_dat0$T6 - baseT
+RMS_dat0$T7 &lt;- RMS_dat0$T7 - baseT
+RMS_dat0$T8 &lt;- RMS_dat0$T8 - baseT
+RMS_dat0$T9 &lt;- RMS_dat0$T9 - baseT
+RMS_dat0$ex1 &lt;- scale(RMS_dat0$Approach_to_Learning)
+RMS_dat0$ex2 &lt;- scale(RMS_dat0$Attention_focus)
+RMS_dat0$gx1 &lt;- scale(RMS_dat0$INCOME)
+RMS_dat0$gx2 &lt;- scale(RMS_dat0$EDU)
+
+## Fit a growth mixture model with no TICs
+set.seed(20191029)
+MIX_BLS_LGCM_r &lt;-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.33, 0.34, 0.33), sub_Model = "LGCM",
+  cluster_TIC = NULL, y_var = "M", t_var = "T", records = 1:9,
+  curveFun = "BLS", intrinsic = FALSE, res_scale = list(0.3, 0.3, 0.3),
+  growth_TIC = NULL, tries = 10
+)
+## Membership of each individual from growth mixture model with no TICs
+label1 &lt;- getPosterior(
+  model = MIX_BLS_LGCM_r@mxOutput, nClass = 3, label = FALSE, cluster_TIC = NULL
+)
+set.seed(20191029)
+## Fit a growth mixture model with growth TICs and cluster TICs
+MIX_BLS_LGCM.TIC_r &lt;-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.33, 0.34, 0.33), sub_Model = "LGCM",
+  cluster_TIC = c("gx1", "gx2"), y_var = "M", t_var = "T", records = 1:9,
+  curveFun = "BLS", intrinsic = FALSE, res_scale = list(0.3, 0.3, 0.3),
+  growth_TIC = c("ex1", "ex2"), tries = 10
+)
+## Membership of each individual from growth mixture model with growth TICs and cluster TICs
+label2 &lt;- getPosterior(
+  model = MIX_BLS_LGCM.TIC_r@mxOutput, nClass = 3, label = FALSE,
+  cluster_TIC = c("gx1", "gx2")
+)
+## Calcualte the agreement between two sets of membership labels
+getLatentKappa(label1 = label1@membership, label2 = label2@membership)
+
+
+</code></pre>
+
+
+</div>

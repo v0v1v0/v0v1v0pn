@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netmatrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a matrix with additional information for pairwise
+comparisons</h2>
+
+<h3>Description</h3>
+
+<p>Auxiliary function to create a matrix with additional information
+for pairwise comparisons
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netmatrix(
+  x,
+  var,
+  levels,
+  labels = levels,
+  func = "mode",
+  ties.method = "random"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>netmeta</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>Variable with additional information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels</code></td>
+<td>
+<p>An optional vector of the values that <code>var</code>
+might have taken (see <code>factor</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+<p>An optional vector with labels for <code>var</code> (see
+<code>factor</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>func</code></td>
+<td>
+<p>A character string with the function name to summarize
+values within pairwise comparisons; see Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ties.method</code></td>
+<td>
+<p>A character string describing how ties are
+handled if <code>func = "mode"</code>; see Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For each pairwise comparison, unique values will be calculated for
+the variable <code>var</code> based on the argument <code>func</code>: "mode"
+(most common value), "min" (minimum value), "max", "mean",
+"median", and "sum". In order to determine the most common value,
+the argument <code>ties.method</code> can be used in the case of ties
+with "first" meaning that the first / smallest value will be
+selected; similar for "last" (last / largest value) and "random"
+(random selection).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix with the same row and column names as the adjacency matrix
+<code>x$A.matrix</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>netgraph.netmeta</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(smokingcessation)
+# Add variable with (fictious) risk of bias values
+# with 1 = "low risk" and 2 = "high risk"
+#
+smokingcessation$rob &lt;- rep(1:2, 12)
+
+p1 &lt;- pairwise(list(treat1, treat2, treat3),
+  event = list(event1, event2, event3), n = list(n1, n2, n3),
+  data = smokingcessation, sm = "OR")
+net1 &lt;- netmeta(p1, common = FALSE, ref = "A")
+
+# Generate network graph with information on risk of bias
+#
+col.rob &lt;- netmatrix(net1, rob, ties.method = "last",
+  levels = 1:2, labels = c("green", "yellow"))
+#
+netgraph(net1, plastic = FALSE, col = col.rob,
+  cex.points = 5, bg.points = "gray", adj = 0.5)
+
+netgraph(net1, plastic = FALSE, col = col.rob,
+  cex.points = n.trts, bg.points = "blue",
+  labels = paste0(trts, " (n=", n.trts, ")"),
+  offset = c(0.05, 0.035, 0.05, 0.025))
+
+</code></pre>
+
+
+</div>

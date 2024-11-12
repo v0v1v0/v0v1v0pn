@@ -1,0 +1,167 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>flagsAssign</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Assign exclusion flags to a dataset based on specified table</h2>
+
+<h3>Description</h3>
+
+<p>The aim with this function is to take a (say PK) dataset and a
+pre-specified table of flags, assign the flags automatically.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">flagsAssign(
+  data,
+  tab.flags,
+  subset.data,
+  col.flagn,
+  col.flagc,
+  flags.increasing = FALSE,
+  grp.incomp = "EVID",
+  flagc.0 = "Analysis set",
+  as.fun = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The dataset to assign flags to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tab.flags</code></td>
+<td>
+<p>A data.frame containing at least these named
+columns: FLAG, flag, condition. Condition is disregarded for
+FLAG==0. FLAG must be numeric and non-negative, flag and
+condition are characters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset.data</code></td>
+<td>
+<p>An optional string that provides a subset of
+data to assign flags to. A common example is
+subset=\"EVID==0\" to only assign to observations. Numerical
+and character flags will be missing in rows that are not
+matched by this subset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.flagn</code></td>
+<td>
+<p>The name of the column containing the numerical
+flag values in tab.flags. This will be added to data. Default
+value is FLAG and can be configured using NMdataConf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.flagc</code></td>
+<td>
+<p>The name of the column containing the character
+flag values in tab.flags. This will be added to data. Default
+value is flag and can be configured using NMdataConf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flags.increasing</code></td>
+<td>
+<p>The flags are applied by either decreasing
+(default) or increasing value of col.flagn. Decreasing order
+means that conditions associated with higher values of
+col.flagn will be evaluated first. By using decreasing order,
+you can easily adjust the Nonmem IGNORE statement from
+IGNORE(FLAG.NE.0) to say IGNORE(FLAG.GT.10) if BLQ's have
+FLAG=10, and you decide to include these in the analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grp.incomp</code></td>
+<td>
+<p>Column(s) that distinct incompatible subsets of
+data. Default is "EVID" meaning that if different values of
+EVID are found in data, the function will return an
+error. This is a safeguard not to mix data unintentionally
+when counting flags.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flagc.0</code></td>
+<td>
+<p>The character flag to assign to rows that are not
+matched by exclusion conditions (numerical flag 0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>The default is to return data.tables if input data
+is a data.table, and return a data.frame for all other input
+classes. Pass a function in as.fun to convert to something
+else. If return.all=FALSE, this is applied to data and
+tab.flags independently.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>dt.flags must contain a column with numerical exclusion
+flags, one with character exclusion flags, and one with a
+expressions to evaluate for whether to apply the exclusion
+flag. The flags are applied sequentially, by increasing value
+of the numerical exclusion flag.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The dataset with flags added. Class as defined by
+as.fun. See parameter flags.return as well.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other DataCreate: 
+<code>NMorderColumns()</code>,
+<code>NMstamp()</code>,
+<code>NMwriteData()</code>,
+<code>addTAPD()</code>,
+<code>findCovs()</code>,
+<code>findVars()</code>,
+<code>flagsCount()</code>,
+<code>mergeCheck()</code>,
+<code>tmpcol()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+pk &lt;- readRDS(file=system.file("examples/data/xgxr2.rds",package="NMdata"))
+dt.flags &lt;- data.frame(
+       flagn=10,
+       flagc="Below LLOQ",
+       condition=c("BLQ==1")
+)
+pk &lt;- flagsAssign(pk,dt.flags,subset.data="EVID==0",col.flagn="flagn",col.flagc="flagc")
+pk &lt;- flagsAssign(pk,subset.data="EVID==1",flagc.0="Dosing",
+        col.flagn="flagn",col.flagc="flagc")
+unique(pk[,c("EVID","flagn","flagc","BLQ")])
+flagsCount(pk[EVID==0],dt.flags,col.flagn="flagn",col.flagc="flagc")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

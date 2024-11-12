@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stackEddy</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extract eddy covariance data from HDF5 format</h2>
+
+<h3>Description</h3>
+
+<p>Convert data of choice from HDF5 to tabular format. Specific to eddy covariance data product: DP4.00200.001
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stackEddy(
+  filepath,
+  level = "dp04",
+  var = NA,
+  avg = NA,
+  metadata = FALSE,
+  useFasttime = FALSE,
+  runLocal = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>filepath</code></td>
+<td>
+<p>One of: a folder containing NEON EC H5 files, a zip file of DP4.00200.001 data downloaded from the NEON data portal, a folder of DP4.00200.001 data downloaded by the neonUtilities::zipsByProduct() function, or a single NEON EC H5 file [character]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>The level of data to extract; one of dp01, dp02, dp03, dp04 [character]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>The variable set to extract. Can be any of the variables in the "name" level or the "system" level of the H5 file; use the getVarsEddy() function to see the available variables. From the inputs, all variables from "name" and all variables from "system" will be returned, but if variables from both "name" and "system" are specified, the function will return only the intersecting set. This allows the user to, e.g., return only the pressure data ("pres") from the CO2 storage system ("co2Stor"), instead of all the pressure data from all instruments.  [character]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>avg</code></td>
+<td>
+<p>The averaging interval to extract, in minutes [numeric]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metadata</code></td>
+<td>
+<p>Should the output include metadata from the attributes of the H5 files? Defaults to false. Even when false, variable definitions, issue logs, and science review flags will be included. [logical]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useFasttime</code></td>
+<td>
+<p>Should the fasttime package be used to convert time stamps to time format? Decreases stacking time but can introduce imprecision at the millisecond level. Defaults to false. [logical]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>runLocal</code></td>
+<td>
+<p>Set to TRUE to omit any calls to the NEON API. Data are extracted and reformatted from local files, but citation and issue log are not retrieved. [logical]</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Given a filepath containing H5 files of DP4.00200.001 data, extracts variables, stacks data tables over time, and joins variables into a single table.
+For data product levels 2-4 (dp02, dp03, dp04), joins all available data, except for the flux footprint data in the expanded package.
+For dp01, an averaging interval and a set of variable names must be provided as inputs.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named list of data frames. One data frame per site, plus one data frame containing the metadata (objDesc) table and one data frame containing units for each variable (variables).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Claire Lunch <a href="mailto:clunch@battelleecology.org">clunch@battelleecology.org</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>License: GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# To extract and merge Level 4 data tables, where data files are in the working directory
+flux &lt;- stackEddy(filepath=getwd(), level='dp04', var=NA, avg=NA)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

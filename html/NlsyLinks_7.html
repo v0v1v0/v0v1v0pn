@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CleanSemAceDataset</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Produces a cleaned dataset that works well with when using SEM to estimate a univariate ACE model.</h2>
+
+<h3>Description</h3>
+
+<p>This function takes a 'GroupSummary' base::data.frame (which is created by the <code>RGroupSummary()</code> function) and returns a base::data.frame that is used by the <code>Ace()</code> function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CleanSemAceDataset(dsDirty, dsGroupSummary, oName_S1, oName_S2, rName = "R")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dsDirty</code></td>
+<td>
+<p>This is the base::data.frame to be cleaned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dsGroupSummary</code></td>
+<td>
+<p>The base::data.frame containing information about which groups should be included in the analyses.  It should be created by the <code>RGroupSummary()</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oName_S1</code></td>
+<td>
+<p>The name of the manifest variable (in <code>dsDirty</code>) for the first subject in each pair.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oName_S2</code></td>
+<td>
+<p>The name of the manifest variable (in <code>dsDirty</code>) for the second subject in each pair.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rName</code></td>
+<td>
+<p>The name of the variable (in <code>dsDirty</code>) indicating the pair's relatedness coefficient.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function takes <code>dsDirty</code> and produces a new base::data.frame with the following features:
+</p>
+
+<ol>
+<li>
+<p> Only three existing columns are retained: <code>O1</code>, <code>O2</code>, and <code>R</code>.  They are assigned these names.
+</p>
+</li>
+<li>
+<p> A new column called <code>GroupID</code> is created to reflect their group membership (which is based on the <code>R</code> value).  These values are sequential integers, starting at 1.  The group with the weakest <code>R</code> is 1.  The group with the strongest <code>R</code> has the largest <code>GroupID</code> (this is typically the MZ twins).
+</p>
+</li>
+<li>
+<p> Any row is excluded if it has a missing data point for <code>O1</code>, <code>O2</code>, or <code>R</code>.
+</p>
+</li>
+<li>
+<p> The base::data.frame is sorted by the <code>R</code> value.  This helps program against the multiple-group SEM API sometimes.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A base::data.frame with one row per subject pair.  The base::data.frame contains the following variables (which can NOT be changed by the user through optional parameters):
+</p>
+
+<ul>
+<li> <p><strong>R</strong> The pair's <code>R</code> value.
+</p>
+</li>
+<li> <p><strong>O1</strong> The outcome variable for the first subject in each pair.
+</p>
+</li>
+<li> <p><strong>O2</strong> The outcome variable for the second subject in each pair.
+</p>
+</li>
+<li> <p><strong>GroupID</strong> Indicates the pair's group membership.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Will Beasley
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NlsyLinks) # Load the package into the current R session.
+dsLinks &lt;- Links79PairExpanded # Start with the built-in data.frame in NlsyLinks
+dsLinks &lt;- dsLinks[dsLinks$RelationshipPath == "Gen2Siblings", ] # Use only NLSY79-C siblings
+
+oName_S1 &lt;- "MathStandardized_S1" # Stands for Outcome1
+oName_S2 &lt;- "MathStandardized_S2" # Stands for Outcome2
+dsGroupSummary &lt;- RGroupSummary(dsLinks, oName_S1, oName_S2)
+
+dsClean &lt;- CleanSemAceDataset(dsDirty = dsLinks, dsGroupSummary, oName_S1, oName_S2, rName = "R")
+summary(dsClean)
+
+dsClean$AbsDifference &lt;- abs(dsClean$O1 - dsClean$O2)
+plot(jitter(dsClean$R), dsClean$AbsDifference, col = "gray70")
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,408 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>attribute.activity.functions</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Functions to activate and query dynamic attributes on vertices, edges, and networks
+</h2>
+
+<h3>Description</h3>
+
+<p>These functions set, query and modify attributes of networkDynamic objects used to represent values which change over time. These dynamic or "temporally extended attributes" are stored as standard attributes with a specially defined structure.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">activate.vertex.attribute(x, prefix, value, onset = NULL, terminus = NULL, 
+    length = NULL, at = NULL, v = seq_len(network.size(x)), dynamic.only = FALSE)
+
+activate.edge.attribute(x, prefix, value, onset = NULL, terminus = NULL, 
+    length = NULL, at = NULL, e = seq_along(x$mel), dynamic.only = FALSE)
+    
+activate.edge.value(x, prefix, value, onset = NULL, terminus = NULL, 
+    length = NULL, at = NULL, e = seq_along(x$mel), dynamic.only = FALSE)
+    
+activate.network.attribute(x, prefix, value, onset = NULL, terminus = NULL, 
+    length = NULL, at = NULL, dynamic.only = FALSE)    
+    
+## S3 method for class 'active'
+get.vertex.attribute(x, prefix, onset = NULL, terminus = NULL, 
+          length = NULL, at = NULL, rule = c("any", "all","earliest","latest"), 
+          na.omit = FALSE, null.na = TRUE, active.default = TRUE,
+          dynamic.only = FALSE, require.active = FALSE,
+          return.tea = FALSE, unlist = TRUE, ...)   
+ 
+## S3 method for class 'active'
+get.edge.attribute(x, prefix, onset = NULL, terminus = NULL,
+          length = NULL, at = NULL, rule = c("any", "all","earliest","latest"), 
+          active.default = TRUE, dynamic.only = FALSE, require.active = FALSE, 
+          return.tea = FALSE, unlist = TRUE, ..., el) 
+
+## S3 method for class 'active'
+get.edge.value(x, prefix, onset = NULL, terminus = NULL,
+          length = NULL, at = NULL, rule = c("any", "all","earliest","latest"), 
+          active.default = TRUE, dynamic.only = FALSE, require.active = FALSE, 
+          return.tea = FALSE, unlist = TRUE, ...) 
+
+## S3 method for class 'active'
+get.network.attribute(x, prefix, onset = NULL, terminus = NULL,length = NULL, 
+                at = NULL, rule = c("any", "all","earliest","latest"), 
+                dynamic.only = FALSE, return.tea=FALSE, unlist=TRUE, ...) 
+                
+deactivate.vertex.attribute (x, prefix, onset=NULL, terminus=NULL,
+          length = NULL, at = NULL, v = seq_len(network.size(x)), dynamic.only = FALSE)
+                 
+deactivate.edge.attribute (x, prefix, onset = NULL, terminus = NULL,
+          length = NULL, at = NULL, e = seq_along(x$mel), dynamic.only = FALSE)
+
+deactivate.network.attribute(x, prefix, onset = NULL, terminus = NULL, 
+          length = NULL, at = NULL, dynamic.only = FALSE)
+                
+## S3 method for class 'active'
+list.vertex.attributes(x, onset = NULL, terminus = NULL,length = NULL, 
+                at = NULL, na.omit = FALSE, rule = c("any", "all"), 
+                v = seq_len(network.size(x)), require.active = FALSE, 
+                active.default = TRUE, dynamic.only = FALSE, ...)
+                
+## S3 method for class 'active'
+list.edge.attributes(x, onset = NULL, terminus = NULL,length = NULL, 
+                at = NULL, na.omit = FALSE, rule = c("any", "all"), 
+                e = seq_along(x$mel), require.active = FALSE, 
+                active.default = TRUE, dynamic.only = FALSE, ...)
+                
+## S3 method for class 'active'
+list.network.attributes(x, onset = NULL, terminus = NULL,length = NULL, 
+                at = NULL, na.omit = FALSE, rule = c("any", "all"),
+                dynamic.only = FALSE, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>a <code>networkDynamic</code> object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prefix</code></td>
+<td>
+
+<p>character string for the name of the attribute to be stored (will be stored as prefix.active)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+
+<p>an object that is the value of the attribute to be stored. If <code>value</code> is a <code>list</code>, it is assumed that each element corresponds to an index in <code>v</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>onset</code></td>
+<td>
+
+<p>an optional vector of time-points that specifies the starts of the interval(s) at which the <code>value</code> argument should be considered active for each vertex/edge.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terminus</code></td>
+<td>
+
+<p>an optional vector of time-points that specifies the ends of the interval(s) at which the <code>value</code> argument should be considered active for each vertex/edge.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>length</code></td>
+<td>
+
+<p>an optional vector of interval lengths for the interval(s) which should be activated for each vertex/edge. This must be accompanied by one of <code>onset</code> or <code>terminus</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>at</code></td>
+<td>
+
+<p>optional, one or more time points (corresponding to vertices/edges) at which values should be activated for each vertex/edge
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+
+<p>optional, one or more IDs indicating which vertices should have the TEA attribute added (default is all vertices)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+
+<p>optional, one or more edge IDs indicating which edge should have the TEA attribute added. Default is all edges. Note: Currently values of <code>e</code> correspond to elements of <code>x$mel</code>, including null elements from deleted edges. So if some edges have been deleted from the network, <code>e</code> may need to be padded out appropriately and can be longer than <code>network.edgecount(x)</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dynamic.only</code></td>
+<td>
+
+<p>If dynamic.only==TRUE, only TEAs are considered; otherwise, non-TEA attributes are also employed (with activity as defined by active.default). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>require.active</code></td>
+<td>
+
+<p>logical. If TRUE, NA will be returned instead of an attribute value if the associated vertex or edge is inactive for the query period. When vertex or edge activity has not be explicitly set, the state is controlled by <code>active.default</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>active.default</code></td>
+<td>
+
+<p>logical; should underlying vertices or edges without an activity attribute be regarded as active by default?
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.omit</code></td>
+<td>
+
+<p>logical; should values from missing vertices/edges be removed? (implemented for vertices, but removal means that the index may not correspond to vertex.id for returned values)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.na</code></td>
+<td>
+
+<p>logical; should <code>NULL</code> values be replaced with NAs? 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rule</code></td>
+<td>
+
+<p>a character string indicating how the attribute activity spells should be matched against the query spell for this query: 
+</p>
+
+<ul>
+<li> <p><code>any</code> (default) match attribute values if they overlap with any part of the query interval.  
+</p>
+</li>
+<li> <p><code>all</code> match an attribute value only if it overlaps with the entire query interval, 
+</p>
+</li>
+<li> <p><code>earliest</code> match a single value corresponding to the earliest attribute overlaping any part of the query spell, 
+</p>
+</li>
+<li> <p><code>latest</code> match a single value corresponding to the earliest attribute overlaping any part of the query spell.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.tea</code></td>
+<td>
+
+<p>logical; if <code>return.tea=TRUE</code>, will return an (appropriately truncated) activity attribute- a list with the first element a list of values and the second element the spell matrix of corresponding spell(s) matching according to <code>rule</code>. Also sets <code>unlist=FALSE</code> and <code>dynamic.only=TRUE</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unlist</code></td>
+<td>
+
+<p>logical; should retrieved attributes be unlisted prior to being returned? Setting to FALSE is necessary to correctly fetch list objects stored as attributes.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>possible additional arguments
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>el</code></td>
+<td>
+
+<p>unused argument that exists solely for consistency with <code>network</code>; do not use this argument!
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>These functions provide easy ways to work with temporally extended attributes, making it possible to store attributes on a dynamic network that should be represented as changing values and different points in time. Because the serve as wrappers for get.*.attribute and set.*.attribute, many of the arguments are directly passed through. 
+</p>
+<p>The activate.*.attribute methods act as a cross between  activate.*  set.*.attribute methods.  They are used to activate an attribute for a given spell, and in so doing set a value for that spell.  The corresponding deactivate methods are more straightforward, deactivating the attribute over a set interval (and removing any spells/values as needed).
+</p>
+<p>A dynamic or Temporally Extended Attribute (TEA) is an edge, vertex, or network attribute satisfying the following properties:
+</p>
+
+<ol>
+<li>
+<p> Its name consists of an arbitrary prefix, together with the suffix ".active".
+</p>
+</li>
+<li>
+<p> Its value consists of a two-element list, whose respective contents must be maintained in order as follows:
+</p>
+
+<ul>
+<li>
+<p> a. A list of value entries, such that the ith list element is the value of the attribute for the ith spell in the associated activity matrix.  An attribute not active at any given point in time is defined as having a value of NA (but the reverse is not true – an active attribute can also take a value of NA).
+</p>
+</li>
+<li>
+<p> b. A two-column numeric matrix, conforming to the specifications for activity attributes in the networkDynamic package.  Every active spell indicated in the activity matrix must correspond to exactly one entry of the associated value list, and these must be maintained in order (i.e., the value of the attribute for the ith active spell is the ith element in the value list).
+</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>There are several ways to specify the activity spell, and the general syntax rules are described at <code>activity.attribute</code>.  Activity can be set for a single time point, using either <code>at</code>, or by setting onset=terminus.  Activity can be set for an interval [onset,terminus), using a valid combination of the <code>onset</code>, <code>terminus</code> and <code>length</code> attributes. 
+</p>
+<p>This allows for a wide range of options when specifying spells, but a correct specification must use only one of these forms:
+</p>
+<pre>
+  at
+  onset and terminus 
+  onset and length
+  terminus and length
+</pre>
+<p>If the <code>set</code> and <code>deactivate</code> functions are provided with no timing information, the element is activated/deactivated from <code>-Inf</code> to <code>Inf</code>. The specified interval spans the period from the onset (inclusive) to the terminus (exclusive), so <code>[onset,terminus)</code>. For more details, see <code>activate</code> The <code>get</code> query functions will give an error if no timing information is provided. 
+</p>
+<p>When the activity arguments have a length greater than 1, the elements are assumed to correspond to the vertex or edge ids that should have that activity specified, not to the elements of <code>value</code>. In other words, it is possible to use one function call to activate multiple values on multiple vertices with a different activity time on each vertex, but it is not possible to activate multiple values at multiple times on a single vertex with one call. 
+</p>
+<p><code>activate.edge.value</code> is a wrapper for <code>activate.edge.attribute</code>. 
+</p>
+<p>When the attribute query has a non-zero duration (i.e. <code>length</code> &gt; 0, or <code>onset!=terminus</code>) it is possible that the query spell will match against multiple attribute values for each network element. If multiple values match and <code>return.tea=FALSE</code>, a warning will be generated and only the earliest value will be returned. To avoid the warning, this behavior (or its opposite) can be specified by setting <code>rule='earliest'</code> or <code>rule='latest'</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The set methods modify their network argument internally and also invisibly return a reference to the modified network. The get methods return the attribute object appropriate for the time range specified query spell parameters.  If query results in multiple values and <code>return.tea=FALSE</code> only the first (earliest) is returned along with a warning. Note that <code>get.edge.value.active</code> returns <code>NULL</code> if no attributes names match, where <code>get.vertex.attribute.active</code> returns <code>NA</code>s.  Also of <code>null.na=FALSE</code> and <code>unlist=TRUE</code>, the index position for returned values may not correspond to the vertex.id because NULL values will be omited.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Attribute activity is only checked against vertex and edge activity during fetching if <code>require.active=TRUE</code>.  Otherwise the attributes for a vertex can take values (be active) when the vertex itself is inactive. Likewise for edges.  The because they must check all attributes on all network elements, the <code>list.*.active</code> functions are generally more computationally expensive that a <code>get</code> call for checking if a specific attribute exists. Note that  <code>get.edge.attribute.active</code> currently calls <code>get.edge.attribute.active</code> and does not support a list of edges as input. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>skyebend, ayn, carter, pavel, martina, steve
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See Also as <code>set.vertex.attribute</code>, <code>get.vertex.attribute</code>,<code>list.vertex.attributes</code>,<code>activate.vertices</code>, <code>activity.attribute</code>, <code>activate</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#initialize network
+test&lt;-network.initialize(5)
+
+#activate vertex attribute
+test&lt;-activate.vertex.attribute(test,"letter","a",onset=0,terminus=1)
+test&lt;-activate.vertex.attribute(test,"number","4",onset=1,terminus=2)
+test&lt;-activate.vertex.attribute(test,"number","5",onset=2,terminus=3)
+
+#list active/all vertex attributes
+list.vertex.attributes.active(test, onset=0,terminus=3,dynamic.only=TRUE)
+list.vertex.attributes.active(test, onset=1,terminus=3,dynamic.only=FALSE)
+
+#get values for specific vertex attribute
+get.vertex.attribute.active(test,"letter",onset=2,terminus=3)
+
+#deactive vertex attribute
+test &lt;- deactivate.vertex.attribute(test, "letter", onset=0, terminus=3)
+list.vertex.attributes.active(test, onset=0,terminus=3,dynamic.only=TRUE)
+
+#initialize edges
+test[1,2]&lt;-1
+test[2,3]&lt;-1
+
+#activate edge attribute
+test&lt;-activate.edge.attribute(test,"number",1,onset=0,terminus=2)
+test&lt;-activate.edge.attribute(test,"number",5,onset=2,terminus=5)
+test&lt;-activate.edge.attribute(test,"letter","a",onset=1,terminus=4)
+
+#list edge attributes
+list.edge.attributes.active(test, onset=0,terminus=4,dynamic.only=TRUE)
+list.edge.attributes.active(test, onset=0,terminus=4,dynamic.only=FALSE)
+
+#get values for specific edge attribute
+get.edge.value.active(test,"number",onset=3,terminus=4)
+
+#deactive edge attribute
+test &lt;- deactivate.edge.attribute(test, "letter", onset=0, terminus=3)
+list.edge.attributes.active(test, onset=0,terminus=3,dynamic.only=TRUE)
+
+#activate network attribute
+test &lt;- activate.network.attribute(test,"alist",list("a","b"),onset=1,terminus=2)
+test &lt;- activate.network.attribute(test,"alist",list("c","d"),onset=2,terminus=3)
+test &lt;- activate.network.attribute(test,"aspace",list("1","2"),onset=1,terminus=2)
+test &lt;- activate.network.attribute(test,"aspace",list("3","4"),onset=2,terminus=3)
+
+#list network attributes
+list.network.attributes.active(test, onset=0,terminus=3,dynamic.only=TRUE)
+list.network.attributes.active(test, onset=0,terminus=3,dynamic.only=FALSE)
+
+#get values for specific network attribute
+get.network.attribute.active(test,"alist",at=2.5,unlist=FALSE)
+
+#deactive network attribute
+test &lt;- deactivate.network.attribute(test, "alist", onset=0, terminus=3)
+list.network.attributes.active(test, onset=0,terminus=3,dynamic.only=TRUE)
+
+# activate multiple values on multiple vertices at multiple times
+test&lt;-network.initialize(3)
+activate.vertex.attribute(test,"letters",c("a","b","c"),onset=c(0,1,2),terminus=c(1,2,3))
+
+# peek at TEA structure using non-TEA attribute query
+get.vertex.attribute(test,"letters.active",unlist=FALSE)
+
+# compare different 'rules'
+test&lt;-network.initialize(1)
+activate.vertex.attribute(test,'color','red',onset=0,terminus=1)
+activate.vertex.attribute(test,'color','green',onset=1,terminus=2)
+activate.vertex.attribute(test,'color','blue',onset=2,terminus=3)
+
+get.vertex.attribute.active(test,'color',onset=0,terminus=3)
+get.vertex.attribute.active(test,'color',onset=0,terminus=3,return.tea=TRUE)
+get.vertex.attribute.active(test,'color',onset=0,terminus=3,rule='earliest')
+get.vertex.attribute.active(test,'color',onset=0,terminus=3,rule='latest')
+
+</code></pre>
+
+
+</div>

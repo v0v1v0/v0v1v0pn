@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>null_dist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate null data with a specific distribution.</h2>
+
+<h3>Description</h3>
+
+<p>Null hypothesis: variable has specified distribution
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">null_dist(var, dist, params = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>variable name</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>distribution name. One of: beta, cauchy, chisq,
+exp, f, gamma, geom, lnorm, logis,
+nbinom, binom, norm, pois, t, unif, weibull</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>params</code></td>
+<td>
+<p>list of parameters of distribution. If <code>NULL</code>, will
+use <code>fitdistr</code> to estimate them.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a function that given <code>data</code> generates a null data set.
+For use with <code>lineup</code> or <code>rorschach</code>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>null_permute, null_lm
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dframe &lt;- data.frame(x = rnorm(150))
+library(ggplot2)
+# three histograms of normally distributed values
+ggplot(
+  data=rorschach(method=null_dist("x", "norm"), n = 3, true=dframe)
+  ) +
+  geom_histogram(aes(x=x, y=..density..), binwidth=0.25) +
+  facet_grid(.~.sample) +
+  geom_density(aes(x=x), colour="steelblue", size=1)
+
+# uniform distributions are not as easy to recognize as such
+dframe$x = runif(150)
+ggplot(
+  data=rorschach(method=null_dist("x", "uniform",
+                 params=list(min=0, max=1)),
+  n = 3, true=dframe)) +
+  geom_histogram(aes(x=x, y=..density..), binwidth=0.1) +
+  facet_grid(.~.sample) +
+  geom_density(aes(x=x), colour="steelblue", size=1)
+</code></pre>
+
+
+</div>

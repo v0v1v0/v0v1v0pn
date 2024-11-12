@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dbinom_vector</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Vectorized binomial distribution</h2>
+
+<h3>Description</h3>
+
+<p>The <code>dbinom_vector</code> distribution is a vectorized version of the binomial distribution.
+It can be used to model a vector of binomial realizations. NB: using the vectorized version 
+is beneficial only when the entire joint likelihood of the vector of binomial realizations (x)
+is calculated simultaneously.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dbinom_vector(x, size, prob, log = 0)
+
+rbinom_vector(n = 1, size, prob)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector of quantiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>Vector of number of trials (zero or more).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>Vector of success probabilities on each trial</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical argument, specifying whether to return the log-probability of the distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of observations. Only n = 1 is supported.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The log-likelihood value associated with the vector of binomial observations.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Pierre Dupont
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## define vectorized model code
+code &lt;- nimbleCode({
+    p ~ dunif(0,1)
+    p_vector[1:J] &lt;- p
+    y[1:J] ~ dbinom_vector(size = trials[1:J],
+                           prob = p_vector[1:J])
+})
+ 
+## simulate binomial data
+J &lt;- 1000
+trials &lt;- sample(x = 10, size = J, replace = TRUE)
+y &lt;- rbinom_vector(J, size = trials, prob = 0.21)
+ 
+constants &lt;- list(J = J, trials = trials)
+ 
+data &lt;- list(y = y)
+ 
+inits &lt;- list(p = 0.5)
+ 
+## create NIMBLE model object
+Rmodel &lt;- nimbleModel(code, constants, data, inits)
+ 
+## use model object for MCMC, etc.
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gatherFactors</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>gatherFactors</h2>
+
+<h3>Description</h3>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gatherFactors(data,
+methods = c("HG7", "ERCC", "TN", "TC", "CR", "NR", "DESeq", "UQ", "TMM", "TU"),
+HG7.size = NULL, ERCC.size = NULL, TN.size = NULL, TC.size = NULL,
+CR.size = NULL, NR.size = NULL, pre_ratio = 0.5,
+lower_trim = 0.05, upper_trim = 0.65, min_ubq = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methods</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HG7.size</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ERCC.size</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TN.size</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TC.size</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CR.size</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NR.size</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pre_ratio</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower_trim</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper_trim</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_ubq</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (data, methods = c("HG7", "ERCC", "TN", "TC", "CR",
+    "NR", "DESeq", "UQ", "TMM", "TU"), HG7.size = NULL, ERCC.size = NULL,
+    TN.size = NULL, TC.size = NULL, CR.size = NULL, NR.size = NULL,
+    pre_ratio = 0.5, lower_trim = 0.05, upper_trim = 0.65, min_ubq = 100)
+{
+    method1 &lt;- as.list(methods)
+    numMethod &lt;- length(method1)
+    method_range &lt;- seq(1, numMethod, 1)
+    for (i in method_range) {
+        if (method1[[i]] == "HG7" || method1[[i]] == "ERCC" ||
+            method1[[i]] == "TN" || method1[[i]] == "TC" || method1[[i]] ==
+            "CR" || method1[[i]] == "NR") {
+            size.name &lt;- paste(method1[[i]], ".size", sep = "")
+            out.name1 &lt;- paste(method1[[i]], ".factors", sep = "")
+            if (is.null(size.name)) {
+                stop("Please provide", size.name, "!")
+            }
+            else {
+                assign(out.name1, getFactors(data, method = "sizefactor",
+                  lib.size = get(size.name)))
+            }
+        }
+        if (method1[[i]] == "DESeq" || method1[[i]] == "RLE" ||
+            method1[[i]] == "UQ" || method1[[i]] == "TMM") {
+            out.name2 &lt;- paste(method1[[i]], ".factors", sep = "")
+            assign(out.name2, getFactors(data, method = method1[[i]]))
+        }
+        if (method1[[i]] == "TU") {
+            TU.factors &lt;- getFactors(data, method = "TU", pre_ratio = pre_ratio,
+                lower_trim = lower_trim, upper_trim = upper_trim,
+                min_ubq = min_ubq)
+        }
+    }
+    factors.list &lt;- NULL
+    for (m in methods) {
+        m.factors &lt;- paste(m, ".factors", sep = "")
+        factors.list &lt;- c(factors.list, m.factors)
+    }
+    factors.result &lt;- NULL
+    for (i in method_range) {
+        factors.result &lt;- cbind(factors.result, get(factors.list[i]))
+    }
+    colnames(factors.result) &lt;- methods
+    return(factors.result)
+  }
+</code></pre>
+
+
+</div>

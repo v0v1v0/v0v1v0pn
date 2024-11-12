@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nhd_query</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Select NHD features clipped by a circular buffer a coordinate pair</h2>
+
+<h3>Description</h3>
+
+<p>Select NHD features clipped by a circular buffer a coordinate pair
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nhd_query(
+  lon = NA,
+  lat = NA,
+  poly = NA,
+  dsn,
+  approve_all_dl = FALSE,
+  buffer_dist = units::as_units(4.75, "km"),
+  temporary = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lon</code></td>
+<td>
+<p>numeric longitude</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lat</code></td>
+<td>
+<p>numeric latitude</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>poly</code></td>
+<td>
+<p>sfc polygon. optional</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dsn</code></td>
+<td>
+<p>character data source</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>approve_all_dl</code></td>
+<td>
+<p>logical blanket approval to download all missing data.
+Defaults to TRUE if session is non-interactive.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer_dist</code></td>
+<td>
+<p>numeric buffer with specified units</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temporary</code></td>
+<td>
+<p>logical set FALSE to save data to a persistent
+rappdirs location</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments passed to sf::st_read</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(sf)
+wk &lt;- wikilake::lake_wiki("Worden Pond")
+qry &lt;- nhd_query(wk$Lon, wk$Lat, dsn = c("NHDWaterbody", "NHDFlowLine"),
+  buffer_dist = units::as_units(1, "km"))
+qry$sp$NHDWaterbody &lt;- dplyr::filter(qry$sp$NHDWaterbody, FType != 466)
+
+plot(sf::st_geometry(qry$sp$NHDWaterbody), col = "blue")
+plot(sf::st_geometry(qry$sp$NHDFlowLine), col = "cyan", add = TRUE)
+plot(qry$pnt, col = "red", pch = 19, add = TRUE)
+axis(1)
+axis(2)
+
+# query with a polygon
+wbd &lt;- qry$sp$NHDWaterbody[
+  order(st_area(qry$sp$NHDWaterbody), decreasing = TRUE), ][1, ]
+qry_lines &lt;- nhd_query(poly = st_as_sfc(st_bbox(wbd)), dsn = "NHDFlowLine")
+library(ggplot2)
+ggplot() +
+  geom_sf(data = qry$sp$NHDWaterbody) +
+  geom_sf(data = qry_lines$sp$NHDFlowLine, color = "red")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

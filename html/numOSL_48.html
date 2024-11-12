@@ -1,0 +1,192 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RadialPlotter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Statistical age model optimization (with a Maximum Likelihood Estimation method) 
+</h2>
+
+<h3>Description</h3>
+
+<p>Depending on the specified number of components, this function performs statistical age models analysis reviewed in Galbraith and Roberts (2012) dynamically using a Maximum Likelihood Estimation method. Age models that can be applied include: central age model (CAM), minimum age model (MAM), and finite mixture age model (FMM). 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RadialPlotter(EDdata, ncomp = 0, addsigma = 0, 
+              maxcomp = 6, algorithm = c("port","lbfgsb"),
+              plot = TRUE, pcolor = "blue", psize = 1.5, 
+              kratio = 0.3, zscale = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>EDdata</code></td>
+<td>
+<p>matrix(<b>required</b>): a two-column matrix (i.e., equivalent dose values and<br>
+associated standard errors)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncomp</code></td>
+<td>
+<p>integer(with default): number of components, <code>ncomp=-1</code>, <code>ncomp=-2</code>, and <code>ncomp=1</code> mean respectively fitting <code>"MAM3"</code>, <code>"MAM4"</code>, and <code>"CAM"</code>, <code>ncomp=0</code> means fitting <code>"FMM"</code> with an automatically optimized number of components, and <code>ncomp=k</code> (k&gt;=2) means fitting <code>"FMM"</code> with k components</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>addsigma</code></td>
+<td>
+<p>numeric(with default): additional uncertainty, i.e., the sigmab value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxcomp</code></td>
+<td>
+<p>integer(with default): maximum number of components in FMM</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>character(with default): algorithm used for optimizing MAM,<br>
+default <code>algorithm="port"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical(with default): draw a radial plot or not</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pcolor</code></td>
+<td>
+<p>character(with default): color of a data point, input colors() to see more available colors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psize</code></td>
+<td>
+<p>numeric(with default): size of a data point</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kratio</code></td>
+<td>
+<p>numeric(with default): argument controlling the shape of zscale</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zscale</code></td>
+<td>
+<p>vector(optional): argument controlling the scale of z-axis.<br>
+Example: <code>zscale=seq(min(EDdata),max(EDdata),by=3L)</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+ 
+<p>Both CAM and FMM are fitted using a iterative Maximum Likelihood Estimation procedure outlined by Galbraith (1988), while MAM can be estimated using either the "L-BFGS-B" algorithm (<b><em>R</em></b> function optim in package <b><em>stats</em></b>) or the "port" algorithm (<b><em>R</em></b> function nlminb in package <b><em>stats</em></b>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Return an object of S3 class <code>"RadialPlotter"</code> that contains the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pars</code></td>
+<td>
+<p>optimized parameters, the names of CAM parameters are <code>c("CAM.OD","CAM.De")</code>, those of MAM3 paramters are <code>c("Prop","MAM3.De","Sigma")</code>, those of MAM4 parameters are <code>c("Prop","MAM4.De","Mu","Sigma")</code>, and those of FMM parameters are <code>c("Prop", "FMM.De")</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxlik</code></td>
+<td>
+<p>optimized maximum logged likelihood value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bic</code></td>
+<td>
+<p>calculated Bayesian Information Criterion (BIC) value</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Function RadialPlotter was given the same name as the <b><em>Java</em></b> package <b><em>RadialPlotter</em></b> written by Pieter Vermeesch (Vermeesch, 2009). Note that this function fits a model in log-scale, hence any minus equivalent dose value is not allowed, and that the procedure will return an error if any standard error of a parameter cannot be estimated by numerical difference-approximation.<br><br>
+The original <b><em>S</em></b> code for drawing a radial plot was written by Rex Galbraith and was transformed to <b><em>R</em></b> by Sebastian Kreutzer. The code for drawing radial plot in this function was modified from package <b><em>Luminescence</em></b> written by Kreutzer et al. (2012). We thank Dr Rex Galbraith for his permission to modify and bundle the code to this function. We also thank Dr Silke Schmidt, Dr Helena Rodnight, Dr Xian-Jiao Ou, and Dr Amanda Keen-Zebert for providing published OSL data sets to test this routine.<br><br>
+This function only considered the optimization of statistical age models (including CAM, MAM, and FMM) in a log-scale and will not be updated in future. The newly developed function optimSAM allows the optimzation of age models (including COM, MAM, MXAM, and FMM) in either log- or unlog-scale, and the accompanied function sensSAM allows the optimization of these age models with a number of different sizes of additional uncertainty (sigmab).
+</p>
+
+
+<h3>References</h3>
+
+<p>Galbraith RF, 1988. Graphical display of estimates having differing standard errors. Technometrics, 30(3): 271-281.
+</p>
+<p>Galbraith RF, 1990. The radial plot: Graphical assessment of spread in ages. International Journal of Radiation Applications and Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17(3): 207-214.
+</p>
+<p>Galbraith RF, Green P, 1990. Estimating the component ages in a finite mixture. International Journal of Radiation Applications and Instrumentation. Part D. Nuclear Tracks and Radiation Measurements, 17: 197-206.
+</p>
+<p>Galbraith RF, Laslett GM, 1993. Statistical models for mixed fission track ages. Nuclear Tracks And Radiation Measurements, 21(4): 459-470.
+</p>
+<p>Galbraith RF, 1994. Some applications of radial plots. Journal of the American Statistical Association, 89(428): 1232-1242.
+</p>
+<p>Galbraith RF, Roberts RG, Laslett GM, Yoshida H, Olley JM, 1999. Optical dating of single grains of quartz from Jinmium rock shelter, northern Australia. Part I: experimental design and statistical models. Archaeometry, 41(2): 339-364.
+</p>
+<p>Galbraith RF, 2005. Statistics for fission track analysis. Chapman &amp; Hall/CRC Press.
+</p>
+<p>Galbraith RF, 2010. On plotting OSL equivalent doses. Ancient TL, 28(1): 1-10.
+</p>
+<p>Galbraith RF, Roberts RG, 2012. Statistical aspects of equivalent dose and error calculation and display in OSL dating: an overview and some recommendations. Quaternary Geochronology, 11: 1-27.
+</p>
+<p><b>Further reading</b>
+</p>
+<p>Duller GAT, 2008. Single-grain optical dating of Quaternary sediments: why aliquot size matters in luminescence dating. Boreas, 37(4): 589-612.
+</p>
+<p>Kreutzer S, Schmidt C, Fuchs MC, Dietze M, Fischer M, Fuchs M, 2012. Introducing an R package for luminescence dating analysis. Ancient TL, 30(1): 1-8. 
+Software is freely available at <a href="https://CRAN.R-project.org/package=Luminescence">https://CRAN.R-project.org/package=Luminescence</a>.
+</p>
+<p>Rodnight H, 2008. How many equivalent dose values are needed to obtain a reproducible distribution? Ancient TL, 26(1): 3-10.
+</p>
+<p>Rodnight H, Duller GAT, Wintle AG, Tooth S, 2006. Assessing the reproducibility and accuracy of optical dating of fluvial deposits. Quaternary Geochronology, 1(2): 109-120.
+</p>
+<p>Schmidt S, Tsukamoto S, Salomon E, Frechen M, Hetzel R, 2012. Optical dating of alluvial deposits at the orogenic front of the andean precordillera (Mendoza, Argentina). Geochronometria, 39(1): 62-75.
+</p>
+<p>Vermeesch P, 2009. RadialPlotter: a Java application for fission track, luminescence and other radial plots. Radiation Measurements, 44: 409-410. 
+Software is freely available at <a href="https://www.ucl.ac.uk/~ucfbpve/radialplotter/">https://www.ucl.ac.uk/~ucfbpve/radialplotter/</a>.
+</p>
+<p>Peng J, Li B, Jacobs Z, 2020. Modelling heterogeneously bleached single-grain equivalent dose distributions: Implications for the reliability of burial dose determination. Quaternary Geochronology, 60: 101108.
+</p>
+<p>Peng J, Li B, Jacobs Z, Gliganic LA, 2023. Optical dating of sediments affected by post-depositional mixing: Modelling, synthesizing and implications. Catena, 232: 107383.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>mcMAM; mcFMM; dbED; psRadialPlot; EDdata; optimSAM; sensSAM
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  data(EDdata)
+  # Find out the appropriate number of components 
+  # in FMM and fit automatically.
+  RadialPlotter(EDdata$al3,zscale=seq(24,93,7))
+
+  # Fit MAM3 (not run). 
+  # RadialPlotter(EDdata$gl11,ncomp=-1,zscale=seq(20,37,3))
+</code></pre>
+
+
+</div>

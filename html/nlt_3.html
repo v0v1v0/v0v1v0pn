@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Denoise a signal using a nondecimated lifting transform</h2>
+
+<h3>Description</h3>
+
+<p>Starting with a noise-contaminated signal, we decompose it using a 'nondecimated' lifting algorithm (i.e. by applying the modified lifting transform following several random paths), shrink all the obtained detail coefficients and invert each transform to give an estimated signal. The average of all these estimates is the final proposal for estimating the true (unknown) signal.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlt(x, f, J, Pred = AdaptPred, neighbours = 1, closest = FALSE, intercept = TRUE, 
+nkeep = 2, trule = "median",verbose = TRUE,do.orig = FALSE, returnall = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector of any length (possibly irregularly spaced) that gives the grid locations where the signal is observed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>Vector of the same length as <code>x</code> that gives the signal values corresponding to the <code>x</code>-locations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>J</code></td>
+<td>
+<p>Number of trajectories to be used by the nondecimated lifting algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pred</code></td>
+<td>
+<p>The type of regression to be used in the prediction step of the modified lifting algorithm. Choices are linear, quadratic or cubic (respectively, <code>LinearPred</code>, <code>QuadPred</code> or <code>CubicPred</code>), or two adaptive procedures which automatically choose the degree used in regression, (<code>AdaptPred</code> or <code>AdaptNeigh</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neighbours</code></td>
+<td>
+<p>Number of neighbours to be used for defining the neighbourhood of each point that has to be removed. If (<code>closest</code>=FALSE), then this gives the number of neighbours to be used on each side of the removed point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>closest</code></td>
+<td>
+<p>If (<code>closest</code>=TRUE) or (<code>closest</code>=FALSE), then at each step the neighbours are in closest, respectively symmetrical configuration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>Specifies whether (<code>intercept</code>=TRUE) or not (<code>intercept</code>=FALSE) an intercept is to be used in the regression curve. For <code>Pred</code>=<code>AdaptPred</code> or <code>AdaptNeigh</code>, the algorithm automatically makes this choice.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nkeep</code></td>
+<td>
+<p>Number of scaling points we want at the end of the application of the transform. The usual choice is <code>nkeep</code>=2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trule</code></td>
+<td>
+<p>The type of Bayesian shrinkage technique, with possible choices posterior median (<code>"median"</code>) or posterior mean (<code>"mean"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A boolean indicating whether extra information should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.orig</code></td>
+<td>
+<p>A boolean indicating whether the original <code>adlift</code> algorithm should also be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnall</code></td>
+<td>
+<p>A boolean indicating whether the function returns useful variables or just the denoised datapoints.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Essentially, this function applies <code>J</code> times the modified lifting algorithm (that can be found in <code>fwtnpperm</code>), and removes the noise from all sets of detail coefficients by using empirical Bayes shrinkage (of package 'EbayesThresh'). Inverting (by means of the function <code>invtnp</code> of the package 'adlift') each transform consequently results in <code>J</code> estimates of the (unknown) true signal. The average of these estimators is our proposed estimator. The functions that appear as choices for <code>Pred</code> can be found in the package 'adlift'.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>vec</code></td>
+<td>
+<p>Matrix whose rows give the trajectories to be used by the nondecimated lifting algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ghatnat</code></td>
+<td>
+<p>Vector that gives the estimated true signal given by denoising using the lifting scheme that establishes its own order for removing the points (but with the same specification for prediction stage and neighbourhood as the modified algorithm), rather than a randomly generated order.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aveghat</code></td>
+<td>
+<p>Estimated signal, obtained as the average of the individual estimates from the random trajectory runs.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Use this function together with the "adlift" and "EbayesThresh" packages available from CRAN.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Marina Knight (marina.knight@bristol.ac.uk)</p>
+
+
+<h3>References</h3>
+
+<p>See the paper 'A "nondecimated" lifting transform.' by Knight, M.I. and Nason, G.P. (2009) for further details.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>denoiseperm</code>, <code>fwtnpperm</code>, <code>fwtnpperm</code>, and also <code>invtnp</code> of package 'adlift'</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># construct the grid
+x&lt;-runif(256) 
+
+# construct the true, normally unknown, signal
+g&lt;-make.signal2("blocks",x=x) 
+
+# generate noise with mean 0 and signal-to-noise ratio 5
+noise&lt;-rnorm(256,mean=0,sd=sqrt(var(g))/5)
+
+# generate a noisy version of g 
+f&lt;-g+noise 
+
+# decide on a number of random trajectories to be used (below J=100, in paper J=20,30), and apply
+# the nondecimated lifting transform to the noisy signal (x,f) 
+#
+# below we apply the modified lifting transform J times, each time following a different path, 
+# and using adaptive prediction with neighbourhoods of size 2 in closest configuration; 
+# all details are then thresholded using posterior medians and the algorithms inverted
+# the aggregate estimator of g proposed by our method is found in out$aveghat
+out&lt;-nlt(x,f,J=10,Pred=AdaptPred,neighbours=2,closest=TRUE,intercept=TRUE,nkeep=2,trule="median") 
+</code></pre>
+
+
+</div>

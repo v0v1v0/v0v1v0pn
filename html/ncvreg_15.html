@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ncvfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Direct interface for nonconvex penalized regression (non-pathwise)</h2>
+
+<h3>Description</h3>
+
+<p>This function is intended for users who know exactly what they're doing and want complete
+control over the fitting process:
+no standardization is applied, no intercept is included, no path is fit.
+All of these things are best practices for data analysis, so if you are choosing not to do
+them, you are on your own – there is no guarantee that your results will be meaningful.
+Some things in particular that you should pay attention to:
+</p>
+
+<ul>
+<li>
+<p> If your model has an intercept, it is up to you to (un)penalize it properly, typically
+by settings its corresponding element of <code>penalty.factor</code> to zero.
+</p>
+</li>
+<li>
+<p> You should provide initial values for the coefficients; in nonconvex optimization,
+initial values are very important in determining which local solution an algorithm
+converges to.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">ncvfit(
+  X,
+  y,
+  init = rep(0, ncol(X)),
+  r,
+  xtx,
+  penalty = c("MCP", "SCAD", "lasso"),
+  gamma = switch(penalty, SCAD = 3.7, 3),
+  alpha = 1,
+  lambda,
+  eps = 1e-05,
+  max.iter = 1000,
+  penalty.factor = rep(1, ncol(X)),
+  warn = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Design matrix; no intercept will be added, no standardization
+will occur (n x p matrix)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Response vector (length n vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>Initial values for beta.  Default: zero (length p vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>Residuals corresponding to <code>init</code>; these will be calculated if not
+supplied, but if they have already been calculated elsewhere, it is
+more efficient to pass them as an argument. WARNING: If you supply
+an incorrect value of <code>r</code>, the solution will be incorrect. (length
+n vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xtx</code></td>
+<td>
+<p>X scales: the jth element should equal <code>crossprod(X[,j])/n</code>. These
+will be calculated if not supplied, but if they have already been
+calculated elsewhere, it is more efficient to pass them as an
+argument.  In particular, if X is standardized, one should pass
+<code>xtx = rep(1, p)</code>.  WARNING: If you supply an incorrect value of
+<code>xtx</code>, the solution will be incorrect. (length p vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>Penalty function to be applied, either "MCP" (default), "SCAD", or
+"lasso")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>Tuning parameter of the MCP/SCAD penalty, as in <code>ncvreg()</code>; default
+is 3 for MCP and 3.7 for SCAD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Tuning paramter controlling the ridge component of penalty, as in
+<code>ncvreg()</code>; default is 1 (meaning no ridge penalty)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Regularization parameter value at which to estimate beta; must be
+scalar – for pathwise optimization, see <code>ncvreg()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>Convergence threshhold. The algorithm iterates until the RMSD for
+the change in linear predictors for each coefficient is less than
+eps. Default is 1e-4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.iter</code></td>
+<td>
+<p>Maximum number of allowed iterations; if this number is reached,
+algorithm will terminate prior to convergence.  Default: 1000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty.factor</code></td>
+<td>
+<p>Multiplicative factor for the penalty applied to each coefficient,
+as in <code>ncvreg()</code>.  In particular, note that if you include an
+intercept, you probably want to set its entry to zero here.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>Return warning messages for failures to converge and model
+saturation? Default is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>At the moment, this function only works for least-squares loss functions.  Additional
+functionality for other loss functions (logistic, Cox) is in development.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing:
+</p>
+
+<ul>
+<li> <p><code>beta</code>: The estimated regression coefficients
+</p>
+</li>
+<li> <p><code>iter</code>: The number of iterations required to solve for 'beta
+</p>
+</li>
+<li> <p><code>loss</code>: The loss (residual sum of squares) at convergence
+</p>
+</li>
+<li> <p><code>resid</code>: The residuals at convergence
+</p>
+</li>
+<li> <p><code>lambda</code>: See above
+</p>
+</li>
+<li> <p><code>penalty</code>: See above
+</p>
+</li>
+<li> <p><code>gamma</code>: See above
+</p>
+</li>
+<li> <p><code>alpha</code>: See above
+</p>
+</li>
+<li> <p><code>penalty.factor</code>: See above
+</p>
+</li>
+<li> <p><code>n</code>: Sample size
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Prostate)
+X &lt;- cbind(1, Prostate$X)
+y &lt;- Prostate$y
+fit &lt;- ncvfit(X, y, lambda=0.1, penalty.factor=c(0, rep(1, ncol(X)-1)))
+fit$beta
+# Compare with:
+coef(ncvreg(X, y), 0.1)
+# The unstandardized version makes little sense here, as it fails to account
+# for differences in the scales of the predictors.
+</code></pre>
+
+
+</div>

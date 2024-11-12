@@ -1,0 +1,90 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculate_area_intersection_weights</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Area Weighted Intersection (areal implementation)</h2>
+
+<h3>Description</h3>
+
+<p>Returns the fractional percent of each
+feature in x that is covered by each intersecting feature
+in y. These can be used as the weights in an area-weighted
+mean overlay analysis where x is the data source and area-
+weighted means are being generated for the target, y.
+</p>
+<p>This function is a lightwieght wrapper around the functions
+aw_intersect aw_total and aw_weight
+from the <a href="https://chris-prener.github.io/areal/">areal package</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculate_area_intersection_weights(x, y, allow_lonlat = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>sf data.frame source features including one geometry column and one identifier column</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>sf data.frame target features including one geometry column and one identifier column</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow_lonlat</code></td>
+<td>
+<p>boolean If FALSE (the default) lon/lat target features are not allowed.
+Intersections in lon/lat are generally not valid and problematic at the international date line.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data.frame containing fraction of each feature in x that is
+covered by each feature in y. e.g. If a feature from x is entirely within a feature in y,
+w will be 1. If a feature from x is 50
+will be two rows, one for each x/y pair of features with w = 0.5 in each.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">b1 = sf::st_polygon(list(rbind(c(-1,-1), c(1,-1),
+                           c(1,1), c(-1,1),
+                           c(-1,-1))))
+b2 = b1 + 2
+b3 = b1 + c(-0.2, 2)
+b4 = b1 + c(2.2, 0)
+b = sf::st_sfc(b1, b2, b3, b4)
+a1 = b1 * 0.8
+a2 = a1 + c(1, 2)
+a3 = a1 + c(-1, 2)
+a = sf::st_sfc(a1,a2,a3)
+plot(b, border = 'red')
+plot(a, border = 'green', add = TRUE)
+
+sf::st_crs(b) &lt;- sf::st_crs(a) &lt;- sf::st_crs(5070)
+
+b &lt;- sf::st_sf(b, data.frame(idb = c(1, 2, 3, 4)))
+a &lt;- sf::st_sf(a, data.frame(ida = c(1, 2, 3)))
+
+sf::st_agr(a) &lt;- sf::st_agr(b) &lt;- "constant"
+
+a_b &lt;- calculate_area_intersection_weights(a, b)
+b_a &lt;- calculate_area_intersection_weights(b, a)
+
+</code></pre>
+
+
+</div>

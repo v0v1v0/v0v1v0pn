@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NVAR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a nonlinear vector autoregression model</h2>
+
+<h3>Description</h3>
+
+<p>Described by Gauthier et al. (2021), also known as the "next generation reservoir computing" (NG-RC).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NVAR(data, vars, s, k, p, constant = TRUE, alpha = 0.05)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <code>tibble</code>, data.frame, or matrix that represents a time series of vectors, with each row as a time step.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars</code></td>
+<td>
+<p>A character vector of the variable names used in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>The number of time steps skipped between each two used time steps.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>The number of time steps used for constructing features.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>The order of polynomial feature vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constant</code></td>
+<td>
+<p>Whether there should be a constant value (1) in the feature set? Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The <code class="reqn">\alpha</code> value for ridge regression. Default is 0.05.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The feature vector is as follows (from the reference):
+</p>
+<p style="text-align: center;"><code class="reqn">\mathbb{O}_{\text {total }}=\mathbb{O}_{\text {lin }} \oplus \mathbb{O}_{\text {nonlinear }}^{(p)}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\mathbb{O}_{\operatorname{lin}, i}=\mathbf{X}_i \oplus \mathbf{X}_{i-s} \oplus \mathbf{X}_{i-2 s} \oplus \ldots \oplus \mathbf{X}_{i-(k-1) s}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\mathbb{O}_{\text {nonlinear }}^{(p)}=\mathbb{O}_{\text {lin }}\lceil\otimes\rceil \mathbb{O}_{\text {lin }}\lceil\otimes\rceil \ldots\lceil\otimes\rceil \mathbb{O}_{\text {lin }}</code>
+</p>
+
+<p>The feature vector <code class="reqn">\mathbb{O}_{\text {total }}</code> is then used as input for a ridge regression with <code>alpha</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <code>NVAR</code> object that contains <code>data</code>, <code>data_td</code> (a tidy form of <code>tibble</code> that contains the training data), <code>W_out</code> (the fitted coefficients), and <code>parameters</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Gauthier, D. J., Bollt, E., Griffith, A., &amp; Barbosa, W. A. S. (2021). Next generation reservoir computing. Nature Communications, 12(1), 5564. https://doi.org/10.1038/s41467-021-25801-2
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sim_NVAR()</code> for simulating the NVAR model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate test data from the Lorenz system
+testdata &lt;- nonlinearTseries::lorenz()
+testdata &lt;- tibble::as_tibble(testdata)
+# fit an NVAR model for the Lorenz system
+t1 &lt;- NVAR(data = testdata, vars = c("x", "y", "z"), s = 2, k = 2, p = 2, alpha = 1e-3)
+# simulate the NVAR model
+t1_sim &lt;- sim_NVAR(t1, length = 5000)
+# (also see README for the plots of the results and the comparison with the true model)
+
+</code></pre>
+
+
+</div>

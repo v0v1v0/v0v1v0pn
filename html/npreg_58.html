@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fitted</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Extract Smooth Model Fitted Values
+</h2>
+
+<h3>Description</h3>
+
+<p>Extracts the fitted values from a fit smoothing spline (fit by <code>ss</code>), smooth model (fit by <code>sm</code>), or generalized smooth model (fit by <code>gsm</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ss'
+fitted(object, ...)
+
+## S3 method for class 'sm'
+fitted(object, ...)
+
+## S3 method for class 'gsm'
+fitted(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class "gsm" output by the <code>gsm</code> function, "sm" output by the <code>sm</code> function, or "ss" output by the <code>ss</code> function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>other arugments (currently ignored)  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For objects of class <code>ss</code>, fitted values are predicted via <code>predict(object, object$data$x)$y</code>
+</p>
+<p>For objects of class <code>sm</code>, fitted values are extracted via <code>object$fitted.values</code>
+</p>
+<p>For objects of class <code>gsm</code>, fitted values are computed via <code>ginv(object$linear.predictors)</code> where <code>ginv = object$family$linkinv</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>Fitted values extracted (or predicted) from <code>object</code>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Chambers, J. M. and Hastie, T. J. (1992) <em>Statistical Models in S</em>. Wadsworth &amp; Brooks/Cole.
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), SAGE Research Methods Foundations. <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ss</code>, <code>sm</code>, <code>gsm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+fx &lt;- 2 + 3 * x + sin(2 * pi * x)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# smoothing spline
+mod.ss &lt;- ss(x, y, nknots = 10)
+fit.ss &lt;- fitted(mod.ss)
+
+# smooth model
+mod.sm &lt;- sm(y ~ x, knots = 10)
+fit.sm &lt;- fitted(mod.sm)
+
+# generalized smooth model (family = gaussian)
+mod.gsm &lt;- gsm(y ~ x, knots = 10)
+fit.gsm &lt;- fitted(mod.gsm)
+
+# compare fitted values
+mean((fit.ss - fit.sm)^2)
+mean((fit.ss - fit.gsm)^2)
+mean((fit.sm - fit.gsm)^2)
+</code></pre>
+
+
+</div>

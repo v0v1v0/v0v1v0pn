@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impact_susceptibility</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Impact Susceptibility, Fluidity and Diffusion</h2>
+
+<h3>Description</h3>
+
+<p>The <code>impact_susceptibility</code> measures the
+feasible contagion paths that can reach a vertex in relation to its
+direct contagion paths. When the impact susceptibility is greater than 1,
+it means that the vertex is vulnerable to other vertices beyond its direct
+neighbors (remotely vulnerable).
+</p>
+<p>The <code>impact_fluidity</code> is simply the average of the impact susceptibility in
+the network.
+</p>
+<p>The <code>impact_diffusion</code> tries to capture the influence
+exercised by a node on the propagation of impacts in the network. The
+impact diffusion of a vertex is measured by the change it causes on the
+impact susceptibility of other vertices when its power to
+propagate contagion is removed from the network.
+</p>
+<p>All these measures are based on the communicability of the
+vulnerability matrix (see <code>vulnerability_matrix</code> and
+<code>communicability_matrix</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impact_susceptibility(
+  exposures,
+  buffer,
+  weights = NULL,
+  terms = Inf,
+  sparse = TRUE,
+  binary = TRUE,
+  exposure_type = c("assets", "liabilities", "impact", "vulnerability")
+)
+
+impact_fluidity(
+  exposures,
+  buffer,
+  weights = NULL,
+  terms = Inf,
+  sparse = TRUE,
+  binary = TRUE,
+  exposure_type = c("assets", "liabilities", "impact", "vulnerability")
+)
+
+impact_diffusion(
+  exposures,
+  buffer,
+  weights = NULL,
+  terms = Inf,
+  sparse = TRUE,
+  binary = TRUE,
+  exposure_type = c("assets", "liabilities", "impact", "vulnerability")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>exposures</code></td>
+<td>
+<p>an adjacency <code>matrix</code>, (sparse) <code>Matrix</code> or an <code>igraph</code>
+object with the network of bilateral exposures between vertices. By default, the function
+expects the exposures in the form of an assets matrix
+in which A -&gt; B means that A has an asset with B. However, you can
+change that with the parameter <code>exposure_type</code>. When using a matrix, preferably it should have
+rows and columns names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>a numeric vector with the capital buffer for each vertex.
+Values should be in the same row/column order as the network of bilateral exposures. The
+buffer is not needed if <code>exposure_type = "vulnerability"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>default is <code>NULL</code>. You can use a numeric
+vector of weights to give some economic significance to the measures, like,
+for instance, the total assets of the nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>truncates the communicability matrix evaluation up to a pre-defined number of terms.
+If <code>terms = Inf</code> the function computes the matrix exponential using <code>expm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sparse</code></td>
+<td>
+<p>should the function use sparse matrices when computing the communicability? 
+However, if <code>terms = Inf</code>
+the function will use <code>expm</code> which uses <code>dgeMatrix-class</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>binary</code></td>
+<td>
+<p>if <code>binary = TRUE</code> the function computes a 'binary' impact or vulnerability matrix.
+It truncates all values less than 1 to 0 and all values greater than 1 to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exposure_type</code></td>
+<td>
+<p>character vector indicating the type of the bilateral exposures. It can be
+an <code>"assets"</code> network (where A -&gt; B means that A has an asset with B),
+a <code>"liabilities"</code> network (where A -&gt; B means that A has a debt with B),
+a (binary) <code>"impact"</code> matrix (where A -&gt; B indicates the relative impact
+of A in B's capital buffer), or 
+a (binary) <code>"vulnerability"</code> matrix 
+(where A -&gt; B indicates the relative impact A suffers from B's default). 
+The default is <code>"assets"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The <code>impact_susceptibility</code> function returns a vector with the (weighted) impact susceptibility
+</p>
+<p>The <code>impact_fluidity</code> function returns a vector with the (weighted) impact fluidity of the network.
+</p>
+<p>The <code>impact_diffusion</code> function returns a <code>data.frame</code> with
+the vertex name and the (weighted) start, intermediate and total impact diffusion.
+</p>
+
+
+<h3>References</h3>
+
+<p>Silva, T.C.; Souza, S.R.S.; Tabak, B.M. (2015) Monitoring vulnerability and impact
+diffusion in financial networks. Working Paper 392, Central Bank of Brazil.
+</p>
+<p>Silva, T.C.; Souza, S.R.S.; Tabak, B.M. (2015) Network structure analysis
+of the Brazilian interbank market . Working Paper 391, Central Bank of Brazil.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Creating example data
+## Assets Matrix (bilateral exposures)
+assets_matrix &lt;- matrix(c(0, 10, 3, 1, 0, 2, 0, 3, 0), ncol = 3)
+rownames(assets_matrix) &lt;- colnames(assets_matrix) &lt;- letters[1:3]
+
+## Capital Buffer
+buffer &lt;- c(a = 2, b = 5, c = 2)
+
+# Measures
+impact_susceptibility(assets_matrix, buffer)
+impact_fluidity(assets_matrix, buffer)
+impact_diffusion(assets_matrix, buffer)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nBentler</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bentler and Yuan's Procedure to Determine the Number of Components/Factors</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the Bentler and Yuan's indices for determining the
+number of components/factors to retain.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nBentler(x, N, log = TRUE, alpha = 0.05, cor = TRUE,
+  details = TRUE, minPar = c(min(lambda) - abs(min(lambda)) + 0.001,
+  0.001), maxPar = c(max(lambda), lm(lambda ~
+  I(length(lambda):1))$coef[2]), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>numeric: a <code>vector</code> of eigenvalues, a <code>matrix</code> of
+correlations or of covariances or a <code>data.frame</code> of data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>numeric: number of subjects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>logical: if <code>TRUE</code> does the maximization on the log values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>numeric: statistical significance level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cor</code></td>
+<td>
+<p>logical: if <code>TRUE</code> computes eigenvalues from a correlation
+matrix, else from a covariance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>logical: if <code>TRUE</code> also returns detains about the
+computation for each eigenvalue.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minPar</code></td>
+<td>
+<p>numeric: minimums for the coefficient of the linear trend to
+maximize.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxPar</code></td>
+<td>
+<p>numeric: maximums for the coefficient of the linear trend to
+maximize.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>variable: additionnal parameters to give to the <code>cor</code> or
+<code>cov</code> functions</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The implemented Bentler and Yuan's procedure must be used with care because
+the minimized function is not always stable, as Bentler and Yan (1996, 1998)
+already noted. In many cases, constraints must applied to obtain a solution,
+as the actual implementation did, but the user can modify these constraints.
+</p>
+<p>The hypothesis tested (Bentler and Yuan, 1996, equation 10) is: <br><br></p>
+<p>(1) <code class="reqn">\qquad \qquad H_k: \lambda_{k+i} = \alpha + \beta x_i, (i = 1,
+\ldots, q)</code> <br></p>
+<p>The solution of the following simultaneous equations is needed to find
+<code class="reqn">(\alpha, \beta) \in</code> <br></p>
+<p>(2) <code class="reqn">\qquad \qquad f(x) = \sum_{i=1}^q \frac{ [ \lambda_{k+j} - N \alpha
++ \beta x_j ] x_j}{(\alpha + \beta x_j)^2} = 0</code> <br><br> and <code class="reqn">\qquad
+\qquad g(x) = \sum_{i=1}^q \frac{ \lambda_{k+j} - N \alpha + \beta x_j
+x_j}{(\alpha + \beta x_j)^2} = 0</code> <br></p>
+<p>The solution to this system of equations was implemented by minimizing the
+following equation: <br></p>
+<p>(3) <code class="reqn">\qquad \qquad (\alpha, \beta) \in \inf{[h(x)]} = \inf{\log{[f(x)^2
++ g(x)^2}}]</code> <br></p>
+<p>The likelihood ratio test <code class="reqn">LRT</code> proposed by Bentler and Yuan (1996,
+equation 7) follows a <code class="reqn">\chi^2</code> probability distribution with <code class="reqn">q-2</code>
+degrees of freedom and is equal to: <br></p>
+<p>(4) <code class="reqn">\qquad \qquad LRT = N(k - p)\left\{ {\ln \left( {{n \over N}}
+\right) + 1} \right\} - N\sum\limits_{j = k + 1}^p {\ln \left\{ {{{\lambda
+_j } \over {\alpha + \beta x_j }}} \right\}} + n\sum\limits_{j = k + 1}^p
+{\left\{ {{{\lambda _j } \over {\alpha + \beta x_j }}} \right\}} </code> <br></p>
+<p>With <code class="reqn">p</code> beeing the number of eigenvalues, <code class="reqn">k</code> the number of
+eigenvalues to test, <code class="reqn">q</code> the <code class="reqn">p-k</code> remaining eigenvalues, <code class="reqn">N</code>
+the sample size, and <code class="reqn">n = N-1</code>.  Note that there is an error in the
+Bentler and Yuan equation, the variables <code class="reqn">N</code> and <code class="reqn">n</code> beeing inverted
+in the preceeding equation 4.
+</p>
+<p>A better strategy proposed by Bentler an Yuan (1998) is to used a minimized
+<code class="reqn">\chi^2</code> solution. This strategy will be implemented in a future version
+of the <span class="pkg">nFactors</span> package.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nFactors</code></td>
+<td>
+<p> numeric: vector of the number of factors retained
+by the Bentler and Yuan's procedure. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p> numeric: matrix of
+the details of the computation.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Gilles Raiche <br> Centre sur les Applications des Modeles de
+Reponses aux Items (CAMRI) <br> Universite du Quebec a Montreal<br><a href="mailto:raiche.gilles@uqam.ca">raiche.gilles@uqam.ca</a>
+<br><br> David Magis <br> Departement de mathematiques <br> Universite de Liege
+<br><a href="mailto:David.Magis@ulg.ac.be">David.Magis@ulg.ac.be</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bentler, P. M. and Yuan, K.-H. (1996). Test of linear trend in
+eigenvalues of a covariance matrix with application to data analysis.
+<em>British Journal of Mathematical and Statistical Psychology, 49</em>,
+299-312.
+</p>
+<p>Bentler, P. M. and Yuan, K.-H. (1998). Test of linear trend in the smallest
+eigenvalues of the correlation matrix. <em>Psychometrika, 63</em>(2), 131-144.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nBartlett</code>, <code>bentlerParameters</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## ................................................
+## SIMPLE EXAMPLE OF THE BENTLER AND YUAN PROCEDURE
+
+# Bentler (1996, p. 309) Table 2 - Example 2 .............
+n=649
+bentler2&lt;-c(5.785, 3.088, 1.505, 0.582, 0.424, 0.386, 0.360, 0.337, 0.303,
+            0.281, 0.246, 0.238, 0.200, 0.160, 0.130)
+
+results  &lt;- nBentler(x=bentler2, N=n)
+results
+
+plotuScree(x=bentler2, model="components",
+    main=paste(results$nFactors,
+    " factors retained by the Bentler and Yuan's procedure (1996, p. 309)",
+    sep=""))
+# ........................................................
+
+# Bentler (1998, p. 140) Table 3 - Example 1 .............
+n        &lt;- 145
+example1 &lt;- c(8.135, 2.096, 1.693, 1.502, 1.025, 0.943, 0.901, 0.816, 0.790,
+              0.707, 0.639, 0.543,
+              0.533, 0.509, 0.478, 0.390, 0.382, 0.340, 0.334, 0.316, 0.297,
+              0.268, 0.190, 0.173)
+
+results  &lt;- nBentler(x=example1, N=n)
+results
+
+plotuScree(x=example1, model="components",
+   main=paste(results$nFactors,
+   " factors retained by the Bentler and Yuan's procedure (1998, p. 140)",
+   sep=""))
+# ........................................................
+
+</code></pre>
+
+
+</div>

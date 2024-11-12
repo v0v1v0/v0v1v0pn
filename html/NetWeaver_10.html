@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rc.initialize</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Initialize Circos Plot Parameters</h2>
+
+<h3>Description</h3>
+
+<p>Setup default parameter for Circos plot.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rc.initialize(cyto.info, num.tracks=NULL, chr.order=NULL, 
+	stepUnit=10^7, Layout=c('circular','landscape'), params=list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cyto.info</code></td>
+<td>
+<p>data.frame, see <code>Details</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.tracks</code></td>
+<td>
+<p>integer, number of tracks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chr.order</code></td>
+<td>
+<p>character vector of chromosome ids specifying the ordering of chromosomes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stepUnit</code></td>
+<td>
+<p>integer, smoothing factor for faster plotting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Layout</code></td>
+<td>
+<p>layout for plotting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>params</code></td>
+<td>
+<p>a list of named items. See <code>Details</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>cyto.info</code> is a data.frame of chromosomal position ordered cytobands, with columns: <code>Chr</code>, <code>Start</code>, <code>End</code>, <code>Stain</code>, and any additional information (like band color),
+where <code>Chr</code> is chromosome name, <code>Start</code> and <code>End</code> are the start and end positions on the chromosome, and <code>Stain</code> is the cyto stain.
+The stain is normally one of the "gneg", "acen", "stalk", "gvar", "gpos", "gpos100", "gpos75", "gpos66", "gpos50", "gpos33", and "gpos25", which will be plotted by color
+"white", "red", "steelblue", "lightgrey", "black", "black", "gray40", "gray50", "gray60", "gray70" and "gray80", accordingly. Customized colors for the cyto bands can be specified in
+an additional column named "<code>BandColor</code>".<br><br>
+Additional plot parameters can be specified through argument <code>params</code>, including:
+</p>
+
+<ul>
+<li> <p><code>color.line</code>, color for lines and links, default "black".
+</p>
+</li>
+<li> <p><code>chr.padding</code>, padding between chromsomes is a fraction of the total chromosome sizes, default 0.1.
+</p>
+</li>
+<li> <p><code>track.padding</code>, paddings between tracks is a fraction of the track height, default 0.1
+</p>
+</li>
+<li> <p><code>track.height</code>, track height, default 0.15.
+</p>
+</li>
+<li> <p><code>radius</code> radius of the circos, default 1.
+</p>
+</li>
+<li> <p><code>sector.degree</code>, a value between 0 and <code>2*Pi</code> (the default) specifying the circular sector size of the circos plot.
+</p>
+</li>
+</ul>
+<p>After initialization, the parameter settings can be retrieved by <code>rc.get.params</code>.
+</p>
+<p>Noted that while <code>cyto.info</code> requires input to be in a form of chromosome cytobands, the input is not limited to genomic features. As illustrated in example data <code>Modules</code>, complex features of gene coexpression network modules can also be plotted with the current circos visualization technique.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Minghui Wang &lt;m.h.wang@live.com&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rc.get.params</code>, <code>rc.reset.params</code>, <code>rc.plot.ideogram</code>, <code>rc.plot.histogram</code>, <code>rc.plot.mHistogram</code>, <code>rc.plot.barchart</code>, <code>rc.plot.link</code>, <code>rc.plot.ribbon</code>, <code>Modules</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NetWeaver)
+options(stringsAsFactors=FALSE)
+## set fake Cyto data
+Cyto=data.frame(Chr=paste0('C',1:20), Start=1, End=100, BandColor=colors()[2:21])
+
+## initialize circos
+#firstly set number of tracks, should be larger than the actual number of tracks
+#used for plotting in order to leave sufficient sapce in the middle
+num.tracks=9 
+rc.initialize(Cyto, num.tracks=num.tracks, params=list(chr.padding=0.1,sector.degree=2*pi))
+
+##retrieve parameters
+params=rc.get.params()
+#make plot area
+rc.plot.area(size=0.95)
+
+##plot ideogram on track 1 and 2 (start from the outside to inside)
+track.num=1:2
+rc.plot.ideogram(track.num, plot.band=TRUE, plot.chromosome.id=TRUE)
+
+##plot histogram/barchart that span multiple chromosomes
+MultHistData=data.frame(Chr1=paste0('C',seq(1,18,3)), Start1=50, 
+	Chr2=paste0('C',seq(3,20,3)), End2=20, Col=1:6)
+track.num=3
+rc.plot.mHistogram(MultHistData, track.id=track.num, data.col=5,
+	color.col=5, fixed.height=FALSE)
+
+##plot histogram that occupies two tracks 4 and 5
+HistData=data.frame(Chr=paste0('C',1:20), Start=1, End=50, Data=runif(20))
+params$color.hist &lt;- 'black'
+rc.reset.params(params)
+track.num=5
+rc.plot.histogram(HistData, track.num, data.col=4, fixed.height=FALSE, 
+	track.border=NA, custom.track.height=params$track.height*2)
+
+##plot heatmap on track 6
+HeatData=data.frame(Chr=paste0('C',1:20), Start=1,End=100, Data=1:20)
+colfuncHeat=function(n) rev(heat.colors(n))
+track.num=track.num+1
+rc.plot.histogram(HeatData, track.num, data.col=4, color.gradient=colfuncHeat(50),
+	fixed.height=TRUE)
+
+##plot stacked barchart on track 7
+BarData=data.frame(Chr=paste0('C',1:20), Start=1, 
+	End=seq(10,86,length.out=20), Data=matrix(runif(20*4),nrow=20))
+track.num=track.num+1
+rc.plot.barchart(BarData, track.num, data.col=4:7)
+
+##plot links in the middle
+LinkData=data.frame(Chr1=sample(Cyto$Chr,40,replace=TRUE), Pos1=20, 
+	Chr2=sample(Cyto$Chr,40,replace=TRUE),Pos2=20, Data=runif(20))
+LinkData=LinkData[LinkData$Chr1 != LinkData$Chr2,]
+params$color.line='blue'
+rc.reset.params(params)
+track.num=track.num+1
+rc.plot.link(LinkData, track.num, data.col=4, arrow.length=0.1)
+ribbonData=data.frame(Chr1=c('C1','C3'), Start1=c(10,10), End1=c(40,40),
+	Chr2=c('C17','C10'), Start2=20, End2=60, Col=c('red','brown'))
+rc.plot.ribbon(ribbonData, track.num, color.col='Col', twist=TRUE)
+#label track id
+rc.plot.track.id(2:7, col=2)
+#add text label
+rc.plot.text(data.frame(Chr='C3',Pos=50,Label='GeneX'), 
+	track.id=3,srt=45,cex=0.8,col='blue')
+#add line mark
+rc.plot.line(data.frame(Chr='C19',Pos=seq(10,90,by=15),Col='red'), 
+	track.id=3, color.col=3,arrow.length=0.2)
+</code></pre>
+
+
+</div>

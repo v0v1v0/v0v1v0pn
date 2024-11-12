@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>spot_price_forecast</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forecast spot prices of an N-factor model</h2>
+
+<h3>Description</h3>
+
+<script id="MathJax-script" async src="../../mathjaxr/doc/mathjax/es5/tex-chtml-full.js"></script><p>Analytically forecast expected spot prices following the "true" process of a given n-factor stochastic model
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">spot_price_forecast(x_0, parameters, t, percentiles = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x_0</code></td>
+<td>
+<p><code>vector</code>. Initial values of the state variables, where the length must correspond to the number of factors specified in the parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameters</code></td>
+<td>
+<p><code>vector</code>. A named vector of parameter values of a specified N-factor model. Function <code>NFCP_parameters</code> is recommended.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p><code>vector</code>. Discrete time points, in years, to forecast spot prices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percentiles</code></td>
+<td>
+<p><code>vector</code>. Optional. Probabilistic forecasting percentile intervals.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Future expected spot prices under the N-factor model can be forecasted through the analytic expression of expected future prices under the "true" N-factor process.
+</p>
+<p>Given that the log of the spot price is equal to the sum of the state variables (equation 1), the spot price is log-normally distributed with the expected prices given by:
+</p>
+\[E[S_t] = exp(E[ln(S_t)] + \frac{1}{2}Var[ln(S_t)])\]
+<p>Where:
+\[E[ln(S_t)] = season(t) + \sum_{i=1}^Ne^{-(\kappa_it)}x_i(0) + \mu t\]
+</p>
+<p>Where \(\kappa_i = 0\) when <code>GBM=T</code> and \(\mu = 0\) when <code>GBM = F</code>
+</p>
+\[Var[ln(S_t)] =  \sigma_1^2t + \sum_{i.j\neq1}\sigma_i\sigma_j\rho_{i,j}\frac{1-e^{-(\kappa_i+\kappa_j)t}}{\kappa_i+\kappa_j}\]
+<p>and thus:
+</p>
+\[E[S_t] = exp(season(t) + \sum_{i=1}^N e^{-\kappa_it}x_i(0) + (\mu + \frac{1}{2}\sigma_1^2)t + \frac{1}{2}\sum_{i.j\neq1} \sigma_i\sigma_j\rho_{i,j}\frac{1-e^{-(\kappa_i+\kappa_j)t}}{\kappa_i+\kappa_j})\]
+<p>Under the assumption that the first factor follows a Brownian Motion, in the long-run expected spot prices grow over time at a constant rate of \(\mu + \frac{1}{2}\sigma_1^2\) as the \(e^{-\kappa_it}\) and \(e^{-(\kappa_i + \kappa_j)t}\) terms approach zero.
+</p>
+<p>An important consideration when forecasting spot prices using parameters estimated through maximum likelihood estimation is that the parameter estimation process takes the assumption of risk-neutrality and thus the
+true process growth rate \(\mu\) is not estimated with a high level of precision. This can be shown from the higher standard error for \(\mu\) than other estimated parameters,
+such as the risk-neutral growth rate \(\mu^*\). See Schwartz and Smith (2000) for more details.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>spot_price_forecast</code> returns a vector of expected future spot prices under a given N-factor model at specified discrete future time points. When <code>percentiles</code> are specified, the function returns a matrix with the corresponding confidence bands in each column of the matrix.
+</p>
+
+
+<h3>References</h3>
+
+<p>Schwartz, E. S., and J. E. Smith, (2000). Short-Term Variations and Long-Term Dynamics in Commodity Prices. <em>Manage. Sci.</em>, 46, 893-911.
+</p>
+<p>Cortazar, G., and L. Naranjo, (2006). An N-factor Gaussian model of oil futures prices. <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em>, 26(3), 243-268.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Forecast the Schwartz and Smith (2000) two-factor oil model:
+
+##Step 1 - Kalman filter of the two-factor oil model:
+SS_2F_filtered &lt;- NFCP_Kalman_filter(SS_oil$two_factor,
+                                    names(SS_oil$two_factor),
+                                    log(SS_oil$stitched_futures),
+                                    SS_oil$dt,
+                                    SS_oil$stitched_TTM,
+                                    verbose = TRUE)
+
+##Step 2 - Probabilistic forecast of N-factor stochastic differential equation (SDE):
+spot_price_forecast(x_0 = SS_2F_filtered$x_t,
+                   parameters = SS_oil$two_factor,
+                   t = seq(0,9,1/12),
+                   percentiles = c(0.1, 0.9))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>identifyUbq</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>identifyUbq</h2>
+
+<h3>Description</h3>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">identifyUbq(data, pre_ratio = 0.5, lower_trim = 0.05, upper_trim = 0.65, min_ubq = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pre_ratio</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower_trim</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper_trim</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_ubq</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (data, pre_ratio = 0.5, lower_trim = 0.05, upper_trim = 0.65,
+    min_ubq = 100)
+{
+    qlower &lt;- apply(data, 2, function(x) quantile(x[x != 0],
+        p = lower_trim))
+    qupper &lt;- apply(data, 2, function(x) quantile(x[x != 0],
+        p = upper_trim))
+    ubq_genes &lt;- NULL
+    for (i in 1:nrow(data)) {
+        genes_finded &lt;- findGenes(data[i, ], qlower = qlower,
+            qupper = qupper, pre_ratio = pre_ratio)
+        ubq_genes &lt;- c(ubq_genes, genes_finded)
+    }
+    if (length(ubq_genes) &lt; min_ubq) {
+        cat("Parameters range", lower_trim, "-", upper_trim,
+            "...identified too few ubiquitous genes (", length(ubq_genes),
+            "), trying range 5-95  instead", "\n")
+        ubq_genes &lt;- identifyUbqRepeat(data, pre_ratioC = pre_ratio,
+            lower_trimC = 0.05, upper_trimC = 0.95)
+    }
+    return(ubq_genes)
+  }
+</code></pre>
+
+
+</div>

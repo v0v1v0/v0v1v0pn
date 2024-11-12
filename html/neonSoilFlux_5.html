@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compute_monthly_mean</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function to compute monthly means for a given month of NEON data.</h2>
+
+<h3>Description</h3>
+
+<p>Given a NEON measurement data frame calculate the monthly mean values across all horizontal and vertical locations. Based off code from Zoey Werbin.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compute_monthly_mean(
+  NEON_data,
+  position_columns = c("horizontalPosition", "verticalPosition")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>NEON_data</code></td>
+<td>
+<p>Required. Input vector of neon measurements for a month</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>position_columns</code></td>
+<td>
+<p>Optional. Do we group by horizontalPosition, verticalPosition, and? Default is both. Added this option in case we just want to average across a given dimension.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame that reports for each horiztonal and vertical position the computed mean and standard deviation from sampling (similar to a bootstrap method) as well as the sample mean and sample standard deviation
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>John Zobitz <a href="mailto:zobitz@augsburg.edu">zobitz@augsburg.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Zoey Werbin (@zoey-rw): original author https://github.com/zoey-rw/microbialForecasts/blob/caa7b1a8aa8a131a5ff9340f1562cd3a3cb6667b/data_construction/covariate_prep/soil_moisture/clean_NEON_sensor_moisture_data.r
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Download the NEON data directly - here this would be soil moisture
+NEON_moist_30m_orig &lt;- neonUtilities::loadByProduct(
+  dpID = "DP1.00094.001",
+  site = "WREF",
+  startdate = "2022-06",
+  enddate = "2022-06",
+  timeIndex = "30",
+  package = "expanded",
+  check.size = FALSE,
+  include.provisional = TRUE
+)
+
+
+# Then correct the swc
+site_swc &lt;- swc_correct(NEON_moist_30m_orig, "WREF","2022-06")
+
+# Select the columns and the time frequency
+time_frequency &lt;- "30_minute"
+column_selectors &lt;- c("Mean", "Minimum", "Maximum", "ExpUncert", "StdErMean")
+
+    swc &lt;- site_swc |&gt;
+    purrr::pluck(paste0("SWS_",time_frequency)) |&gt;
+    dplyr::select(tidyselect::all_of(c("domainID","siteID",
+    "horizontalPosition","verticalPosition","startDateTime","VSWCFinalQF")),
+    tidyselect::matches(stringr::str_c("VSWC",column_selectors)))
+
+  # Determine a data frame of the different horizontal and vertical positions
+  swc_positions &lt;- site_swc |&gt;
+  purrr::pluck(paste0("sensor_positions_","00094"))
+
+  # Add on the positions for swc
+  swc &lt;- determine_position(swc_positions,swc)
+  
+</code></pre>
+
+
+</div>

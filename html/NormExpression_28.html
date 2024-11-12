@@ -1,0 +1,241 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nonzeroRatio2AUCVC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>nonzeroRatio2AUCVC</h2>
+
+<h3>Description</h3>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nonzeroRatio2AUCVC(data, dataType = c("bk", "sc"),
+HG7 = NULL, ERCC = NULL, TN = NULL, TC = NULL, CR = NULL, NR = NULL, DESeq = NULL,
+UQ = NULL, TMM = NULL, TU = 0, GAPDH = NULL, nonzeroRatio = NULL, cvNorm = TRUE,
+cvResolution = 0.005)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataType</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HG7</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ERCC</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TN</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TC</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CR</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NR</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DESeq</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>UQ</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TMM</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TU</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>GAPDH</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonzeroRatio</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvNorm</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvResolution</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (data, dataType = c("bk", "sc"), HG7 = NULL, ERCC = NULL,
+    TN = NULL, TC = NULL, CR = NULL, NR = NULL, DESeq = NULL,
+    UQ = NULL, TMM = NULL, TU = 0, GAPDH = NULL, nonzeroRatio = NULL,
+    cvNorm = TRUE, cvResolution = 0.005)
+{
+    nozeroIndex &lt;- filteredZero(data, nonzeroRatio = nonzeroRatio)
+    methodsList &lt;- list(HG7 = HG7, ERCC = ERCC, TN = TN, TC = TC,
+        CR = CR, NR = NR, DESeq = DESeq, UQ = UQ, TMM = TMM,
+        TU = TU, GAPDH = GAPDH)
+    specifiedMethods &lt;- methodsList[!unlist(lapply(methodsList,
+        is.null))]
+    if (length(TU) == 1 &amp;&amp; TU == 0) {
+        specifiedMethods$TU &lt;- NULL
+    }
+    if (length(TU) == 1 &amp;&amp; TU == 1) {
+        if (dataType == "bk") {
+            optimalPara &lt;- optTU(data, nonzeroRatio = nonzeroRatio,
+                pre_ratio_range = c(1, 1), prResolution = 0.1,
+                lower_range = c(0.05, 0.4), upper_range = c(0.6,
+                  0.95), qResolution = 0.05, min_ubq = 1000,
+                cvNorm = cvNorm, cvResolution = cvResolution)
+        }
+        else {
+            optimalPara &lt;- optTU(data, nonzeroRatio = nonzeroRatio,
+                pre_ratio_range = c(0.2, 0.6), prResolution = 0.1,
+                lower_range = c(0.05, 0.4), upper_range = c(0.6,
+                  0.95), qResolution = 0.05, min_ubq = 100, cvNorm = cvNorm,
+                cvResolution = cvResolution)
+        }
+        optimalPara &lt;- as.matrix(optimalPara)
+        lower_trim &lt;- optimalPara["lower", 1]
+        upper_trim &lt;- optimalPara["upper", 1]
+        pre_ratio &lt;- optimalPara["ratio", 1]
+        para &lt;- c(nonzeroRatio, pre_ratio, lower_trim, upper_trim)
+        names(para)[1] &lt;- "nonzeroRatio"
+        paraMatrix &lt;- t(as.matrix(para))
+        write.table(paraMatrix, file = "bestPara.txt", sep = "\t",
+            row.names = FALSE, col.names = FALSE, append = TRUE)
+        TU.factors &lt;- getFactors(data, method = "TU", lower_trim = lower_trim,
+            upper_trim = upper_trim, pre_ratio = pre_ratio, min_ubq = 100)
+        norm.matrix &lt;- getNormMatrix(data, TU.factors)
+        dataUse2CV &lt;- norm.matrix[nozeroIndex, ]
+        cv.result &lt;- getCV(dataUse2CV, cvNorm = cvNorm)
+        TU.AUCVC &lt;- CV2AUCVC(cv.result, cvResolution = cvResolution)
+        specifiedMethods$TU &lt;- NULL
+    }
+    numMethod &lt;- length(specifiedMethods)
+    if (numMethod &gt;= 1) {
+        method_range &lt;- seq(1, numMethod, 1)
+        for (i in method_range) {
+            norm.matrix &lt;- getNormMatrix(data, specifiedMethods[[i]])
+            dataUse2CV &lt;- norm.matrix[nozeroIndex, ]
+            cv.result &lt;- getCV(dataUse2CV, cvNorm = cvNorm)
+            assign(names(specifiedMethods)[i], CV2AUCVC(cv.result,
+                cvResolution = cvResolution))
+        }
+        AUCVC.result &lt;- NULL
+        for (i in method_range) {
+            AUCVC.result &lt;- cbind(AUCVC.result, get(names(specifiedMethods)[i]))
+        }
+        colnames(AUCVC.result) &lt;- names(specifiedMethods)
+        if (length(TU) == 1 &amp;&amp; TU == 1) {
+            AUCVC.result &lt;- cbind(AUCVC.result, TU.AUCVC)
+            colnames(AUCVC.result) &lt;- c(names(specifiedMethods),
+                "TU")
+        }
+    }
+    if (numMethod == 0 &amp;&amp; TU == 0)
+        stop("Please specify at least one method!")
+    if (numMethod == 0 &amp;&amp; TU == 1) {
+        AUCVC.result &lt;- as.matrix(TU.AUCVC)
+        colnames(AUCVC.result) &lt;- "TU"
+    }
+    return(AUCVC.result)
+  }
+</code></pre>
+
+
+</div>

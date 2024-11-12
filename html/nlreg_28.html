@@ -1,0 +1,337 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlreg.diag</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonlinear Heteroscedastic Model Diagnostics
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates different types of residuals, influence measures and 
+leverages for a nonlinear heteroscedastic model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  nlreg.diag(fitted, hoa = TRUE, infl = TRUE, trace = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fitted</code></td>
+<td>
+
+<p>a <code>nlreg</code> object, that is, the result of a call to 
+<code>nlreg</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hoa</code></td>
+<td>
+
+<p>logical value indicating whether higher order asymptotics should 
+be used for calculating the regression diagnostics.  Default is 
+<code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>infl</code></td>
+<td>
+
+<p>logical value indicating whether influence measures should be
+calculated on the basis of a leave-one-out analysis.  Default is 
+<code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+
+<p>logical value.  If <code>TRUE</code>, details of the iterations are 
+printed.  Default is <code>FALSE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The regression diagnostics implemented in the <code>nlreg.diag</code> 
+routine follow two approaches.  The first exploits, where possible, 
+the analogy with linear models, that is, it applies the classical 
+definitions of residuals, leverages and Cook's distance after having
+linearized the nonlinear model through Taylor series expansion 
+(<cite>Carroll and Ruppert, 1988, Section 2.8</cite>).  The second 
+approach uses the mean shift outlier model (<cite>Cook and Weisberg,
+1982, Section 2.2.2</cite>), where a dummy variable is included for each 
+observation at a time, the model refitted and the significance of 
+the corresponding coefficient assessed.
+</p>
+<p>The leverages are defined in analogy to the linear case 
+(<cite>Brazzale, 2000, Appendix A.2.2</cite>).  Two versions are available.
+In the first case the sub-block of the inverse of the expected 
+information matrix corresponding to the regression coefficients is 
+used in the definition.  In the second case, this matrix is replaced 
+by the inverse of <code class="reqn">M'WM</code>, where <code class="reqn">M</code> is the 
+<code class="reqn">n\times p</code> matrix whose <code class="reqn">i</code>th row is the gradient 
+of the mean function evaluated at the ith data point and <code class="reqn">W</code> 
+is a diagonal matrix whose elements are the inverses of the variance
+function evaluated at each data point.
+</p>
+<p>If the model is correctly specified, all residuals follow the standard
+normal distribution.  The second kind of leverages described above 
+are used to calculate the approximate studentized residuals, whereas 
+the generalized Pearson residuals use the first kind.  The 
+<code class="reqn">i</code>th generalized Pearson residual can also be obtained as the
+score statistic for testing the significance of the dummy coefficient
+in the mean shift outlier model for observation <code class="reqn">i</code>.  
+Accordingly, the <code class="reqn">i</code>th deletion and <code class="reqn">r^*</code>-type 
+residuals are defined as respectively the likelihood root and
+modified likelihood root statistics (<code class="reqn">r</code> and 
+<code class="reqn">r^*</code>) for the same situation (<cite>Bellio, 2000, Section 
+2.6.1</cite>).
+</p>
+<p>Different influence measures were implemented in 
+<code>nlreg.diag</code>.  If <code>infl = TRUE</code>, the global measure 
+(<cite>Cook and Weisberg, 1982, Section 5.2</cite>) and two partial ones 
+(<cite>Bellio, 2000, Section 2.6.2</cite>), the first measuring the 
+influence of each observation on the regression coefficients and the 
+second on the variance parameters, are returned.  They are calculated
+through a leave-one-out analysis, where one observation at a time is 
+deleted and the model refitted.  In order to avoid a further model 
+fit, the constrained maximum likelihood estimates that would be 
+needed are approximated by means of a Taylor series expansion 
+centered at the <abbr><span class="acronym">MLE</span></abbr>s.  If <code>infl = FALSE</code>, only an 
+approximation to Cook's distance, obtained from a first order Taylor 
+series expansion of the partial influence measure for the regression
+coefficients, is returned.
+</p>
+<p>A detailed account of regression diagnostics can be found in 
+<cite>Davison and Snell (1991)</cite> and <cite>Davison and Tsai (1992)</cite>.  
+The details and in particular the definitions of the above residuals 
+and diagnostics are given in <cite>Brazzale (2000, Section 6.3.1 and 
+Appendix A.2.2)</cite>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns an object of class <code>nlreg.diag</code> with the following 
+components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fitted</code></td>
+<td>
+
+<p>the fitted values, that is, the mean function evaluated at each 
+data point.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid</code></td>
+<td>
+
+<p>the response (or standardized) residuals from the fit.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rp</code></td>
+<td>
+
+<p>the generalized Pearson residuals from the fit.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rs</code></td>
+<td>
+
+<p>the approximate studentized residuals from the fit.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rj</code></td>
+<td>
+
+<p>the deletion residuals from the fit; only if <code>hoa = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rsj</code></td>
+<td>
+
+<p>the <code class="reqn">r^*</code>-type residuals from the fit; only if 
+<code>hoa = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+
+<p>the leverages of the observations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ha</code></td>
+<td>
+
+<p>the approximate leverages of the observations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cook</code></td>
+<td>
+
+<p>an approximation to Cook's distance for the regression 
+coefficients. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ld</code></td>
+<td>
+
+<p>the global influence of each observation; only for heteroscedastic
+errors and if <code>infl = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ld.rc</code></td>
+<td>
+
+<p>the partial influence of each observation on the estimates of the 
+regression coefficients; only for heteroscedastic errors and if 
+<code>infl = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ld.vp</code></td>
+<td>
+
+<p>the partial influence of each observation on the estimates of the
+variance parameters; only for heteroscedastic errors and if 
+<code>infl = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+
+<p>the number of regression coefficients.
+</p>
+</td>
+</tr>
+</table>
+<h3>Side Effects</h3>
+
+<p>If <code>trace = TRUE</code>, the number of the observation currently 
+considered in the mean shift outlier model or omitted in the 
+leave-one-out analysis (see <b>Details</b> section above) is printed;
+only if <code>hoa = TRUE</code> or <code>infl = TRUE</code>.
+</p>
+
+
+<h3>Acknowledgments</h3>
+
+<p>This function is based on A. J. Canty's function 
+<code>glm.diag</code> contained in library <code>boot</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The calculation of the deletion and <code class="reqn">r^*</code>-type residuals and 
+of the influence measures can be time-consuming.  In the first case, 
+the mean shift outlier model has to be refitted as many times as the 
+total number of observations.  In the second case, the original model
+is refitted the same amount of times, where one observation at a time
+is deleted.  Furthermore, the definition of the <code class="reqn">r^*</code>-type 
+residuals 
+requires differentiation of the mean function of the mean shift 
+outlier model.  These calculations can be avoided by changing the 
+default setting of the arguments <code>hoa</code> and <code>infl</code> to 
+<code>FALSE</code>.
+</p>
+<p>To obtain some of the regression diagnostics (typically those based 
+on higher order statistics), the model is repeatedly refitted for 
+different values of the mean shift outlier model parameter.  Although
+rarely, convergence problems may occur as the starting values are 
+chosen in an automatic way.  A <code>try</code> construct is 
+used to prevent the <code>nlreg.diag</code> method from breaking down.  
+Hence, the values of the diagnostics are not available where a 
+convergence problem was encountered.  A warning is issued whenever 
+this occurs.
+</p>
+
+
+<h3>References</h3>
+
+<p>Bellio, R. (2000) <em>Likelihood Asymptotics: Applications in 
+Biostatistics</em>.  Ph.D. Thesis, Department of Statistics, University 
+of Padova.
+</p>
+<p>Brazzale, A. R. (2000) <em>Practical Small-Sample Parametric 
+Inference</em>.  Ph.D. Thesis N. 2230, Department of Mathematics, Swiss 
+Federal Institute of Technology Lausanne.
+</p>
+<p>Carroll, R. J. and Ruppert, D. (1988) <em>Transformation and 
+Weighting in Regression</em>.  London: Chapman &amp; Hall.
+</p>
+<p>Cook, R. D. and Weisberg, S. (1982) <em>Residuals and Influence in 
+Regression</em>.  New York: Chapman &amp; Hall.
+</p>
+<p>Davison, A. C. and Snell, E. J. (1991) Residuals and diagnostics.  
+In <em>Statistical Theory and Modelling: In Honour of Sir David 
+Cox</em> (eds. D. V. Hinkley, N. Reid, and E. J. Snell), 83–106.  
+London: Chapman &amp; Hall.
+</p>
+<p>Davison, A. C. and Tsai, C.-L. (1992) Regression model diagnostics.  
+<em>Int. Stat. Rev.</em>, <b>60</b>, 337–353.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nlreg.diag.plots</code>, 
+<code>nlreg.object</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(boot)
+data(calcium)
+calcium.nl &lt;- nlreg( cal ~ b0*(1-exp(-b1*time)), weights = ~ ( 1+time^g )^2, 
+                     data=calcium, start = c(b0 = 4, b1 = 0.1, g = 1), 
+                     hoa = TRUE )
+##
+calcium.diag &lt;- nlreg.diag( calcium.nl )
+plot( calcium.diag, which = 9 )
+##
+calcium.diag &lt;- nlreg.diag( calcium.nl, hoa = FALSE, infl = FALSE)
+plot(calcium.diag, which = 9)
+## Not available
+</code></pre>
+
+
+</div>

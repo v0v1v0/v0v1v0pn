@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dLogitBeta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Logit transformed beta distribution.</h2>
+
+<h3>Description</h3>
+
+<p>Logit transformation of beta random variable to the real line.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dLogitBeta(x, shape1 = 1, shape2 = 1, log = 0)
+
+rLogitBeta(n = 1, shape1 = 1, shape2 = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A continuous random variable on the real line, where y=ilogit(x) and y ~ dbeta(shape1, shape2).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape1</code></td>
+<td>
+<p>non-negative parameter of the Beta distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape2</code></td>
+<td>
+<p>non-negative parameter of the Beta distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>logical flag. Returns log-density if TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of random variables. Currently limited to 1, as is common in nimble. See ?replicate for an alternative.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>density or log-density of beta distributions transformed to real line via logit function.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>David R.J. Pleydell
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Create a beta random variable, and transform it to the logit scale
+n      = 100000
+sh1    = 1
+sh2    = 11
+y      = rbeta(n=n, sh1, sh2)
+x      = logit(y)
+
+## Plot histograms of the two random variables
+oldpar &lt;- par()
+par(mfrow=n2mfrow(2))
+## Plot 1
+hist(x, n=100, freq=FALSE)
+curve(dLogitBeta(x, sh1, sh2), -15, 4, n=1001, col="red", add=TRUE, lwd=3)
+## Plot 2: back-transformed
+xNew = replicate(n=n, rLogitBeta(n=1, sh1, sh2))
+yNew   = ilogit(xNew)
+hist(yNew, n=100, freq=FALSE, xlab="exp(x)")
+curve(dbeta(x, sh1, sh2), 0, 1, n=1001, col="red", lwd=3, add=TRUE)
+par(oldpar)
+
+## Create a NIMBLE model that uses this transformed distribution
+code = nimbleCode({
+  x ~ dLogitBeta(sh1, sh2)
+})
+
+
+## Build &amp; compile the model
+const = list(sh1=sh1, sh2=sh2)
+modelR = nimbleModel(code=code, const=const)
+modelC = compileNimble(modelR)
+
+## Configure, build and compile an MCMC
+conf  = configureMCMC(modelC)
+mcmc  = buildMCMC(conf=conf)
+cMcmc = compileNimble(mcmc)
+
+## Run the MCMC
+x = as.vector(runMCMC(mcmc=cMcmc, niter=50000))
+
+## Plot MCMC output
+oldpar &lt;- par()
+par(mfrow=n2mfrow(3))
+## Plot 1: MCMC trajectory
+plot(x, typ="l")
+## Plot 2: taget density on unbounded sampling scale
+hist(x, n=100, freq=FALSE, xlab="x = logit(y)")
+curve(dLogitBeta(x, sh1, sh2), -15, 5, n=1001, col="red", lwd=3, add=TRUE)
+## Plot 3: taget density on bounded scale
+hist(ilogit(x), n=100, freq=FALSE, xlab="y")
+curve(dbeta(x, sh1, sh2), 0, 1, n=1001, col="red", lwd=3, add=TRUE)
+par(oldpar)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neon_download</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Download NEON data products into a local store</h2>
+
+<h3>Description</h3>
+
+<p>Download NEON data products into a local store
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neon_download(
+  product,
+  table = NA,
+  site = NA,
+  start_date = NA,
+  end_date = NA,
+  type = "basic",
+  release = NA,
+  quiet = FALSE,
+  verify = TRUE,
+  unique = TRUE,
+  dir = neon_dir(),
+  get_zip = FALSE,
+  unzip = FALSE,
+  api = "https://data.neonscience.org/api/v0",
+  .token = Sys.getenv("NEON_TOKEN")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>product</code></td>
+<td>
+<p>A NEON <code>productCode</code> or list of product codes, see examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>table</code></td>
+<td>
+<p>Include only files matching this table name (or regex pattern).
+(optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>site</code></td>
+<td>
+<p>4-letter site code(s) to filter on. Leave as <code>NA</code> to search all.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start_date</code></td>
+<td>
+<p>Download only files as recent as (<code>YYYY-MM-DD</code>). Leave
+as <code>NA</code> to download up to the most recent available data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end_date</code></td>
+<td>
+<p>Download only files up to end_date (<code>YYYY-MM-DD</code>). Leave as
+<code>NA</code> to download all prior data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Should we prefer the basic or expanded version of this product?
+Note that not all products have expanded formats.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>release</code></td>
+<td>
+<p>Select only data files associated with a particular release tag,
+see <a href="https://www.neonscience.org/data-samples/data-management/data-revisions-releases">https://www.neonscience.org/data-samples/data-management/data-revisions-releases</a>,
+e.g. "RELEASE-2021".  Releases are associated with a specific DOI and the promise that
+files associated with a particular release will not change.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Should download progress be displayed?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verify</code></td>
+<td>
+<p>Should downloaded files be compared against the MD5 hash
+reported by the NEON API to verify integrity? (default <code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unique</code></td>
+<td>
+<p>Should we skip downloads of files we already have?  Note: file
+comparisons are based on file hash, which will omit files that have identical
+content but different names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dir</code></td>
+<td>
+<p>Location where files should be downloaded. By default will
+use the appropriate applications directory for your system
+(see <code>tools::R_user_dir()</code>).  This default also be configured by
+setting the environmental variable <code>NEONSTORE_HOME</code>, see Sys.setenv or
+Renviron.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>get_zip</code></td>
+<td>
+<p>should we attempt to download .zip archive versions of files?
+default <code>FALSE</code>, as zip archives are being deprecated from NEON API starting
+in early 2021.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unzip</code></td>
+<td>
+<p>should we extract .zip files? (default <code>TRUE</code>). Note: .zip
+files are preserved in the store to avoid repeated downloads. Use of .zip
+files in NEON API is now deprecated in favor of requesting individual files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>api</code></td>
+<td>
+<p>the URL to the NEON API, leave as default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.token</code></td>
+<td>
+<p>an authentication token from NEON. A token is not
+required but will allow access to a higher number of requests before
+rate limiting applies, see
+<a href="https://data.neonscience.org/data-api/rate-limiting/#api-tokens">https://data.neonscience.org/data-api/rate-limiting/#api-tokens</a>.
+Note that once files are downloaded once, <code>neonstore</code> provides persistent
+access to them without further interaction required with the API.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Each NEON data product consists of a collection of
+objects (e.g. tables), which are in turn broken into individual files by
+site and sampling month.  Additionally, many NEON products have been
+expanded, including some additional columns. Consequently, users must
+specify if they want the "basic" or "expanded" version of this data.
+</p>
+<p>In the products table (see neon_products), the <code>productHasExpanded</code>
+column indicates if the data
+product has expanded, and the columns <code>productHasBasicDescription</code> and
+<code>productHasExpandedDescription</code> provide a detailed explanation of the
+differences between the <code>"expanded"</code> and <code>"basic"</code> versions of that
+particular product.
+</p>
+<p>The API allows users to request component files directly.
+By default, <code>neon-download()</code> will download all available
+extensions.  Users can request only products of a certain format
+(e.g. <code>.csv</code> or <code>.h5</code>) by altering the <code>file_regex</code> argument
+(see examples).
+</p>
+<p>Prior to 2021, the API provided
+access to a <code>.zip</code> file containing all the component objects
+(e.g. tables) for that product at that site and sampling month.
+</p>
+<p><code>neon_download()</code> will avoid downloading metadata files which are bitwise
+identical to other files in the same download request, as indicated by the
+crc32 hash reported by the API.  These typically include metadata that are
+shared across the product as a whole, but are for some reason included in
+each sampling month for each site – potentially thousands of duplicates.
+These duplicates are also packaged within the <code>.zip</code> downloads where it
+is not possible to exclude them from the download.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+ 
+ ## Omit dir=tempfile() to use persistent storage
+ neon_download("DP1.10003.001", 
+               start_date = "2018-01-01", 
+               end_date = "2019-01-01",
+               site = "YELL",
+               dir = tempfile())
+               
+ ## Advanced use: filter for a particular table in the product
+ neon_download(product = "DP1.10003.001",
+               start_date = "2018-01-01",
+               end_date = "2019-01-01",
+               site = "YELL",
+               table = "countdata",
+               dir = tempfile())
+
+
+</code></pre>
+
+
+</div>

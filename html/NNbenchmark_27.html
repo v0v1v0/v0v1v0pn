@@ -1,0 +1,217 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prepareZZ</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prepare a Dataset For All Possible Formats</h2>
+
+<h3>Description</h3>
+
+<p>This function modifies a dataset to the format required by a training function: 
+data.frame, matrix or vector (numeric), pre-normalization.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prepareZZ(Z, xdmv = "m", ydmv = "v", zdm = "d", scale = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>a matrix or a data.frame representing a dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xdmv</code></td>
+<td>
+<p>character, either "d", "m" or "v". The prefered output format for x: 
+data.frame, matrix, vector (numeric).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ydmv</code></td>
+<td>
+<p>character, either "d", "m" or "v". The prefered output format for y: 
+data.frame, matrix, vector (numeric).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zdm</code></td>
+<td>
+<p>character, either "d" or "m". The prefered output format for Zxy: 
+data.frame or matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>logical. Scale x, y and Zxy with their respective means and standard
+deviations.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The output is a list, usually named <code>ZZ</code>, with the following items:
+</p>
+
+<ul>
+<li>
+<p>Zxy: the original or scaled Z in the desired format (data.frame, matrix).
+</p>
+</li>
+<li>
+<p>x: the original or scaled x in the desired format (data.frame, matrix, vector).
+</p>
+</li>
+<li>
+<p>y: the original or scaled y in the desired format (data.frame, matrix, vector).
+</p>
+</li>
+<li>
+<p>xory: the original x or y (as vector).
+</p>
+</li>
+<li>
+<p>y0: the original y (as vector).
+</p>
+</li>
+<li>
+<p>xm0: the mean(s) of the original x.
+</p>
+</li>
+<li>
+<p>ym0: the mean of the original y.
+</p>
+</li>
+<li>
+<p>xsd0: the standard deviation(s) of the original x.
+</p>
+</li>
+<li>
+<p>ysd0: the standard deviation of the original y.
+</p>
+</li>
+<li>
+<p>uni: the univariate (TRUE) or multivariate (FALSE) status of x (Z).
+</p>
+</li>
+<li>
+<p>fmla: the formula <code>y ~ x</code> or <code>y ~ x1 + x2 + .. + xn</code> where n is the 
+number of inputs variables.
+</p>
+</li>
+</ul>
+<p>The use of <code>attach()</code> and <code>detach()</code> gives direct access to the modified 
+values of ZZ. See the examples.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("brnn")
+library("validann")
+
+maxit &lt;- 200  # increase this number to get more accurate results with validann:ann
+TF    &lt;- TRUE # display the plots
+
+### UNIVARIATE DATASET
+Z     &lt;- uGauss2
+neur  &lt;- 4
+
+## brnn
+ZZ &lt;- prepareZZ(Z, xdmv = "m", ydmv= "v", scale = FALSE) ; ht(ZZ) 
+attach(ZZ)
+y_pred &lt;- ym0 + ysd0*predict(brnn(x, y, neur))
+plotNN(xory, y0, uni, TF)
+lipoNN(xory, y_pred, uni, TF, lwd = 4, col = 2)
+ym0 ; ysd0
+detach(ZZ) ; rm(y_pred)
+
+
+## validann
+ZZ &lt;- prepareZZ(Z, xdmv = "m", ydmv= "v", scale = TRUE) ; ht(ZZ)
+attach(ZZ)
+y_pred &lt;- ym0 + ysd0*predict(validann::ann(x, y, neur, maxit = maxit))
+lipoNN(xory, y_pred, uni, TF, lwd = 4, col = 3)
+ym0 ; ysd0
+detach(ZZ) ; rm(y_pred)
+
+
+### UNIVARIATE DATASET + LOOP
+nruns  &lt;- 10
+
+## brnn
+ZZ &lt;- prepareZZ(Z, xdmv = "m", ydmv= "v", scale = FALSE) ; ht(ZZ) 
+attach(ZZ)
+Zreg &lt;- list() ; Zreg
+for (i in 1:nruns) Zreg[[i]] &lt;- brnn::brnn(x, y, neur) 
+m      &lt;- matrix(sapply(Zreg, function(x) x$Ed) , ncol=1) ; m
+best   &lt;- which(min(m) == m)[1] ; best
+y_pred &lt;- ym0 + ysd0*predict(Zreg[[best]])
+plotNN(xory, y0, uni, TF)
+lipoNN(xory, y_pred, uni, TF, lwd = 4, col = 2)
+detach(ZZ) ; rm(y_pred)
+
+## validann
+ZZ &lt;- prepareZZ(Z, xdmv = "m", ydmv= "v", scale = TRUE) ; ht(ZZ)
+attach(ZZ)
+Zreg &lt;- list()
+for (i in 1:nruns) Zreg[[i]] &lt;- validann::ann(x, y, size = neur, maxit = maxit) 
+m      &lt;- matrix(sapply(Zreg, function(x) x$value), ncol=1) ; m
+best   &lt;- which(min(m) == m)[1] ; best
+y_pred &lt;- ym0 + ysd0*predict(Zreg[[best]])
+lipoNN(xory, y_pred, uni, TF, lwd = 4, col = 4)
+detach(ZZ) ; rm(y_pred)
+
+
+### MULTIVARIATE DATASET
+Z    &lt;- mDette
+neur &lt;- 5
+
+## brnn
+ZZ &lt;- prepareZZ(Z, xdmv = "m", ydmv= "v", scale = FALSE) ; ht(ZZ)
+attach(ZZ)
+y_pred &lt;- ym0 + ysd0*predict(brnn::brnn(x, y, neur))
+plotNN(xory, y0, uni, TF)
+lipoNN(xory, y_pred, uni, TF, lwd = 4, col = 2)
+ym0 ; ysd0
+detach(ZZ) ; rm(y_pred)
+
+## validann
+ZZ &lt;- prepareZZ(Z, xdmv = "m", ydmv= "v", scale = TRUE) ; ht(ZZ)
+attach(ZZ)
+y_pred &lt;- ym0 + ysd0*predict(validann::ann(x, y, neur, maxit = maxit))
+lipoNN(xory, y_pred, uni, TF, lwd = 4, col = 3)
+ym0 ; ysd0
+detach(ZZ) ; rm(y_pred)
+
+
+### INSIDE A FUNCTION
+plotds &lt;- function(Z, xdmv = "m", ydmv = "v", scale = FALSE, neurons = 3, col = 2) {
+    ZZ &lt;- prepareZZ(Z, xdmv = xdmv, ydmv= ydmv, scale = scale) 
+    attach(ZZ) ; on.exit(detach(ZZ))
+    y_pred &lt;- ym0 + ysd0*predict(brnn::brnn(x, y, neurons))
+    plotNN(xory, y0, uni, TF)
+    lipoNN(xory, y_pred, uni, TF, lwd = 4, col = col)
+    print(ht(x))
+    print(ht(y))
+}
+plotds(uNeuroOne, scale = FALSE, neurons = 2, col = 2)
+plotds(uNeuroOne, scale = TRUE,  neurons = 3, col = 3)
+
+plotds(mFriedman, scale = TRUE,  neurons = 5, col = 4)
+
+
+
+</code></pre>
+
+
+</div>

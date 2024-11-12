@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>make_sensor</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Construct a <code>sensor</code> object</h2>
+
+<h3>Description</h3>
+
+<p>Construct a <code>sensor</code> object for IMU, GPS, and Baro from error model of class <code>ts.model</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">make_sensor(
+  name,
+  frequency = 1,
+  error_model1 = NULL,
+  error_model2 = NULL,
+  error_model3 = NULL,
+  error_model4 = NULL,
+  error_data1 = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Name of the sensor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frequency</code></td>
+<td>
+<p>Frequency associated with the error model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_model1</code></td>
+<td>
+<p>Error model of class <code>ts.model</code> for either accelerometer (as part of imu), horizontal components of GPS position, or Barometer</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_model2</code></td>
+<td>
+<p>Error model of class <code>ts.model</code> for either gyroscope (as part of imu) or vertical component of GPS position</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_model3</code></td>
+<td>
+<p>Error model of class <code>ts.model</code> for horizontal components of GPS velocity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_model4</code></td>
+<td>
+<p>Error model of class <code>ts.model</code> for vertical component of GPS velocity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_data1</code></td>
+<td>
+<p>Vector of error observations.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>sensor</code> containing sensor name and its additive error model along with the frequency associated to that model
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Davide Cucci, Lionel Voirol, Mehran Khaghani, Stéphane Guerrier
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># IMU:
+imu.freq &lt;- 250
+acc.mdl &lt;- WN(sigma2 = 1.535466e-04) + RW(gamma2 = 1.619511e-10)
+gyr.mdl &lt;- WN(sigma2 = 1.711080e-03) + RW(gamma2 = 1.532765e-13)
+imu.mdl &lt;- make_sensor(
+  name = "imu",
+  frequency = imu.freq,
+  error_model1 = acc.mdl,
+  error_model2 = gyr.mdl
+)
+
+# GPS:
+gps.freq &lt;- 1
+gps.mdl.pos.hor &lt;- WN(sigma2 = 2^2)
+gps.mdl.pos.ver &lt;- WN(sigma2 = 4^2)
+gps.mdl.vel.hor &lt;- WN(sigma2 = 0.04^2)
+gps.mdl.vel.ver &lt;- WN(sigma2 = 0.06^2)
+gps.mdl &lt;- make_sensor(
+  name = "gps", frequency = gps.freq,
+  error_model1 = gps.mdl.pos.hor,
+  error_model2 = gps.mdl.pos.ver,
+  error_model3 = gps.mdl.vel.hor,
+  error_model4 = gps.mdl.vel.ver
+)
+
+# Baro:
+baro.freq &lt;- 1
+baro.mdl &lt;- WN(sigma2 = 0.5^2)
+baro.mdl &lt;- make_sensor(
+  name = "baro",
+  frequency = baro.freq,
+  error_model1 = baro.mdl
+)
+
+</code></pre>
+
+
+</div>

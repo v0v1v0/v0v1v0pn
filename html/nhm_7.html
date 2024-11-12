@@ -1,0 +1,164 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nhm.control</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Ancillary arguments for controlling nhm fits
+</h2>
+
+<h3>Description</h3>
+
+<p>This is used to set various logical or numeric parameters controlling a non-homogeneous Markov model fit. Usually to be used within a call to <code>nhm</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nhm.control(tmax=NULL, coarsen=FALSE, coarsen.vars=NULL, coarsen.lv=NULL,
+checks=FALSE,rtol=1e-6, atol=1e-6, fishscore=NULL, linesearch=FALSE, damped=FALSE,
+damppar=0,obsinfo=TRUE,splits=NULL,ncores=1,print.level=2, maxLikcontrol=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tmax</code></td>
+<td>
+<p>Optional parameter to set the maximum time to which the Kolmogorov Forward equations should be integrated. Defaults to 1+max(time) if left unspecified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coarsen</code></td>
+<td>
+<p>If <code>TRUE</code> the covariate values will be subjected to coarsening using K-means clustering, so there are fewer unique values. This is useful for large datasets with continuous covariates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coarsen.vars</code></td>
+<td>
+<p>Vector of the index of covariates which require coarsening. Must be supplied if <code>coarsen=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coarsen.lv</code></td>
+<td>
+<p>Number of unique covariate values to which the covariates should be coarsened.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>checks</code></td>
+<td>
+<p>If <code>TRUE</code> some basic checks will be performed to ensure the accuracy of the supplied <code>intens</code> function. Mainly useful if a user defined <code>type="bespoke"</code> intensity function is used for which the default is <code>TRUE</code>, otherwise default is <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rtol</code></td>
+<td>
+<p>Relative error tolerance to be passed to lsoda, default is 1e-6</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>atol</code></td>
+<td>
+<p>Absolute error tolerance to be passed to lsoda, default is 1e-6</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fishscore</code></td>
+<td>
+<p>If <code>TRUE</code> then the Fisher scoring algorithm will be used provided the model has no censoring, exact death times or misclassification. This is generally faster, but less robust than the BHHH algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linesearch</code></td>
+<td>
+<p>If <code>TRUE</code> and <code>fishscore=TRUE</code> then a line search will be performed to find the best step length in the Fisher scoring algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>damped</code></td>
+<td>
+<p>If <code>TRUE</code> the Fisher scoring algorithm will be damped (e.g. Levenberg type algorithm). Useful if some parameters are close to being unidentifiable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>damppar</code></td>
+<td>
+<p>Numerical damping parameter to be applied if <code>damped=TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obsinfo</code></td>
+<td>
+<p>If <code>TRUE</code> the observed Fisher information will be computed in addition to the expected information when the Fisher scoring algorithm is used. For optimization with <code>maxLik</code> the observed Fisher information will be used as the Hessian rather than the squared gradient vectors. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splits</code></td>
+<td>
+<p>Optional vector of intermediate split times for solving the ODEs. Only needed if P(0,t) becomes singular for some t causing the optimization to stop. Should be a set of consecutive values less than tmax.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Number of cores to use. 1= no parallelization, 2 or more: Uses <code>mclapply</code> when solving ODEs with different covariates patterns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.level</code></td>
+<td>
+<p>For <code>maxLik</code> optimization; level of detail to print. Integer from 0 to 3. Defaults to 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxLikcontrol</code></td>
+<td>
+<p>For <code>maxLik</code> optimization; optional list of control parameters to be passed to <code>maxLik</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>tmax</code>, <code>rtol</code> and <code>atol</code> refer directly to parameters with the <code>lsoda</code> function in <code>deSolve</code> and relate to how the Kolmogorov Forward Equations are numerically solved.
+</p>
+<p><code>coarsen</code>, <code>coarsen.vars</code> and <code>coarsen.lv</code> are useful in situations where it is computationally infeasible (or unattractive) to compute the exact solution for all covariate patterns. Implements an approximate solution in which the covariates are coarsened using K-means clustering (as proposed in Titman (2011)).
+</p>
+<p><code>linesearch</code>, <code>damped</code>, <code>damppar</code> are specific to the Fisher scoring algorithm.
+</p>
+<p>Setting <code>obsinfo=TRUE</code> will tend to give more accurate standard error estimates and gives more opportunity to check for non-convergence of the maximum likelihood procedure.
+</p>
+<p>The option <code>splits</code> modifies the way in which the transition probabilities are computed. By default, <code>nhm</code> solves a single system of differential equations starting from 0 to obtain <code class="reqn">P(0,t)</code> and then uses inversion of the Chapman-Kolmogorov equation <code class="reqn">P(0,t) =P(0,t_0)P(t_0,t)</code> to find <code class="reqn">P(t_0,t)</code> for a given <code class="reqn">t_0 &gt; 0</code>. In some cases <code class="reqn">P(0,t_0)</code> will be singular or effectively singular. If a split is specified at <code class="reqn">s</code> then <code>nhm</code> will find <code class="reqn">P(t_0,t)</code> for <code class="reqn">t_0 &gt; t*</code> by solving the system of equations <code class="reqn">P(t*,t)</code> where <code class="reqn">t*</code> is the smallest interval start time greater than or equal to <code class="reqn">s</code> within the data. If <code>nhm</code> fails due to the lack of split times, the error message will advise on the interval in which the split should be introduced. Note that the need for splits can also arise if the initial parameters specified are inappropriate. It may often be better to find more appropriate initial parameter estimates,for instance by fitting the analogous homogeneous model in <code>msm</code>, rather than adding multiple split times.
+</p>
+<p><code>ncores</code> allows parallel processing to be used, through the <span class="pkg">parallel</span> package, to simultaneously solve the systems of differential equations for each covariate pattern. If <code>ncores &gt; 1</code> then <code>ncores</code> defines the <code>mc.cores</code> value in <code>mclapply</code>. Note that the data needs to include multiple covariate patterns for this to successfully increase computation speed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the values of each of the above constants
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Andrew Titman <a href="mailto:a.titman@lancaster.ac.uk">a.titman@lancaster.ac.uk</a></p>
+
+
+<h3>References</h3>
+
+<p>Titman AC. Flexible Nonhomogeneous Markov Models for Panel Observed Data. <em>Biometrics</em>, 2011. 67, 780-787.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nhm</code>
+</p>
+
+
+</div>

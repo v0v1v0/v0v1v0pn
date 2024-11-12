@@ -1,0 +1,304 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nScree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non Graphical Cattel's Scree Test</h2>
+
+<h3>Description</h3>
+
+<p>The <code>nScree</code> function returns an analysis of the number of component or
+factors to retain in an exploratory principal component or factor analysis.
+The function also returns information about the number of components/factors
+to retain with the Kaiser rule and the parallel analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nScree(eig = NULL, x = eig, aparallel = NULL, cor = TRUE,
+  model = "components", criteria = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>eig</code></td>
+<td>
+<p>depreciated parameter (use x instead): eigenvalues to analyse</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>numeric: a <code>vector</code> of eigenvalues, a <code>matrix</code> of
+correlations or of covariances or a <code>data.frame</code> of data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aparallel</code></td>
+<td>
+<p>numeric: results of a parallel analysis.  Defaults
+eigenvalues fixed at <code class="reqn">\lambda &gt;= \bar{\lambda}</code> (Kaiser and related
+rule) or <code class="reqn">\lambda &gt;= 0</code> (CFA analysis)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cor</code></td>
+<td>
+<p>logical: if <code>TRUE</code> computes eigenvalues from a correlation
+matrix, else from a covariance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>character: <code>"components"</code> or <code>"factors"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criteria</code></td>
+<td>
+<p>numeric: by default fixed at <code class="reqn">\bar{\lambda}</code>.  When the
+<code class="reqn">\lambda</code>s are computed from a principal component analysis on a
+correlation matrix, it corresponds to the usual Kaiser <code class="reqn">\lambda &gt;= 1</code>
+rule. On a covariance matrix or from a factor analysis, it is simply the
+mean.  To apply <code class="reqn">\lambda &gt;= 0</code>, sometimes used with factor analysis, fix
+the criteria to <code class="reqn">0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>variabe: additionnal parameters to give to the <code>cor</code> or
+<code>cov</code> functions</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>nScree</code> function returns an analysis of the number of
+components/factors to retain in an exploratory principal component or factor
+analysis. Different solutions are given. The classical ones are the Kaiser
+rule, the parallel analysis, and the usual scree test
+(<code>plotuScree</code>).  Non graphical solutions to the Cattell
+subjective scree test are also proposed: an acceleration factor (<em>af</em>)
+and the optimal coordinates index <em>oc</em>. The acceleration factor
+indicates where the elbow of the scree plot appears. It corresponds to the
+acceleration of the curve, i.e. the second derivative.  The optimal
+coordinates are the extrapolated coordinates of the previous eigenvalue that
+allow the observed eigenvalue to go beyond this extrapolation. The
+extrapolation is made by a linear regression using the last eigenvalue
+coordinates and the <code class="reqn">k+1</code> eigenvalue coordinates. There are <code class="reqn">k-2</code>
+regression lines like this.  The Kaiser rule or a parallel analysis
+criterion (<code>parallel</code>) must also be simultaneously satisfied to
+retain the components/factors, whether for the acceleration factor, or for
+the optimal coordinates.
+</p>
+<p>If <code class="reqn">\lambda_i</code> is the <code class="reqn">i^{th}</code> eigenvalue, and <code class="reqn">LS_i</code> is a
+location statistics like the mean or a centile (generally the followings:
+<code class="reqn">1^{st}, \ 5^{th}, \ 95^{th}, \ or \ 99^{th}</code>).
+</p>
+<p>The Kaiser rule is computed as: </p>
+<p style="text-align: center;"><code class="reqn"> n_{Kaiser} = \sum_{i} (\lambda_{i}
+\ge \bar{\lambda}).</code>
+</p>
+<p> Note that <code class="reqn">\bar{\lambda}</code> is equal to 1 when a
+correlation matrix is used.
+</p>
+<p>The parallel analysis is computed as: </p>
+<p style="text-align: center;"><code class="reqn">n_{parallel} = \sum_{i}
+(\lambda_{i} \ge LS_i).</code>
+</p>
+
+<p>The acceleration factor (<code class="reqn">AF</code>) corresponds to a numerical solution to
+the elbow of the scree plot: </p>
+<p style="text-align: center;"><code class="reqn">n_{AF} \equiv \ If \ \left[ (\lambda_{i}
+\ge LS_i) \ and \ max(AF_i) \right].</code>
+</p>
+
+<p>The optimal coordinates (<code class="reqn">OC</code>) corresponds to an extrapolation of the
+preceeding eigenvalue by a regression line between the eigenvalue
+coordinates and the last eigenvalue coordinates: </p>
+<p style="text-align: center;"><code class="reqn">n_{OC} = \sum_i
+\left[(\lambda_i \ge LS_i) \cap (\lambda_i \ge (\lambda_{i \ predicted})
+\right].</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Components </code></td>
+<td>
+<p> Data frame for the number of components/factors
+according to different rules </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Components$noc </code></td>
+<td>
+<p> Number of
+components/factors to retain according to optimal coordinates <em>oc</em></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Components$naf </code></td>
+<td>
+<p> Number of components/factors to retain according to
+the acceleration factor <em>af</em></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Components$npar.analysis </code></td>
+<td>
+<p>Number
+of components/factors to retain according to parallel analysis </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Components$nkaiser </code></td>
+<td>
+<p> Number of components/factors to retain according
+to the Kaiser rule </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis </code></td>
+<td>
+<p> Data frame of vectors linked to the
+different rules </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis$Eigenvalues </code></td>
+<td>
+<p> Eigenvalues </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis$Prop </code></td>
+<td>
+<p> Proportion of variance accounted by eigenvalues </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis$Cumu </code></td>
+<td>
+<p> Cumulative proportion of variance accounted by
+eigenvalues </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis$Par.Analysis </code></td>
+<td>
+<p> Centiles of the random
+eigenvalues generated by the parallel analysis. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis$Pred.eig </code></td>
+<td>
+
+<p>Predicted eigenvalues by each optimal coordinate regression line </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis$OC</code></td>
+<td>
+<p> Critical optimal coordinates <em>oc</em></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis$Acc.factor </code></td>
+<td>
+<p> Acceleration factor <em>af</em></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Analysis$AF</code></td>
+<td>
+<p> Critical acceleration factor <em>af</em></p>
+</td>
+</tr>
+</table>
+<p> Otherwise,
+returns a summary of the analysis.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gilles Raiche <br> Centre sur les Applications des Modeles de
+Reponses aux Items (CAMRI) <br> Universite du Quebec a Montreal<br><a href="mailto:raiche.gilles@uqam.ca">raiche.gilles@uqam.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Cattell, R. B. (1966). The scree test for the number of factors.
+<em>Multivariate Behavioral Research, 1</em>, 245-276.
+</p>
+<p>Dinno, A. (2009). <em>Gently clarifying the application of Horn's parallel
+analysis to principal component analysis versus factor analysis</em>.  Portland,
+Oregon: Portland Sate University.
+</p>
+<p>Guttman, L. (1954). Some necessary conditions for common factor analysis.
+<em>Psychometrika, 19, 149-162</em>.
+</p>
+<p>Horn, J. L. (1965). A rationale for the number of factors in factor
+analysis.  <em>Psychometrika, 30</em>, 179-185.
+</p>
+<p>Kaiser, H. F. (1960). The application of electronic computer to factor
+analysis.  <em>Educational and Psychological Measurement, 20</em>, 141-151.
+</p>
+<p>Raiche, G., Walls, T. A., Magis, D., Riopel, M. and Blais, J.-G. (2013). Non-graphical solutions
+for Cattell's scree test. Methodology, 9(1), 23-29.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plotuScree</code>, <code>plotnScree</code>,
+<code>parallel</code>, <code>plotParallel</code>,
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## INITIALISATION
+ data(dFactors)                      # Load the nFactors dataset
+ attach(dFactors)
+ vect         &lt;- Raiche              # Uses the example from Raiche
+ eigenvalues  &lt;- vect$eigenvalues    # Extracts the observed eigenvalues
+ nsubjects    &lt;- vect$nsubjects      # Extracts the number of subjects
+ variables    &lt;- length(eigenvalues) # Computes the number of variables
+ rep          &lt;- 100                 # Number of replications for PA analysis
+ cent         &lt;- 0.95                # Centile value of PA analysis
+
+## PARALLEL ANALYSIS (qevpea for the centile criterion, mevpea for the
+## mean criterion)
+ aparallel    &lt;- parallel(var     = variables,
+                          subject = nsubjects,
+                          rep     = rep,
+                          cent    = cent
+                          )$eigen$qevpea  # The 95 centile
+
+## NUMBER OF FACTORS RETAINED ACCORDING TO DIFFERENT RULES
+ results      &lt;- nScree(x=eigenvalues, aparallel=aparallel)
+ results
+ summary(results)
+
+## PLOT ACCORDING TO THE nScree CLASS
+ plotnScree(results)
+
+</code></pre>
+
+
+</div>

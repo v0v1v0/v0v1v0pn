@@ -1,0 +1,294 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tolfind</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Grid search over tol for NPML estimation of (generalized) random effect models</h2>
+
+<h3>Description</h3>
+
+<p>Performs a grid search to select the parameter  <code>tol</code>, 
+which is a tuning parameter for starting point selection of the EM algorithm 
+for NPML estimation (see e.g. Aitkin, Hinde &amp; Francis, 2009, p. 437)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">tolfind(formula, 
+        random = ~1, 
+        family = gaussian(), 
+        data, 
+        k = 4, 
+        random.distribution="np",
+        offset, 
+        weights, 
+        na.action, 
+        EMmaxit = 500, 
+        EMdev.change = 0.001, 
+        lambda = 0, 
+        damp = TRUE, 
+        damp.power = 1, 
+        spike.protect = 1, 
+        sdev,
+        shape, 
+        plot.opt = 1, 
+        steps = 15, 
+        find.in.range = c(0.05, 0.8), 
+        verbose = FALSE, 
+        noformat = FALSE,
+        ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula defining the response and the fixed effects (e.g. <code>y ~ x</code>). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>a formula defining the random model. Set <code>random=~1</code>
+to model overdispersion. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>conditional distribution of responses: "gaussian",
+"poisson", "binomial",  "Gamma", or "inverse.gaussian" can be set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data frame (mandatory, even if it is attached to the workspace!).  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number of mass points/integration points (supported are 
+up to 600 mass points). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.distribution</code></td>
+<td>
+<p>the mixing distribution, Gaussian Quadrature 
+(<code>gq</code>) or NPML (<code>np</code>) can be set.   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>an optional offset to be included in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>optional prior weights for the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function indicating what should happen when <code>NA</code>'s occur,
+with possible arguments <code>na.omit</code> and <code>na.fail</code>. The default is 
+set by the <code>na.action</code> setting in <code>options()</code> .   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EMmaxit</code></td>
+<td>
+<p>maximum number of EM iterations.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EMdev.change</code></td>
+<td>
+<p>stops EM algorithm when deviance change falls below this value.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>see the help file for <code>alldist</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>damp</code></td>
+<td>
+<p> switches EM damping on or off.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>damp.power</code></td>
+<td>
+<p>steers degree of damping. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spike.protect</code></td>
+<td>
+<p>see the help file for <code>alldist</code>. For unequal or 
+smooth component dispersion parameters, the setting <code>spike.protect=1</code>
+is strongly recommended.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sdev</code></td>
+<td>
+<p>optional fixed standard deviation for normal mixture.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>optional fixed shape parameter for Gamma and IG  mixtures.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.opt</code></td>
+<td>
+<p>For <code>plot.opt=1</code> the EM trajectories are plotted, 
+for <code>plot.opt=2</code> the development of the disparity <code class="reqn">-2\log L</code> over 
+iteration number is plotted, for <code>plot.opt=3</code> both plots are shown, 
+and for <code>plot.opt=0</code> none of them. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>steps</code></td>
+<td>
+<p>number of grid points for the search of <code>tol</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>find.in.range</code></td>
+<td>
+<p>range for the search of <code>tol</code>.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If set to <code>FALSE</code>, no printed output is given during 
+execution of <code>alldist</code> or <code>allvc</code>.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noformat</code></td>
+<td>
+<p>If <code>TRUE</code>, then any formatting of the plots is omitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments which will be ignored. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The EM algorithm for NPML estimation (Aitkin, 1996) uses the Gauss-Hermite masses 
+and mass points as starting  points. The position of the starting points can be 
+concentrated or extended by setting <code>tol</code> smaller or larger than 1, 
+respectively. The tuning parameter <code>tol</code> is, as in GLIM4, responsible for this scaling. 
+A careful selection of <code>tol</code> may be necessary for some data sets. 
+The reason  is that NPML has a tendency to get stuck in local maxima, 
+as the log-likelihhod function is not concave for fixed <code>k</code>  (Boehning, 1999).
+</p>
+<p>For Gaussian, Gamma, and IG mixtures this R implementation uses by default a damping 
+procedure  in the first cycles of the EM algorithm (Einbeck &amp; Hinde, 2006), 
+which stabilizes the algorithm and  makes it less sensitive to the optimal choice 
+of <code>tol</code>.  Application of  <code>tolfind</code> to check that the optimal  solution has 
+not been overlooked may  nevertheless be advisable. 
+</p>
+<p><code>tolfind</code> works for <code>alldist</code> and <code>allvc</code>. The <code>tolfind</code> function 
+is mainly designed for NPML (<code>random.distribution="np"</code>). It
+can also be applied to Gaussian Quadrature (<code>random.distribution="gq"</code>), 
+though <code>tol</code> is of little importance for this and primarily influences 
+the speed of convergence.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of 5 items: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>MinDisparity</code></td>
+<td>
+<p>the minimal disparity achieved (for which EM converged).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Mintol</code></td>
+<td>
+<p>the <code>tol</code> value at which this disparity is achieved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AllDisparities</code></td>
+<td>
+<p>a vector containing all disparities calculated on the grid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alltol</code></td>
+<td>
+<p>all corresponding <code>tol</code> values making up the grid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AllEMconverged</code></td>
+<td>
+<p>a vector of Booleans indicating 
+if EM converged for the particular <code>tol</code> values.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jochen Einbeck &amp; John Hinde (2006). 
+</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Aitkin, M. (1996). A general maximum likelihood analysis of overdispersion in generalized linear models. Statistics and Computing 6 , 251-262. 
+</p>
+<p>Aitkin, M., Francis, B. and Hinde, J. (2009). Statistical Modelling in R.  Oxford Statistical Science Series, Oxford, UK. 
+</p>
+<p>Boehning, D. (1999). Computer-Assisted Analysis of Mixtures and Applications. Meta-Analysis, Disease Mapping and others. Chapman &amp; Hall / CRC, Boca Raton, FL, USA.
+</p>
+<p>Einbeck, J. &amp; Hinde, J. (2006). A note on NPML estimation for exponential family regression models with unspecified dispersion parameter. Austrian Journal of Statistics 35, 233-243. 
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>alldist</code>, <code>allvc</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  data(galaxies, package="MASS")
+  gal&lt;-as.data.frame(galaxies)
+  tolfind(galaxies/1000~1, random=~1, k=5, data=gal, lambda=1, damp=TRUE, 
+      find.in.range=c(0,1), steps=10) 
+  # Minimal Disparity: 380.1444 at tol= 0.5 
+ </code></pre>
+
+
+</div>

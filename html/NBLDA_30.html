@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extract predictions from NBLDA model</h2>
+
+<h3>Description</h3>
+
+<p>This function predicts the class labels of a test data for a given model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nblda'
+predict(object, test.data, return = c("predictions", "everything"), ...)
+
+## S4 method for signature 'nblda'
+predict(object, test.data, return = c("predictions", "everything"), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a <code>nblda</code> object returned from the <code>trainNBLDA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test.data</code></td>
+<td>
+<p>a data frame or matrix whose class labels to be predicted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return</code></td>
+<td>
+<p>what should be returned? Predicted class labels or everything?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments to be passed to or from methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>It is possible to return only predicted class labels or a list with elements which are used within prediction
+process. These arguments are as follows:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xte</code></td>
+<td>
+<p>count data for test set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nste</code></td>
+<td>
+<p>normalized count data for test set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ds</code></td>
+<td>
+<p>estimates of offset parameter for each variable. See notes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discriminant</code></td>
+<td>
+<p>discriminant scores of each subject.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>prior probabilities for each class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytehat</code></td>
+<td>
+<p>predicted class labels for test set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>power transformation parameter. If no transformation is requested, it returns NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>normalization method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dispersions</code></td>
+<td>
+<p>dispersion estimates of each variable.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p><code>d_kj</code> is simply used to re-parameterize the Negative Binomial mean as s_i*g_j*d_kj where s_i is the size
+factor for subject i, g_j is the total count of variable j and d_kj is the offset parameter for variable j at class k.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Dincer Goksuluk
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(2128)
+counts &lt;- generateCountData(n = 20, p = 10, K = 2, param = 1, sdsignal = 0.5, DE = 0.8,
+                            allZero.rm = FALSE, tag.samples = TRUE)
+x &lt;- t(counts$x + 1)
+y &lt;- counts$y
+xte &lt;- t(counts$xte + 1)
+ctrl &lt;- nbldaControl(folds = 2, repeats = 2)
+
+fit &lt;- trainNBLDA(x = x, y = y, type = "mle", tuneLength = 10,
+                  metric = "accuracy", train.control = ctrl)
+
+predict(fit, xte)
+
+</code></pre>
+
+
+</div>

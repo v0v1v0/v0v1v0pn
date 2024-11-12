@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ldl</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>LDL' Cholesky Decomposition</h2>
+
+<h3>Description</h3>
+
+<p>Simple (but not too simple) <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> implementation of the (square root free)
+<code class="reqn">LDL'</code> Choleksy decomposition.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ldl(m)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>positive semi-definite square matrix, say of dimension <code class="reqn">n
+      \times n</code>.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>a <code>list</code> with two components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>a lower triangular matrix with diagonal entries 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>numeric vector, the <em>diagonal</em>
+<code class="reqn">d_{1,1},d_{2,2},\dots,d_{n,n}</code> of the diagonal matrix <code class="reqn">D</code>.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>chol()</code> in base <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>, or also a “generalized LDL”
+decomposition, the Bunch-Kaufman, <code>BunchKaufman()</code>
+in (‘Recommended’) package <a href="https://CRAN.R-project.org/package=Matrix"><span class="pkg">Matrix</span></a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">(L &lt;- rbind(c(1,0,0), c(3,1,0), c(-4,5,1)))
+D &lt;- c(4,1,9)
+FF &lt;- L %*% diag(D) %*% t(L)
+FF
+LL &lt;- ldl(FF)
+stopifnot(all.equal(L, LL$L),
+          all.equal(D, LL$D))
+
+## rank deficient :
+FF0 &lt;- L %*% diag(c(4,0,9)) %*% t(L)
+((L0 &lt;- ldl(FF0))) #  !! now fixed with the  if(Di == 0) test
+## With the "trick", it works:
+stopifnot(all.equal(FF0,
+                    L0$L %*% diag(L0$D) %*% t(L0$L)))
+## [hint: the LDL' is no longer unique when the matrix is singular]
+
+system.time(for(i in 1:10000) ldl(FF) ) # ~ 0.2 sec
+
+(L &lt;- rbind(c( 1, 0, 0, 0),
+            c( 3, 1, 0, 0),
+            c(-4, 5, 1, 0),
+            c(-2,20,-7, 1)))
+D &lt;- c(4,1, 9, 0.5)
+F4 &lt;- L %*% diag(D) %*% t(L)
+F4
+L4 &lt;- ldl(F4)
+stopifnot(all.equal(L, L4$L),
+          all.equal(D, L4$D))
+
+system.time(for(i in 1:10000) ldl(F4) ) # ~ 0.16 sec
+
+## rank deficient :
+F4.0 &lt;- L %*% diag(c(4,1,9,0)) %*% t(L)
+((L0 &lt;- ldl(F4.0)))
+stopifnot(all.equal(F4.0,
+                    L0$L %*% diag(L0$D) %*% t(L0$L)))
+
+F4_0 &lt;- L %*% diag(c(4,1,0,9)) %*% t(L)
+((L0 &lt;- ldl(F4_0)))
+stopifnot(all.equal(F4_0,
+                    L0$L %*% diag(L0$D) %*% t(L0$L)))
+
+## Large
+mkLDL &lt;- function(n, rF = function(n) sample.int(n), rFD = function(n) 1+ abs(rF(n))) {
+    L &lt;- diag(nrow=n)
+    L[lower.tri(L)] &lt;- rF(n*(n-1)/2)
+    list(L = L, D = rFD(n))
+}
+
+(LD &lt;- mkLDL(17))
+
+chkLDL &lt;- function(n, ..., verbose=FALSE, tol = 1e-14) {
+    LD &lt;- mkLDL(n, ...)
+    if(verbose) cat(sprintf("n=%3d ", n))
+    n &lt;- length(D &lt;- LD$D)
+    L &lt;- LD$L
+    M &lt;- L %*% diag(D) %*% t(L)
+    r &lt;- ldl(M)
+    stopifnot(exprs = {
+        all.equal(M,
+                  r$L %*% diag(r$D) %*% t(r$L), tol=tol)
+        all.equal(L, r$L, tol=tol)
+        all.equal(D, r$D, tol=tol)
+    })
+    if(verbose) cat("[ok]\n")
+    invisible(list(LD = LD, M = M, ldl = r))
+}
+
+(chkLDL(7))
+
+
+N &lt;- 99 ## test  N  random cases
+set.seed(101)
+for(i in 1:N) {
+    cat(sprintf("i=%3d, ",i))
+    chkLDL(rpois(1, lambda = 20), verbose=TRUE)
+}
+
+
+
+system.time(chkLDL( 500)) # 0.62
+
+try( ## this almost never "works":
+    system.time(
+        chkLDL( 500, rF = rnorm, rFD = function(n) 10 + runif(n))
+    ) # 0.64
+)
+system.time(chkLDL( 600)) # 1.09
+## .. then it grows quickly for (on nb-mm4)
+## for n = 1000  it typically *fails*: The matrix M  is typically very ill conditioned
+## does not depend much on the RNG ?
+
+
+"==&gt; much better conditioned L and hence M : "
+set.seed(120)
+L &lt;- as(Matrix::tril(toeplitz(exp(-(0:999)/50))), "matrix")
+dimnames(L) &lt;- NULL
+D &lt;- 10 + runif(nrow(L))
+M &lt;- L %*% diag(D) %*% t(L)
+rcond(L) # 0.010006 !
+rcond(M) # 9.4956e-5
+if(FALSE) # ~ 4-5 sec
+   system.time(r &lt;- ldl(M))
+</code></pre>
+
+
+</div>

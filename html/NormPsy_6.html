@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predictMMSE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Prediction of MMSE scores in their natural scale.
+</h2>
+
+<h3>Description</h3>
+
+<p>From the estimates of a linear mixed model applied on normalized MMSE scores, the function computes the predicted values of MMSE in its natural 0-30 scale. The function also provides 95% confidence intervals computed by a Monte Carlo method. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">predictMMSE(model, VarTime, Timelim, nTime, Xprofile, 
+methInteg = "GH", nsim = 20, draws = FALSE, ndraws = 2000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>a hlme object representing a latent class linear mixed model 
+</p>
+</td>
+</tr></table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>VarTime</code></td>
+<td>
+
+<p>a character string containing the name of the time variable in the model
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Timelim</code></td>
+<td>
+
+<p>a numeric vector indicating the time limits of the prediction
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nTime</code></td>
+<td>
+
+<p>an integer indicating the number of prediction times
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xprofile</code></td>
+<td>
+
+<p>a named vector containing the values of the model's covariate
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methInteg</code></td>
+<td>
+
+<p>integration method used to compute the numerical integration. If 0 or 'GH' (the default) a Gauss-Hermite numerical approximation is employed. Value 1 or 'MC' specifies a Monte Carlo method.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+
+<p>number of integration points used for the integration method specified in argument methInteg
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>draws</code></td>
+<td>
+
+<p>optional logical indicating if 95% confidence intervals of the predictions should be calculated. If TRUE, the posterior distribution of the predicted values is approximated by a Monte Carlo method. The predicted value is given by the median value, and the confidence interval is given by the 2.5% and 97.5% percentiles of this distribution. If FALSE (the default), a point prediction is provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ndraws</code></td>
+<td>
+
+<p>optional integer indicating the number of draws in the Monte Carlo approximation if draws=TRUE.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a predMMSE object consisting in a matrix containing the prediction time, the predicted values and, if draws=TRUE, the lower and upper limits of the confidence interval.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Cecile Proust-Lima, Viviane Philipps
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.predMMSE</code>,<code>normMMSE</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#import data paquid from lcmm package
+library(lcmm)
+data(paquid)
+
+# computation of the normalized MMSE
+paquid$MMSEnorm &lt;- normMMSE(paquid$MMSE)
+
+# estimation of a model on the normalized MMSE scores
+m &lt;- hlme(MMSEnorm~I(age-65)*CEP, random=~I(age-65), subject="ID", data=paquid)
+
+# prediction from the model in the natural scale of MMSE
+predictMMSE(m,VarTime="age",Timelim=c(65,85),nTime=30,
+Xprofile=c(CEP=1),methInteg='MC',nsim=200,draws=FALSE)
+
+</code></pre>
+
+
+</div>

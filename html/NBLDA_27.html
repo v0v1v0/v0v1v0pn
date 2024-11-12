@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot Method for the <code>nblda</code> and <code>nblda_trained</code> Classes</h2>
+
+<h3>Description</h3>
+
+<p>This function is used to generate model performance plots using <code>ggplot2</code> functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nblda'
+plot(
+  x,
+  y,
+  ...,
+  theme = c("nblda", "default"),
+  metric = c("accuracy", "error", "sparsity"),
+  return = c("plot", "aes")
+)
+
+## S3 method for class 'nblda_trained'
+plot(
+  x,
+  y,
+  ...,
+  theme = c("nblda", "default"),
+  metric = c("accuracy", "error", "sparsity"),
+  return = c("plot", "aes")
+)
+
+## S4 method for signature 'nblda'
+plot(
+  x,
+  y,
+  ...,
+  theme = c("nblda", "default"),
+  metric = c("accuracy", "error", "sparsity"),
+  return = c("plot", "aes")
+)
+
+## S4 method for signature 'nblda_trained'
+plot(
+  x,
+  y,
+  ...,
+  theme = c("nblda", "default"),
+  metric = c("accuracy", "error", "sparsity"),
+  return = c("plot", "aes")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a <code>nblda</code> object returned from the <code>trainNBLDA</code> or <code>nblda_trained</code> object returned from the <code>nbldaTrained</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>same as <code>x</code> and not required to be defined. If <code>x</code> is missing or NULL, <code>nblda</code> or <code>nblda_trained</code> object is imported from <code>y</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments to be passed to plotting function <code>ggplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theme</code></td>
+<td>
+<p>pre-defined plot themes. It can be defined outside <code>plot</code> function using the ggplot's library. See examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metric</code></td>
+<td>
+<p>which metric should be used in the y-axis?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return</code></td>
+<td>
+<p>should a complete plot or a ggplot object from <code>ggplot</code> be returned? One may select "aes" in order to add plot layers to a returned ggplot aesthetics. See examples.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of class <code>ggplot</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Dincer Goksuluk
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ggplot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(2128)
+counts &lt;- generateCountData(n = 20, p = 10, K = 2, param = 1, sdsignal = 0.5,
+                            DE = 0.8, allZero.rm = FALSE, tag.samples = TRUE)
+x &lt;- t(counts$x + 1)
+y &lt;- counts$y
+xte &lt;- t(counts$xte + 1)
+ctrl &lt;- nbldaControl(folds = 2, repeats = 2)
+
+fit &lt;- trainNBLDA(x = x, y = y, type = "mle", tuneLength = 10,
+                  metric = "accuracy", train.control = ctrl)
+
+plot(fit)
+
+# Use pre-defined theme
+plot(fit, theme = "nblda")
+
+# Externally defining plot theme
+plot(fit, theme = "default") + theme_dark(base_size = 14)
+
+# Return empty ggplot object and add layers.
+plot(fit, theme = "nblda", return = "aes") +
+  geom_point() + geom_line(linetype = 2)
+
+</code></pre>
+
+
+</div>

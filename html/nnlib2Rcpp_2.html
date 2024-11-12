@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Autoencoder</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Autoencoder NN
+</h2>
+
+<h3>Description</h3>
+
+<p>A neural network for autoencoding data, projects data to a new set of variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Autoencoder(
+  data_in,
+  desired_new_dimension,
+  number_of_training_epochs,
+  learning_rate,
+  num_hidden_layers = 1L,
+  hidden_layer_size = 5L,
+  show_nn = FALSE,
+  error_type = "MAE",
+  acceptable_error_level = 0,
+  display_rate = 1000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data_in</code></td>
+<td>
+
+<p>data to be autoencoded, a numeric matrix, (2d, cases in rows, variables in columns).  It is recommended to be in [0 1] range.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>desired_new_dimension</code></td>
+<td>
+
+<p>number of new variables to be produced. This is effectively the size (length) of the special hidden layer that outputs the new variable values, thus the dimension of the output vector space.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number_of_training_epochs</code></td>
+<td>
+
+<p>number of training epochs, aka presentations of all training data to ANN during training.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>learning_rate</code></td>
+<td>
+
+<p>the learning rate parameter of the Back-Propagation (BP) NN.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_hidden_layers</code></td>
+<td>
+
+<p>number of hidden layers on each side of the special layer.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hidden_layer_size</code></td>
+<td>
+<p>number of nodes (processing elements or PEs) in each of the hidden layers. In this implementation of Autoencoder all hidden layers are of the same length (defined here), except for the special hidden layer (whose size is defined by <code>desired_new_dimension</code> above).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_nn</code></td>
+<td>
+<p>boolean, option to display the (trained) ANN internal structure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_type</code></td>
+<td>
+<p>string, error to display and possibly use to stop training (must be 'MSE' or 'MAE').</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acceptable_error_level</code></td>
+<td>
+<p>stops training when error is below this level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display_rate</code></td>
+<td>
+<p>number of epochs that pass before current error level is displayed (0 = never display current error).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a numeric matrix containing the projected data.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This Autoencoder NN employs a <code>BP</code>-type NN to perform a data pre-processing step baring similarities to PCA since it too can be used for dimensionality reduction (Kramer 1991)(DeMers and Cottrell 1993)(Hinton and Salakhutdinov 2006). Unlike PCA, an autoencoding NN can also expand the feature-space dimensions (as feature expansion methods do). The NN maps input vectors to themselves via a special hidden layer (the coding layer, usually of different size than the input vector length) from which the new data vectors are produced. Note:
+The internal BP PEs in computing layers apply the logistic sigmoid threshold function, and their output is in [0 1] range. It is recommended to use this range in your data as well. More for this particular autoencoder implementation can be found in (Nikolaidis, Makris, and Stavroyiannis 2013). The method is not deterministic and the mappings may be non-linear, depending on the NN topology.
+</p>
+<p>(This function uses Rcpp to employ 'bpu_autoencoder_nn' class in nnlib2.)
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vasilis N. Nikolaidis &lt;vnnikolaidis@gmail.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Nikolaidis V.N., Makris I.A, Stavroyiannis S, "ANS-based preprocessing of company performance indicators." Global Business and Economics Review 15.1 (2013): 49-58.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>BP</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">iris_s &lt;- as.matrix(scale(iris[1:4]))
+output_dim &lt;- 2
+epochs &lt;- 100
+learning_rate &lt;- 0.73
+num_hidden_layers &lt;-2
+hidden_layer_size &lt;- 5
+
+out_data &lt;-  Autoencoder( iris_s, output_dim,
+                          epochs, learning_rate,
+                          num_hidden_layers, hidden_layer_size, FALSE)
+
+plot( out_data,pch=21,
+      bg=c("red","green3","blue")[unclass(iris$Species)],
+      main="Randomly autoencoded Iris data")
+</code></pre>
+
+
+</div>

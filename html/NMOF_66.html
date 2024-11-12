@@ -1,0 +1,233 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>restartOpt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Restart an Optimisation Algorithm
+</h2>
+
+<h3>Description</h3>
+
+<p>The function provides a simple wrapper for the optimisation algorithms in the package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">restartOpt(fun, n, OF, algo, ...,
+           method = c("loop", "multicore", "snow"),
+           mc.control = list(), cl = NULL,
+           best.only = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+
+<p>the optimisation function: <code>DEopt</code>, <code>GAopt</code>, <code>LSopt</code>,
+<code>TAopt</code> or <code>PSopt</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>the number of restarts
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OF</code></td>
+<td>
+
+<p>the objective function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algo</code></td>
+<td>
+
+<p>the list <code>algo</code> that is passed to the particular optimisation function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional data that is passed to the particular optimisation function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>can be <code>loop</code> (the default), <code>multicore</code>
+or <code>snow</code>. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mc.control</code></td>
+<td>
+
+<p>a list containing settings that will be passed to <code>mclapply</code> if
+<code>method</code> is <code>multicore</code>. Must be a list of named
+elements. See the documentation of <code>mclapply</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+
+<p>default is <code>NULL</code>. If method <code>snow</code> is used, this must be
+a cluster object or an integer (the number of cores).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>best.only</code></td>
+<td>
+<p>if <code>TRUE</code>, only the best run is
+reported. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function returns a list of lists. If a specific starting solution
+is passed, all runs will start from this solution. If this is not
+desired, initial solutions can be created randomly. This is done per
+default in <code>DEopt</code>, <code>GAopt</code> and
+<code>PSopt</code>, but <code>LSopt</code> and <code>TAopt</code>
+require to specify a starting solution.
+</p>
+<p>In case of <code>LSopt</code> and <code>TAopt</code>, the passed
+initial solution <code>algo$x0</code> is checked with <code>is.function</code>: if
+<code>TRUE</code>, the function is evaluated in each single run. For
+<code>DEopt</code>, <code>GAopt</code> and <code>PSopt</code>, the
+initial solution (which also can be a function) is specified with
+<code>algo$initP</code>.
+</p>
+<p>The argument <code>method</code> determines how <code>fun</code> is
+evaluated. Default is <code>loop</code>. If <code>method</code> is "multicore",
+function <code>mclapply</code> from package <span class="pkg">parallel</span> is used. Further
+settings for <code>mclapply</code> can be passed through the list
+<code>mc.control</code>. If <code>multicore</code> is chosen but the functionality
+is not available, then <code>method</code> will be set to <code>loop</code> and a
+warning is issued. If <code>method == "snow"</code>, function
+<code>clusterApply</code> from package <span class="pkg">parallel</span> is used. In this case,
+the argument <code>cl</code> must either be a cluster object (see the
+documentation of <code>clusterApply</code>) or an integer. If an integer, a
+cluster will be set up via <code>makeCluster(c(rep("localhost", cl)),
+  type = "SOCK")</code>, and <code>stopCluster</code> is called when the function is
+exited. If <code>snow</code> is chosen but <span class="pkg">parallel</span> is not available
+or <code>cl</code> is not specified, then <code>method</code> will be set to
+<code>loop</code> and a warning is issued. In case that <code>cl</code> is an
+cluster object, <code>stopCluster</code> will not be called automatically.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>best.only</code> is <code>FALSE</code> (the default), the function
+returns a list of <code>n</code> lists. Each of the <code>n</code> lists stores
+the output of one of the runs.
+</p>
+<p>If <code>best.only</code> is <code>TRUE</code>, only the best restart is
+reported. The returned list has the structure specific to the used
+method.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>DEopt</code>, <code>GAopt</code>, <code>LSopt</code>,
+<code>PSopt</code>, <code>TAopt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## see example(DEopt)
+algo &lt;- list(nP = 50L,
+              F = 0.5,
+             CR = 0.9,
+            min = c(-10, -10),
+            max = c( 10,  10),
+    printDetail = FALSE,
+       printBar = FALSE)
+
+## choose a larger 'n' when you can afford it
+algo$nG &lt;- 100L
+res100 &lt;- restartOpt(DEopt, n = 5L, OF = tfTrefethen, algo = algo)
+res100F &lt;- sapply(res100, `[[`, "OFvalue")
+
+algo$nG &lt;- 200L
+res200 &lt;- restartOpt(DEopt, n = 5L, OF = tfTrefethen, algo = algo)
+res200F &lt;- sapply(res200, `[[`, "OFvalue")
+
+xx &lt;- pretty(c(res100F, res200F, -3.31))
+plot(ecdf(res100F), main = "optimum is -3.306",
+     xlim = c(xx[1L], tail(xx, 1L)))
+abline(v = -3.3069, col = "red")  ## optimum
+lines(ecdf(res200F), col = "blue")
+legend(x = "right", box.lty = 0, , lty = 1,
+      legend = c("optimum", "100 generations", "200 generations"),
+      pch = c(NA, 19, 19), col = c("red", "black", "blue"))
+
+## a 'best-of-N' strategy: given a sample x of objective
+## function values, compute the probability that, after N draws,
+## we have at least one realisation not worse than X
+x &lt;- c(0.1,.3,.5,.5,.6)
+bestofN &lt;- function(x, N) {
+    nx &lt;- length(x)
+    function(X)
+        1 - (sum(x &gt; X)/nx)^N
+}
+bestof2 &lt;- bestofN(x, 2)
+bestof5 &lt;- bestofN(x, 5)
+bestof2(0.15)
+bestof5(0.15)
+
+
+## Not run: 
+## with R &gt;= 2.13.0 and the compiler package
+algo$nG &lt;- 100L
+system.time(res100 &lt;- restartOpt(DEopt, n = 10L, OF = tfTrefethen, algo = algo))
+
+require("compiler")
+enableJIT(3)
+system.time(res100 &lt;- restartOpt(DEopt, n = 10L, OF = tfTrefethen, algo = algo))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

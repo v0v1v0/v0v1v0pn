@@ -1,0 +1,175 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RegAdjust</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The regression adjustment estimator of the dose-response curve.</h2>
+
+<h3>Description</h3>
+
+<p>This function implements the standard regression adjustment or G-computation
+estimator of the dose-response curve or its derivative via (partial) local
+polynomial regression.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RegAdjust(
+  Y,
+  X,
+  t_eval = NULL,
+  h = NULL,
+  b = NULL,
+  C_h = 7,
+  C_b = 3,
+  print_bw = TRUE,
+  degree = 2,
+  deriv_ord = 0,
+  kernT = "epanechnikov",
+  kernS = "epanechnikov",
+  parallel = TRUE,
+  cores = 6
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>The input n-dimensional outcome variable vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>The input n*(d+1) matrix. The first column of X stores the
+treatment/exposure variables, while the other d columns are confounding variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t_eval</code></td>
+<td>
+<p>The m-dimensional vector for evaluating the dose-response curve.
+(Default: t_eval = NULL. Then, t_eval = <code>X[,1]</code>, which consists of the observed
+treatment variables.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h, b</code></td>
+<td>
+<p>The bandwidth parameters for the treatment/exposure variable
+and confounding variables (Default: h = NULL, b = NULL. Then, the rule-of-thumb
+bandwidth selector in Eq. (A1) of Yang and Tschernig (1999) is used with
+additional scaling factors C_h and C_b, respectively.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C_h, C_b</code></td>
+<td>
+<p>The scaling factors for the rule-of-thumb bandwidth parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print_bw</code></td>
+<td>
+<p>The indicator of whether the current bandwidth parameters
+should be printed to the console. (Default: print_bw = TRUE.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>degree</code></td>
+<td>
+<p>Degree of local polynomials. (Default: degree = 2.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deriv_ord</code></td>
+<td>
+<p>The order of the estimated derivative of the conditional mean
+outcome function. (Default: deriv_ord = 1.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernT, kernS</code></td>
+<td>
+<p>The names of kernel functions for the treatment/exposure
+variable and confounding variables. (Default: kernT = "epanechnikov",
+kernS = "epanechnikov".)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>The indicator of whether the function should be parallel
+executed. (Default: parallel = TRUE.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>The number of cores for parallel execution. (Default: cores = 6.)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The estimated dose-response curves or its derivatives evaluated
+at points <code>t_eval</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Yikun Zhang, <a href="mailto:yikunzhang@foxmail.com">yikunzhang@foxmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Zhang, Y., Chen, Y.-C., and Giessing, A. (2024)
+<em>Nonparametric Inference on Dose-Response Curves Without the Positivity Condition.</em>
+<a href="https://arxiv.org/abs/2405.09003">https://arxiv.org/abs/2405.09003</a>.
+</p>
+<p>Fan, J. and Gijbels, I. (1996) <em>Local Polynomial Modelling and its
+Applications. Chapman &amp; Hall/CRC.</em>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  library(parallel)
+  set.seed(123)
+  n &lt;- 300
+
+  S2 &lt;- cbind(2 * runif(n) - 1, 2 * runif(n) - 1)
+  Z2 &lt;- 4 * S2[, 1] + S2[, 2]
+  E2 &lt;- 0.2 * runif(n) - 0.1
+  T2 &lt;- cos(pi * Z2^3) + Z2 / 4 + E2
+  Y2 &lt;- T2^2 + T2 + 10 * Z2 + rnorm(n, mean = 0, sd = 1)
+  X2 &lt;- cbind(T2, S2)
+
+  t_qry2 = seq(min(T2) + 0.01, max(T2) - 0.01, length.out = 100)
+  chk &lt;- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
+  if (nzchar(chk) &amp;&amp; chk == "TRUE") {
+    # use 2 cores in CRAN/Travis/AppVeyor
+    num_workers &lt;- 2L
+  } else {
+    # use all cores in devtools::test()
+    num_workers &lt;- parallel::detectCores()
+  }
+  Y_RA2 = RegAdjust(Y2, X2, t_eval = t_qry2, h = NULL, b = NULL, C_h = 7, C_b = 3,
+                    print_bw = FALSE, degree = 2, deriv_ord = 0,
+                    kernT = "epanechnikov", kernS = "epanechnikov",
+                    parallel = TRUE, cores = num_workers)
+
+
+</code></pre>
+
+
+</div>

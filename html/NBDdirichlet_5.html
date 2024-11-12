@@ -1,0 +1,253 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summary.dirichlet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Theoretical summary statistics from the Dirichlet model.</h2>
+
+<h3>Description</h3>
+
+<p>This function summarizes a 'dirichlet' object.  It is a method for the
+generic function <code>summary</code> of class 'dirichlet'.  It
+calculate four types of theoretical summary statistics, which can be
+compared with the corresponding observed statistics.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'dirichlet'
+summary(object, t = 1, type = c("buy", "freq", "heavy", "dup"),
+digits = 2, freq.cutoff = 5, heavy.limit = 1:6, dup.brand = 1, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of "dirichlet" class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Multiple of the base time period. For example, if the assumed
+base time period is quarterly, then <code>t=4</code> would mean
+annually. Default to one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A character vector that specifies which types of
+theoretical statistics (during the time period indicated by <code>t</code>) are to be
+calculated.  Four character strings can be listed:
+</p>
+
+<dl>
+<dt>buy</dt>
+<dd>
+<p>Theoretical brand penetration, buying rate, and the buying
+rate of the category per brand buyer.</p>
+</dd>
+<dt>freq</dt>
+<dd>
+<p>Distribution of the number of brand purchases.</p>
+</dd>
+<dt>heavy</dt>
+<dd>
+<p>Theoretical brand penetration and buying rate among
+category buyers with a specific frequency range.</p>
+</dd>
+<dt>dup</dt>
+<dd>
+<p>Brand duplication (proportion of buyers of a particular
+brand also buying other brand).</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Number of decimal digits to control the rounding
+precision of the reported statistics. Default to 2. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freq.cutoff</code></td>
+<td>
+<p>For the <code>type="freq"</code> table, where to cut off and
+lump the tail of the frequency distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>heavy.limit</code></td>
+<td>
+<p>For the <code>type="heavy"</code> table, a vector containing the
+specific purchase frequency range of the category buyers. The
+upper-bound of the frequency is <code>nstar</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dup.brand</code></td>
+<td>
+<p>For the <code>type="dup"</code> table, the focal
+brand. Defaul to the first brand in the brand list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other parameters passing to the generic function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The output corresponds to the theoretical portion of the Table 3, 4,
+5, 6 in the reference paper.  We also have another set of functions
+(available upon request) that put observed and theoretical statistics
+together for making tables that resemble those in the reference.
+</p>
+<p>Let <code class="reqn">P_n</code> be the probability of a consumer buying the product
+category <code class="reqn">n</code> times.  Then <code class="reqn">P_n</code> has a Negative Binomial
+Distribution (NBD).   Let <code class="reqn">p(r_j|n)</code> be the probability of making
+<code class="reqn">r_j</code> purchases of brand <code class="reqn">j</code>, gien that <code class="reqn">n</code> purchases
+of the category having been make (<code class="reqn">r_j\leq n</code>).  Then <code class="reqn">p(r_j|n)</code>
+has a Beta-Binomial distribution.
+</p>
+<p>The theoretical brand penetration <code class="reqn">b</code> is then
+</p>
+<p style="text-align: center;"><code class="reqn">b = 1 - \sum_{n=0} P_n p(0|n)</code>
+</p>
+
+<p>The theoretical brand buying rate <code class="reqn">w</code> is
+</p>
+<p style="text-align: center;"><code class="reqn">w = \frac{\sum_{n=1} \{  P_n \sum_{r=1}^n r p(r|n) \}}{b} </code>
+</p>
+
+<p>and the category buying rate per brand buyer <code class="reqn">w_P</code> is
+</p>
+<p style="text-align: center;"><code class="reqn">w_P = \frac{\sum_{n=1} \{ n P_n [ 1 - p(0|n)] \}}{b} </code>
+</p>
+
+<p>The brand purchase frequency distribution is
+</p>
+<p style="text-align: center;"><code class="reqn"> f(r) = \sum_{n \geq r} P_n p(r|n) </code>
+</p>
+
+<p>The brand penetration given a specific category purchase frequency range
+<code class="reqn">R=\{i_1, i_2, i_3, \ldots\}</code> is
+</p>
+<p style="text-align: center;"><code class="reqn">1 - \frac{\sum_{n \in R}  P(n) p(0|n)}{\sum_{n \in R} P(n)}</code>
+</p>
+
+<p>The brand buying rate given a specific category purchase frequency range
+<code class="reqn">R=\{i_1, i_2, i_3, \ldots\}</code> is
+</p>
+<p style="text-align: center;"><code class="reqn">\frac{\sum_{n \in R} P(n) [\sum_{r=1}^n r p(r|n)]}{\sum_{n \in R}
+    P(n) [1 - p(0|n)] }</code>
+</p>
+
+<p>To calculate the brand duplication measure, we first get the penetration <code class="reqn">b_{(j+k)}</code>
+of the "composite" brand of two brands <code class="reqn">j</code> and <code class="reqn">k</code> as:
+</p>
+<p style="text-align: center;"><code class="reqn"> b_{(j+k)} = 1 - \sum_n  P_n p_k(0|n) p_j(0|n)</code>
+</p>
+
+<p>Then the theoretical proportion <code class="reqn">b_{jk}</code> of the population buying both brands at
+least once  is:
+</p>
+<p style="text-align: center;"><code class="reqn">b_{jk} = b_j + b_k - b_{(j+k)}</code>
+</p>
+
+<p>and the brand duplication <code class="reqn">b_{j/k}</code> (where brand <code class="reqn">k</code> is the focal
+brand) is:
+</p>
+<p style="text-align: center;"><code class="reqn">b_{j/k} = b_{jk} / b_k</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>A list with those components that are specified by the input
+<code>type</code> parameter. 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>buy</code></td>
+<td>
+<p>A data frame with three components: <code>pen.brand</code> (Theoretical brand penetration),
+<code>pur.brand</code> (buying rate of the brand), <code>pur.cat</code> (buying
+rate of the category per brand buyer). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freq</code></td>
+<td>
+<p>A matrix that lists the distribution of brand
+purchases.  The number of rows is the number of brands.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>heavy</code></td>
+<td>
+<p>A matrix with two columns.  The first column
+(<code>Penetration</code>) is the theoretical brand penetration among
+category buyers with a specific frequency range. The second column
+(<code>Avg Purchase Freq</code>) is the brand buying rate of those category
+buyers. The number of rows is the number of brands.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dup</code></td>
+<td>
+<p>A vector with dimension as the number of brands. It reports
+the brand duplication (proportion of buyers of a particular brand
+also buying other brand) of the focal brand (<code>dup.brand</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Feiming Chen  </p>
+
+
+<h3>References</h3>
+
+<p><em>The Dirichlet: A Comprehensive Model of Buying
+Behavior</em>.  G.J. Goodhardt, A.S.C. Ehrenberg, C. Chatfield.  <em>Journal
+of the Royal Statistical Society. Series A  (General)</em>, Vol. 147, No. 5 (1984), pp. 621-655
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dirichlet</code>, <code>print.dirichlet</code>,
+<code>plot.dirichlet</code>, <code>NBDdirichlet-package</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">cat.pen &lt;- 0.56 # Category Penetration
+cat.buyrate &lt;- 2.6 # Category Buyer's Average Purchase Rate in a given period.
+brand.share &lt;- c(0.25, 0.19, 0.1, 0.1, 0.09, 0.08, 0.03, 0.02) # Brands' Market Share
+brand.pen.obs &lt;- c(0.2,0.17,0.09,0.08,0.08,0.07,0.03,0.02) # Brand Penetration
+brand.name &lt;- c("Colgate DC", "Macleans","Close Up","Signal","ultrabrite",
+"Gibbs SR","Boots Priv. Label","Sainsbury Priv. Lab.")
+
+dobj &lt;- dirichlet(cat.pen, cat.buyrate, brand.share, brand.pen.obs, brand.name)
+
+## Not run: summary(dobj)
+summary(dobj, t=4, type="freq")
+summary(dobj, t=4, type="heavy", heavy.limit=c(7:50))
+summary(dobj, t=1, type="dup", dup.brand=2)
+</code></pre>
+
+
+</div>

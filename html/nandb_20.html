@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cc_number_timeseries_folder</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-correlated number time-series calculations for every image in a
+folder.</h2>
+
+<h3>Description</h3>
+
+<p>Perform <code>cc_number_timeseries()</code> calculations on all tif images in a
+folder and save the resulting images to disk.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cc_number_timeseries_folder(
+  folder_path = ".",
+  frames_per_set,
+  overlap = FALSE,
+  ch1 = 1,
+  ch2 = 2,
+  thresh = NULL,
+  detrend = FALSE,
+  quick = FALSE,
+  filt = NULL,
+  parallel = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>folder_path</code></td>
+<td>
+<p>The path (relative or absolute) to the folder you wish to
+process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frames_per_set</code></td>
+<td>
+<p>The number of frames with which to calculate the
+successive cross-correlated numbers.
+</p>
+<p>This may discard some images, for example if 175 frames are in the input and
+<code>frames_per_set = 50</code>, then the last 25 are discarded. If bleaching or/and
+thresholding are selected, they are performed on the whole image stack before
+the sectioning is done for calculation of cross-correlated numbers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlap</code></td>
+<td>
+<p>A boolean. If <code>TRUE</code>, the windows used to calculate brightness
+are overlapped, if <code>FALSE</code>, they are not. For example, for a 20-frame image
+series with 5 frames per set, if the windows are not overlapped, then the
+frame sets used are 1-5, 6-10, 11-15 and 16-20; whereas if they are
+overlapped, the frame sets are 1-5, 2-6, 3-7, 4-8 and so on up to 16-20.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ch1</code></td>
+<td>
+<p>A natural number. The index of the first channel to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ch2</code></td>
+<td>
+<p>A natural number. The index of the second channel to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>Do you want to apply an intensity threshold prior to
+calculating cross-correlated number (via
+<code>autothresholdr::mean_stack_thresh()</code>)? If so, set your thresholding method
+here. If this is a single value, that same threshold will be applied to
+both channels. If this is a length-2 vector or list, then these two
+thresholds will be applied to channels 1 and 2 respectively. A value of
+<code>NA</code> for either channel gives no thresholding for that channel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detrend</code></td>
+<td>
+<p>Detrend your data with <code>detrendr::img_detrend_rh()</code>. This is
+the best known detrending method for brightness analysis. For more
+fine-grained control over your detrending, use the <code>detrendr</code> package. To
+detrend one channel and not the other, specify this as a length 2 vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quick</code></td>
+<td>
+<p><code>FALSE</code> repeats the detrending procedure (which has some inherent
+randomness) a few times to hone in on the best detrend. <code>TRUE</code> is quicker,
+performing the routine only once. <code>FALSE</code> is better.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filt</code></td>
+<td>
+<p>Do you want to smooth (<code>filt = 'smooth'</code>) or median (<code>filt = 'median'</code>) filter the cross-correlated number image using <code>smooth_filter()</code>
+or <code>median_filter()</code> respectively? If selected, these are invoked here with
+a filter radius of 1 and with the option <code>na_count = TRUE</code>. A value of <code>NA</code>
+for either channel gives no thresholding for that channel. If you want to
+smooth/median filter the cross-correlated number image in a different way,
+first calculate the cross-correlated numbers without filtering (<code>filt = NULL</code>) using this function and then perform your desired filtering routine
+on the result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Would you like to use multiple cores to speed up this
+function? If so, set the number of cores here, or to use all available
+cores, use <code>parallel = TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>cc_number_timeseries()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+setwd(tempdir())
+ijtiff::write_tif(img, "a.tif")
+ijtiff::write_tif(img, "ab.tif")
+cc_number_timeseries_folder(frames_per_set = 25)
+list.files()
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

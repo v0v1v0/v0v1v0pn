@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dLogChisq</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Log transformed chi-squared distribution.</h2>
+
+<h3>Description</h3>
+
+<p><code>dLogChisq</code> and <code>rLogChisq</code> provide a log-transformed chi-squared distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dLogChisq(x, df = 1, log = 0)
+
+rLogChisq(n = 1, df = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A continuous random variable on the real line, where y=exp(x) and y ~ dchisq(df).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>df parameter of y ~ dchisq(df).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical flag to toggle returning the log density.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of random variables. Currently limited to 1, as is common in nimble. See ?replicate for an alternative.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The density or log density of x, such that x = log(y) and y ~ dchisq(df).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>David R.J. Pleydell
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Create a Chi-squared random variable, and transform it to the log scale
+n  = 100000
+df = 3
+y  = rchisq(n=n, df=df)
+x  = log(y)
+
+## Plot histograms of the two random variables
+oldpar &lt;- par()
+par(mfrow=n2mfrow(2))
+## Plot 1
+hist(x, n=100, freq=FALSE, main="", xlab= "x = log(y)")
+curve(dLogChisq(x, df=df), -7, 4, n=1001, col="red", add=TRUE, lwd=3)
+## Plot 2: back-transformed
+xNew = replicate(n=n, rLogChisq(n=1, df=df))
+yNew = exp(xNew)
+hist(yNew, n=100, freq=FALSE, xlab="y = exp(x)", main="")
+curve(dchisq(x, df=df), 0, 30, n=1001, col="red", lwd=3, add=TRUE)
+par(oldpar)
+
+## Create a NIMBLE model that uses this transformed distribution
+code = nimbleCode({
+  x ~ dLogChisq(df = 0.5)
+  y &lt;- exp(x)
+})
+
+
+## Build &amp; compile the model
+modelR = nimbleModel(code=code)
+modelC = compileNimble(modelR)
+
+## Configure, build and compile an MCMC
+conf   = configureMCMC(modelC, monitors=c("x","y"))
+mcmc   = buildMCMC(conf=conf)
+cMcmc  = compileNimble(mcmc)
+
+## Run the MCMC
+samps = runMCMC(mcmc=cMcmc, niter=50000)
+x     = samps[,"x"]
+y     = samps[,"y"]
+
+## Plot MCMC output
+oldpar &lt;- par()
+par(mfrow=n2mfrow(3))
+## Plot 1: MCMC trajectory
+plot(x, typ="l")
+## Plot 2: taget density on unbounded sampling scale
+hist(x, n=100, freq=FALSE, main="Histogram of MCMC samples", xlab="x = log(y)")
+curve(dLogChisq(x, df=0.5), -55, 5, n=1001, col="red", lwd=3, add=TRUE)
+## Plot 3: taget density on bounded scale
+hist(y, n=100, freq=FALSE, xlab="y = exp(x)", main="Back-transformed MCMC samples")
+curve(dchisq(x, df=0.5), 0, 20, n=1001, col="red", lwd=3, add=TRUE)
+par(oldpar)
+
+</code></pre>
+
+
+</div>

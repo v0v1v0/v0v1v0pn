@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>highlight_cells</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Highlight Cells</h2>
+
+<h3>Description</h3>
+
+<p>A lightweight cell highlighter that uses non-standard evaluation.  This
+function is designed for interactive use.  It's behavior outside of this
+context is not gaurenteed.  For finer contral use an <code>ifelse</code> with
+<code>paste</code> within a <code>?dplyr::mutate</code> statement.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">highlight_cells(
+  data,
+  rows,
+  columns = seq_len(ncol(data)),
+  left = "&lt;b&gt;",
+  right = gsub("(&lt;)([^&gt; ]+)([^&gt;]*&gt;)", "\\1/\\2&gt;", left),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data.frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rows</code></td>
+<td>
+<p>An expression that evaluates to logical and is equal in length to
+the number of rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>columns</code></td>
+<td>
+<p>A vector of either integer positions or character names
+corresponding to columns that should be highlighted.  Defaults to all columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>left</code></td>
+<td>
+<p>A highlighting tag for the left side of the cell value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>right</code></td>
+<td>
+<p>A highlighting tag for the right side of the cell value.
+Attempts to use the <code>left</code> input to create a corresponding <code>right</code>
+HTML based tag.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a data.frame with the chosen cell values wrapped in highlight
+tags.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">highlight_cells(mtcars, rows = hp &gt; 230 | qsec &gt; 20)
+highlight_cells(mtcars, rows = hp &gt; 230, columns = 'hp')
+
+## Not run: 
+library(dplyr); library(tibble); library(pander)
+
+mtcars %&gt;%
+    highlight_cells(rows = hp &gt; 230, columns = 'hp') %&gt;%
+    highlight_cells(rows = qsec &gt; 20, columns = 'qsec', left = '&lt;b style="color:blue;"&gt;')  %&gt;%
+    rownames_to_column('car') %&gt;%
+    data.frame(stringsAsFactors = FALSE, check.names = FALSE) %&gt;%
+    pander::pander(split.tables = Inf, justify = alignment(.))
+
+## End(Not run)
+
+## Not run: 
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, magrittr)
+
+set.seed(10)
+data_frame(
+    w = paste(constant_months, rep(2016:2017, each = 12))[1:20] ,
+    x = rnorm(20, 200000, 75000)
+) %&gt;%
+    {
+        a &lt;- .
+        rbind(
+            a,
+            a %&gt;%
+                mutate(w = 'Total') %&gt;%
+                group_by(w) %&gt;%
+                summarize(x = sum(x))
+        )
+    } %&gt;%
+    mutate(
+        y = f_denom(x, prefix = '$'),
+        z = f_denom(x, mix.denom = TRUE, prefix = '$'),
+        x = f_comma(f_dollar(x, 2))
+    )  %&gt;%
+    highlight_cells(w == 'Total') %&gt;%
+    data.frame(stringsAsFactors = FALSE, check.names = FALSE) %&gt;%
+    pander::pander(split.tables = Inf, justify = alignment(.))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

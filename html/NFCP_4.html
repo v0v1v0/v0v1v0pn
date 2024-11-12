@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>European_option_value</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>N-factor model European options on futures contracts valuation</h2>
+
+<h3>Description</h3>
+
+<p>Value European Option Put and Calls under the parameters of an N-factor model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">European_option_value(
+  x_0,
+  parameters,
+  futures_maturity,
+  option_maturity,
+  K,
+  r,
+  call = FALSE,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x_0</code></td>
+<td>
+<p><code>vector</code>. Initial values of the state variables, where the length must correspond to the number of factors specified in the parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameters</code></td>
+<td>
+<p><code>vector</code>. A named vector of parameter values of a specified N-factor model. Function <code>NFCP_parameters</code> is recommended.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>futures_maturity</code></td>
+<td>
+<p><code>numeric</code>. Time, in years, when the underlying futures contract matures.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>option_maturity</code></td>
+<td>
+<p><code>numeric</code>. Time, in years,  when the American option expires.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p><code>numeric</code>. Strike price of the American Option.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p><code>numeric</code>. Annualized risk-free interest rate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p><code>logical</code>. Is the American option a call or put option?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p><code>logical</code>. Should additional option value information be output? see <b>details</b>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<script id="MathJax-script" async src="../../mathjaxr/doc/mathjax/es5/tex-chtml-full.js"></script><p>The <code>European_option_value</code> function calculates analytic expressions of the value of European call and put options on futures contracts within the N-factor model. A European option on a commodity futures contract gives the holder
+the right, but not the obligation, to buy (call) or sell (put) the underlying asset at option maturity. If the European option is exercised, the option devolves into buying or selling of the underlying futures asset.
+</p>
+<p>State variables (i.e., the states of the factors of an N-factor model) are generally unobservable. Filtering the commodity pricing model using term structure data will provide the most recent optimal estimates of state variables, which can then be used to forecast and value European options.
+</p>
+<p>Under the assumption that future futures prices
+are log-normally distributed under the risk-neutral process, there exist analytic expressions of the value of European call and put options on futures contracts. The value of a European option on a futures contract
+is given by calculating the current expected futures price and the average instantaneous variance of the futures return innovations over the life of the option.
+</p>
+<p>Consider a European option with strike price \(K\) and a risk-free interest rate of \(r_f\). The option maturity is at time \(T_0\) and futures maturity at time \(T_1\).
+The particular model features a state vector of length \(N\) (i.e., N-factors) \(x(t)\)
+</p>
+<p>The value of a European call option would thus be:
+</p>
+\[e^{-r T_0}  E^*[max(F(x(T_0),T_0,T_1) - K, 0)]\]
+<p>The analytic solution to call and put options are given by:
+</p>
+<p>Call options:
+\[e^{-r T_0}(F(x(0), 0, T_1)  N(d_1) - KN(d_2))\]
+</p>
+<p>Put options:
+\[e^{-r T_0}(KN(-d_2) - F(x(0), 0, T_1)  N(-d_1))\]
+</p>
+<p>Where:
+</p>
+<p>Where:
+\[d_1 = \frac{\ln(F/K) + \frac{1}{2} v^2}{v}\]
+</p>
+\[d_2 = d_1 - v\]
+<p>Parameter \( N(d) \) indicates cumulative probabilities for the standard normal distribution (i.e. \(P(Z &lt; d)\)).
+</p>
+<p>Finally, parameter \(v\), the annualized option volatility, is given by:
+</p>
+\[Var^*[\ln(F(x(T_0), T_0, T_1))] \equiv v^2 = \sum_{i.j=1} e^{(-\kappa_i + \kappa_j)(T_1 - T_0)}Cov^*(x_i(T_0), x_j(T_0))\]
+<p>The annualized option volatility approaches \(\sigma_1^2 T_0\) as both \(T_0\) and \(T_1\) increase, as most uncertainty about spot prices at futures contract maturity and option expiration
+are a result of uncertainty about spot prices, rather than the cost of carry (Schwartz and Smith, 2000).
+</p>
+<p>The presented option valuation formulas are analogous to the Black-Scholes formulas for valuing European options on stocks that do not pay dividends
+</p>
+<p>When <code>verbose = T</code>, the <code>European_option_value</code> function numerically calculates the sensitivity of option prices to underlying option and model parameters. Gradients are calculated numerically through the
+<code>grad</code> function of the <code>numDeriv</code> package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The <code>European_option_value</code> function returns a numeric value corresponding to the present value of an option when <code>verbose = F</code>.
+When <code>verbose = T</code>, <code>European_option_value</code> returns a list with three objects:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+
+<code>option value</code> </td>
+<td style="text-align: left;"> Present value of the option. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>annualized volatility</code> </td>
+<td style="text-align: left;"> Annualized volatility of the option. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>parameter sensitivity</code> </td>
+<td style="text-align: left;"> Sensitivity of option value to model parameters. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>greeks</code> </td>
+<td style="text-align: left;"> Sensitivity of option value to option parameters. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Schwartz, E. S., and J. E. Smith, (2000). Short-Term Variations and Long-Term Dynamics in Commodity Prices. <em>Manage. Sci.</em>, 46, 893-911.
+</p>
+<p>Cortazar, G., and L. Naranjo, (2006). An N-factor Gaussian model of oil futures prices. <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em>, 26(3), 243-268.
+</p>
+<p>Paul Gilbert and Ravi Varadhan (2016). numDeriv: Accurate Numerical Derivatives. R package version 2016.8-1. https://CRAN.R-project.org/package=numDeriv
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##Example 1 - A European 'put' option on a futures contract following 'GBM'
+
+European_option_value(x_0 = log(20), parameters = c(mu_rn = 0.06, sigma_1 = 0.2),
+                     futures_maturity = 1, option_maturity = 1,
+                     K = 20, r = 0.06, call = FALSE, verbose = TRUE)
+
+##Example 2 - A European put option under a two-factor crude oil model:
+
+##Step 1 - Obtain current (i.e. most recent) state vector by filtering the
+##two-factor oil model:
+Schwartz_Smith_oil &lt;- NFCP_Kalman_filter(parameter_values = SS_oil$two_factor,
+                                        parameter_names = names(SS_oil$two_factor),
+                                        log_futures = log(SS_oil$stitched_futures),
+                                        dt = SS_oil$dt,
+                                        futures_TTM = SS_oil$stitched_TTM,
+                                        verbose = TRUE)
+
+##Step 2 - Calculate 'call' option price:
+European_option_value(x_0 = Schwartz_Smith_oil$x_t,
+                     parameters = SS_oil$two_factor,
+                     futures_maturity = 2,
+                     option_maturity = 1,
+                     K = 20,
+                     r = 0.05,
+                     call = FALSE,
+                     verbose = FALSE)
+</code></pre>
+
+
+</div>

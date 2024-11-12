@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>putCallParity</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Put-Call Parity
+</h2>
+
+<h3>Description</h3>
+
+<p>Put–call parity
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  putCallParity(what, call, put, S, X, tau, r, q = 0, tauD = 0, D = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+<p>character: what to compute. Currently only <code>call</code> or <code>put</code> are supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>call price</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>put</code></td>
+<td>
+<p>put price</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>underlier</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>strike</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>time to expiry</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>interest rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>dividend rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tauD</code></td>
+<td>
+<p>numeric vector: time to dividend</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>numeric vector: dividends</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Put–call parity only works for European options. The function is
+vectorised (like <code>vanillaOptionEuropean</code>), except for
+dividends.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Numeric vector.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">S &lt;- 100; X &lt;- 100; tau &lt;- 1; r &lt;- 0.02; q &lt;- 0.0;
+vol &lt;- 0.3; D &lt;- 20; tauD &lt;- 0.5
+call &lt;- vanillaOptionEuropean(S, X, tau, r, q, vol^2,
+                              tauD = tauD, D = D, type = "call")$value
+put  &lt;- vanillaOptionEuropean(S, X, tau, r, q, vol^2,
+                              tauD = tauD, D = D, type = "put")$value
+
+## recover the call from the put (et vice versa)
+all.equal(call, putCallParity("call", put = put,  S=S, X=X, tau=tau,
+                              r=r, q=q, tauD=tauD, D=D))
+all.equal(put, putCallParity("put",  call = call, S=S, X=X, tau=tau,
+                             r=r, q=q, tauD=tauD, D=D))
+
+
+## Black--Scholes--Merton with with 'callCF'
+S &lt;- 100; X &lt;- 90; tau &lt;- 1; r &lt;- 0.02; q &lt;- 0.08
+v &lt;- 0.2^2  ## variance, not volatility
+
+(ccf &lt;- callCF(cf = cfBSM, S = S, X = X, tau = tau, r = r, q = q,
+                 v = v, implVol = TRUE))
+all.equal(ccf$value,
+          vanillaOptionEuropean(S, X, tau, r, q, v, type = "call")$value)
+all.equal(
+  putCallParity("put", call=ccf$value, S=S, X=X, tau=tau, r=r, q=q),
+  vanillaOptionEuropean(S, X, tau, r, q, v, type = "put")$value)
+</code></pre>
+
+
+</div>

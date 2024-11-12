@@ -1,0 +1,191 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vuongtest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Vuong Tests for Model Comparison</h2>
+
+<h3>Description</h3>
+
+<p>Test pairs of models using Vuong's (1989) &lt;DOI:10.2307/1912557&gt; theory.  This includes
+a test of model distinguishability and a test of model fit.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">vuongtest(
+  object1,
+  object2,
+  nested = FALSE,
+  adj = "none",
+  ll1 = llcont,
+  ll2 = llcont,
+  score1 = NULL,
+  score2 = NULL,
+  vc1 = vcov,
+  vc2 = vcov
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object1</code></td>
+<td>
+<p>a model object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object2</code></td>
+<td>
+<p>a model object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nested</code></td>
+<td>
+<p>if <code>TRUE</code>, models are assumed to be nested</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adj</code></td>
+<td>
+<p>Should an adjusted test statistic be calculated?  Defaults to “none”, with possible adjustments being “aic” and “bic”</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ll1</code></td>
+<td>
+<p>an optional function for computing log-likelihood contributions of object1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ll2</code></td>
+<td>
+<p>an optional function for computing log-likelihood contributions of object2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score1</code></td>
+<td>
+<p>an optional function for computing scores of object 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score2</code></td>
+<td>
+<p>an optional function for computing scores of object 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vc1</code></td>
+<td>
+<p>an optional function for computing the asymptotic covariance matrix of the object1 parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vc2</code></td>
+<td>
+<p>an optional function for computing the asymptotic covariance matrix of the object2 parameters</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For non-nested models, the test of distinguishability indicates whether or
+not the models can possibly be distinguished on the basis of the observed
+data.  The LRT then indicates whether or not one model fits better
+than another.
+</p>
+<p>For nested models (<code>nested=TRUE</code>), both tests serve as robust
+alternatives to the classical likelihood ratio tests.  In this case,
+the <code>adj</code> argument is ignored.
+</p>
+<p>Users should take care to ensure that the two models have
+the same dependent variable (or, for lavaan objects, identical
+modeled variables), with observations ordered identically within
+each model object.  Assuming the same data matrix is used to fit each model,
+observation ordering should generally be identical.  There are currently
+no checks for this, however.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>vuongtest</code> containing test results.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ed Merkle and Dongjun You
+</p>
+
+
+<h3>References</h3>
+
+<p>Vuong, Q. H. (1989).  Likelihood ratio tests for model selection and non-nested hypotheses.  <em>Econometrica, 57</em>, 307-333. &lt;DOI:10.2307/1912557&gt;
+</p>
+<p>Merkle, E. C., You, D., &amp; Preacher, K. (2016). Testing non-nested structural equation models.  <em>Psychological Methods, 21</em>, 151-163. &lt;DOI:10.1037/met0000038&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Count regression comparisons
+require(MASS)
+house1 &lt;- glm(Freq ~ Infl + Type + Cont, family=poisson, data=housing)
+house2 &lt;- glm(Freq ~ Infl + Sat, family=poisson, data=housing)
+house3 &lt;- glm(Freq ~ Infl, family=poisson, data=housing)
+## house3 is nested within house1 and house2
+anova(house3, house1, test="Chisq")
+anova(house3, house2, test="Chisq")
+
+## house 2 is not nested in house1, so this test is invalid
+anova(house2, house1, test="Chisq")
+
+## Use vuongtest() instead
+vuongtest(house2, house1)
+
+## Application to models with different distributional assumptions
+require(pscl)
+bio1 &lt;- glm(art ~ fem + mar + phd + ment, family=poisson, data=bioChemists)
+bio2 &lt;- hurdle(art ~ fem + mar + phd + ment, data=bioChemists)
+bio3 &lt;- zeroinfl(art ~ fem + mar + phd + ment, data=bioChemists)
+vuongtest(bio2, bio1)
+vuongtest(bio3, bio1)
+vuongtest(bio1, bio2)
+vuongtest(bio1, bio3)
+vuongtest(bio3, bio2)
+
+## Application to latent variable models
+require(lavaan)
+HS.model &lt;- 'visual  =~ x1 + x2 + x3
+              textual =~ x4 + x5 + x6
+              speed   =~ x7 + x8 + x9 '
+fit1 &lt;- cfa(HS.model, data=HolzingerSwineford1939)
+fit2 &lt;- cfa(HS.model, data=HolzingerSwineford1939, group="school")
+vuongtest(fit1, fit2)
+
+## Supplying custom vcov function
+require(lme4)
+require(merDeriv)
+
+fm1 &lt;- lmer(Reaction ~ Days + (Days | Subject), sleepstudy, REML=FALSE)
+fm2 &lt;- lmer(Reaction ~ Days + (Days || Subject), sleepstudy, REML=FALSE)
+
+vcl &lt;- function(obj) vcov(obj, full=TRUE)
+vuongtest(fm1, fm2, vc1=vcl, vc2=vcl, nested=TRUE)
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

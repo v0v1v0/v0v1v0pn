@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Annotator</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Annotator (pipeline) objects</h2>
+
+<h3>Description</h3>
+
+<p>Create annotator (pipeline) objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Annotator(f, meta = list(), classes = NULL)
+Annotator_Pipeline(..., meta = list())
+as.Annotator_Pipeline(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>an annotator function, which must have formals <code>s</code> and
+<code>a</code> giving, respectively, the string with the natural language
+text to annotate and an annotation object to start from, and return
+an annotation object with the computed annotations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta</code></td>
+<td>
+<p>an empty or named list of annotator (pipeline) metadata
+tag-value pairs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classes</code></td>
+<td>
+<p>a character vector or <code>NULL</code> (default) giving
+classes to be used for the created annotator object in addition to
+<code>"Annotator"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>annotator objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>Annotator()</code> checks that the given annotator function has the
+appropriate formals, and returns an annotator object which inherits
+from the given classes and <code>"Annotator"</code>.  There are
+<code>print()</code> and <code>format()</code> methods for such objects, which use
+the <code>description</code> element of the metadata if available.
+</p>
+<p><code>Annotator_Pipeline()</code> creates an annotator pipeline object from
+the given annotator objects.  Such pipeline objects can be used by
+<code>annotate()</code> for successively computing and merging
+annotations, and can also be obtained by coercion with
+<code>as.Annotator_Pipeline()</code>, which currently handles annotator
+objects and lists of such (and of course, annotator pipeline
+objects).
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>Annotator()</code>, an annotator object inheriting from the given
+classes and class <code>"Annotator"</code>.
+</p>
+<p>For <code>Annotator_Pipeline()</code> and <code>as.Annotator_Pipeline()</code>, an
+annotator pipeline object inheriting from class
+<code>"Annotator_Pipeline"</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Simple annotator generators for creating “simple”
+annotator objects based on function performing simple basic NLP tasks.
+</p>
+<p>Package <span class="pkg">StanfordCoreNLP</span> available from the repository at
+<a href="https://datacube.wu.ac.at">https://datacube.wu.ac.at</a> which provides generators for annotator
+pipelines based on the Stanford CoreNLP tools.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Use blankline_tokenizer() for a simple paragraph token annotator:
+para_token_annotator &lt;-
+Annotator(function(s, a = Annotation()) {
+              spans &lt;- blankline_tokenizer(s)
+              n &lt;- length(spans)
+              ## Need n consecutive ids, starting with the next "free"
+              ## one:
+              from &lt;- next_id(a$id)
+              Annotation(seq(from = from, length.out = n),
+                         rep.int("paragraph", n),
+                         spans$start,
+                         spans$end)
+          },
+          list(description = 
+              "A paragraph token annotator based on blankline_tokenizer()."))
+para_token_annotator
+## Alternatively, use Simple_Para_Token_Annotator().
+
+## A simple text with two paragraphs:
+s &lt;- String(paste("  First sentence.  Second sentence.  ",
+                  "  Second paragraph.  ",
+                  sep = "\n\n"))
+a &lt;- annotate(s, para_token_annotator)
+## Annotations for paragraph tokens.
+a
+## Extract paragraph tokens.
+s[a]
+</code></pre>
+
+
+</div>

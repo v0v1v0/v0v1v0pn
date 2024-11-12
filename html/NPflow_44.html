@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mvsnpdf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>multivariate Skew-Normal probability density function</h2>
+
+<h3>Description</h3>
+
+<p>multivariate Skew-Normal probability density function
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mvsnpdf(x, xi, sigma, psi, Log = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>p x n data matrix with n the number of observations and
+p the number of dimensions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xi</code></td>
+<td>
+<p>mean vector or list of mean vectors (either a vector,
+a matrix or a list)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>variance-covariance matrix or list of variance-covariance
+matrices (either a matrix or a list)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi</code></td>
+<td>
+<p>skew parameter vector or list of skew parameter vectors
+(either a vector, a matrix or a list)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Log</code></td>
+<td>
+<p>logical flag for returning the log of the probability density
+function. Defaults is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>mvnpdf</code>, <code>mmvsnpdfC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+mvnpdf(x=matrix(1.96), mean=0, varcovM=diag(1), Log=FALSE)
+dnorm(1.96)
+mvsnpdf(x=matrix(rep(1.96,1), nrow=1, ncol=1),
+      xi=c(0), psi=c(0), sigma=diag(1),
+      Log=FALSE
+)
+
+mvsnpdf(x=matrix(rep(1.96,2), nrow=2, ncol=1),
+      xi=c(0, 0), psi=c(1, 1), sigma=diag(2)
+)
+
+N=50000#00
+Yn &lt;- rnorm(n=N, mean=0, sd=1)
+
+Z &lt;- rtruncnorm(n=N, a=0, b=Inf, mean=0, sd=1)
+eps &lt;- rnorm(n=N, mean=0, sd=1)
+psi &lt;- 10
+Ysn &lt;- psi*Z + eps
+
+nu &lt;- 1.5
+W &lt;- rgamma(n=N, shape=nu/2, rate=nu/2)
+Yst=Ysn/sqrt(W)
+
+library(reshape2)
+library(ggplot2)
+data2plot &lt;- melt(cbind.data.frame(Ysn, Yst))
+#pdf(file="ExSNST.pdf", height=5, width=4)
+p &lt;- (ggplot(data=data2plot)
+     + geom_density(aes(x=value, fill=variable, alpha=variable), col="black")#, lwd=1.1)
+     + theme_bw()
+     + xlim(-15,100)
+     + theme(legend.position="bottom")
+     + scale_fill_manual(values=alpha(c("#F8766D", "#00B0F6"),c(0.2,0.45)),
+                         name =" ",
+                         labels=c("Y~SN(0,1,10)      ", "Y~ST(0,1,10,1.5)")
+     )
+     + scale_alpha_manual(guide=FALSE, values=c(0.25, 0.45))
+     + xlab("Y")
+     + ylim(0,0.08)
+     + ylab("Density")
+     + guides(fill = guide_legend(override.aes = list(colour = NULL)))
+     + theme(legend.key = element_rect(colour = "black"))
+)
+p
+#dev.off()
+
+
+</code></pre>
+
+
+</div>

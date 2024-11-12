@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>niiw.post</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Random draws from the posterior distribution with Normal-Independent-Inverse-Wishart (NIIW) prior.</h2>
+
+<h3>Description</h3>
+
+<p>Given iid <code class="reqn">d</code>-dimensional niche indicators  <code class="reqn">X = (X_1,\ldots,X_N)</code> with <code class="reqn">X_i \sim N(\mu, \Sigma)</code>, this function generates random draws from <code class="reqn">p(\mu,\Sigma | X)</code> for the Normal-Independent-Inverse-Wishart (NIIW) prior.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">niiw.post(nsamples, X, lambda, Omega, Psi, nu, mu0 = lambda, burn)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nsamples</code></td>
+<td>
+<p>The number of posterior draws.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A data matrix with observations along the rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Mean of <code class="reqn">\mu</code>. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Omega</code></td>
+<td>
+<p>Variance of <code class="reqn">\mu</code>. Defaults to <code>Omega = 0</code>.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Psi</code></td>
+<td>
+<p>Scale matrix of <code class="reqn">\Sigma</code>. Defaults to <code>Psi = 0</code>.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+<p>Degrees of freedom of <code class="reqn">\Sigma</code>. Defaults to <code>nu = ncol(X)+1</code>.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu0</code></td>
+<td>
+<p>Initial value of <code class="reqn">\mu</code> to start the Gibbs sampler.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burn</code></td>
+<td>
+<p>Burn-in for the MCMC sampling algorithm.  Either an integer giving the number of initial samples to discard, or a fraction with <code style="white-space: pre;">⁠0 &lt; burn &lt; 1⁠</code>.  Defaults to <code>burn = floor(nsamples/10)</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The NIIW distribution <code class="reqn">p(\mu, \Sigma | \lambda, \kappa, \Psi, \nu)</code> is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">
+\Sigma \sim W^{-1}(\Psi, \nu), \quad \mu | \Sigma \sim N(\lambda, \Omega).
+</code>
+</p>
+
+<p>The default value <code>Omega = 0</code> uses the Lebesque prior on <code class="reqn">\mu</code>: <code class="reqn">p(\mu) \propto 1</code>.  In this case the NIW and NIIW priors produce identical resuls, but <code>niw.post()</code> is faster.
+</p>
+<p>The default value <code>Psi = 0</code> uses the scale-invariant prior on <code class="reqn">\Sigma</code>: <code class="reqn">p(\Sigma) \propto |\Sigma|^{-(\nu+d+1)/2}</code>.
+</p>
+<p>The default value <code>nu = ncol(X)+1</code> for <code>Omega = 0</code> and <code>Psi = 0</code> makes <code class="reqn">E[\mu|X]=`colMeans(X)`</code> and <code class="reqn">E[\Sigma | X]=`var(X)`</code>.
+</p>
+<p>Random draws are obtained by a Markov chain Monte Carlo (MCMC) algorithm; specifically, a Gibbs sampler alternates between draws from <code class="reqn">p(\mu | \Sigma, X)</code> and <code class="reqn">p(\Sigma | \mu, X)</code>, which are Normal and Inverse-Wishart distributions respectively.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list with elements <code>mu</code> and <code>Sigma</code> of sizes <code>c(nsamples, length(lambda))</code> and <code>c(dim(Psi), nsamples)</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>niw.post()</code>, <code>rwish()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># simulate normal data with mean and variance (mu0, Sigma0)
+d &lt;- 4
+mu0 &lt;- rnorm(d)
+Sigma0 &lt;- matrix(rnorm(d^2), d, d)
+Sigma0 &lt;- Sigma0 %*% t(Sigma0)
+N &lt;- 1e2
+X &lt;- matrix(rnorm(N*d), N, d) # iid N(0,1)
+X &lt;- t(t(X %*% chol(Sigma0)) + mu0) # each row is N(mu0, Sigma)
+
+# prior parameters
+# flat prior on mu
+lambda &lt;- 0
+Omega &lt;- 0
+# informative prior on Sigma
+Psi &lt;- crossprod(matrix(rnorm(d^2), d, d))
+nu &lt;- 5
+
+# sample from NIIW posterior
+nsamples &lt;- 2e3
+system.time({
+  siiw &lt;- niiw.post(nsamples, X, lambda, Omega, Psi, nu, burn = 100)
+})
+
+# sample from NIW posterior
+kappa &lt;- 0
+system.time({
+  siw &lt;- niw.post(nsamples, X, lambda, kappa, Psi, nu)
+})
+
+# check that posteriors are the same
+
+# p(mu | X)
+clrs &lt;- c("black", "red")
+par(mar = c(4.2, 4.2, 2, 1)+.1)
+niche.par.plot(list(siiw, siw), col = clrs, plot.mu = TRUE, plot.Sigma = FALSE)
+legend(x = "topright", legend = c("NIIW Prior", "NIW Prior"), fill = clrs)
+
+# p(Sigma | X)
+par(mar = c(4.2, 4.2, 2, 1)+.1)
+niche.par.plot(list(siiw, siw), col = clrs, plot.mu = FALSE, plot.Sigma = TRUE)
+legend(x = "topright", legend = c("NIIW Prior", "NIW Prior"), fill = clrs)
+</code></pre>
+
+
+</div>

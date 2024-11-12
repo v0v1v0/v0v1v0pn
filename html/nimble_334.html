@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>parameterTransform</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Automated transformations of model nodes to unconstrained scales</h2>
+
+<h3>Description</h3>
+
+<p>Provide general transformations of constrained continuous-valued model nodes (parameters) to unconstrained scales.  It handles the cases of interval-bounded parameters (e.g. uniform or beta distributions), semi-interval-bounded parameters (e.g. exponential or gamma distributions), and the multivariate Wishart, inverse Wishart, Dirichlet, and LKJ distributions.  Utilities are provided to transform parameters to an unconstrained scale, back-transform from the unconstrained scale to the original scale of the constrained parameterization, and to calculate the natural logarithm of the determinant of the Jacobian matrix of the inverse transformation, calculated at any location in the transformed (unconstrained) space.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">parameterTransform(model, nodes = character(0), control = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A nimble model object.  See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>A character vector specifying model node names to undergo transformation.  See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>An optional list allowing for additional control of the transformation. This currently supports a single element <code>allowDeterm</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>parameterTransform</code> nimbleFunction is an unspecialized function.  Calling <code>parameterTransform(model, nodes)</code> will generate and return a specialized nimbleFunction, which provides transformation functionality for the specified hierarchical model and set of model nodes.  The <code>nodes</code> argument can represent mutliple model nodes arising from distinct prior distributions, which will be simultaneously transformed according to their respective distributions and constraints.
+</p>
+<p>If the <code>nodes</code> argument is missing or has length zero, then no nodes will be transformed.  A specialized nimbleFunction is created, but will not transform or operate on any model nodes.
+</p>
+<p>The <code>control</code> argument is a list that supports one additional setting. If <code>control$allowDeterm=FALSE</code> (the default), deterministic nodes are not allowed in the <code>nodes</code> argument.  If <code>control$allowDeterm=TRUE</code>, deterministic nodes are allowed and assumed to have no constraints on valid values.
+</p>
+<p>This specialized nimbleFunction has the following methods:
+</p>
+<p><code>transform</code>: Transforms a numeric vector of values from the original constrained model scale to a vector of values on the unconstrained scale.
+</p>
+<p><code>inverseTransform</code>: Transforms a numeric vector of values from the unconstrained scale to the original constrained parameterization scale.
+</p>
+<p>The unconstrained scale may have different dimensionality from the original constrained scale of the model parameters.  For example, a d-dimensional dirichlet distribution is constrained to reside on a simplex in d-dimensional space.  In contrast, the corresponding unconstrained parameterization is unrestrained in (d-1) dimensional space.  The specialized <code>parameterTransform</code> nimbleFunction also provides utilities to return the dimensionality of the original (constrained) parameterization, and the transformed (unconstrained) parameterization:
+</p>
+<p><code>getOriginalLength</code>: Returns the dimensionality (number of scalar elements) of the original constrained parameterization.
+</p>
+<p><code>getTransformedLength</code>: Returns the dimensionality (number of scalar elements) comprising the transformed unconstrained parameterization.
+</p>
+<p>The specialized <code>parameterTransform</code> nimbleFunction also provides a method for calculating the natural logarithm of the jacobian of the inverse transformation, calculated at any point in the transformed (unconstrained) space:
+</p>
+<p><code>logDetJacobian</code>
+</p>
+<p>The <code>parameterTransformation</code> function has no facility for handling discrete-valued parameters.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Turek
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>buildLaplace</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+code &lt;- nimbleCode({
+    a ~ dnorm(0, 1)
+    b ~ dgamma(1, 1)
+    c ~ dunif(2, 10)
+    d[1:3] ~ dmnorm(mu[1:3], cov = C[1:3,1:3])
+    e[1:3,1:3] ~ dwish(R = C[1:3,1:3], df = 5)
+})
+ 
+constants &lt;- list(mu=rep(0,3), C=diag(3))
+ 
+Rmodel &lt;- nimbleModel(code, constants)
+ 
+## create a specialized parameterTransform function:
+nodes &lt;- c('a', 'b', 'c', 'd', 'e')
+pt &lt;- parameterTransform(Rmodel, nodes)
+ 
+vals &lt;- c(1, 10, 5,    1,2,3,   as.numeric(diag(3)))
+ 
+## transform values to unconstrained scale:
+transformedVals &lt;- pt$transform(vals)
+ 
+## back-transform to original constrained scale of parameterization
+pt$inverseTransform(transformedVals)  ## return is same as original vals
+ 
+## dimensionality of original constrained scale = 1 + 1 + 1 + 3 + 9
+pt$getOriginalLength()      ## 15
+ 
+## dimensionality of transformed (unconstrained) scale = 1 + 1 + 1 + 3 + 6
+pt$getTransformedLength()   ## 12
+ 
+## log of the jacobian of the inverse transformation matrix:
+pt$logDetJacobian(transformedVals)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

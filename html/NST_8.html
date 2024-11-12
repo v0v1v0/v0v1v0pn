@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>beta.g</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Various taxonomic beta diversity indexes
+</h2>
+
+<h3>Description</h3>
+
+<p>This function can simultaneously calculate various taxonomic dissimilarity indexes, mainly based on vegdist from package vegan.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">beta.g(comm, dist.method="bray", abundance.weighted=TRUE,
+       as.3col=FALSE,out.list=TRUE, transform.method=NULL, logbase=2)
+chaosorensen(comm, dissimilarity=TRUE, to.dist=TRUE)
+chaojaccard(comm, dissimilarity=TRUE, to.dist=TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>comm</code></td>
+<td>
+<p>Community data matrix. rownames are sample names. colnames are species names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist.method</code></td>
+<td>
+<p>A character or vector indicating one or more index(es). match to "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup" , "binomial", "chao", "cao", "mahalanobis", "mGower", "mEuclidean", "mManhattan", "chao.jaccard", "chao.sorensen". default is "bray"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>abundance.weighted</code></td>
+<td>
+<p>Logic, consider abundances or not (just presence/absence). default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.3col</code></td>
+<td>
+<p>Logic, output a 3-column matrix (TRUE) or a square matrix (FALSE) for each index. default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.list</code></td>
+<td>
+<p>Logic, if using multiple indexes, output their results as a list (TRUE) or a matrix combining all 3-column matrixes (FALSE). if out.list=FALSE, as.3col will be forced to be TRUE. default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dissimilarity</code></td>
+<td>
+<p>Logic, calculate dissimilarity or similarity. default is TRUE, means to return dissimilarity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>to.dist</code></td>
+<td>
+<p>Logic, return distance object or squared matrix. default is TRUE, means to return distance object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform.method</code></td>
+<td>
+<p>character or a defined function, to specify how to transform community matrix before calculating dissimilarity. if it is a characher, it should be a method name as in the function 'decostand' in package 'vegan', including 'total','max','freq','normalize','range','standardize','pa','chi.square','cmdscale','hellinger','log'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logbase</code></td>
+<td>
+<p>numeric, the logarithm base used when transform.method='log'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All the taxonomic beta diversity indexes are mainly calculated by vegdist in package vegan, except following methods:
+</p>
+<p>mGower, mEuclidean, and mManhattan are modified from Gower, Euclidean, and Manhattan, respectively, according to the method reported previously (Anderson et al 2006).
+</p>
+<p>chao.jaccard and chao.sorensen are calculated as described previously (Chao et al 2005), using open-source code from R package "fossil" (Vavrek 2011), but output as dissimilarity for each pairwise comparison.
+</p>
+
+
+<h3>Value</h3>
+
+<p>beta.g will return a square matrix of each index if as.3col=FALSE, and combined as a list if out.list=TRUE (default). A 3-column matrix with first 2 columns indicating the pairwised samples will be output for each index if as.3col=TRUE, and combined as a list if out.list=TRUE  or integrated into one matrix if out.list=FALSE.
+</p>
+<p>chaosorensen and chaojaccard will return a distance object (if to.dist=TRUE) or a squared matrix (if to.dist=FALSE).
+</p>
+
+
+<h3>Note</h3>
+
+<p>Version 3: 2021.4.16, add option to transform community matrix.
+Version 2: 2019.5.10.
+Version 1: 2015.9.25.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Jari Oksanen, F. Guillaume Blanchet, Michael Friendly, Roeland Kindt, Pierre Legendre, Dan McGlinn, Peter R. Minchin, R. B. O'Hara, Gavin L. Simpson, Peter Solymos, M. Henry H. Stevens, Eduard Szoecs and Helene Wagner (2019). vegan: Community Ecology Package. R package version 2.5-4.
+</p>
+<p>Anderson MJ, Ellingsen KE, &amp; McArdle BH (2006) Multivariate dispersion as a measure of beta diversity. Ecol Lett 9(6):683-693.
+</p>
+<p>Chao, A., R. L. Chazdon, et al. (2005) A new statistical approach for assessing similarity of speciescomposition with incidence and abundance data. Ecology Letters 8: 148-159
+</p>
+<p>Vavrek, Matthew J. 2011. fossil: palaeoecological and palaeogeographical analysis tools. Palaeontologia Electronica, 14:1T.
+</p>
+<p>Legendre, P. &amp; Gallagher, E.D. (2001) Ecologically meaningful transformations for ordination of species data. Oecologia 129, 271–280.
+</p>
+<p>Others cited in the help document of vegdist in R package vegan.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>tNST</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(tda)
+comm=tda$comm
+# calculate one index
+beta.bray=beta.g(comm=comm,as.3col=TRUE)
+
+# calculate multiple indexes
+beta.td=beta.g(comm=comm,dist.method=c("bray","jaccard","euclidean",
+              "manhattan","binomial","chao","cao"),
+              abundance.weighted = TRUE,out.list=FALSE)
+</code></pre>
+
+
+</div>

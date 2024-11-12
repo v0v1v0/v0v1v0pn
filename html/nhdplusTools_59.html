@@ -1,0 +1,76 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_xs_point</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Cross Section From Point (experimental)</h2>
+
+<h3>Description</h3>
+
+<p>Uses a cross section retrieval web services to retrieve a
+cross section given a point and specified width. Orientation is determined
+based on direction of a the flowline found near point. This function uses
+a 10m National Elevation Dataset request on the back end.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_xs_point(point, width, num_pts)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>point</code></td>
+<td>
+<p>sfc POINT including crs as created by:
+<code>sf::st_sfc(sf::st_point(.. ,..), crs)</code>crs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width</code></td>
+<td>
+<p>Cross section width in meters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_pts</code></td>
+<td>
+<p>numeric number of points to retrieve along the cross section.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>sf data.frame containing points retrieved.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+point &lt;- sf::st_sfc(sf::st_point(x = c(-105.97218, 36.17592)), crs = 4326)
+
+(xs &lt;- get_xs_point(point, 300, 100))
+
+if(inherits(xs, "sf")) {
+
+bbox &lt;- sf::st_bbox(xs) + c(-0.005, -0.005, 0.005, 0.005)
+
+nhdplusTools::plot_nhdplus(bbox = bbox, cache_data = FALSE)
+
+plot(sf::st_transform(sf::st_geometry(xs), 3857), pch = ".", add = TRUE, col = "red")
+plot(sf::st_transform(sf::st_sfc(point, crs = 4326), 3857), add = TRUE)
+
+plot(xs$distance_m, xs$elevation_m)
+}
+
+
+</code></pre>
+
+
+</div>

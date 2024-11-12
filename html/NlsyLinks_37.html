@@ -1,0 +1,82 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ValidatePairLinksAreSymmetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Verifies that the pair relationships are symmetric.</h2>
+
+<h3>Description</h3>
+
+<p>Validates that the <code>linksPair</code> data frame is symmetric.
+In a symmetric <code>linksPair</code>, each row has a corresponding row with reversed SubjectTag_S1 and SubjectTag_S2,
+but the same <code>R</code> value.
+For certain analyses (like types of DF methods and some
+spatially-inspired methods), the pairs links (which can be considered a type of
+sparse matrix) need to be symmetric. For example, if Subject 201 is related to
+Subject 202 with a value of <code>R=0.5</code>, then there must be
+a reciprocal row where Subject 202 is related to Subject 201 with <code>R=0.5</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ValidatePairLinksAreSymmetric(linksPair)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>linksPair</code></td>
+<td>
+<p>A base::data.frame containing the pair relationships that should be symmetric</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>Returns <code>TRUE</code> if symmetric.  Throw an error with <code>base::stop()</code> if asymmetric.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Will Beasley
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>CreatePairLinksDoubleEntered()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dsSingleLinks &lt;- data.frame(
+  ExtendedID       = c(1, 1, 1, 2),
+  SubjectTag_S1    = c(101, 101, 102, 201),
+  SubjectTag_S2    = c(102, 103, 103, 202),
+  R                = c(.5, .25, .25, .5),
+  RelationshipPath = rep("Gen2Siblings", 4)
+)
+dsSingleOutcomes &lt;- data.frame(
+  SubjectTag = c(101, 102, 103, 201, 202),
+  DV1        = c(11, 12, 13, 41, 42),
+  DV2        = c(21, 22, 23, 51, 52)
+)
+dsDouble &lt;- CreatePairLinksDoubleEntered(
+  outcomeDataset         = dsSingleOutcomes,
+  linksPairDataset       = dsSingleLinks,
+  outcomeNames           = c("DV1", "DV2"),
+  validateOutcomeDataset = TRUE
+)
+dsDouble # Show the 8 rows in the double-entered pair links
+summary(dsDouble) # Summarize the variables
+
+ValidatePairLinksAreSymmetric(dsDouble) # Should return TRUE.
+
+</code></pre>
+
+
+</div>

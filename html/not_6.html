@@ -1,0 +1,264 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>not</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Narrowest-Over-Threshold Change-Point Detection</h2>
+
+<h3>Description</h3>
+
+<p>Identifies potential locations of the change-points in the data following 'deterministic signal + noise' model (see details below) in a number of different scenarios.
+The object returned by this routine can be further passed to the <code>features</code> function,  which finds the final estimate of the change-points based on a chosen stopping criterion. 
+It can be also passed to <code>plot</code>, <code>predict</code> and <code>residuals</code> routines.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">not(x, ...)
+
+## Default S3 method:
+not(x, M = 10000, method = c("not", "max"),
+  contrast = c("pcwsConstMean", "pcwsConstMeanHT", "pcwsLinContMean",
+  "pcwsLinMean", "pcwsQuadMean", "pcwsConstMeanVar"),
+  rand.intervals = TRUE, parallel = FALSE, augmented = FALSE,
+  intervals, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric vector with data points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Not in use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>A number of intervals drawn in the procedure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Choice of "not" (recommended) and "max". If <code>method="not"</code>, the Narrowest-Over-Threshold intervals are used in the algorithm. 
+If <code>method="max"</code>, the intervals corresponding to the largest contrast function are used. For an explanation, see the references.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrast</code></td>
+<td>
+<p>A type of the contrast function used in the NOT algorithm. 
+Choice of <code>"pcwsConstMean"</code>, <code>"pcwsConstMeanHT"</code>, <code>"pcwsLinContMean"</code>, <code>"pcwsLinMean"</code>, <code>"pcwsQuadMean"</code>, <code>"pcwsConstMeanVar"</code>. 
+For the explanation, see details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rand.intervals</code></td>
+<td>
+<p>A logical variable. If <code>rand.intervals=TRUE</code> intervals used in the procedure are drawn uniformly using the <code>random.intervals</code> routine. 
+If <code>rand.intervals=FALSE</code>, the intervals need to be passed using the <code>intervals</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>A logical variable. If TRUE some of computations are run in parallel using OpenMP framework. Currently this option is not supported on Windows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>augmented</code></td>
+<td>
+<p>A logical variable. if TRUE, the entire data are considered when the NOT segmentation tree is constructed (see the solution path algorithm in the references).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intervals</code></td>
+<td>
+<p>A 2-column matrix with the intervals considered in the algorithm, with start- and end- points of the intervals in, respectively, the first and  the second column. 
+The intervals are used only if <code>rand.intervals=FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The data points provided in <code>x</code> are assumed to follow
+</p>
+<p style="text-align: center;"><code class="reqn">Y_{t} = f_{t}+\sigma_{t}\varepsilon_{t},</code>
+</p>
+
+<p>for <code class="reqn">t=1,\ldots,n</code>, where <code class="reqn">n</code> is the number of observations in <code>x</code>, the signal <code class="reqn">f_{t}</code> and the standard deviation <code class="reqn">\sigma_{t}</code> 
+are non-stochastic with structural breaks at unknown locations in time <code class="reqn">t</code>. Currently, thefollowing scenarios for <code class="reqn">f_{t}</code> and <code class="reqn">\sigma_{t}</code> are implemented:
+</p>
+
+<ul>
+<li>
+<p> Piecewise-constant signal with a Gaussian noise and constant standard deviation. 
+</p>
+<p>Use <code>contrast="pcwsConstMean"</code> here.
+</p>
+</li>
+<li>
+<p> Piecewise-constant mean with a heavy-tailed noise and constant standard deviation. 
+</p>
+<p>Use <code>contrast="pcwsConstMeanHT"</code> here.
+</p>
+</li>
+<li>
+<p> Piecewise-linear continuous signal with Gaussian noise and constant standard deviation. 
+</p>
+<p>Use <code>contrast="pcwsLinContMean"</code> here.
+</p>
+</li>
+<li>
+<p> Piecewise-linear signal with Gaussian noise and constant standard deviation.
+</p>
+<p>Use <code>contrast="pcwsLinMean"</code> here.
+</p>
+</li>
+<li>
+<p> Piecewise-quadratic signal with Gaussian noise and constant standard deviation. 
+</p>
+<p>Use <code>contrast="pcwsQuadMean"</code> here.
+</p>
+</li>
+<li>
+<p> Piecewise-constant signal and piecewise-constant standard deviation of the Gaussian noise. 
+</p>
+<p>Use <code>contrast="pcwsConstMeanVar"</code> here.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>An object of class "not", which contains the following fields:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The input vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>The length of <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrast</code></td>
+<td>
+<p>A scenario for the change-points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>A 5-column matrix with the values of the contrast function, where 's' and 'e' denote start-
+end points of the intervals in which change-points candidates 'arg.max' have been found; 'length' shows the length of the intervals drawn,
+column 'max.contrast' contains corresponding value of the contrast statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solution.path</code></td>
+<td>
+<p>A list with the solution path of the NOT algorithm (see the references) containing three fields of the same length: <code>cpt</code> - a list with consecutive solutions, i.e. s the sets of change-point candidates, 
+<code>th</code> - a vector of thresholds corresponding to the solutions, <code>n.cpt</code> - a vector with the number of change-points for each solution.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>R. Baranowski, Y. Chen, and P. Fryzlewicz (2019). Narrowest-Over-Threshold Change-Point Detection.  (<a href="http://stats.lse.ac.uk/fryzlewicz/not/not.pdf">http://stats.lse.ac.uk/fryzlewicz/not/not.pdf</a>)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># **** Piecewisce-constant mean with Gaussian noise.
+# *** signal
+pcws.const.sig &lt;- c(rep(0, 100), rep(1,100))
+# *** data vector
+x &lt;- pcws.const.sig + rnorm(100)
+# *** identify potential locations of the change-points
+w &lt;- not(x, contrast = "pcwsConstMean") 
+# *** some examples of how the w object can be used
+plot(w)
+plot(residuals(w))
+plot(predict(w))
+# *** this is how to extract the change-points
+fo &lt;- features(w)
+fo$cpt
+
+# **** Piecewisce-constant mean with a heavy-tailed noise.
+# *** data vector, signal the same as in the previous example, but heavy tails
+x &lt;- pcws.const.sig + rt(100, 3) 
+# *** identify potential locations of the change-points, 
+# using a contrast taylored to heavy-tailed data
+w &lt;- not(x, contrast = "pcwsConstMeanHT") 
+plot(w)
+
+# **** Piecewisce-constant mean and piecewise-constant variance
+# *** signal's standard deviation
+pcws.const.sd &lt;- c(rep(2, 50), rep(1,150))
+# *** data vector with pcws-const mean and variance
+x &lt;- pcws.const.sig + pcws.const.sd * rnorm(100)
+# *** identify potential locations of the change-points in this model
+w &lt;- not(x, contrast = "pcwsConstMeanVar") 
+# *** extracting locations of the change-points
+fo &lt;- features(w)
+fo$cpt
+
+# **** Piecewisce-linear coninuous mean
+# *** signal with a change in slope
+pcws.lin.cont.sig &lt;- cumsum(c(rep(-1/50, 100), rep(1/50,100)))
+# *** data vector 
+x &lt;- pcws.lin.cont.sig +  rnorm(100)
+# *** identify potential locations of the change-points in the slope coefficient
+w &lt;- not(x, contrast = "pcwsLinContMean") 
+# *** ploting the results
+plot(w)
+# *** location(s) of the change-points
+fo &lt;- features(w)
+fo$cpt
+
+# **** Piecewisce-linear mean with jumps
+# *** signal with a change in slope and jumpe
+pcws.lin.sig &lt;- pcws.lin.cont.sig + pcws.const.sig
+# *** data vector 
+x &lt;- pcws.lin.sig +  rnorm(100)
+# *** identify potential locations of the change-points in the slope coefficient and the intercept
+w &lt;- not(x, contrast = "pcwsLinMean") 
+# *** ploting the results
+plot(w)
+# *** location(s) of the change-points
+fo &lt;- features(w)
+fo$cpt
+
+# **** Piecewisce-quadratic mean with jumps
+# *** Piecewise-quadratic signal
+pcws.quad.sig &lt;- 2*c((1:50)^2 /1000, rep(2, 100), 1:50 / 50 )
+# *** data vector 
+x &lt;- pcws.quad.sig +  rnorm(100)
+# *** identify potential locations of the change-points in the slope coefficient and the intercept
+w &lt;- not(x, contrast = "pcwsQuadMean") 
+# *** ploting the results
+plot(w)
+# *** location(s) of the change-points
+fo &lt;- features(w)
+fo$cpt
+</code></pre>
+
+
+</div>

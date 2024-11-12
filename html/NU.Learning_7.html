@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mlme</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a &lt;&lt;Most-Like-Me&gt;&gt; data.frame for a specified X-Confounder vector: xvec</h2>
+
+<h3>Description</h3>
+
+<p>For a Given X-confounder Vector (xvec), sort all experimental units (eUnits)
+in an ltdagg() or lrcagg() output object into the strictly non-decreasing order of
+their distances from this X-Vector, which defines the TARGET eUnit: "Me". Plots of
+mlme() objects and displays of mlme.stats() are then used to Visualize and Summarize
+"Mini-" &lt;&lt; LOCAL effect-size Distributions &gt;&gt; for different Numbers of "Nearest
+Neighbor" eUnits.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  mlme(envir, hcl, NUagg, xvec )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>envir</code></td>
+<td>
+<p>Environment output by a call to the NUsetup() function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hcl</code></td>
+<td>
+<p>Name of a NUcluster() output object created using a cluster::diana or
+stats::hclust method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NUagg</code></td>
+<td>
+<p>A data.frame object output by ltdagg() or lrcagg() containing LOCAL
+effect-size Estimates for eUnits within Clusters defined in X-covariate space.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xvec</code></td>
+<td>
+<p>A suitable vector of the Numerical values for the X-Confounder variables,
+used in the current CLUSTERING, that define the eUnit: "Me".</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For example, in demo(radon), the eUnits are 2881 US "Counties", and the NUagg
+object is of type lrcagg() because radon exposure is a continuous variable. But, in
+demo(pci15k), the eUnits are 15487 "Patients," and the NUagg object is of type
+ltdagg() because treatment choice (thin) is Binary (0 = "No", 1 = "Yes").
+</p>
+
+
+<h3>Value</h3>
+
+<p> An output list object of class mlme:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xvec</code></td>
+<td>
+<p>The xvec vector input to mlme().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Type</code></td>
+<td>
+<p>Either "LTD" or "LRC".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xvars</code></td>
+<td>
+<p>Names of the X-Confounder variables specified in NUsetup().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varx</code></td>
+<td>
+<p>The vector of Variances of the xvars variabes, used in rescaling distances.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outdf</code></td>
+<td>
+<p>The output data.frame of sorted "Nearest Neighbor" candidate eUnits.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Bob Obenchain &lt;wizbob@att.net&gt;</p>
+
+
+<h3>References</h3>
+
+<p>Obenchain RL. NU.Learning-vignette. (2023) <b>NU.Learning_in_R.pdf</b>
+http://localcontrolstatistics.org 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.mlme</code>,<code>print.mlme</code>,<code>mlme.stats</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  
+  # Running takes about 7 seconds...
+  data(pci15k)
+  xvars = c("stent", "height", "female", "diabetic", "acutemi", "ejfract", "ves1proc")
+  hclobj = NUcluster(pci15k, xvars)
+  NU.env = NUsetup(hclobj, pci15k, thin, surv6mo)
+  surv0500 = ltdagg(500, NU.env)
+  xvec11870 = c( 0, 162, 1, 1, 0, 57, 1) 
+  mlmeC5H = mlme(envir = NU.env, hcl = hclobj, NUagg = surv0500, xvec = xvec11870 ) 	
+  plot(mlmeC5H) # using default "NN" and "breaks" settings...
+  
+</code></pre>
+
+
+</div>

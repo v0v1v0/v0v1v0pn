@@ -1,0 +1,382 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>maxLyapunov</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum lyapunov exponent</h2>
+
+<h3>Description</h3>
+
+<p>Functions for estimating the maximal Lyapunov exponent of a dynamical system
+from 1-dimensional time series using Takens' vectors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">maxLyapunov(
+  time.series,
+  min.embedding.dim = 2,
+  max.embedding.dim = min.embedding.dim,
+  time.lag = 1,
+  radius,
+  theiler.window = 1,
+  min.neighs = 5,
+  min.ref.points = 500,
+  max.time.steps = 10,
+  number.boxes = NULL,
+  sampling.period = 1,
+  do.plot = TRUE,
+  ...
+)
+
+## S3 method for class 'maxLyapunov'
+divTime(x)
+
+## S3 method for class 'maxLyapunov'
+embeddingDims(x)
+
+## S3 method for class 'maxLyapunov'
+divergence(x)
+
+## S3 method for class 'maxLyapunov'
+plot(
+  x,
+  main = "Estimating maximal Lyapunov exponent",
+  xlab = "time t",
+  ylab = "S(t)",
+  type = "p",
+  col = NULL,
+  pch = NULL,
+  add.legend = T,
+  ...
+)
+
+## S3 method for class 'maxLyapunov'
+estimate(
+  x,
+  regression.range = NULL,
+  do.plot = FALSE,
+  use.embeddings = NULL,
+  main = "Estimating maximal Lyapunov exponent",
+  xlab = "time t",
+  ylab = "S(t)",
+  type = "p",
+  col = NULL,
+  pch = NULL,
+  ylim = NULL,
+  fit.col = NULL,
+  fit.lty = 2,
+  fit.lwd = 2,
+  add.legend = T,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>time.series</code></td>
+<td>
+<p>The original time series from which the maximal Lyapunov 
+exponent will be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.embedding.dim</code></td>
+<td>
+<p>Integer denoting the minimum dimension in which we 
+shall embed the time.series (see buildTakens).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.embedding.dim</code></td>
+<td>
+<p>Integer denoting the maximum dimension in which we 
+shall embed the time.series (see buildTakens).Thus,
+we shall estimate the Lyapunov exponent between <em>min.embedding.dim</em> 
+and <em>max.embedding.dim</em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.lag</code></td>
+<td>
+<p>Integer denoting the number of time steps that will be use 
+to construct the Takens' vectors (see buildTakens).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radius</code></td>
+<td>
+<p>Maximum distance in which will look for nearby trajectories.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theiler.window</code></td>
+<td>
+<p>Integer denoting the Theiler window:  Two Takens' 
+vectors must be separated by more than <em>theiler.window</em> time steps in 
+order to be considered neighbours. By using a Theiler window, we exclude 
+temporally correlated vectors from our estimations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.neighs</code></td>
+<td>
+<p>Minimum number of neighbours that a Takens' vector must 
+have to be considered a reference point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.ref.points</code></td>
+<td>
+<p>Number of reference points that the routine will try 
+to use. The routine stops when it finds <em>min.ref.points</em> reference 
+points, saving computation time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.time.steps</code></td>
+<td>
+<p>Integer denoting the number of time steps marking the 
+end of the linear region.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number.boxes</code></td>
+<td>
+<p>Number of boxes that will be used in the box assisted 
+algorithm (see neighbourSearch).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampling.period</code></td>
+<td>
+<p>Sampling period of the time series. When dealing 
+with a discrete system, the <em>sampling.period</em> should be set to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.plot</code></td>
+<td>
+<p>Logical value. If TRUE (default value), a plot of <code class="reqn">S(t)</code> 
+Vs  <code class="reqn">t</code> is shown.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional plotting parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <em>maxLyapunov</em> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>A title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>A title for the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>A title for the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of plot (see <code>?plot</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Vector of colors for each of the dimensions of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch</code></td>
+<td>
+<p>Vector of symbols for each of the dimensions of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.legend</code></td>
+<td>
+<p>add a legend to the plot?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regression.range</code></td>
+<td>
+<p>Vector with 2 components denoting the range where 
+the function will perform linear regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.embeddings</code></td>
+<td>
+<p>A numeric vector specifying which embedding dimensions 
+should the <em>estimate</em> function use to compute the Lyapunov exponent.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>Numeric vector of length 2, giving the y coordinates range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.col</code></td>
+<td>
+<p>A vector of colors to plot the regression lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.lty</code></td>
+<td>
+<p>The type of line to plot the regression lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.lwd</code></td>
+<td>
+<p>The width of the line for the regression lines.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It is a well-known fact that close trajectories diverge 
+exponentially fast in a chaotic system. The averaged exponent that determines 
+the divergence rate is called the Lyapunov exponent (usually denoted with 
+<code class="reqn">\lambda</code>). If <code class="reqn">\delta(0)</code> is the distance between 
+two Takens' vectors in the embedding.dim-dimensional space, we expect that 
+the distance after a time <code class="reqn">t</code> between the two trajectories arising 
+from this two vectors fulfills:
+</p>
+<p style="text-align: center;"><code class="reqn">\delta (n) \sim \delta (0)\cdot exp(\lambda \cdot t)</code>
+</p>
+
+<p>The lyapunov exponent is estimated using the slope obtained by performing a 
+linear regression of 
+<code class="reqn">S(t)=\lambda \cdot t \sim log(\delta (t)/\delta (0))</code> 
+on <code class="reqn">t</code>. <code class="reqn">S(t)</code> will be estimated by averaging the divergence of 
+several reference points.
+</p>
+<p>The user should plot <code class="reqn">S(t) Vs t</code> when looking for the maximal lyapunov 
+exponent and, if for some temporal range <code class="reqn">S(t)</code> shows a linear 
+behaviour, its slope is an estimate of the maximal Lyapunov exponent per 
+unit of time. The estimate routine allows the user to get always an 
+estimate of the maximal Lyapunov exponent, but the user must check that 
+there is a linear region in the <code class="reqn">S(t) Vs t</code>. If such a region does 
+not exist, the estimation should be discarded. The computations should be 
+performed for several embedding dimensions in order to check that the 
+Lyapunov exponent does not depend on the embedding dimension.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with three components named  <code class="reqn">time</code> and <code class="reqn">s.function</code>.
+<code class="reqn">time</code> is a vector containing the temporal interval where the system 
+evolves. It ranges from 0 to 
+<em><code class="reqn">max.time.steps \cdot sampling.period</code></em>.
+<code class="reqn">s.function</code> is a matrix containing the 
+values of the <code class="reqn">S(t)</code> for each t in the time vector(the columns) and each 
+embedding dimension (the rows).
+</p>
+<p>The <em>divTime</em> function returns the 
+time in which the divergence of close trajectories was computed.
+</p>
+<p>The <em>embeddingDims</em> function returns the 
+embeddings in which the divergence of close trajectories was computed
+</p>
+<p>The <em>divergence</em> function returns the 
+rate of divergence of close trajectories needed for the maximum Lyapunov
+exponent estimation.
+</p>
+<p>In order to obtain an estimation of the Lyapunov exponent the user 
+can use the <em>estimate</em> function. The  <code class="reqn">estimate</code> function allows 
+the user to obtain an estimation of the maximal Lyapunov exponent by 
+averaging the slopes of the embedding dimensions specified in the 
+<em>use.embeddings</em> parameter. The slopes are determined by performing a 
+linear regression over the radius' range specified in <em>regression.range</em>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Constantino A. Garcia
+</p>
+
+
+<h3>References</h3>
+
+<p>Eckmann, Jean-Pierre and Kamphorst, S Oliffson and Ruelle, David and 
+Ciliberto, S and others. Liapunov exponents from time series.
+Physical Review A, 34-6, 4971–4979, (1986).
+</p>
+<p>Rosenstein, Michael T and Collins, James J and De Luca, Carlo J.A practical 
+method for calculating largest Lyapunov exponents from small data sets.
+Physica D: Nonlinear Phenomena, 65-1, 117–134, (1993).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Henon System
+h=henon(n.sample=  5000,n.transient= 100, a = 1.4, b = 0.3, 
+        start = c(0.63954883, 0.04772637), do.plot = FALSE) 
+my.ts=h$x 
+ml=maxLyapunov(time.series=my.ts,
+               min.embedding.dim=2,
+               max.embedding.dim=5,
+               time.lag=1,
+               radius=0.001,theiler.window=4,
+               min.neighs=2,min.ref.points=500,
+               max.time.steps=40,do.plot=FALSE)
+plot(ml)
+ml.estimation = estimate(ml,regression.range = c(0,15),
+                         use.embeddings=4:5,
+                         do.plot = TRUE)
+# The max Lyapunov exponent of the Henon system is 0.41
+cat("expected: ",0.41," calculated: ",ml.estimation,"\n")
+
+## Rossler system
+r=rossler(a=0.15,b=0.2,w=10,start=c(0,0,0), time=seq(0,1000,0.1), 
+          do.plot=FALSE)
+my.ts=r$x
+use.cols = c("#999999","#E69F00","#56B4E9")
+ml=maxLyapunov(time.series=my.ts,min.embedding.dim=5,max.embedding.dim = 7,
+               time.lag=12,radius=0.1,theiler.window=50,
+               min.neighs=5,min.ref.points=length(r),
+               max.time.steps=300,number.boxes=NULL,
+               sampling.period=0.1,do.plot=TRUE,
+               col=use.cols)
+#  The max Lyapunov exponent of the Rossler system is 0.09
+ml.est=estimate(ml,col=use.cols,do.plot=T,
+                fit.lty=1,
+                fit.lwd=5)
+cat("expected: ",0.090," calculated: ",ml.est,"\n")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

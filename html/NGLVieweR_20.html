@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>updateFocus</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Update Focus</h2>
+
+<h3>Description</h3>
+
+<p>Update the focus of an existing NGLVieweR object in Shinymode.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">updateFocus(NGLVieweR_proxy, focus = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>NGLVieweR_proxy</code></td>
+<td>
+<p>A NGLVieweR object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>focus</code></td>
+<td>
+<p>Numeric value between 0-100 (default = 0).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>API call containing <code>NGLVieweR</code> <code>id</code> and list of message parameters.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>setFocus()</code>
+</p>
+</li>
+<li> <p><code>NGLVieweR_example()</code> See example "updateFocus".
+</p>
+</li>
+</ul>
+<p>Other options: 
+<code>setFocus()</code>,
+<code>setQuality()</code>,
+<code>snapShot()</code>,
+<code>updateFullscreen()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+NGLVieweR_proxy("structure") %&gt;%
+  updateFocus(focus = 50)
+
+## End(Not run)
+
+if (interactive()) {
+  library(shiny)
+  ui = fluidPage(
+    titlePanel("Viewer with API inputs"),
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("focus", "Focus", 0, 100, 50)
+      ),
+      mainPanel(
+        NGLVieweROutput("structure")
+      )
+    )
+  )
+  server = function(input, output) {
+    output$structure &lt;- renderNGLVieweR({
+      NGLVieweR("7CID") %&gt;%
+        addRepresentation("cartoon", 
+        param = list(name = "cartoon", color= "red"))
+    })
+    observeEvent(input$focus, {
+      NGLVieweR_proxy("structure") %&gt;%
+        updateFocus(input$focus)
+    })
+  }
+shinyApp(ui, server)
+}
+</code></pre>
+
+
+</div>

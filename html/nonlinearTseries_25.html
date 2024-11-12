@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimateEmbeddingDim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate the embedding dimension</h2>
+
+<h3>Description</h3>
+
+<p>This function determines the minimum embedding dimension from a scalar time 
+series using the algorithm proposed by L. Cao (see references).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimateEmbeddingDim(
+  time.series,
+  number.points = length(time.series),
+  time.lag = 1,
+  max.embedding.dim = 15,
+  threshold = 0.95,
+  max.relative.change = 0.1,
+  do.plot = TRUE,
+  main = "Computing the embedding dimension",
+  xlab = "dimension (d)",
+  ylab = "E1(d) &amp; E2(d)",
+  ylim = NULL,
+  xlim = NULL,
+  std.noise
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>time.series</code></td>
+<td>
+<p>The original time series.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number.points</code></td>
+<td>
+<p>Number of points from the time series that will be used 
+to estimate the embedding dimension. By default, all the points in the time 
+series are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.lag</code></td>
+<td>
+<p>Time lag used to build the Takens' vectors needed to 
+estimate the embedding dimension (see buildTakens). Default: 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.embedding.dim</code></td>
+<td>
+<p>Maximum possible embedding dimension for the time 
+series. Default: 15.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>Numerical value between 0 and 1. The embedding dimension is 
+estimated using the E1(d) function. E1(d) stops changing when d is greater 
+than or equal to embedding dimension, staying close to 1. This value 
+establishes a threshold for considering that E1(d) is close to 1. 
+Default: 0.95</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.relative.change</code></td>
+<td>
+<p>Maximum relative change in E1(d) with respect to 
+E1(d-1) in order to consider that the E1 function has been stabilized and it 
+will stop changing. Default: 0.01.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.plot</code></td>
+<td>
+<p>Logical value. If TRUE (default value), a plot of E1(d) and 
+E2(d) is shown.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Title for the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Title for the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>numeric vectors of length 2, giving the y coordinates range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>numeric vectors of length 2, giving the x coordinates range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>std.noise</code></td>
+<td>
+<p>numeric value that permits to add a small amount of noise
+to the original series to avoid the appearance of false neighbours due to 
+discretizacion errors. This also prevents the method to fail with periodic
+signals (in which neighbours at a distance of 0 appear). By default, a small
+amount of noise is always added. Use 0 not to add noise.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Cao's algorithm uses 2 functions in order to estimate the embedding 
+dimension from a time series: the E1(d) and the E2(d) functions, where d 
+denotes the dimension.
+</p>
+<p>E1(d) stops changing when d is greater than or equal to the embedding 
+dimension, staying close to 1. On the other hand, E2(d) is used to 
+distinguish deterministic signals from stochastic signals. For 
+deterministic signals, there exist some d such that E2(d)!=1. For stochastic 
+signals, E2(d) is approximately 1 for all the values. 
+</p>
+<p>This function uses the Arya and Mount's C++ ANN library for nearest neighbour
+search (For more information on the ANN library please visit 
+<a href="http://www.cs.umd.edu/~mount/ANN/">http://www.cs.umd.edu/~mount/ANN/</a>). The R wrapper is a modified 
+version of the RANN package code by Samuel E. Kemp and Gregory Jefferis.
+</p>
+<p>If no suitable embedding dimension can be found within the provided range,
+the function will return NA.
+</p>
+
+
+<h3>Note</h3>
+
+<p>In the current version of the package, the automatic detection of stochastic 
+signals has not been implemented yet.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Constantino A. Garcia
+</p>
+
+
+<h3>References</h3>
+
+<p>Cao, L. Practical method for determining the minimum embedding dimension of
+a scalar time series. Physica D: Nonlinear Phenomena, 110,1, 
+pp. 43-50 (1997).
+</p>
+<p>Arya S. and Mount D. M. (1993), Approximate nearest neighbor searching, 
+Proc. 4th Ann. ACM-SIAM Symposium on Discrete Algorithms (SODA'93), 271-280.
+</p>
+<p>Arya S., Mount D. M., Netanyahu N. S., Silverman R. and Wu A. Y (1998), 
+An optimal algorithm for approximate nearest neighbor searching, 
+Journal of the ACM, 45, 891-923.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+h = henon(do.plot=FALSE) 
+dimension = estimateEmbeddingDim(h$x, time.lag=1, max.embedding.dim=6,
+             threshold=0.9, do.plot=TRUE)
+             
+## End(Not run)
+</code></pre>
+
+
+</div>

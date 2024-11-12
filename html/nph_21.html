@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>subpop_pchaz</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate survival for piecewise constant hazards with change after random time</h2>
+
+<h3>Description</h3>
+
+<p>Calculates hazard, cumulative hazard, survival and distribution function
+based on hazards that are constant over pre-specified time-intervals
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">subpop_pchaz(
+  Tint,
+  lambda1,
+  lambda2,
+  lambdaProg,
+  timezero = FALSE,
+  int_control = list(rel.tol = .Machine$double.eps^0.4, abs.tol = 1e-09),
+  discrete_approximation = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Tint</code></td>
+<td>
+<p>vector of length <code class="reqn">k+1</code>, for the boundaries of <code class="reqn">k</code> time intervals (presumably in days) with piecewise constant hazard. The boundaries should be increasing and the first one should
+be <code>0</code>, the last one should be larger than the assumed trial duration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda1</code></td>
+<td>
+<p>vector of length <code class="reqn">k</code> for piecewise constant hazards before the changing event happens, for the intervals specified via <code>T</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda2</code></td>
+<td>
+<p>vector of length <code class="reqn">k</code> for piecewise constant hazards after the changing event has happened, for the intervals specified via <code>T</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaProg</code></td>
+<td>
+<p>vector of length <code class="reqn">k</code> for piecewise constant hazards for the changing event, for the intervals specified via <code>T</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timezero</code></td>
+<td>
+<p>logical, indicating whether after the changeing event the timecount, governing which interval in <code>Tint</code> and which according value in
+<code>lambda2</code> is used, should restart at zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>int_control</code></td>
+<td>
+<p>A list with the <code>rel.tol</code> and <code>abs.tol</code> paramaters to be passed to the  <code>integrate</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discrete_approximation</code></td>
+<td>
+<p>if TRUE, the function uses an approximation based on discretizing the time, instead of integrating. This speeds up the calculations</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We assume that the time to disease progression <code class="reqn">T_{PD}</code> is governed
+by a separate process with hazard function <code class="reqn">\eta(t)</code>,
+which does not depend on the hazard function for death <code class="reqn">\lambda(t)</code>.
+<code class="reqn">\eta(t)</code>, too, may be modelled as piecewise constant or, for simplicity,
+as constant over time. We define <code class="reqn">\lambda_{prePD}(t)</code> and <code class="reqn">\lambda_{postPD}(t)</code>
+as the hazard functions for death before and after disease progression.
+Conditional on <code class="reqn">T_{PD}=s</code>, the hazard function for death is
+<code class="reqn">\lambda(t|T_{PD}=s)=\lambda_{prePD}(t){I}_{t\leq s}+\lambda_{postPD}(t){I}_{t&gt;s}</code>.
+The conditional survival function is
+<code class="reqn">S(t|T_{PD}=s)=\exp(-\int_0^t \lambda(t|T_{PD}=s)ds)</code>.
+The unconditional survival function results from integration over all
+possible progression times as <code class="reqn">S(t)=\int_0^t S(t|T_{PD}=s)dP(T_{PD}=s)</code>.
+The output includes the function values calculated for all integer time points
+between 0 and the maximum of <code>Tint</code>.
+Additionally, a list with functions is also given to calculate the values at any arbitrary point <code class="reqn">t</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with class <code>mixpch</code> containing the following components:
+</p>
+
+<dl>
+<dt><code>haz</code></dt>
+<dd>
+<p>Values of the hazard function.</p>
+</dd>
+<dt><code>cumhaz</code></dt>
+<dd>
+<p>Values of the cumulative hazard function.</p>
+</dd>
+<dt><code>S</code></dt>
+<dd>
+<p>Values of the survival function.</p>
+</dd>
+<dt><code>F</code></dt>
+<dd>
+<p>Values of the distribution function.</p>
+</dd>
+<dt><code>t</code></dt>
+<dd>
+<p>Time points for which the values of the different functions are calculated.</p>
+</dd>
+<dt><code>Tint</code></dt>
+<dd>
+<p>Input vector of boundaries of time intervals.</p>
+</dd>
+<dt><code>lambda1</code></dt>
+<dd>
+<p>Input vector of piecewise constant hazards before the changing event happen.</p>
+</dd>
+<dt><code>lambda2</code></dt>
+<dd>
+<p>Input vector of piecewise constant hazards after the changing event happen.</p>
+</dd>
+<dt><code>lambdaProg</code></dt>
+<dd>
+<p>Input vector of piecewise constant hazards for the changing event.</p>
+</dd>
+<dt><code>funs</code></dt>
+<dd>
+<p>A list with functions to calculate the hazard, cumulative hazard, survival, and cdf over arbitrary continuous times.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Robin Ristl, <a href="mailto:robin.ristl@meduniwien.ac.at">robin.ristl@meduniwien.ac.at</a>, Nicolas Ballarini
+</p>
+
+
+<h3>References</h3>
+
+<p>Robin Ristl, Nicolas Ballarini, Heiko Götte, Armin Schüler, Martin Posch, Franz König. Delayed treatment effects, treatment switching and
+heterogeneous patient populations: How to design and analyze RCTs in oncology. Pharmaceutical statistics. 2021; 20(1):129-145.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pchaz</code>, <code>pop_pchaz</code>, <code>plot.mixpch</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">subpop_pchaz(Tint = c(0, 40, 100), lambda1 = c(0.2, 0.4), lambda2 = c(0.1, 0.01),
+lambdaProg = c(0.5, 0.4),timezero = FALSE, discrete_approximation = TRUE)
+subpop_pchaz(Tint = c(0, 40, 100), lambda1 = c(0.2, 0.4), lambda2 = c(0.1, 0.01),
+lambdaProg = c(0.5, 0.4), timezero = TRUE, discrete_approximation = TRUE)
+</code></pre>
+
+
+</div>

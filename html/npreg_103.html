@@ -1,0 +1,156 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.ss</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Predict method for Smoothing Spline Fits
+</h2>
+
+<h3>Description</h3>
+
+<p><code>predict</code> method for class "ss". 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ss'
+predict(object, x, deriv = 0, se.fit = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>a fit from <code>ss</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>the new values of x.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deriv</code></td>
+<td>
+
+<p>integer; the order of the derivative required.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se.fit</code></td>
+<td>
+
+<p>a switch indicating if standard errors are required.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments affecting the prediction produced (currently ignored).
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Inspired by the <code>predict.smooth.spline</code> function in R's <b>stats</b> package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x </code></td>
+<td>
+<p>The input <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y </code></td>
+<td>
+<p>The fitted values or derivatives at x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se </code></td>
+<td>
+<p>The standard errors of the fitted values or derivatives (if requested).</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>https://stat.ethz.ch/R-manual/R-devel/library/stats/html/predict.smooth.spline.html
+</p>
+<p>Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. <em>Numerische Mathematik, 31</em>, 377-403. <a href="https://doi.org/10.1007/BF01404567">doi:10.1007/BF01404567</a>
+</p>
+<p>Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), <em>SAGE Research Methods Foundations.</em> <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ss</code> 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+fx &lt;- 2 + 3 * x + sin(2 * pi * x)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# GCV selection (default)
+ss.GCV &lt;- ss(x, y, nknots = 10)
+
+# get predictions and SEs (at design points)
+fit &lt;- predict(ss.GCV, x = x)
+head(fit)
+
+# compare to original fit
+mean((fit$y - ss.GCV$y)^2)
+
+# plot result (with default 95% CI)
+plotci(fit)
+
+# estimate first derivative
+d1 &lt;- 3 + 2 * pi * cos(2 * pi * x)
+fit &lt;- predict(ss.GCV, x = x, deriv = 1)
+head(fit)
+
+# plot result (with default 95% CI)
+plotci(fit)
+lines(x, d1, lty = 2)   # truth
+
+</code></pre>
+
+
+</div>

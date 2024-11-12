@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>network.layout.animate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Sequentially-stable network layout algorithms suitable for generating network animations.
+</h2>
+
+<h3>Description</h3>
+
+<p>The <code>network.layout.animate.*</code> layouts are often adaptations or wrappers for existing static layout algorithms with some appropriate presets.  They all accept the coordinates of the ‘previous’ layout as an argument so that they can try to construct a suitably smooth sequence of node positions. Usually these layouts are not called directly and instead selected by specifying the appropriate <code>animation.mode</code> argument to <code>compute.animation</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">network.layout.animate.kamadakawai(net, dist.mat = NULL, default.dist = NULL, 
+                        seed.coords = NULL, layout.par = list(),verbose=FALSE)
+
+network.layout.animate.MDSJ(net, dist.mat = NULL, default.dist = NULL, 
+                seed.coords = NULL, layout.par=list(max_iter=50, dimensions =
+                 2),verbose=TRUE)
+                
+network.layout.animate.useAttribute(net, dist.mat = NULL, default.dist = NULL,
+     seed.coords = NULL,  layout.par = list(x = "x", y = "y"), verbose = TRUE)
+     
+network.layout.animate.Graphviz(net, dist.mat = NULL, default.dist = NULL,
+     seed.coords = NULL,  layout.par = list(), verbose = TRUE)     
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+<p> The network (or temporal sub-network) that will be used to determine vertex positions. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist.mat</code></td>
+<td>
+<p> A (usually optional) matrix of distances between vertices that should be used to define node positions.  This is important to provide if network edge weights need special handling - for example to be fliped from similarities to distances, symmetrized, etc. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>default.dist</code></td>
+<td>
+<p> A default distance value which a layout may use to fill in for undefined dyads to space out isolates and disconnected components. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed.coords</code></td>
+<td>
+<p>A two-column by n-vertex matrix of starting coordinates for the layout to use, usually the coordinates of the previous layout. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layout.par</code></td>
+<td>
+<p>A list of named layout parameters specific to the algorithm. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Print more information about the layout process</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>These layouts are generally called by <code>compute.animation</code> on a sequence of extracted networks, with each layout fed the output of the previous layout
+</p>
+<p>Usually if the dist.mat is not included, one will be calculated using the <code>layout.distance</code> function which will compute the geodesic path length distance between nodes after symmetrizing the network and replacing Inf values with either sqrt(network.size) or the passed in <code>default.dist</code>
+</p>
+<p><strong>KamadaKawai</strong>
+</p>
+<p>The KamadaKawai option provides resonably good dynamically stable layouts. It computes a symmetric geodesic distance matrix from the input network (replacing infinite values with <code>default.dist</code>, and seeds the initial coordinates for each slice with the results of the previous slice in an attempt to find solutions that are as close as possible to the previous positions.  However, it performs poorly on large networks and is not as stable as MDSJ. 
+See <code>network.layout.kamadakawai</code> for more details about the implementation and parameters
+</p>
+<p><strong>MDSJ</strong>
+</p>
+<p>The MDSJ layout uses the MDSJ Java library written by Christian Pich, Algorithmics Group, Department of Computer &amp; Information Science, University of Konstanz, Germany <code>http://algo.uni-konstanz.de/software/mdsj/</code> (original url), 2009. The library does Multidimensional Scaling (MDS) of the distance matrix using SMACOF optimization.  Because MDSJ is released under a creative commons by-nc-sa license it is not distributed with the ndtv package, but an installer is included.
+</p>
+<p>When the MDSJ layout is called it checks for working Java installation, and then checks if MDSJ is installed. If not, it prompts the user and (optionally) downloads and installs MDSJ. If MDSJ is not installed, it falls back to calling the KamadaKawai layout instead.  
+</p>
+<p>MDSJ is quite fast for larger networks, but relatively less efficient for smaller ones because of the overhead of <code>system</code> calls and Java start up for each layout.  The <code>verbose</code> option prints more information on the Java process.  The <code>max_iter</code> parameter sets the maximum of minimization steps the algorithm can try. In cases where it seems like the layout has not completely finished, this can be set higher. The <code>dimensions</code> argument sets the number of dimensions the layout should be performed in and indirectly the number of columns expected and produced for coordinate matrices. 
+</p>
+<p><strong>useAttribute</strong>
+</p>
+<p>The <code>useAttribute</code> layout makes it possible to define vertex positions using a static or dynamic vertex attributes to provide the x and y coordinates for each time step.  The names of the attributes to be used are passed in via the <code>layout.par</code> argument.  For example <code>layout.par = list(x = "myX", y = "myY")</code> The attribute must have values defined for each time point that the network plotted. 
+</p>
+<p><strong>Graphviz</strong>
+</p>
+<p>The <code>Graphviz</code> layout is a wrapper for the Graphviz <a href="https://www.graphviz.org">https://www.graphviz.org</a> software library. If the library is installed on your system (see <code>install.graphviz</code>), it provides a number of additional high-quality layouts. When layout is called it checks for a working Graphviz installation (falling back to KamadaKawai if Graphviz cannot be found) and writes the network to a temp file using <code>export.dot</code>. Then the appropriate Graphviz layout engine (default is <code>neato</code>) is executed via a <code>system</code> call, and the coordinates of the vertices are parsed from the output.  
+</p>
+<p>Currently, the arguments to <code>layout.par</code> can be used to specify the Graphviz layout engine to use (i.e. <code>gv.engine='neato'</code> for stress-minimized, <code>gv.engine='dot'</code> for hierarchal, <code>gv.engine='fdp'</code> for force-directed, etc) and additional command-line control parameters can be passed in via <code>gv.args</code>.  For example, to use the 'dot' layout, but change layout rank direction to Left-Right: <code>layout.par=list(gv.engine='dot',gv.args='-Grankdir=LR')</code>.  See <a href="https://graphviz.gitlab.io/doc/info/command.html">https://graphviz.gitlab.io/doc/info/command.html</a>.  Note that Graphviz's graphic rendering parameters are not used to control network plot rendering (but they may impact layout positions). 
+</p>
+<p>It is also possible to pass edge attributes of the network directly through to the Graphviz .dot file by passing in the names of the attributes using <code>gv.edge.attrs</code> argument to <code>layout.par</code>. For example, <code>layout.par=list(gv.edge.attrs='len')</code> will write the value of the edge attribute 'len' to a gv attribute 'len', which would control the edge lengths when using neato or fdp <a href="https://graphviz.gitlab.io/docs/attrs/len/">https://graphviz.gitlab.io/docs/attrs/len/</a>.
+</p>
+<p>The Graphviz layout normally ignores the values in <code>dist.mat</code>, but for compatibility with other layouts, it is possible to use the values in <code>dist.mat</code> to influence Graphviz's edge length by setting <code>layout.par</code> <code>gv.len.mode='ndtv.distance.matrix'</code> instead of its default <code>'gv.edge.len'</code>. This writes out all of the possible edges to the file and will overide any other edge attributes. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A two-column by n-vertex matrix of coordinates. 
+</p>
+
+
+<h3>Note</h3>
+
+<p>The MDSJ algorithm can only be used for non-comercial projects as it is available under the terms and conditions of the Creative Commons License "by-nc-sa" 3.0. <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/">https://creativecommons.org/licenses/by-nc-sa/3.0/</a>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Skye Bender-deMoll
+</p>
+
+
+<h3>References</h3>
+
+<p>Algorithmics Group. MDSJ: Java Library for Multidimensional Scaling (Version 0.2). Available at <code>http://algo.uni-konstanz.de/software/mdsj/</code>. University of Konstanz, 2009.
+</p>
+<p>Kamada, T. and Kawai, S. (1989). An Algorithm for Drawing General Undirected Graphs. Information Processing Letters, 31(1):7-15.
+</p>
+<p>John Ellson et.al (2001) "Graphviz – open source graph drawing tools" Lecture Notes in Computer Science. Springer-Verlag. p483-484  <a href="https://www.graphviz.org">https://www.graphviz.org</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See Also <code>network.layout.kamadakawai</code>,<code>layout.distance</code>,<code>compute.animation</code>
+</p>
+
+
+</div>

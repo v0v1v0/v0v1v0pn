@@ -1,0 +1,379 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vanillaOptionEuropean</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Pricing Plain-Vanilla (European and American) and
+Barrier Options (European)
+</h2>
+
+<h3>Description</h3>
+
+<p>Functions to calculate the theoretical prices and (some)
+Greeks for plain-vanilla and barrier options.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">vanillaOptionEuropean(S, X, tau, r, q, v, tauD = 0, D = 0,
+                      type = "call", greeks = TRUE,
+                      model = NULL, ...)
+vanillaOptionAmerican(S, X, tau, r, q, v, tauD = 0, D = 0,
+                      type = "call", greeks = TRUE, M = 101)
+
+vanillaOptionImpliedVol(exercise = "european", price,
+                        S, X, tau, r, q = 0,
+                        tauD = 0, D = 0,
+                        type = "call",
+                        M = 101,
+                        uniroot.control = list(),
+                        uniroot.info = FALSE)
+
+barrierOptionEuropean(S, X, H, tau, r, q = 0, v, tauD = 0, D = 0,
+                      type = "call",
+                      barrier.type = "downin",
+                      rebate = 0,
+                      greeks = FALSE,
+                      model = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+
+<p>spot
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>strike
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H</code></td>
+<td>
+
+<p>barrier
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+
+<p>time-to-maturity in years
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+
+<p>risk-free rate
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+
+<p>continuous dividend yield, see Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+
+<p>variance (volatility squared)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tauD</code></td>
+<td>
+
+<p>vector of times-to-dividends in years. Only dividends with
+<code>tauD</code> greater than zero and not greater than <code>tau</code> are kept.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+
+<p>vector of dividends (in currency units); default is no dividends.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>call or put; default is call.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>barrier.type</code></td>
+<td>
+<p>string: combination of <code>up</code>/<code>down</code> and
+<code>in</code>/<code>out</code>, such as <code>downin</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rebate</code></td>
+<td>
+
+<p>currently not implemented
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>greeks</code></td>
+<td>
+
+<p>compute Greeks? Defaults to <code>TRUE</code>. But see Details for
+American options.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>what model to use to value the option. Default is <code>NULL</code> which
+is equivalent to <code>bsm</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>parameters passed to pricing model
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+
+<p>number of time steps in the tree
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exercise</code></td>
+<td>
+
+<p><code>european</code> (default) or <code>american</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>price</code></td>
+<td>
+
+<p>numeric; the observed price to be recovered through choice of volatility.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uniroot.control</code></td>
+<td>
+<p>A list. If there are elements named
+<code>interval</code>, <code>tol</code> or <code>maxiter</code>, these are passed to
+<code>uniroot</code>. Any other elements of the list are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uniroot.info</code></td>
+<td>
+<p>logical; default is <code>FALSE</code>. If <code>TRUE</code>,
+the function will return the information returned by
+<code>uniroot</code>. See paragraph Value below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For European options the formula of Messrs Black, Scholes and
+Merton is used. It can be used for equities (set <code>q</code> equal
+to the dividend yield), futures (Black, 1976; set <code>q</code> equal
+to <code>r</code>), currencies (Garman and Kohlhagen, 1983; set
+<code>q</code> equal to the foreign risk-free rate). For future-style
+options (e.g. options on the German Bund future), set <code>q</code>
+and <code>r</code> equal to zero.
+</p>
+<p>The Greeks are provided in their raw (‘textbook’) form
+with only one exception: Theta is made negative. For practical
+use, the other Greeks are also typically adjusted: Theta is
+often divided by 365 (or some other yearly day count); Vega and
+Rho are divided by 100 to give the sensitivity for one
+percentage-point move in volatility/the interest rate. Raw Gamma
+is not much use if not adjusted for the actual move in the
+underlier.
+</p>
+<p>For European options the Greeks are computed through the
+respective analytic expressions. For American options only
+Delta, Gamma and Theta are computed because they can be directly
+obtained from the binomial tree; other Greeks need to be
+computed through a finite difference (see Examples).
+</p>
+<p>For the European-type options, the function understands vectors
+of inputs, except for dividends. American options are priced via
+a Cox-Ross-Rubinstein tree; no vectorisation is implemented
+here.
+</p>
+<p>The implied volatility is computed with <code>uniroot</code>
+from the <span class="pkg">stats</span> package (the default search interval is
+<code>c(0.00001, 2)</code>; it can be changed through
+<code>uniroot.control</code>).
+</p>
+<p>Dividends (<code>D</code>) are modelled via the escrowed-dividend
+model.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns the price (a numeric vector of length one) if <code>greeks</code> is
+<code>FALSE</code>, else returns a list.
+</p>
+
+
+<h3>Note</h3>
+
+<p>If <code>greeks</code> is <code>TRUE</code>, the function will return a list with
+named elements (<code>value</code>, <code>delta</code> and so on). Prior to version
+0.26-3, the first element of this list was named <code>price</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Haug, E. (2007) <em>The Complete Guide to Option Pricing Formulas</em>.
+2nd edition. McGraw-Hill.
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>EuropeanCall</code>, <code>callCF</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">S &lt;- 100; X &lt;- 100; tau &lt;- 1; r &lt;- 0.02; q &lt;- 0.06; vol &lt;- 0.3
+unlist(vanillaOptionEuropean(S, X, tau, r, q, vol^2, type = "put"))
+
+S &lt;- 100; X &lt;- 110; tau &lt;- 1; r &lt;- 0.1; q &lt;- 0.06; vol &lt;- 0.3; type &lt;- "put"
+unlist(vanillaOptionAmerican(S, X, tau, r, q, vol^2, type = type,
+                             greeks = TRUE))
+
+## compute rho for 1% move
+h &lt;- 0.01
+(vanillaOptionAmerican(S, X, tau, r + h, q, vol^2,
+    type = type, greeks = FALSE) -
+ vanillaOptionAmerican(S, X, tau, r, q, vol^2,
+    type = type, greeks = FALSE)) / (h*100)
+
+## compute vega for 1% move
+h &lt;- 0.01
+(vanillaOptionAmerican(S, X, tau, r, q,(vol + h)^2,
+    type = type, greeks = FALSE) -
+ vanillaOptionAmerican(S, X, tau, r, q, vol^2,
+    type = type, greeks = FALSE)) / (h*100)
+
+
+
+S &lt;- 100; X &lt;- 100
+tau &lt;- 1; r &lt;- 0.05; q &lt;- 0.00
+D &lt;- c(1,2); tauD &lt;- c(0.3,.6)
+type &lt;- "put"
+v &lt;- 0.245^2  ## variance, not volatility
+
+p &lt;- vanillaOptionEuropean(S = S, X = X, tau, r, q, v = v,
+                           tauD = tauD, D = D, type = type, greeks = FALSE)
+vanillaOptionImpliedVol(exercise = "european", price = p,
+     S = S, X = X, tau = tau, r = r, q = q, tauD = tauD, D = D, type = type)
+
+p &lt;- vanillaOptionAmerican(S = S, X = X, tau, r, q, v = v,
+     tauD = tauD, D = D, type = type, greeks = FALSE)
+vanillaOptionImpliedVol(exercise = "american", price = p,
+     S = S, X = X, tau = tau, r = r, q = q, tauD = tauD, D = D, type =
+     type, uniroot.control = list(interval = c(0.01, 0.5)))
+
+
+## compute implied q
+S &lt;- 100; X &lt;- 100
+tau &lt;- 1; r &lt;- 0.05; q &lt;- 0.072
+v &lt;- 0.22^2  ## variance, not volatility
+
+call &lt;- vanillaOptionEuropean(S=S, X = X, tau=tau, r=r, q=q, v=v,
+         type = "call", greeks = FALSE)
+put  &lt;- vanillaOptionEuropean(S=S, X = X, tau=tau, r=r, q=q, v=v,
+         type = "put", greeks = FALSE)
+
+# ... the simple way
+-(log(call + X * exp(-tau*r) - put) - log(S)) / tau
+
+# ... the complicated way :-)
+volDiffCreate &lt;- function(exercise, call, put, S, X, tau, r) {
+    f &lt;- function(q) {
+        cc &lt;- vanillaOptionImpliedVol(exercise = exercise, price = call,
+            S = S, X = X, tau = tau, r = r, q = q, type = "call")
+        pp &lt;- vanillaOptionImpliedVol(exercise = exercise, price = put,
+            S = S, X = X, tau = tau, r = r, q = q, type = "put")
+        abs(cc - pp)
+    }
+    f
+}
+f &lt;- volDiffCreate(exercise = "european",
+                   call = call, put = put, S = S, X = X, tau = tau, r)
+optimise(f,interval = c(0, 0.2))$minimum
+
+##
+S &lt;- 100; X &lt;- 100
+tau &lt;- 1; r &lt;- 0.05; q &lt;- 0.072
+v &lt;- 0.22^2  ## variance, not volatility
+vol &lt;- 0.22
+
+vanillaOptionEuropean(S=S, X = X, tau=tau, r=r, q=q, v=v,     ## with variance
+                      type = "call", greeks = FALSE)
+vanillaOptionEuropean(S=S, X = X, tau=tau, r=r, q=q, vol=vol, ## with vol
+                      type = "call", greeks = FALSE)
+vanillaOptionEuropean(S=S, X = X, tau=tau, r=r, q=q, vol=vol, ## with vol
+                      type = "call", greeks = FALSE, v = 0.2^2)
+
+</code></pre>
+
+
+</div>

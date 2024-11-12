@@ -1,0 +1,570 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netsplit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Split direct and indirect evidence in network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>Methods to split network estimates into the contribution of direct
+and indirect evidence and to test for local inconsistency in
+network meta-analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netsplit(
+  x,
+  method,
+  upper = TRUE,
+  reference.group = x$reference.group,
+  baseline.reference = x$baseline.reference,
+  order = NULL,
+  sep.trts = x$sep.trts,
+  quote.trts = "",
+  tol.direct = 5e-04,
+  common = x$common,
+  random = x$random,
+  backtransf = x$backtransf,
+  warn = FALSE,
+  warn.deprecated = gs("warn.deprecated"),
+  verbose = FALSE,
+  ...
+)
+
+## S3 method for class 'netsplit'
+print(
+  x,
+  common = x$x$common,
+  random = x$x$random,
+  show = "all",
+  overall = TRUE,
+  ci = FALSE,
+  test = show %in% c("all", "with.direct", "both"),
+  only.reference = FALSE,
+  sortvar = NULL,
+  subset = NULL,
+  nchar.trts = x$nchar.trts,
+  digits = gs("digits"),
+  digits.stat = gs("digits.stat"),
+  digits.pval = gs("digits.pval"),
+  digits.prop = max(gs("digits.pval") - 2, 2),
+  text.NA = ".",
+  backtransf = x$backtransf,
+  scientific.pval = gs("scientific.pval"),
+  big.mark = gs("big.mark"),
+  legend = TRUE,
+  indent = TRUE,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netmeta</code> or <code>netsplit</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character string indicating which method to split
+direct and indirect evidence is to be used. Either
+<code>"Back-calculation"</code> or <code>"SIDDE"</code>, can be abbreviated.
+See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+<p>A logical indicating whether treatment comparisons
+should be selected from the lower or upper triangle of the
+treatment effect matrices (see list elements <code>TE.common</code> and
+<code>TE.random</code> in the <code>netmeta</code> object). Ignored if
+argument <code>order</code> is provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference.group</code></td>
+<td>
+<p>Reference treatment. Ignored if argument
+<code>order</code> is provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseline.reference</code></td>
+<td>
+<p>A logical indicating whether results
+should be expressed as comparisons of other treatments versus the
+reference treatment or vice versa. This argument is only
+considered if <code>reference.group</code> is not equal to <code>""</code>
+and argument<code>order</code> is not provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>A optional character or numerical vector specifying
+the order of treatments in comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep.trts</code></td>
+<td>
+<p>A character string used in comparison names as
+separator between treatment labels, e.g., " vs ".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quote.trts</code></td>
+<td>
+<p>A character used to print around treatment
+labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol.direct</code></td>
+<td>
+<p>A numeric defining the maximum deviation of the
+direct evidence proportion from 0 or 1 to classify a comparison
+as providing only indirect or direct evidence, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether results for the common
+effects network meta-analysis should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether results for the random
+effects network meta-analysis should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether printed results
+should be back transformed. For example, if <code>backtransf =
+TRUE</code>, results for <code>sm = "OR"</code> are printed as odds ratios
+rather than log odds ratios.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>A logical indicating whether warnings should be
+printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical indicating whether progress information
+should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show</code></td>
+<td>
+<p>A character string indicating which comparisons should
+be printed (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overall</code></td>
+<td>
+<p>A logical indicating whether estimates from network
+meta-analyis should be printed in addition to direct and indirect
+estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>A logical indicating whether confidence intervals should
+be printed in addition to treatment estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>A logical indicating whether results of a test
+comparing direct and indirect estimates should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>only.reference</code></td>
+<td>
+<p>A logical indicating whether only comparisons
+with the reference group should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sortvar</code></td>
+<td>
+<p>An optional vector used to sort comparisons (must be
+of same length as the total number of comparisons).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional logical vector specifying a subset of
+comparisons to print (must be of same length as the total number of
+comparisons) .</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.trts</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique treatment names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.stat</code></td>
+<td>
+<p>Minimal number of significant digits for z-value
+of test of agreement between direct and indirect evidence, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.pval</code></td>
+<td>
+<p>Minimal number of significant digits for p-value
+of test of agreement between direct and indirect evidence, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.prop</code></td>
+<td>
+<p>Minimal number of significant digits for direct
+evidence proportions, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.NA</code></td>
+<td>
+<p>A character string specifying text printed for
+missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scientific.pval</code></td>
+<td>
+<p>A logical specifying whether p-values should
+be printed in scientific notation, e.g., 1.2345e-01 instead of
+0.12345.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>big.mark</code></td>
+<td>
+<p>A character used as thousands separator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>A logical indicating whether a legend should be
+printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indent</code></td>
+<td>
+<p>A logical indicating whether items in the legend
+should be indented.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A comparison of direct and indirect treatment estimates can serve
+as check for consistency of network meta-analysis (Dias et al.,
+2010).
+</p>
+<p>This function provides two methods to derive indirect estimates:
+</p>
+
+<ul>
+<li>
+<p> Separate Indirect from Direct Evidence (SIDE) using a
+back-calculation method (<code>method = "Back-calculation"</code>)
+based on the <em>direct evidence proportion</em> to calculate the
+indirect evidence (König et al., 2013);
+</p>
+</li>
+<li>
+<p> Separate Indirect from Direct Design Evidence (SIDDE) as
+described in Efthimiou et al. (2019).
+</p>
+</li>
+</ul>
+<p>Note, for the back-calculation method, indirect treatment estimates
+are already calculated in <code>netmeta</code> and this function
+combines and prints these estimates in a user-friendly
+way. Furthermore, this method is not available for the
+Mantel-Haenszel and non-central hypergeometric distribution
+approach implemented in <code>netmetabin</code>.
+</p>
+<p>For the random-effects model, the direct treatment estimates are
+based on the common between-study variance <code class="reqn">\tau^2</code> from the
+network meta-analysis, i.e. the square of list element
+<code>x$tau</code>.
+</p>
+<p>Argument <code>show</code> determines which comparisons are printed:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+“all” </td>
+<td style="text-align: left;"> All comparisons </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+“both” </td>
+<td style="text-align: left;"> Only comparisons contributing both direct and
+  indirect evidence </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+“with.direct” </td>
+<td style="text-align: left;"> Comparisons providing direct evidence </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+“direct.only” </td>
+<td style="text-align: left;"> Comparisons providing only direct
+  evidence </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+“indirect.only” </td>
+<td style="text-align: left;"> Comparisons providing only indirect
+  evidence
+</td>
+</tr>
+</table>
+<p>The node-splitting method and SIDDE can be compute-intensive in
+large networks. Crude information on the computation progress is
+printed if argument <code>verbose = TRUE</code>. In addition, computation
+times are printed if R package <b>tictoc</b> is installed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>netsplit</code> with corresponding <code>print</code>
+and <code>forest</code> functions. The object is a list containing the
+following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>common, random</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comparison</code></td>
+<td>
+<p>A vector with treatment comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop.common, prop.random</code></td>
+<td>
+<p>A vector with direct evidence
+proportions (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common, random</code></td>
+<td>
+<p>Results of network meta-analysis (common /
+random effects model), i.e., data frame with columns comparison,
+TE, seTE, lower, upper, z, and p.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direct.common, direct.random</code></td>
+<td>
+<p>Network meta-analysis results
+based on direct evidence (common / random effects model), i.e.,
+data frame with columns comparison, TE, seTE, lower, upper, z,
+and p.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indirect.common, indirect.random</code></td>
+<td>
+<p>Network meta-analysis
+results based on indirect evidence (common / random effects
+model), i.e., data frame with columns comparison, TE, seTE,
+lower, upper, z, and p.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compare.common, compare.random</code></td>
+<td>
+<p>Comparison of direct and
+indirect evidence in network meta-analysis (common / random
+effects model), i.e., data frame with columns comparison, TE,
+seTE, lower, upper, z, and p.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sm</code></td>
+<td>
+<p>A character string indicating underlying summary measure</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level.ma</code></td>
+<td>
+<p>The level used to calculate confidence intervals
+for pooled estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tictoc</code></td>
+<td>
+<p>Computation times for node-splitting method or SIDDE
+(if R package <b>tictoc</b> is installed).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+<p>Version of R package netmeta used to create object.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>, Gerta
+Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>, Orestis Efthimiou
+<a href="mailto:oremiou@gmail.com">oremiou@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Dias S, Welton NJ, Caldwell DM, Ades AE (2010):
+Checking consistency in mixed treatment comparison meta-analysis.
+<em>Statistics in Medicine</em>,
+<b>29</b>, 932–44
+</p>
+<p>Efthimiou O, Rücker G, Schwarzer G, Higgins J, Egger M, Salanti G
+(2019):
+A Mantel-Haenszel model for network meta-analysis of rare events.
+<em>Statistics in Medicine</em>,
+<b>38</b>, 2992–3012
+</p>
+<p>König J, Krahn U, Binder H (2013):
+Visualizing the flow of evidence in network meta-analysis and
+characterizing mixed treatment comparisons.
+<em>Statistics in Medicine</em>,
+<b>32</b>, 5414–29
+</p>
+<p>Puhan MA, Schünemann HJ, Murad MH, et al. (2014):
+A GRADE working group approach for rating the quality of treatment
+effect estimates from network meta-analysis.
+<em>British Medical Journal</em>,
+<b>349</b>, g5630
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>forest.netsplit</code>, <code>netmeta</code>,
+<code>netmetabin</code>, <code>netmeasures</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Woods2010)
+#
+p1 &lt;- pairwise(treatment, event = r, n = N,
+  studlab = author, data = Woods2010, sm = "OR")
+#
+net1 &lt;- netmeta(p1)
+#
+print(netsplit(net1), digits = 2)
+
+## Not run: 
+print(netsplit(net1), digits = 2,
+  backtransf = FALSE, common = FALSE)
+
+# Sort by increasing number of studies in direct comparisons
+print(netsplit(net1), digits = 2, sortvar = k)
+# Sort by decreasing number of studies in direct comparisons
+print(netsplit(net1), digits = 2, sortvar = -k)
+
+# Sort by increasing evidence proportion under common effects model
+print(netsplit(net1), digits = 2, sortvar = prop.common)
+# Sort by decreasing evidence proportion under common effects model
+print(netsplit(net1), digits = 2, sortvar = -prop.common)
+
+# Sort by decreasing evidence proportion under common effects model
+# and number of studies
+print(netsplit(net1), digits = 2, sortvar = cbind(-prop.common, -k))
+
+data(Senn2013)
+#
+net2 &lt;- netmeta(TE, seTE, treat1.long, treat2.long,
+  studlab, data = Senn2013)
+#
+print(netsplit(net2), digits = 2)
+# Layout of Puhan et al. (2014), Table 1
+print(netsplit(net2), digits = 2, ci = TRUE, test = FALSE)
+
+data(Dong2013)
+p3 &lt;- pairwise(treatment, death, randomized, studlab = id,
+  data = Dong2013, sm = "OR")
+net3 &lt;- netmetabin(p3)
+netsplit(net3)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

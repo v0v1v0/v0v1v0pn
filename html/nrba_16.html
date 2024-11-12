@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stepwise_model_selection</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Select and fit a model using stepwise regression</h2>
+
+<h3>Description</h3>
+
+<p>A regression model is selected by iteratively adding and removing variables based on the p-value from a
+likelihood ratio rest. At each stage, a single variable is added to the model if
+the p-value of the likelihood ratio test from adding the variable is below <code>alpha_enter</code>
+and its p-value is less than that of all other variables not already in the model.
+Next, of the variables already in the model, the variable with the largest p-value
+is dropped if its p-value is greater than <code>alpha_remain</code>. This iterative process
+continues until a maximum number of iterations is reached or until
+either all variables have been added to the model or there are no variables
+not yet in the model whose likelihood ratio test has a p-value below <code>alpha_enter</code>. <br></p>
+<p>Stepwise model selection generally invalidates inferential statistics
+such as p-values, standard errors, or confidence intervals and leads to
+overestimation of the size of coefficients for variables included in the selected model.
+This bias increases as the value of <code>alpha_enter</code> or <code>alpha_remain</code> decreases.
+The use of stepwise model selection should be limited only to
+reducing a large list of candidate variables for nonresponse adjustment.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stepwise_model_selection(
+  survey_design,
+  outcome_variable,
+  predictor_variables,
+  model_type = "binary-logistic",
+  max_iterations = 100L,
+  alpha_enter = 0.5,
+  alpha_remain = 0.5
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>survey_design</code></td>
+<td>
+<p>A survey design object created with the <code>survey</code> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcome_variable</code></td>
+<td>
+<p>The name of an outcome variable to use as the dependent variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictor_variables</code></td>
+<td>
+<p>A list of names of variables to consider as predictors for the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_type</code></td>
+<td>
+<p>A character string describing the type of model to fit.
+<code>'binary-logistic'</code> for a binary logistic regression,
+<code>'ordinal-logistic'</code> for an ordinal logistic regression (cumulative proportional-odds),
+<code>'normal'</code> for the typical model which assumes residuals follow a Normal distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iterations</code></td>
+<td>
+<p>Maximum number of iterations to try adding new variables to the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha_enter</code></td>
+<td>
+<p>The maximum p-value allowed for a variable to be added to the model.
+Large values such as 0.5 or greater are recommended to reduce the bias
+of estimates from the selected model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha_remain</code></td>
+<td>
+<p>The maximum p-value allowed for a variable to remain in the model.
+Large values such as 0.5 or greater are recommended to reduce the bias
+of estimates from the selected model.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See Lumley and Scott (2017) for details of how regression models are fit to survey data.
+For overall tests of variables, a Rao-Scott Likelihood Ratio Test is conducted
+(see section 4 of Lumley and Scott (2017) for statistical details)
+using the function <code>regTermTest(method = "LRT", lrt.approximation = "saddlepoint")</code>
+from the 'survey' package.
+</p>
+<p>See Sauerbrei et al. (2020) for a discussion of statistical issues with using stepwise model selection.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>svyglm</code> representing
+a regression model fit using the 'survey' package.
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Lumley, T., &amp; Scott A. (2017). Fitting Regression Models to Survey Data. Statistical Science 32 (2) 265 - 278. https://doi.org/10.1214/16-STS605
+</p>
+</li>
+<li>
+<p> Sauerbrei, W., Perperoglou, A., Schmid, M. et al. (2020). State of the art in selection of variables and functional forms in multivariable analysis - outstanding issues. Diagnostic and Prognostic Research 4, 3. https://doi.org/10.1186/s41512-020-00074-3
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(survey)
+
+# Load example data and prepare it for analysis
+data(involvement_survey_str2s, package = 'nrba')
+
+involvement_survey &lt;- svydesign(
+  data = involvement_survey_str2s,
+  ids = ~ SCHOOL_ID + UNIQUE_ID,
+  fpc = ~ N_SCHOOLS_IN_DISTRICT + N_STUDENTS_IN_SCHOOL,
+  strata = ~ SCHOOL_DISTRICT,
+  weights = ~ BASE_WEIGHT
+)
+
+involvement_survey &lt;- involvement_survey |&gt;
+    transform(WHETHER_PARENT_AGREES = factor(WHETHER_PARENT_AGREES))
+
+# Fit a regression model using stepwise selection
+selected_model &lt;- stepwise_model_selection(
+  survey_design = involvement_survey,
+  outcome_variable = "WHETHER_PARENT_AGREES",
+  predictor_variables = c("STUDENT_RACE", "STUDENT_DISABILITY_CATEGORY"),
+  model_type = "binary-logistic",
+  max_iterations = 100,
+  alpha_enter = 0.5,
+  alpha_remain = 0.5
+)
+</code></pre>
+
+
+</div>

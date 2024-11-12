@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dCJS</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cormack-Jolly-Seber distribution for use in <code>nimble</code> models</h2>
+
+<h3>Description</h3>
+
+<p><code>dCJS_**</code> and <code>rCJS_**</code> provide Cormack-Jolly-Seber capture-recapture
+distributions that can be used directly from R or in <code>nimble</code>
+models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dCJS_ss(x, probSurvive, probCapture, len = 0, log = 0)
+
+dCJS_sv(x, probSurvive, probCapture, len = 0, log = 0)
+
+dCJS_vs(x, probSurvive, probCapture, len = 0, log = 0)
+
+dCJS_vv(x, probSurvive, probCapture, len = 0, log = 0)
+
+rCJS_ss(n, probSurvive, probCapture, len = 0)
+
+rCJS_sv(n, probSurvive, probCapture, len = 0)
+
+rCJS_vs(n, probSurvive, probCapture, len = 0)
+
+rCJS_vv(n, probSurvive, probCapture, len = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>capture history vector of 0s (not captured) and 1s (captured).
+Include the initial capture, so <code>x[1]</code> should equal 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probSurvive</code></td>
+<td>
+<p>survival probability, either a time-independent scalar
+(for dCJS_s*) or a time-dependent vector (for dCJS_v*) with length
+<code>len - 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probCapture</code></td>
+<td>
+<p>capture probability, either a time-independent scalar
+(for dCJS_*s) or a time-dependent vector (for dCJS_*v) with length <code>len</code>.
+If a vector, first element is ignored, as the total probability is conditioned
+on the capture at <code>t = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>len</code></td>
+<td>
+<p>length of capture history. Should equal <code>length(x)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>TRUE or 1 to return log probability. FALSE or 0 to return probability.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of random draws, each returning a vector of length
+<code>len</code>. Currently only <code>n = 1</code> is supported, but the
+argument exists for standardization of "<code>r</code>" functions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>These nimbleFunctions provide distributions that can be used directly in R or
+in <code>nimble</code> hierarchical models (via <code>nimbleCode</code>
+and <code>nimbleModel</code>).
+</p>
+<p>The letters following the 'dCJS_' indicate whether survival and/or capture
+probabilities, in that order, are scalar (s, meaning the probability applies
+to every <code>x[t]</code>) or vector (v, meaning the probability is a vector
+aligned with <code>x</code>).  When <code>probCapture</code> and/or <code>probSurvive</code> is
+a vector, they must be the same length as <code>x</code>.
+</p>
+<p>It is important to use the time indexing correctly for survival.
+<code>probSurvive[t]</code> is the survival probabilty from time <code>t</code> to time
+<code>t + 1</code>. When a vector, <code>probSurvive</code> may have length greater than
+<code>length(x) - 1</code>, but all values beyond that index are ignored.
+</p>
+<p>Time indexing for detection is more obvious: <code>probDetect[t]</code> is the
+detection probability at time <code>t</code>.
+</p>
+<p>When called from R, the <code>len</code> argument to <code>dCJS_**</code> is not
+necessary. It will default to the length of <code>x</code>.  When used in
+<code>nimble</code> model code (via <code>nimbleCode</code>), <code>len</code> must be provided
+(even though it may seem redundant).
+</p>
+<p>For more explanation, see package vignette
+(<code>vignette("Introduction_to_nimbleEcology")</code>).
+</p>
+<p>Compared to writing <code>nimble</code> models with a discrete latent state for
+true alive/dead status at each time and a separate scalar datum for each
+observation, use of these distributions allows one to directly sum
+(marginalize) over the discrete latent states and calculate the probability
+of the detection history for one individual jointly.
+</p>
+<p>These are <code>nimbleFunction</code>s written in the format of user-defined
+distributions for NIMBLE's extension of the BUGS model language. More
+information can be found in the NIMBLE User Manual at
+<a href="https://r-nimble.org">https://r-nimble.org</a>.
+</p>
+<p>When using these distributions in a <code>nimble</code> model, the left-hand side
+will be used as <code>x</code>, and the user should not provide the <code>log</code>
+argument.
+</p>
+<p>For example, in <code>nimble</code> model code,
+</p>
+<p><code>captures[i, 1:T] ~ dCSJ_ss(survive, capture, T)</code>
+</p>
+<p>declares a vector node, <code>captures[i, 1:T]</code>, (detection history for individual
+<code>i</code>,  for example) that follows a CJS distribution
+with scalar survival probability <code>survive</code> and scalar capture probability <code>capture</code>
+(assuming <code>survive</code> and <code>capture</code> are defined elsewhere in the model).
+</p>
+<p>This will invoke (something like) the following call to <code>dCJS_ss</code> when <code>nimble</code> uses the
+model such as for MCMC:
+</p>
+<p><code>dCJS_ss(captures[i, 1:T], survive, capture, len = T, log = TRUE)</code>
+</p>
+<p>If an algorithm using a <code>nimble</code> model with this declaration
+needs to generate a random draw for <code>captures[i, 1:T]</code>, it
+will make a similar invocation of <code>rCJS_ss</code>, with <code>n = 1</code>.
+</p>
+<p>If both survival and capture probabilities are time-dependent, use
+</p>
+<p><code>captures[i,1:T] ~ dCSJ_vv(survive[1:(T-1)], capture[1:T], T)</code>
+</p>
+<p>and so on for each combination of time-dependent and time-independent parameters.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>dCJS_**</code>: the probability (or likelihood) or log probability of observation vector <code>x</code>.
+</p>
+<p>For <code>rCJS_**</code>: a simulated capture history, <code>x</code>.
+</p>
+
+
+<h3>Notes for use with automatic differentiation</h3>
+
+<p>The <code>dCJS_**</code> distributions should all work for models and algorithms
+that use nimble's automatic differentiation (AD) system. In that system,
+some kinds of values are "baked in" (cannot be changed) to the AD calculations
+from the first call, unless and until the AD calculations are reset. For
+the <code>dCJS_**</code> distributions, the lengths of vector inputs and the data
+(<code>x</code>) values themselves are baked in. These can be different for different
+iterations through a for loop (or nimble model declarations with different indices,
+for example), but the lengths and data values for each specific iteration
+will be "baked in" after the first call. <b>In other words, it is assumed that
+<code>x</code> are data and are not going to change.</b>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ben Goldstein, Perry de Valpine, and Daniel Turek
+</p>
+
+
+<h3>References</h3>
+
+<p>D. Turek, P. de Valpine and C. J. Paciorek. 2016. Efficient Markov chain Monte
+Carlo sampling for hierarchical hidden Markov models. Environmental and Ecological Statistics
+23:549–564. DOI 10.1007/s10651-016-0353-z
+</p>
+
+
+<h3>See Also</h3>
+
+<p>For multi-state or multi-event capture-recapture models, see <code>dHMM</code> or <code>dDHMM</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Set up constants and initial values for defining the model
+dat &lt;- c(1,1,0,0,0) # A vector of observations
+probSurvive &lt;- c(0.6, 0.3, 0.3, 0.1)
+probCapture &lt;- 0.4
+
+
+# Define code for a nimbleModel
+nc &lt;- nimbleCode({
+  x[1:4] ~ dCJS_vs(probSurvive[1:4], probCapture, len = 4)
+  probCapture ~ dunif(0,1)
+  for (i in 1:4) probSurvive[i] ~ dunif(0, 1)
+})
+
+# Build the model, providing data and initial values
+CJS_model &lt;- nimbleModel(nc, data = list(x = dat),
+                         inits = list(probSurvive = probSurvive,
+                                      probCapture = probCapture))
+
+# Calculate log probability of data from the model
+CJS_model$calculate()
+# Use the model for a variety of other purposes...
+</code></pre>
+
+
+</div>

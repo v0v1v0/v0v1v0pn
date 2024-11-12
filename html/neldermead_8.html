@@ -1,0 +1,373 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fminsearch</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Computation of the unconstrained minimum of given function with the
+Nelder-Mead algorithm.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function searches for the unconstrained minimum of a given cost function.
+The provided algorithm is a direct search algorithm, i.e. an algorithm which
+does not use the derivative of the cost function. It is based on the update of
+a simplex, which is a set of k&gt;=n+1 vertices, where each vertex is associated
+with one point and one function value. This algorithm is the Nelder-Mead
+algorithm. This function is based on a specialized use of the more general
+<code>neldermead</code> function bundle. Users who want to have a more flexible
+solution based on direct search algorithms should consider using the
+<code>neldermead</code> functions instead of the <code>fminsearch</code> function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  fminsearch(fun = NULL, x0 = NULL, options = NULL, verbose=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>A cost function return a numeric scalar.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x0</code></td>
+<td>
+<p>A numerical vector of initial guesses (length n).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>options</code></td>
+<td>
+<p>A list of optimization options, which drives the behaviour of
+<code>fminsearch</code>. These options must be set with the <code>optimset</code>
+function (see <code>?optimset</code>) which returns a list with the following
+elements: </p>
+
+<dl>
+<dt>MaxIter</dt>
+<dd>
+<p>The maximum number of iterations. The default is 200 * n.</p>
+</dd>
+<dt>MaxFunEvals</dt>
+<dd>
+<p>The maximum number of evaluations of the cost function.
+The default is 200 * n.</p>
+</dd>
+<dt>TolFun</dt>
+<dd>
+<p>The absolute tolerance on function value. The default value
+is 1.e-4.</p>
+</dd>
+<dt>TolX</dt>
+<dd>
+<p>The absolute tolerance on simplex size. The default value is
+1.e-4.</p>
+</dd>
+<dt>Display</dt>
+<dd>
+<p>The verbose level.</p>
+</dd>
+<dt>OutputFcn</dt>
+<dd>
+<p>The output function, or a list of output functions
+called at the end of each iteration. The default value is NULL.</p>
+</dd>
+<dt>PlotFcns</dt>
+<dd>
+<p>The plot function, or a list of plotput functions called
+at the end of each iteration. The default value is empty.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>The verbose option, controlling the amount of messages.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><strong>Termination criteria</strong>
+</p>
+<p>In this section, we describe the termination criteria used by fminsearch.
+The criteria is based on the following variables: </p>
+
+<dl>
+<dt>ssize</dt>
+<dd>
+<p>the current simplex size,</p>
+</dd>
+<dt>shiftfv</dt>
+<dd>
+<p>the absolute value of the difference of function value
+between the highest and lowest vertices.</p>
+</dd>
+</dl>
+<p>If both <code>ssize &lt; options$TolX</code> and <code>shiftfv &lt; options$TolFun</code>
+conditions are true, then the iterations stop. The size of the simplex is
+computed using the 'sigmaplus' method of the <span class="pkg">optimsimplex</span> package. The
+'sigmamplus' size is the maximum length of the vector from each vertex to the
+first vertex. It requires one loop over the vertices of the simplex.
+</p>
+<p><strong>The initial simplex</strong>
+</p>
+<p>The <code>fminsearch</code> algorithm uses a special initial simplex, which is an
+heuristic depending on the initial guess. The strategy chosen by
+<code>fminsearch</code> corresponds to the content of <code>simplex0method</code>
+element of the neldermead object (set to 'pfeffer').  It is applied using 
+the content of the <code>simplex0deltausual</code> (0.05) and
+<code>simplex0deltazero</code> (0.0075) elements. Pfeffer's method is an heuristic
+which is presented in 'Global Optimization Of Lennard-Jones Atomic Clusters'
+by Ellen Fan. It is due to L. Pfeffer at Stanford. See in the help of
+optimsimplex for more details.
+</p>
+<p><strong>The number of iterations</strong>
+</p>
+<p>In this section, we present the default values for the number of iterations in
+<code>fminsearch</code>.
+</p>
+<p>The <code>options</code> input argument is an optional list which can
+contain the <code>MaxIter</code> field, which stores the maximum number of
+iterations. The default value is 200n, where n is the number of variables.
+The factor 200 has not been chosen by chance, but is the result of experiments
+performed against quadratic functions with increasing space dimension.
+This result is presented in 'Effect of dimensionality on the Nelder-mead
+simplex method' by Lixing Han and Michael Neumann. This paper is based on
+Lixing Han's  PhD, 'Algorithms in Unconstrained Optimization'. The study is
+based on numerical experiments with a quadratic function where the number of
+terms depends on the dimension of the space (i.e. the number of variables).
+Their study showed that the number of iterations required to reach the
+tolerance criteria is roughly 100n. Most iterations are based on inside
+contractions. Since each step of the Nelder-Mead algorithm only require one
+or two function evaluations, the number of required function evaluations in
+this experiment is also roughly 100n.
+</p>
+<p><strong>Output and plot functions</strong>
+</p>
+<p>The <code>optimset</code> function can be used to configure one or more output and
+plot functions.
+The output or plot function is expected to have the following definition:
+</p>
+<p><code>myfun &lt;- function(x , optimValues , state)</code>
+</p>
+<p>The input arguments <code>x</code>, <code>optimValues</code> and <code>state</code> are
+described in detail in the <code>optimset</code> help page. The
+<code>optimValues$procedure</code> field represents the type of step performed at
+the current iteration and can be equal to one of the following strings:
+</p>
+
+<ul>
+<li>
+<p> ” (the empty string),
+</p>
+</li>
+<li>
+<p> 'initial simplex',
+</p>
+</li>
+<li>
+<p> 'expand',
+</p>
+</li>
+<li>
+<p> 'reflect',
+</p>
+</li>
+<li>
+<p> 'contract inside',
+</p>
+</li>
+<li>
+<p> 'contract outside'.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>Return a object of class neldermead. Use the <code>neldermead.get</code> to extract
+the following element from the returned object:</p>
+
+<dl>
+<dt>xopt</dt>
+<dd>
+<p>The vector of n numeric values, minimizing the cost function.</p>
+</dd>
+<dt>fopt</dt>
+<dd>
+<p>The minimum value of the cost function.</p>
+</dd>
+<dt>exitflag</dt>
+<dd>
+<p>The flag associated with exist status of the algorithm.
+The following values are available:</p>
+
+<dl>
+<dt>-1</dt>
+<dd>
+<p>The maximum number of iterations has been reached.</p>
+</dd>
+<dt>0</dt>
+<dd>
+<p>The maximum number of function evaluations has been reached.</p>
+</dd>
+<dt>1</dt>
+<dd>
+<p>The tolerance on the simplex size and function value delta has
+been reached. This signifies that the algorithm has converged,
+probably to a solution of the problem.</p>
+</dd>
+</dl>
+</dd>
+<dt>output</dt>
+<dd>
+<p>A list which stores detailed information about the exit of the
+algorithm. This list contains the following fields:</p>
+
+<dl>
+<dt>algorithm</dt>
+<dd>
+<p>A string containing the definition of the algorithm
+used, i.e. 'Nelder-Mead simplex direct search'.</p>
+</dd>
+<dt>funcCount</dt>
+<dd>
+<p>The number of function evaluations.</p>
+</dd>
+<dt>iterations</dt>
+<dd>
+<p>The number of iterations.</p>
+</dd>
+<dt>message</dt>
+<dd>
+<p>A string containing a termination message.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Author of Scilab neldermead module: Michael Baudin (INRIA - Digiteo)
+</p>
+<p>Author of R adaptation: Sebastien Bihorel (<a href="mailto:sb.pmlab@gmail.com">sb.pmlab@gmail.com</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>'Sequential Application of Simplex Designs in Optimisation and Evolutionary
+Operation', Spendley, W. and Hext, G. R. and Himsworth, F. R., American
+Statistical Association and American Society for Quality, 1962
+</p>
+<p>'A Simplex Method for Function Minimization', Nelder, J. A. and Mead, R., The
+Computer Journal, 1965
+</p>
+<p>'Iterative Methods for Optimization', C. T. Kelley, SIAM Frontiers in Applied
+Mathematics, 1999
+</p>
+<p>'Algorithm AS47 - Function minimization using a simplex procedure', O'Neill, R.,
+Applied Statistics, 1971
+</p>
+<p>'Effect of dimensionality on the nelder-mead simplex method', Lixing Han and
+Michael Neumann, Optimization Methods and Software, 21, 1, 1–16, 2006.
+</p>
+<p>'Algorithms in Unconstrained Optimization', Lixing Han, Ph.D., The University of
+Connecticut, 2000.
+</p>
+<p>'Global Optimization Of Lennard-Jones Atomic Clusters' Ellen Fan, Thesis,
+February 26, 2002, McMaster University
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>optimset</code>
+<code>neldermead</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#In the following example, we use the fminsearch function to compute the minimum
+#of the Rosenbrock function. We first define the function 'banana', and then use
+#the fminsearch function to search the minimum, starting with the initial guess
+#(-1.2, 1.0). In this particular case, 85 iterations are performed with 159
+#function evaluations
+  banana &lt;- function(x){
+    y &lt;- 100*(x[2]-x[1]^2)^2 + (1-x[1])^2
+  }
+  sol &lt;- fminsearch(banana, c(-1.2,1))
+  sol
+
+#In the following example, we configure the absolute tolerance on the size of
+#the simplex to a larger value, so that the algorithm performs less iterations.
+#Since the default value of 'TolX' for the fminsearch function is 1.e-4, we
+#decide to use 1.e-2. The optimset function is used to create an optimization
+#option list and the field 'TolX' is set to 1.e-2. The options list is then
+#passed to the fminsearch function as the third input argument. In this
+#particular case, the number of iterations is 70 with 130 function evaluations.
+
+  opt &lt;- optimset(TolX=1.e-2)
+  sol &lt;- fminsearch(banana, c(-1.2,1), opt)
+  sol
+  
+#In the following example, we want to produce intermediate outputs of the
+#algorithm. We define the outfun function, which takes the current point x as
+#input argument. The function plots the current point into the current graphic
+#window with the plot function. We use the 'OutputFcn' feature of the optimset
+#function and set it to the output function. Then the option list is passed 
+#to the fminsearch function. At each iteration, the output function is called 
+#back, which creates and update a plot. While this example creates a 2D plot,
+#the user may customized the output function so that it writes a message in 
+#the console, write some data into a data file, etc... The user can distinguish 
+#between the output function (associated with the 'OutputFcn' option) and the
+#plot function (associated with the 'PlotFcns' option). See the optimset for
+#more details on this feature.
+
+  outfun &lt;- function(x, optimValues, state){
+    plot(x[1],x[2],xlim=c(-1.5,1.5),ylim=c(-1.5,1.5))
+    par(new=TRUE)
+  }
+  opt &lt;- optimset(OutputFcn=outfun)
+  sol &lt;- fminsearch(banana, c(-1.2,1), opt)
+  sol
+
+#The 'Display' option allows to get some input about the intermediate steps of
+#the algorithm as well as to be warned in case of a convergence problem.
+#In the following example, we present what happens in case of a convergence
+#problem. We set the number of iterations to 10, instead of the default 400
+#iterations. We know that 85 iterations are required to reach the convergence
+#criteria. Therefore, the convergence criteria is not met and the maximum number
+#of iterations is reached.
+
+  opt &lt;- optimset(MaxIter=10)
+  sol &lt;- fminsearch(banana, c(-1.2,1), opt)
+
+#Since the default value of the 'Display' option is 'notify', a message is
+#generated, which warns the user about a possible convergence problem. The
+#previous script produces the following output.
+# Exiting: Maximum number of iterations has been exceeded
+#          - increase MaxIter option.
+#          Current function value: 4.1355598
+
+#In the following example, we present how to display intermediate steps used by
+#the algorithm. We simply set the 'Display' option to the 'iter' value. This 
+#option allows to see the number of function evaluations, the minimum function
+#value and which type of simplex step is used for the iteration.
+  opt &lt;- optimset(Display='iter')
+  sol &lt;- fminsearch(banana, c(-1.2,1), opt)
+  sol
+</code></pre>
+
+
+</div>

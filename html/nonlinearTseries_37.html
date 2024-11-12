@@ -1,0 +1,432 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>infDim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Information dimension</h2>
+
+<h3>Description</h3>
+
+<p>Functions for estimating the information dimension of a dynamical 
+system from 1-dimensional time series using Takens' vectors
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">infDim(
+  time.series,
+  min.embedding.dim = 2,
+  max.embedding.dim = min.embedding.dim,
+  time.lag = 1,
+  min.fixed.mass,
+  max.fixed.mass,
+  number.fixed.mass.points = 10,
+  radius,
+  increasing.radius.factor = sqrt(2),
+  number.boxes = NULL,
+  number.reference.vectors = 5000,
+  theiler.window = 1,
+  kMax = 1000,
+  do.plot = TRUE,
+  ...
+)
+
+## S3 method for class 'infDim'
+fixedMass(x)
+
+## S3 method for class 'infDim'
+logRadius(x)
+
+## S3 method for class 'infDim'
+embeddingDims(x)
+
+## S3 method for class 'infDim'
+estimate(
+  x,
+  regression.range = NULL,
+  do.plot = TRUE,
+  use.embeddings = NULL,
+  col = NULL,
+  pch = NULL,
+  fit.col = NULL,
+  fit.lty = 2,
+  fit.lwd = 2,
+  add.legend = T,
+  lty = 1,
+  lwd = 1,
+  ...
+)
+
+## S3 method for class 'infDim'
+plot(
+  x,
+  main = "Information Dimension",
+  xlab = "fixed mass (p)",
+  ylab = "&lt;log10(radius)&gt;",
+  type = "b",
+  log = "x",
+  ylim = NULL,
+  col = NULL,
+  pch = NULL,
+  localScalingExp = T,
+  add.legend = T,
+  ...
+)
+
+## S3 method for class 'infDim'
+plotLocalScalingExp(
+  x,
+  main = "Local scaling exponents d1(p)",
+  xlab = "fixed mass p",
+  ylab = "1/d1(p)",
+  type = "b",
+  log = "x",
+  ylim = NULL,
+  col = NULL,
+  pch = NULL,
+  add.legend = T,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>time.series</code></td>
+<td>
+<p>The original time series from which the information 
+dimension will be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.embedding.dim</code></td>
+<td>
+<p>Integer denoting the minimum dimension in which we 
+shall embed the time.series (see buildTakens).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.embedding.dim</code></td>
+<td>
+<p>Integer denoting the maximum dimension in which we 
+shall embed the time.series (see buildTakens).Thus,
+we shall estimate the information dimension between <em>min.embedding.dim</em> 
+and <em>max.embedding.dim</em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.lag</code></td>
+<td>
+<p>Integer denoting the number of time steps that will be use 
+to construct the Takens' vectors (see <code>buildTakens</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.fixed.mass</code></td>
+<td>
+<p>Minimum percentage of the total points that the 
+algorithm shall use for the estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.fixed.mass</code></td>
+<td>
+<p>Maximum percentage of the total points that the 
+algorithm shall use for the estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number.fixed.mass.points</code></td>
+<td>
+<p>The number of different <em>fixed mass</em> 
+fractions between <em>min.fixed.mass</em>
+and <em>max.fixed.mass</em> that the algorithm will use for estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radius</code></td>
+<td>
+<p>Initial radius for searching neighbour points in the phase 
+space. Ideally, it should be small
+enough so that the fixed mass contained in this radius is slightly greater 
+than the <em>min.fixed.mass</em>. However, whereas the radius is not too 
+large (so that the performance decreases) the choice is not critical.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>increasing.radius.factor</code></td>
+<td>
+<p>Numeric value. If no enough neighbours are 
+found within <em>radius</em>, the radius is increased by a factor 
+<em>increasing.radius.factor</em> until succesful. Default: sqrt(2) = 1.414214.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number.boxes</code></td>
+<td>
+<p>Number of boxes that will be used in the box assisted 
+algorithm (see neighbourSearch).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number.reference.vectors</code></td>
+<td>
+<p>Number of reference points that the routine 
+will try to use, saving computation time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theiler.window</code></td>
+<td>
+<p>Integer denoting the Theiler window:  Two Takens' 
+vectors must be separated by more than theiler.window time steps in order to 
+be considered neighbours. By using a Theiler window, we exclude temporally 
+correlated vectors from our estimations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kMax</code></td>
+<td>
+<p>Maximum number of neighbours used for achieving p with all the 
+points from the time series (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.plot</code></td>
+<td>
+<p>Logical value. If TRUE (default value), a plot of the 
+correlation sum is shown.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional graphical parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <em>infDim</em> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regression.range</code></td>
+<td>
+<p>Vector with 2 components denoting the range where 
+the function will perform linear regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.embeddings</code></td>
+<td>
+<p>A numeric vector specifying which embedding dimensions 
+should be used to compute the information dimension.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Vector of colors for each of the dimensions of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch</code></td>
+<td>
+<p>Vector of symbols for each of the dimensions of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.col</code></td>
+<td>
+<p>A vector of colors to plot the regression lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.lty</code></td>
+<td>
+<p>The type of line to plot the regression lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.lwd</code></td>
+<td>
+<p>The width of the line for the regression lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.legend</code></td>
+<td>
+<p>add a legend to the plot?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty</code></td>
+<td>
+<p>The line type of the &lt;log10(radius)&gt; functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>The line width of the &lt;log10(radius)&gt; functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>A title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>A title for the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>A title for the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of plot (see <code>?plot</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>A character string which contains "x" if the x axis is to be 
+logarithmic, "y" if the y axis is to be logarithmic and "xy" or "yx" if both
+axes are to be logarithmic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>Numeric vector of length 2, giving the y coordinates range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>localScalingExp</code></td>
+<td>
+<p>add a plot of the local information dimension 
+scaling exponents?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The information dimension is a particular case of the generalized 
+correlation dimension when setting the order q = 1. It is possible to 
+demonstrate that the information dimension <code class="reqn">D_1</code> may be defined as:
+<code class="reqn">D_1=lim_{r \rightarrow 0} &lt;\log p(r)&gt;/\log(r)</code>.
+Here, <code class="reqn">p(r)</code> is the probability of finding a neighbour in a 
+neighbourhood of size <code class="reqn">r</code> and &lt;&gt; is the mean value. Thus, the 
+information dimension specifies how the average Shannon information scales 
+with the radius <code class="reqn">r</code>. The user should compute the information dimension 
+for different embedding dimensions for checking if <code class="reqn">D_1</code> saturates.
+</p>
+<p>In order to estimate <code class="reqn">D_1</code>, the algorithm looks for the scaling 
+behaviour of the the average radius that contains a given portion 
+(a "fixed-mass") of the total points in the phase space. By performing
+a linear regression of <code class="reqn">\log(p)\;Vs.\;\log(&lt;r&gt;)</code> (being
+<code class="reqn">p</code> the fixed-mass of the total points), an estimate of <code class="reqn">D_1</code> is
+obtained. 
+</p>
+<p>The algorithm also introduces a variation of <code class="reqn">p</code> for achieving a better 
+performance: for small values of <code class="reqn">p</code>, all the points in the time 
+series (<code class="reqn">N</code>) are considered for obtaining <code class="reqn">p=n/N</code>. Above a maximum 
+number of neighbours <code class="reqn">kMax</code>, the algorithm obtains <code class="reqn">p</code> by decreasing 
+the number of points considerd  from the time series  <code class="reqn">M&lt;N</code>. 
+Thus <code class="reqn">p = kMax/M</code>.
+</p>
+<p>Even with these improvements, the calculations for the information 
+dimension are heavier than those needed for the correlation dimension.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <em>infDim</em> object that consist of a list with two components: 
+<em>log.radius</em> and <em>fixed.mass</em>. <em>log.radius</em> contains
+the average log10(radius) in which the <em>fixed.mass</em> can be found.
+</p>
+<p>The <em>fixedMass</em> function returns the fixed mass vector used
+in the information dimension algorithm.
+</p>
+<p>The <em>logRadius</em> function returns the average log(radius) 
+computed on the information dimension algorithm.
+</p>
+<p>The <em>embeddingDims</em> function returns the 
+embeddings in which the information dimension was computed
+</p>
+<p>The 'estimate' function estimates the information dimension of the 
+'infDim' object by by averaging the slopes of the
+embedding dimensions specified in the <em>use.embeddings</em> parameter. The
+slopes are determined  by performing a linear regression
+over the fixed mass' range specified in 'regression.range'. If do.plot is 
+TRUE, a graphic of the regression over the data is shown.
+</p>
+<p>The 'plot' function plots the computations performed for the 
+information dimension estimate:  a graphic of &lt;log10(radius)&gt; Vs fixed mass.
+Additionally, the inverse of the local scaling exponents can be plotted.
+</p>
+<p>The <em>plotLocalScalingExp</em> function plots the inverse of the 
+local scaling exponentes of the information dimension 
+(for reasons of numerical stability).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Constantino A. Garcia
+</p>
+
+
+<h3>References</h3>
+
+<p>H. Kantz  and T. Schreiber: Nonlinear Time series Analysis 
+(Cambridge university press)
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>corrDim</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+x=henon(n.sample=  3000,n.transient= 100, a = 1.4, b = 0.3, 
+        start =  c(0.8253681, 0.6955566), do.plot = FALSE)$x
+
+leps = infDim(x,min.embedding.dim=2,max.embedding.dim = 5,
+              time.lag=1, min.fixed.mass=0.04, max.fixed.mass=0.2,
+              number.fixed.mass.points=100, radius =0.001, 
+              increasing.radius.factor = sqrt(2), number.boxes=100, 
+              number.reference.vectors=100, theiler.window = 10, 
+              kMax = 100,do.plot=FALSE)
+
+plot(leps,type="l")
+colors2=c("#999999", "#E69F00", "#56B4E9", "#009E73", 
+          "#F0E442", "#0072B2", "#D55E00")
+id.estimation = estimate(leps,do.plot=TRUE,use.embeddings = 3:5,
+                         fit.lwd=2,fit.col=1,
+                         col=colors2)
+cat("Henon---&gt; expected: 1.24    predicted: ", id.estimation ,"\n")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

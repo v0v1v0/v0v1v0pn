@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nbResults</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Dataset with results of <code>nbProbabilities</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>A ordered dataset created from <code>pairData</code> of the outbreak of 100 individuals 
+including the relative transmission probabilities for each pair estimated using the function
+<code>nbProbabilities</code>. The code to recreate this dataset from <code>pairData</code> 
+is shown below.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nbResults
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 9900 rows and 24 variables:
+</p>
+
+<dl>
+<dt>pairID</dt>
+<dd>
+<p>A pair-level ID variable (the individual IDs separated by an '_').</p>
+</dd>
+<dt>label</dt>
+<dd>
+<p>The label for the run, here "SNPs".</p>
+</dd>
+<dt>pAvg</dt>
+<dd>
+<p>The mean transmission probability for the pair over all runs.</p>
+</dd>
+<dt>pSD</dt>
+<dd>
+<p>The standard deviation of the transmission probability for the pair over all runs.</p>
+</dd>
+<dt>pScaled</dt>
+<dd>
+<p>The mean relative transmission probability for the pair over
+all runs: pAvg scaled so that the probabilities for all infectors per infectee add to 1.</p>
+</dd>
+<dt>pRank</dt>
+<dd>
+<p>The rank of the probability of the the pair out of all pairs for that
+infectee (in case of ties all values have the minimum rank of the group).</p>
+</dd>
+<dt>nSamples</dt>
+<dd>
+<p>The number of probability estimates that contributed to pAvg. This
+represents the number of prediction datasets this pair was included in over the 10x1
+cross prediction repeated 50 times.</p>
+</dd>
+<dt>individualID.1</dt>
+<dd>
+<p>The ID of the potential "infector".</p>
+</dd>
+<dt>individualID.2</dt>
+<dd>
+<p>The ID of the potential "infectee".</p>
+</dd>
+<dt>transmission</dt>
+<dd>
+<p>Did individual.1 truly infect individual.2?</p>
+</dd>
+<dt>snpDist</dt>
+<dd>
+<p>The number of SNPs between the individuals.</p>
+</dd>
+<dt>infectionDate.1</dt>
+<dd>
+<p>The date and time of infection of individualID.1.</p>
+</dd>
+<dt>infectionDate.2</dt>
+<dd>
+<p>The date and time of infection of individualID.2.</p>
+</dd>
+<dt>sampleDate.1</dt>
+<dd>
+<p>The date and time of sampling of individualID.1.</p>
+</dd>
+<dt>sampleDate.2</dt>
+<dd>
+<p>The date and time of sampling of individualID.2.</p>
+</dd>
+<dt>sampleDiff</dt>
+<dd>
+<p>The number of days between sampleDate.1 and sampleDate.2.</p>
+</dd>
+<dt>infectionDiff</dt>
+<dd>
+<p>The number of days between infectionDate.1 and infectionDate.2.</p>
+</dd>
+<dt>infectionDiffY</dt>
+<dd>
+<p>The number of years between infectionDate.1 and infectionDate.2.</p>
+</dd>
+<dt>timeCat</dt>
+<dd>
+<p>A categorical representation of infectionDiff: &lt;1y, 1-2y, 2-3y, 3-4y, 4-5y, &gt;5y.</p>
+</dd>
+<dt>Z1</dt>
+<dd>
+<p>Pair-level covariate derived from X1: 1 if match, 0 if not match.</p>
+</dd>
+<dt>Z2</dt>
+<dd>
+<p>Pair-level covariate derived from X2: 1 if match, 0 if not match.</p>
+</dd>
+<dt>Z3</dt>
+<dd>
+<p>Pair-level covariate derived from X3: 1 if a-a, 2 if b-b, 3 if a-b, 4 if b-a.</p>
+</dd>
+<dt>Z4</dt>
+<dd>
+<p>Pair-level covariate derived from X4: 1 if match, 2 if adjacent, 2 otherwise.</p>
+</dd>
+<dt>snpClose</dt>
+<dd>
+<p>Logical value indicating if a pair is a probable link. 
+TRUE if the pair has fewer than 3 SNPs, FALSE if the pair has more than 12 SNPs, NA otherwise</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# ## NOT RUN ##
+# ## This is the code used to create this dataset ##
+# orderedPair &lt;- pairData[pairData$infectionDiff &gt; 0, ]
+# orderedPair$snpClose &lt;- ifelse(orderedPair$snpDist &lt; 3, TRUE,
+#                         ifelse(orderedPair$snpDist &gt; 12, FALSE, NA))
+# set.seed(0)
+# covariates = c("Z1", "Z2", "Z3", "Z4", "timeCat")
+# resGen &lt;- nbProbabilities(orderedPair = orderedPair,
+#                             indIDVar = "individualID",
+#                             pairIDVar = "pairID",
+#                             goldStdVar = "snpClose",
+#                             covariates = covariates,
+#                             label = "SNPs", l = 1,
+#                             n = 10, m = 1, nReps = 50)
+# nbResults &lt;- merge(resGen[[1]], orderedPair, by = "pairID", all = TRUE)
+</code></pre>
+
+
+</div>

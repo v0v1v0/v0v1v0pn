@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>da.norm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Data augmentation for incomplete multivariate normal data
+</h2>
+
+<h3>Description</h3>
+
+<p>Data augmentation under a normal-inverted Wishart prior. If no prior
+is specified by the user, the usual "noninformative" prior for the
+multivariate normal distribution is used. This function simulates one
+or more iterations of a single Markov chain. Each iteration consists
+of a random imputation of the missing data given the observed data and
+the current parameter value (I-step), followed by a draw from the
+posterior distribution of the parameter given the observed data and
+the imputed data (P-step).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">da.norm(s, start, prior, steps=1, showits=FALSE, return.ymis=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+
+<p>summary list of an incomplete normal data matrix produced by the
+function <code>prelim.norm</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+
+<p>starting value of the parameter.  This is a parameter vector in packed
+storage, such as one created by the function <code>makeparam.norm</code>. One
+obvious choice for a starting value is an ML estimate or posterior
+mode produced by <code>em.norm.</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+
+<p>optional prior distribution. This is a list containing the
+hyperparameters of a normal-inverted Wishart distribution. In order,
+the elements of the list are: tau (a scalar), m (a scalar), mu0 (a
+vector of length <code>ncol(x)</code>, where <code>x</code> is the original matrix of
+incomplete data), and lambdainv (a matrix of dimension
+<code>c(ncol(x),ncol(x))</code>). The elements of mu0 and lambdainv apply to the
+data after transformation, i.e. after the columns have been centered
+and scaled to have mean zero and variance one. If no prior is
+supplied, the default is the usual noninformative prior for a
+multivariate normal model: tau=0, m=-1, mu0=arbitrary, and lambdainv =
+matrix of zeros.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>steps</code></td>
+<td>
+
+<p>number of data augmentation iterations to be simulated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>showits</code></td>
+<td>
+
+<p>if <code>TRUE</code>, reports the iterations so the user can monitor the progress
+of the algorithm.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.ymis</code></td>
+<td>
+
+<p>if <code>TRUE</code>, returns the output of the last I-step (imputed values of
+missing data) in addition to the output of the last P-step. These
+imputed values are useful for forming Rao-Blackwellized estimates of
+posterior summaries.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>if <code>return.ymis=FALSE</code>, returns a parameter vector, the result of the last
+P-step. If the value of <code>steps</code> was large enough to guarantee
+approximate stationarity, then this parameter can be regarded as a
+proper draw from the observed-data posterior, independent of <code>start</code>.
+If <code>return.ymis=TRUE</code>, then this function returns a list of the following
+two components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>parameter</code></td>
+<td>
+
+<p>a parameter vector, the result of the last P-step
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ymis</code></td>
+<td>
+
+<p>a vector of missing values, the result of the last I-step.  The length
+of this vector is <code>sum(is.na(x))</code>, where x is the original data
+matrix. The storage order is the same as that of <code>x[is.na(x)]</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>WARNING</h3>
+
+<p>Before this function may be used, the random number generator seed
+must be initialized with <code>rngseed</code> at least once in the current S
+session.
+</p>
+
+
+<h3>References</h3>
+
+<p>See Chapter 5 of Schafer (1996).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rngseed</code>, <code>em.norm</code>, <code>prelim.norm</code>, and <code>getparam.norm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(mdata)
+s  &lt;-  prelim.norm(mdata)
+thetahat &lt;- em.norm(s)   #find the MLE for a starting value
+rngseed(1234567)   #set random number generator seed
+theta &lt;- da.norm(s,thetahat,steps=20,showits=TRUE)  # take 20 steps
+getparam.norm(s,theta) # look at result
+</code></pre>
+
+
+</div>

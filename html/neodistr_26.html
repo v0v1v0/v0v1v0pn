@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stanf_msnburr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Stan function of MSNBurr Distribution</h2>
+
+<h3>Description</h3>
+
+<p>Stan code of MSNBurr distribution for custom distribution in stan
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stanf_msnburr(vectorize = TRUE, rng = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>vectorize</code></td>
+<td>
+<p>logical; if TRUE, Vectorize Stan code of MSNBurr distribution are given 
+The default value of this parameter is TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rng</code></td>
+<td>
+<p>logical; if TRUE,  Stan code of quantile and 
+random number generation of MSNBurr distribution are given 
+The default value of this parameter is TRUE</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>MSNBurr Distribution has density:
+</p>
+<p style="text-align: center;"><code class="reqn">f(y |\mu,\sigma,\alpha)=\frac{\omega}{\sigma}\exp{\left(-\omega{\left(\frac{y-\mu}{\sigma}\right)}\right)}{{\left(1+\frac{\exp{\left(-\omega{(\frac{y-\mu}{\sigma})}\right)}}{\alpha}\right)}^{-(\alpha+1)}}</code>
+</p>
+
+<p>where <code class="reqn">-\infty &lt; y &lt; \infty, -\infty &lt; \mu&lt; \infty, \sigma&gt;0, \alpha&gt;0, 
+\omega = \frac{1}{\sqrt{2\pi}} {\left(1+\frac{1}{\alpha}\right)^{\alpha+1}}</code>
+</p>
+<p>This function gives stan code  of log density, cumulative distribution, log of cumulatif distribution, log complementary cumulative distribution, quantile, random number of MSNBurr distribution
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>msnburr_lpdf</code> gives the log of density, <code>msnburr_cdf</code> gives the distribution
+function, <code>msnburr_lcdf</code> gives the log of distribution function, <code>msnburr_lccdf</code> gives the complement of log ditribution function (1-msnburr_lcdf),
+and <code>msnburr_rng</code> generates
+random deviates.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Achmad Syahrul Choir and Nur Iriawan
+</p>
+
+
+<h3>References</h3>
+
+<p>Iriawan, N. (2000). Computationally Intensive Approaches to Inference in Neo-Normal Linear Models. Curtin University of Technology.
+Choir, A. S. (2020). The New Neo-Normal DDistributions and their Properties. Disertation. Institut Teknologi Sepuluh Nopember.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library (neodistr)
+library(rstan)
+#inputting data
+set.seed(136)
+dt &lt;- neodistr::rmsnburr(100,0,1,0.5) # random generating MSNBurr data 
+dataf &lt;- list(
+  n = 100,
+  y = dt
+)
+#### not vector  
+##Calling the function of the neo-normal distribution that is available in the package.
+func_code&lt;-paste(c("functions{",neodistr::stanf_msnburr(vectorize=FALSE),"}"),collapse="\n")
+#define stan model code
+model&lt;-"
+ data {
+ int&lt;lower=1&gt; n;
+ vector[n] y;
+ }
+ parameters {
+ real mu;
+ real &lt;lower=0&gt; sigma;
+ real &lt;lower=0&gt; alpha;
+ 
+ }
+ model {
+ for(i in 1:n){
+ y[i]~msnburr(mu,sigma,alpha);
+ }
+ mu~cauchy(0,1);
+ sigma~cauchy(0,2.5);
+ alpha~cauchy(0,1);
+ }
+  "
+#merge stan model code and selected neo-normal stan function
+fit_code&lt;-paste(c(func_code,model,"\n"),collapse="\n") 
+
+# Create the model using stan function
+fit1 &lt;- stan(
+  model_code = fit_code,  # Stan program
+  data = dataf,    # named list of data
+  chains = 2,             # number of Markov chains
+  #warmup = 5000,          # number of warmup iterations per chain
+  iter = 10000,           # total number of iterations per chain
+  cores = 2              # number of cores (could use one per chain)
+)
+
+# Showing the estimation results of the parameters that were executed using the Stan file
+print(fit1, pars=c("mu", "sigma", "alpha", "lp__"), probs=c(.025,.5,.975))
+
+
+# Vector
+##Calling the function of the neo-normal distribution that is available in the package.
+func_code_vector&lt;-paste(c("functions{",neodistr::stanf_msnburr(vectorize=TRUE),"}"),collapse="\n")
+# define stan model as vector
+model_vector&lt;-"
+data {
+  int&lt;lower=1&gt; n;
+  vector[n] y;
+}
+parameters {
+  real mu;
+  real &lt;lower=0&gt; sigma;
+  real &lt;lower=0&gt; alpha;
+}
+model {
+  y~msnburr(rep_vector(mu,n),sigma,alpha);
+  mu~cauchy(0,1);
+  sigma~cauchy(0,2.5);
+  alpha~cauchy(0,1);
+}
+"
+#merge stan model code and selected neo-normal stan function
+fit_code_vector&lt;-paste(c(func_code_vector,model_vector,"\n"),collapse="\n")
+
+# Create the model using stan function
+fit2 &lt;- stan(
+  model_code = fit_code_vector,  # Stan program
+  data = dataf,    # named list of data
+  chains = 2,             # number of Markov chains
+  #warmup = 5000,          # number of warmup iterations per chain
+  iter = 10000,           # total number of iterations per chain
+  cores = 2             # number of cores (could use one per chain)
+)
+
+# Showing the estimation results of the parameters that were executed using the Stan file
+print(fit2, pars=c("mu", "sigma", "alpha",  "lp__"), probs=c(.025,.5,.975))
+
+
+</code></pre>
+
+
+</div>

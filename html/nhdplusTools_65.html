@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>navigate_nldi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Navigate NLDI</h2>
+
+<h3>Description</h3>
+
+<p>Navigate the Network Linked Data Index network.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">navigate_nldi(
+  nldi_feature,
+  mode = "upstreamMain",
+  data_source = "flowlines",
+  distance_km = 10
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nldi_feature</code></td>
+<td>
+<p>list with names 'featureSource' and 'featureID' where
+'featureSource' is derived from the "source" column of  the response of
+get_nldi_sources and the 'featureID' is a known identifier
+from the specified 'featureSource'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>character chosen from ("UM", "UT", DM", "DD"). See examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_source</code></td>
+<td>
+<p>character chosen from "source" column of the response
+of get_nldi_sources or empty string for flowline geometry.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distance_km</code></td>
+<td>
+<p>numeric distance in km to stop navigating.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>sf data.frame with result
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(sf)
+library(dplyr)
+
+nldi_nwis &lt;- list(featureSource = "nwissite", featureID = "USGS-05428500")
+
+navigate_nldi(nldi_feature = nldi_nwis,
+              mode = "upstreamTributaries")$UT %&gt;%
+  st_geometry() %&gt;%
+  plot()
+
+navigate_nldi(nldi_feature = nldi_nwis,
+              mode = "UM")$UM %&gt;%
+  st_geometry() %&gt;%
+  plot(col = "blue", add = TRUE)
+
+
+
+nwissite &lt;- navigate_nldi(nldi_feature = nldi_nwis,
+                          mode = "UT",
+                          data_source = "nwissite")$UT_nwissite
+
+st_geometry(nwissite) %&gt;%
+  plot(col = "green", add = TRUE)
+
+nwissite
+
+
+</code></pre>
+
+
+</div>

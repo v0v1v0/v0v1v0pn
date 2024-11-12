@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>quantifier</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>quantifier</h2>
+
+<h3>Description</h3>
+
+<p>Create a <code>group</code> with a quantifier.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">quantifier(...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Pattern(s) to be enclosed in a <code>group</code>, and a quantifier (last
+argument). A quantifier is character string: "?" for zero or one,
+"*?"  for non-greedy zero or more, "+" for greedy one or more,
+etc.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A pattern list.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre]</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## No need to use nc::quantifier when the pattern to be quantified
+## is just a string literal.
+digits &lt;- "[0-9]+"
+
+## nc::quantifier is useful when there is a sequence of patterns to
+## be quantified, here an optional group with a dash (not captured)
+## followed by some digits (captured in the chromEnd group).
+str(optional.end &lt;- nc::quantifier("-", chromEnd=digits, "?"))
+str(optional.end &lt;- list(list("-", chromEnd=digits), "?"))#same
+
+## Use it as a sub-pattern for capturing genomic coordinates.
+chr.pos.vec &lt;- c(
+  "chr10:213054000-213055000",
+  "chrM:111000",
+  "chr1:110-111 chr2:220-222") # two possible matches.
+nc::capture_first_vec(
+  chr.pos.vec,
+  chrom="chr.*?",
+  ":",
+  chromStart=digits,
+  optional.end)
+
+## Another example which uses quantifier twice, for extracting code
+## chunks from Rmd files.
+vignette.Rmd &lt;- system.file(
+  "extdata", "vignette.Rmd", package="nc")
+non.greedy.lines &lt;- nc::quantifier(".*\n", "*?")
+optional.name &lt;- nc::quantifier(" ", name="[^,}]+", "?")
+Rmd.dt &lt;- nc::capture_all_str(
+  vignette.Rmd,
+  before=non.greedy.lines,
+  "```\\{r",
+  optional.name,
+  parameters=".*",
+  "\\}\n",
+  code=non.greedy.lines,
+  "```")
+Rmd.dt[, chunk := 1:.N]
+Rmd.dt[, .(chunk, name, parameters, some.code=substr(code, 1, 20))]
+
+</code></pre>
+
+
+</div>

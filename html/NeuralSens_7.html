@@ -1,0 +1,76 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ComputeHessMeasures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot sensitivities of a neural network model</h2>
+
+<h3>Description</h3>
+
+<p>Function to plot the sensitivities created by <code>SensAnalysisMLP</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ComputeHessMeasures(sens)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>sens</code></td>
+<td>
+<p><code>SensAnalysisMLP</code> object created by <code>SensAnalysisMLP</code>.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p><code>SensAnalysisMLP</code> object with the sensitivities calculated
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load data -------------------------------------------------------------------
+data("DAILY_DEMAND_TR")
+fdata &lt;- DAILY_DEMAND_TR
+
+## Parameters of the NNET ------------------------------------------------------
+hidden_neurons &lt;- 5
+iters &lt;- 250
+decay &lt;- 0.1
+
+################################################################################
+#########################  REGRESSION NNET #####################################
+################################################################################
+## Regression dataframe --------------------------------------------------------
+# Scale the data
+fdata.Reg.tr &lt;- fdata[,2:ncol(fdata)]
+fdata.Reg.tr[,3] &lt;- fdata.Reg.tr[,3]/10
+fdata.Reg.tr[,1] &lt;- fdata.Reg.tr[,1]/1000
+
+# Normalize the data for some models
+preProc &lt;- caret::preProcess(fdata.Reg.tr, method = c("center","scale"))
+nntrData &lt;- predict(preProc, fdata.Reg.tr)
+
+#' ## TRAIN nnet NNET --------------------------------------------------------
+# Create a formula to train NNET
+form &lt;- paste(names(fdata.Reg.tr)[2:ncol(fdata.Reg.tr)], collapse = " + ")
+form &lt;- formula(paste(names(fdata.Reg.tr)[1], form, sep = " ~ "))
+
+set.seed(150)
+nnetmod &lt;- nnet::nnet(form,
+                           data = nntrData,
+                           linear.output = TRUE,
+                           size = hidden_neurons,
+                           decay = decay,
+                           maxit = iters)
+# Try SensAnalysisMLP
+sens &lt;- NeuralSens::SensAnalysisMLP(nnetmod, trData = nntrData, plot = FALSE)
+</code></pre>
+
+
+</div>

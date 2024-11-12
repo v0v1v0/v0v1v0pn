@@ -1,0 +1,182 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_sites</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>get_sites</h2>
+
+<h3>Description</h3>
+
+<p>The get_sites() function is a wrapper for the Neotoma <code>sites</code> API
+endpoint.
+The function takes parameters defined by the user and returns a list
+of site information supplied by the Neotoma Paleoecological Database.
+The user may define all or none of the possible fields.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_sites(x = NA, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Use a single integer or vector of integers representing
+unique Neotoma site identifiers (siteids) to extract site information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>accepted arguments, see details for more information.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A <code>site</code> object in Neotoma is a physical location at which one or more
+collection units are located. Each collection unit may have one or more
+datasets within it, defined by the dataset type. The <code>get_sites()</code>
+function searches for each site within Neotoma that matches the query
+parameters, and returns them as a <code>sites</code> object, a list of <code>site</code>
+objects. The <code>get_sites()</code> command wraps the Neotoma API
+(<a href="https://api.neotomadb.org">api.neotomadb.org</a>) call for <code>sites</code>.
+The call itself uses a SQL query which accepts any one of the following
+parameters:
+</p>
+
+<ul>
+<li> <p><code>siteid</code>  The unique site ID (integer) in Neotoma. Can be passed as a
+vector of site IDs.
+</p>
+</li>
+<li> <p><code>sitename</code>  The site name, or approximate match using the % wildcard.
+</p>
+</li>
+<li> <p><code>database</code>  The constituent database for the record. See <code>get_table("constituentdatabases")</code>
+</p>
+</li>
+<li> <p><code>altmin</code>  The minimum altitude range for site elevation (in meters).
+</p>
+</li>
+<li> <p><code>altmax</code>  The maximum altitude range for site elevation (in meters).
+</p>
+</li>
+<li> <p><code>datasetid</code>  The unique dataset ID (integer) in Neotoma. Can be passed
+as a vector of dataset IDs.
+</p>
+</li>
+<li> <p><code>datasettype</code>  Neotoma contains data for a number of datasettypes.
+This returns a subset of data types. For a complete list of available
+datasettypes, run <code>neotoma2::get_table('datasettypes')</code>
+</p>
+</li>
+<li> <p><code>doi</code>  The dataset DOI for a dataset contained within a site. Can be
+passed as a vector of DOIs.
+</p>
+</li>
+<li> <p><code>gpid</code>  The geopolitical name or identifier containing a site. Can be
+passed as a vector of names.
+</p>
+</li>
+<li> <p><code>keywords</code>  Keywords for samples within a set of sites. For example
+"modern" indicates a sample within the record uses the keyword "modern".
+</p>
+</li>
+<li> <p><code>contacts</code>  Contact names or IDs associated with a site.
+</p>
+</li>
+<li> <p><code>ageyoung</code>  A minimum spanning age for the record, in years before
+radiocarbon present (1950).
+</p>
+</li>
+<li> <p><code>ageold</code>  A maximum spanning age for the record, in years before
+radiocarbon present (1950).
+</p>
+</li>
+<li> <p><code>ageof</code>  An age which must be contained within the range of sample ages
+for a site.
+</p>
+</li>
+<li> <p><code>taxa</code>  The names of taxa which must be present within samples in a
+record.
+</p>
+</li>
+<li> <p><code>all_data</code>  The API only downloads the first 25 records of the query.
+For the complete records, use <code>all_data=TRUE</code>
+This call will then return a data object that contains site metadata for one
+or more sites, along with limited metadata describing the collection units
+and datasets located at that site.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>The function returns either a single item of class <code>"try-error"</code>
+describing the reason for failure (either misdefined parameters or an error
+from the Neotoma API), or a table of sites, with rows corresponding to the
+number of individual sites returned by the Neotoma API.
+Each "site" object contains 6 parameters that can be accessed as well:
+siteid, sitename, location, altitude, description,
+limited collection units information.
+</p>
+
+<ul>
+<li> <p><code>loc</code> An <code>sf</code> object that describes site's location.
+</p>
+</li>
+<li> <p><code>description</code>
+</p>
+</li>
+<li> <p><code>collunits</code> limited information on collunits
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Socorro Dominguez <a href="mailto:s.dominguez@ht-data.com">s.dominguez@ht-data.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Find all sites with a min altitude of 12m and a max altitude of 25m
+## By default returns only 25 sites (default limit is 25):
+sites_12to25 &lt;- get_sites(altmin=12, altmax=25)
+## Return all sites, using a minimum altitude of 2500m (returns &gt;500 sites):
+sites_2500 &lt;- get_sites(altmin=2500, all_data = TRUE)
+## To find all sites that contain the string "Alex%"
+alex_sites &lt;- get_sites(sitename="Alex%")
+## To find sites in Brazil (again with default 25 records)
+brazil &lt;- '{"type": "Polygon",
+"coordinates": [[
+ [-73.125, -9.102096738726443],
+ [-56.953125,-33.137551192346145],
+ [-36.5625,-7.710991655433217],
+ [-68.203125,13.923403897723347],
+ [-73.125,-9.102096738726443]]]}'
+brazil_sites &lt;- get_sites(loc = brazil[1])
+
+# Finding all sites with Liliaceae pollen in 1000 year bins:
+lilysites &lt;- c()
+for (i in seq(0, 10000, by = 1000)) {
+  lily &lt;- get_sites(taxa=c("Liliaceae"),
+                    ageyoung = i - 500,
+                    ageold = i + 500,
+                    all_data = TRUE)
+  lilysites &lt;- c(lilysites, length(lily))
+}
+plot(x = seq(0, 10000, by = 1000), y = lilysites, type = 'b')
+
+</code></pre>
+
+
+</div>

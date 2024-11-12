@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>run.simulation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Run a direct N-body simulation</h2>
+
+<h3>Description</h3>
+
+<p>Run direct N-body simulations using an adaptive block timestep.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">run.simulation(sim, measure.time = TRUE, verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sim</code></td>
+<td>
+<p>structured list of simulation settings, which must contain the following sublists:<br><br></p>
+<p><code>ics</code> is the sublist of initial conditions. It must contain the items:<br><code>m</code> = N-vector with the masses of the N particles. Negative mass values are considered as positive masses belonging to a background field, which is not subject to any forces. Therefore particles with negative mass will have a normal effect on particles with positive masses, but they will not, themselves, be accelerated by any other particle.<br><code>x</code> = N-by-3 matrix specifying the initial position in Cartesian coordinates<br><code>v</code> = N-by-3 matrix specifying the initial velocities<br></p>
+<p><code>para</code> is an optional sublist of optional simulation parameters. It contains the items:<br><code>t.max</code> = final simulation time in simulation units (see details). If not given, a characteristic time is computed as <code>t.max = 2*pi*sqrt(R^3/GM)</code>, where <code>R</code> is the RMS radius and <code>M</code> is the total mass.<br><code>dt.max</code> = maximum time step. If not given, no maximum time step is imposed, meaning that the maximum time step is either equal to <code>dt.out</code> or the adaptive time step, whichever is smaller.<br><code>dt.min</code> = minimum time step used, unless a smaller time step is required to save an output or to land precisely on the final time <code>t.max</code>.
+<code>dt.out</code> = output time step, i.e. time step between successive snapshots in the <code>output</code> sublist returned by <code>run.simulation</code>. If not given, <code>dt.max=t.max/100</code> is assumed.<br><code>eta</code> = accuracy parameter of adaptive time step. Smaller values lead to proportionally smaller adaptive time steps. Typical values range between 0.001 and 0.1. If not given, a default value of 0.01 is assumed. To use fixed time steps, set <code>eta=1e99</code> and set a time step <code>dt.max</code>.<br><code>integrator</code> = character string specifying the integrator to be used. Currently implemented integrators are 'euler' (1st order), 'leapfrog' (2nd order), 'yoshida' (4th order), 'yoshida6' (6th order). If not given, 'leapfrog' is the default integrator.<br><code>rsmooth</code> = optional smoothing radius. If not given, no smoothing is assumed.<br><code>afield</code> = a function(x,t) of positions <code>x</code> (N-by-3 matrix) and time <code>t</code> (scalar), specifying the external acceleration field. It must return an N-by-3 matrix. If not given, no external field is assumed. If the external code "nbodyx" is used, then afield should be a vector of the parameters p1, p2, ... for the external acceleration field of "nbodyx".<br><code>G</code> = gravitational constant in simulation units (see details). If not given, the measured value in SI units is used.<br><code>box.size</code> = scalar&gt;=0. If 0, open boundary conditions are adopted. If &gt;0, the simulation is run in a cubic box of side length box.size with periodic boundary conditions. In this case, the cubic box is contained in the interval [0,box.size) in all three Cartesian coordinates, and all initial positions must be contained in this interval. For periodic boundary conditions, the force between any two particles is always calculated along their shortest separation, which may cross 0-3 boundaries. The exception is GADGET-4, which also evaluates the forces from the periodic repetitions.<br><code>include.bg</code> = logical argument. If FALSE (default), only foreground particles, i.e. particles with masses &gt;=0, are contained in the output vectors <code>x</code> and <code>v</code>. If TRUE, all particles are included.<br></p>
+<p><code>code</code> is an optional sublist to force the use of an external simulation code (see details). It contains the items:<br><code>name</code> = character string specifying the name of the code, currently available options are "R" (default), "nbodyx" (a simple, but fast N-body simulator in Fortran) and "gadget4" (a powerful N-body+SPH simulator, not very adequate for small direct N-body simulations).<br><code>file</code> = character string specifying the path+filename of the external compiled simulation code.<br><code>interface</code> = optional character string specifying a temporary working path used as interface with external codes. NOTE: All existing files in this directory are deleted! If not given, the current working directory is used by default.<br><code>kind</code> = optional number of bytes per floating-point number used in nbodyx output files (has no bearing on computation accuracy)<br><code>gadget.np</code> = number of processors used with GADGET-4 (defaults to 1, which is normally best for small direct N-body runs)<br></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>measure.time</code></td>
+<td>
+<p>logical flag that determines whether time computation time will be measured and displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical flag indicating whether to show console outputs from external codes. Ignored when using the in-built simulator.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>UNITS: The initial conditions (in the sublist <code>ics</code>) can be provided in any units. The units of mass, length and velocity then fix the other units.
+For instance, [unit of time in seconds] = [unit of length in meters] / [unit of velocity in m/s]. E.g., if initial positions are given in units of 1AU=1.49598e11m and velocities in units of 1km/s, one unit of time is 1.49598e8s=4.74yrs.
+Likewise, units of the gravitational constant <code>G</code> are given via [unit of G in m^3*kg^(-1)*s^(-2)] = [unit of length in meters] * [unit of velocity in m/s]^2 / [unit of mass in kg]. E.g., for length units of 1AU=1.49598e11m, velocity units of 1km/s=1e3m/s and mass units of 1Msun=1.98847e30kg, a unit of G is
+7.523272e-14 m^3*kg^(-1)*s^(-2). In these units the true value of G is about 887.154.<br><br></p>
+<p>NBODYX simulator:<br>
+Can be downloaded from github via<br><code>git clone https://github.com/obreschkow/nbodyx</code><br>
+Details on installing, compiling and running the code are given in the README file.<br>
+Note: To run very high-accuracy simulations, such as the Pythagorean three-body problem, you can use 128-bit floating-point numbers by compiling the code as<br><code>make kind=16</code><br><br></p>
+<p>GADGET-4 simulator:<br>
+This his a very powerful N-body+SPH simulator used primarily for large astrophysical simulations. GADGET-4 is not particularly suitable for small direct N-body problems, but it can nonetheless be used for such simulations for the sake of comparison, at least if not too much accuracy is needed and if a massively increased computational overhead is acceptable.
+Please refer to https://wwwmpa.mpa-garching.mpg.de/gadget4 for details on how to download and compile the code. In order to use GADGET-4 with this R-package, it must be compiled with the following compile-time options (in the file Config.sh):<br><code>NTYPES=2</code><br><code>GADGET2_HEADER</code><br><code>SELFGRAVITY</code><br><code>ALLOW_DIRECT_SUMMATION</code><br><code>HIERARCHICAL_GRAVITY</code><br><code>DOUBLEPRECISION=1</code><br><code>ENLARGE_DYNAMIC_RANGE_IN_TIME</code><br>
+If and only if periodic boundary conditions are used, you also need to add the option<br><code>PERIODIC</code><br>
+If you plan to often switch between runs with open and periodic boundaries, it may be advisable to compile two versions of GADGET-4, with and without this option. To do so, one needs to create two sub-directories with the respective Config.sh files and compile them via<br><code>make -j [number of cores] DIR=[path containing Config.sh with PERIODIC]</code><br><code>make -j [number of cores] DIR=[path containing Config.sh without PERIODIC]</code><br>
+The runtime parameter file (param.txt) needed by GADGET-4 is written automatically when calling <code>run.simulation</code>. The gravitational softening length in GADGET-4 is computed as sim$para$rsmooth/2.8, which ensures that the particles behave like point masses at separations beyond sim$para$rsmooth. If rsmooth is not provided, it is computed as <code>stats::sd(apply(sim$ics$x,2,sd))*1e-5</code>. The accuracy parameter ErrTolIntAccuracy is set equal to sim$para$eta/sim$para$rsmooth*1e-3, which gives roughly comparable accuracy to in-built simulator for the Leapfrog integrator.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The routine returns the structured list of the input argument, with one sublist <code>output</code> added. This sublist contains the items:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>k-vector with the simulation times of the k snapshots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>k-by-N-by-3 array giving the 3D coordinates of the N particles in k snapshots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>k-by-N-by-3 array giving the 3D velocities of the N particles in k snapshots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.snapshots</code></td>
+<td>
+<p>total number of snapshots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.iterations</code></td>
+<td>
+<p>total number of iterations used to run the simulation.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Danail Obreschkow
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">sim = setup.halley()
+sim = run.simulation(sim)
+AU = 149597870700 # Astronomical unit in meters
+plot(sim, units=AU, xlim=c(-20,60), ylim=c(-40,40), xlab='[AU]', ylab='[AU]')
+cat(sprintf('This simulation was run with %d iterations.\n',sim$output$n.iterations))
+
+</code></pre>
+
+
+</div>

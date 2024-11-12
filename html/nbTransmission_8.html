@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>indToPair</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transforms a dataset of individuals to a dataset of pairs</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>indToPair</code> takes a dataset of observations (such as individuals in an infectious
+disease outbreak) and transforms it into a dataset of pairs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">indToPair(
+  indData,
+  indIDVar,
+  separator = "_",
+  dateVar = NULL,
+  units = c("mins", "hours", "days", "weeks"),
+  ordered = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>indData</code></td>
+<td>
+<p>An individual-level dataframe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indIDVar</code></td>
+<td>
+<p>The name (in quotes) of the column with the individual ID.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>separator</code></td>
+<td>
+<p>The character to be used to separate the individual IDs when creating
+the pairID.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dateVar</code></td>
+<td>
+<p>The name (in quotes) of the column with the dates that the individuals are observed
+(optional unless <code>ordered = TRUE</code>). This column must be a date or date-time (POSIXt) object.
+If supplied, the time difference between individuals will be calculated in the units specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>units</code></td>
+<td>
+<p>The units for the time difference, only necessary if <code>dateVar</code> is supplied.
+Must be one of <code>"mins", "hours", "days", "weeks"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ordered</code></td>
+<td>
+<p>A logical indicating if a set of ordered pairs should be returned
+(<code>&lt;dateVar&gt;.1</code> before <code>&lt;dateVar&gt;.2</code> or <code>&lt;dateVar&gt;.1</code> = <code>&lt;dateVar&gt;.2</code>).
+If FALSE a dataframe of all pairs will be returned</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function requires an id column: <code>indIDVar</code> to identify the individual observations.
+The resulting pair-level dataframe will have a <code>pairID</code> column which combines the individual IDs
+for that pair.
+</p>
+<p>The function can either output all possible pairs (<code>ordered = FALSE</code>) or only ordered pairs 
+(<code>ordered = TRUE</code>) where the ordered is determined by a date variable (<code>dateVar</code>).
+If <code>orded = TRUE</code>, then <code>dateVar</code> must be provided and if <code>ordered = FALSE</code>,
+it is optional. In both cases, if <code>dateVar</code> is provided, the output will include the time
+difference between the individuals in the pair in the <code>units</code> specified ("mins", "hours", "days", "weeks").
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe of either all possible pairs of individuals (<code>ordered = FALSE</code>) or ordered
+pairs of individuals (<code>ordered = TRUE</code>). The dataframe will have all of the original variables
+with suffixes ".1" and ".2" corresponding to the original values of 
+<code>&lt;indIDVar&gt;.1</code> and <code>&lt;indIDVar&gt;.2</code>.
+</p>
+<p>Added to the dataframe will be a column called <code>pairID</code> which is <code>&lt;indIDVar&gt;.1</code>
+and <code>&lt;indIDVar&gt;.2</code> separated by <code>separator</code>.
+</p>
+<p>If dateVar is provided the dataframe will also include variables <code>&lt;dateVar&gt;.Diff</code> giving 
+the difference of time of <code>dateVar</code> for <code>&lt;indIDVar&gt;.1</code> and <code>&lt;indIDVar&gt;.2</code> 
+in the units specified
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Create a dataset of all pairs with no date variable
+pairU &lt;- indToPair(indData = indData, indIDVar = "individualID")
+
+## Create a dataset of all pairs with a date variable
+pairUD &lt;- indToPair(indData = indData, indIDVar = "individualID",
+                      dateVar = "infectionDate", units = "days")
+
+## Create a dataset of ordered pairs
+pairO &lt;- indToPair(indData = indData, indIDVar = "individualID",
+                     dateVar = "infectionDate", units = "days", ordered = TRUE)
+
+</code></pre>
+
+
+</div>

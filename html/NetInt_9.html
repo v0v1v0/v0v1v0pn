@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>WA.int</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Weighted Average (WA) network integration</h2>
+
+<h3>Description</h3>
+
+<p>It performs the WA integration between networks.
+</p>
+<p>Note that this function puts more weight (alpha parameter) for networks with
+associated larger M. The alphas are computed by averaging across the alpha
+of each class, and hence a unique integrated network is available for all the
+considered classes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">WA.int(M, logint = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>a numeric matrix with the values of the metric used to compute the alpha
+coefficients for each class and for each network.
+Rows correspond to networks and columns to classes. Element (i,j) of the
+matrix corresponds to the value of the metric (e.g. AUC) for the ith
+network and the jth class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logint</code></td>
+<td>
+<p>logic. If TRUE the mean values m are log transformed: -log(1-m),
+otherwise a linear integration is performed (def: FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>a list of numeric matrices. These must be named matrices representing
+adjacency matrices of the networks. Matrices may have different dimensions,
+but corresponding elements in different matrices must have the same name.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with two elements:
+</p>
+
+<ul>
+<li>
+<p> WA : the matrix resulting from WA
+</p>
+</li>
+<li>
+<p> alpha : a numeric vector with the weight coefficients of the networks
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create three example networks of different size
+set.seed(123);
+A1 &lt;- matrix(runif(100, min = 0, max = 1), nrow = 10);
+A1[lower.tri(A1)] = t(A1)[lower.tri(A1)];
+diag(A1) &lt;- 0;
+rownames(A1) &lt;- colnames(A1) &lt;- sample(LETTERS, 10);
+
+A2 &lt;- matrix(runif(49, min = 0, max = 1), nrow = 7);
+A2[lower.tri(A2)] = t(A2)[lower.tri(A2)];
+diag(A2) &lt;- 0;
+rownames(A2) &lt;- colnames(A2) &lt;- rownames(A1)[1:7];
+
+A3 &lt;- matrix(runif(100, min = 0, max = 1), nrow = 10);
+A3[lower.tri(A3)] = t(A3)[lower.tri(A3)];
+diag(A3) &lt;- 0;
+rownames(A3) &lt;- colnames(A3) &lt;- c(rownames(A1)[1:5], c("A", "B", "Z", "K", "Q"));
+
+# Create random matrix of accuracy metrics (considering 3 classes)
+M &lt;- matrix(runif(9, min = 0, max = 1), ncol = 3);
+
+# Integrate networks using Weighted Average (WA) method
+A_int &lt;- WA.int(M, logint=TRUE, A1, A2, A3);
+</code></pre>
+
+
+</div>

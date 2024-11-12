@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>aiCI</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Confidence Intervals for Variance Components</h2>
+
+<h3>Description</h3>
+
+<p>Produces the 1-alpha Upper and Lower Confidence Limits for the variance
+components in an ASReml-R model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">aiCI(asr.model, Dimnames = NULL, alpha = 0.05)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>asr.model</code></td>
+<td>
+<p>Object from a call to <code>asreml</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Dimnames</code></td>
+<td>
+<p>A vector of characters if names are desired for the output.
+If not specified, the default labels from the <code>asreml</code> object will be
+used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A numeric value indicating the level of Type I error for
+constructing the Confidence Intervals.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Variances from the inverse of the Average Information matrix of an ASReml
+model are translated according to the <code>varTrans</code> function and
+used in constructing the 1-alpha Confidence Interval.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>matrix</code> is returned with a row for each variance component. 
+The three columns correspond to the Lower Confidence Limit, estimate from
+the <code>asreml</code> model, and Upper Confidence Limit for each variance 
+component.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The vector of <code>Dimnames</code> should match the same order of variance
+components specified in the model.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p><a href="mailto:matthewwolak@gmail.com">matthewwolak@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>aiFun</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  ## Not run: 
+    library(asreml)
+    ginvA &lt;- ainverse(warcolak)
+    ginvD &lt;- makeD(warcolak[, 1:3])$listDinv
+      attr(ginvD, "rowNames") &lt;- as.character(warcolak[, 1])
+      attr(ginvD, "INVERSE") &lt;- TRUE
+    warcolak$IDD &lt;- warcolak$ID
+    warcolak.mod &lt;- asreml(trait1 ~ sex,
+     random = ~ vm(ID, ginvA) + vm(IDD, ginvD), 
+	data = warcolak) 
+    summary(warcolak.mod)$varcomp
+    aiCI(warcolak.mod)    
+   
+## End(Not run)
+
+</code></pre>
+
+
+</div>

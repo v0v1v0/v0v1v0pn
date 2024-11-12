@@ -1,0 +1,198 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dOcc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Occupancy distribution suitable for use in <code>nimble</code> models</h2>
+
+<h3>Description</h3>
+
+<p><code>dOcc_*</code> and <code>rOcc_*</code> provide occupancy model
+distributions that can be used directly from R or in <code>nimble</code>
+models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dOcc_s(x, probOcc, probDetect, len = 0, log = 0)
+
+dOcc_v(x, probOcc, probDetect, len = 0, log = 0)
+
+rOcc_s(n, probOcc, probDetect, len = 0)
+
+rOcc_v(n, probOcc, probDetect, len = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>detection/non-detection vector of 0s (not detected) and 1s
+(detected).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probOcc</code></td>
+<td>
+<p>occupancy probability (scalar).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probDetect</code></td>
+<td>
+<p>detection probability (scalar for <code>dOcc_s</code>,
+vector for <code>dOcc_v</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>len</code></td>
+<td>
+<p>length of detection/non-detection vector (see below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>TRUE or 1 to return log probability. FALSE or 0 to
+return probability.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of random draws, each returning a vector of length
+<code>len</code>. Currently only <code>n = 1</code> is supported, but the
+argument exists for standardization of "<code>r</code>" functions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>These nimbleFunctions provide distributions that can be used directly in R or
+in <code>nimble</code> hierarchical models (via <code>nimbleCode</code>
+and <code>nimbleModel</code>).
+</p>
+<p>The probability of observation vector <code>x</code> depends on
+occupancy probability, <code>probOcc</code>, and detection probability,
+<code>probDetect</code> or <code>probDetect[1:T]</code>.
+</p>
+<p>The letter following the 'dOcc_' indicates whether detection probability is
+scalar (s, meaning <code>probDetect</code> is detection probability for every
+<code>x[t]</code>) or vector (v, meaning <code>probDetect[t]</code> is detection
+probability for <code>x[t]</code>).
+</p>
+<p>When used directly from R, the <code>len</code> argument to <code>dOcc_*</code> is not
+necessary. It will default to the length of <code>x</code>.  When used in
+<code>nimble</code> model code (via <code>nimbleCode</code>), <code>len</code> must be provided
+(even though it may seem redundant).
+</p>
+<p>For more explanation, see package vignette
+(<code>vignette("Introduction_to_nimbleEcology")</code>).
+</p>
+<p>Compared to writing <code>nimble</code> models with a discrete latent state for
+true occupancy status and a separate scalar datum for each observation, use
+of these distributions allows one to directly sum (marginalize) over the
+discrete latent state and calculate the probability of all observations from
+one site jointly.
+</p>
+<p>These are <code>nimbleFunction</code>s written in the format of user-defined
+distributions for NIMBLE's extension of the BUGS model language. More
+information can be found in the NIMBLE User Manual at
+<a href="https://r-nimble.org">https://r-nimble.org</a>.
+</p>
+<p>When using these distributions in a <code>nimble</code> model, the left-hand side
+will be used as <code>x</code>, and the user should not provide the <code>log</code>
+argument.
+</p>
+<p>For example, in <code>nimble</code> model code,
+</p>
+<p><code>detections[i, 1:T] ~ dOcc_s(occupancyProbability,
+detectionProbability, T)</code>
+</p>
+<p>declares that <code>detections[i, 1:T]</code> (detection history at site <code>i</code>,
+for example) follows an occupancy distribution with parameters as indicated,
+assuming all the parameters have been declared elsewhere in the model.  This
+will invoke (something like) the following call to <code>dOcc_s</code> when
+<code>nimble</code> uses the model such as for MCMC:
+</p>
+<p><code>dOcc_s(detections[i, 1:T], occupancyProbability,
+detectionProbability, len = T, log = TRUE)</code>
+</p>
+<p>If an algorithm using a <code>nimble</code> model with this declaration
+needs to generate a random draw for <code>detections[i, 1:T]</code>, it
+will make a similar invocation of <code>rOcc_s</code>, with <code>n = 1</code>.
+</p>
+<p>If the detection probabilities are time-dependent, use:
+</p>
+<p><code>detections[i, 1:T] ~ dOcc_v(occupancyProbability,
+detectionProbability[1:T], len = T)</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>dOcc_*</code>: the probability (or likelihood) or log probability of observation vector <code>x</code>.
+</p>
+<p>For <code>rOcc_*</code>: a simulated detection history, <code>x</code>.
+</p>
+
+
+<h3>Notes for use with automatic differentiation</h3>
+
+<p>The <code>dOcc_*</code> distributions should all work for models and algorithms
+that use nimble's automatic differentiation (AD) system. In that system, some
+kinds of values are "baked in" (cannot be changed) to the AD calculations
+from the first call, unless and until the AD calculations are reset. For the
+<code>dOcc_*</code> distributions, the lengths of vector inputs are baked in. These
+can be different for different iterations through a for loop (or nimble model
+declarations with different indices, for example), but the lengths for each
+specific iteration will be "baked in" after the first call. <b>It is
+safest if one can assume that <code>x</code> are data and are not going to change.</b>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ben Goldstein, Perry de Valpine, and Lauren Ponisio
+</p>
+
+
+<h3>See Also</h3>
+
+<p>For dynamic occupancy models, see documentation for
+<code>dDynOcc</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Set up constants and initial values for defining the model
+dat &lt;- c(1,1,0,0) # A vector of observations
+probOcc &lt;- 0.6
+probDetect &lt;- 0.4
+
+
+# Define code for a nimbleModel
+nc &lt;- nimbleCode({
+  x[1:4] ~ dOcc_s(probOcc, probDetect, len = 4)
+  probOcc ~ dunif(0,1)
+  probDetect ~ dunif(0,1)
+})
+
+# Build the model, providing data and initial values
+Occ_model &lt;- nimbleModel(nc, data = list(x = dat),
+                         inits = list(probOcc = probOcc,
+                                      probDetect = probDetect))
+
+# Calculate log probability of data from the model
+Occ_model$calculate()
+# Use the model for a variety of other purposes...
+</code></pre>
+
+
+</div>

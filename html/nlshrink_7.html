@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlshrink_cov</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-linear shrinkage estimator of population covariance matrix.</h2>
+
+<h3>Description</h3>
+
+<p><code>nlshrink_cov</code> calls <code>tau_estimate</code> to estimate
+the population eigenvalues. Note that the eigenvalues of the estimated
+population covariance matrix are not the same as the non-linear shrinkage
+estimates of the population eigenvalues. Theoretical and implementation
+details in references.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlshrink_cov(X, k = 0, method = "nlminb", control = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>(Optional) Non-negative integer less than <code>ncol(X)</code>. If <code>k
+== 0</code> (default), <code>X</code> is assumed to contain 1 class, which will be
+centered. If <code>k &gt;= 1</code>, <code>X</code> is assumed to contain <code>k</code>
+classes, each of which has already been centered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>(Optional) The optimization routine called in
+<code>tau_estimate</code>. Choices are <code>nlminb</code> (default) and
+<code>nloptr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>(Optional) A list of control parameters. Must correspond to
+the selected optimization method. See <code>nlminb</code>,
+<code>nloptr</code> for details.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A numeric positive semi-definite matrix of dimension <code>ncol(X)</code>.
+</p>
+
+
+<h3>References</h3>
+
+ <ul>
+<li>
+<p> Ledoit, O. and Wolf, M. (2015). Spectrum
+estimation: a unified framework for covariance matrix estimation and PCA in
+large dimensions. Journal of Multivariate Analysis, 139(2) </p>
+</li>
+<li>
+<p> Ledoit, O.
+and Wolf, M. (2016). Numerical Implementation of the QuEST function.
+arXiv:1601.05870 [stat.CO] </p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate matrix of uniform random variates
+X &lt;- matrix(sapply(1:20, function(b) runif(50, max=b)), nrow = 50, ncol = 20)
+Sigma &lt;- diag((1:20)^2/12) # true population covariance matrix
+nlshrink_X &lt;- nlshrink_cov(X, k=0) # compute non-linear shrinkage estimate
+linshrink_X &lt;- linshrink_cov(X, k=0) # compute linear shrinkage estimate
+S &lt;- cov(X) # sample covariance matrix
+
+# compare accuracy of estimators (sum of squared elementwise Euclidean distance)
+sum((S-Sigma)^2)
+sum((nlshrink_X - Sigma)^2)
+sum((linshrink_X - Sigma)^2)
+
+</code></pre>
+
+
+</div>

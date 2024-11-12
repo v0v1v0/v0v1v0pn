@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>network</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Coercion between <code>diffnet</code>, <code>network</code> and <code>networkDynamic</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Coercion between <code>diffnet</code>, <code>network</code> and <code>networkDynamic</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">diffnet_to_network(graph, slices = 1:nslices(graph), ...)
+
+diffnet_to_networkDynamic(
+  graph,
+  slices = 1:nslices(graph),
+  diffnet2net.args = list(),
+  netdyn.args = list()
+)
+
+networkDynamic_to_diffnet(graph, toavar)
+
+network_to_diffnet(
+  graph = NULL,
+  graph.list = NULL,
+  toavar,
+  t0 = NULL,
+  t1 = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>An object of class <code>diffnet</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slices</code></td>
+<td>
+<p>An integer vector indicating the slices to subset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to <code>networkDynamic</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffnet2net.args</code></td>
+<td>
+<p>List of arguments passed to <code>diffnet_to_network</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>netdyn.args</code></td>
+<td>
+<p>List of arguments passed to <code>networkDynamic</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>toavar</code></td>
+<td>
+<p>Character scalar. Name of the vertex attribute that holds the times of adoption.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph.list</code></td>
+<td>
+<p>A list of <code>network</code> objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t0</code></td>
+<td>
+<p>Integer scalar. Passed to <code>new_diffnet</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t1</code></td>
+<td>
+<p>Integer scalar. Passed to <code>new_diffnet</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>diffnet_to_networkDynamic</code> calls <code>diffnet_to_network</code> and
+uses the output to call <code>networkDynamic</code>, passing the resulting list of
+<code>network</code> objects as <code>network.list</code> (see <code>networkDynamic</code>).
+</p>
+<p>By default, <code>diffnet_to_networkDynamic</code> passes <code>net.obs.period</code> as
+</p>
+<pre>
+  net.obs.period = list(
+    observations = list(range(graph$meta$pers)),
+    mode="discrete",
+    time.increment = 1,
+    time.unit = "step"
+  )
+</pre>
+<p>By default, <code>networkDynamic_to_diffnet</code> uses the first slice as reference for
+vertex attributes and times of adoption.
+</p>
+<p>By default, <code>network_to_diffnet</code> uses the first element of <code>graph</code>
+(a list) as reference for vertex attributes and times of adoption.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>diffnet_to_network</code> returns a list of length <code>length(slices)</code> in which
+each element is a <code>network</code> object corresponding a slice of the
+<code>graph</code> (<code>diffnet</code> object). The attributes list will include <code>toa</code> (time of
+adoption).
+</p>
+<p>An object of class <code>networkDynamic</code>.
+</p>
+
+
+<h3>Caveats</h3>
+
+<p>Since <code>diffnet</code> does not support edges attributes, these will be lost when
+converting from <code>network</code>-type objects. The same applies to <code>network</code>
+attributes.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Foreign: 
+<code>igraph</code>,
+<code>read_pajek()</code>,
+<code>read_ucinet_head()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Cohersing a diffnet to a list of networks ---------------------------------
+set.seed(1)
+ans &lt;- diffnet_to_network(rdiffnet(20, 2))
+ans
+
+# and back
+network_to_diffnet(graph.list = ans, toavar="toa")
+
+# If it was static, we can use -graph- instead
+network_to_diffnet(ans[[1]], toavar="toa")
+
+# A random diffusion network ------------------------------------------------
+set.seed(87)
+dn  &lt;- rdiffnet(50, 4)
+ans &lt;- diffnet_to_networkDynamic(dn)
+
+# and back
+networkDynamic_to_diffnet(ans, toavar = "toa")
+
+</code></pre>
+
+
+</div>

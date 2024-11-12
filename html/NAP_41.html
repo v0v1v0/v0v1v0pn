@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SBFHajnal_twoz</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Sequential Bayes Factor using the Hajnal's ratio for two-sample <code class="reqn">z</code>-tests
+</h2>
+
+<h3>Description</h3>
+
+<p>In case of two independent populations <code class="reqn">N(\mu_1,\sigma_0^2)</code> and <code class="reqn">N(\mu_2,\sigma_0^2)</code> with known common variance <code class="reqn">\sigma_0^2</code>, consider the two-sample <code class="reqn">z</code>-test for testing the point null hypothesis of difference in their means <code class="reqn">H_0 : \mu_2 - \mu_1 = 0</code> against <code class="reqn">H_1 : \mu_2 - \mu_1 \neq 0</code>. This function calculates the operating characteristics (OC) and average sample number (ASN) of the Sequential Bayes Factor design when the prior assumed under the alternative on the difference between standardized effect sizes <code class="reqn">(\mu_2 - \mu_1)/\sigma_0</code> places equal probability at <code class="reqn">+\delta</code> and <code class="reqn">-\delta</code> (<code class="reqn">\delta&gt;0</code> prefixed).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SBFHajnal_twoz(es = c(0, 0.2, 0.3, 0.5), es1 = 0.3,
+               n1min = 1, n2min = 1, n1max = 5000, n2max = 5000, sigma0 = 1, 
+               RejectH1.threshold = exp(-3), RejectH0.threshold = exp(3),
+               batch1.size.increment, batch2.size.increment, 
+               nReplicate = 50000, nCore)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>es</code></td>
+<td>
+
+<p>Numeric vector. Standardized effect size differences <code class="reqn">(\mu_2 - \mu_1)/\sigma_0</code> where OC and ASN are desired. <strong>Default:</strong> <code>c(0, 0.2, 0.3, 0.5)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>es1</code></td>
+<td>
+
+<p>Positive numeric. <code class="reqn">\delta</code> as above. <strong>Default:</strong> <code class="reqn">0.3</code>. For this, the prior on <code class="reqn">(\mu_2 - \mu_1)/\sigma_0</code> takes values <code class="reqn">0.3</code> and <code class="reqn">-0.3</code> each with equal probability 1/2.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n1min</code></td>
+<td>
+
+<p>Positive integer. Minimum sample size from Group-1 in the sequential comparison. <strong>Default:</strong> 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n2min</code></td>
+<td>
+
+<p>Positive integer. Minimum sample size from Group-2 in the sequential comparison. <strong>Default:</strong> 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n1max</code></td>
+<td>
+
+<p>Positive integer. Maximum sample size from Group-1 in the sequential comparison. <strong>Default:</strong> 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n2max</code></td>
+<td>
+
+<p>Positive integer. Maximum sample size from Group-2 in the sequential comparison. <strong>Default:</strong> 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma0</code></td>
+<td>
+
+<p>Positive numeric. Known common standard deviation of the populations. <strong>Default:</strong> 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RejectH1.threshold</code></td>
+<td>
+
+<p>Positive numeric. <code class="reqn">H_0</code> is accepted if <code class="reqn">BF \le</code><code>RejectH1.threshold</code>. <strong>Default:</strong> <code>exp(-3)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RejectH0.threshold</code></td>
+<td>
+
+<p>Positive numeric. <code class="reqn">H_0</code> is rejected if <code class="reqn">BF \ge</code><code>RejectH0.threshold</code>. <strong>Default:</strong> <code>exp(3)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>batch1.size.increment</code></td>
+<td>
+
+<p>function. Increment in sample size from Group-1 at each sequential step. <strong>Default:</strong> <code>function(narg){20}</code>. This means an increment of 20 samples at each step.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>batch2.size.increment</code></td>
+<td>
+
+<p>function. Increment in sample size from Group-2 at each sequential step. <strong>Default:</strong> <code>function(narg){20}</code>. This means an increment of 20 samples at each step.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nReplicate</code></td>
+<td>
+
+<p>Positve integer. Number of replicated studies based on which the OC and ASN are calculated.  <strong>Default:</strong> 50,000.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nCore</code></td>
+<td>
+
+<p>Positive integer. <strong>Default:</strong> One less than the total number of available cores.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with three components named <code>summary</code>, <code>BF</code>, and <code>N</code>. 
+</p>
+<p><code>$summary</code> is a data frame with columns <code>effect.size</code> containing the values in <code>es</code>. At those values, <code>acceptH0</code> contains the proportion of times <code>H_0</code> is accepted, <code>rejectH0</code> contains the proportion of times <code>H_0</code> is rejected, <code>inconclusive</code> contains the proportion of times the test is inconclusive, <code>ASN</code> contains the ASN, and <code>avg.logBF</code> contains the expected weight of evidence values.
+</p>
+<p><code>$BF</code> is a matrix of dimension <code>length(es)</code> by <code>nReplicate</code>. Each row contains the Bayes factor values at the corresponding standardized effec size in <code>nReplicate</code> replicated studies.
+</p>
+<p><code>$N</code> is a matrix of the same dimension as <code>$BF</code>. Each row contains the sample size required to reach a decision at the corresponding standardized effec size in <code>nReplicate</code> replicated studies.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Sandipan Pramanik and Valen E. Johnson
+</p>
+
+
+<h3>References</h3>
+
+<p>Hajnal, J. (1961). <em>A two-sample sequential t-test.Biometrika, 48:65-75</em>,
+<a href="https://academic.oup.com/biomet/article-abstract/48/1-2/65/227215">[Article]</a>.
+</p>
+<p>Schnuerch, M. and Erdfelder, E. (2020). <em>A two-sample sequential t-test.Biometrika, 48:65-75</em>, <a href="https://martinschnuerch.com/wp-content/uploads/2020/08/Schnuerch_Erdfelder_2020.pdf">[Article]</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+out = SBFHajnal_twoz(n1max = 100, n2max = 100, es = c(0, 0.3), nCore = 1)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>extract_group_metrics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>extract maximum-likelihood estimates for group metrics</h2>
+
+<h3>Description</h3>
+
+<p>Extract group metrics within each community from a matrix object
+that is produced by <code>groupMetricsML()</code> function from
+<a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>. These metrics
+are the following   the convex hull total area (TA), Standard Ellipse Area (SEA), and the
+corresponding small sample size corrected version SEAc based on the maximum likelihood
+estimates of the means and covariance matrices of each group.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">extract_group_metrics(data = NULL, community_df = NULL, data_format = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a <code>matrix</code> produced by the function <code>groupMetricsML()</code> in the
+package <a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>community_df</code></td>
+<td>
+<p>a four column data frame. One of the columns has to be named
+<code>community</code> and the data in the column will be <code>numeric</code> as a <code>character</code>
+string(e.g., <code style="white-space: pre;">⁠"1", "2", "3"⁠</code>). This is the order of the community names
+and will be used to join the actual community names to the correct data.
+These are the same class and values required by the function, <code>createSiberObject()</code>
+from <a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>.
+The second column will be the names of the groups that are needed to supply
+required by the function, <code>createSiberObject()</code>
+from <a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>.
+The third and fourth columns contains the actual names of the communities
+and groups the user is working with (e.g., <code>"region"</code>, <code>"common_name"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_format</code></td>
+<td>
+<p>a <code>character</code> string that decides whether the returned object is
+in long or wide format. Default is <code>"long"</code>, with the alternative supplied being <code>"wide"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>tibble</code> containing four rows when <code>data_format</code> is set to its
+default which is <code>long</code>. These four rows are the following, <code>community</code>,
+<code>the_name_of_the_communities</code>, <code>metric</code> and <code>post_est</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(SIBER)
+
+# ---- create community names data frame ----
+# uncomment to use
+# str(demo.siber.data.2)
+
+demo.siber.data.2$group_name &lt;- as.factor(demo.siber.data.2$group)
+
+demo.siber.data.2$group &lt;- as.numeric(demo.siber.data.2$group_name) |&gt;
+as.character()
+
+demo.siber.data.2$community_name &lt;- as.factor(demo.siber.data.2$community)
+
+demo.siber.data.2$community &lt;- as.numeric(demo.siber.data.2$community_name) |&gt;
+as.character()
+
+cg_name &lt;- demo.siber.data.2 |&gt;
+dplyr::distinct(community, group, community_name, group_name)
+
+# ---- create comparsions ----
+
+demo.siber.data.2 &lt;- demo.siber.data.2[,1:4]
+
+siber_example &lt;- createSiberObject(demo.siber.data.2)
+
+# extract group metrics
+group_ml &lt;- groupMetricsML(siber_example)
+
+group_convert &lt;- extract_group_metrics(data = group_ml,
+                                community_df = cg_name)
+</code></pre>
+
+
+</div>

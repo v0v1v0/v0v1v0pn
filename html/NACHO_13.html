@@ -1,0 +1,90 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>visualise</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualise quality-control metrics of a "nacho" object</h2>
+
+<h3>Description</h3>
+
+<p>This function allows to visualise results from <code>load_rcc()</code> or <code>normalise()</code>
+several quality-control metrics in an interactive shiny application,
+in which thresholds can be customised and exported.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">visualise(nacho_object)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>nacho_object</code></td>
+<td>
+<p>[list] A list object of class <code>"nacho"</code> obtained
+from <code>load_rcc()</code> or <code>normalise()</code>.</p>
+</td>
+</tr></table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (interactive()) {
+  data(GSE74821)
+  # Must be run in an interactive R session!
+  visualise(GSE74821)
+}
+
+if (interactive()) {
+  library(GEOquery)
+  library(NACHO)
+
+  # Import data from GEO
+  gse &lt;- GEOquery::getGEO(GEO = "GSE74821")
+  targets &lt;- Biobase::pData(Biobase::phenoData(gse[[1]]))
+  GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
+  utils::untar(
+    tarfile = file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
+    exdir = file.path(tempdir(), "GSE74821")
+  )
+  targets$IDFILE &lt;- list.files(
+    path = file.path(tempdir(), "GSE74821"),
+    pattern = ".RCC.gz$"
+  )
+  targets[] &lt;- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
+  utils::write.csv(
+    x = targets,
+    file = file.path(tempdir(), "GSE74821", "Samplesheet.csv")
+  )
+
+  # Read RCC files and format
+  nacho &lt;- load_rcc(
+    data_directory = file.path(tempdir(), "GSE74821"),
+    ssheet_csv = file.path(tempdir(), "GSE74821", "Samplesheet.csv"),
+    id_colname = "IDFILE"
+  )
+  visualise(nacho)
+
+  # (re)Normalise data by removing outliers
+  nacho_norm &lt;- normalise(
+    nacho_object = nacho,
+    remove_outliers = TRUE
+  )
+  visualise(nacho_norm)
+
+  # (re)Normalise data with "GLM" method and removing outliers
+  nacho_norm &lt;- normalise(
+    nacho_object = nacho,
+    normalisation_method = "GLM",
+    remove_outliers = TRUE
+  )
+  visualise(nacho_norm)
+}
+
+</code></pre>
+
+
+</div>

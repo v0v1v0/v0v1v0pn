@@ -1,0 +1,53 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>parties_v</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>New Zealand political party colours</h2>
+
+<h3>Description</h3>
+
+<p>Colours associated with New Zealand political parties in the early 21st century
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">parties_v
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A named vector of colours</p>
+
+
+<h3>Source</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Wikipedia:Index_of_New_Zealand_political_party_meta_attributes">https://en.wikipedia.org/wiki/Wikipedia:Index_of_New_Zealand_political_party_meta_attributes</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example use of parties_v in a colour scale for ggplot2
+if(require(ggplot2) &amp; require(scales) &amp; require(dplyr) &amp; require(forcats)){
+polls %&gt;%
+    filter(MidDate &gt; as.Date("2014-11-20") &amp; !is.na(VotingIntention)) %&gt;%
+    filter(Party %in% c("National", "Labour", "Green", "NZ First")) %&gt;%
+    mutate(Party = fct_reorder(Party, VotingIntention, .desc = TRUE),
+           Party = fct_drop(Party)) %&gt;%
+    ggplot(aes(x = MidDate, y = VotingIntention, colour = Party, linetype = Pollster)) +
+    geom_line(alpha = 0.5) +
+    geom_point(aes(shape = Pollster)) +
+    geom_smooth(aes(group = Party), se = FALSE, colour = "grey15", span = .4) +
+    scale_colour_manual(values = parties_v) +
+    scale_y_continuous("Voting intention", label = percent) +
+    scale_x_date("") +
+    facet_wrap(~Party, scales = "free_y") 
+    }
+</code></pre>
+
+
+</div>

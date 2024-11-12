@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>TrophInd</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The trophic level and omnivory index</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the trophic level and omnivory index of each component of
+a food web.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">TrophInd(Flow = NULL, Tij = t(Flow), 
+         Import = NULL, Export = NULL, Dead = NULL)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Flow </code></td>
+<td>
+<p>network matrix with Flow[i,j] the flow from i (row) to j
+(column); component positions in rows and columns must be the same;
+if present, rownames or columnnames denote the compartment names.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tij </code></td>
+<td>
+<p>network matrix where connectance is from column j to row i;
+component positions in rows and columns must be the same ;
+if present, rownames or columnnames denote the compartment names.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Import </code></td>
+<td>
+<p>vector with either the *indices* or the *names* of
+<em>external</em> compartmens from where flow enters the network; the
+indices point to the <b>column</b> positions in <code>Tij</code> (and the
+row positions in Flow).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Export </code></td>
+<td>
+<p>vector with either the *indices* or the *names* of
+<em>external</em> compartmens to where flow leaves the network; the indices
+point to the <b>row</b> positions in <code>Tij</code> (and the column positions
+in Flow).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Dead </code></td>
+<td>
+<p>vector with either the *indices* or the *names* of dead matter;
+the indices point to <b>row</b> positions in <code>Tij</code>; the trophic level
+of these components is assumed to be 1.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Primary producers, defined as those compartments that do not receive matter
+from another internal compartment, will be assigned a trophic level of 1.
+</p>
+<p>In many trophic level calculations, it is also assumed that TL of detritus,
+dissolved organic matter and other inert material (i.e. that does not feed)
+is also = 1.
+</p>
+<p>If this is desired, these compartments have to be designated as "Dead"
+(i.e. <code>Dead</code> should contain an index to row positions in <code>Tij</code>
+of these compartments. 
+</p>
+<p>If not specified as "Dead", these compartments will have a TL &gt; 1 and
+consequently the TL of other compartments will be higher too.
+</p>
+<p>The mathematical formulation of these indices can be found in the package
+vignette - <em>vignette("NetIndices")</em>.
+</p>
+<p>The PDF can be found in the subdirectory ‘<span class="file">doc</span>’ of the NetIndices package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a 2-columned data.frame with, for each compartment of the network the
+following:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>TL </code></td>
+<td>
+<p>the trophic level of a compartment, defined as 1 + the weighted
+average of the trophic levels of its food items.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OI </code></td>
+<td>
+<p>the omnivory index, the variety in the trophic levels of a
+consumer's food.
+</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Up to version 1.4.1, the estimation of TL produced strange results in case
+compartments feed on themselves. Then it was possible to produce negative
+Trophic levels. From version 1.4.2, it is implemented that self-feeding does
+not affect the TL of the compartment. Because of that, results may be 
+different from the initial versions in such cases.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Karline Soetaert &lt;karline.soetaert@nioz.nl&gt;,
+Julius Kipyegon Kones&lt;jkones@uonbi.ac.ke&gt;</p>
+
+
+<h3>References</h3>
+
+<p>Christensen V, Pauly D. 1992. ECOPATH II - a software for balancing
+steady-state ecosystem models and calculating network characteristics.
+Ecological Modelling 61: 169-185.
+</p>
+<p>Lindeman RL. 1942. The trophic dynamic aspect of ecology.
+Ecology 23: 399-418.
+</p>
+<p>Kones, J.K., Soetaert, K., van Oevelen, D. and J.Owino (2009).
+Are network indices robust indicators of food web functioning? a
+Monte Carlo approach.  Ecological Modelling, 220, 370-382.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># The takapoto atoll network
+# First trophic level without assuming that TL of detritus and DOC is 1
+TrophInd(Takapoto, Import = "CO2",
+        Export = c("CO2", "Sedimentation", "Grazing"))
+
+# Now imposing TL=1 for detritus and DOC 
+TrophInd(Takapoto, Import = "CO2",
+        Export = c("CO2", "Sedimentation", "Grazing"),
+        Dead = c("Detritus", "DOC"))</code></pre>
+
+
+</div>

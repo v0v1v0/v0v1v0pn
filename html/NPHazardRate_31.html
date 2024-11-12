@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>KMest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kaplan-Meier Estimate</h2>
+
+<h3>Description</h3>
+
+<p>Custom implementation of the Kaplan Meier estimate. The major difference with existing implementations is that the user can specify exactly the grid points where the estimate is calculated. The implementation corresponds to <code class="reqn">1-\hat H(x)</code> of <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/anzs.12224">Hua, Patil and Bagkavos (2018)</a>, and is used mainly for estimation of the censoring distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">KMest(xin, cens, xout) </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p> A vector of data points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xout</code></td>
+<td>
+<p> The point at which the estimates should be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cens</code></td>
+<td>
+<p> Censoring Indicators.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Calculates the well known Kaplan-Meier estimate
+</p>
+<p style="text-align: center;"><code class="reqn">1-\hat H(x) =  1,   0 \leq x \leq X_{(1)}</code>
+</p>
+<p> or
+</p>
+<p style="text-align: center;"><code class="reqn">
+1-\hat H(x) = \prod_{i=1}^{k-1} \left ( \frac{n-i+1}{n-i+2} \right )^{1-\delta_{(i)}},   X_{(k-1)} &lt;x \leq X_{(k)}, k=2,\dots,n </code>
+</p>
+<p> or
+</p>
+<p style="text-align: center;"><code class="reqn">
+1-\hat H(x) = \prod_{i=1}^{n} \left ( \frac{n-i+1}{n-i+2} \right )^{1-\delta_{(i)}},  X_{(n)}&lt;x.</code>
+</p>
+
+<p>The implementation is mainly for estimating the censoring distribution of the available sample.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector with the Kaplan-Meier estimate at xout.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://www.jstor.org/stable/2281868">Kaplan, E. L., and Paul Meier. Nonparametric Estimation from Incomplete Observations., J. of the American Statist. Association 53, (1958): 457-81.</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+SampleSize&lt;-100 #amount of data to be generated
+ti&lt;- rweibull(SampleSize, .6, 1) # draw a random sample
+ui&lt;-rexp(SampleSize, .2)         # censoring sample
+cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+x1&lt;-pmin(ti,ui)                  # observed data
+cen&lt;-rep.int(1, SampleSize)      # initialize censoring indicators
+cen[which(ti&gt;ui)]&lt;-0             # 0's correspond to censored indicators
+
+arg1&lt;- KMest(x1, cen, x)
+plot(x, arg1, type="l")
+</code></pre>
+
+
+</div>

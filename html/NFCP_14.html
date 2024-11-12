@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stitch_contracts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Stitch futures contracts</h2>
+
+<h3>Description</h3>
+
+<p>Aggregate futures contract price data by stitching according to either approximate maturities and rollover frequency or contract number from closest maturity.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stitch_contracts(
+  futures,
+  futures_TTM = NULL,
+  maturity_matrix = NULL,
+  rollover_frequency = NULL,
+  contract_numbers = NULL,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>futures</code></td>
+<td>
+<p>Contract futures price data. Each row of <code>Futures</code> should represent one observation of futures prices and each column should represent one quoted futures contract. NA's in <code>Futures</code> are allowed, representing missing observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>futures_TTM</code></td>
+<td>
+<p>A <code>vector</code> of contract maturities to stitch</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maturity_matrix</code></td>
+<td>
+<p>The time-to-maturity (in years) for each contract at each given observation point. The dimensions of <code>maturity_matrix</code> should match those of <code>Futures</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rollover_frequency</code></td>
+<td>
+<p>the frequency (in years) at which contracts should be rolled over</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contract_numbers</code></td>
+<td>
+<p>A <code>vector</code> of contract numbers offset from the closest-to-maturity contract at which to stitch contracts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p><code>logical</code>. Should additional information be output? see <b>details</b></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function aggregates a set of futures contract data by stitching contract data over an observation period, resulting in a
+set of futures observations that is 'complete' (ie. Does not feature missing observations). Aggregated futures
+data benefit from several computational efficiencies compared to raw contract data, but results in the loss of futures price information.
+</p>
+<p>There are two methods of the <code>stitch_contracts</code> function that can be utilized the stitch contracts:
+</p>
+<p><b>Method 1</b>
+</p>
+<p><code>stitch_contracts(futures, contract_numbers, verbose = T)</code>
+Futures data may be aggregated by stitching prices according to maturity matching. This method requires the inputs <code>futures_TTM</code>, <code>maturity_matrix</code> and <code>rollover_frequency</code>.
+This method stitched contracts by matching the observation prices according to which contract has the closest time-to-maturity of the desired maturity specified
+in <code>futures_TTM</code>. Contracts are rolled over at the frequency specified in <code>rollover_frequency</code>.
+</p>
+<p><b>Method 2</b>
+</p>
+<p><code>stitch_contracts(futures, futures_TTM, maturity_matrix, rollover_frequency, verbose = T)</code>
+Futures data may be stitched according to the contract numbers offset from the closest-to-maturity contract. This method requires only the
+input <code>contract_numbers</code> specifying which contracts should be included. This method is most appropriate when the maturity of available
+contracts are consistent (ie. contracts expire every month or three months).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>stitch_contracts</code> returns a matrix of stitched futures prices if <code>verbose = T</code> and a list with two or three objects otherwise (see below).
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+
+<code>prices</code> </td>
+<td style="text-align: left;"> A data frame of Stitched futures prices. Each row represents an observation of the specified contracts. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>maturities</code> </td>
+<td style="text-align: left;"> A data frame of the time-to-maturity of observed futures prices. Each row represents an observation of the
+specified contracts. Returned only when <b>Method 1</b> is used (see <b>Details</b>)  and <code>verbose = T</code>. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>tickers</code> </td>
+<td style="text-align: left;">  A data frame of the named columns of observed futures prices (e.g. contract tickers). Returned only when <code>Futures</code> or <code>maturity_matrix</code> have named columns and <code>verbose = T</code>. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Schwartz, E. S., and J. E. Smith, (2000). Short-Term Variations and Long-Term Dynamics in Commodity Prices. <em>Manage. Sci.</em>, 46, 893-911.
+</p>
+<p>Cortazar, G., and L. Naranjo, (2006). An N-factor Gaussian model of oil futures prices. <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em>, 26(3), 243-268.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+##These examples approximately replicate the Crude Oil data utilized within the
+##prominent work of Schwartz and Smith (2000):
+
+###Method 1 - Stitch crude oil contracts according to maturity matching:
+SS_stitched_M1 &lt;- stitch_contracts(futures = SS_oil$contracts,
+                                  futures_TTM = c(1, 5, 9, 13, 17)/12,
+                                  maturity_matrix = SS_oil$contract_maturities,
+                                  rollover_frequency = 1/12, verbose = TRUE)
+
+###Method 2 - Stitch crude oil contracts according to nearest contract numbers:
+SS_stitched_M2 &lt;- stitch_contracts(futures = SS_oil$contracts,
+                                  contract_numbers = c(1, 5, 9, 13, 17), verbose = TRUE)
+
+</code></pre>
+
+
+</div>

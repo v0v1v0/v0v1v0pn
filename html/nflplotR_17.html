@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ggpreview</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Preview ggplot in Specified Dimensions</h2>
+
+<h3>Description</h3>
+
+<p>This function previews a ggplot in its actual dimensions in order to see how
+it will look when saved. It is also significantly faster than the default
+preview in RStudio for ggplots created using nflplotR.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ggpreview(
+  plot = ggplot2::last_plot(),
+  width = NA,
+  height = NA,
+  asp = NULL,
+  dpi = 300,
+  device = "png",
+  units = c("in", "cm", "mm", "px"),
+  scale = 1,
+  limitsize = TRUE,
+  bg = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>Plot to save, defaults to last plot displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width, height</code></td>
+<td>
+<p>Plot size in units expressed by the <code>units</code> argument.
+If not supplied, uses the size of the current graphics device.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>asp</code></td>
+<td>
+<p>The aspect ratio of the plot calculated as <code>width / height</code>. If
+this is a numeric value (and not <code>NULL</code>) the <code>height</code> of the plot will be
+recalculated to <code>height = width / asp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dpi</code></td>
+<td>
+<p>Plot resolution. Also accepts a string input: "retina" (320),
+"print" (300), or "screen" (72). Applies only to raster output types.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>device</code></td>
+<td>
+<p>Device to use. Can either be a device function
+(e.g. png), or one of "eps", "ps", "tex" (pictex),
+"pdf", "jpeg", "tiff", "png", "bmp", "svg" or "wmf" (windows only). If
+<code>NULL</code> (default), the device is guessed based on the <code>filename</code> extension.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>units</code></td>
+<td>
+<p>One of the following units in which the <code>width</code> and <code>height</code>
+arguments are expressed: <code>"in"</code>, <code>"cm"</code>, <code>"mm"</code> or <code>"px"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>Multiplicative scaling factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limitsize</code></td>
+<td>
+<p>When <code>TRUE</code> (the default), <code>ggsave()</code> will not
+save images larger than 50x50 inches, to prevent the common error of
+specifying dimensions in pixels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bg</code></td>
+<td>
+<p>Background colour. If <code>NULL</code>, uses the <code>plot.background</code> fill value
+from the plot theme.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed on to the graphics device function,
+as specified by <code>device</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>No return value, called for side effects.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nflplotR)
+library(ggplot2)
+
+team_abbr &lt;- valid_team_names()
+# remove conference logos from this example
+team_abbr &lt;- team_abbr[!team_abbr %in% c("AFC", "NFC", "NFL")]
+
+df &lt;- data.frame(
+  random_value = runif(length(team_abbr), 0, 1),
+  teams = team_abbr
+)
+
+# use logos for x-axis
+# note that the plot is assigned to the object "p"
+p &lt;- ggplot(df, aes(x = teams, y = random_value)) +
+  geom_col(aes(color = teams, fill = teams), width = 0.5) +
+  scale_color_nfl(type = "secondary") +
+  scale_fill_nfl(alpha = 0.4) +
+  theme_minimal() +
+  theme(axis.text.x = element_nfl_logo())
+
+# preview p with defined width and aspect ratio (only available in RStudio)
+if (rstudioapi::isAvailable()){
+  ggpreview(p, width = 5, asp = 16/9)
+}
+</code></pre>
+
+
+</div>

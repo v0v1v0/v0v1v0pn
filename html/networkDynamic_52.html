@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.networks</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Obtain a list of collapsed networks sampled periodically from a networkDynamic object</h2>
+
+<h3>Description</h3>
+
+<p>Given a start time, end time, and increment (or vectors of onsets and termini) to express sampling intervals, return a list of collapsed networks from a networkDynamic object. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  get.networks(dnet, start = NULL, end = NULL, time.increment = NULL, 
+               onsets=NULL, termini=NULL,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dnet</code></td>
+<td>
+
+<p>A <code>networkDynamic</code> object with possible vertex, edge, network, and attribute spell information. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p> numeric value giving the start of the sampling interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end</code></td>
+<td>
+<p> numeric value giving the end of the sampling interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.increment</code></td>
+<td>
+<p>value for the offset (and duration) between sucessive samples. Will default to 1 if not otherwise specified</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>onsets</code></td>
+<td>
+<p> A numeric vector containing the onset times of the networks to be extracted.   This must be accompanied by <code>termini</code> of the same length.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>termini</code></td>
+<td>
+<p> A numeric vector containing the terminus times of the networks to be extracted.   This must be  accompanied by <code>onsets</code> of the same length.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Additional arguments to <code>network.collapse</code> (such as <code>rule</code>,<code>active.default</code>,<code>retain.all.vertices</code>) </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The sampling ("slicing") intervals may be defined using either the <code>start</code>, <code>end</code>, and <code>time.increment</code> parameters, or by providing parallel vectors of <code>onsets</code> and <code>termini</code>. If values are not specefied but a <code>net.obs.period</code> attribute exists to describe the 'natural' sampling parameters, <code>start</code> and <code>end</code> will defult to the max an min of the observations element, with <code>time.increment</code> set to its corresponding value in the <code>net.obs.period</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>list</code> of static <code>network</code> objects corresponding to the specified sampling intervals of the <code>networkDynamic</code>
+</p>
+
+
+<h3>Note</h3>
+
+<p>See Note in <code>network.collapse</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Kirk Li, Skye Bender-deMoll
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See Also as <code>network.collapse</code> for obtaining a slice of static network, <code>network.extract</code> for extracting sub-ranges of a networkDynamic, <code>get.vertex.attribute.active</code> for more on TEA attributes, and <code>as.network.networkDynamic</code> for stripping the the networkDynamic class from an object. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># create a networkDynamic with some basic activity and time extended attributes (TEA)
+test &lt;- network.initialize(5)
+add.edges.active(test, tail=c(1,2,3), head=c(2,3,4),onset=0,terminus=1)
+activate.edges(test,onset=3,terminus=5)
+activate.edges(test,onset=-2,terminus=-1)
+activate.edge.attribute(test,'weight',5,onset=3,terminus=4)
+activate.edge.attribute(test,'weight',3,onset=4,terminus=5,e=1:2)
+
+# obtain the list of networks
+list &lt;- get.networks(test,start=0, end=5)
+
+# aggregate over a longer time period with specified rule
+list &lt;- get.networks(test,start=0, end=6,time.increment=2,rule='latest')
+
+# use 'at' style extraction of momentary slices via onsets &amp; termini
+list &lt;- get.networks(test,onsets=0:5,termini=0:5)
+
+# ensure that all networks returned will be the same size
+list &lt;- get.networks(test,onsets=0:5,termini=0:5,retain.all.vertices=TRUE)
+
+
+# find out how many edges in each sampling point with apply
+sapply(get.networks(test,start=0,end=5),network.edgecount)
+
+# generate a list of matrices
+lapply(get.networks(test,start=0,end=5),as.matrix)
+
+
+</code></pre>
+
+
+</div>

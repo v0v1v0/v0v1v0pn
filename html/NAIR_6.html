@@ -1,0 +1,214 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>addNodeNetworkStats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute Node-Level Network Properties
+</h2>
+
+<h3>Description</h3>
+
+<p><img src="../help/figures/lifecycle-deprecated.svg" width="35%" alt="lifecycle-deprecated.svg"></p>
+<p>Given the node metadata and <code>igraph</code> for a network,
+computes a specified set of network properties for the network nodes.
+The node metadata is returned
+with each property added as a variable.
+</p>
+<p>This function was deprecated in favor of
+<code>addNodeStats()</code>
+in NAIR 1.0.1.
+The new function accepts and returns the entire list of network
+objects returned by <code>buildRepSeqNetwork()</code>
+or by <code>generateNetworkObjects()</code>.
+It can compute cluster membership and add the values to the node metadata.
+It additionally updates the list element <code>details</code> with further
+information linking the node-level and cluster-level metadata.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">addNodeNetworkStats(
+  data,
+  net,
+  stats_to_include = chooseNodeStats(),
+  cluster_fun = "fast_greedy",
+  cluster_id_name = "cluster_id",
+  overwrite = FALSE,
+  verbose = FALSE,
+  ...
+)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A data frame containing the node-level metadata for the network, with each
+row corresponding to a network node.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+
+<p>The network <code>igraph</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats_to_include</code></td>
+<td>
+
+<p>Specifies which network properties to compute.
+Accepts a vector created using
+<code>chooseNodeStats()</code> or
+<code>exclusiveNodeStats()</code>,
+or the character string <code>"all"</code> to compute all network properties.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_fun</code></td>
+<td>
+
+<p>A character string specifying the clustering algorithm to use when
+computing cluster membership.
+Applicable only when <code>stats_to_include = "all"</code> or
+<code>stats_to_include["cluster_id"]</code> is <code>TRUE</code>.
+Passed to <code>addClusterMembership()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_id_name</code></td>
+<td>
+
+<p>A character string specifying the name of the cluster membership variable
+to be added to <code>data</code>.
+Applicable only when <code>stats_to_include = "all"</code> or
+<code>stats_to_include["cluster_id"]</code> is <code>TRUE</code>.
+Passed to <code>addClusterMembership()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code> and <code>data</code> contains a variable whose
+name matches the value of <code>cluster_id_name</code>, then its values will be
+overwritten with new cluster membership values (obtained using
+<code>addClusterMembership()</code>
+with the specified value of <code>cluster_fun</code>).
+Applicable only when <code>stats_to_include = "all"</code> or
+<code>stats_to_include["cluster_id"]</code> is <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Named optional arguments to the function specified by <code>cluster_fun</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Node-level network properties are properties that pertain to each individual
+node in the network graph.
+</p>
+<p>Some are local properties, meaning that their value for a given node depends only
+on a subset of the nodes in the network. One example is the network degree of a
+given node, which represents the number of other nodes that are directly joined
+to the given node by an edge connection.
+</p>
+<p>Other properties are global properties, meaning that their value for a given node
+depends on all of the nodes in the network. An example is the authority score of
+a node, which is computed using the entire graph adjacency matrix (if we denote
+this matrix by <code class="reqn">A</code>, then the principal eigenvector of <code class="reqn">A^T A</code> represents
+the authority scores of the network nodes).
+</p>
+<p>See <code>chooseNodeStats()</code>
+for a list of the available node-level network properties.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A copy of <code>data</code> with with an additional column for each
+new network property computed.
+See <code>chooseNodeStats()</code>
+for the network property names,
+which are used as the column names,
+except for the cluster membership variable,
+whose name is the value of <code>cluster_id_name</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>,
+vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>addNodeStats()</code>
+<code>chooseNodeStats()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+net &lt;-
+  generateNetworkObjects(
+    toy_data,
+    "CloneSeq"
+  )
+
+net$node_data &lt;-
+  addNodeNetworkStats(
+    net$node_data,
+    net$igraph
+  )
+
+
+</code></pre>
+
+
+</div>

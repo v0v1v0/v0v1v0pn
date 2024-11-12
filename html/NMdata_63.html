@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NMscanMultiple</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Run NMscanData on multiple models and stack results</h2>
+
+<h3>Description</h3>
+
+<p>Useful function for meta analyses when multiple models are stored
+in one folder and can be read with NMscanData using the same
+arguments.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NMscanMultiple(files, dir, file.pattern, as.fun, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>files</code></td>
+<td>
+<p>File paths to the models (control stream) to
+edit. See file.pattern too.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dir</code></td>
+<td>
+<p>The directory in which to find the models. Passed to
+list.files(). See file.pattern argument too.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file.pattern</code></td>
+<td>
+<p>The pattern used to match the filenames to
+read with NMscanData. Passed to list.files(). If <code>dir</code> is
+supplied and <code>files</code> is not (or is <code>NULL</code>), the
+default is <code>".*\.lst"</code> which means all files ending in
+'<code>.lst</code>'. See <code>dir</code> argument too.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.fun</code></td>
+<td>
+<p>The default is to return data as a data.frame. Pass
+a function (say tibble::as_tibble) in as.fun to convert to
+something else. If data.tables are wanted, use
+as.fun="data.table". The default can be configured using
+NMdataConf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed to NMscanData.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>All results stacked, class as defined by as.fun
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+res &lt;- NMscanMultiple(dir=system.file("examples/nonmem", package="NMdata"),
+file.pattern="xgxr01.*\\.lst",as.fun="data.table")
+res.mean &lt;- res[,.(meanPRED=exp(mean(log(PRED)))),by=.(model,NOMTIME)]
+library(ggplot2)
+ggplot(res.mean,aes(NOMTIME,meanPRED,colour=model))+geom_line()
+
+## End(Not run)
+</code></pre>
+
+
+</div>

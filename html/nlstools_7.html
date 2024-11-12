@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlsBootPredict</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prediction from Bootstrap resampling </h2>
+
+<h3>Description</h3>
+
+<p>Computation of confidence intervals on predictions from Bootstrap resampling</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  nlsBootPredict(nlsBoot, newdata, interval = c("confidence", "prediction")) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nlsBoot</code></td>
+<td>
+<p> An object of class 'nlsBoot'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p> A data frame in which to look for values of independent variables 
+for the predictions.If omitted, the data used for fitting are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p> Type of interval to compute, "confidence", or "prediction".</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>nlsBootPredict</code> produces confidence intervals on predicted values 
+that can be obtained using <code>predict.nls</code> for values of the
+independent variable(s) defined in the data frame newdata. 
+Non-parametric bootstrapping is used (results of <code>nlsBoot</code>). 
+For confidence intervals the bootstrap sample of predictions is simply computed
+from the bootstrap sample of estimations of the model parameters, by evaluating
+the mean value of the model on each new data. For prediction intervals, 
+to take into account the residual errors, a residual error sampled
+in the mean centered residuals is added to each mean predicted
+value. In both cases, bootstrap predictions are summarized by the median and 95 
+percent confidence intervals (50, 2.5, and 97.5 percentiles of the bootstrapped values).   
+</p>
+
+
+<h3>Value</h3>
+
+ 
+<p><code>nlsBoot</code> returns a matrix of predictions with three columns 
+respectively corresponding to the 50, 2.5 and 97.5 percentiles of bootstrap predictions.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Florent Baty, Marie-Laure Delignette-Muller</p>
+
+
+<h3>References</h3>
+
+<p>Huet S, Bouvier A, Poursat M-A, Jolivet E (2003) Statistical tools for nonlinear regression: a practical guide with S-PLUS and R examples. Springer, Berlin, Heidelberg, New York.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>nlsBoot</code> and <code>predict.nls</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">formulaExp &lt;- as.formula(VO2 ~ (t &lt;= 5.883) * VO2res + (t &gt; 5.883) * 
+                        (VO2res + (VO2peak - VO2res) * 
+                        (1 - exp(-(t - 5.883) / mu))))
+O2K.nls1 &lt;- nls(formulaExp, start = list(VO2res = 400, VO2peak = 1600, mu = 1), data = O2K)
+niter &lt;- 200
+
+### To reach stable prediction intervals use far greater niter (&gt;&gt; 1000)
+O2K.boot1 &lt;- nlsBoot(O2K.nls1, niter = niter)
+newdata &lt;- data.frame(t = seq(0, 12, length.out = 50))
+(pred.clim &lt;- nlsBootPredict(O2K.boot1, newdata = newdata, interval = "confidence"))
+(pred.plim &lt;- nlsBootPredict(O2K.boot1, newdata = newdata, interval = "prediction"))
+
+plotfit(O2K.nls1, smooth = TRUE, ylim = c(200, 1800))
+lines(newdata$t, pred.clim[, 2], col = "red")
+lines(newdata$t, pred.clim[, 3], col = "red")
+lines(newdata$t, pred.plim[, 2], col = "blue")
+lines(newdata$t, pred.plim[, 3], col = "blue")
+
+### An example without giving newdata
+
+# plot of data
+plot(O2K$t, O2K$VO2)
+
+# add of predictions computed using predict.nls()
+pred &lt;- predict(O2K.nls1)
+points(O2K$t, pred, pch = 16)
+
+# add of prediction intervals using nlsBootPredict()
+(pred.plim &lt;- nlsBootPredict(O2K.boot1, interval = "prediction"))
+segments(O2K$t, pred.plim[, 2], O2K$t, pred.plim[, 3], col = "blue")
+</code></pre>
+
+
+</div>

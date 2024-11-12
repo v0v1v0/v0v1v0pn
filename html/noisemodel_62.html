@@ -1,0 +1,215 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lap_bor_ln</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Laplace borderline label noise</h2>
+
+<h3>Description</h3>
+
+<p>Introduction of <em>Laplace borderline label noise</em> into a classification dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## Default S3 method:
+lap_bor_ln(x, y, level, mu = 0, b = 1, k = 1, sortid = TRUE, ...)
+
+## S3 method for class 'formula'
+lap_bor_ln(formula, data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data frame of input attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a factor vector with the output class of each sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>a double in [0,1] with the noise level to be introduced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>a double with the location for the Laplace distribution (default: 0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>a double with the scale for the Laplace distribution (default: 1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>an integer with the number of nearest neighbors to be used (default: 1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sortid</code></td>
+<td>
+<p>a logical indicating if the indices must be sorted at the output (default: <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other options to pass to the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula with the output class and, at least, one input attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame in which to interpret the variables in the formula.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><em>Laplace borderline label noise</em> uses uses an SVM to induce the decision border 
+in the dataset. For each sample, its distance
+to the decision border is computed. Then,
+a Laplace distribution with parameters (<code>mu</code>, <code>b</code>) is used to compute the
+value for the probability density function associated to each distance. Finally, 
+(<code>level</code>·100)% of the samples in the dataset are randomly selected to be mislabeled
+according to their values of the probability density function. For each noisy sample, the 
+majority class among its <code>k</code>-nearest neighbors of a different class 
+is chosen as the new label.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>ndmodel</code> with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xnoise</code></td>
+<td>
+<p>a data frame with the noisy input attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ynoise</code></td>
+<td>
+<p>a factor vector with the noisy output class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numnoise</code></td>
+<td>
+<p>an integer vector with the amount of noisy samples per class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idnoise</code></td>
+<td>
+<p>an integer vector list with the indices of noisy samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numclean</code></td>
+<td>
+<p>an integer vector with the amount of clean samples per class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idclean</code></td>
+<td>
+<p>an integer vector list with the indices of clean samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distr</code></td>
+<td>
+<p>an integer vector with the samples per class in the original data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the full name of the noise introduction model used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>a list of the argument values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the function call.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Noise model adapted from the papers in References to multiclass data, considering SVM with linear 
+kernel as classifier, a mislabeling process using the neighborhood of noisy samples and a 
+noise level to control the number of errors in the data.
+</p>
+
+
+<h3>References</h3>
+
+<p>J. Du and Z. Cai. 
+<strong>Modelling class noise with symmetric and asymmetric distributions</strong>. 
+In <em>Proc. 29th AAAI Conference on Artificial Intelligence</em>, pages 2589-2595, 2015.
+url:<a href="https://dl.acm.org/doi/10.5555/2886521.2886681">https://dl.acm.org/doi/10.5555/2886521.2886681</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ugau_bor_ln</code>, <code>gaum_bor_ln</code>, <code>print.ndmodel</code>, <code>summary.ndmodel</code>, <code>plot.ndmodel</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load the dataset
+data(iris2D)
+
+# usage of the default method
+set.seed(9)
+outdef &lt;- lap_bor_ln(x = iris2D[,-ncol(iris2D)], y = iris2D[,ncol(iris2D)], level = 0.1)
+
+# show results
+summary(outdef, showid = TRUE)
+plot(outdef)
+
+# usage of the method for class formula
+set.seed(9)
+outfrm &lt;- lap_bor_ln(formula = Species ~ ., data = iris2D, level = 0.1)
+
+# check the match of noisy indices
+identical(outdef$idnoise, outfrm$idnoise)
+
+</code></pre>
+
+
+</div>

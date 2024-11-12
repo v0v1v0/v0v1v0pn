@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getSummary</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarize Model Fit Statistics for Fitted Models</h2>
+
+<h3>Description</h3>
+
+<p>This function summarizes the model fit statistics for a list of fitted models. The summary includes the
+number of parameters, estimated likelihood (-2ll), AIC, BIC, and other relevant statistics.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getSummary(model_list, HetModels = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model_list</code></td>
+<td>
+<p>A list of fitted mxModel objects. Specifically, each element of the list should be the <code>mxOutput</code>
+slot from the result returned by one of the estimation functions provided by this package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HetModels</code></td>
+<td>
+<p>A logical flag indicating whether a mixture model or a multiple group model is included in the list.
+If set to <code>TRUE</code>, the function can also be used for the enumeration process, allowing the determination of the
+optimal number of latent classes based on model fit statistics such as BIC. The default value is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame summarizing model fit statistics (number of parameters, estimated likelihood, AIC, BIC, etc.)
+for each model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Load ECLS-K (2011) data
+data("RMS_dat")
+RMS_dat0 &lt;- RMS_dat
+# Re-baseline the data so that the estimated initial status is for the starting point of the study
+baseT &lt;- RMS_dat0$T1
+RMS_dat0$T1 &lt;- RMS_dat0$T1 - baseT
+RMS_dat0$T2 &lt;- RMS_dat0$T2 - baseT
+RMS_dat0$T3 &lt;- RMS_dat0$T3 - baseT
+RMS_dat0$T4 &lt;- RMS_dat0$T4 - baseT
+RMS_dat0$T5 &lt;- RMS_dat0$T5 - baseT
+RMS_dat0$T6 &lt;- RMS_dat0$T6 - baseT
+RMS_dat0$T7 &lt;- RMS_dat0$T7 - baseT
+RMS_dat0$T8 &lt;- RMS_dat0$T8 - baseT
+RMS_dat0$T9 &lt;- RMS_dat0$T9 - baseT
+
+# Fit bilinear spline growth model with fix knot
+## Single group model
+BLS_LGCM1 &lt;- getLGCM(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "BLS", intrinsic = FALSE,
+  records = 1:9, res_scale = 0.1
+  )
+getSummary(model_list = list(BLS_LGCM1@mxOutput), HetModels = FALSE)
+## Mixture model with two latent classes
+set.seed(20191029)
+BLS_LGCM2 &lt;-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.45, 0.55), sub_Model = "LGCM", cluster_TIC = NULL,
+  y_var = "M", t_var = "T", records = 1:9, curveFun = "BLS", intrinsic = FALSE,
+  res_scale = list(0.3, 0.3), growth_TIC = NULL, tries = 10
+  )
+## Mixture model with three latent classes
+set.seed(20191029)
+BLS_LGCM3 &lt;-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.33, 0.34, 0.33), sub_Model = "LGCM", cluster_TIC = NULL,
+  y_var = "M", t_var = "T", records = 1:9, curveFun = "BLS", intrinsic = FALSE,
+  res_scale = list(0.3, 0.3, 0.3), growth_TIC = NULL, tries = 10
+  )
+
+getSummary(model_list = list(BLS_LGCM1@mxOutput, BLS_LGCM2@mxOutput, BLS_LGCM3@mxOutput),
+  HetModels = TRUE)
+
+
+</code></pre>
+
+
+</div>

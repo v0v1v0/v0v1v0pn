@@ -1,0 +1,185 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netheat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Net heat plot</h2>
+
+<h3>Description</h3>
+
+<p>This function creates a net heat plot, a graphical tool for
+locating inconsistency in network meta-analyses.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netheat(
+  x,
+  random = FALSE,
+  tau.preset = NULL,
+  showall = TRUE,
+  nchar.trts = x$nchar.trts,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netmeta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether the net heat plot should
+be based on a random effects model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.preset</code></td>
+<td>
+<p>An optional value for the square-root of the
+between-study variance <code class="reqn">\tau^2</code> for a random effects model on
+which the net heat plot will be based.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>showall</code></td>
+<td>
+<p>A logical indicating whether results should be shown
+for all designs or only a sensible subset (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.trts</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique treatment names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The net heat plot is a matrix visualization proposed by Krahn et
+al. (2013) that highlights hot spots of inconsistency between
+specific direct evidence in the whole network and renders
+transparent possible drivers.
+</p>
+<p>In this plot, the area of a gray square displays the contribution
+of the direct estimate of one design in the column to a network
+estimate in a row. In combination, the colors show the detailed
+change in inconsistency when relaxing the assumption of consistency
+for the effects of single designs. The colors on the diagonal
+represent the inconsistency contribution of the corresponding
+design. The colors on the off-diagonal are associated with the
+change in inconsistency between direct and indirect evidence in a
+network estimate in the row after relaxing the consistency
+assumption for the effect of one design in the column. Cool colors
+indicate an increase and warm colors a decrease: the stronger the
+intensity of the color, the greater the difference between the
+inconsistency before and after the detachment. So, a blue colored
+element indicates that the evidence of the design in the column
+supports the evidence in the row. A clustering procedure is applied
+to the heat matrix in order to find warm colored hot spots of
+inconsistency. In the case that the colors of a column
+corresponding to design <code class="reqn">d</code> are identical to the colors on the
+diagonal, the detaching of the effect of design <code class="reqn">d</code> dissolves
+the total inconsistency in the network.
+</p>
+<p>The pairwise contrasts corresponding to designs of three- or
+multi-arm studies are marked by '_' following the treatments of the
+design.
+</p>
+<p>Designs where only one treatment is involved in other designs of
+the network or where the removal of corresponding studies would
+lead to a splitting of the network do not contribute to the
+inconsistency assessment. By default (<code>showall = TRUE</code>), these
+designs are not incorporated into the net heat plot. If
+<code>showall = FALSE</code>, additional designs with minimal
+contribution to the inconsistency Q statistic are not incorporated
+(i.e., designs with <code>abs(Q.inc.design)</code> <code>&lt;=</code>
+<code>.Machine$double.eps^0.5)</code>.).
+</p>
+<p>In the case of <code>random = TRUE</code>, the net heat plot is based on
+a random effects model generalised for multivariate meta-analysis
+in which the between-study variance <code class="reqn">\tau^2</code> is estimated by the
+method of moments (see Jackson et al., 2012) and embedded in a full
+design-by-treatment interaction model (see Higgins et al., 2012).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ulrike Krahn <a href="mailto:ulrike.krahn@bayer.com">ulrike.krahn@bayer.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Krahn U, Binder H, König J (2013):
+A graphical tool for locating inconsistency in network meta-analyses.
+<em>BMC Medical Research Methodology</em>,
+<b>13</b>, 35
+</p>
+<p>Jackson D, White IR and Riley RD (2012):
+Quantifying the impact of between-study heterogeneity in
+multivariate meta-analyses.
+<em>Statistics in Medicine</em>,
+<b>31</b>, 3805–20
+</p>
+<p>Higgins JPT, Jackson D, Barrett JK, Lu G, Ades AE, White IR (2012):
+Consistency and inconsistency in network meta-analysis: concepts
+and models for multi-arm studies.
+<em>Research Synthesis Methods</em>,
+<b>3</b>, 98–110
+</p>
+
+
+<h3>See Also</h3>
+
+<p>netmeta
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Senn2013)
+
+# Only consider first five studies (to reduce runtime of example)
+#
+studies &lt;- unique(Senn2013$studlab)
+Senn2013.5 &lt;- subset(Senn2013, studlab %in% studies[1:5])
+
+# Conduct network meta-analysis with placebo as reference treatment
+#
+net1 &lt;- netmeta(TE, seTE, treat1, treat2, studlab,
+  data = Senn2013.5, sm = "MD", reference = "plac")
+        
+# Generate a net heat plot based on a common effects model
+#
+netheat(net1) 
+
+## Not run: 
+# Generate a net heat plot based on a random effects model
+#
+netheat(net1, random = TRUE)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>numero.evaluate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Self-organizing map statistics</h2>
+
+<h3>Description</h3>
+
+<p>Evaluate regional variation of data values on a
+self-organizing map</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">numero.evaluate(model, data, ranked = TRUE, n = 1000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>A list object that contains a self-organizing map and a data layout.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A matrix or a data frame.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ranked</code></td>
+<td>
+
+<p>If true, a rank transform is applied to avoid problems from skewed
+distributions or outliers.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>Maximum number of permutations per data column.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The input argument <code>model</code> can be the output from
+<code>numero.create()</code> or from <code>numero.quality()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with named elements: <code>som</code> contains the self-organizing map,
+<code>layout</code> contains the district assignments for data points,
+<code>planes</code> contains smoothed district averages from
+<code>nroAggregate()</code>, the element <code>ranges</code> contains the
+reference ranges to be used in <code>nroColorize()</code>,
+the element <code>statistics</code> contains the output from
+<code>nroPermute()</code>, the element <code>palette</code> is the name of
+the colormap and the element <code>data</code> contains the data points
+that were used for calculating the statistics.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Set identities and manage missing data.
+dataset &lt;- numero.clean(dataset, identity = "INDEX")
+
+# Prepare training variables.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- numero.prepare(data = dataset, variables = trvars)
+
+# Create a self-organizing map.
+sm &lt;- numero.create(data = trdata)
+qc &lt;- numero.quality(model = sm)
+
+# Evaluate map statistics.
+results &lt;- numero.evaluate(model = qc, data = dataset)
+print(results$statistics[,c("TRAINING", "Z", "P.z", "P.freq")])
+</code></pre>
+
+
+</div>

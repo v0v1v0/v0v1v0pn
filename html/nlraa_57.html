@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IA_tab</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Indexes of Agreement Table</h2>
+
+<h3>Description</h3>
+
+<p>Indexes of agreement
+</p>
+<p>printing function for IA_tab
+</p>
+<p>plotting function for a IA_tab, it requires ‘ggplot2’
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IA_tab(obs, sim, object, null.object)
+
+## S3 method for class 'IA_tab'
+print(x, ..., digits = 2)
+
+## S3 method for class 'IA_tab'
+plot(x, y, ..., type = c("OvsS", "RvsS"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+<p>vector with observed data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sim</code></td>
+<td>
+<p>vector with simulated data (should be the same length as observed)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>alternative to the previous two arguments. An object of class ‘lm’, ‘nls’, ‘lme’ or ‘nlme’</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.object</code></td>
+<td>
+<p>optional object which represents the ‘null’ model. It is an intercept-only model
+by default. (Not used at the moment).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class ‘IA_tab’.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional plotting arguments (none use at the moment).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>number of digits for rounding (default is 2)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>not used at the moment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>either “OvsS” (observed vs. simulated) or “RvsS” (residuals vs. simulated).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function returns several indexes that might be useful for interpretation
+</p>
+<p>For objects of class ‘lm’ and ‘nls’ <br>
+bias: mean(obs - sim) <br>
+intercept: intercept of the model obs ~ beta_0 + beta_1 * sim + error <br>
+slope: slope of the model obs ~ beta_0 + beta_1 * sim + error <br>
+RSS (deviance): residual sum of squares of the previous model <br>
+MSE (RSS / n): mean squared error; where n is the number of observations <br>
+RMSE: squared root of the previous index <br>
+R2.1: R-squared extracted from an ‘lm’ object <br>
+R2.2: R-squared computed as the correlation between observed and simulated to the power of 2. <br>
+ME: model efficiency <br>
+NME: Normalized model efficiency <br>
+Corr: correlation between observed and simulated <br>
+ConCorr: concordance correlation  <br></p>
+<p>For objects of class ‘gls’, ‘gnls’, ‘lme’ or ‘nlme’ there
+are additional metrics such as:
+</p>
+<p><a href="https://en.wikipedia.org/wiki/Coefficient_of_determination">https://en.wikipedia.org/wiki/Coefficient_of_determination</a> <br><a href="https://en.wikipedia.org/wiki/Nash-Sutcliffe_model_efficiency_coefficient">https://en.wikipedia.org/wiki/Nash-Sutcliffe_model_efficiency_coefficient</a> <br><a href="https://en.wikipedia.org/wiki/Concordance_correlation_coefficient">https://en.wikipedia.org/wiki/Concordance_correlation_coefficient</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IC_tab</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(nlme)
+require(ggplot2)
+## Fit a simple model and then compute IAs
+data(swpg)
+#' ## Linear model
+fit0 &lt;- lm(lfgr ~ ftsw + I(ftsw^2), data = swpg)
+ias0 &lt;- IA_tab(object = fit0)
+ias0
+## Nonlinear model
+fit1 &lt;- nls(lfgr ~ SSblin(ftsw, a, b, xs, c), data = swpg)
+ias1 &lt;- IA_tab(object = fit1)
+ias1
+plot(ias1)
+## Linear Mixed Models
+data(barley, package = "nlraa")
+fit2 &lt;- lme(yield ~ NF + I(NF^2), random = ~ 1 | year, data = barley)
+ias2 &lt;- IA_tab(object = fit2)
+ias2
+## Nonlinear Mixed Model
+barleyG &lt;- groupedData(yield ~ NF | year, data = barley)
+fit3L &lt;- nlsLMList(yield ~ SSquadp3(NF, a, b, c), data = barleyG)
+fit3 &lt;- nlme(fit3L, random = pdDiag(a + b ~ 1))
+ias3 &lt;- IA_tab(object = fit3)
+ias3
+plot(ias3)
+## Plotting model
+prds &lt;- predict_nlme(fit3, interval = "conf", plevel = 0)
+barleyGA &lt;- cbind(barleyG, prds)
+ggplot(data = barleyGA, aes(x = NF, y = yield)) + 
+   geom_point() + 
+   geom_line(aes(y = Estimate)) + 
+   geom_ribbon(aes(ymin = Q2.5, ymax = Q97.5), 
+               fill = "purple", alpha = 0.2)
+## R2M for model 2
+R2M(fit2)
+## R2M for model 3
+R2M(fit3)
+
+## Using IA_tab without a model
+IA_tab(obs = swpg$lfgr, sim = fitted(fit0))
+
+
+
+</code></pre>
+
+
+</div>

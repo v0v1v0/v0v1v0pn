@@ -1,0 +1,191 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>matrix_estimation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Matrix Estimation</h2>
+
+<h3>Description</h3>
+
+<p>Methods for estimating matrix entries from the marginals (row and column sums).
+</p>
+<p>There are currently two methods implemented: Maximum Entropy (Upper 2004) and 
+Minimum Density (Anand et al. 2015).
+</p>
+<p>You may use the <code>matrix_estimation()</code> function, setting the desired <code>method</code>.
+Or you may use directly the <code>max_ent()</code> function for maximum entropy estimation 
+or the <code>min_dens()</code> function for minimum density estimation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">matrix_estimation(
+  rowsums,
+  colsums,
+  method = c("me", "md"),
+  ...,
+  max.it = 1e+05,
+  abs.tol = 0.001,
+  verbose = TRUE
+)
+
+max_ent(rowsums, colsums, max.it = 1e+05, abs.tol = 0.001, verbose = TRUE)
+
+min_dens(
+  rowsums,
+  colsums,
+  c = 1,
+  lambda = 1,
+  k = 100,
+  alpha = 1/sum(rowsums),
+  delta = 1/sum(rowsums),
+  theta = 1,
+  remove.prob = 0.01,
+  max.it = 1e+05,
+  abs.tol = 0.001,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>rowsums</code></td>
+<td>
+<p>a numeric vector with the row sums.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colsums</code></td>
+<td>
+<p>a numeric vector with the column sums.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the matrix estimation method. Choose <code>"me"</code> for 
+maximum entropy or <code>"md"</code> for minimum density.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.it</code></td>
+<td>
+<p>the maximum number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>abs.tol</code></td>
+<td>
+<p>the desired accuracy.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>gives verbose output. Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>the 'cost' an extra link for the minimum density estimation. 
+See Anand et al. (2015).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>you should use <code>lamda</code> 
+together with <code>k</code>. For the first <code>k</code> rounds of 
+the algorithm, the function will allocate a fraction <code>lambda</code> of the total,
+thus obtaining a "low density" solution, instead of a "minimum density" solution.
+See Anand et al. (2015).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>you should use <code>lamda</code> 
+together with <code>k</code>. For the first <code>k</code> rounds of 
+the algorithm, the function will allocate a fraction <code>lambda</code> of the total,
+thus obtaining a "low density" solution, instead of a "minimum density" solution.
+See Anand et al. (2015).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>weights for the row sums deviations. See Anand et al. (2015).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>weights for the column sums deviations. See Anand et al. (2015).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>scaling parameter. 
+Emphasizes the weight placed on finding solutions with similar characteristics 
+to the prior matrix. See Anand et al. (2015).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove.prob</code></td>
+<td>
+<p>probability to randomly remove a link during the algorithm. See Anand et al. (2015).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The functions return the estimated matrix.
+</p>
+
+
+<h3>References</h3>
+
+<p>Upper, C. and A. Worm (2004). Estimating bilateral exposures in the German interbank market:
+Is there a danger of contagion? European Economic Review 48, 827-849.
+</p>
+<p>Anand, K., Craig, B. and G. von Peter (2015). Filling in the blanks:
+network structure and interbank contagion. 
+Quantitative Finance 15:4, 625-636.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example from Anand, Craig and Von Peter (2015, p.628)
+
+# Liabilities
+L &lt;- c(a = 4, b = 5, c = 5, d = 0, e = 0, f = 2, g = 4)
+
+# Assets
+A &lt;- c(a = 7, b = 5, c = 3, d = 1, e = 3, f = 0, g = 1)
+
+# Maximum Entropy
+ME &lt;- matrix_estimation(A, L, method = "me")
+ME &lt;- round(ME, 2)
+
+# Minimum Density
+set.seed(192)
+MD &lt;- matrix_estimation(A, L, method = "md")
+
+</code></pre>
+
+
+</div>

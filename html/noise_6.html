@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulateSC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate single-cell expression levels of two reporters
+</h2>
+
+<h3>Description</h3>
+
+<p>This function simulates expression levels of two reporters across 
+single cells, mimicking the two-reporter assay.  The hierarchical model described in Fu 
+and Pachter (2016) is used for simulation.  We further make the simplifying assumption 
+that intrinsic noise is the same across cells.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulateSC(n = 1000, intrinsic = 0.7, extrinsic = 0.8, mean = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of single cells (sample size).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intrinsic</code></td>
+<td>
+<p>Scalar.  The (unscaled) intrinsic noise (or within-cell variability), denoted 
+by <code class="reqn">\sigma^2</code> (equation 8) in Fu and Pachter (2016).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extrinsic</code></td>
+<td>
+<p>Scalar.  The (unscaled) extrinsic noise (or between-cell variability), denoted 
+by <code class="reqn">\sigma^2_\mu</code> (equation 9) in Fu and Pachter (2016).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean</code></td>
+<td>
+<p>Scalar.  The overall mean of expression level, denoted by <code class="reqn">\mu</code> (equation 6) in Fu and Pachter (2016).
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame of two columns and <code class="reqn">n</code> rows.  Each column contains the expression levels of a reporter.  Each row is a single cell.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Audrey Q. Fu
+</p>
+
+
+<h3>References</h3>
+
+<p>Fu, A. Q. and Pachter, L. (2016). Estimating intrinsic and extrinsic noise from single-cell gene expression measurements.  arXiv:1601.03334.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>computeIntrinsicNoise</code>, <code>computeExtrinsicNoise</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># simulation #1
+
+# simulate 500 data sets
+n.simu &lt;- 500
+
+# true intrinsic and extrinsic noise
+int.true &lt;- 0.7
+ext.true &lt;- 0.8
+
+# create matrices to hold estimated intrinsic and extrinsic noise
+# using different estimators
+int.simu.mtx &lt;- matrix (0, nrow=n.simu, ncol=8)
+ext.simu.mtx &lt;- matrix (0, nrow=n.simu, ncol=4)
+
+for (i in 1:n.simu) {
+    n &lt;- 1000
+    simu &lt;- simulateSC (n=n, intrinsic=int.true, extrinsic=ext.true, mean=1)
+    
+    int.simu.mtx[i,] &lt;- c(unlist (computeIntrinsicNoise (simu[,1], simu[,2])), 
+        cor (simu[,1], simu[,2]))
+    ext.simu.mtx[i,] &lt;- unlist (computeExtrinsicNoise (simu[,1], simu[,2]))
+    
+}
+
+# add column names to simulation estimates
+colnames (int.simu.mtx) &lt;- c("ELSS", "unbiasedGeneral", "unbiasedEqualMean", 
+    "minMSEGeneral", "minMSEEqualMean", "asymptoticGeneral", 
+    "asymptoticEqualMean", "cor")
+colnames (ext.simu.mtx) &lt;- c("ELSS", "unbiased", "minMSE", "asymptotic")
+
+
+# simulation #2
+
+# simulate 500 data sets
+n.simu &lt;- 500
+
+# true intrinsic and extrinsic noise
+int.true &lt;- 0.7
+ext.true &lt;- 0.8
+
+# use true correlation for the min-MSE estimates of extrinsic noise
+true.cor &lt;- ext.true / (ext.true + int.true)
+
+# create matrices to hold estimated intrinsic and extrinsic noise
+# using different estimators
+int.simu.mtx &lt;- matrix (0, nrow=n.simu, ncol=8)
+ext.simu.mtx &lt;- matrix (0, nrow=n.simu, ncol=4)
+ext.simu.mtx.2 &lt;- matrix (0, nrow=n.simu, ncol=4)
+
+for (i in 1:n.simu) {
+    n &lt;- 50
+    simu &lt;- simulateSC (n=n, intrinsic=int.true, extrinsic=ext.true, mean=1)
+    
+    int.simu.mtx[i,] &lt;- c(unlist (computeIntrinsicNoise (simu[,1], simu[,2])), 
+      cor (simu[,1], simu[,2]))
+    ext.simu.mtx[i,] &lt;- unlist (computeExtrinsicNoise (simu[,1], simu[,2]))
+    ext.simu.mtx.2[i,] &lt;- c(unlist (computeExtrinsicNoiseKnownCor (simu[,1], 
+      simu[,2], true.cor)))
+}
+
+# add column names to simulation estimates
+colnames (int.simu.mtx) &lt;- c("ELSS", "unbiasedGeneral", "unbiasedEqualMean", 
+    "minMSEGeneral", "minMSEEqualMean", "asymptoticGeneral", 
+    "asymptoticEqualMean", "cor")
+colnames (ext.simu.mtx) &lt;- c("ELSS", "unbiased", "minMSE", "asymptotic")
+colnames (ext.simu.mtx.2) &lt;- c("ELSS", "unbiased", "minMSE", "asymptotic")
+
+# compute the MSE of estimates
+computeMSE &lt;- function (a, t) {return (mean((a-t)^2))}
+apply (int.simu.mtx[,1:7], 2, computeMSE, t=int.true)
+apply (ext.simu.mtx, 2, computeMSE, t=ext.true)
+apply (ext.simu.mtx.2, 2, computeMSE, t=ext.true)
+
+</code></pre>
+
+
+</div>

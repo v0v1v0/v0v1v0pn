@@ -1,0 +1,85 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.nlmixr2FitData</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot a nlmixr2 data object</h2>
+
+<h3>Description</h3>
+
+<p>Plot some standard goodness of fit plots for the focei fitted object
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nlmixr2FitData'
+plot(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a focei fit object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (currently ignored)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>nlmixr2PlotList</code> object (a list of ggplot2 objects with easier
+plotting for all of them at the same time)
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Wenping Wang &amp; Matthew Fidler
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(nlmixr2est)
+one.compartment &lt;- function() {
+  ini({
+    tka &lt;- 0.45
+    tcl &lt;- 1
+    tv &lt;- 3.45
+    eta.ka ~ 0.6
+    eta.cl ~ 0.3
+    eta.v ~ 0.1
+    add.sd &lt;- 0.7
+  })
+  model({
+    ka &lt;- exp(tka + eta.ka)
+    cl &lt;- exp(tcl + eta.cl)
+    v &lt;- exp(tv + eta.v)
+    d/dt(depot) = -ka * depot
+    d/dt(center) = ka * depot - cl / v * center
+    cp = center / v
+    cp ~ add(add.sd)
+  })
+}
+
+## The fit is performed by the function nlmixr/nlmix2 specifying the model, data and estimate
+fit &lt;- nlmixr2(one.compartment, theo_sd,  est="saem", saemControl(print=0, nBurn = 10, nEm = 20))
+
+# This shows many goodness of fit plots
+plot(fit)
+
+</code></pre>
+
+
+</div>

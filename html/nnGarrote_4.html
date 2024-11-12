@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nnGarrote</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-negative Garrote Estimator</h2>
+
+<h3>Description</h3>
+
+<p><code>nnGarrote</code> computes the non-negative garrote estimator.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nnGarrote(
+  x,
+  y,
+  intercept = TRUE,
+  initial.model = c("LS", "glmnet")[1],
+  lambda.nng = NULL,
+  lambda.initial = NULL,
+  alpha = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Design matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Response vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>Boolean variable to determine if there is intercept (default is TRUE) or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.model</code></td>
+<td>
+<p>Model used for the groups. Must be one of "LS" (default) or "glmnet".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.nng</code></td>
+<td>
+<p>Shinkage parameter for the non-negative garrote. If NULL(default), it will be computed based on data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.initial</code></td>
+<td>
+<p>The shinkrage parameter for the "glmnet" regularization. If NULL (default), optimal value is chosen by cross-validation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Elastic net mixing parameter for initial estimate. Should be between 0 (default) and 1.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class nnGarrote.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Anthony-Alexander Christidis, <a href="mailto:anthony.christidis@stat.ubc.ca">anthony.christidis@stat.ubc.ca</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>coef.nnGarrote</code>, <code>predict.nnGarrote</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Setting the parameters
+p &lt;- 500
+n &lt;- 100
+n.test &lt;- 5000
+sparsity &lt;- 0.15
+rho &lt;- 0.5
+SNR &lt;- 3
+set.seed(0)
+# Generating the coefficient
+p.active &lt;- floor(p*sparsity)
+a &lt;- 4*log(n)/sqrt(n)
+neg.prob &lt;- 0.2
+nonzero.betas &lt;- (-1)^(rbinom(p.active, 1, neg.prob))*(a + abs(rnorm(p.active)))
+true.beta &lt;- c(nonzero.betas, rep(0, p-p.active))
+# Two groups correlation structure
+Sigma.rho &lt;- matrix(0, p, p)
+Sigma.rho[1:p.active, 1:p.active] &lt;- rho
+diag(Sigma.rho) &lt;- 1
+sigma.epsilon &lt;- as.numeric(sqrt((t(true.beta) %*% Sigma.rho %*% true.beta)/SNR))
+
+# Simulate some data
+library(mvnfast)
+x.train &lt;- mvnfast::rmvn(n, mu=rep(0,p), sigma=Sigma.rho)
+y.train &lt;- 1 + x.train %*% true.beta + rnorm(n=n, mean=0, sd=sigma.epsilon)
+x.test &lt;- mvnfast::rmvn(n.test, mu=rep(0,p), sigma=Sigma.rho)
+y.test &lt;- 1 + x.test %*% true.beta + rnorm(n.test, sd=sigma.epsilon)
+
+# Applying the NNG with Ridge as an initial estimator
+nng.out &lt;- nnGarrote(x.train, y.train, intercept=TRUE,
+                     initial.model=c("LS", "glmnet")[2],
+                     lambda.nng=NULL, lambda.initial=NULL, alpha=0)
+nng.predictions &lt;- predict(nng.out, newx=x.test)
+nng.coef &lt;- coef(nng.out)
+
+
+</code></pre>
+
+
+</div>

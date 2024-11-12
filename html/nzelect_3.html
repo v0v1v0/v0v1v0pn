@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>GE2014</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>General Election Results 2014</h2>
+
+<h3>Description</h3>
+
+<p>New Zealand 2014 general election results by voting place
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">GE2014
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 136,195 rows and 7 variables.</p>
+
+
+<h3>Details</h3>
+
+
+<ul>
+<li> <p><code>ApproxLocation</code>. Approximate location of voting place
+</p>
+</li>
+<li> <p><code>VotingPlace</code>. Exact location of voting place
+</p>
+</li>
+<li> <p><code>Party</code>. Party voted for (party vote) or party of candidate voted for
+(candidate vote)
+</p>
+</li>
+<li> <p><code>Votes</code>. Number of votes
+</p>
+</li>
+<li> <p><code>Electorate</code>. Electorate in which voters were enrolled.  Note that this 
+is not necessarily the physical location of the VotingPlace, so VotingPlace
+and Electorate have a many to many relationship
+</p>
+</li>
+<li> <p><code>VotingType</code>. Party (proportional representation) or Candidate (first past 
+the vote).  In New Zealand each voter has to vote for both an individual
+candidate to represent their electorate, and a party vote for the overall makeup
+of Parliament.
+</p>
+</li>
+<li> <p><code>Candidate</code>. If VotingType == "Candidate", the name of the candidate; 
+otherwise NA
+</p>
+</li>
+</ul>
+<p><code>GE2014</code> is deprecated; please use <code>nzge</code> instead - it has results back to 2002 and is the one we 
+will update in future.
+</p>
+
+
+<h3>Source</h3>
+
+<p><a href="http://www.electionresults.govt.nz/electionresults_2014/e9/html/statistics.html">http://www.electionresults.govt.nz/electionresults_2014/e9/html/statistics.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Locations2014</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># the following matches the results published at
+# http://www.electionresults.govt.nz/electionresults_2014/e9/html/e9_part1.html
+library(tidyr)
+library(dplyr)
+GE2014 %&gt;%
+    mutate(VotingType = paste0(VotingType, "Vote")) %&gt;%
+    group_by(Party, VotingType) %&gt;%
+    summarise(Votes = sum(Votes)) %&gt;%
+    spread(VotingType, Votes) %&gt;%
+    select(Party, PartyVote, CandidateVote) %&gt;%
+    ungroup() %&gt;%
+    arrange(desc(PartyVote))
+</code></pre>
+
+
+</div>

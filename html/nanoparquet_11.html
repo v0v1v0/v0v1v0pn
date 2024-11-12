@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_parquet_page</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read a page from a Parquet file</h2>
+
+<h3>Description</h3>
+
+<p>Read a page from a Parquet file
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_parquet_page(file, offset)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>Path to a Parquet file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>Integer offset of the start of the page in the file.
+See <code>parquet_pages()</code> for a list of all pages and their offsets.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Named list. Many entries correspond to the columns of
+the result of <code>parquet_pages()</code>. Additional entries are:
+</p>
+
+<ul>
+<li> <p><code>codec</code>: compression codec. Possible values:
+</p>
+</li>
+<li> <p><code>has_repetition_levels</code>: whether the page has repetition levels.
+</p>
+</li>
+<li> <p><code>has_definition_levels</code>: whether the page has definition levels.
+</p>
+</li>
+<li> <p><code>schema_column</code>: which schema column the page corresponds to. Note
+that only leaf columns have pages.
+</p>
+</li>
+<li> <p><code>data_type</code>: low level Parquet data type. Possible values:
+</p>
+</li>
+<li> <p><code>repetition_type</code>: whether the column the page belongs to is
+<code>REQUIRED</code>, <code>OPTIONAL</code> or <code>REPEATED</code>.
+</p>
+</li>
+<li> <p><code>page_header</code>: the bytes of the page header in a raw vector.
+</p>
+</li>
+<li> <p><code>num_null</code>: number of missing (<code>NA</code>) values. Only set in V2 data
+pages.
+</p>
+</li>
+<li> <p><code>num_rows</code>: this is the same as <code>num_values</code> for flat tables, i.e.
+files without repetition levels.
+</p>
+</li>
+<li> <p><code>compressed_data</code>: the data of the page in a raw vector. It includes
+repetition and definition levels, if any.
+</p>
+</li>
+<li> <p><code>data</code>: the uncompressed data, if nanoparquet supports the
+compression codec of the file (GZIP and SNAPPY at the time of
+writing), or if the file is not compressed. In the latter case it
+is the same as <code>compressed_data</code>.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>parquet_pages()</code> for a summary of all pages.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+file_name &lt;- system.file("extdata/userdata1.parquet", package = "nanoparquet")
+nanoparquet:::parquet_pages(file_name)
+options(max.print = 100)  # otherwise long raw vector
+nanoparquet:::read_parquet_page(file_name, 4L)
+
+</code></pre>
+
+
+</div>

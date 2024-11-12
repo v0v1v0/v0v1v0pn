@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nca_output</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>display the result of the NCA analysis</h2>
+
+<h3>Description</h3>
+
+<p>Show the plots, NCA summaries and bottleneck tables of a NCA analysis.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nca_output(model, plots=TRUE, plotly=FALSE, bottlenecks=FALSE,
+           summaries=TRUE, test=FALSE, pdf=FALSE, path=NULL, selection = NULL)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Displays output of the nca or nca_analysis command</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+<p>If true (default) show the scatter plot(s), one  for each independent variable.<br>
+In Rstudio the plots are shown the Plots window.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotly</code></td>
+<td>
+<p>If true shows the interactive scatter plot(s), one for each independent variable.<br>
+In RStudio the plots are shown in the Viewer window. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bottlenecks</code></td>
+<td>
+<p>If true displays the bottleneck table(s) in the Console window, one table for each ceiling line</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summaries</code></td>
+<td>
+<p>If true shows the summaries for each independent variable in the Console window, see Details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>If true shows the result of the statistical sigificance test (if present), see Details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf</code></td>
+<td>
+<p>If true exports the output to a pdf file, except for the plotly plot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+<p>Optional path for the output file(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>selection</code></td>
+<td>
+<p>Optionally selects the independent variables for inclusion in the output.<br>
+For example, only the plots for the selected independent variable are shown.<br>
+In the bottleneck table the required levels of only the selected independent variables for given levels of Y are shown.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><strong>Plotly</strong><br>
+The plot highlights the points that construct the ceiling line ('peers').
+The names and XY coordinates of all points pop up when moving the pointer over the plot.
+The toolbar allows several actions such as zoom and selection of parts of the plot. Optionally subgroups of points can be labeled.
+<br><br><b>Summaries</b><br>
+The output starts with 6 lines of basic information ("global") about the dataset ("Number of observations", "Scope", "Xmin", "Xmax", "Ymin", and "Ymax").
+"Scope" refers to the empirical area of possible x-y combinations, given the minimum and maximum observed x and y values.<br>
+The next 11 lines present the NCA parameters ("param", see below) for each of the selected ceiling techniques (the defaults techniques are ce_fdh and cr_fdh).<br><br>
+The 11 printed NCA parameters are:<br>
+- <em>Ceiling zone</em>, which is the size of the "empty" area in the upper-left corner<br>
+- <em>Effect size</em>, which is the ceiling zone divided by the scope<br>
+- <em># above</em>, which is the number of observations that are above the ceiling line and hence in the "empty" ceiling zone<br>
+- <em>c-accuracy</em>, which is the number of observations on or below the ceiling line divided by the total number of observations and multiplied by 100 percent<br>
+- <em>Fit</em>, which relates to the "closeness" of the selected ceiling line to the ce_fdh ceiling line<br>
+- <em>Slope</em> and <em>Intercept</em>, which are the slope and the intercept of the straight ceiling line (no values are printed if the ceiling line is not a straight line, but a step function)<br>
+- <em>Abs. ineff.</em>, which is the total xy-space where x does not constrain y, and y is not constrained by x<br>
+- <em>Rel. ineff.</em>, which is the total xy-space where x does not constrain y, and y is not constrained by x as percentage of the scope<br>
+- <em>Condition ineff.</em>, which is the condition inefficiency that indicates for which range of x (as a percentage of the total range) x does not constrain y (i.e., there is no ceiling line in that x-range)<br>
+- <em>Outcome ineff.</em>, which is the outcome efficiency that indicates for which range of y (as a percentage of the total range of y) y is not constrained by x (i.e., there is no ceiling line in that y-range)
+<br><br><b>Test</b><br>
+NCA's statistical test is a randomness test to evaluate if the observed effect size may be a random result of unrelated X and Y variables
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Use the result of the nca command:
+data(nca.example)
+data &lt;- nca.example
+model &lt;- nca_analysis(data, c(1, 2), 3)
+
+# Show the full summaries in the Console window
+nca_output(model)
+
+# Suppress the summaries and display the plots
+nca_output(model, plots=TRUE, summaries=FALSE)
+
+# Display the plots via Plotly
+nca_output(model, plotly=TRUE, summaries=FALSE)
+
+# Label the observation of the Plotly plot by using a vector of names (no more than 5).
+# For example label the observations in nca.example
+labels &lt;- c('Australia', 'Europe', 'Europe', 'North America', 'Europe', 'Europe',
+'Europe', 'Europe', 'Europe', 'Europe', 'Europe', 'Europe', 'Europe', 'Asia',
+'North America', 'Europe', 'Australia', 'Europe', 'Europe', 'Europe', 'Europe',
+'Asia', 'Europe', 'Europe', 'Europe', 'Europe', 'Europe', 'North America')
+nca_output(model, plotly=labels, summaries=FALSE)
+
+# Suppress the summaries and display the bottlenecks
+nca_output(model, bottlenecks=TRUE, summaries=FALSE)
+
+# Show the results of the statistical significance test (p-value)
+# Make sure to set test.rep in nca_analysis
+nca_output(model, test=TRUE)
+
+# Show all five
+nca_output(model, plots=TRUE, plotly=TRUE, bottlenecks=TRUE, test=TRUE)
+
+# Per independent variable, export plots and summaries to PDF files,
+# and export all the bottleneck tables to a single PDF file
+nca_output(model, plots=TRUE, bottlenecks=TRUE, pdf=TRUE)
+
+# Use the path option to export to an existing directory
+outdir &lt;- '/tmp' 
+nca_output(model, plots=TRUE, pdf=TRUE, path=outdir)
+
+# Limit the output to a selection of independent variables by name
+nca_output(model, plots=TRUE, selection=c("Individualism"))
+
+# Or by column index, in both cases the order matters
+nca_output(model, plots=TRUE, selection=c(2, 1))
+</code></pre>
+
+
+</div>

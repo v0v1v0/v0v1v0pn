@@ -1,0 +1,67 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>eval_simoutput</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Evaluate input/output integrity</h2>
+
+<h3>Description</h3>
+
+<p>Evaluate input/output integrity
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">eval_simoutput(nl)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>nl</code></td>
+<td>
+<p>nl object with attached simulation output</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>This function checks if the attached simulation output in the simoutput slot of the simdesign,
+corresponds to the defined siminput matrix.
+</p>
+<p>Warning messages are thrown if data is missing in the simoutput tibble.
+Additionally, missing combinations of siminputrow and random seed for which no data was found can be reported as tibble.
+Such a tibble can then be used directly to rerun missing combinations conveniently (see examples below)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Check eval_simoutput for testdata nl_lhs:
+nl &lt;- nl_lhs
+eval_simoutput(nl)
+
+# Now remove one row of simoutput and check output:
+nl &lt;- nl_lhs
+nl@simdesign@simoutput &lt;- nl@simdesign@simoutput[-1,]
+check &lt;- eval_simoutput(nl)
+check
+
+# Rerun missing combinations within check tibble:
+rerun &lt;- purrr::map_dfr(seq(nrow(check)), function(x) {
+  res &lt;- run_nl_one(nl, siminputrow=check$siminputrow[x], seed=check$seed[x])
+    return(res)
+    }) %&gt;%
+      dplyr::bind_rows(., nl@simdesign@simoutput)
+
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nemtr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nonparametric Extended Median Test</h2>
+
+<h3>Description</h3>
+
+<p>Take a dataframe, validate it, and then conduct the Nonparametric Extended
+Median Test to generate and display a control chart
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nemtr(
+  dataFrame,
+  timing,
+  streams,
+  VoI = NA,
+  type = "long",
+  median0 = NA,
+  delta = 3
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataFrame</code></td>
+<td>
+<p>A user inputted dataframe, can be wide or long</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timing</code></td>
+<td>
+<p>A string of the timing variable name</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>streams</code></td>
+<td>
+<p>A string of the streams variable name</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>VoI</code></td>
+<td>
+<p>A string of the Variable of Interest name</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A string of the type of data (default long)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>median0</code></td>
+<td>
+<p>A value for expected median</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>A value for delta (default 3)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A validated dataframe in long format
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(795014178)
+streams &lt;- 20
+time &lt;- 60
+samples &lt;- 15
+mu0 &lt;- 3
+delta &lt;- 3
+library(dplyr)
+turnstiles &lt;- tibble(
+  turnstile = rep(rep(1:streams,each=samples),time),
+  hour = rep(1:time,each=streams * samples),
+  sample = rep(rep(1:samples), times = streams * time),
+  waitTime = rexp(streams * time * samples,rate=.22985)
+  ) %&gt;% mutate(waitTime = if_else(hour == 38, waitTime * 2,waitTime))
+nemtr(turnstiles, timing="hour", streams="sample", VoI="waitTime", type="long", median0 = 3)
+
+</code></pre>
+
+
+</div>

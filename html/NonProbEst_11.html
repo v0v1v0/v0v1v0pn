@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model_calibrated</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculates a model calibrated estimation</h2>
+
+<h3>Description</h3>
+
+<p>It uses the model calibrated estimator introduced by Wu et al. (2001).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">model_calibrated(
+  sample_data,
+  weights,
+  full_data,
+  covariates,
+  estimated_var,
+  estimate_mean = FALSE,
+  positive_label = NULL,
+  algorithm = "glm",
+  proc = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sample_data</code></td>
+<td>
+<p>Data frame containing the sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Vector containing the sample weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full_data</code></td>
+<td>
+<p>Data frame containing all the individuals contained in the population.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariates</code></td>
+<td>
+<p>String vector specifying the common variables to use for training.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimated_var</code></td>
+<td>
+<p>String specifying the variable to estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimate_mean</code></td>
+<td>
+<p>Boolean specifying whether the mean estimation should be returned. Otherwise, the total estimation is returned by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>positive_label</code></td>
+<td>
+<p>String specifying the label to be considered positive if the estimated variable is categorical. Leave it as the default NULL otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>A string specifying which classification or regression model to use (same as caret's method).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proc</code></td>
+<td>
+<p>A string or vector of strings specifying if any of the data preprocessing techniques available in train function from 'caret' package should be applied to data prior to the propensity estimation. By default, its value is NULL and no preprocessing is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further parameters to be passed to the train function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Training of the models is done via the 'caret' package. The algorithm specified in <code>algorithm</code> must match one of the names in the list of algorithms supported by 'caret'.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The population total estimation (or mean if specified by the 'estimate_mean' parameter).
+</p>
+
+
+<h3>References</h3>
+
+<p>Wu, C., &amp; Sitter, R. R. (2001). <em>A model-calibration approach to using complete auxiliary information from survey data.</em> Journal of the American Statistical Association, 96(453), 185-193.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Simple example
+covariates = c("education_primaria", "education_secundaria",
+   "age", "sex", "language")
+if (is.numeric(sampleNP$vote_gen))
+   sampleNP$vote_gen = factor(sampleNP$vote_gen, c(0, 1), c('F', 'T'))
+model_calibrated(sampleNP, nrow(population) / nrow(sampleNP),
+   population, covariates, "vote_gen", positive_label = 'T', algorithm = 'glmnet')
+</code></pre>
+
+
+</div>

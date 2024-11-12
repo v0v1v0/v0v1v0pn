@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calibrate_water</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>calibrate_water</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+This function uses NEON validation data to apply drift corrections to
+measured ambient water isotope ratios. In brief, ambient water isotope
+ratios are calibrated by generating regressions using reference water
+measurements bracketing an ambient period. Three reference waters are
+measured once per day, with several injections per reference water.
+Due to memory effects, only the last three are used currently to generate
+calibration equations. Regressions between measured d18O and d2H values
+and NEON-provisioned known reference values are generated, and used to
+calibrate the period of ambient measurements between them if the r2 of
+the regression is greater than a threshold value (by default, this is 0.95).
+Most of this function deals with selecting the appropriate calibration data
+and determining calibration quality. This function also contains a wrapper
+for <code>calibrate_ambient_water_linreg</code>, which calibrates the ambient
+water data using the calibration parameters generated in this function.
+This function also copies over data in the qfqm and ucrt hdf5 data groups.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calibrate_water(
+  inname,
+  outname,
+  site,
+  calibration_half_width = 14,
+  filter_data = TRUE,
+  force_cal_to_beginning = FALSE,
+  force_cal_to_end = FALSE,
+  r2_thres = 0.95,
+  slope_tolerance = 9999,
+  correct_ref_data = TRUE,
+  write_to_file = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>inname</code></td>
+<td>
+<p>Input file(s) that are to be calibrated. If a single file is
+given, output will be a single file per site per month. If a
+list of files corresponding to a timeseries at a given site
+is provided, will calibrate the whole time series.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outname</code></td>
+<td>
+<p>Name of the output file. (character)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>site</code></td>
+<td>
+<p>Four-letter NEON code for site being processed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calibration_half_width</code></td>
+<td>
+<p>Determines the range of standard measurements
+to use in determining the calibration regression dataset. Creates
+a moving window that is <code>2*calibration_half_width</code> days wide.
+Default is set to 14 for a 28 day moving window.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter_data</code></td>
+<td>
+<p>Apply median absolute deviation filter from Brock 86 to
+remove impulse spikes?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_cal_to_beginning</code></td>
+<td>
+<p>Extend first calibration to
+the beginning of the file?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_cal_to_end</code></td>
+<td>
+<p>Extend last calibration to the end of the file?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r2_thres</code></td>
+<td>
+<p>Minimum r2 threshold of an "acceptable" calibration. Acts to
+remove calibration periods where a measurement error makes
+relationship nonlinear. Default = 0.95</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slope_tolerance</code></td>
+<td>
+<p>How different from 1 should we allow
+'passing' regression slopes to be? Experimental parameter,
+off by default (e.g., default slope parameter = 9999)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct_ref_data</code></td>
+<td>
+<p>There are a few instances where the reference d18O
+and d2H values may have been switched, causing very anomalous
+d-excess values. If TRUE, implement a switch that corrects this
+issue.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>write_to_file</code></td>
+<td>
+<p>Write calibrated ambient data to file?
+(Mostly used for testing)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><em>IMPORTANT NOTE</em> Currently this function does not apply a correction for
+humidity dependence of Picarro isotopic measurements. This is because the
+data to implement these corrections is not yet publicly available.
+Caution is suggested when analyzing data at low humidities, below ~5000 ppm,
+with likely higher biases at lower humidity values.
+</p>
+<p>Additionally, please note that this function is meant to work on <em>all</em> files
+for a given site at the same time. A more flexible version that can handle
+all files or monthly files will be added to a future release.
+</p>
+
+
+<h3>Value</h3>
+
+<p>nothing to the workspace, but creates a new output file of
+calibrated water isotope data.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Rich Fiorella <a href="mailto:rfiorella@lanl.gov">rfiorella@lanl.gov</a>
+</p>
+
+
+</div>

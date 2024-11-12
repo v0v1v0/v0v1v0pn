@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netEst.dir</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Constrained estimation of directed networks
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates a directed network using a lasso (L1) penalty.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netEst.dir(x, zero = NULL, one = NULL, lambda, verbose = FALSE, eps = 1e-08)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The <code class="reqn">p \times n</code> data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero</code></td>
+<td>
+<p>(Optional) indices of entries of the matrix to be constrained to be zero. The input should be a matrix of <code class="reqn">p \times p</code>, with 1 at entries to be constrained to be zero and 0 elsewhere.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>one</code></td>
+<td>
+<p>(Optional) indices of entries of the matrix to be kept regardless of the regularization parameter for lasso. The input is similar to that of <code>zero</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>(Non-negative) numeric scalar or a vector of length <code class="reqn">p-1</code> representing the regularization parameters for nodewise lasso. If <code>lambda</code> is a scalar, the same penalty will be used for all <code class="reqn">p-1</code> lasso regressions. By default (<code>lambda=NULL</code>), the vector of <code>lambda</code> is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\lambda_j(\alpha) = 2 n^{-1/2} Z^*_{\frac{\alpha}{2p(j-1)}}, \quad j=2,\ldots,p.</code>
+</p>
+
+<p>Here <code class="reqn">Z^*_q</code> represents the <code class="reqn">(1-q)</code>-th quantile of the standard normal distribution and <code class="reqn">\alpha</code> is a positive constant between 0 and 1. See Shojaie and Michailidis (2010a) for details on the choice of tuning parameters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Whether to print out information as estimation proceeds. Default = <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>(Non-negative) numeric scalar indicating the tolerance level for differentiating zero and non-zero edges: entries with magnitude <code class="reqn">&lt;</code> <code>eps</code> will be set to 0. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>netEst.dir</code> performs constrained estimation of a directed network using a lasso (L1) penalty, as described in Shojaie and Michailidis (2010a). Two sets of constraints determine subsets of entries of the weighted adjacency matrix that should be exactly zero (the option <code>zero</code> argument), or should take non-zero values (option <code>one</code> argument). The remaining entries will be estimated from data.
+</p>
+<p>The arguments <code>one</code> and/or <code>zero</code> can come from external knowledge on the 0-1 structure of underlying network, such as a list of edges and/or non-edges learned from available databases.
+</p>
+<p>In this function, it is assumed that the columns of <code class="reqn">x</code> are ordered according to a correct (Wald) causal order, such that no <code class="reqn">x_j</code> is a parent of <code class="reqn">x_k</code> (<code class="reqn">k \le j</code>). Given the causal ordering of nodes, the resulting adjacency matrix is lower triangular (see Shojaie &amp; Michailidis, 2010b). Thus, only lower triangular parts of <code>zero</code> and <code>one</code> are used in this function. For this reason, it is important that both of these matrices are also ordered according to the causal order of the nodes in <code class="reqn">x</code>. To estimate the network, first each node is regressed on the known edges (<code>one</code>). The residual obtained from this regression is then used to find the additional edges, among the nodes that could potentially interact with the given node (those not in <code>zero</code>).
+</p>
+<p>This function is closely related to <code>NetGSA</code>, which requires the weighted adjacency matrix as input. When the user does not have complete information on the weighted adjacency matrix, but has data (not necessarily the same as the <code>x</code> in <code>NetGSA</code>) and external information (<code>one</code> and/or <code>zero</code>) on the adjacency matrix, then <code>netEst.dir</code> can be used to estimate the remaining interactions in the adjacency matrix using the data.
+Further, when it is anticipated that the adjacency matrices under different conditions are different, and data from different conditions are available, the user needs to run <code>netEst.dir</code> separately to obtain estimates of the adjacency matrices under each condition.
+</p>
+<p>The algorithm used in <code>netEst.undir</code> is based on <code>glmnet</code>. Please refer to <code>glmnet</code> for computational details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Adj</code></td>
+<td>
+<p>The weighted adjacency matrix of dimension <code class="reqn">p \times p</code>. This is the matrix that will be used in <code>NetGSA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>infmat</code></td>
+<td>
+<p>The influence matrix of dimension <code class="reqn">p \times p</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>The values of tuning parameters used.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ali Shojaie
+</p>
+
+
+<h3>References</h3>
+
+<p>Shojaie, A., &amp; Michailidis, G. (2010a). Penalized likelihood methods for estimation of sparse high-dimensional directed acyclic graphs. Biometrika 97(3), 519-538. <a href="https://academic.oup.com/biomet/article-abstract/97/3/519/243918">https://academic.oup.com/biomet/article-abstract/97/3/519/243918</a>
+</p>
+<p>Shojaie, A., &amp; Michailidis, G. (2010b). Network enrichment analysis in complex experiments. Statistical applications in genetics and molecular biology, 9(1), Article 22. <a href="https://pubmed.ncbi.nlm.nih.gov/20597848/">https://pubmed.ncbi.nlm.nih.gov/20597848/</a>.
+</p>
+<p>Shojaie, A., &amp; Michailidis, G. (2009). Analysis of gene sets based on the underlying regulatory network. Journal of Computational Biology, 16(3), 407-426. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3131840/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3131840/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>prepareAdjMat</code>, <code>glmnet</code>
+</p>
+
+
+</div>

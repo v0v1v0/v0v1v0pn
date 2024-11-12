@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>std</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Standardizes a design matrix</h2>
+
+<h3>Description</h3>
+
+<p>Accepts a design matrix and returns a standardized version of that matrix
+(i.e., each column will have mean 0 and mean sum of squares equal to 1).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">std(X, Xnew)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A matrix (or object that can be coerced to a matrix, such as a data frame or numeric vector).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xnew</code></td>
+<td>
+<p>Optional. If supplied, <code>X</code> must be the output of <code>std()</code> and <code>Xnew</code> is to be standardized in the same way. See examples for why this might be useful.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function centers and scales each column of <code>X</code> so that
+</p>
+<p style="text-align: center;"><code class="reqn">\sum_{i=1}^n x_{ij}=0</code>
+</p>
+
+<p>and
+</p>
+<p style="text-align: center;"><code class="reqn">n^{-1} \sum_{i=1}^n x_{ij}^2 = 1</code>
+</p>
+
+<p>for all j. This is usually not necessary to call directly, as <strong>ncvreg</strong> internally
+standardizes the design matrix, but inspection of the standardized design matrix
+can sometimes be useful. This differs from the base R function <code>scale()</code> in two ways:
+</p>
+
+<ol>
+<li> <p><code>scale()</code> uses the sample standard deviation <code>sqrt(sum(x^2)/(n-1))</code>, while <code>std()</code> uses the root-mean-square standard deviation <code style="white-space: pre;">⁠sqrt(mean(sum(x^2))⁠</code> without the <code class="reqn">n/(n-1)</code> correction
+</p>
+</li>
+<li> <p><code>std</code> is faster.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>The standardized design matrix, with the following attribues:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>center, scale</code></td>
+<td>
+<p>mean and standard deviation used to scale the columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonsingular</code></td>
+<td>
+<p>A vector indicating which columns of the original design matrix were able to be standardized (constant columns cannot be standardized to have a standard deviation of 1)</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Prostate)
+S &lt;- std(Prostate$X)
+apply(S, 2, sum)
+apply(S, 2, function(x) mean(x^2))
+
+# Standardizing new observations
+X1 &lt;- Prostate$X[1:90,]
+X2 &lt;- Prostate$X[91:97,]
+S &lt;- std(X1)
+head(std(S, X2))
+# Useful if you fit to a standardized X, but then get new obs:
+y &lt;- Prostate$y[1:90]
+fit &lt;- ncvreg(S, y)
+predict(fit, std(S, X2), lambda=0.1)
+# Same as
+predict(ncvreg(X1, y), X2, lambda=0.1)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>div_gof</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Divergence Tests of Goodness of Fit</h2>
+
+<h3>Description</h3>
+
+<p>Tests of various hypothetical structural models <em>p0</em> against
+the general model <em>p</em> which is estimated using empirical data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">div_gof(dat, var1, var2, var_cond = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>dataframe with rows as observations and columns as variables.
+Variables must all be observed or transformed categorical with finite range spaces.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var1</code></td>
+<td>
+<p>variable name as character in <code>dat</code> specified to be independent to
+those specified in <code>var2</code> under <em>p0</em></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var2</code></td>
+<td>
+<p>variable name as character in <code>dat</code> specified to be independent to
+those specified in <code>var1</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_cond</code></td>
+<td>
+<p>character of variable name in <code>dat</code> to condition the independence specification on,
+must be different variables than those specified in <code>var1</code> and <code>var2</code>).
+Default = empty (no conditioning).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>this function is currently implemented to only test goodness of fit of models specified as
+<em>X</em> independent of <em>Y</em>, or <em>X</em> independent of <em>Y</em> given <em>Z</em>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Message indicating whether the hypothesis with the specified independence model
+can be rejected or not on approximately 5% level of significance.
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>summary</code></td>
+<td>
+<p>Dataframe including the value of the divergence <em>D</em> and its degrees of freedom</p>
+</td>
+</tr></table>
+<h3>Author(s)</h3>
+
+<p>Termeh Shafie
+</p>
+
+
+<h3>References</h3>
+
+<p>Frank, O., &amp; Shafie, T. (2016). Multivariate entropy analysis of network data.
+<em>Bulletin of Sociological Methodology/Bulletin de Méthodologie Sociologique</em>, 129(1), 45-63.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>joint_entropy</code>,   <code>assoc_graph</code>,  <code>entropy_trivar</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Data editing and creation of dyad variables:
+data(lawdata)
+adj.advice &lt;- lawdata[[1]]
+adj.friend &lt;- lawdata[[2]]
+adj.cowork &lt;-lawdata[[3]]
+df.att &lt;- lawdata[[4]]
+att.var &lt;-
+data.frame(
+ status   = df.att$status-1,
+ gender   = df.att$gender,
+ office   = df.att$office-1,
+ years    = ifelse(df.att$years&lt;=3,0,
+            ifelse(df.att$years&lt;=13,1,2)),
+ age  = ifelse(df.att$age&lt;=35,0,
+        ifelse(df.att$age&lt;=45,1,2)),
+ practice = df.att$practice,
+ lawschool= df.att$lawschool-1)
+dyad.status    &lt;- get_dyad_var(att.var$status, type = 'att')
+dyad.gender    &lt;- get_dyad_var(att.var$gender, type = 'att')
+dyad.office    &lt;- get_dyad_var(att.var$office, type = 'att')
+dyad.years     &lt;- get_dyad_var(att.var$years, type = 'att')
+dyad.age       &lt;- get_dyad_var(att.var$age, type = 'att')
+dyad.practice  &lt;- get_dyad_var(att.var$practice, type = 'att')
+dyad.lawschool &lt;- get_dyad_var(att.var$lawschool, type = 'att')
+dyad.cwk    &lt;- get_dyad_var(adj.cowork, type = 'tie')
+dyad.adv    &lt;- get_dyad_var(adj.advice, type = 'tie')
+dyad.frn    &lt;- get_dyad_var(adj.friend, type = 'tie')
+dyad.var &lt;-
+data.frame(cbind(status    = dyad.status$var,
+                 gender    = dyad.gender$var,
+                 office    = dyad.office$var,
+                 years     = dyad.years$var,
+                 age       = dyad.age$var,
+                 practice  = dyad.practice$var,
+                 lawschool = dyad.lawschool$var,
+                 cowork    = dyad.cwk$var,
+                 advice    = dyad.adv$var,
+                 friend    = dyad.frn$var)
+                 )
+# To test whether friend is independent of cowork given advice:
+div_gof(dat = dyad.var, var1 = "friend", var2 = "cowork", var_cond = "advice")
+</code></pre>
+
+
+</div>

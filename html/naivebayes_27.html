@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.nonparametric_naive_bayes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predict Method for nonparametric_naive_bayes Objects</h2>
+
+<h3>Description</h3>
+
+<p>Classification based on the Non-Parametric Naive Bayes model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nonparametric_naive_bayes'
+predict(object, newdata = NULL, type = c("class","prob"),
+  threshold = 0.001, eps = 0, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class inheriting from <code>"nonparametric_naive_bayes"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>matrix with metric predictors (only numeric matrix accepted).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>if "class", new data points are classified according to the highest posterior probabilities. If "prob", the posterior probabilities for each class are returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>value by which zero probabilities or probabilities within the epsilon-range corresponding to metric variables are replaced (zero probabilities corresponding to categorical variables can be handled with Laplace (additive) smoothing).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>value that specifies an epsilon-range to replace zero or close to zero probabilities by <code>threshold</code>. It applies to metric variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This is a specialized version of the Naive Bayes classifier, in which all features take on real values (numeric/integer) and class conditional probabilities are non-parametrically estimated with kernel density estimator. By default Gaussian kernel is used and the smoothing bandwidth is selected according to the Silverman's 'rule of thumb'. For more details, please see the references and the documentation of <code>density</code> and <code>bw.nrd0</code>.
+</p>
+<p>The Non-Parametric Naive Bayes is available in both, <code>naive_bayes()</code> and <code>nonparametric_naive_bayes()</code>. This specialized implementation of the Naive Bayes does not provide a substantial speed-up over the general <code>naive_bayes()</code> function but it should be more transparent and user friendly.
+</p>
+<p>The <code>nonparametric_naive_bayes</code> function is equivalent to <code>naive_bayes()</code> when the numeric matrix or a data.frame contains only numeric variables and <code>usekernel = TRUE</code>.
+</p>
+<p>The missing values (NAs) are omitted during the parameter estimation. The NAs in the newdata in <code>predict.nonparametric_naive_bayes()</code> are not included into the calculation of posterior probabilities; and if present an informative warning is given.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>predict.nonparametric_naive_bayes</code> returns either a factor with class labels corresponding to the maximal conditional posterior probabilities or a matrix with class label specific conditional posterior probabilities.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michal Majka, <a href="mailto:michalmajka@hotmail.com">michalmajka@hotmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Silverman, B. W. (1986). Density Estimation for Statistics and Data Analysis. Chapman &amp; Hall.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>naive_bayes</code>, <code>nonparametric_naive_bayes</code>, <code>plot.nonparametric_naive_bayes</code>, <code>tables</code>, <code>get_cond_dist</code>, <code>naive_bayes</code>, <code>%class%</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(iris)
+y &lt;- iris[[5]]
+M &lt;- as.matrix(iris[-5])
+
+### Train the Non-Parametric Naive Bayes
+nnb &lt;- nonparametric_naive_bayes(x = M, y = y, bw = "SJ")
+
+### Classification
+head(predict(nnb, newdata = M, type = "class"))
+head(nnb %class% M)
+
+### Posterior probabilities
+head(predict(nnb, newdata = M, type = "prob"))
+head(nnb %prob% M)
+</code></pre>
+
+
+</div>

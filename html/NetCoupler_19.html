@@ -1,0 +1,84 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nc_standardize</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Standardize the metabolic variables.</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>Can standardize by either 1) <code>log()</code>-transforming and then applying <code>scale()</code>
+(mean-center and scaled by standard deviation), or 2) if <code>regressed_on</code>
+variables are given, then log-transforming, running a linear regression to obtain
+the <code>stats::residuals()</code>, and finally scaled. Use <code>regressed_on</code> to try to
+remove influence of potential confounding.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nc_standardize(data, cols = everything(), regressed_on = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols</code></td>
+<td>
+<p>Metabolic variables that will make up the network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regressed_on</code></td>
+<td>
+<p>Optional. A character vector of variables to regress the
+metabolic variables on. Use if you want to standardize the metabolic variables
+on variables that are known to influence them, e.g. sex or age. Calculates
+the residuals from a linear regression model.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Outputs a tibble object, with the original metabolic
+variables now standardized.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>nc_estimate_links for more detailed examples or the <code>vignette("NetCoupler")</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Don't regress on any variable
+simulated_data %&gt;%
+  nc_standardize(starts_with("metabolite_"))
+
+# Extract residuals by regressing on a variable
+simulated_data %&gt;%
+  nc_standardize(starts_with("metabolite_"), "age")
+
+# Works with factors too
+simulated_data %&gt;%
+  dplyr::mutate(Sex = as.factor(sample(rep(c("F", "M"), times = nrow(.) / 2)))) %&gt;%
+  nc_standardize(starts_with("metabolite_"), c("age", "Sex"))
+
+</code></pre>
+
+
+</div>

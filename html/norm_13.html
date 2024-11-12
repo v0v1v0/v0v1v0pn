@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ninvwish</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Random normal-inverted Wishart variate
+</h2>
+
+<h3>Description</h3>
+
+<p>Simulates a value from a normal-inverted Wishart distribution. This
+function may be useful for obtaining starting values of the
+parameters of a  multivariate normal distribution for multiple
+chains of data augmentation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ninvwish(s, params)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+
+<p>summary list of an incomplete normal data matrix produced by the
+function <code>prelim.norm</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>params</code></td>
+<td>
+
+<p>list of parameters of a normal-inverted Wishart distribution. In
+order, the elements of the list are: tau (a scalar), m (a scalar), mu0
+(a vector of length ncol(x)), and lambdainv (a matrix of dimension
+c(ncol(x),ncol(x))). When using this function to create starting
+values for data augmentation, mu0 and lambdainv should be chosen in
+relation to the data matrix after the columns have been centered and
+scaled to have mean zero and variance one.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a vector in packed storage representing the simulated normal-inverted
+Wishart variate. This vector has the same form as parameter vectors
+produced by functions such as <code>em.norm</code> and <code>da.norm</code>, and may be
+used directly as a starting value for these functions. This vector can
+also be put into a more understandable format by <code>getparam.norm</code>.
+</p>
+
+
+<h3>WARNING</h3>
+
+<p>Before this function may be used, the random number generator seed
+must be initialized with <code>rngseed</code> at least once in the current S
+session.
+</p>
+
+
+<h3>References</h3>
+
+<p>See Section 5.4.2 of Schafer (1996).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rngseed</code>, <code>getparam.norm</code>, <code>em.norm</code> and <code>da.norm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(mdata)
+s &lt;- prelim.norm(mdata)   #do preliminary manipulations
+params &lt;- list(1,.5,rep(0,ncol(mdata)), .5*diag(rep(1,ncol(mdata)))) # gives widely dispersed values
+rngseed(1234567)
+start &lt;- ninvwish(s,params)  # draw a variate
+thetahat &lt;- em.norm(s,start=start) # run EM from this starting value
+</code></pre>
+
+
+</div>

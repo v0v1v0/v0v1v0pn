@@ -1,0 +1,315 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fitnvmix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fitting Multivariate Normal Variance Mixtures</h2>
+
+<h3>Description</h3>
+
+<p>Functionalities for fitting multivariate normal variance mixtures (in
+particular also Multivariate <em>t</em> distributions) via an ECME algorithm.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fitnvmix(x, qmix, mix.param.bounds, nu.init = NA, loc = NULL, scale = NULL,
+         init.size.subsample = min(n, 100), size.subsample = n,
+         control = list(), verbose = TRUE)
+
+fitStudent(x, loc = NULL, scale = NULL, mix.param.bounds = c(1e-3, 1e2), ...)
+fitNorm(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code class="reqn">(n, d)</code>-data <code>matrix</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmix</code></td>
+<td>
+<p>specification of the mixing variable <code class="reqn">W</code>; see McNeil et
+al. (2015, Chapter 6). Supported are the following types of
+specification (see also the examples below):
+</p>
+
+<dl>
+<dt>
+<code>character</code>:</dt>
+<dd>
+<p><code>character</code> string
+specifying a supported distribution; currently available are
+<code>"constant"</code> (in which case <code class="reqn">W = 1</code> and thus
+the multivariate normal distribution with mean vector
+<code>loc</code> and covariance matrix <code>scale</code> results),
+<code>"inverse.gamma"</code> (in which case <code class="reqn">W</code> is
+inverse gamma distributed with shape and rate parameters
+<code>df</code>/2 and thus the multivariate
+Student <em>t</em> distribution with <code>df</code> degrees of freedom
+results) and <code>"pareto"</code> (in which case <code class="reqn">W</code> is
+Pareto distributed with scale equal to unity and shape equal to
+<code>alpha</code>).
+</p>
+</dd>
+<dt>
+<code>function</code>:</dt>
+<dd>
+<p><code>function</code>
+interpreted as the quantile function of the mixing
+variable <code class="reqn">W</code>. In this case, <code>qmix</code> <em>must</em> have the
+form <code>qmix = function(u, nu)</code>, where the argument <code>nu</code>
+corresponds to the parameter (vector) specifying the distribution
+of the mixing variable.
+</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mix.param.bounds</code></td>
+<td>
+<p>either <code>numeric(2)</code> or a
+<code>matrix</code> with two columns. The first/second column
+corresponds to the lower/upper bound of <code class="reqn">nu_i</code>, the ith
+component of the parameter vector <code class="reqn">nu</code> of the mixing variable
+<code class="reqn">W</code>. All elements need to be finite, numeric values.
+Note: The algorithm tends to converge quicker if the parameter
+ranges supplied are smaller.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nu.init</code></td>
+<td>
+<p>either <code>NA</code> or an initial guess for the parameter
+(vector) <code class="reqn">nu</code>. In the former case an initial estimate is
+calculated by the algorithm. If <code>nu.init</code> is provided, the
+algorithm often converges faster; the better the starting value,
+the faster convergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc</code></td>
+<td>
+<p><code class="reqn">d</code>-<code>vector</code>; if provided, taken as the 'true'
+location vector in which case <code>loc</code> is not estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>positive definite <code class="reqn">(d, d)</code>-<code>matrix</code>; if provided,
+taken as the 'true' scale matrix in which case <code>scale</code> is not estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.size.subsample</code></td>
+<td>
+<p><code>numeric</code>, non-negative,
+giving the sub-samplesize used to get an initial estimate for
+<code class="reqn">nu</code>. Only used if <code>is.na(nu.init)</code>, otherwise ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size.subsample</code></td>
+<td>
+<p><code>numeric</code>, non-negative, specifying
+the size of the subsample that is being used in the ECME iterations
+to optimize the log-likelihood over <code class="reqn">nu</code>. Defaults to <code>n</code>,
+so that the full sample is being used. Decreasing this number can
+lead to faster run-times (as fewer log-densities need to be
+estimated) but also to an increase in bias and variance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p><code>list</code> specifying algorithm specific
+parameters; see below under 'Details' and <code>get_set_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p><code>numeric</code> or <code>logical</code> (in
+which case it is converted to <code>numeric</code>) specifying the
+amount of tracing to be done. If <code>0</code> or <code>FALSE</code>, neither tracing
+nor warnigns are communicated; if <code>1</code>, only warnigns are communicated,
+if <code>2</code> or <code>3</code>, warnings and (shorter or longer) tracing information is
+provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments passed to the underlying
+<code>fitnvmix()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>fitnvmix()</code> uses an ECME algorithm to approximate the
+MLEs of the parameters <code>nu</code>, <code>loc</code> and <code>scale</code> of a
+normal variance mixture specified by <code>qmix</code>. The underlying
+procedure successively estimates <code>nu</code> (with given <code>loc</code> and
+<code>scale</code>) by maximizing the likelihood which is approximated by
+<code>dnvmix()</code> (unless <code>qmix</code> is a <code>character</code>
+string, in which case analytical formulas for the log-densities are
+used) and <code>scale</code> and <code>loc</code> (given <code>nu</code>) using weights
+(which again need to be approximated) related to the posterior
+distribution, details can be found in the first reference below.
+</p>
+<p>It should be highlighted that (unless unless <code>qmix</code> is a
+<code>character</code> string), every log-likelihood and every weight needed
+in the estimation is numerically approximated via RQMC methods. For
+large dimensions and sample sizes this procedure can therefore be
+slow.
+</p>
+<p>Various tolerances and convergence criteria can be changed by the user
+via the <code>control</code> argument. For more details, see
+<code>get_set_param()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function <code>fitnvmix()</code> returns an S3 object of
+<code>class</code> <code>"fitnvmix"</code>, basically a <code>list</code>
+which contains, among others, the components
+</p>
+
+<dl>
+<dt><code>nu</code></dt>
+<dd>
+<p>Estimated mixing parameter (vector) <code>nu</code>.</p>
+</dd>
+<dt><code>loc</code></dt>
+<dd>
+<p>Estimated or provided <code>loc</code> vector.</p>
+</dd>
+<dt><code>scale</code></dt>
+<dd>
+<p>Estimated or provided <code>scale</code> matrix.</p>
+</dd>
+<dt><code>max.ll</code></dt>
+<dd>
+<p>Estimated log-likelihood at reported estimates.</p>
+</dd>
+<dt><code>x</code></dt>
+<dd>
+<p>Input data matrix <code>x</code>.</p>
+</dd>
+</dl>
+<p>The methods <code>print()</code>, <code>summary()</code> and <code>plot()</code> are defined
+for the class <code>"fitnvmix"</code>.
+</p>
+<p><code>fitStudent()</code> is a wrapper to <code>fitnvmix()</code> for parameter
+estimation of multivariate Student <em>t</em> distributions; it also
+returns an S3 object of <code>class</code> <code>"fitnvmix"</code> where
+the fitted degrees of freedom are called <code>"df"</code> instead of
+<code>"nu"</code> (to be consistent
+with the other wrappers for the Student <em>t</em> distributions).
+</p>
+<p><code>fitNorm()</code> just returns a <code>list</code> with components
+<code>loc</code> (columnwise sample means) and <code>scale</code> (sample
+covariance matrix).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+<p>McNeil, A. J., Frey, R. and Embrechts, P. (2015).
+<em>Quantitative Risk Management: Concepts, Techniques, Tools</em>.
+Princeton University Press.
+</p>
+<p>Liu, C. and Rubin, D. (1994).
+The ECME algorithm: a simple extension of EM and ECM with faster monotone
+convergence.
+<em>Biometrika</em> 81(4),
+633–648.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dnvmix()</code>, <code>rnvmix()</code>, <code>pnvmix()</code>,
+<code>qqplot_maha()</code>, <code>get_set_param()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Sampling parameters
+set.seed(274) # for reproducibility
+nu               &lt;- 2.8 # parameter used to sample data
+d                &lt;- 4 # dimension
+n                &lt;- 75 # small sample size to have examples run fast
+loc              &lt;- rep(0, d) # location vector
+A                &lt;- matrix(runif(d * d), ncol = d)
+diag_vars        &lt;- diag(runif(d, min = 2, max = 5))
+scale            &lt;- diag_vars %*% cov2cor(A %*% t(A)) %*% diag_vars # scale matrix
+mix.param.bounds &lt;- c(1, 5) # nu in [1, 5]
+
+### Example 1: Fitting a multivariate t distribution ###########################
+
+if(FALSE){
+    ## Define 'qmix' as the quantile function of an IG(nu/2, nu/2) distribution
+    qmix &lt;- function(u, nu) 1 / qgamma(1 - u, shape = nu/2, rate = nu/2)
+    ## Sample data using 'rnvmix'
+    x &lt;- rnvmix(n, qmix = qmix, nu = nu, loc = loc, scale = scale)
+    ## Call 'fitvnmix' with 'qmix' as a function (so all densities/weights are estimated)
+    (MyFit11 &lt;- fitnvmix(x, qmix = qmix, mix.param.bounds = mix.param.bounds))
+    ## Call 'fitnvmix' with 'qmix = "inverse.gamma"' in which case analytical formulas
+    ## for weights and densities are used:
+    (MyFit12 &lt;- fitnvmix(x, qmix = "inverse.gamma",
+                         mix.param.bounds = mix.param.bounds))
+    ## Alternatively, use the wrapper 'fitStudent()'
+    (MyFit13 &lt;- fitStudent(x))
+    ## Check
+    stopifnot(all.equal(MyFit11$nu, MyFit12$nu, tol = 5e-2),
+              all.equal(MyFit11$nu, MyFit13$nu, tol = 5e-2))
+    ## Can also provide 'loc' and 'scale' in which case only 'nu' is estimated
+    (MyFit13 &lt;- fitnvmix(x, qmix = "inverse.gamma", mix.param.bounds = mix.param.bounds,
+                         loc = loc, scale = scale))
+    (MyFit14 &lt;- fitStudent(x, loc = loc, scale = scale))
+    stopifnot(all.equal(MyFit13$nu, MyFit14$df, tol = 1e-6))
+}
+
+### Example 2: Fitting a Pareto mixture ########################################
+
+## Define 'qmix' as the quantile function of a Par(nu, 1) distribution
+qmix &lt;- function(u, nu) (1-u)^(-1/nu)
+## Sample data using 'rnvmix':
+x &lt;- rnvmix(n, qmix = qmix, nu = nu, loc = loc, scale = scale)
+## Call 'fitvnmix' with 'qmix' as function (=&gt; densities/weights estimated)
+(MyFit21 &lt;- fitnvmix(x, qmix = qmix, mix.param.bounds = mix.param.bounds))
+## Call 'fitnvmix' with 'qmix = "pareto"' in which case an analytical formula
+## for the density is used
+(MyFit22 &lt;- fitnvmix(x, qmix = "pareto", mix.param.bounds = mix.param.bounds))
+stopifnot(all.equal(MyFit21$nu, MyFit22$nu, tol = 5e-2))
+
+</code></pre>
+
+
+</div>

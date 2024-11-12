@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Phen</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Phen</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the annual phenological cycle from a time series of vegetation greenness.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Phen(x, dates, h, frequency = "16-days", rge, plot = T)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Numeric vector. A time series of a vegetation index (e.g. LAI, NDVI, EVI) or any other variable with seasonal behavior. The code has been optimized to work with integer values. Please re-scale the input values if necessary (e.g. NDVI ranging from 0.0000 to 1.0000, multiply by 10,000</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dates</code></td>
+<td>
+<p>A date vector. The number of dates must be equal to the number of "x" values (numeric input vector).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>Numeric. Indicates the geographic hemisphere to define the starting date of the growing season. h = 1 if the vegetation is in the Northern Hemisphere (season starting at January 1st), h = 2 if it is in the Southern Hemisphere (season starting at July 1st)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frequency</code></td>
+<td>
+<p>Character string. Defines the number of samples for the output phenology and must be one of the following options: 'daily' giving output vector of length 365, '8-days' giving output vector of length 46 (i.e MOD13Q1 and MYD13Q1), 'monthly' giving output vector of length 12,'bi-weekly' giving output vector of length 24 (i.e. GIMMS) or '16-days' (default) giving output vector of length 23 (i.e MOD13Q1 or MYD13Q1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rge</code></td>
+<td>
+<p>Numeric vector with two values setting the minimum and maximum values of the response variable (e.g. NDVI) used in the analysis. We suggest the use of theoretically based limits. For example in the case of MODIS NDVI or EVI, it ranges from 0 to 10,000, so rge = c(0,10000)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>Logical. Set TRUE (default) or FALSE to show the phenology curve plot.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Derives the annual phenological cycle for a standard growing season using a numeric vector of vegetation canopy greenness values (e.g. Leaf Area Index, LAI) or satellite based greenness proxies such as the Normalized Difference Vegetation Index (NDVI) or Enhanced Vegetation Index (EVI). A vector with dates for the greenness values is also required.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric vector, where each value represents the expected greeness at that date
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>PhenMap</code>,<code>PhenKplot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+library(lubridate)
+library(terra)
+## Testing raster data from Central Chile (NDVI), h=2##
+# Load data
+f &lt;- system.file("extdata/MegaDrought_spatRast.rda", package = "npphen")
+MegaDrought &lt;- readRDS(f)
+# Dates
+data("modis_dates")
+
+# Generate a Raster time series using a raster stack and a date database from Central Chile
+# Obtain data from a particular pixel generating a time series
+md_pixel &lt;- cellFromXY(MegaDrought, cbind(313395, 6356610))
+md_pixelts &lt;- as.numeric(MegaDrought[md_pixel])
+plot(modis_dates, md_pixelts, type = "l")
+
+# Phenology for the given pixel
+Phen(x = md_pixelts, dates = modis_dates, h = 2, frequency = "16-days", rge = c(0, 10000))
+
+## Testing with the Bdesert_stack from the Atacama Desert, Northern Chile (NDVI), h=2 ##
+
+# Load data
+# SparRaster
+f &lt;- system.file("extdata/Bdesert_spatRast.rda", package = "npphen")
+Bdesert &lt;- readRDS(f)
+
+# Generate a Raster time series using a raster stack and a date database from Northern Chile
+# Obtain data from a particular pixel generating a time series
+bd_pixel &lt;- cellFromXY(Bdesert, cbind(286638, 6852107))
+bd_pixelts &lt;- as.numeric(Bdesert[bd_pixel])
+plot(modis_dates, bd_pixelts, type = "l")
+
+# Phenology for the given pixel
+Phen(x = bd_pixelts, dates = modis_dates, h = 2, frequency = "16-days", rge = c(0, 10000))
+
+</code></pre>
+
+
+</div>

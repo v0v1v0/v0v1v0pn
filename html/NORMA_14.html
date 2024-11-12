@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NORMA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>NORMA Optimization</h2>
+
+<h3>Description</h3>
+
+<p>Computes general noise SVR based on NORMA optimization.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NORMA(x, y, f_0 = 0, beta_0 = 0, lambda = 0, rate = function(t) {     1
+  }, kernel = linear_kernel, cost_der = ILF_cost_der,
+  cost_name = "ILF_cost_der", gamma = 1, max_iterations = nrow(x),
+  stopping_threshold = 0, trace = TRUE, no_beta = TRUE,
+  fixed_epsilon = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>matrix</code> containing training points. Each row must be a point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p><code>numeric</code> containing target for training points <code class="reqn">x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f_0</code></td>
+<td>
+<p>initial hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta_0</code></td>
+<td>
+<p>initial value for offset <code class="reqn">b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>NORMA optimization parameter <code class="reqn">lambda</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rate</code></td>
+<td>
+<p>learning rate for NORMA optimization. Must be a function with one argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>kernel function to use. Must be a function with three arguments such as <code>gaussian_kernel</code>.
+See also linear_kernel</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cost_der</code></td>
+<td>
+<p>Loss function derivative to use. See also ILF_cost_der. Must be "ILF_cost_der" when
+ILF derivative is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cost_name</code></td>
+<td>
+<p><code>character</code> indicating the symbolic name of <code>cost_der</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>gaussian kernel parameter <code class="reqn">\gamma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iterations</code></td>
+<td>
+<p>maximum number of NORMA iterations computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stopping_threshold</code></td>
+<td>
+<p>value indicating when to stop NORMA optimization. See also 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p><code>boolean</code> indicating if information messages should be printed (TRUE) or not (FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no_beta</code></td>
+<td>
+<p><code>boolean</code> indicating if an offset <code class="reqn">b</code> is used (FALSE) or not (TRUE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed_epsilon</code></td>
+<td>
+<p><code>boolean</code> indicating if <code>epsilon</code> should be updated (FALSE) or not (TRUE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to be passed to the low level functions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Optimization will stop when the sum of the differences between all training predicted values of present
+iteration versus values from previous iteration does not exceeds <code>stopping_threshold</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a <code>list</code> containing:
+</p>
+
+<dl>
+<dt>alpha</dt>
+<dd>
+<p><code>matrix</code> representing <code class="reqn">\alpha</code> parameters of NORMA optimization in each iteration, one per row.</p>
+</dd>
+<dt>beta</dt>
+<dd>
+<p><code>numeric</code> representing <code class="reqn">\beta</code> parameter of NORMA optimization in each iteration.</p>
+</dd>
+<dt>n_iterations</dt>
+<dd>
+<p>Number of NORMA iterations performed.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Jesus Prada, <a href="mailto:jesus.prada@estudiante.uam.es">jesus.prada@estudiante.uam.es</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Link to the scientific paper
+</p>
+<p>Kivinen J., Smola A. J., Williamson R.C.: Online learning with kernels. In: IEEE
+transactions on signal processing, vol. 52, pp. 2165-2176, IEEE (2004).
+</p>
+<p>with theoretical background for NORMA optimization is provided below.
+</p>
+<p><a href="http://realm.sics.se/papers/KivSmoWil04(1).pdf">http://realm.sics.se/papers/KivSmoWil04(1).pdf</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">NORMA(x=matrix(rnorm(10),nrow=10,ncol=1,byrow=TRUE),y=rnorm(10),kernel=function(x,y,gamma=0){x%*%y},
+cost_der=function(phi,sigma_cuad,mu){return((phi-mu)/sigma_cuad)},cost_name="example",
+sigma_cuad=1,mu=0)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dietaryfat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Network meta-analysis of dietary fat</h2>
+
+<h3>Description</h3>
+
+<p>Network meta-analysis comparing the effects of two diets to control
+on mortality.
+</p>
+<p>The data are rates, given as the number of deaths and person-years.
+These data are used as an example in the supplemental material of
+Dias et al. (2013).
+</p>
+
+
+<h3>Format</h3>
+
+<p>A data frame with the following columns:
+</p>
+
+<table>
+<tr>
+<td style="text-align: right;">
+<b><em>treat1</em></b>
+</td>
+<td style="text-align: left;"> treatment 1 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>treat2</em></b>
+</td>
+<td style="text-align: left;"> treatment 2 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>treat3</em></b>
+</td>
+<td style="text-align: left;"> treatment 3 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>years1</em></b>
+</td>
+<td style="text-align: left;"> person years arm 1 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>years2</em></b>
+</td>
+<td style="text-align: left;"> person years arm 2 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>years3</em></b>
+</td>
+<td style="text-align: left;"> person years arm 3 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>d1</em></b>
+</td>
+<td style="text-align: left;"> events (deaths) arm 1 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>d2</em></b>
+</td>
+<td style="text-align: left;"> events (deaths) arm 2 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>d3</em></b>
+</td>
+<td style="text-align: left;"> events (deaths) arm 3 </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+<b><em>ID</em></b>
+</td>
+<td style="text-align: left;"> study ID
+</td>
+</tr>
+</table>
+<h3>Source</h3>
+
+<p>Dias S, Sutton AJ, Ades AE and Welton NJ (2013):
+Evidence synthesis for decision making 2: A generalized linear
+modeling framework for pairwise and network meta-analysis of
+randomized controlled trials.
+<em>Medical Decision Making</em>,
+<b>33</b>, 607–17
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pairwise</code>, <code>metainc</code>,
+<code>netmeta</code>, <code>netgraph.netmeta</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(dietaryfat)
+
+# Transform data from arm-based format to contrast-based format
+# Using incidence rate ratios (sm = "IRR") as effect measure.
+# Note, the argument 'sm' is not necessary as this is the default
+# in R function metainc() called internally
+#
+p1 &lt;- pairwise(list(treat1, treat2, treat3),
+  list(d1, d2, d3), time = list(years1, years2, years3),
+  studlab = ID, data = dietaryfat, sm = "IRR")
+p1
+
+# Conduct network meta-analysis
+#
+net1 &lt;- netmeta(p1)
+net1
+
+# Conduct network meta-analysis using incidence rate differences
+# (sm = "IRD")
+#
+p2 &lt;- pairwise(list(treat1, treat2, treat3),
+  list(d1, d2, d3), time = list(years1, years2, years3),
+  studlab = ID, data = dietaryfat, sm = "IRD")
+net2 &lt;- netmeta(p2)
+net2
+
+# Draw network graph
+#
+netgraph(net1, points = TRUE, cex.points = 3, cex = 1.25)
+
+netgraph(net1, points = TRUE, cex.points = 3, cex = 1.25,
+  labels = c("Control","Diet", "Diet 2"))
+</code></pre>
+
+
+</div>

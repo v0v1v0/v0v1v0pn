@@ -1,0 +1,79 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_sorted</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Sorted Network</h2>
+
+<h3>Description</h3>
+
+<p>given a tree with an id and and toid in the
+first and second columns, returns a sorted and potentially
+split set of output.
+</p>
+<p>Can also be used as a very fast implementation of upstream
+with tributaries navigation. The full network from each
+outlet is returned in sorted order.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_sorted(x, split = FALSE, outlets = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>data.frame with an identifier and to identifier in the
+first and second columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split</code></td>
+<td>
+<p>logical if TRUE, the result will be split into
+independent networks identified by the id of their outlet. The
+outlet id of each independent network is added as a "terminalID"
+attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlets</code></td>
+<td>
+<p>same as id in x; if specified only the network
+emanating from these outlets will be considered and returned.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data.frame containing a topologically sorted version
+of the requested network and optionally a terminal id.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">source(system.file("extdata/new_hope_data.R", package = "nhdplusTools"))
+
+fpath &lt;- get_tocomid(
+  dplyr::select(new_hope_flowline, COMID, FromNode, ToNode, Divergence, FTYPE,
+                AreaSqKM, LENGTHKM, GNIS_ID)
+)
+
+head(fpath &lt;- get_sorted(fpath, split = TRUE))
+
+fpath['sort_order'] &lt;- 1:nrow(fpath)
+
+plot(fpath['sort_order'])
+
+</code></pre>
+
+
+</div>

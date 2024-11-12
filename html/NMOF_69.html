@@ -1,0 +1,362 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SAopt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Optimisation with Simulated Annealing
+</h2>
+
+<h3>Description</h3>
+
+<p>The function implements a Simulated-Annealing algorithm.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SAopt(OF, algo = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>OF</code></td>
+<td>
+<p>The objective function, to be minimised. Its first argument
+needs to be a solution <code>x</code>; it will be called as <code>OF(x,
+      ...)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algo</code></td>
+<td>
+<p>A list of settings for the algorithm. See
+Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other variables passed to <code>OF</code> and
+<code>algo$neighbour</code>. See Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Simulated Annealing (<abbr><span class="acronym">SA</span></abbr>) changes an initial solution
+iteratively; the algorithm stops after a fixed number of
+iterations. Conceptually, <abbr><span class="acronym">SA</span></abbr> consists of a loop than runs
+for a number of iterations. In each iteration, a current solution
+<code>xc</code> is changed through a function <code>algo$neighbour</code>. If this
+new (or neighbour) solution <code>xn</code> is not worse than <code>xc</code>, ie,
+if <code>OF(xn,...) &lt;= OF(xc,...)</code>, then <code>xn</code> replaces
+<code>xc</code>. If <code>xn</code> is worse, it still replaces <code>xc</code>, but
+only with a certain probability. This probability is a function of the
+degree of the deterioration (the greater, the less likely the new
+solution is accepted) and the current iteration (the longer the
+algorithm has already run, the less likely the new
+solution is accepted).
+</p>
+<p>The list <code>algo</code> contains the following items.
+</p>
+
+<dl>
+<dt><code>nS</code></dt>
+<dd>
+<p>The number of steps per temperature. The default is
+1000; but this setting depends very much on the problem.</p>
+</dd>
+<dt><code>nT</code></dt>
+<dd>
+<p>The number of temperatures. Default is 10.</p>
+</dd>
+<dt><code>nI</code></dt>
+<dd>
+<p>Total number of iterations, with default
+<code>NULL</code>. If specified, it will override
+<code>nS</code> with <code>ceiling(nI/nT)</code>. Using this
+option makes it easier to compare and switch
+between functions <code>LSopt</code>,
+<code>TAopt</code> and <code>SAopt</code>.
+</p>
+</dd>
+<dt><code>nD</code></dt>
+<dd>
+<p>The number of random steps to calibrate the
+temperature. Defaults to 2000.</p>
+</dd>
+<dt><code>initT</code></dt>
+<dd>
+<p>Initial temperature. Defaults to <code>NULL</code>, in
+which case it is automatically chosen so that <code>initProb</code> is
+achieved.</p>
+</dd>
+<dt><code>finalT</code></dt>
+<dd>
+<p>Final temperature. Defaults to 0.</p>
+</dd>
+<dt><code>alpha</code></dt>
+<dd>
+<p>The cooling constant. The current temperature is
+multiplied by this value. Default is 0.9.</p>
+</dd>
+<dt><code>mStep</code></dt>
+<dd>
+<p>Step multiplier. The default is 1, which implies
+constant number of steps per temperature. If greater than 1, the step
+number <code>nS</code> is increased to <code>m*nS</code> (and rounded).</p>
+</dd>
+<dt><code>x0</code></dt>
+<dd>
+<p>The initial solution. If this is a function, it will
+be called once without arguments to compute an initial solution, ie,
+<code>x0 &lt;- algo$x0()</code>. This can be useful when the routine is
+called in a loop of restarts, and each restart is to have its own
+starting value.</p>
+</dd>
+<dt><code>neighbour</code></dt>
+<dd>
+<p>The neighbourhood function, called as
+<code>neighbour(x, ...)</code>. Its first argument must be a solution
+<code>x</code>; it must return a changed solution.</p>
+</dd>
+<dt><code>printDetail</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), information
+is printed. If an integer <code>i</code> greater then one, information
+is printed at very <code>i</code>th iteration.</p>
+</dd>
+<dt><code>printBar</code></dt>
+<dd>
+<p>If <code>TRUE</code> (default is <code>FALSE</code>), a
+<code>txtProgressBar</code> (from package <span class="pkg">utils</span>) is
+printed. The progress bar is not shown if <code>printDetail</code> is an
+integer greater than 1.</p>
+</dd>
+<dt><code>storeF</code></dt>
+<dd>
+<p>if <code>TRUE</code> (the default), the objective
+function values for every solution in every generation are stored
+and returned as matrix <code>Fmat</code>.</p>
+</dd>
+<dt><code>storeSolutions</code></dt>
+<dd>
+<p>Default is <code>FALSE</code>. If
+<code>TRUE</code>, the solutions (ie, decision variables) in every
+generation are stored and returned in list <code>xlist</code> (see Value
+section below). To check, for instance, the current solution at
+the end of the <code>i</code>th generation, retrieve <code>xlist[[c(2L,
+      i)]]</code>.</p>
+</dd>
+<dt><code>classify</code></dt>
+<dd>
+<p>Logical; default is <code>FALSE</code>. If
+<code>TRUE</code>, the result will have a class attribute <code>SAopt</code>
+attached.</p>
+</dd>
+<dt><code>OF.target</code></dt>
+<dd>
+<p>Numeric; when specified, the algorithm will
+stop when an objective-function value as low as <code>OF.target</code> (or
+lower) is achieved. This is useful when an optimal
+objective-function value is known: the algorithm will then stop and
+not waste time searching for a better solution.</p>
+</dd>
+</dl>
+<p>At the minimum, <code>algo</code> needs to contain an initial solution
+<code>x0</code> and a <code>neighbour</code> function.
+</p>
+<p>The total number of iterations equals <code>algo$nT</code> times
+<code>algo$nS</code> (plus possibly <code>algo$nD</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>SAopt</code> returns a list with five components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xbest</code></td>
+<td>
+<p>the solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OFvalue</code></td>
+<td>
+<p>objective function value of the solution, ie,
+<code>OF(xbest, ...)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fmat</code></td>
+<td>
+<p>if <code>algo$storeF</code> is <code>TRUE</code>, a matrix with
+one row for each iteration (excluding the initial <code>algo$nD</code>
+steps) and two columns. The first column contains the objective
+function values of the neighbour solution at a given iteration; the
+second column contains the value of the current solution. Since
+<abbr><span class="acronym">SA</span></abbr> can walk away from locally-optimal solutions, the best
+solution can be monitored through <code>cummin(Fmat[ ,2L])</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlist</code></td>
+<td>
+<p>if <code>algo$storeSolutions</code> is <code>TRUE</code>, a
+list; else <code>NA</code>. Contains the neighbour solutions at a given
+iteration (<code>xn</code>) and the current solutions
+(<code>xc</code>). Example: <code>Fmat[i, 2L]</code> is the objective function
+value associated with <code>xlist[[c(2L, i)]]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.state</code></td>
+<td>
+<p>the value of <code>.Random.seed</code>
+when the function was called.</p>
+</td>
+</tr>
+</table>
+<p>If <code>algo$classify</code> was set to <code>TRUE</code>, the resulting list
+will have a class attribute <code>TAopt</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>If the <code>...</code> argument is used, then all the objects passed
+with <code>...</code> need to go into the objective function and the
+neighbourhood function. It is recommended to collect all information
+in a list <code>myList</code> and then write <code>OF</code> and <code>neighbour</code>
+so that they are called as <code>OF(x, myList)</code> and <code>neighbour(x,
+      myList)</code>. Note that <code>x</code> need not be a vector but can be any data
+structure (eg, a <code>matrix</code> or a <code>list</code>).
+</p>
+<p>Using an initial and final temperature of zero means that
+<abbr><span class="acronym">SA</span></abbr> will be equivalent to a Local Search. The function
+<code>LSopt</code> may be preferred then because of smaller
+overhead.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Kirkpatrick, S., Gelatt, C.D. and Vecchi, M.P. (1983). Optimization
+with Simulated Annealing. Science. <strong>220</strong> (4598), 671–680.
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>LSopt</code>, <code>TAopt</code>, <code>restartOpt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Aim: given a matrix x with n rows and 2 columns,
+##      divide the rows of x into two subsets such that
+##      in one subset the columns are highly correlated,
+##      and in the other lowly (negatively) correlated.
+##      constraint: a single subset should have at least 40 rows
+
+## create data with specified correlation
+n &lt;- 100L
+rho &lt;- 0.7
+C &lt;- matrix(rho, 2L, 2L); diag(C) &lt;- 1
+x &lt;- matrix(rnorm(n * 2L), n, 2L) %*% chol(C)
+
+## collect data
+data &lt;- list(x = x, n = n, nmin = 40L)
+
+## a random initial solution
+x0 &lt;- runif(n) &gt; 0.5
+
+## a neighbourhood function
+neighbour &lt;- function(xc, data) {
+    xn &lt;- xc
+    p &lt;- sample.int(data$n, size = 1L)
+    xn[p] &lt;- abs(xn[p] - 1L)
+    # reject infeasible solution
+    c1 &lt;- sum(xn) &gt;= data$nmin
+    c2 &lt;- sum(xn) &lt;= (data$n - data$nmin)
+    if (c1 &amp;&amp; c2) res &lt;- xn else res &lt;- xc
+    as.logical(res)
+}
+
+## check (should be 1 FALSE and n-1 TRUE)
+x0 == neighbour(x0, data)
+
+## objective function
+OF &lt;- function(xc, data)
+    -abs(cor(data$x[xc, ])[1L, 2L] - cor(data$x[!xc, ])[1L, 2L])
+
+## check
+OF(x0, data)
+## check
+OF(neighbour(x0, data), data)
+
+## plot data
+par(mfrow = c(1,3), bty = "n")
+plot(data$x,
+     xlim = c(-3,3), ylim = c(-3,3),
+     main = "all data", col = "darkgreen")
+
+## *Local Search*
+algo &lt;- list(nS = 3000L,
+             neighbour = neighbour,
+             x0 = x0,
+             printBar = FALSE)
+sol1 &lt;- LSopt(OF, algo = algo, data=data)
+sol1$OFvalue
+
+## *Simulated Annealing*
+algo$nT &lt;- 10L
+algo$nS &lt;- ceiling(algo$nS/algo$nT)
+sol &lt;- SAopt(OF, algo = algo, data = data)
+sol$OFvalue
+
+c1 &lt;- cor(data$x[ sol$xbest, ])[1L, 2L]
+c2 &lt;- cor(data$x[!sol$xbest, ])[1L, 2L]
+
+lines(data$x[ sol$xbest, ], type = "p", col = "blue")
+
+plot(data$x[ sol$xbest, ], col = "blue",
+     xlim = c(-3, 3), ylim = c(-3, 3),
+     main = paste("subset 1, corr.", format(c1, digits = 3)))
+
+plot(data$x[!sol$xbest, ], col = "darkgreen",
+     xlim = c(-3,3), ylim = c(-3,3),
+     main = paste("subset 2, corr.", format(c2, digits = 3)))
+
+## compare LS/SA
+par(mfrow = c(1, 1), bty = "n")
+plot(sol1$Fmat[ , 2L],type = "l", ylim=c(-1.5, 0.5),
+     ylab = "OF", xlab = "Iterations")
+lines(sol$Fmat[ , 2L],type = "l", col = "blue")
+legend(x = "topright", legend = c("LS", "SA"),
+       lty = 1, lwd = 2, col = c("black", "blue"))
+</code></pre>
+
+
+</div>

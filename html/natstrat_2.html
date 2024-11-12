@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>balance_LP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Linear program that selects which controls to use in order to optimize balance</h2>
+
+<h3>Description</h3>
+
+<p>This linear program is used by <code>optimize_controls()</code> to choose which controls
+to select.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">balance_LP(
+  z,
+  X,
+  importances,
+  st,
+  st_vals,
+  S,
+  q_s,
+  N,
+  solver,
+  integer,
+  time_limit,
+  threads = 1,
+  weight_comp = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>a factor with the <code>i</code>th entry equal to the treatment of unit <code>i</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a matrix or data frame containing constraints in the columns. The number
+of rows should equal the length of <code>z</code>. Balance is achieved when a constraint
+sums to 0, such that numbers closer to 0 are better. When a constraint
+does not apply to a particular unit, the entry should be <code>NA</code>.
+This should typically be generated using <code>generate_constraints()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>importances</code></td>
+<td>
+<p>a vector with length equal to the number of constraints or columns
+in <code>X</code>. This can be generated using <code>generate_constraints()</code> and each nonnegative value
+denotes how much to prioritize each constraint, with the default being 1
+for all constraints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a stratum vector with the <code>i</code>th entry equal to the
+stratum of unit <code>i</code>. This should have the same order of units and length
+as <code>z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st_vals</code></td>
+<td>
+<p>the unique stratum levels contained in <code>st</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>the number of unique stratum levels contained in <code>st</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q_s</code></td>
+<td>
+<p>a named vector or matrix indicating how many control units are to be selected from each stratum.
+If there is one control group and all treated units are desired, this can be a vector; otherwise,
+this should have one row per treatment group, where the order of the rows matches the order of
+the levels of <code>z</code>, including the treated level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>the total number of available controls in the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver</code></td>
+<td>
+<p>a character stating which solver to use to run the linear program.
+Options are "Rglpk" (default) or "gurobi". You must have the 'gurobi' package
+installed to use the "gurobi" option. If available, this is the recommended solver.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>integer</code></td>
+<td>
+<p>a logical stating whether to use a mixed integer programming solver
+instead of randomized rounding. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_limit</code></td>
+<td>
+<p>numeric stating maximum amount of seconds for which the
+program is allowed to run before aborting. Default is <code>Inf</code> for no time limit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threads</code></td>
+<td>
+<p>The maximum number of threads that should be used. This is only
+applicable if <code>solver = 'gurobi'</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing two elements:
+</p>
+
+<dl>
+<dt><code>lpdetails</code></dt>
+<dd>
+<p>The output of either <code>gurobi()</code> or <code>Rglpk_solve_LP()</code>,
+except that if <code>gurobi()</code> is used, the elements <code>objval</code> and <code>x</code>
+are renamed <code>optimum</code> and <code>solution</code>
+to be consistent with the output of <code>Rglpk_solve_LP()</code>.</p>
+</dd>
+<dt><code>o</code></dt>
+<dd>
+<p>The original output of either <code>gurobi()</code> or <code>Rglpk_solve_LP()</code>.</p>
+</dd>
+</dl>
+</div>

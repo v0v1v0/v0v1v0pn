@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getEstimateStats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate p-Values and Confidence Intervals of Parameters for a Fitted Model</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates p-values and confidence intervals (CIs) of parameters for a given model.It supports
+different types of CIs, including Wald CIs, likelihood-based CIs, bootstrap CIs, or all three.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getEstimateStats(
+  model = NULL,
+  est_in,
+  p_values = TRUE,
+  CI = TRUE,
+  CI_type = "Wald",
+  rep = NA,
+  conf.level = 0.95
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A fitted mxModel object. Specifically, this should be the <code>mxOutput</code> slot from the result returned by
+one of the estimation functions provided by this package. The default value is <code>NULL</code>. Providing this parameter is
+essential when generating likelihood-based and bootstrap confidence intervals (CIs).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est_in</code></td>
+<td>
+<p>The <code>Estimates</code> slot from the result returned by one of the estimation functions provided by this
+package, which contains a dataframe with point estimates and standard errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_values</code></td>
+<td>
+<p>A logical flag indicating whether to calculate p-values. Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>A logical flag indicating whether to compute confidence intervals. Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI_type</code></td>
+<td>
+<p>A string specifying the type of confidence interval to compute. Supported options include
+<code>"Wald"</code>, <code>"likelihood"</code>, <code>"bootstrap"</code>, or <code>"all"</code>. Default is <code>"Wald"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rep</code></td>
+<td>
+<p>An integer specifying the number of replications for bootstrap. This is applicable if <code>CI_type</code> is
+<code>"bootstrap"</code> or <code>"all"</code>. Default is <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level</code></td>
+<td>
+<p>A numeric value representing the confidence level for confidence interval calculation. Default is
+<code>0.95</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>StatsOutput</code> with potential slots:
+</p>
+
+<ul>
+<li> <p><code>wald</code>: Contains a data frame with, point estimates, standard errors p-values, and Wald confidence intervals
+(when specified).
+</p>
+</li>
+<li> <p><code>likelihood</code>: Contains a data frame with likelihood-based confidence intervals (when specified).
+</p>
+</li>
+<li> <p><code>bootstrap</code>: Contains a data frame with bootstrap confidence intervals (when specified).
+</p>
+</li>
+</ul>
+<p>The content of these slots can be printed using the <code>printTable()</code> method for S4 objects.
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li> <p>Casella, G. &amp; Berger, R.L. (2002). Statistical Inference (2nd ed.). Duxbury Press.
+</p>
+</li>
+<li> <p>Madansky, A. (1965). Approximate Confidence Limits for the Reliability of Series and Parallel Systems.
+Technometrics, 7(4), 495-503. Taylor &amp; Francis, Ltd. <a href="https://www.jstor.org/stable/1266390">https://www.jstor.org/stable/1266390</a>
+</p>
+</li>
+<li> <p>Matthews, D. E. (1988). Likelihood-Based Confidence Intervals for Functions of Many Parameters.
+Biometrika, 75(1), 139-144. Oxford University Press. <a href="https://www.jstor.org/stable/2336444">https://www.jstor.org/stable/2336444</a>
+</p>
+</li>
+<li> <p>Efron, B. &amp; Tibshirani, R. J. (1994). An Introduction to the Bootstrap. CRC press.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Load ECLS-K (2011) data
+data("RMS_dat")
+RMS_dat0 &lt;- RMS_dat
+# Re-baseline the data so that the estimated initial status is for the starting point of the study
+baseT &lt;- RMS_dat0$T1
+RMS_dat0$T1 &lt;- RMS_dat0$T1 - baseT
+RMS_dat0$T2 &lt;- RMS_dat0$T2 - baseT
+RMS_dat0$T3 &lt;- RMS_dat0$T3 - baseT
+RMS_dat0$T4 &lt;- RMS_dat0$T4 - baseT
+RMS_dat0$T5 &lt;- RMS_dat0$T5 - baseT
+RMS_dat0$T6 &lt;- RMS_dat0$T6 - baseT
+RMS_dat0$T7 &lt;- RMS_dat0$T7 - baseT
+RMS_dat0$T8 &lt;- RMS_dat0$T8 - baseT
+RMS_dat0$T9 &lt;- RMS_dat0$T9 - baseT
+# Standardized time-invariant covariates
+RMS_dat0$ex1 &lt;- scale(RMS_dat0$Approach_to_Learning)
+RMS_dat0$ex2 &lt;- scale(RMS_dat0$Attention_focus)
+
+# Fit bilinear spline latent growth curve model (fixed knots)
+paraBLS_LGCM.r &lt;- c(
+  "mueta0", "mueta1", "mueta2", "knot",
+  paste0("psi", c("00", "01", "02", "11", "12", "22")),
+  "residuals"
+  )
+BLS_LGCM_r &lt;- getLGCM(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "BLS", intrinsic = FALSE,
+  records = 1:9, res_scale = 0.1, paramOut = TRUE, names = paraBLS_LGCM.r)
+## Generate P value and Wald confidence intervals
+getEstimateStats(
+  est_in = BLS_LGCM_r@Estimates, CI_type = "Wald"
+  )
+# Fit bilinear spline latent growth curve model (random knots) with time-invariant covariates for
+# mathematics development
+## Define parameter names
+paraBLS.TIC_LGCM.f &lt;- c(
+  "alpha0", "alpha1", "alpha2", "alphag",
+  paste0("psi", c("00", "01", "02", "0g", "11", "12", "1g", "22", "2g", "gg")), "residuals",
+  paste0("beta1", c(0:2, "g")), paste0("beta2", c(0:2, "g")), paste0("mux", 1:2),
+  paste0("phi", c("11", "12", "22")), "mueta0", "mueta1", "mueta2", "mu_knot"
+  )
+## Fit the model
+BLS_LGCM.TIC_f &lt;- getLGCM(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "BLS", intrinsic = TRUE, records = 1:9,
+  growth_TIC = c("ex1", "ex2"), res_scale = 0.1, paramOut = TRUE, names = paraBLS.TIC_LGCM.f
+  )
+## Change optimizer to "SLSQP" for getting likelihood-based confidence interval
+mxOption(model = NULL, key = "Default optimizer", "SLSQP", reset = FALSE)
+## Generate P value and all three types of confidence intervals
+getEstimateStats(
+  model = BLS_LGCM.TIC_f@mxOutput, est_in = BLS_LGCM.TIC_f@Estimates, CI_type = "all", rep = 1000
+  )
+
+
+</code></pre>
+
+
+</div>

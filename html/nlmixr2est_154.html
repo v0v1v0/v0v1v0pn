@@ -1,0 +1,214 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nmNearPD</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>C++ implementation of Matrix's nearPD</h2>
+
+<h3>Description</h3>
+
+<p>With 'ensureSymmetry' it makes sure it is symmetric by applying 0.5*(t(x) + x) before using nmNearPD
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nmNearPD(
+  x,
+  keepDiag = FALSE,
+  do2eigen = TRUE,
+  doDykstra = TRUE,
+  only.values = FALSE,
+  ensureSymmetry = !isSymmetric(x),
+  eig.tol = 1e-06,
+  conv.tol = 1e-07,
+  posd.tol = 1e-08,
+  maxit = 100L,
+  trace = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>numeric <code class="reqn">n \times n</code> approximately positive
+definite matrix, typically an approximation to a correlation or
+covariance matrix.  If <code>x</code> is not symmetric (and
+<code>ensureSymmetry</code> is not false), <code>symmpart(x)</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keepDiag</code></td>
+<td>
+<p>logical, generalizing <code>corr</code>: if <code>TRUE</code>, the
+resulting matrix should have the same diagonal
+(<code>diag(x)</code>) as the input matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do2eigen</code></td>
+<td>
+<p>logical indicating if a
+<code>posdefify()</code> eigen step should be applied to
+the result of the Higham algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doDykstra</code></td>
+<td>
+<p>logical indicating if Dykstra's correction should be
+used; true by default.  If false, the algorithm is basically the
+direct fixpoint iteration
+<code class="reqn">Y_k = P_U(P_S(Y_{k-1}))</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>only.values</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, the result is just the
+vector of eigenvalues of the approximating matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ensureSymmetry</code></td>
+<td>
+<p>logical; by default, <code>symmpart(x)</code>
+is used whenever <code>isSymmetric(x)</code> is not true.  The user
+can explicitly set this to <code>TRUE</code> or <code>FALSE</code>, saving the
+symmetry test. <em>Beware</em> however that setting it <code>FALSE</code>
+for an <b>a</b>symmetric input <code>x</code>, is typically nonsense!</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eig.tol</code></td>
+<td>
+<p>defines relative positiveness of eigenvalues compared
+to largest one, <code class="reqn">\lambda_1</code>. Eigenvalues <code class="reqn">\lambda_k</code> are
+treated as if zero when <code class="reqn">\lambda_k / \lambda_1 \le eig.tol</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conv.tol</code></td>
+<td>
+<p>convergence tolerance for Higham algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posd.tol</code></td>
+<td>
+<p>tolerance for enforcing positive definiteness (in the
+final <code>posdefify</code> step when <code>do2eigen</code> is <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>maximum number of iterations allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>logical or integer specifying if convergence monitoring
+should be traced.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This implements the algorithm of Higham (2002), and then (if
+<code>do2eigen</code> is true) forces positive definiteness using code from
+<code>posdefify</code>.  The algorithm of Knol and ten
+Berge (1989) (not implemented here) is more general in that it
+allows constraints to (1) fix some rows (and columns) of the matrix and
+(2) force the smallest eigenvalue to have a certain value.
+</p>
+<p>Note that setting <code>corr = TRUE</code> just sets <code>diag(.) &lt;- 1</code>
+within the algorithm.
+</p>
+<p>Higham (2002) uses Dykstra's correction, but the version by Jens
+Oehlschlägel did not use it (accidentally),
+and still gave reasonable results; this simplification, now only
+used if <code>doDykstra = FALSE</code>,
+was active in <code>nearPD()</code> up to Matrix version 0.999375-40.
+</p>
+
+
+<h3>Value</h3>
+
+<p>unlike the matrix package, this simply returns the nearest
+positive definite matrix
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jens Oehlschlägel donated a first version.
+Subsequent changes by the Matrix package authors.
+</p>
+
+
+<h3>References</h3>
+
+
+<p>Cheng, Sheung Hun and Higham, Nick (1998)
+A Modified Cholesky Algorithm Based on a Symmetric Indefinite Factorization;
+<em>SIAM J. Matrix Anal.\ Appl.</em>, <b>19</b>, 1097–1110.
+</p>
+<p>Knol DL, ten Berge JMF (1989)
+Least-squares approximation of an improper correlation matrix by a
+proper one.
+<em>Psychometrika</em> <b>54</b>, 53–61.
+</p>
+<p>Higham, Nick (2002)
+Computing the nearest correlation matrix - a problem from finance;
+<em>IMA Journal of Numerical Analysis</em> <b>22</b>, 329–343.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>A first version of this (with non-optional <code>corr=TRUE</code>)
+has been available as <code>nearcor()</code>; and
+more simple versions with a similar purpose
+<code>posdefify()</code>, both from package <span class="pkg">sfsmisc</span>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(27)
+m &lt;- matrix(round(rnorm(25),2), 5, 5)
+m &lt;- m + t(m)
+diag(m) &lt;- pmax(0, diag(m)) + 1
+(m &lt;- round(cov2cor(m), 2))
+
+near.m &lt;- nmNearPD(m)
+round(near.m, 2)
+norm(m - near.m) # 1.102 / 1.08
+
+round(nmNearPD(m, only.values=TRUE), 9)
+
+## A longer example, extended from Jens' original,
+## showing the effects of some of the options:
+
+pr &lt;- matrix(c(1,     0.477, 0.644, 0.478, 0.651, 0.826,
+               0.477, 1,     0.516, 0.233, 0.682, 0.75,
+               0.644, 0.516, 1,     0.599, 0.581, 0.742,
+               0.478, 0.233, 0.599, 1,     0.741, 0.8,
+               0.651, 0.682, 0.581, 0.741, 1,     0.798,
+               0.826, 0.75,  0.742, 0.8,   0.798, 1),
+               nrow = 6, ncol = 6)
+
+nc  &lt;- nmNearPD(pr)
+
+</code></pre>
+
+
+</div>

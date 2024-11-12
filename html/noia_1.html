@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td> NOIA package</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Implementation of the Natural and Orthogonal InterAction (NOIA) model
+</h2>
+
+<h3>Description</h3>
+
+<p>The NOIA model, as described extensively in Alvarez-Castro &amp; 
+Carlborg (2007), is a framework facilitating the 
+estimation of geneticEffects and genotype-to-phenotype maps. This package
+provides the basic tools to perform linear and multilinear regressions from
+real populations, analyse pure genotype-to-phenotype (GP) maps in ideal populations, estimating the genetic effects from different reference
+points, the genotypic values, and the decomposition of genetic variances in
+a multi-locus, 2 alleles system. This package is extensively described in 
+Le Rouzic &amp; Alvarez-Castro (2008).
+</p>
+
+
+<h3>Details</h3>
+
+
+<table>
+<tr>
+<td style="text-align: left;">
+Package: </td>
+<td style="text-align: left;"> noia</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Type: </td>
+<td style="text-align: left;"> Package</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Version: </td>
+<td style="text-align: left;"> 0.94.1</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Date: </td>
+<td style="text-align: left;"> 2010-04-20</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+License: </td>
+<td style="text-align: left;"> GPL-2</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<p><strong>Regression data set</strong>: The user must provide (i) The vector of phenotypes 
+of all individuals measured in 
+the population, and (ii) The matrix of the genotypes. There are two input 
+formats for the genotype, see <code>linearRegression</code>.
+</p>
+<p><strong>Regression functions</strong>: <code>linearRegression</code> and 
+<code>multilinearRegression</code>.
+</p>
+<p><strong>GP map data set</strong>: The user must provide (i) The <code class="reqn">3^L</code> (where <code class="reqn">L</code> is the number of loci) vector of genotypic values 
+(<strong>G</strong> in Alvarez-Castro &amp; Carlborg (2007))
+(ii) Allele or genotype frequencies in the reference population.
+</p>
+<p><strong>GP map analysis function</strong>: <code>linearGPmapanalysis</code>.
+</p>
+<p><strong>Change of reference</strong>: <code>geneticEffects</code>.
+</p>
+<p><strong>Genotype-to-phenotype map</strong>: <code>GPmap</code>.
+</p>
+<p><strong>Decomposition of genetic variance</strong>: <code>varianceDecomposition</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Arnaud Le Rouzic, Arne B. Gjuvsland
+</p>
+<p>Maintainer: Arnaud Le Rouzic
+</p>
+
+
+<h3>References</h3>
+
+<p>Alvarez-Castro JM, Carlborg O. (2007). A unified model for functional 
+and statistical epistasis and its application in quantitative trait 
+loci analysis. Genetics 176(2):1151-1167.
+</p>
+<p>Alvarez-Castro JM, Le Rouzic A, Carlborg O. (2008). How to perform meaningful
+estimates of genetic effects. PLoS Genetics 4(5):e1000062.
+</p>
+<p>Le Rouzic A, Alvarez-Castro JM. (2008). Estimation of genetic effects and
+genotype-phenotype maps. Evolutionary Bioinformatics 4. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123456789)
+
+map &lt;- c(0.25, -0.75, -0.75, -0.75, 2.25, 2.25, -0.75, 2.25, 2.25)
+names(map) &lt;- genNames(2)
+pop &lt;- simulatePop(map, N=500, sigmaE=0.2, type="F2")
+
+# Regressions
+
+linear &lt;- linearRegression(phen=pop$phen, gen=pop[2:3])
+
+multilinear &lt;- multilinearRegression(phen=pop$phen, gen=cbind(pop$Loc1, 
+	pop$Loc2))
+
+# Linear effects, associated variances and stderr
+linear
+
+# Multilinear effects
+multilinear
+
+# Genotype-to-phenotype map analysis
+linearGP &lt;- linearGPmapanalysis(map, reference="F2")
+
+# Linear effects in ideal F2 population
+linearGP
+
+# Change of reference: geneticEffects in the "11" genotype (parental 1)
+geneticEffects(linear, ref.genotype="P1")
+
+# Variance decomposition
+varianceDecomposition(linear)
+varianceDecomposition(linearGP)
+
+# GP maps
+maps &lt;- cbind(map, GPmap(linear)[,1], GPmap(multilinear)[,1])
+colnames(maps) &lt;- c("Actual", "Linear", "Multilinear")
+maps
+</code></pre>
+
+
+</div>

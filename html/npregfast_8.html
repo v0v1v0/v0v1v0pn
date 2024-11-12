@@ -1,0 +1,592 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>frfast</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fitting nonparametric models</h2>
+
+<h3>Description</h3>
+
+<p>This function is used to fit nonparametric models by
+using local polynomial kernel smoothers or splines. These models can 
+include or not  
+factor-by-curve interactions. Additionally, a parametric 
+model (allometric model) can be estimated (or not).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">frfast(
+  formula,
+  data,
+  na.action = "na.omit",
+  model = "np",
+  smooth = "kernel",
+  h0 = -1,
+  h = -1,
+  nh = 30,
+  weights = NULL,
+  kernel = "epanech",
+  p = 3,
+  kbin = 100,
+  nboot = 500,
+  rankl = NULL,
+  ranku = NULL,
+  seed = NULL,
+  cluster = TRUE,
+  ncores = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>An object of class <code>formula</code>: a sympbolic 
+description of the model to be fitted. The details of model 
+specification are given under 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame, matrix or list required by 
+the formula. If not found in data, the variables are taken from 
+<code>environment(formula)</code>, typically the environment from which
+<code>frfast</code> is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>A function which indicates what should happen when the 
+data contain 'NA's. The default is 'na.omit'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Type model used: <code>model = "np"</code> for a nonparametric
+regression model, 
+<code>model = "allo"</code>  for an allometric model. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth</code></td>
+<td>
+<p>Type smoother used: <code>smooth = "kernel"</code> for local polynomial
+kernel smoothers and <code>smooth = "splines"</code> for splines using the 
+<code>mgcv</code> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h0</code></td>
+<td>
+<p>The kernel bandwidth smoothing parameter for the global effect (see
+references for more details at the estimation). Large values of the bandwidth lead
+to smoothed estimates; smaller values of the bandwidth lead lo undersmoothed estimates. 
+By default, cross validation is used to obtain the bandwidth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>The kernel bandwidth smoothing parameter for the partial effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nh</code></td>
+<td>
+<p>Integer number of equally-spaced bandwidth in which the
+<code>h</code> is discretised, to speed up computation in the kernel-based regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Prior weights on the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>A character string specifying the desired kernel. 
+Defaults to <code>kernel = "epanech"</code>, where the Epanechnikov
+density function kernel will be used. Also, several types of kernel functons 
+can be used:  triangular and Gaussian density function, 
+with <code>"triang"</code> and <code>"gaussian"</code> term, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Polynomial degree to be used in the kernel-based regression. Its 
+value must be the value of
+derivative + 1. The default value is 3, returning 
+the estimation, first and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kbin</code></td>
+<td>
+<p>Number of binning nodes over which the function 
+is to be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>Number of bootstrap repeats. Defaults to 500 bootstrap repeats. 
+The wild bootstrap is used when <code>model = "np"</code> and the simple bootstrap 
+when <code>model = "allo"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rankl</code></td>
+<td>
+<p>Number or vector specifying the minimum value for the
+interval at which to search the <code>x</code> value which maximizes the
+estimate, first or second derivative  (for each level). The default
+is the minimum data value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ranku</code></td>
+<td>
+<p>Number or vector specifying the maximum value for the
+interval at which to search the <code>x</code> value which maximizes the
+estimate, first or second derivative  (for each level). The default
+is the maximum data value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Seed to be used in the bootstrap procedure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>A logical value. If  <code>TRUE</code> (default), the
+bootstrap procedure is  parallelized (only for <code>smooth = "splines"</code>).
+Note that there are cases 
+(e.g., a low number of bootstrap repetitions) that R will gain in
+performance through serial computation. R takes time to distribute tasks
+across the processors also it will need time for binding them all together
+later on. Therefore, if the time for distributing and gathering pieces
+together is greater than the time need for single-thread computing, it does
+not worth parallelize.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>An integer value specifying the number of cores to be used
+in the parallelized procedure. If <code>NULL</code> (default), the number of cores 
+to be used is equal to the number of cores of the machine - 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other options.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The models fitted by <code>frfast</code> function are specified 
+in a compact symbolic form. The ~ operator is basic in the formation 
+of such models. An expression of the form <code>y ~ model</code>  is interpreted as 
+a specification that the response <code>y</code> is modelled by a predictor 
+specified symbolically by <code>model</code>. The possible terms consist of a 
+variable name or a variable name and a factor name separated by : operator. 
+Such a term is interpreted as the interaction of the continuous variable and 
+the factor. However, if <code>smooth = "splines"</code>, the formula is based on the function
+formula.gam of the mgcv package.
+</p>
+<p>According with the <code>model</code> argument, if <code>model = "np"</code> the 
+estimated regression model will be of the type
+</p>
+<p style="text-align: center;"><code class="reqn">Y = m(X) + e</code>
+</p>
+
+<p>being <code class="reqn">m</code> an smooth and unknown function and <code class="reqn">e</code>
+the regression error with zero mean. If <code>model = "allo"</code>, users could estimate
+the classical allometric model (Huxley, 1924) with a regression curve 
+</p>
+<p style="text-align: center;"><code class="reqn">m(X) = a X^b</code>
+</p>
+
+<p>being <code class="reqn">a</code> and <code class="reqn">b</code> the parameters of the model.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object is returned with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector of values of the grid points at which model is to 
+be estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Matrix of values of the grid points at which to compute the 
+estimate, their first and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pl</code></td>
+<td>
+<p>Lower values of  95% confidence interval for the estimate, 
+their first and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pu</code></td>
+<td>
+<p>Upper values of  95% confidence interval for the estimate, 
+their first and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff</code></td>
+<td>
+<p>Differences between the estimation values of a couple of 
+levels (i. e. level 2 - level 1). The same procedure for their first
+and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffl</code></td>
+<td>
+<p>Lower values of 95% confidence interval for the differences 
+between the estimation values of a couple of levels. It is performed 
+for their first and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffu</code></td>
+<td>
+<p>Upper values of 95% confidence interval for the differences 
+between the estimation values of a couple of levels. It is performed for 
+their first and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>Number of bootstrap repeats.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dp</code></td>
+<td>
+<p>Degree of polynomial to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h0</code></td>
+<td>
+<p>The kernel bandwidth smoothing parameter for the global effect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>The kernel bandwidth smoothing parameter for the partial effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fmod</code></td>
+<td>
+<p>Factor's level for each data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xdata</code></td>
+<td>
+<p>Original x values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ydata</code></td>
+<td>
+<p>Original y values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Weights on the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kbin</code></td>
+<td>
+<p>Number of binning nodes over which the function is to 
+be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nf</code></td>
+<td>
+<p>Number of levels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max</code></td>
+<td>
+<p>Value of covariate <code>x</code> which maximizes the  estimate, 
+first or second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxu</code></td>
+<td>
+<p>Upper value of 95% confidence interval for the 
+value <code>max</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxl</code></td>
+<td>
+<p>Lower value of 95% confidence interval for the 
+value <code>max</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffmax</code></td>
+<td>
+<p>Differences between the estimation of <code>max</code> for a 
+couple of levels (i. e. level 2 - level 1). The same procedure for their 
+first and second derivative.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffmaxu</code></td>
+<td>
+<p>Upper value of 95% confidence interval for the value 
+<code>diffmax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffmaxl</code></td>
+<td>
+<p>Lower value of 95% confidence interval for the value 
+<code>diffmax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repboot</code></td>
+<td>
+<p>Matrix of values of the grid points at which to compute 
+the estimate, their first and second derivative for each bootstrap repeat.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rankl</code></td>
+<td>
+<p>Maximum value for the interval at which to search the 
+<code>x</code> value which maximizes the estimate, first or second derivative  
+(for each level). The default is the maximum data value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ranku</code></td>
+<td>
+<p>Minimum value for the interval at which to search the 
+<code>x</code> value which maximizes the estimate, first or second derivative  
+(for each level). The default is the minimum data value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmodel</code></td>
+<td>
+<p>Type model used: <code>nmodel = 1</code> the nonparametric model, 
+<code>nmodel = 2</code> the allometric model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>Labels of the variables in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numlabel</code></td>
+<td>
+<p>Number of labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>A character specifying the derised kernel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>Estimated coefficient in the case of fitting an allometric model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>al</code></td>
+<td>
+<p>Lower value of 95% confidence interval for the value of <code>a</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>au</code></td>
+<td>
+<p>Upper value of 95% confidence interval for the value of <code>a</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>Estimated coefficient in the case of fitting an allometric model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bl</code></td>
+<td>
+<p>Lower value of 95% confidence interval for the value of <code>b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bu</code></td>
+<td>
+<p>Upper value of 95% confidence interval for the value of <code>b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Name of the variables in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A sympbolic description of the model to be fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nh</code></td>
+<td>
+<p>Integer number of equally-spaced bandwidth on which the
+<code>h</code> is discretised.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r2</code></td>
+<td>
+<p>Coefficient of determination (in the case of the allometric model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth</code></td>
+<td>
+<p>Type smoother used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>Is the procedure parallelized? (for splines smoothers).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Number of cores used in the parallelized procedure? (for splines smoothers).</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Marta Sestelo, Nora M. Villanueva and Javier Roca-Pardinas.
+</p>
+
+
+<h3>References</h3>
+
+<p>Huxley, J. S. (1924). Constant differential growth-ratios and their 
+significance. Nature, 114:895–896.
+</p>
+<p>Sestelo, M. (2013). Development and computational implementation of 
+estimation and inference methods in flexible regression models. 
+Applications in Biology, Engineering and Environment. PhD Thesis, Department
+of Statistics and O.R. University of Vigo.
+</p>
+<p>Sestelo, M., Villanueva, N.M., Meira-Machado, L., Roca-Pardinas, J. (2017). 
+npregfast: An R Package for Nonparametric Estimation and Inference in Life 
+Sciences. Journal of Statistical Software, 82(12), 1-27.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(npregfast)
+data(barnacle)
+
+# Nonparametric regression without interactions
+fit &lt;- frfast(DW ~ RC, data = barnacle, nboot = 100, smooth = "kernel") 
+fit
+summary(fit)
+
+# using  splines
+#fit &lt;- frfast(DW ~ s(RC), data = barnacle, nboot = 100, 
+#smooth = "splines", cluster = TRUE, ncores = 2) 
+#fit
+#summary(fit)
+
+
+# Change the number of binning nodes and bootstrap replicates
+fit &lt;- frfast(DW ~ RC, data = barnacle, kbin = 200,
+               nboot = 100, smooth = "kernel")
+
+# Nonparametric regression with interactions
+fit2 &lt;- frfast(DW ~ RC : F, data = barnacle, nboot = 100)
+fit2
+summary(fit2)
+
+# using  splines
+#fit2 &lt;- frfast(DW ~ s(RC, by = F), data = barnacle,
+#               nboot = 100, smooth = "splines", cluster = TRUE, ncores = 2)
+#fit2
+#summary(fit2)
+
+
+# Allometric model
+fit3 &lt;- frfast(DW ~ RC, data = barnacle, model = "allo", nboot = 100)
+summary(fit3)
+
+# fit4 &lt;- frfast(DW ~ RC : F, data = barnacle, model = "allo", nboot = 100)
+# summary(fit4)
+
+</code></pre>
+
+
+</div>

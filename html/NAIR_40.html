@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>saveNetworkPlots</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Write Plots to a PDF
+</h2>
+
+<h3>Description</h3>
+
+<p>Given a list of plots, write all plots to a single pdf file containing one
+plot per page, and optionally save the graph layout as a csv file.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">saveNetworkPlots(
+  plotlist,
+  outfile,
+  pdf_width = 12,
+  pdf_height = 10,
+  outfile_layout = NULL,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>plotlist</code></td>
+<td>
+
+<p>A named list whose elements are of class <code>ggraph</code>. May
+also contain an element named <code>graph_layout</code> with the matrix specifying
+the graph layout.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outfile</code></td>
+<td>
+
+<p>A <code>connection</code> or a character string containing the file path
+used to save the pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_width</code></td>
+<td>
+
+<p>Sets the page width. Passed to the <code>width</code> argument of
+<code>pdf()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_height</code></td>
+<td>
+
+<p>Sets the page height. Passed to the <code>height</code> argument of
+<code>pdf()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outfile_layout</code></td>
+<td>
+
+<p>An optional <code>connection</code> or file path for saving the graph layout.
+Passed to
+the <code>file</code> argument of <code>write()</code>,
+which is called with <code>ncolumns = 2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns <code>TRUE</code>, invisibly.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+net &lt;-
+  generateNetworkObjects(
+    toy_data,
+    "CloneSeq"
+  )
+
+net &lt;-
+  addPlots(
+    net,
+    color_nodes_by =
+      c("SampleID", "CloneCount"),
+    print_plots = TRUE
+  )
+
+saveNetworkPlots(
+  net$plots,
+  outfile =
+    file.path(tempdir(), "network.pdf"),
+  outfile_layout =
+    file.path(tempdir(), "graph_layout.txt")
+)
+
+# Load saved graph layout
+graph_layout &lt;- matrix(
+  scan(file.path(tempdir(), "graph_layout.txt"), quiet = TRUE),
+  ncol = 2
+)
+all.equal(graph_layout, net$plots$graph_layout)
+
+
+
+</code></pre>
+
+
+</div>

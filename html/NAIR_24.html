@@ -1,0 +1,213 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generateAdjacencyMatrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute Graph Adjacency Matrix for Immune Repertoire Network
+</h2>
+
+<h3>Description</h3>
+
+<p>Given a list of receptor sequences, computes the adjacency matrix for the
+network graph based on sequence similarity.
+</p>
+<p><code>sparseAdjacencyMatFromSeqs()</code> is a deprecated equivalent of
+<code>generateAdjacencyMatrix()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generateAdjacencyMatrix(
+  seqs,
+  dist_type = "hamming",
+  dist_cutoff = 1,
+  drop_isolated_nodes = TRUE,
+  method = "default",
+  verbose = FALSE
+)
+
+# Deprecated equivalent:
+sparseAdjacencyMatFromSeqs(
+  seqs,
+  dist_type = "hamming",
+  dist_cutoff = 1,
+  drop_isolated_nodes = TRUE,
+  method = "default",
+  verbose = FALSE,
+  max_dist = deprecated()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>seqs</code></td>
+<td>
+
+<p>A character vector containing the receptor sequences.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_type</code></td>
+<td>
+
+<p>Specifies the function used to quantify the similarity between sequences. The
+similarity between two sequences determines the pairwise distance between their
+respective nodes in the network graph, with greater similarity corresponding to
+shorter distance. Valid options are <code>"hamming"</code> (the default), which uses
+<code>hamDistBounded</code>, and <code>"levenshtein"</code>, which uses
+<code>levDistBounded</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_cutoff</code></td>
+<td>
+
+<p>A nonnegative scalar. Specifies the maximum pairwise distance (based on
+<code>dist_type</code>) for an edge connection to exist between two nodes. Pairs of
+nodes whose distance is less than or equal to this value will be joined by an
+edge connection in the network graph. Controls the stringency of the network
+construction and affects the number and density of edges in the network. A lower
+cutoff value requires greater similarity between sequences in order for their
+respective nodes to be joined by an edge connection. A value of <code>0</code> requires
+two sequences to be identical in order for their nodes to be joined by an edge.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_isolated_nodes</code></td>
+<td>
+
+<p>Logical. When <code>TRUE</code>, removes each node that is not joined by an
+edge connection to any other node in the network graph.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>A character string specifying the algorithm to use. Choices are <code>"default"</code> and  <code>"pattern"</code>. <code>"pattern"</code> is only valid when <code>dist_cutoff &lt; 3</code>, but tends to be faster than <code>"default"</code> for sparsely connected networks, at the cost of greater memory usage (can cause crashes for large or densely-connected networks, particularly for <code>dist_cutoff = 2</code>). The default algorithm tends to be faster for densely-connected networks or long sequences.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_dist</code></td>
+<td>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a>
+Equivalent to <code>dist_cutoff</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The adjacency matrix of a graph with <code class="reqn">n</code> nodes is the symmetric
+<code class="reqn">n \times n</code> matrix for which entry <code class="reqn">(i,j)</code> is equal to 1 if nodes
+<code class="reqn">i</code> and <code class="reqn">j</code> are connected by an edge in the network graph and 0 otherwise.
+</p>
+<p>To construct the graph of the immune repertoire network, each receptor sequence
+is modeled as a node. The similarity between receptor sequences, as measured
+using either the Hamming or Levenshtein distance, determines the distance between
+nodes in the network graph. The more similar two sequences are, the shorter the
+distance between their respective nodes. Two nodes in the graph are joined by an
+edge if the distance between them is sufficiently small, i.e., if their receptor
+sequences are sufficiently similar.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A sparse matrix of class <code>dgCMatrix</code>
+(see <code>dgCMatrix-class</code>).
+</p>
+<p>If <code>drop_isolated_nodes = TRUE</code>, the row and column names of the matrix
+indicate which receptor sequences in the <code>seqs</code> vector correspond to each
+row and column of the matrix. The row and column names can be accessed using
+<code>dimnames</code>. This returns a list containing two character vectors,
+one for the row names and one for the column names. The name of the <code class="reqn">i</code>th
+matrix row is the index of the <code>seqs</code> vector corresponding to the <code class="reqn">i</code>th
+row and <code class="reqn">i</code>th column of the matrix. The  name of the <code class="reqn">j</code>th matrix column
+is the receptor sequence corresponding to the <code class="reqn">j</code>th row and <code class="reqn">j</code>th column
+of the matrix.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">generateAdjacencyMatrix(
+  c("fee", "fie", "foe", "fum", "foo")
+)
+
+# No edge connections exist based on a Hamming distance of 1
+# (returns a 0x0 sparse matrix)
+generateAdjacencyMatrix(
+  c("foo", "foobar", "fubar", "bar")
+)
+
+# Same as the above example, but keeping all nodes
+# (returns a 4x4 sparse matrix)
+generateAdjacencyMatrix(
+  c("foo", "foobar", "fubar", "bar"),
+  drop_isolated_nodes = FALSE
+)
+
+# Relaxing the edge criteria using a Hamming distance of 2
+# (still results in no edge connections)
+generateAdjacencyMatrix(
+  c("foo", "foobar", "fubar", "bar"),
+  dist_cutoff = 2
+)
+
+# Using a Levenshtein distance of 2, however,
+# does result in edge connections
+generateAdjacencyMatrix(
+  c("foo", "foobar", "fubar", "bar"),
+  dist_type = "levenshtein",
+  dist_cutoff = 2
+)
+
+# Using a Hamming distance of 3
+# also results in (different) edge connections
+generateAdjacencyMatrix(
+  c("foo", "foobar", "fubar", "bar"),
+  dist_cutoff = 3
+)
+</code></pre>
+
+
+</div>

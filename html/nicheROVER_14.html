@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>overlap.plot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot the overlap metric.</h2>
+
+<h3>Description</h3>
+
+<p>Plots the posterior distribution of the niche region overlap metric calculated for each pairwise combination of species.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">overlap.plot(
+  over.stat,
+  nbreaks = 50,
+  equal.axis = FALSE,
+  species.names,
+  col,
+  mean.cred = TRUE,
+  mean.cred.col = "green",
+  xlab
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>over.stat</code></td>
+<td>
+<p>An array with <code>dim(over.stat) = c(nspecies, nspecies, nreps)</code> containing <code>nreps</code> calculations of the overlap metric for each pair of species. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbreaks</code></td>
+<td>
+<p>Number of breaks in the histogram. Defaults to 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal.axis</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, all histograms in a given column of the output (corresponding to different Species <code class="reqn">A</code> for the same Species <code class="reqn">B</code>) are plotted on the same range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>species.names</code></td>
+<td>
+<p>A vector of species names. Defaults to <code>dimnames(over.stat)[[1]]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>A vector of the colours in which each species will be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.cred</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, vertical lines for mean and 95% credible intervals will be included in the historgram of each overlap metric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.cred.col</code></td>
+<td>
+<p>Colour of the mean and credible interval lines in the histogram.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Optional plot title, located on the bottom.  Default is no title.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function uses the overlap metric information in <code>over.stat</code> calculated by <code>overlap()</code> to create 2-dimensional plots of interspecific niche region overlap.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a series of histograms illustrating the probability of pairwise species overlap.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>overlap()</code>, <code>niw.post()</code>, <code>niiw.post()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># fish data
+data(fish)
+
+# parameter draws from the "default" posteriors of each fish
+nsamples &lt;- 500
+system.time({
+  fish.par &lt;- tapply(1:nrow(fish), fish$species,
+                     function(ii) niw.post(nsamples = nsamples,
+                                           X = fish[ii,2:4]))
+})
+
+# overlap calculation
+system.time({
+  over &lt;- overlap(fish.par, nreps = nsamples, nprob = nsamples,
+                  alpha = c(.95, .99))
+})
+
+# overlap plot
+clrs &lt;- c("black", "red", "blue", "orange") # color for each species
+ii &lt;- 1 # which niche region alpha level to use
+overlap.plot(over[,,,ii], col = clrs, mean.cred.col = "turquoise",
+             xlab = paste0("Overlap Probability (%) -- Niche Region Size: ",
+                           dimnames(over)[[4]][ii]))
+</code></pre>
+
+
+</div>

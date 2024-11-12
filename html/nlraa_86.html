@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SSbg4rp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>self start for the reparameterized Beta growth function with four parameters</h2>
+
+<h3>Description</h3>
+
+<p>Self starter for Beta Growth function with parameters w.max, lt.e, ldtm, ldtb
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bg4rp(time, w.max, lt.e, ldtm, ldtb)
+
+SSbg4rp(time, w.max, lt.e, ldtm, ldtb)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>input vector (x) which is normally ‘time’, the smallest value should be close to zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w.max</code></td>
+<td>
+<p>value of weight or mass at its peak</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lt.e</code></td>
+<td>
+<p>log of the time at which the maximum weight or mass has been reached.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ldtm</code></td>
+<td>
+<p>log of the difference between time at which the weight or mass reaches its peak and half its peak.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ldtb</code></td>
+<td>
+<p>log of the difference between time at which the weight or mass reaches its peak and when it starts growing</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details see the publication by Yin et al. (2003) “A Flexible Sigmoid Function of Determinate Growth”.
+This is a reparameterization of the beta growth function (4 parameters) with guaranteed constraints, so it is expected to 
+behave numerically better than <code>SSbgf4</code>.
+</p>
+<p>Reparameterizing the four parameter beta growth
+</p>
+
+<ul>
+<li>
+<p> ldtm = log(t.e - t.m)
+</p>
+</li>
+<li>
+<p> ldtb = log(t.m - t.b)
+</p>
+</li>
+<li>
+<p> t.e = exp(lt.e)
+</p>
+</li>
+<li>
+<p> t.m = exp(lt.e) - exp(ldtm)
+</p>
+</li>
+<li>
+<p> t.b = (exp(lt.e) - exp(ldtm)) - exp(ldtb)
+</p>
+</li>
+</ul>
+<p>The form of the equation is: </p>
+<p style="text-align: center;"><code class="reqn">w.max * (1 + (exp(lt.e) - time)/exp(ldtm)) * ((time - (exp(lt.e) - exp(ldtb)))/exp(ldtb))^(exp(ldtb)/exp(ldtm))</code>
+</p>
+
+<p>This is a reparameterized version of the Beta-Growth function in which the parameters are unconstrained, but they are expressed in the log-scale.
+</p>
+
+
+<h3>Value</h3>
+
+<p>bg4rp: vector of the same length as x (time) using the beta growth function with four parameters
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(ggplot2)
+set.seed(1234)
+x &lt;- 1:100
+y &lt;- bg4rp(x, 20, log(70), log(30), log(20)) + rnorm(100, 0, 1)
+dat &lt;- data.frame(x = x, y = y)
+fit &lt;- nls(y ~ SSbg4rp(x, w.max, lt.e, ldtm, ldtb), data = dat)
+## We are able to recover the original values
+exp(coef(fit)[2:4])
+ggplot(data = dat, aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_line(aes(y = fitted(fit)))
+
+</code></pre>
+
+
+</div>

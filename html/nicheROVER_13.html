@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>overlap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Monte Carlo calculation of niche region overlap metrics.</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the distribution of a niche region overlap metric for each pairwise species combination and user-specified niche region sizes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">overlap(
+  niche.par,
+  nreps,
+  nprob,
+  alpha = 0.95,
+  species.names,
+  norm.redraw = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>niche.par</code></td>
+<td>
+<p>A list with <code>nspecies = length(niche.par)</code>, each element of which in turn is a list with elements <code>mu</code> and <code>Sigma</code>.  See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nreps</code></td>
+<td>
+<p>The number of overlap metric calculations for each species.  Defaults to the smallest number of parameter samples supplied by <code>niche.par</code>.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nprob</code></td>
+<td>
+<p>The number of normal draws for each Monte Carlo overlap metric calculation.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Scalar or vector of niche region sizes for calculating the niche overlap metric. Defaults to 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>species.names</code></td>
+<td>
+<p>Names of the species. Defaults to <code>names(niche.par)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.redraw</code></td>
+<td>
+<p>Logical. If <code>FALSE</code>, the same <code>nprob*nspecies</code> iid <code class="reqn">N(0,1)</code> draws are used for each calculation of the overlap metric. This increases the Monte Carlo error, but the procedure is about 1.5x faster.  Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The overlap metric is the probability that a randomly drawn individual from species <code class="reqn">A</code> will be found within the niche region of species <code class="reqn">B</code> (for a given niche region size, e.g., <code>alpha = .95</code>).  It is a single number which is a function of the parameters for each species, <code class="reqn">\Theta_A = (\mu_A, \Sigma_A)</code> and <code class="reqn">\Theta_B = (\mu_B, \Sigma_B)</code>.  This number is difficult to calculate directly, but easy to approximate stochastically by generating <code>nprob</code> draws from the distribution of species <code class="reqn">A</code> and counting the fraction of them which fall in the niche region of species <code class="reqn">B</code>.
+</p>
+<p>Typically the true values of <code class="reqn">\Theta_A</code> and <code class="reqn">\Theta_B</code> are unknown and must be estimated from the data. Thus, the overlap metric is calculated for <code>nreps</code> combinations of samples from <code class="reqn">p(\Theta_A | X)</code> and <code class="reqn">p(\Theta_B | X)</code> which are supplied in <code>niche.par</code>.
+</p>
+<p>See Swanson et al. (2015) for a detailed description of niche overlap and its calculation.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns an array of size <code>c(nspecies, nspecies, nreps, nlevels)</code>, where <code>nlevels</code> is the number of alpha levels at which to calculate the overlap metric.  For each of the last two dimensions of the output array, the first two dimensions form an <code>nspecies</code> by <code>nspecies</code> matrix giving each pairwise calculation of overlap metric between two species for given <code class="reqn">\Theta_A</code>, <code class="reqn">\Theta_B</code>, and <code>alpha</code>. In each of these matrices, Species <code class="reqn">A</code> is along the rows of this matrix and Species <code class="reqn">B</code> is along the columns.
+</p>
+
+
+<h3>References</h3>
+
+<p>Swanson, H.K., Lysy, M., Stasko, A.D., Power, M., Johnson, J.D., and Reist, J.D. "A new probabilistic method for quantifying n-dimensional ecological niches and niche overlap." <em>Ecology: Statistical Reports</em> 96:2 (2015): 318-324. <a href="https://doi.org/10.1890/14-0235.1">doi:10.1890/14-0235.1</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>overlap.plot()</code>, <code>niw.post()</code>, <code>niiw.post()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># fish data
+data(fish)
+
+# generate parameter draws from the "default" posteriors of each fish
+nsamples &lt;- 500
+system.time({
+  fish.par &lt;- tapply(1:nrow(fish), fish$species,
+                     function(ii) niw.post(nsamples = nsamples, X = fish[ii,2:4]))
+})
+
+# overlap calculation. use nsamples = nprob = 1e4 for more accurate results.
+system.time({
+  over &lt;- overlap(fish.par, nreps = nsamples, nprob = nsamples,
+                  alpha = c(.95, .99))
+})
+
+# posterior expectations of overlap metrics
+over.mean &lt;- apply(over*100, c(1:2, 4), mean)
+round(over.mean)
+
+# posterior 95% credible intervals of overlap metrics
+over.cred &lt;- apply(over*100, c(1:2, 4), quantile,
+                   prob = c(.025, .975), na.rm = TRUE)
+round(over.cred[,,,1]) # display alpha = .95 niche region
+</code></pre>
+
+
+</div>

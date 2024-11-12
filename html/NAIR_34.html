@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>levDistBounded</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bounded Computation of Levenshtein Distance
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes the Levenshtein distance between two strings subject to a specified
+upper bound.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">levDistBounded(a, b, k)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+
+<p>A character string.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+
+<p>A character string to be compared to <code>a</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+
+<p>An integer specifying the upper bound on the Levenshtein distance between <code>a</code> and <code>b</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Levenshtein distance (sometimes referred to as edit distance) between two
+character strings measures the minimum number of single-character edits
+(insertions, deletions and transformations) needed to transform one string into
+the other.
+</p>
+<p>Compared to the Hamming distance
+(see <code>hamDistBounded()</code>), the
+Levenshtein distance is particularly useful for comparing sequences of different
+lengths, as it can account for insertions and deletions, whereas the Hamming
+distance only accounts for single-character transformations. However, the
+computational burden for the Levenshtein distance can be significantly greater
+than for the Hamming distance.
+</p>
+<p>Computation is aborted early if the Levenshtein distance is determined to exceed
+the specified upper bound. This functionality is designed for cases when
+distinguishing between values above the upper bound is not meaningful, taking
+advantage of this fact to reduce the computational burden.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An integer. If the Levenshtein distance exceeds the specified upper bound
+<code>k</code>, then a value of <code>-1</code> is returned. Otherwise, returns the
+Levenshtein distance between <code>a</code> and <code>b</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The computed value may be invalid when the length of either string is close to
+or greater than the value of <code>INT_MAX</code> in the compiler that was used at
+build time (typically 2147483647).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>hamDistBounded</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># equal string lengths,
+# character transmutations only
+levDistBounded("foo", "bar", 3)
+hamDistBounded("foo", "bar", 3) # agrees with Hamming distance
+
+# one insertion, one deletion
+levDistBounded("1234567", "1.23457", 7)
+hamDistBounded("1234567", "1.23457", 7) # compare to Hamming distance
+
+# same as above, but with a different lower bound
+levDistBounded("1234567", "1.23457", 3) # within the bound
+hamDistBounded("1234567", "1.23457", 3) # exceeds the bound
+
+# one deletion (last position)
+levDistBounded("1234567890", "123456789", 10)
+hamDistBounded("1234567890", "123456789", 10)
+
+# note the Hamming distance agrees with the Levenshtein distance
+# for the above example, since the deletion occurs in the final
+# character position. This is due to how hamDistBounded() handles
+# strings of different lengths. In the example below, however...
+
+# one deletion (first position)
+levDistBounded("1234567890", "234567890", 10)
+hamDistBounded("1234567890", "234567890", 10) # compare to Hamming distance
+
+# one deletion, one transmutation
+levDistBounded("foobar", "fubar", 6)
+hamDistBounded("foobar", "fubar", 6) # compare to Hamming distance
+</code></pre>
+
+
+</div>

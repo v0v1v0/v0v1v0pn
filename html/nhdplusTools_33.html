@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_nldi_basin</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get NLDI Basin Boundary</h2>
+
+<h3>Description</h3>
+
+<p>Get a basin boundary for a given NLDI feature.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_nldi_basin(nldi_feature, simplify = TRUE, split = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nldi_feature</code></td>
+<td>
+<p>list with names 'featureSource' and 'featureID' where
+'featureSource' is derived from the "source" column of  the response of
+get_nldi_sources and the 'featureID' is a known identifier
+from the specified 'featureSource'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplify</code></td>
+<td>
+<p>logical should response geometry be simplified for
+visualization and performance?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split</code></td>
+<td>
+<p>logical should response resolve precisely to the location
+of the 'nldi_feature'? Setting 'TRUE' calls an additional service and
+will be slower and less robust.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Only resolves to the nearest NHDPlus catchment divide. See:
+https://waterdata.usgs.gov/blog/nldi-intro/ for more info on the nldi.
+</p>
+
+
+<h3>Value</h3>
+
+<p>sf data.frame with result basin boundary
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(sf)
+library(dplyr)
+
+nldi_nwis &lt;- list(featureSource = "nwissite", featureID = "USGS-05428500")
+
+site &lt;- get_nldi_feature(nldi_nwis)
+
+basin &lt;- get_nldi_basin(nldi_feature = nldi_nwis)
+
+plot(st_geometry(basin))
+
+basin
+
+basin2 &lt;- get_nldi_basin(nldi_feature = nldi_nwis,
+                         simplify = FALSE, split = TRUE)
+
+if(inherits(basin, "sf") &amp; inherits(basin2, "sf")) {
+
+length(st_coordinates(basin))
+length(st_coordinates(basin2))
+
+plot(st_geometry(st_buffer(site, units::set_units(3000, "m"))), border = NA)
+
+plot(st_geometry(site), add = TRUE)
+plot(st_geometry(basin2), add = TRUE)
+
+plot(st_geometry(basin), border = "red", add = TRUE)
+
+}
+
+</code></pre>
+
+
+</div>

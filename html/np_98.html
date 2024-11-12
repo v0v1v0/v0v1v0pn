@@ -1,0 +1,600 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npscoefbw</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Smooth Coefficient Kernel Regression Bandwidth Selection</h2>
+
+<h3>Description</h3>
+
+<p><code>npscoefbw</code> computes a bandwidth object for a smooth
+coefficient kernel regression estimate of a one (1) dimensional
+dependent variable on 
+<code class="reqn">p+q</code>-variate explanatory data, using the model
+<code class="reqn">Y_i = W_{i}^{\prime} \gamma (Z_i) + u_i</code> where <code class="reqn">W_i'=(1,X_i')</code>
+given training points (consisting of explanatory data and dependent
+data), and a bandwidth specification, which can be a <code>rbandwidth</code>
+object, or a bandwidth vector, bandwidth type and kernel type. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npscoefbw(...)
+
+## S3 method for class 'formula'
+npscoefbw(formula, data, subset, na.action, call, ...)
+
+## S3 method for class 'NULL'
+npscoefbw(xdat = stop("invoked without data 'xdat'"),
+          ydat = stop("invoked without data 'ydat'"),
+          zdat = NULL,
+          bws,
+          ...)
+
+## Default S3 method:
+npscoefbw(xdat = stop("invoked without data 'xdat'"),
+          ydat = stop("invoked without data 'ydat'"),
+          zdat = NULL,
+          bws,
+          nmulti,
+          random.seed,
+          cv.iterate,
+          cv.num.iterations,
+          backfit.iterate,
+          backfit.maxiter,
+          backfit.tol,
+          bandwidth.compute = TRUE,
+          bwmethod,
+          bwscaling,
+          bwtype,
+          ckertype,
+          ckerorder,
+          ukertype,
+          okertype,
+          optim.method,
+          optim.maxattempts,
+          optim.reltol,
+          optim.abstol,
+          optim.maxit,
+          ...)
+
+## S3 method for class 'scbandwidth'
+npscoefbw(xdat = stop("invoked without data 'xdat'"),
+          ydat = stop("invoked without data 'ydat'"),
+          zdat = NULL,
+          bws,
+          nmulti,
+          random.seed = 42,
+          cv.iterate = FALSE,
+          cv.num.iterations = 1,
+          backfit.iterate = FALSE,
+          backfit.maxiter = 100,
+          backfit.tol = .Machine$double.eps,
+          bandwidth.compute = TRUE,
+          optim.method = c("Nelder-Mead", "BFGS", "CG"),
+          optim.maxattempts = 10,
+          optim.reltol = sqrt(.Machine$double.eps),
+          optim.abstol = .Machine$double.eps,
+          optim.maxit = 500,
+          ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>a symbolic description of variables on which bandwidth selection is
+to be performed. The details of constructing a formula are
+described below.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(formula)</code>, typically the environment from which the
+function is called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>an optional vector specifying a subset of observations to be used in
+the fitting process. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+
+<p>a function which indicates what should happen when the data contain
+<code>NA</code>s. The default is set by the <code>na.action</code> setting of options, and is
+<code>na.fail</code> if that is unset. The (recommended) default is
+<code>na.omit</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+
+<p>the original function call. This is passed internally by
+<code>np</code> when a bandwidth search has been implied by a call to
+another function. It is not recommended that the user set this.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data (training data),
+which, by default, populates the columns <code class="reqn">2</code> through <code class="reqn">p+1</code>
+of <code class="reqn">W</code> in the model equation, and in the 
+absence of <code>zdat</code>, will also correspond to 
+<code class="reqn">Z</code> from the model equation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>xdat</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zdat</code></td>
+<td>
+
+<p>an optionally specified <code class="reqn">q</code>-variate data frame of explanatory
+data (training data), which corresponds to <code class="reqn">Z</code>
+in the model equation. Defaults to be the same as <code>xdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as a <code>scbandwidth</code>
+object returned from a previous invocation, or as a vector of
+bandwidths, with each element <code class="reqn">i</code> corresponding to the bandwidth
+for column <code class="reqn">i</code> in <code>xdat</code>. In either case, the bandwidth
+supplied will serve as a starting point in the numerical search for
+optimal bandwidths. If specified as a vector, then additional
+arguments will need to be supplied as necessary to specify the
+bandwidth type, kernel types, selection methods, and so on. This can
+be left unset.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the regression type,
+bandwidth type, kernel types, selection methods, and so on, detailed
+below. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bandwidth.compute</code></td>
+<td>
+
+<p>a logical value which specifies whether to do a numerical search for
+bandwidths or not. If set to <code>FALSE</code>, a <code>scbandwidth</code> object
+will be returned with bandwidths set to those specified
+in <code>bws</code>. Defaults to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bwmethod</code></td>
+<td>
+
+<p>which method was used to select bandwidths. <code>cv.ls</code>
+specifies least-squares cross-validation, which is all that is
+currently supported. Defaults to <code>cv.ls</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bwscaling</code></td>
+<td>
+<p> a logical value that when set to <code>TRUE</code> the
+supplied bandwidths are interpreted as ‘scale factors’
+(<code class="reqn">c_j</code>), otherwise when the value is <code>FALSE</code> they are
+interpreted as ‘raw bandwidths’ (<code class="reqn">h_j</code> for continuous data
+types, <code class="reqn">\lambda_j</code> for discrete data types). For
+continuous data types, <code class="reqn">c_j</code> and <code class="reqn">h_j</code> are
+related by the formula <code class="reqn">h_j = c_j \sigma_j n^{-1/(2P+l)}</code>, where <code class="reqn">\sigma_j</code> is an
+adaptive measure of spread of continuous variable <code class="reqn">j</code> defined as
+min(standard deviation, mean absolute deviation, interquartile
+range/1.349), <code class="reqn">n</code> the number of observations, <code class="reqn">P</code> the
+order of the kernel, and <code class="reqn">l</code> the number of continuous
+variables. For discrete data types, <code class="reqn">c_j</code> and
+<code class="reqn">h_j</code> are related by the formula <code class="reqn">h_j =
+    c_jn^{-2/(2P+l)}</code>, where here
+<code class="reqn">j</code> denotes discrete variable <code class="reqn">j</code>.  Defaults to
+<code>FALSE</code>.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bwtype</code></td>
+<td>
+
+<p>character string used for the continuous variable bandwidth type,
+specifying the type of bandwidth provided. Defaults to
+<code>fixed</code>. Option summary:<br><code>fixed</code>: fixed bandwidths or scale factors <br><code>generalized_nn</code>: generalized nearest neighbors <br><code>adaptive_nn</code>:  adaptive nearest neighbors
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ckertype</code></td>
+<td>
+
+<p>character string used to specify the continuous kernel type.
+Can be set as <code>gaussian</code>, <code>epanechnikov</code>, or
+<code>uniform</code>. Defaults to <code>gaussian</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ckerorder</code></td>
+<td>
+
+<p>numeric value specifying kernel order (one of
+<code>(2,4,6,8)</code>). Kernel order specified along with a
+<code>uniform</code> continuous kernel type will be ignored. Defaults to
+<code>2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ukertype</code></td>
+<td>
+
+<p>character string used to specify the unordered categorical kernel type.
+Can be set as <code>aitchisonaitken</code> or <code>liracine</code>. Defaults to
+<code>aitchisonaitken</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>okertype</code></td>
+<td>
+
+<p>character string used to specify the ordered categorical kernel type.
+Can be set as <code>wangvanryzin</code> or <code>liracine</code>. Defaults to
+<code>liracine</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmulti</code></td>
+<td>
+
+<p>integer number of times to restart the process of finding extrema of
+the cross-validation function from different (random) initial
+points. Defaults to <code>min(5,ncol(xdat))</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+
+<p>an integer used to seed R's random number generator. This ensures
+replicability of the numerical search. Defaults to 42.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.method</code></td>
+<td>
+<p> method used by <code>optim</code> for minimization of
+the objective function. See <code>?optim</code> for references. Defaults
+to <code>"Nelder-Mead"</code>.
+</p>
+<p>the default method is an implementation of that of Nelder and Mead
+(1965), that uses only function values and is robust but relatively
+slow.  It will work reasonably well for non-differentiable
+functions.
+</p>
+<p>method <code>"BFGS"</code> is a quasi-Newton method (also known as a
+variable metric algorithm), specifically that published
+simultaneously in 1970 by Broyden, Fletcher, Goldfarb and Shanno.
+This uses function values and gradients to build up a picture of the
+surface to be optimized.
+</p>
+<p>method <code>"CG"</code> is a conjugate gradients method based
+on that by Fletcher and Reeves (1964) (but with the option of
+Polak-Ribiere or Beale-Sorenson updates).  Conjugate gradient
+methods will generally be more fragile than the BFGS method, but as
+they do not store a matrix they may be successful in much larger
+optimization problems.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.maxattempts</code></td>
+<td>
+
+<p>maximum number of attempts taken trying to achieve successful
+convergence in <code>optim</code>. Defaults to <code>100</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.abstol</code></td>
+<td>
+
+<p>the absolute convergence tolerance used by <code>optim</code>. Only useful
+for non-negative functions, as a tolerance for reaching
+zero. Defaults to <code>.Machine$double.eps</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.reltol</code></td>
+<td>
+
+<p>relative convergence tolerance used by <code>optim</code>.  The algorithm
+stops if it is unable to reduce the value by a factor of 'reltol *
+(abs(val) + reltol)' at a step.  Defaults to
+<code>sqrt(.Machine$double.eps)</code>, typically about <code>1e-8</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.maxit</code></td>
+<td>
+
+<p>maximum number of iterations used by <code>optim</code>. Defaults
+to <code>500</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv.iterate</code></td>
+<td>
+
+<p>boolean value specifying whether or not to perform iterative,
+cross-validated backfitting on the data. See details for limitations
+of the backfitting procedure. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv.num.iterations</code></td>
+<td>
+
+<p>integer specifying the number of times to iterate the backfitting
+process over all covariates. Defaults to <code>1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backfit.iterate</code></td>
+<td>
+
+<p>boolean value specifying whether or not to iterate evaluations of
+the smooth coefficient estimator, for extra accuracy, during the
+cross-validated backfitting procedure. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backfit.maxiter</code></td>
+<td>
+
+<p>integer specifying the maximum number of times to iterate the
+evaluation of the smooth coefficient estimator in the attempt to
+obtain the desired accuracy. Defaults to <code>100</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backfit.tol</code></td>
+<td>
+
+<p>tolerance to determine convergence of iterated evaluations of the
+smooth coefficient estimator. Defaults to <code>.Machine$double.eps</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npscoefbw</code> implements a variety of methods for semiparametric
+regression on multivariate (<code class="reqn">p+q</code>-variate) explanatory data defined
+over a set of possibly continuous data. The approach is based on Li and
+Racine (2003) who employ ‘generalized product kernels’ that
+admit a mix of continuous and discrete data types.
+</p>
+<p>Three classes of kernel estimators for the continuous data types are
+available: fixed, adaptive nearest-neighbor, and generalized
+nearest-neighbor. Adaptive nearest-neighbor bandwidths change with
+each sample realization in the set, <code class="reqn">x_i</code>, when estimating the
+density at the point <code class="reqn">x</code>. Generalized nearest-neighbor bandwidths change
+with the point at which the density is estimated, <code class="reqn">x</code>. Fixed bandwidths
+are constant over the support of <code class="reqn">x</code>.
+</p>
+<p><code>npscoefbw</code> may be invoked <em>either</em> with a formula-like
+symbolic description of variables on which bandwidth selection is to be
+performed <em>or</em> through a simpler interface whereby data is passed
+directly to the function via the <code>xdat</code>, <code>ydat</code>, and
+<code>zdat</code> parameters. Use of these two interfaces is <b>mutually
+exclusive</b>.
+</p>
+<p>Data contained in the data frame <code>xdat</code> may be continuous and in
+<code>zdat</code> may be of mixed type. Data can be entered in an arbitrary
+order and data types will be detected automatically by the routine (see
+<code>np</code> for details).
+</p>
+<p>Data for which bandwidths are to be estimated may be specified
+symbolically. A typical description has the form <code>dependent</code>
+<code>data</code> <code>~</code> <code>parametric</code> <code>explanatory</code> <code>data</code>
+<code>|</code> <code>nonparametric</code> <code>explanatory</code> <code>data</code>, where
+<code>dependent</code> <code>data</code> is a univariate response, and
+<code>parametric</code> <code>explanatory</code> <code>data</code> and
+<code>nonparametric</code> <code>explanatory</code> <code>data</code> are both series of
+variables specified by name, separated by the separation character
+'+'. For example, <code> y1 ~ x1 + x2 | z1 </code> specifies that the
+bandwidth object for the smooth coefficient model with response
+<code>y1</code>, linear parametric regressors <code>x1</code> and <code>x2</code>, and
+nonparametric regressor (that is, the slope-changing variable)
+<code>z1</code> is to be estimated. See below for further examples.  In the
+case where the nonparametric (slope-changing) variable is not
+specified, it is assumed to be the same as the parametric variable.
+</p>
+<p>A variety of kernels may be specified by the user. Kernels implemented
+for continuous data types include the second, fourth, sixth, and eighth
+order Gaussian and Epanechnikov kernels, and the uniform
+kernel. Unordered discrete data types use a variation on Aitchison and
+Aitken's (1976) kernel, while ordered data types use a variation of the
+Wang and van Ryzin (1981) kernel.
+</p>
+
+
+<h3>Value</h3>
+
+<p>if <code>bwtype</code> is set to <code>fixed</code>, an object containing
+bandwidths (or scale factors if <code>bwscaling = TRUE</code>) is
+returned. If it is set to <code>generalized_nn</code> or <code>adaptive_nn</code>,
+then instead the <code class="reqn">k</code>th nearest neighbors are returned for the
+continuous variables while the discrete kernel bandwidths are returned
+for the discrete variables. Bandwidths are stored in a vector under the
+component name <code>bw</code>. Backfitted bandwidths are stored under the
+component name <code>bw.fitted</code>.
+</p>
+<p>The functions <code>predict</code>, <code>summary</code>, and
+<code>plot</code> support 
+objects of this class.
+</p>
+
+
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+<p>Caution: multivariate data-driven bandwidth selection methods are, by
+their nature, <em>computationally intensive</em>. Virtually all methods
+require dropping the <code class="reqn">i</code>th observation from the data set,
+computing an object, repeating this for all observations in the
+sample, then averaging each of these leave-one-out estimates for a
+<em>given</em> value of the bandwidth vector, and only then repeating
+this a large number of times in order to conduct multivariate
+numerical minimization/maximization. Furthermore, due to the potential
+for local minima/maxima, <em>restarting this procedure a large
+number of times may often be necessary</em>. This can be frustrating for
+users possessing large datasets. For exploratory purposes, you may
+wish to override the default search tolerances, say, setting
+optim.reltol=.1 and conduct multistarting (the default is to restart
+min(5,ncol(zdat)) times). Once the procedure terminates, you can restart
+search with default tolerances using those bandwidths obtained from
+the less rigorous search (i.e., set <code>bws=bw</code> on subsequent calls
+to this routine where <code>bw</code> is the initial bandwidth object).  A
+version of this package using the <code>Rmpi</code> wrapper is under
+development that allows one to deploy this software in a clustered
+computing environment to facilitate computation involving large
+datasets.
+</p>
+<p>Support for backfitted bandwidths is experimental and is limited in
+functionality. The code does not support asymptotic standard errors
+or out of sample estimates with backfitting.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Cai Z. (2007), “Trending time-varying coefficient time series
+models with serially correlated errors,” Journal of Econometrics,
+136, 163-188.
+</p>
+<p>Hastie, T. and R. Tibshirani (1993), “Varying-coefficient
+models,” Journal of the Royal Statistical Society, B 55, 757-796.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics: Theory
+and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2010), “Smooth varying-coefficient
+estimation and inference for qualitative and quantitative data,”
+Econometric Theory, 26, 1-31.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em>
+Cambridge University Press.
+</p>
+<p>Li, Q. and D. Ouyang and J.S. Racine (2013), “Categorical
+semiparametric varying-coefficient models,” Journal of Applied
+Econometrics, 28, 551-589.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth estimators
+for discrete distributions,”  Biometrika, 68, 301-309.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npregbw</code>, <code>npreg</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA):
+set.seed(42)
+
+n &lt;- 100
+x &lt;- runif(n)
+z &lt;- runif(n, min=-2, max=2)
+y &lt;- x*exp(z)*(1.0+rnorm(n,sd = 0.2))
+bw &lt;- npscoefbw(formula=y~x|z)
+summary(bw)
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): 
+
+n &lt;- 100
+x &lt;- runif(n)
+z &lt;- runif(n, min=-2, max=2)
+y &lt;- x*exp(z)*(1.0+rnorm(n,sd = 0.2))
+bw &lt;- npscoefbw(xdat=x, ydat=y, zdat=z)
+summary(bw)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

@@ -1,0 +1,229 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>specify_sem</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Specify a structural equation model</h2>
+
+<h3>Description</h3>
+
+<p>Specify a structural equation model with constraints.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  specify_sem(num.x, num.y, num.xi, num.eta, xi, eta, 
+              constraints = c("indirect", "direct1", "direct2"),
+              num.classes = 1, rel.lat = "default", interaction = "none")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>num.x</code></td>
+<td>
+<p>number of observed variables for xi.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.y</code></td>
+<td>
+<p>number of observed variables for eta.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.xi</code></td>
+<td>
+<p>number of latent exogenous variabeles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.eta</code></td>
+<td>
+<p>number of latent endognous variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xi</code></td>
+<td>
+<p>which observed variables are indicators for which exogenous
+variable. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>which observed variables are indicators for which endogenous
+variable. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraints</code></td>
+<td>
+<p>which should be set for a model with more than one
+latent class. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.classes</code></td>
+<td>
+<p>number of latent classes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interaction</code></td>
+<td>
+<p>define which interaction terms should be included.
+Default is ‘none’. See Details for how to enter interaction terms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rel.lat</code></td>
+<td>
+<p>define relations between latent variables.
+Influences Beta and Gamma matrices. For ‘defaults’ and how to define
+see Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The notation for the <code>matrices</code> given back by <code>specify_sem</code>
+follows typical notation used in structural equation modeling. The
+notation, of course, may vary dependingly. Therefore, here are examples
+for typical structural equation models with the notation used by
+<code>specify_sem</code> (in matrix notation):
+</p>
+<p>Structural model for LMS, QML (nonlinear SEM), and NSEMM (nonlinear SEM
+with latent classes):
+</p>
+<p style="text-align: center;"><code class="reqn">\boldsymbol{\eta} = \boldsymbol{\alpha} + \boldsymbol{\Gamma}
+        \boldsymbol{\xi} + \boldsymbol{\xi}' \boldsymbol{\Omega}
+        \boldsymbol{\xi} + \boldsymbol{\zeta}</code>
+</p>
+
+<p>Structural model for SEMM (linear SEM with latent classes):
+</p>
+<p style="text-align: center;"><code class="reqn">\boldsymbol{B} \boldsymbol{\eta} = \boldsymbol{\alpha} +
+        \boldsymbol{\Gamma} \boldsymbol{\xi} + \boldsymbol{\zeta}</code>
+</p>
+
+<p>Measurement model:
+</p>
+<p style="text-align: center;"><code class="reqn">\textbf{x} = \boldsymbol{\nu}_x + \boldsymbol{\lambda}_x
+        \boldsymbol{\xi} + \boldsymbol{\delta}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\textbf{y} = \boldsymbol{\nu}_y + \boldsymbol{\lambda}_y
+        \boldsymbol{\eta} + \boldsymbol{\varepsilon}</code>
+</p>
+
+<p>Which indicators belong to which latent variable is defined by
+<code>xi</code> and <code>eta</code>. Must be specified in the following way:
+<code>xi='x1-x2,x3-x4'</code> which means that variables <code>x1, x2</code> are
+indicators for <code>xi1</code> and <code>x3, x4</code> are indicators for
+<code>xi2</code>. And accordingly for the endogenous variables <code>eta</code>.
+</p>
+<p>Interactions between latent exogenous variables are defined by<br><code>interaction='eta1~xi1:xi2,eta1~xi1:xi1'</code>. It is important to note,
+that interactions must always start with <code>xi1</code> and build from there.
+A definition like <code>interaction='eta1~xi1:xi2,eta1~xi2:xi3'</code> is not
+feasible and must be changed to
+<code>interaction='eta1~xi1:xi2,eta1~xi1:xi3'</code> (by simple switching
+<code>xi1</code> and <code>xi2</code> in one's definitions). <code>interaction</code> fills
+the <code class="reqn">\bf \Omega</code> matrix (see above) and must always be a
+triangular matrix where the lower triangle is filled with 0's (see Klein
+&amp; Moosbrugger, 2000, for details).
+</p>
+<p><code>rel.lat</code> defines which latent variables influence each
+other. It must be defined like<br><code>rel.lat='eta1~xi1+xi2,eta2~eta1'</code>. Free parameters will be
+set accordingly in <code class="reqn">\bf B</code> and <code class="reqn">\bf \Gamma</code>
+matrices. When nothing is defined, <code class="reqn">\bf \Gamma</code> defaults to
+all <code>NA</code>s (which means all <code class="reqn">\xi</code>'s influence all
+<code class="reqn">\eta</code>'s) and <code class="reqn">\bf B</code> is an identity matrix.
+</p>
+<p>Structural equation models with latent classes like SEMM and NSEMM can be
+used in two different approaches usually called direct and indirect. When
+constraints are set to <code>indirect</code> then parameters for the latent
+classes are constraint to be equal except for the parameters for the
+mixture distributions (<code class="reqn">\tau</code>'s and <code class="reqn">\Phi</code>). In a
+direct approach, parameters for the latent classes are estimated
+independently. For <code>direct1</code> all parameters will be estimated
+independently for each latent class. For <code>direct2</code> it is assumed
+that the measurement model is equal for both groups and only the
+parameters for the mixtures and the structural model are estimated
+separately.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>singleClass</code>, <code>semm</code>, or <code>nsemm</code>
+which can be used to estimate parameters using <code>em</code> that
+consists of the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>matrices</code></td>
+<td>
+<p>list of matrices specifying the structural equation
+model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>info</code></td>
+<td>
+<p>list of informations about structural equation model.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Jedidi, K., Jagpal, H. S., &amp; DeSarbo, W. S. (1997). STEMM: A General
+Finite Mixture Structural Equation Model, <em>Journal of
+Classification, 14</em>, 23–50. doi:http://dx.doi.org/10.1007/s003579900002
+</p>
+<p>Kelava, A., Nagengast, B., &amp; Brandt, H. (2014). A nonlinear structural
+equation mixture modeling approach for non-normally distributed latent
+predictor variables. <em>Structural Equation Modeling, 21</em>, 468-481.
+doi:http://dx.doi.org/10.1080/10705511.2014.915379
+</p>
+<p>Klein, A. &amp;, Moosbrugger, H. (2000). Maximum likelihood estimation of
+latent interaction effects with the LMS method. <em>Psychometrika, 65</em>,
+457–474. doi:http://dx.doi.org/10.1007/bf02296338
+</p>
+<p>Klein, A. &amp;, Muthen, B. O. (2007). Quasi-Maximum Likelihood Estimation of
+Structural Equation Models With Multiple Interaction and Quadratic
+Effects. <em>Multivariate Behavior Research, 42</em>, 647–673.
+doi:http://dx.doi.org/10.1080/00273170701710205
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>create_sem</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># with default constraints
+model &lt;- specify_sem(num.x = 6, num.y = 3, num.xi = 2, num.eta = 1,
+  xi = "x1-x3,x4-x6", eta = "y1-y3")
+
+# create data frame
+specs &lt;- as.data.frame(model)
+# and add custom constraints
+constr &lt;- c(1, NA, NA, 0, 0, 0, 0, 0, 0, 1, NA, NA, 1, NA, NA, NA, NA, 1, NA,
+  0, 0, 0, 0, 0, 0, NA, 0, 0, 0, 0, 0, 0, NA, 0, 0, 0, 0, 0, 0, NA, 0, 0, 0,
+  0, 0, 0, NA, 0, 0, 0, 0, 0, 0, NA, NA, 0, 0, 0, NA, 0, 0, 0, NA, NA, NA,
+  NA, 0, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 0, 0, 0, 0, NA, 0)
+specs$class1 &lt;- constr
+# create model from data frame
+model.custom &lt;- create_sem(specs)
+</code></pre>
+
+
+</div>

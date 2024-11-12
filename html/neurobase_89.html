@@ -1,0 +1,65 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>images2matrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transform set of images to matrix</h2>
+
+<h3>Description</h3>
+
+<p>Creates a matrix, where the voxels are on the rows 
+and images are on the columns
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">images2matrix(imgs, mask = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>imgs</code></td>
+<td>
+<p>Vector of files or list of images (niftiImage, array, or nifti)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask</code></td>
+<td>
+<p>Binary image to subset the voxels</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Matrix of V by p, where V is the product of the dimensions of one 
+image or the number of voxels in the mask, and p is the number of images
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(5)
+dims = rep(10, 3)
+arr = array(rpois(prod(dims), lambda = 2), dim = dims)
+nim = oro.nifti::nifti(arr)
+imgs = list(nim, arr)
+mask = nim &gt; 2
+mat1 = images2matrix(imgs)
+mat2 = images2matrix(list(nim, nim))
+if (packageVersion("oro.nifti") &gt;= package_version("0.10.2")) {
+testthat::expect_equal(mat1, mat2)
+} else {
+testthat::expect_error(testthat::expect_equal(mat1, mat2))
+}
+mat1 = images2matrix(imgs, mask = mask)
+mat2 = images2matrix(list(nim, nim), mask)
+</code></pre>
+
+
+</div>

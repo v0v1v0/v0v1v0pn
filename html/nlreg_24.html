@@ -1,0 +1,202 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mpl.nlreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Maximum Adjusted Profile Likelihood Estimates for a ‘nlreg’ Object
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the maximum adjusted profile likelihood estimates of the
+variance parameters for a nonlinear heteroscedastic model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nlreg'
+mpl(fitted, offset = NULL, stats = c("sk", "fr"), 
+    control = list(x.tol = 1e-6, rel.tol = 1e-6, step.min = 1/2048,
+    maxit = 100), trace = FALSE, ... )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fitted</code></td>
+<td>
+
+<p>a <code>nlreg</code> object, that is, the result of a call to 
+<code>nlreg</code> with non-constant variance function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+
+<p>a numerical vector whose elements are named after the variance
+parameters appearing in the nonlinear model.  These will be fixed 
+to the values specified in <code>offset</code>.  The name <code>logs</code> is 
+used to identify the constant term 
+<code class="reqn">\log(\sigma^2)</code> which is included by default 
+in the variance function (see the <code>weights</code> argument in 
+<code>nlreg</code>).  The default is <code>NULL</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats</code></td>
+<td>
+
+<p>character value indicating which correction term to use.  
+Admissible values are <code>"sk"</code> for <cite>Skovgaard's (1996)</cite> 
+proposal and <code>"fr"</code> for <cite>Fraser, Reid and Wu's (1999)</cite>
+approach.  The default is <code>"sk"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>a list of iteration and algorithmic constants.  See the 
+<b>Details</b> section below for their definition.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+
+<p>logical flag.  If <code>TRUE</code>, details of the iterations are 
+printed. Default is <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>absorbs any additional argument.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>mpl.nlreg</code> routine returns nearly unbiased estimates of the
+variance parameters of a nonlinear heteroscedastic regression model 
+by maximizing the corresponding adjusted profile likelihood
+(<cite>Barndorff-Nielsen, 1983</cite>).  More precisely, it implements two 
+approximations derived from the theories developed respectively by 
+<cite>Skovgaard (1996)</cite> and <cite>Fraser, Reid and Wu (1999)</cite>. The 
+core algorithm alternates 
+minimization of minus the adjusted profile log likelihood with 
+respect to the variance parameters, and minimization of minus the 
+profile log likelihood with respect to the regression coefficients.  
+The first step is omitted if the <code>offset</code> argument is used in 
+which case <code>mpl.nlreg</code> returns the constrained maximum 
+likelihood estimates of the regression coefficients.  The 
+quasi-Newton optimizer <code>optim</code> is used in both 
+steps.  Starting values are retrieved from the <code>nlreg</code> object
+passed through the <code>fitted</code> argument.
+</p>
+<p>The algorithm iterates until convergence or until the maximum number
+of iterations is reached.  The stopping rule considers the relative
+difference between successive estimates of the variance parameters 
+and the relative increment of the adjusted profile log likelihood.  
+These are governed by the parameters <code>x.tol</code> and 
+<code>rel.tol</code>/<code>step.min</code>, respectively.
+If the <code>offset</code> argument is used, the relative difference 
+between successive estimates of the regression coefficients and the 
+relative increment of the profile log likelihood are considered 
+instead.  If convergence has been reached, the results are saved in 
+an object of class <code>mpl</code>.  The output can be examined by 
+<code>print</code> and <code>summary</code>.
+Components can be extracted using <code>coef</code> and 
+<code>param</code>.
+</p>
+<p>The theory is outlined in <cite>Brazzale (2000, Sections 3.1 and 
+3.2.3)</cite>.  Details of the implementation are given in <cite>Brazzale 
+(2000, Section 6.3.1)</cite>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>mpl</code> which inherits from <code>nlreg</code>.  
+See <code>mpl.object</code> for details.
+</p>
+
+
+<h3>Side Effects</h3>
+
+<p>If <code>trace = TRUE</code> and <code>offset = NULL</code>, the iteration number
+and the corresponding adjusted profile log likelihood are printed. 
+</p>
+
+
+<h3>Note</h3>
+
+<p>The argument <code>control</code> which controls the convergence criteria 
+plays an important role.  Fine-tuning of this argument helps 
+surrounding a well-known problem in nonlinear regression, that is,
+convergence failure in cases where the likelihood and/or the adjusted 
+profile likelihood are very flat.
+</p>
+
+
+<h3>References</h3>
+
+<p>Barndorff-Nielsen, O. E. (1983) On a formula for the distribution of
+the maximum likelihood estimator.  <em>Biometrika</em>, <b>70</b>, 
+343–365.
+</p>
+<p>Brazzale, A. R. (2000) <em>Practical Small-Sample Parametric 
+Inference</em>. Ph.D. Thesis N. 2230, Department of Mathematics, Swiss
+Federal Institute of Technology Lausanne.  
+</p>
+<p>Fraser, D.A.S., Reid, N. and Wu, J. (1999).  A simple general formula 
+for tail probabilities for frequentist and Bayesian inference. 
+<em>Biometrika</em>, <b>86</b>, 249–264.
+</p>
+<p>Skovgaard, I.  (1996) An explicit large-deviation approximation to
+one-parameter tests.  <em>Bernoulli</em>, <b>2</b>, 145–165.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mpl</code>, <code>mpl.object</code>, 
+<code>nlreg.object</code>, <code>optim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(metsulfuron)
+metsulfuron.nl &lt;- 
+    nlreg( formula = log(area) ~ log( b1+(b2-b1) / (1+(dose/b4)^b3) ), 
+           weights = ~ ( 1+dose^exp(g) )^2, data = metsulfuron, hoa = TRUE, 
+          start = c(b1 = 138, b2 = 2470, b3 = 2, b4 = 0.07, g = log(0.3)) )
+##
+## MMPLE of the variance parameters
+##
+metsulfuron.mpl &lt;- mpl( metsulfuron.nl, trace = TRUE )
+summary( metsulfuron.mpl, corr = FALSE )
+##
+## constrained MLEs of the regression coefficients  
+##
+metsulfuron.mpl &lt;- mpl( metsulfuron.nl, offset = metsulfuron.nl$varPar, 
+                        trace = TRUE )
+summary( metsulfuron.mpl, corr = FALSE )
+</code></pre>
+
+
+</div>

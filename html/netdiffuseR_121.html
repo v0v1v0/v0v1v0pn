@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vertex_covariate_dist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Computes covariate distance between connected vertices</h2>
+
+<h3>Description</h3>
+
+<p>Computes covariate distance between connected vertices
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">vertex_covariate_dist(graph, X, p = 2)
+
+vertex_mahalanobis_dist(graph, X, S)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>A square matrix of size <code class="reqn">n</code> of class dgCMatrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A numeric matrix of size <code class="reqn">n \times K</code>. Vertices attributes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Numeric scalar. Norm to compute</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>Square matrix of size <code>ncol(x)</code>. Usually the var-covar matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Faster than <code>dist</code>, these functions compute distance metrics
+between pairs of vertices that are connected (otherwise skip).
+</p>
+<p>The function <code>vertex_covariate_dist</code> is the simil of <code>dist</code>
+and returns p-norms (Minkowski distance). It is implemented as follows (for
+each pair of vertices):
+</p>
+<p style="text-align: center;"><code class="reqn">%
+D_{ij} = \left(\sum_{k=1}^K \left|X_{ik} - X_{jk}\right|^{p} \right)^{1/p}\mbox{ if }graph_{i,j}\neq 0
+</code>
+</p>
+
+<p>In the case of mahalanobis distance, for each pair of vertex <code class="reqn">(i,j)</code>, the
+distance is computed as follows:
+</p>
+<p style="text-align: center;"><code class="reqn">%
+D_{ij} = \left( (X_i - X_j)\times S \times (X_i - X_j)' \right)^{1/2}\mbox{ if }graph_{i,j}\neq 0
+</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>A matrix of size <code class="reqn">n\times n</code> of class <code>dgCMatrix</code>. Will
+be symmetric only if <code>graph</code> is symmetric.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>References</h3>
+
+<p>Mahalanobis distance. (2016, September 27). In Wikipedia, The Free Encyclopedia.
+Retrieved 20:31, September 27, 2016, from
+<a href="https://en.wikipedia.org/w/index.php?title=Mahalanobis_distance&amp;oldid=741488252">https://en.wikipedia.org/w/index.php?title=Mahalanobis_distance&amp;oldid=741488252</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mahalanobis</code> in the stats package.
+</p>
+<p>Other statistics: 
+<code>bass</code>,
+<code>classify_adopters()</code>,
+<code>cumulative_adopt_count()</code>,
+<code>dgr()</code>,
+<code>ego_variance()</code>,
+<code>exposure()</code>,
+<code>hazard_rate()</code>,
+<code>infection()</code>,
+<code>moran()</code>,
+<code>struct_equiv()</code>,
+<code>threshold()</code>
+</p>
+<p>Other dyadic-level comparison functions: 
+<code>matrix_compare()</code>,
+<code>vertex_covariate_compare()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Distance (aka p norm) -----------------------------------------------------
+set.seed(123)
+G &lt;- rgraph_ws(20, 4, .1)
+X &lt;- matrix(runif(40), ncol=2)
+
+vertex_covariate_dist(G, X)[1:5, 1:5]
+
+# Mahalanobis distance ------------------------------------------------------
+S &lt;- var(X)
+
+M &lt;- vertex_mahalanobis_dist(G, X, S)
+
+# Example with diffnet objects ----------------------------------------------
+
+data(medInnovationsDiffNet)
+X &lt;- cbind(
+  medInnovationsDiffNet[["proage"]],
+  medInnovationsDiffNet[["attend"]]
+)
+
+S &lt;- var(X, na.rm=TRUE)
+ans &lt;- vertex_mahalanobis_dist(medInnovationsDiffNet, X, S)
+
+</code></pre>
+
+
+</div>

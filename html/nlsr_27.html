@@ -1,0 +1,332 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlxb</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>nlxb: nonlinear least squares modeling by formula</h2>
+
+<h3>Description</h3>
+
+<p>A simplified and hopefully robust alternative to finding
+the nonlinear least squares minimizer that causes
+'formula' to give a minimal residual sum of squares.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlxb(
+  formula,
+  data = parent.frame(),
+  start,
+  trace = FALSE,
+  lower = NULL,
+  upper = NULL,
+  weights = NULL,
+  control = list(),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>The modeling formula. Looks like 'y~b1/(1+b2*exp(-b3*T))'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame containing data for variables
+used in the formula that are NOT the parameters. This
+data may also be defined in the parent frame i.e.,
+'global' to this function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>MUST be a named vector with all elements present
+e.g., start=c(b1=200, b2=50, b3=0.3)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>TRUE for console output during execution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+<p>a vector of lower bounds on the parameters. 
+If a single number, this will be applied to all parameters
+Default <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+<p>a vector of upper bounds on the parameters. If a single number, 
+this will be applied to all parameters. Default <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A vector of fixed weights or a function or formula
+producing one.  See the Details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of control parameters. See nlsr.control().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional data needed to evaluate the modeling functions</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>nlxb is particularly intended to allow for the
+resolution of very ill-conditioned or else near
+zero-residual problems for which the regular nls()
+function is ill-suited. 
+</p>
+<p>This variant uses a qr solution without forming the sum
+of squares and cross products t(J)
+</p>
+<p>Neither this function nor <code>nlfb</code> have provision for parameter
+scaling (as in the <code>parscale</code> control of <code>optim</code> and
+package <code>optimx</code>). This would be more tedious than difficult to
+introduce, but does not seem to be a priority feature to add.
+</p>
+<p>There are many controls, and some of them are important for <code>nlxb</code>.
+In particular, if the derivatives needed for developing the Jacobian are
+NOT in the derivatives table, then we must supply code elsewhere as 
+specified by the control <code>japprox</code>. This was originally just for
+numerical approximations, with the character strings "jafwd", "jaback",
+"jacentral" and "jand" leading to the use of a forward, backward, central
+or package <code>numDeriv</code> approximation. However, it is also possible to
+use code embedded in the residual function created using the <code>formula</code>.
+This is particularly useful for <code>selfStart</code> models, and we use the
+character string "SSJac" to point to such Jacobian code. Note how the
+starting parameter vector is found using the <code>getInitial</code> function
+from the <code>stats</code> package as in an example below.
+</p>
+<p>The <code>weights</code> argument can be a vector of fixed weights, in which
+case the objective function that will be 
+minimized is the sum of squares where each residual is multiplied by the 
+square root of the corresponding weight. Default <code>NULL</code> implies 
+unit weights.  
+</p>
+<p><code>weights</code> may alternatively be a function with header <code>function(parms, resids)</code> to compute such a vector, or a formula
+whose right hand side gives an expression for the weights.  Variables
+in the expression may include the following:
+</p>
+
+<dl>
+<dt>A variable named <code>resid</code>
+</dt>
+<dd>
+<p>The current residuals.</p>
+</dd>
+<dt>A variable named <code>fitted</code>
+</dt>
+<dd>
+<p>The right hand side of the model formula.</p>
+</dd>
+<dt>Parameters</dt>
+<dd>
+<p>The parameters of the model.</p>
+</dd>
+<dt>Data</dt>
+<dd>
+<p>Values from <code>data</code>.</p>
+</dd>
+<dt>Vars</dt>
+<dd>
+<p>Variables in the environment of the formula.</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>list of solution elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>resid</code></td>
+<td>
+<p>weighted residuals at the proposed solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jacobian</code></td>
+<td>
+<p>Jacobian matrix at the proposed solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>feval   </code></td>
+<td>
+<p>residual function evaluations used to reach solution from starting parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jeval   </code></td>
+<td>
+<p>Jacobian function (or approximation) evaluations used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>a named vector of proposed solution parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ssquares</code></td>
+<td>
+<p>weighted sum of squared residuals (often the deviance)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower   </code></td>
+<td>
+<p>lower bounds on parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper   </code></td>
+<td>
+<p>upper bounds on parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maskidx </code></td>
+<td>
+<p>vector if indices of fixed (masked) parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights0</code></td>
+<td>
+<p>weights specified in function call</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights </code></td>
+<td>
+<p>weights at the final solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula </code></td>
+<td>
+<p>the modeling formula</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resfn   </code></td>
+<td>
+<p>the residual function (unweighted) based on the formula</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>J C Nash 2014-7-16   nashjc _at_ uottawa.ca
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nlsr)
+weed &lt;- c(5.308, 7.24, 9.638, 12.866, 17.069, 23.192, 31.443,
+        38.558, 50.156, 62.948, 75.995, 91.972)
+tt &lt;- 1:12
+weeddf &lt;- data.frame(tt, weed)
+frm &lt;- 
+wmodu &lt;- weed ~ b1/(1+b2*exp(-b3*tt)) # Unscaled
+## nls from unit start FAILS
+start1&lt;-c(b1=1, b2=1, b3=1)
+hunls1 &lt;- try(nls(wmodu, data=weeddf, start=start1, trace=FALSE))
+if (! inherits(hunls1, "try-error")) print(hunls1) ## else cat("Failure -- try-error\n")
+## nlxb from unit start
+hunlx1 &lt;- try(nlxb(wmodu, data=weeddf, start=c(b1=1, b2=1, b3=1), trace=FALSE))
+if (! inherits(hunlx1, "try-error")) print(hunlx1)
+
+st2h&lt;-c(b1=185, b2=10, b3=.3)
+#' hunls2 &lt;- try(nls(wmodu, data=weeddf, start=st2h, trace=FALSE))
+if (! inherits(hunls1, "try-error")) print(hunls1) ## else cat("Failure -- try-error\n")
+## nlxb from unit start
+hunlx1 &lt;- try(nlxb(wmodu, data=weeddf, start=st2h, trace=FALSE))
+if (! inherits(hunlx1, "try-error")) print(hunlx1)
+
+# Functional models need to use a Jacobian approximation or external calculation.
+# For example, the SSlogis() selfStart model from \code{stats} package.
+
+# nls() needs NO starting value
+hSSnls&lt;-try(nls(weed~SSlogis(tt, Asym, xmid, scal), data=weeddf))
+summary(hSSnls)
+# We need to get the start for nlxb explicitly
+stSS &lt;- getInitial(weed ~ SSlogis(tt, Asym, xmid, scal), data=weeddf)
+hSSnlx&lt;-try(nlxb(weed~SSlogis(tt, Asym, xmid, scal), data=weeddf, start=stSS))
+hSSnlx
+
+# nls() can only bound parameters with algorithm="port"
+#   and minpack.lm is unreliable in imposing bounds, but nlsr copes fine.
+lo&lt;-c(0, 0, 0)
+up&lt;-c(190, 10, 2) # Note: start must be admissible.
+bnls0&lt;-try(nls(wmodu, data=weeddf, start=st2h,
+         lower=lo, upper=up)) # should complain and fail
+ 
+bnls&lt;-try(nls(wmodu, data=weeddf, start=st2h,
+         lower=lo, upper=up, algorith="port"))
+summary(bnls)
+bnlx&lt;-try(nlxb(wmodu, data=weeddf, start=st2h, lower=lo, upper=up))
+bnlx
+
+# nlxb() can also MASK (fix) parameters. The mechanism of maskidx from nls
+# is NO LONGER USED. Instead we set upper and lower parameters equal for
+# the masked parameters. The start value MUST be equal to this fixed value.
+lo&lt;-c(190, 0, 0) # mask first parameter
+up&lt;-c(190, 10, 2)
+strt &lt;- c(b1=190, b2=1, b3=1)
+mnlx&lt;-try(nlxb(wmodu, start=strt, data=weeddf, 
+         lower=lo, upper=up))
+mnlx
+mnls&lt;-try(nls(wmodu, data=weeddf, start=strt,
+         lower=lo, upper=up, algorith="port"))
+summary(mnls)
+
+# Try first parameter masked and see if we get SEs 
+lo&lt;-c(200, 0, 0) # mask first parameter
+up&lt;-c(100, 10, 5)
+strt &lt;- c(b1=200, b2=1, b3=1)
+mnlx&lt;-try(nlxb(wmodu, start=strt, data=weeddf, 
+         lower=lo, upper=up))
+mnlx
+mnls&lt;-try(nls(wmodu, data=weeddf, start=strt,
+         lower=lo, upper=up, algorith="port"))
+summary(mnls) 
+
+# Try with weights on the observations
+mnlx&lt;-try(nlxb(wmodu, start=strt, data=weeddf, 
+               weights = ~ 1/weed))
+mnlx
+
+</code></pre>
+
+
+</div>

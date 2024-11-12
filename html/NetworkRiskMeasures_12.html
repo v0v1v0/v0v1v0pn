@@ -1,0 +1,56 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulated Interbank Data</h2>
+
+<h3>Description</h3>
+
+<p>A simulated dataset with interbank assets, liabilities, capital buffer and weights for
+125 "banks". The code to generate the data is on the examples.
+</p>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 125 rows and 5 variables</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Simulated data for ilustration purposes
+
+# Setting Seed
+set.seed(1100)
+
+# Heavy tailed assets
+assets &lt;- rlnorm(125, 0, 2)
+assets[assets &lt; 4] &lt;- runif(length(assets[assets &lt; 4]))
+
+# Heavy tailed liabilities
+liabilities &lt;- rlnorm(125, 0, 2) 
+liabilities[liabilities &lt; 4] &lt;- runif(length(liabilities[liabilities &lt; 4]))
+
+# Making sure assets = liabilities
+assets &lt;- sum(liabilities) * (assets/sum(assets))
+
+# Buffer as a function of assets
+buffer &lt;- pmax(0.01, runif(length(liabilities))*liabilities + abs(rnorm(125, 4, 2.6)))
+
+# Weights as a function of assets, buffer and liabilities
+weights &lt;- (assets + liabilities + buffer + 1) + rlnorm(125, 0, 1)
+
+# creating data.frame
+sim_data &lt;- data.frame(bank  = paste0("b", 1:125),
+                       assets = assets,
+                       liabilities = liabilities,
+                       buffer = buffer,
+                       weights = weights)
+ 
+</code></pre>
+
+
+</div>

@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>make_Null_mixture</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mechanism Null Distributions</h2>
+
+<h3>Description</h3>
+
+<p>Creates a null distribution for a mechanism and parameter combination.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">make_Null_mixture(
+  input_network,
+  net_kind,
+  process,
+  parameter,
+  net_size,
+  iters,
+  method,
+  neighborhood,
+  DD_kind,
+  DD_weight,
+  directed,
+  resolution_min = 0.01,
+  resolution_max = 0.99,
+  power_max = 5,
+  connectance_max = 0.5,
+  divergence_max = 0.5,
+  best_fit_sd = 0,
+  cores = 1,
+  size_different = FALSE,
+  cause_orientation = "row",
+  max_norm = FALSE,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>input_network</code></td>
+<td>
+<p>The network for which to create a null distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_kind</code></td>
+<td>
+<p>If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>process</code></td>
+<td>
+<p>Name of mechanism. Currently only "ER", "PA", "DD", "DM" "SW", and "NM" are supported. Future versions will accept user-defined network-generating functions and associated parameters. ER = Erdos-Renyi random. PA = Preferential Attachment. DD = Duplication and Divergence. DM = Duplication and Mutation. SW = Small World. NM = Niche Model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter</code></td>
+<td>
+<p>Parameter in the governing mechanism.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_size</code></td>
+<td>
+<p>Number of nodes in the network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iters</code></td>
+<td>
+<p>Number of replicates in the null distribution. Note that length(null_dist) = ((iters^2)-iters)/2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neighborhood</code></td>
+<td>
+<p>The range of nodes that form connected communities. Note: This implementation results in overlap of communities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DD_kind</code></td>
+<td>
+<p>A vector of network properties to be used to compare networks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DD_weight</code></td>
+<td>
+<p>A vector of weights for the relative importance of the network properties in DD_kind being used to compare networks. Should be the same length as DD_kind.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>Whether the target network is directed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution_min</code></td>
+<td>
+<p>The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution_max</code></td>
+<td>
+<p>The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>power_max</code></td>
+<td>
+<p>Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>connectance_max</code></td>
+<td>
+<p>Defaults to 0.5. The maximum connectance parameter for the Niche Model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>divergence_max</code></td>
+<td>
+<p>Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>best_fit_sd</code></td>
+<td>
+<p>Defaults to 0.01. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size_different</code></td>
+<td>
+<p>If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cause_orientation</code></td>
+<td>
+<p>The orientation of directed adjacency matrices. Defaults to "row".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_norm</code></td>
+<td>
+<p>Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Defaults to FALSE. Whether to print all messages.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Produces ground-truthing network data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list. The first element contains the networks. The second contains their corresponding parameters.
+</p>
+
+
+<h3>References</h3>
+
+<p>Langendorf, R. E., &amp; Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import netcom
+library(netcom)
+
+make_Systematic(net_size = 10)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,176 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>trackingPortfolio</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute a Tracking Portfolio
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes a portfolio similar to a benchmark, e.g. for tracking the
+benchmark's performance or identifying factors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">trackingPortfolio(var, wmin = 0, wmax = 1,
+                  method = "qp", objective = "variance", R,
+                  ls.algo = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>the covariance matrix: a numeric (real),
+symmetric matrix. The first asset is the benchmark.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>a matrix of returns: each colums holds the
+returns of one asset; each rows holds the returns for
+one observation. The first asset is the benchmark.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wmin</code></td>
+<td>
+<p>numeric: a lower bound on weights. May also
+be a vector that holds specific bounds for each asset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wmax</code></td>
+<td>
+<p>numeric: an upper bound on weights. May also
+be a vector that holds specific bounds for each asset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>character. Currently, <code>"qp"</code> and
+<code>"ls"</code> are supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>objective</code></td>
+<td>
+<p>character. Currently, <code>"variance"</code>
+and <code>"sum.of.squares"</code> are supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ls.algo</code></td>
+<td>
+<p>a list of named elements, for settings for
+method ‘<code>ls</code>’; see Details</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>With method <code>"qp"</code>, the function uses
+<code>solve.QP</code> from package
+<span class="pkg">quadprog</span>. Because of the algorithm that
+<code>solve.QP</code> uses, <code>var</code> has to
+be positive definite (i.e. must be of full rank).
+</p>
+<p>With method <code>"ls"</code>, the function uses
+<code>LSopt</code>. Settings can be passed via
+<code>ls.algo</code>, which corresponds to
+<code>LSopt</code>'s argument <code>algo</code>. Default
+settings are 2000 iterations and <code>printBar</code>,
+<code>printDetail</code> set to <code>FALSE</code>.
+</p>
+<p><code>R</code> is needed only when <code>objective</code> is
+<code>"sum.of.squares"</code> or <code>method</code> is
+‘<code>ls</code>’. (See Examples.)
+</p>
+
+
+<h3>Value</h3>
+
+<p>a numeric vector (the portfolio weights)
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+<p>Schumann, E. (2020) Return-based tracking portfolios.
+<a href="http://enricoschumann.net/notes/return-based-tracking-portfolios.html">http://enricoschumann.net/notes/return-based-tracking-portfolios.html</a>
+</p>
+<p>Sharpe, W. F. (1992) Asset Allocation: Management Style and
+Performance Measurement. Journal of Portfolio Management.
+<strong>18</strong> (2), 7–19.
+<a href="https://web.stanford.edu/~wfsharpe/art/sa/sa.htm">https://web.stanford.edu/~wfsharpe/art/sa/sa.htm</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>minvar</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (requireNamespace("quadprog")) {
+    ns &lt;- 120
+    R &lt;- randomReturns(na = 1 + 20,
+                       ns = ns,
+                       sd = 0.03,
+                       mean = 0.005,
+                       rho = 0.7)
+
+    var &lt;- cov(R)
+
+    sol.qp &lt;- trackingPortfolio(var, wmax = 0.4)
+    sol.ls &lt;- trackingPortfolio(var = var, R = R, wmax = 0.4, method = "ls")
+    data.frame(QP = round(100*sol.qp, 1),
+               LS = round(100*sol.ls, 1))
+
+    sol.qp &lt;- trackingPortfolio(var, R = R, wmax = 0.4,
+                                objective = "sum.of.squares")
+    sol.ls &lt;- trackingPortfolio(var = var, R = R, wmax = 0.4, method = "ls",
+                                objective = "sum.of.squares")
+    data.frame(QP = round(100*sol.qp, 1),
+               LS = round(100*sol.ls, 1))
+
+
+    ## same as 'sol.qp' above
+    sol.qp.R   &lt;- trackingPortfolio(R = R,
+                                    wmax = 0.4,
+                                    objective = "sum.of.squares")
+    sol.qp.var &lt;- trackingPortfolio(var = crossprod(R),
+                                    wmax = 0.4,
+                                    objective = "variance")
+    ## ==&gt; should be the same
+    all.equal(sol.qp.R, sol.qp.var)
+}
+</code></pre>
+
+
+</div>

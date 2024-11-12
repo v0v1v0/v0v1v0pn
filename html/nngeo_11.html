@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>st_remove_holes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Remove polygon holes</h2>
+
+<h3>Description</h3>
+
+<p>The function removes all polygon holes and return the modified layer
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">st_remove_holes(x, max_area = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Object of class <code>sf</code>, <code>sfc</code> or <code>sfg</code>, of type <code>"POLYGON"</code> or <code>"MULTIPOLYGON"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_area</code></td>
+<td>
+<p>Maximum area of holes to be removed (<code>numeric</code>), in the units of <code>x</code> or in <code>[m^2]</code> for layers in geographic projection (lon/lat). Default value (<code>0</code>) causes removing all holes.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Object of same class as <code>x</code>, with holes removed
+</p>
+
+
+<h3>Note</h3>
+
+<p>See function <code>sfheaders::sf_remove_holes</code> for a highly-optimized faster alternative if you don't need the argument <code>max_area</code>: <a href="https://github.com/dcooley/sfheaders">https://github.com/dcooley/sfheaders</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Following the StackOverflow answer by user <code>lbusett</code>:
+</p>
+<p><a href="https://stackoverflow.com/questions/52654701/removing-holes-from-polygons-in-r-sf">https://stackoverflow.com/questions/52654701/removing-holes-from-polygons-in-r-sf</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">opar = par(mfrow = c(1, 2))
+
+# Example with 'sfg' - POLYGON
+p1 = rbind(c(0,0), c(1,0), c(3,2), c(2,4), c(1,4), c(0,0))
+p2 = rbind(c(1,1), c(1,2), c(2,2), c(1,1))
+pol = st_polygon(list(p1, p2))
+pol
+result = st_remove_holes(pol)
+result
+plot(pol, col = "#FF000033", main = "Before")
+plot(result, col = "#FF000033", main = "After")
+
+# Example with 'sfg' - MULTIPOLYGON
+p3 = rbind(c(3,0), c(4,0), c(4,1), c(3,1), c(3,0))
+p4 = rbind(c(3.3,0.3), c(3.8,0.3), c(3.8,0.8), c(3.3,0.8), c(3.3,0.3))[5:1,]
+p5 = rbind(c(3,3), c(4,2), c(4,3), c(3,3))
+mpol = st_multipolygon(list(list(p1,p2), list(p3,p4), list(p5)))
+mpol
+result = st_remove_holes(mpol)
+result
+plot(mpol, col = "#FF000033", main = "Before")
+plot(result, col = "#FF000033", main = "After")
+
+# Example with 'sfc' - POLYGON
+x = st_sfc(pol, pol * 0.75 + c(3.5, 2))
+x
+result = st_remove_holes(x)
+result
+plot(x, col = "#FF000033", main = "Before")
+plot(result, col = "#FF000033", main = "After")
+
+# Example with 'sfc' - MULTIPOLYGON
+x = st_sfc(pol, mpol * 0.75 + c(3.5, 2))
+x
+result = st_remove_holes(x)
+result
+plot(x, col = "#FF000033", main = "Before")
+plot(result, col = "#FF000033", main = "After")
+
+par(opar)
+
+# Example with 'sf'
+x = st_sfc(pol, mpol * 0.75 + c(3.5, 2))
+x = st_sf(geom = x, data.frame(id = 1:length(x)))
+result = st_remove_holes(x)
+result
+plot(x, main = "Before")
+plot(result, main = "After")
+
+# Example with 'sf' using argument 'max_area'
+x = st_sfc(pol, mpol * 0.75 + c(3.5, 2))
+x = st_sf(geom = x, data.frame(id = 1:length(x)))
+result = st_remove_holes(x, max_area = 0.4)
+result
+plot(x, main = "Before")
+plot(result, main = "After")
+</code></pre>
+
+
+</div>

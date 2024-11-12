@@ -1,0 +1,217 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>callHestoncf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Price of a European Call under the Heston Model
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes the price of a European Call under the Heston model (and the
+equivalent Black–Scholes–Merton volatility)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">callHestoncf(S, X, tau, r, q, v0, vT, rho, k, sigma, implVol = FALSE,
+             ...,
+             uniroot.control = list(), uniroot.info = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>current stock price</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>strike price</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>time to maturity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>risk-free rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>dividend rate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v0</code></td>
+<td>
+<p>current variance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vT</code></td>
+<td>
+<p>long-run variance (theta in Heston's paper)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>correlation between spot and variance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>speed of mean-reversion (kappa in Heston's paper)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>volatility of variance. A value smaller
+than 0.01 is replaced with 0.01.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>implVol</code></td>
+<td>
+<p>compute equivalent Black–Scholes–Merton
+volatility? Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>named arguments, passed to <code>integrate</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uniroot.control</code></td>
+<td>
+<p>A list. If there are elements named
+<code>interval</code>, <code>tol</code> or <code>maxiter</code>, these are passed to
+<code>uniroot</code>. Other elements of the list are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uniroot.info</code></td>
+<td>
+<p>logical; default is <code>FALSE</code>.
+If <code>TRUE</code>, the function will return the information
+returned by <code>uniroot</code>. See section Value below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>The function computes the value of a plain vanilla
+European call under the Heston model. Put values can be
+computed through put–call-parity.
+</p>
+<p>If <code>implVol</code> is <code>TRUE</code>, the function will
+compute the implied volatility necessary to obtain the
+same price under Black–Scholes–Merton. The implied
+volatility is computed with <code>uniroot</code> from
+the <span class="pkg">stats</span> package (the default search interval is
+<code>c(0.00001, 2)</code>; it can be changed through
+<code>uniroot.control</code>).
+</p>
+<p>Note that the function takes variances as inputs (not
+volatilities).
+</p>
+
+
+<h3>Value</h3>
+
+
+<p>Returns the value of the call (numeric) under the Heston
+model or, if <code>implVol</code> is <code>TRUE</code>, a list of the
+value and the implied volatility. If <code>uniroot.info</code>
+is <code>TRUE</code>, then instead of only the computed
+volatility, the complete output of <code>uniroot</code>
+is included in the result.
+</p>
+
+
+<h3>Note</h3>
+
+
+<p>If <code>implVol</code> is <code>TRUE</code>, the function will
+return a list with elements named <code>value</code> and
+<code>impliedVol</code>. Prior to version 0.26-3, the first
+element was named <code>callPrice</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Heston, S.L. (1993) A Closed-Form Solution for Options
+with Stochastic Volatility with Applications to Bonds
+and Currency options. <em>Review of Financial Studies</em>
+<strong>6</strong>(2), 327–343.
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>callCF</code>, <code>EuropeanCall</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">S &lt;- 100; X &lt;- 100; tau &lt;- 1; r &lt;- 0.02; q &lt;- 0.01
+v0  &lt;- 0.2^2  ## variance, not volatility
+vT  &lt;- 0.2^2  ## variance, not volatility
+rho &lt;- -0.7; k &lt;- 0.2; sigma &lt;- 0.5
+
+## get Heston price and BSM implied volatility
+result &lt;- callHestoncf(S = S, X = X, tau = tau, r = r, q = q,
+                       v0 = v0, vT = vT, rho = rho, k = k,
+                       sigma = sigma, implVol = TRUE)
+
+## Heston price
+result[[1L]]
+
+## price BSM with implied volatility
+vol &lt;- result[[2L]]
+d1 &lt;- (log(S/X) + (r - q + vol^2 / 2)*tau) / (vol*sqrt(tau))
+d2 &lt;- d1 - vol*sqrt(tau)
+callBSM &lt;- S * exp(-q * tau) * pnorm(d1) -
+           X * exp(-r * tau) * pnorm(d2)
+callBSM  ## should be (about) the same as result[[1L]]
+</code></pre>
+
+
+</div>

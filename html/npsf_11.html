@@ -1,0 +1,448 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nptestrts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonparametric Test of Returns to Scale
+</h2>
+
+<h3>Description</h3>
+
+<p>Routine <code>nptestrts</code> performs nonparametric tests the returns to scale of the underlying technology via bootstrapping techniques.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nptestrts(formula, data, subset,
+ base = c("output", "input"),
+ homogeneous = TRUE, test.two = TRUE,
+ reps = 999, alpha = 0.05,
+ core.count = 1, cl.type = c("SOCK", "MPI"),
+ print.level = 1, dots = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>an object of class “formula” (or one that can be coerced to that class): a symbolic description of the model. The details of model specification are given under ‘Details’.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame containing the variables in the model. If not found in data, the variables are taken from environment (<code>formula</code>), typically the environment from which <code>teradial</code> is called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>an optional vector specifying a subset of observations for which technical efficiency is to be computed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base</code></td>
+<td>
+
+<p>character or numeric. string: first letter of the word “o” for computing output-based or “i” for computing input-based technical efficiency measure. string: 2 for computing output-based or 1 for computing input-based technical efficiency measure
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>homogeneous</code></td>
+<td>
+
+<p>logical. If TRUE, the reference set is bootstrapped with homogeneous smoothing; if FALSE, the reference set is bootstrapped with heterogeneous smoothing.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test.two</code></td>
+<td>
+
+<p>logical. If TRUE, test 2, where efficiency measures under assumption of non-increasing and variable returns to scale technology are compared; if FALSE, <code>nptestrts</code> stops after test 1 is completed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+
+<p>specifies the number of bootstrap replications to be performed.  The default is 999.  The minimum is 100.  Adequate estimates of confidence intervals using bias-corrected methods typically require 1,000 or more replications.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+
+<p>sets significance level; default is <code>alpha=0.05</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>core.count</code></td>
+<td>
+
+<p>positive integer. Number of cluster nodes. If <code>core.count=1</code>, the process runs sequentially. See  <code>performParallel</code> in package <code>snowFT</code> for more details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl.type</code></td>
+<td>
+
+<p>Character string that specifies cluster type (see <code>makeClusterFT</code> in package <code>snowFT</code>). Possible values are 'MPI' and 'SOCK' ('PVM' is currently not available). See <code>performParallel</code> in package <code>snowFT</code> for more details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dots</code></td>
+<td>
+
+<p>logical. Relevant if <code>print.level&gt;=1</code>. If TRUE, one dot character is displayed for each successful replication; if FALSE,  display of the replication dots is suppressed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.level</code></td>
+<td>
+
+<p>numeric. 0 - nothing is printed; 1 - print summary of the model and data. 2 - print summary of technical efficiency measures. 3 - print estimation results observation by observation. Default is 1.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Routine <code>nptestrts</code> performs nonparametric tests the returns to scale of the underlying technology (see Simar L. and P.W. Wilson (2002), Nonparametric Tests of Return to Scale, <em>European Journal of Operational Research</em>, <b>139</b>, 115–132, doi: <a href="https://doi.org/10.1016/S0377-2217(01)00167-9">10.1016/S0377-2217(01)00167-9</a>).
+</p>
+<p>If <code>test.two</code> is not specified, <code>nptestrts</code> performs only Test #1, which consists of two parts. First, the null hypothesis that the technology is globally CRS (vs VRS) is tested. Second, the null hypothesis that the data point is scale efficient is tested.
+</p>
+<p>If <code>test.two</code> is specified, <code>nptestrts</code> may perform Test #2. If the null hypothesis that the technology is CRS is rejected, <code>test.two</code> requests that <code>nptestrts</code> tests the null hypothesis that the technology is NIRS (vs VRS). If not all data points are scale efficient, <code>nptestrts</code> tests that the reason for scale inefficiency is DRS. If the null hypothesis that the technology is CRS is not rejected and all data points are scale efficient, <code>nptestrts</code> will not perform Test #2 even if <code>test.two</code> is specified.
+</p>
+<p>Models for <code>nptestrts</code> are specified symbolically. A typical model has the form <code>outputs ~ inputs</code>, where <code>outputs</code> (<code>inputs</code>) is a series of (numeric) terms which specifies outputs (inputs).  Refer to the examples.
+</p>
+<p>If <code>core.count&gt;=1</code>, <code>nptestrts</code> will perform bootstrap on multiple cores.  Parallel computing requires package <code>snowFT</code>. By the default cluster type is defined by option <code>cl.type="SOCK"</code>.  Specifying <code>cl.type="MPI"</code> requires package <code>Rmpi</code>.
+</p>
+<p>On some systems, specifying option <code>cl.type="SOCK"</code> results in much quicker execution than specifying option <code>cl.type="MPI"</code>.  Option <code>cl.type="SOCK"</code> might be problematic on Mac system.
+</p>
+<p>Parallel computing make a difference for large data sets.  Specifying option <code>dots=TRUE</code> will indicate at what speed the bootstrap actually proceeds.  Specify <code>reps=100</code> and compare two runs with option <code>core.count=1</code> and <code>core.count&gt;1</code> to see if parallel computing speeds up the bootstrap.  For small samples, parallel computing may actually slow down the <code>nptestrts</code>.
+</p>
+<p>Results can be summarized using <code>summary.npsf</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>nptestrts</code> returns a list of class <code>npsf</code> containing the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+
+<p>numeric: number of data points.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+
+<p>numeric: number of outputs.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+
+<p>numeric: number of inputs.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rts</code></td>
+<td>
+
+<p>string: RTS assumption.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base</code></td>
+<td>
+
+<p>string: base for efficiency measurement.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+
+<p>numeric: number of bootstrap replications.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+
+<p>numeric: significance level.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>teCrs</code></td>
+<td>
+
+<p>numeric: measures of technical efficiency under the assumption of CRS.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>teNrs</code></td>
+<td>
+
+<p>numeric: measures of technical efficiency under the assumption of NiRS.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>teVrs</code></td>
+<td>
+
+<p>numeric: measures of technical efficiency under the assumption of VRS.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sefficiency</code></td>
+<td>
+
+<p>numeric: scale efficiency.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sefficiencyMean</code></td>
+<td>
+
+<p>numeric: ratio of means of technical efficiency measures under CRS and VRS.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pGlobalCRS</code></td>
+<td>
+
+<p>numeric: p-value of the test that the technology is globally CRS.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psefficient</code></td>
+<td>
+
+<p>numeric: p-value of the test that data point is statistically scale efficient.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sefficient</code></td>
+<td>
+
+<p>logical: returns <code>TRUE</code>, if statistically scale efficient; <code>FALSE</code> otherwise.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsefficient</code></td>
+<td>
+
+<p>numeric: number of statistically scale efficient.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrsOVERvrsMean</code></td>
+<td>
+
+<p>numeric: ratio of means of technical efficiency measures under NIRS and VRS (if <code>test.two=TRUE</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pGlobalNRS</code></td>
+<td>
+
+<p>numeric: p-value of the test the technology is globally NIRS (if <code>test.two=TRUE</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sineffdrs</code></td>
+<td>
+
+<p>logical: returns <code>TRUE</code> if statistically scale inefficient due to DRS and <code>FALSE</code> if statistically scale inefficient due to IRS (if <code>test.two=TRUE</code> and not all data points are statistically scale efficient <code>nsefficient&lt;K</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pineffdrs</code></td>
+<td>
+
+<p>numeric: p-value of the test that data point is scale inefficient due to DRS (if <code>test.two=TRUE</code> and not all data points are statistically scale efficient <code>nsefficient&lt;K</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrsOVERvrs</code></td>
+<td>
+
+<p>numeric: ratio of measures of technical efficiency under NiRS and VRS (if <code>test.two=TRUE</code> and not all data points are statistically scale efficient <code>nsefficient&lt;K</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>esample</code></td>
+<td>
+
+<p>logical: returns TRUE if the observation in user supplied data is in the estimation subsample and FALSE otherwise.
+</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Before specifying option <code>homogeneous</code> it is advised to preform the test of independence (see <code>nptestind</code>).
+</p>
+<p>Results can be summarized using <code>summary.npsf</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Oleg Badunenko &lt;oleg.badunenko@brunel.ac.uk&gt;, Pavlo Mozharovskyi &lt;pavlo.mozharovskyi@telecom-paris.fr&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Badunenko, O. and Mozharovskyi, P. (2016), Nonparametric Frontier Analysis using Stata, <em>Stata Journal</em>, <b>16</b>3, 550–89, doi: <a href="https://doi.org/10.1177/1536867X1601600302">10.1177/1536867X1601600302</a>
+</p>
+<p>Färe, R. and Lovell, C. A. K. (1978), Measuring the technical efficiency of production, <em>Journal of Economic Theory</em>, <b>19</b>, 150–162, doi: <a href="https://doi.org/10.1016/0022-0531(78)90060-1">10.1016/0022-0531(78)90060-1</a>
+</p>
+<p>Färe, R., Grosskopf, S. and Lovell, C. A. K. (1994), <em>Production Frontiers</em>, Cambridge U.K.: Cambridge University Press, doi: <a href="https://doi.org/10.1017/CBO9780511551710">10.1017/CBO9780511551710</a>
+</p>
+<p>Simar L. and P.W. Wilson (2002), Nonparametric Tests of Return to Scale, <em>European Journal of Operational Research</em>, <b>139</b>, 115–132, doi: <a href="https://doi.org/10.1016/S0377-2217(01)00167-9">10.1016/S0377-2217(01)00167-9</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>teradial</code>, <code>tenonradial</code>, <code>teradialbc</code>, <code>tenonradialbc</code>, <code>nptestind</code>, <code>sf</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+
+require( npsf )
+
+# Prepare data and matrices
+
+data( ccr81 )
+head( ccr81 )
+
+# Create some missing values
+
+ccr81 [64, "x4"] &lt;- NA # just to create missing
+ccr81 [68, "y2"] &lt;- NA # just to create missing
+
+Y2 &lt;- as.matrix( ccr81[ , c("y1", "y2", "y3"), drop = FALSE] )
+X2 &lt;- as.matrix( ccr81[ , c("x1", "x2", "x3", "x4", "x5"), drop = FALSE] )
+
+# Perform output-based test of returns to scale smoothed 
+# homogeneous bootstrap with 999 replications at the 5
+# significance level.  Also perform Test #2
+
+t1 &lt;- nptestrts(y1 + y2 + y3 ~ x1 + x2 + x3 + x4 + x5,
+	data = ccr81, homogeneous = TRUE,
+	reps = 999, dots = TRUE, base = "o")
+
+# suppress printing replication dots
+t2 &lt;- nptestrts(Y2 ~ X2,
+	homogeneous = TRUE,
+	reps = 100, dots = FALSE, base = "o")
+
+
+# heterogeneous
+t3 &lt;- nptestrts(Y2 ~ X2,
+	homogeneous = FALSE,
+	reps = 100, dots = TRUE, base = "o")
+
+
+# ===========================
+# ===  Parallel computing ===
+# ===========================
+
+# Perform previous test but use 8 cores and
+# cluster type SOCK
+
+t3 &lt;-  nptestrts(y1 + y2 + y3 ~ x1 + x2 + x3 + x4 + x5,
+	data = ccr81, homogeneous = FALSE,
+	reps = 100, dots = TRUE, base = "o",
+	core.count = 8, cl.type = "SOCK")
+
+
+# Really large data-set
+
+data(usmanuf)
+head(usmanuf)
+
+nrow(usmanuf)
+table(usmanuf$year)
+
+# Figure industries to include in the sample (first quarter)
+
+summary(usmanuf[usmanuf$year &gt;= 1999 &amp; usmanuf$year &lt; 2000, "naics"])
+
+# This test is quite demanding and it will take some time
+# depending on computer power
+
+t4 &lt;- nptestrts(Y ~ K + L + M, data = usmanuf,
+	subset = year &gt;= 1999 &amp; year &lt; 2000 &amp; naics &lt; 321900,
+	homogeneous = FALSE, reps = 100, dots = TRUE, base = "o",
+	core.count = 8, cl.type = "SOCK")
+
+# This is very computer intensive task
+
+t5 &lt;- nptestrts(Y ~ K + L + M, data = usmanuf,
+	subset = year &gt;= 1999 &amp; year &lt; 2000,
+	homogeneous = FALSE, reps = 100, dots = TRUE, base = "o",
+	core.count = 8, cl.type = "SOCK")
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

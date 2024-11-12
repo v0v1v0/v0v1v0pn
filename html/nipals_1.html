@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>empca</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Principal component analysis by weighted EMPCA, expectation maximization 
+principal component-analysis</h2>
+
+<h3>Description</h3>
+
+<p>Used for finding principal components of a numeric matrix.
+Missing values in the matrix are allowed.
+Weights for each element of the matrix are allowed.
+Principal Components are extracted one a time.  
+The algorithm computes x = TP', where T is the 'scores' matrix and P is
+the 'loadings' matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">empca(
+  x,
+  w,
+  ncomp = min(nrow(x), ncol(x)),
+  center = TRUE,
+  scale = TRUE,
+  maxiter = 100,
+  tol = 1e-06,
+  seed = NULL,
+  fitted = FALSE,
+  gramschmidt = TRUE,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Numerical matrix for which to find principal components. 
+Missing values are allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Numerical matrix of weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncomp</code></td>
+<td>
+<p>Maximum number of principal components to extract from x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>If TRUE, subtract the mean from each column of x before PCA.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>if TRUE, divide the standard deviation from each column of x before PCA.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>Maximum number of EM iterations for each
+principal component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Default 1e-6 tolerance for testing convergence of the EM
+iterations for each principal component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Random seed to use when initializing the random rotation matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted</code></td>
+<td>
+<p>Default FALSE. If TRUE, return the fitted (reconstructed) value of x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gramschmidt</code></td>
+<td>
+<p>Default TRUE. If TRUE, perform Gram-Schmidt 
+orthogonalization at each iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Default FALSE. Use TRUE or 1 to show some diagnostics.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with components <code>eig</code>, <code>scores</code>, <code>loadings</code>, 
+<code>fitted</code>, <code>ncomp</code>, <code>R2</code>, <code>iter</code>, <code>center</code>, 
+<code>scale</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Kevin Wright
+</p>
+
+
+<h3>References</h3>
+
+<p>Stephen Bailey (2012). 
+Principal Component Analysis with Noisy and/or Missing Data.
+Publications of the Astronomical Society of the Pacific.
+http://doi.org/10.1086/668105
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">B &lt;- matrix(c(50, 67, 90, 98, 120,
+              55, 71, 93, 102, 129,
+              65, 76, 95, 105, 134,
+              50, 80, 102, 130, 138,
+              60, 82, 97, 135, 151,
+              65, 89, 106, 137, 153,
+              75, 95, 117, 133, 155), ncol=5, byrow=TRUE)
+rownames(B) &lt;- c("G1","G2","G3","G4","G5","G6","G7")
+colnames(B) &lt;- c("E1","E2","E3","E4","E5")
+dim(B) # 7 x 5
+p1 &lt;- empca(B)
+dim(p1$scores) # 7 x 5
+dim(p1$loadings) # 5 x 5
+
+B2 = B
+B2[1,1] = B2[2,2] = NA
+p2 = empca(B2, fitted=TRUE)
+
+</code></pre>
+
+
+</div>

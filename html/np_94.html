@@ -1,0 +1,431 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npscoef</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Smooth Coefficient Kernel Regression</h2>
+
+<h3>Description</h3>
+
+<p><code>npscoef</code> computes a kernel regression estimate of a one (1)
+dimensional dependent variable on <code class="reqn">p</code>-variate explanatory data,
+using the model <code class="reqn">Y_i = W_{i}^{\prime} \gamma (Z_i) + u_i</code> where
+<code class="reqn">W_i'=(1,X_i')</code>, given a set of evaluation
+points, training points (consisting of explanatory data and dependent
+data), and a bandwidth specification. A bandwidth specification can be
+a <code>scbandwidth</code> object, or a bandwidth vector, bandwidth type and
+kernel type.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npscoef(bws, ...)
+
+## S3 method for class 'formula'
+npscoef(bws, data = NULL, newdata = NULL, y.eval =
+FALSE, ...)
+
+## S3 method for class 'call'
+npscoef(bws, ...)
+
+## Default S3 method:
+npscoef(bws, txdat, tydat, tzdat, ...)
+
+## S3 method for class 'scbandwidth'
+npscoef(bws,
+        txdat = stop("training data 'txdat' missing"),
+        tydat = stop("training data 'tydat' missing"),
+        tzdat = NULL,
+        exdat,
+        eydat,
+        ezdat,
+        residuals = FALSE,
+        errors = TRUE,
+        iterate = TRUE,
+        maxiter = 100,
+        tol = .Machine$double.eps,
+        leave.one.out = FALSE,
+        betas = FALSE,
+        ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as a <code>scbandwidth</code>
+object returned from an invocation of <code>npscoefbw</code>, or
+as a vector of bandwidths, with each element <code class="reqn">i</code> corresponding
+to the bandwidth for column <code class="reqn">i</code> in <code>tzdat</code>. If specified as
+a vector
+additional arguments will need to be supplied as necessary to
+specify the bandwidth type, kernel types, training data, and so on.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the regression type,
+bandwidth type, kernel types, selection methods, and so on.
+To do this, you may specify any of <code>bwscaling</code>, <code>bwtype</code>,
+<code>ckertype</code>, <code>ckerorder</code>, as described in
+<code>npscoefbw</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing
+the variables 
+in the model. If not found in data, the variables are taken from
+<code>environment(bws)</code>, typically the environment from which
+<code>npscoefbw</code> was called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, the training data are used.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y.eval</code></td>
+<td>
+
+<p>If <code>newdata</code> contains dependent data and <code>y.eval = TRUE</code>,
+<code>np</code> will compute goodness of fit statistics on these
+data and return them. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>txdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data (training data),
+which, by default, populates the columns <code class="reqn">2</code> through <code class="reqn">p+1</code>
+of <code class="reqn">W</code> in the model equation, and in the 
+absence of <code>zdat</code>, will also correspond to 
+<code class="reqn">Z</code> from the model equation. Defaults to
+the training data used to 
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>txdat</code>. Defaults to
+the training data used to 
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tzdat</code></td>
+<td>
+
+<p>an optionally specified <code class="reqn">q</code>-variate data frame of explanatory data
+(training data), which corresponds to <code class="reqn">Z</code> in the model
+equation. Defaults to 
+the training data used to 
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of points on which the regression will be
+estimated (evaluation data).By default,
+evaluation takes place on the data provided by <code>txdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of the true values
+of the dependent variable. Optional, and used only to calculate the
+true errors. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ezdat</code></td>
+<td>
+
+<p>an optionally specified <code class="reqn">q</code>-variate data frame of points on
+which
+the regression will be estimated
+(evaluation data), which corresponds to <code class="reqn">Z</code>
+in the model equation. Defaults to be the same as <code>txdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errors</code></td>
+<td>
+
+<p>a logical value indicating whether or not asymptotic standard errors
+should be computed and returned in the resulting
+<code>smoothcoefficient</code> object. Defaults to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+
+<p>a logical value indicating that you want residuals computed and
+returned in the resulting <code>smoothcoefficient</code> object. Defaults to
+<code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterate</code></td>
+<td>
+
+<p>a logical value indicating whether or not backfitted estimates
+should be iterated for self-consistency. Defaults to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+
+<p>integer specifying the maximum number of times to iterate the
+backfitted estimates while attempting to make the backfitted estimates
+converge to the desired tolerance. Defaults to <code>100</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+
+<p>desired tolerance on the relative convergence of backfit
+estimates. Defaults to <code>.Machine$double.eps</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>leave.one.out</code></td>
+<td>
+
+<p>a logical value to specify whether or not to compute the leave one
+out estimates. Will not work if <code>e[xyz]dat</code> is specified. Defaults to
+<code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betas</code></td>
+<td>
+
+<p>a logical value indicating whether or not estimates of the
+components of <code class="reqn">\gamma</code> should be returned in the
+<code>smoothcoefficient</code> object along with the regression estimates.
+Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>npscoef</code> returns a <code>smoothcoefficient</code> object.   The generic
+functions <code>fitted</code>, <code>residuals</code>, <code>coef</code>,
+<code>se</code>, and <code>predict</code>,
+extract (or generate) estimated values,
+residuals, coefficients, bootstrapped standard
+errors on estimates, and predictions, respectively, from
+the returned object. Furthermore, the functions <code>summary</code>
+and <code>plot</code> support objects of this type. The returned object
+has the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p> evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean</code></td>
+<td>
+<p> estimation of the regression function (conditional mean) at the
+evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>merr</code></td>
+<td>
+<p> if <code>errors = TRUE</code>, standard errors of the
+regression estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p> if <code>betas = TRUE</code>, estimates of the coefficients
+<code class="reqn">\gamma</code> at the 
+evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid</code></td>
+<td>
+<p> if <code>residuals = TRUE</code>, in-sample or out-of-sample
+residuals where appropriate (or possible) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R2</code></td>
+<td>
+<p> coefficient of determination (Doksum and Samarov (1995))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MSE</code></td>
+<td>
+<p> mean squared error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MAE</code></td>
+<td>
+<p> mean absolute error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MAPE</code></td>
+<td>
+<p> mean absolute percentage error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CORR</code></td>
+<td>
+<p> absolute value of Pearson's correlation coefficient </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SIGN</code></td>
+<td>
+<p> fraction of observations where fitted and observed values
+agree in sign </p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+<p>Support for backfitted bandwidths is experimental and is limited in
+functionality. The code does not support asymptotic standard errors
+or out of sample estimates with backfitting.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Cai Z. (2007), “Trending time-varying coefficient time series
+models with serially correlated errors,” Journal of Econometrics,
+136, 163-188.
+</p>
+<p>Doksum, K. and A. Samarov (1995), “Nonparametric estimation of
+global functionals and a measure of the explanatory power of
+covariates in regression,” The Annals of Statistics, 23 1443-1473.
+</p>
+<p>Hastie, T. and R. Tibshirani (1993), “Varying-coefficient
+models,” Journal of the Royal Statistical Society, B 55, 757-796.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics:
+Theory and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2010), “Smooth varying-coefficient
+estimation and inference for qualitative and quantitative data,”
+Econometric Theory, 26, 1-31.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em>
+Cambridge University Press.
+</p>
+<p>Li, Q. and D. Ouyang and J.S. Racine (2013), “Categorical
+semiparametric varying-coefficient models,” Journal of Applied
+Econometrics, 28, 551-589.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth
+estimators for discrete distributions,”  Biometrika, 68, 301-309.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bw.nrd</code>, <code>bw.SJ</code>, <code>hist</code>,
+<code>npudens</code>, <code>npudist</code>,
+<code>npudensbw</code>, <code>npscoefbw</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA): 
+
+n &lt;- 250
+x &lt;- runif(n)
+z &lt;- runif(n, min=-2, max=2)
+y &lt;- x*exp(z)*(1.0+rnorm(n,sd = 0.2))
+bw &lt;- npscoefbw(y~x|z)
+model &lt;- npscoef(bw)
+plot(model)
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): 
+
+n &lt;- 250
+x &lt;- runif(n)
+z &lt;- runif(n, min=-2, max=2)
+y &lt;- x*exp(z)*(1.0+rnorm(n,sd = 0.2))
+bw &lt;- npscoefbw(xdat=x, ydat=y, zdat=z)
+model &lt;- npscoef(bw)
+plot(model)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

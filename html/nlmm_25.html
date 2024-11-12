@@ -1,0 +1,323 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlmm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fitting Generalized Laplace Mixed-Effects Models
+</h2>
+
+<h3>Description</h3>
+
+<p><code>nlmm</code> is used to fit mixed-effects models based on the generalized Laplace distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlmm(fixed, random, group, covariance = "pdDiag", data = sys.frame(sys.parent()),
+subset, weights = NULL, na.action = na.fail, control = list(), contrasts = NULL,
+fit = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+
+<p>an object of class <code>formula</code> for fixed effects: a symbolic description of the model to be fitted.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+
+<p>a one-sided formula of the form <code>~x1 + x2 + ... + xn</code> for random effects: a symbolic description of the model to be fitted.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+
+<p>grouping factor.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariance</code></td>
+<td>
+
+<p>variance–covariance matrix of the random effects. Default is <code>pdDiag</code> (see details)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame containing the variables named in <code>fixed</code>, <code>random</code>, <code>group</code>, and <code>weights</code>. By default the variables are taken from the environment from which <code>nlmm</code> is called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>an optional vector specifying a subset of observations to be used in the fitting process.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>an optional <code>varFunc</code> object or one-sided formula describing the within-group heteroscedasticity structure. If given as a formula, it is used as the argument to <code>varFixed</code>, corresponding to fixed variance weights. See the documentation on <code>varClasses</code> in <code>nlme</code> package for a description of the available <code>varFunc</code> classes. Defaults to <code>NULL</code>, corresponding to homoscedastic within-group errors.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+
+<p>a function that indicates what should happen when the
+data contain <code>NA</code>s.  The default action (<code>na.fail</code>) causes
+<code>nlmm</code> to print an error message and terminate if there are any
+incomplete observations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>list of control parameters of the fitting process. See <code>nlmmControl</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+
+<p>not yet implemented.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+
+<p>logical flag. If <code>FALSE</code> the function returns a list of objects used for fitting.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function fits a generalized Laplace mixed-effects model conditional on the covariates, as specified by the <code>formula</code> argument, and on random effects, as specified by the <code>random</code> argument. The predictor is assumed to be linear. The function maximizes the (log)likelihood of the generalized Laplace regression as proposed by Geraci and Farcomeni (2020). The likelihood is numerically integrated via Gaussian quadrature techniques. The optimization algorithm can be either <code>optim</code> (Nelder-Mead by default) or <code>nlminb</code>. See <code>nlmmControl</code> for more details.
+</p>
+<p>By default, the function fits a mixed-effects model where both random effects and error term follow a generalized Laplace distribution (<code>GenLaplace</code>). This is a family of distributions that includes the normal and the Laplace distributions as special cases. Constrained fitting can be controlled via the arguments <code>alpha.index</code> and <code>alpha</code> in <code>nlmmControl</code>. For example, if <code>alpha.index = 0</code>, the model is Normal-Normal if <code>alpha = c(0,0)</code>, Normal-Laplace if <code>alpha = c(0,1)</code>, Laplace-Normal if <code>alpha = c(1,0)</code>, and Laplace-Laplace if <code>alpha = c(1,1)</code>. But any value of alpha between 0 (normal distribution) and 1 (Laplace distribution) is allowed.
+</p>
+<p>Different standard types of positive–definite matrices for the random effects can be specified: <code>pdIdent</code> multiple of an identity; <code>pdCompSymm</code> compound symmetry structure (constant diagonal and constant off–diagonal elements); <code>pdDiag</code> diagonal; <code>pdSymm</code> general positive–definite matrix, with no additional structure.
+</p>
+<p>Within-group heteroscedasticity can be modeled via the <code>weights</code> argument using <code>varClasses</code> in the <code>nlme</code> packages.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>nlmm</code> returns an object of <code>class</code> <code>nlmm</code>.
+</p>
+<p>The function <code>summary</code> is used to obtain and print a summary of the results.
+</p>
+<p>An object of class <code>nlmm</code> is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>a vector containing (in this order) fixed regression coefficients, parameters of the variance–covariance matrix of the random effects, shape parameter, scale parameter, and (optional) within-group variance function parameters. All parameters are unconstrained. See <code>VarCorr.nlmm</code> to extract the variance–covariance of the random effects from an "nlmm" object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_x,theta_z</code></td>
+<td>
+<p>partition of <code>theta</code>: fixed regression coefficients (<code>theta_x</code>) and unique variance–covariance unconstrained parameters (<code>theta_z</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>unconstrained shape parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>constrained shape parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi</code></td>
+<td>
+<p>unconstrained scale parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>constrained scale parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vf</code></td>
+<td>
+<p>(fitted) within-group variance function of class <code>varFunc</code>. S3 methods (<code>summary.varFunc</code>, <code>varWeights.varFunc</code>, <code>coef.varFunc</code>) can be applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>negative log–likelihood.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the matched call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nn</code></td>
+<td>
+<p>column names of <code>mmf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mm</code></td>
+<td>
+<p>column names of <code>mmr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nobs</code></td>
+<td>
+<p>the number of observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dim_theta</code></td>
+<td>
+<p>the number of columns in <code>mmf</code> and <code>mmr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dim_theta_z</code></td>
+<td>
+<p>the length of <code>theta_z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mmf</code></td>
+<td>
+<p>the model matrix – fixed effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mmr</code></td>
+<td>
+<p>the model matrix – random effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>the model response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>revOrder</code></td>
+<td>
+<p>original order of observations (now ordered according to <code>group</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>the grouping factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ngroups</code></td>
+<td>
+<p>the number of groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>InitialPar</code></td>
+<td>
+<p>starting values for theta, included the fitted lme or lm object from where starting values have been taken.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>list of control parameters used for optimization (see <code>nlmmControl</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cov_name</code></td>
+<td>
+<p>class of variance-covariance matrix for the random effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mfArgs</code></td>
+<td>
+<p>arguments for <code>model.frame</code> to return the full data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sc</code></td>
+<td>
+<p>model's distribution. "Generalized Laplace" if unconstrained estimation, or one of four special case for specific values of alpha ("Normal-Normal", "Normal-Laplace", "Laplace-Normal", "Laplace-Laplace").</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Marco Geraci
+</p>
+
+
+<h3>References</h3>
+
+<p>Geraci M (2017). Mixed-effects models using the normal and the Laplace distributions: A 2 x 2 convolution scheme for applied research. arXiv:1712.07216v1 [stat.ME]. URL: <a href="https://arxiv.org/abs/1712.07216v1">https://arxiv.org/abs/1712.07216v1</a>.
+</p>
+<p>Geraci, M. and Farcomeni A. (2020). A family of linear mixed-effects models using the generalized Laplace distribution. Statistical Methods in Medical Research, 29(9), 2665-2682.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>summary.nlmm, fixef.nlmm, ranef.nlmm, VarCorr.nlmm, predict.nlmm, residuals.nlmm</code>, <code>nlmmControl</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(rats)
+
+nlmm(y ~ trt*time, random = ~ 1, group = id, data = rats,
+control = nlmmControl(multistart = FALSE))
+ 
+</code></pre>
+
+
+</div>

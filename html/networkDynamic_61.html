@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>network.dynamic.check</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Verify a Dynamically Extended Network Object </h2>
+
+<h3>Description</h3>
+
+<p>Checks a networkDynamic object for any activity information that is not correctly specified.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">network.dynamic.check(x, verbose = TRUE, complete = TRUE)
+is.networkDynamic(x)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> an object, hopefully of class <code>networkDynamic</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p> logical; should output messages be printed to the
+user? </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>complete</code></td>
+<td>
+<p> logical; should a complete test be ran, including
+checks of the activity matrices for edges and vertices, versus a
+check of only edge activity invovling non-active vertices</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Currently, <code>network.dynamic.check</code> runs three types of checks on an input object:
+</p>
+
+<ol>
+<li>
+<p>If a complete test is run, vertex spell matrices and edge spell
+matrices (if any) are checked for legality, specifically these are
+checked for correct dimensionality and proper spell ordering.
+</p>
+</li>
+<li>
+<p>If vertex and edge spell matrices are correctly specified or
+assumed to be using <code>complete=FALSE</code>, incident vertices of
+active edges (if any) are checked to ensure that they are also
+active during the specified period(s).
+</p>
+</li>
+<li>
+<p>If a complete test is run, and any TEA attributes are attached to the network, vertices or edges, they will be checked for correct structure.  
+</p>
+</li>
+</ol>
+<p>If spell matrices are only acted upon by network or
+networkDynamic methods, there is no need to run a complete test -
+correct dimensionality and spell ordering are guaranteed.
+</p>
+<p><code>is.networkDynamic</code> checks if its argument has the class 'networkDynamic'.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>network.dynamic.check</code>: A list of logical vectors, one for
+each network component checked: 
+</p>
+
+<ul>
+<li>
+<p><code>$vertex.checks</code> : Whether the spell matrix of each vertex (if any)
+is correctly specified
+</p>
+</li>
+<li>
+<p><code>$edge.checks</code> : Whether the spell matrix of each edge (if any)
+is correctly specified
+</p>
+</li>
+<li>
+<p><code>$dyad.checks</code> : Corresponding to edges, whether the incident vertices
+of each edge are active when the edge is active
+</p>
+</li>
+<li>
+<p><code>$vertex.tea.checks</code> : Corresponding to vertices, whether the vertex has 
+correctly formed TEA attributes
+</p>
+</li>
+<li>
+<p><code>$edge.tea.checks</code> : Corresponding to edges, whether the edge has 
+correctly formed TEA attributes
+</p>
+</li>
+<li>
+<p><code>$network.tea.checks</code> : Single boolean, whether the network TEA attributes are formed correctly
+</p>
+</li>
+<li>
+<p><code>$net.obs.period.check</code> : NULL, if no <code>net.obs.period</code> network attribute is present, otherwise a single boolean, whether the attribute is formed correctly. 
+</p>
+</li>
+</ul>
+<p>For <code>is.networkDynamic</code>: a boolean which is true if the class matches
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ayn Leslie-Cook <a href="mailto:aynlc3@uw.edu">aynlc3@uw.edu</a>, Carter T. Butts <a href="mailto:buttsc@uci.edu">buttsc@uci.edu</a>, Skye Bender-deMoll </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>activity.attribute</code>, <code>net.obs.period</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  test &lt;-network.initialize(2) # make a network
+  # only activate one vertex
+  activate.vertices(test,onset=2,length=5,v=1) 
+  test[1,2] &lt;-1 # add an edge between the verticies
+  # activate the edge for a spell not including vertex spell
+  activate.edges(test,onset=0,terminus=7, e=1) 
+  network.dynamic.check(test) # find the bad edge
+  
+  # name a vertex attrible like a TEA but with the wrong structure
+  set.vertex.attribute(test,'letters','a')
+  network.dynamic.check(test)
+</code></pre>
+
+
+</div>

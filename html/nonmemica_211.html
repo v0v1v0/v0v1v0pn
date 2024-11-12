@@ -1,0 +1,164 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>superset.character</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Coerce to Superset from Character</h2>
+
+<h3>Description</h3>
+
+<p>Coerces to superset from character, treating <code>x</code> as a model name.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'character'
+superset(
+  x,
+  read.input = list(read.csv, header = TRUE, as.is = TRUE),
+  read.output = list(read.table, header = TRUE, as.is = TRUE, skip = 1, comment.char =
+    "", check.names = FALSE, na.strings = c("", "\\s", ".", "NA")),
+  include = character(0),
+  exclude = character(0),
+  rename = NULL,
+  digits = 5,
+  visible = "VISIBLE",
+  after = NULL,
+  groups = character(0),
+  imputation = generalize,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>read.input</code></td>
+<td>
+<p>a methodology for acquiring the input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>read.output</code></td>
+<td>
+<p>a methodology for acquiring the output</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include</code></td>
+<td>
+<p>column names in output to consider adding</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude</code></td>
+<td>
+<p>column names in output to reject</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rename</code></td>
+<td>
+<p>logical: whether to keep and rename columns with re-used names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>significant digits for assessing informativeness when exclusive=NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visible</code></td>
+<td>
+<p>a name for the flag column indicating visibility</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>after</code></td>
+<td>
+<p>place new columns after this column; at end by default (NULL); TRUE places them after last model-visible column (see input statement)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+<p>character vector of groupings within which any imputations will be performed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imputation</code></td>
+<td>
+<p>a list of functions (or arguments to match.fun()) to perform imputations within cells defined by groups: e.g. generalize, forbak, etc (to be tried in succession for new columns only).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>passed arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Given a model name, (<code>project</code> passed or set as global option) superset() figures out the run directory and location of a NONMEM control stream. It reads the control stream to identify the run-time location of input and output files, as well as the "ignore" (and/or "accept") criteria that relate extent of input records to extent of output records. 'read.input' and 'read.output' are lists consisting of functions and arguments appropriate for reading input and output file formats, respectively. The ignore criteria will be reconstructed per row so that output can be mapped unambiguously to input. A column named VISIBLE is bound to the input data, showing 1 where a record was visible to NONMEM, and 0 otherwise.
+During integration, naming convention of the input is retained, and output column names are mapped by position, using the control stream input criteria. Output tables are restored to input dimensions using the "ignore" criteria, then checked for length: currently, superset ignores output tables having fewer rows than the input, as well as output tables whose row count is not a multiple of input row count.
+Output tables may contain versions of input columns. Disposition depends on the values of <code>include</code>, <code>exclude</code>, and <code>rename</code>. If <code>include</code> has length, other columns are excluded.  Then, if <code>exclude</code> has length, these columns are excluded. Then, if <code>rename</code> is FALSE all remaining columns with re-used names will be dropped. If TRUE, such columns will be renamed (*.n, where n is table number). If NULL, only informative columns will be retained and renamed. A column is informative if any element is informative. An element is informative if it is newly generated (not NA and not zero, but original is NA) or if it is an alteration (non-NA, and different from non-NA original). If the column pair can be interpreted as numeric, "different" is determined using only the first <code>digits</code> digits.
+Only the first instance of any column among successive output tables is retained.
+In the control stream, avoid use of FIRSTONLY, as this alters the number of rows.
+</p>
+
+
+<h3>Value</h3>
+
+<p>superset: a data.frame  where row count is a multiple of (typically equal to) input row count.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other superset: 
+<code>generalize()</code>,
+<code>ignored()</code>,
+<code>meta.character()</code>,
+<code>meta.numeric()</code>,
+<code>metaplot.character()</code>,
+<code>metaplot.numeric()</code>,
+<code>metaplot_character()</code>,
+<code>metasuperset()</code>,
+<code>meta()</code>,
+<code>ninput.character()</code>,
+<code>ninput.numeric()</code>,
+<code>ninput()</code>,
+<code>shuffle()</code>,
+<code>superset.numeric()</code>,
+<code>superset()</code>,
+<code>superspec.character()</code>,
+<code>superspec.numeric()</code>,
+<code>superspec()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(magrittr)
+library(dplyr)
+library(wrangle)
+options(project = system.file('project/model',package='nonmemica'))
+1001 %&gt;% superset %&gt;% head
+1001 %&gt;% superset %&gt;% filter(VISIBLE == 1) %&gt;% group_by(ID,TIME) %&gt;% status
+1001 %&gt;% ignored %&gt;% table
+</code></pre>
+
+
+</div>

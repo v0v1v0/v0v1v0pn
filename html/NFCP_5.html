@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>futures_price_forecast</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forecast the futures prices of an N-factor model</h2>
+
+<h3>Description</h3>
+
+<p>Analytically forecast future expected Futures prices under the risk-neutral version of a specified N-factor model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">futures_price_forecast(
+  x_0,
+  parameters,
+  t = 0,
+  futures_TTM = 1:10,
+  percentiles = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x_0</code></td>
+<td>
+<p><code>vector</code>. Initial values of the state variables, where the length must correspond to the number of factors specified in the parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameters</code></td>
+<td>
+<p><code>vector</code>. A named vector of parameter values of a specified N-factor model. Function <code>NFCP_parameters</code> is recommended.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p><code>numeric</code>. The time point, in years, at which to forecast futures prices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>futures_TTM</code></td>
+<td>
+<p><code>vector</code>. the time-to-maturity, in years, of futures contracts to forecast.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percentiles</code></td>
+<td>
+<p><code>vector</code>. Optional. Probabilistic forecasting percentile intervals.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<script id="MathJax-script" async src="../../mathjaxr/doc/mathjax/es5/tex-chtml-full.js"></script><p>Under the assumption or risk-neutrality, futures prices are equal to the expected future spot price. Additionally, under deterministic interest rates, forward prices are equal to futures prices. Let \(F_{T,t}\)
+denote the market price of a futures contract at time \(t\) with time \(T\) until maturity. let * denote the risk-neutral expectation and variance of futures prices.
+The following equations assume that the first factor follows a Brownian Motion.
+</p>
+\[E^*[ln(F_{T,t})] = season(T) + \sum_{i=1}^Ne^{-\kappa_iT}x_{i}(0) + \mu^*t +  A(T-t)\]
+<p>Where:
+\[A(T-t) = \mu^*(T-t)-\sum_{i=1}^N - \frac{1-e^{-\kappa_i (T-t)}\lambda_i}{\kappa_i}+\frac{1}{2}(\sigma_1^2(T-t) + \sum_{i.j\neq 1} \sigma_i \sigma_j \rho_{i,j} \frac{1-e^{-(\kappa_i+\kappa_j)(T-t)}}{\kappa_i+\kappa_j})\]
+The variance is given by:
+\[Var^*[ln(F_{T,t})]= \sigma_1^2t + \sum_{i.j\neq1} e^{-(\kappa_i + \kappa_j)(T-t)}\sigma_i\sigma_j\rho_{i,j}\frac{1-e^{-(\kappa_i+\kappa_j)t}}{\kappa_i+\kappa_j}\]
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>futures_price_forecast</code> returns a vector of expected Futures prices under a given N-factor model with specified time to maturities at time \(t\).  When <code>percentiles</code> are specified, the function returns a matrix with the corresponding confidence bands in each column of the matrix.
+</p>
+
+
+<h3>References</h3>
+
+<p>Schwartz, E. S., and J. E. Smith, (2000). Short-Term Variations and Long-Term Dynamics in Commodity Prices. <em>Manage. Sci.</em>, 46, 893-911.
+</p>
+<p>Cortazar, G., and L. Naranjo, (2006). An N-factor Gaussian model of oil futures prices. <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em>, 26(3), 243-268.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Forecast futures prices of the Schwartz and Smith (2000) two-factor oil model:
+## Step 1 - Run the Kalman filter for the two-factor oil model:
+SS_2F_filtered &lt;- NFCP_Kalman_filter(parameter_values = SS_oil$two_factor,
+                                    parameter_names = names(SS_oil$two_factor),
+                                    log_futures = log(SS_oil$stitched_futures),
+                                    dt = SS_oil$dt,
+                                    futures_TTM = SS_oil$stitched_TTM,
+                                    verbose = TRUE)
+
+## Step 2 - Probabilistic forecast of the risk-neutral two-factor
+## stochastic differential equation (SDE):
+futures_price_forecast(x_0 = SS_2F_filtered$x_t,
+                      parameters = SS_oil$two_factor,
+                      t = 0,
+                      futures_TTM = seq(0,9,1/12),
+                      percentiles = c(0.1, 0.9))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vcov.nlmm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calculate Variance-Covariance Matrix for a Fitted Generalized Laplace Mixed-Effects Object
+</h2>
+
+<h3>Description</h3>
+
+<p>Returns the variance-covariance matrix of the all the parameters of a fitted <code>nlmm</code> object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nlmm'
+vcov(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an <code>nlmm</code> object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>not used.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Gives the variance-covariance matrix of the GLME estimator, on the scale of the unconstrained, unrestricted parameters. The size is <code class="reqn">d x d</code>, <code class="reqn">d = p + r + 2 + 1 + s</code>, with <code class="reqn">p</code> fixed coefficients, <code class="reqn">r</code> non-redundant parameters of the random effects distribution, 2 shape parameters, 1 scale parameter, <code class="reqn">s</code> parameters of the residual variance function (if specified in the model), in this order.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a matrix.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Marco Geraci
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nlmm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data(rats)
+
+# Number of parameters is d = 6 + 3 + 2 + 1 + 0 = 12
+fit &lt;- nlmm(y ~ trt*time, random = ~ time, group = id, data = rats,
+cov = "pdSymm", control = nlmmControl(multistart = FALSE))
+fit$par
+vcov(fit)
+
+# Number of parameters is d = 6 + 1 + 2 + 1 + 4 = 14
+fit &lt;- nlmm(y ~ trt*time, random = ~ 1, group = id, data = rats,
+control = nlmmControl(multistart = FALSE), weights = varIdent(form = ~ 1|time))
+fit$par
+vcov(fit)
+
+# Number of parameters is d = 6 + 1 + 0 + 1 + 0 = 8
+# Note that the shape parameters are now constrained
+fit &lt;- nlmm(y ~ trt*time, random = ~ 1, group = id, data = rats,
+control = nlmmControl(alpha.index = 0, multistart = FALSE))
+fit$par
+vcov(fit)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

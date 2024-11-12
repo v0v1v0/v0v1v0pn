@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stat_filter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Univariate filter for binary classification with mixed predictor datatypes</h2>
+
+<h3>Description</h3>
+
+<p>Univariate statistic filter for dataframes of predictors with mixed numeric
+and categorical datatypes. Different statistical tests are used depending on
+the data type of response vector and predictors:
+</p>
+
+<dl>
+<dt>Binary class response: <code>bin_stat_filter()</code>
+</dt>
+<dd>
+<p>t-test for continuous
+data, chi-squared test for categorical data</p>
+</dd>
+<dt>Multiclass response: <code>class_stat_filter()</code>
+</dt>
+<dd>
+<p>one-way ANOVA for
+continuous data, chi-squared test for categorical data</p>
+</dd>
+<dt>Continuous response: <code>cor_stat_filter()</code>
+</dt>
+<dd>
+<p>correlation (or linear
+regression) for continuous data and binary data, one-way ANOVA for
+categorical data</p>
+</dd>
+</dl>
+<h3>Usage</h3>
+
+<pre><code class="language-R">stat_filter(y, x, ...)
+
+bin_stat_filter(
+  y,
+  x,
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  type = c("index", "names", "full", "list"),
+  ...
+)
+
+class_stat_filter(
+  y,
+  x,
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  type = c("index", "names", "full", "list"),
+  ...
+)
+
+cor_stat_filter(
+  y,
+  x,
+  cor_method = c("pearson", "spearman", "lm"),
+  force_vars = NULL,
+  nfilter = NULL,
+  p_cutoff = 0.05,
+  rsq_cutoff = NULL,
+  rsq_method = "pearson",
+  type = c("index", "names", "full", "list"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Response vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Matrix or dataframe of predictors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments, e.g. <code>rsq_method</code>: see <code>collinear()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_vars</code></td>
+<td>
+<p>Vector of column names within <code>x</code> which are always retained
+in the model (i.e. not filtered). Default <code>NULL</code> means all predictors will
+be passed to <code>filterFUN</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfilter</code></td>
+<td>
+<p>Number of predictors to return. If <code>NULL</code> all predictors with
+p-values &lt; <code>p_cutoff</code> are returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_cutoff</code></td>
+<td>
+<p>p value cut-off</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rsq_cutoff</code></td>
+<td>
+<p>r^2 cutoff for removing predictors due to collinearity.
+Default <code>NULL</code> means no collinearity filtering. Predictors are ranked based
+on t-test. If 2 or more predictors are collinear, the first ranked
+predictor by t-test is retained, while the other collinear predictors are
+removed. See <code>collinear()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of vector returned. Default "index" returns indices, "names"
+returns predictor names, "full" returns a dataframe of statistics, "list"
+returns a list of 2 matrices of statistics, one for continuous predictors,
+one for categorical predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cor_method</code></td>
+<td>
+<p>For <code>cor_stat_filter()</code> only, either <code>"pearson"</code>,
+<code>"spearman"</code> or <code>"lm"</code> controlling whether continuous predictors are
+filtered by correlation (faster) or regression (slower but allows inclusion
+of covariates via <code>force_vars</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rsq_method</code></td>
+<td>
+<p>character string indicating which correlation coefficient
+is to be computed. One of "pearson" (default), "kendall", or "spearman".
+See <code>collinear()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>stat_filter()</code> is a wrapper which calls <code>bin_stat_filter()</code>,
+<code>class_stat_filter()</code> or <code>cor_stat_filter()</code> depending on whether <code>y</code> is
+binary, multiclass or continuous respectively. Ordered factors are converted
+to numeric (integer) levels and analysed as if continuous.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Integer vector of indices of filtered parameters (type = "index") or
+character vector of names (type = "names") of filtered parameters in order
+of test p-value. If <code>type</code> is <code>"full"</code> full output is
+returned containing a dataframe of statistical results. If <code>type</code> is
+<code>"list"</code> the output is returned as a list of 2 matrices containing
+statistical results separated by continuous and categorical predictors.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(mlbench)
+data(BostonHousing2)
+dat &lt;- BostonHousing2
+y &lt;- dat$cmedv  ## continuous outcome
+x &lt;- subset(dat, select = -c(cmedv, medv, town))
+
+stat_filter(y, x, type = "full")
+stat_filter(y, x, nfilter = 5, type = "names")
+stat_filter(y, x)
+
+data(iris)
+y &lt;- iris$Species  ## 3 class outcome
+x &lt;- subset(iris, select = -Species)
+stat_filter(y, x, type = "full")
+
+</code></pre>
+
+
+</div>

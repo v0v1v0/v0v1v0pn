@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>weight_polls</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Weight polls</h2>
+
+<h3>Description</h3>
+
+<p>Create a vector of weights to use in calculating a weighted average
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">weight_polls(polldates, n = rep(1, length(polldates)), method = c("pundit",
+  "curia"), refdate = Sys.Date(), electiondate = as.Date("2017-09-23"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>polldates</code></td>
+<td>
+<p>a vector of dates of polls.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>a vector of sample sizes of polls.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>which weighting method to use; either that used in 2017 by Curia or Pundit 
+(two New Zealand poll aggregators).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>refdate</code></td>
+<td>
+<p>date against which to compare polling dates (both methods give more weight
+to more recent polls).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>electiondate</code></td>
+<td>
+<p>date of the next election (the Curia weighting method gives more weight
+to polls close to the election).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is experimental and so far it has not been possible to match published 
+results.  Use with caution.
+</p>
+<p>This function is to facilitate reproduction of existing poll aggregation methods.
+</p>
+<p>Both methods provide weights proportional to the sample sizes.
+</p>
+<p>The Pundit Poll of Polls states its method is an adaptation of that used by 
+fivethirtyeight.  It gives polls a half life of 30 days, so a poll that is 
+120 days old gets 0.125 the weight of one conducted today.
+</p>
+<p>The Curia method gives weight of 1 to all polls that are seven or less days old;
+0 to polls older than 38 days; and a linear interpolation for inbetween.  Note that
+this method gives zero weight to many older surveys that would get a weight in the 
+pundit method.
+</p>
+<p>Caution - as at March 2017, this function had failed to exactly replicate results on the 
+webpages of Curia and Pundit.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a vector of weights, adding up to one, for use in calculating a weighted average of 
+opinion polls
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="http://www.curia.co.nz/methodology/">http://www.curia.co.nz/methodology/</a>
+<a href="http://www.pundit.co.nz/content/poll-of-polls">http://www.pundit.co.nz/content/poll-of-polls</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">polldates &lt;- tail(unique(polls$MidDate), 20)
+weight_polls(polldates, method = "curia", refdate = as.Date("2017-09-22"))
+weight_polls(polldates, method = "pundit", refdate = as.Date("2017-09-22"))
+</code></pre>
+
+
+</div>

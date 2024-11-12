@@ -1,0 +1,236 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model_macro_builder</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>EXPERIMENTAL: Turn a function into a model macro</h2>
+
+<h3>Description</h3>
+
+<p>A model macro expands one line of code in a nimbleModel into one or
+more new lines.  This supports compact programming by defining
+re-usable modules.  <code>model_macro_builder</code> takes as input a
+function that constructs new lines of model code from the original
+line of code.  It returns a function suitable for internal use by
+<code>nimbleModel</code> that arranges arguments for input function.  Macros
+are an experimental feature and are available only after setting
+<code>nimbleOptions(enableModelMacros = TRUE)</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">model_macro_builder(fun, use3pieces = TRUE, unpackArgs = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>A function written to construct new lines of model code (see below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use3pieces</code></td>
+<td>
+<p>logical indicating whether the arguments from the input
+line be split into pieces for the LHS (left-hand side), RHS
+(right-hand side, possibly further split depending on
+<code>unpackArgs</code>), and <code>stoch</code> (<code>TRUE</code> if the line uses a
+<code>~</code> and <code>FALSE</code> otherwise). (default = <code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unpackArgs</code></td>
+<td>
+<p>logical indicating whether arguments be passed as a list
+(<code>FALSE</code>) or as separate arguments (<code>TRUE</code>). (default = <code>TRUE</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The arguments <code>use3pieces</code> and <code>unpackArgs</code>
+indicate how <code>fun</code> expects to have arguments arranged from an
+input line of code (processed by <code>nimbleModel</code>).
+</p>
+<p>Consider the defaults <code>use3pieces = TRUE</code> and <code>unpackArgs =
+TRUE</code>, for a macro called <code>macro1</code>.  In this case, the line of
+model code <code>x ~ macro1(arg1 = z[1:10], arg2 = "hello")</code> will be
+passed to <code>fun</code> as <code>fun(stoch = TRUE, LHS = x, arg1 =
+z[1:10], arg2 = "hello")</code>.
+</p>
+<p>If <code>use3pieces = TRUE</code> but <code>unpackArgs = FALSE</code>, then the
+RHS will be passed as is, without unpacking its arguments into
+separate arguments to <code>fun</code>.  In this case, <code>x ~ macro1(arg1
+= z[1:10], arg2 = "hello")</code> will be passed to <code>fun</code> as
+<code>fun(stoch = TRUE, LHS = x, RHS = macro1(arg1 = z[1:10], arg2 =
+"hello"))</code>.
+</p>
+<p>If <code>use3pieces = FALSE</code> and <code>unpackArgs = FALSE</code>, the entire
+line of code is passed as a single object.  In this case, <code>x ~
+macro1(arg1 = z[1:10], arg2 = "hello")</code> will be passed to <code>fun</code>
+as <code>fun(x ~ macro1(arg1 = z[1:10], arg2 = "hello"))</code>.  It is also
+possible in this case to pass a macro without using a <code>~</code> or
+<code>&lt;-</code>.  For example, the line <code>macro1(arg1 = z[1:10], arg2 =
+"hello")</code> will be passed to <code>fun</code> as <code>fun(macro1(arg1 =
+z[1:10], arg2 = "hello"))</code>.
+</p>
+<p>If <code>use3pieces = FALSE</code> and <code>unpackArgs = TRUE</code>, it
+won't make sense to anticipate a declaration using <code>~</code> or <code>&lt;-</code>.
+Instead, arguments from an arbitrary call will be passed as separate arguments.
+For example, the line <code>macro1(arg1 = z[1:10], arg2 = "hello")</code> will be
+passed to <code>fun</code> as <code>fun(arg1 = z[1:10], arg2 = "hello")</code>.
+</p>
+<p>In addition, the final two arguments of <code>fun</code> must be called <code>modelInfo</code>
+and <code>.env</code> respectively. 
+</p>
+<p>During macro processing, <code>nimbleModel</code> passes a named list to the <code>modelInfo</code> 
+argument of <code>fun</code> containing, among other things, elements called
+<code>constants</code> and <code>dimensions</code>. Macro developers can modify these
+two elements (for example, to add a new constant needed for a macro) and
+these changes will be reflected in the final model object. Note that currently
+it is not possible for a macro to modify the data. Furthermore, if your macro add a new element to the
+constants that <code>nimbleModel</code> then moves to the data, this new data will not be retained
+in the final model object and thus will not be usable. 
+</p>
+<p><code>nimbleModel</code> passes the R environment from which <code>nimbleModel</code> was
+called to the <code>.env</code> argument.
+</p>
+<p>The <code>fun</code> function must return a named list with two elements:
+<code>code</code>, the replacement code, and <code>modelInfo</code>, the <code>modelInfo</code> 
+list described above. <code>modelInfo</code> must be in the output even if the macro
+does not modify it.
+</p>
+<p>It is extremely useful to be familiar with processing R code as an
+object to write <code>fun</code> correctly.  Functions such as
+<code>substitute</code> and <code>as.name</code>
+(e.g. <code>as.name('~')</code>), <code>quote</code>, <code>parse</code>
+and <code>deparse</code> are particularly handy.
+</p>
+<p>Multiple lines of new code should be contained in <code> {} </code>. Extra
+curly braces are not a problem. See example 2.
+</p>
+<p>Macro expansion is done recursively: One macro can return code that
+invokes another macro.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class <code>model_macro</code> with one element called <code>process</code>,
+which contains the macro function suitable for use by <code>nimbleModel</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">nimbleOptions(enableModelMacros = TRUE)
+nimbleOptions(enableMacroComments = FALSE)
+nimbleOptions(verbose = FALSE)
+
+## Example 1: Say one is tired of writing "for" loops.
+## This macro will generate a "for" loop with dnorm declarations
+all_dnorm &lt;- model_macro_builder(
+    function(stoch, LHS, RHSvar, start, end, sd = 1, modelInfo, .env) {
+        newCode &lt;- substitute(
+            for(i in START:END) {
+                LHS[i] ~ dnorm(RHSvar[i], SD)
+            },
+            list(START = start,
+                 END = end,
+                 LHS = LHS,
+                 RHSvar = RHSvar,
+                 SD = sd))
+        list(code = newCode)
+    },
+    use3pieces = TRUE,
+    unpackArgs = TRUE 
+)
+
+model1 &lt;- nimbleModel(
+    nimbleCode(
+    {
+        ## Create a "for" loop of dnorm declarations by invoking the macro
+        x ~ all_dnorm(mu, start = 1, end = 10)
+    }
+    ))
+
+## show code from expansion of macro
+model1$getCode()
+## The result should be:
+## {
+##     for (i in 1:10) {
+##         x[i] ~ dnorm(mu[i], 1)
+##     }
+## }
+
+## Example 2: Say one is tired of writing priors.
+## This macro will generate a set of priors in one statement
+flat_normal_priors &lt;- model_macro_builder(
+    function(..., modelInfo, .env) {
+        allVars &lt;- list(...)
+        priorDeclarations &lt;- lapply(allVars,
+                                    function(x)
+                                        substitute(VAR ~ dnorm(0, sd = 1000),
+                                                   list(VAR = x)))
+        newCode &lt;- quote({})
+        newCode[2:(length(allVars)+1)] &lt;- priorDeclarations
+        list(code = newCode)
+    },
+    use3pieces = FALSE,
+    unpackArgs = TRUE
+)
+
+model2 &lt;- nimbleModel(
+    nimbleCode(
+    {
+        flat_normal_priors(mu, beta, gamma)
+    }
+    ))
+
+## show code from expansion of macro
+model2$getCode()
+## The result should be:
+## {
+##    mu ~ dnorm(0, sd = 1000)
+##    beta ~ dnorm(0, sd = 1000)
+##    gamma ~ dnorm(0, sd = 1000)
+## }
+
+## Example 3: Macro that modifies constants
+new_constant &lt;- model_macro_builder(
+   function(stoch, LHS, RHS, modelInfo, .env) {
+     # number of elements
+     n &lt;- as.numeric(length(modelInfo$constants[[deparse(LHS)]]))
+     code &lt;- substitute({
+       for (i in 1:N){
+         L[i] ~ dnorm(mu[i], 1)
+       }
+     }, list(L = LHS, N = n))
+
+     # Add a new constant mu
+     modelInfo$constants$mu &lt;- rnorm(n, 0, 1)
+
+     list(code = code, modelInfo = modelInfo)
+   },
+   use3pieces = TRUE,
+   unpackArgs = TRUE
+)
+
+const &lt;- list(y = rnorm(10))
+code &lt;- nimbleCode({
+ y ~ new_constant()
+})
+
+mod &lt;- nimbleModel(code = code, constants=const)
+mod$getCode()
+mod$getConstants() # new constant is here
+</code></pre>
+
+
+</div>

@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>control_scheme_DLI_freestate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Discrete Linear Time-Invariant Free Final State Classic Control Scheme</h2>
+
+<h3>Description</h3>
+
+<p>Given a system dynamics <code class="reqn">A</code>, control input matrix <code class="reqn">B</code>, final state weighting matrix <code class="reqn">S</code>,
+intermediate state weighting matrix sequence <code class="reqn">Q_seq</code>, and cost matrix sequence <code class="reqn">R_seq</code>, 
+calculates the Kalman gain sequence to minimize the LQR by time <code class="reqn">t_max</code>.
+See section 2.2 of (Lewis et al. 2012) for details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">control_scheme_DLI_freestate(t_max, A, B, S, Q_seq, R_seq)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>t_max</code></td>
+<td>
+<p>Required. An integer total number of time points to determine the trajectory over</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>Required. A <code class="reqn">p x p</code> matrix of system coefficients</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>Required. A <code class="reqn">p x q</code> matrix of control weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>A <code class="reqn">p x p</code> final state weighting matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q_seq</code></td>
+<td>
+<p>A list of <code class="reqn">t</code> <code class="reqn">p x p</code> intermediate state weighting matrices or a single <code class="reqn">p x p</code> intermediate state weighting matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R_seq</code></td>
+<td>
+<p>A list of <code class="reqn">t</code> <code class="reqn">q x q</code> intermediate cost matrices or a single <code class="reqn">q x q</code> cost matrix</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing an entry labeled <code>gain_seq</code> containing either 1 or <code>t_max - 1</code> Kalman gain matrices and an entry labeled <code>cost_func</code> which contains a LQR function.
+</p>
+
+
+<h3>References</h3>
+
+<p>Lewis FL, Vrabie DL, Syrmos VL (2012).
+<em>Optimal Control</em>, 3rd ed edition.
+Wiley, Hoboken.
+ISBN 978-0-470-63349-6.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+A = matrix(c(0,-3,-2,2,-2,1,-1,2,-1), 3,3)
+
+#Normalize rows to sum to 1
+A = solve(diag(rowSums(A))) %*% A
+
+B = S = Q_seq = R_seq = diag(3)
+
+CS = control_scheme_DLI_freestate(100, A, B, S, Q_seq, R_seq)
+
+</code></pre>
+
+
+</div>

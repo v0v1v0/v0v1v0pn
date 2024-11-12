@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sample_fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Draw survival times based on study settings</h2>
+
+<h3>Description</h3>
+
+<p>Simulates data for a randomized controlled survival study.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sample_fun(
+  A,
+  B,
+  r0 = 0.5,
+  eventEnd,
+  lambdaRecr,
+  lambdaCens,
+  maxRecrCalendarTime,
+  maxCalendar
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>An object of class <code>mixpch</code>, resembling the survival function in treatment group 0</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>An object of class <code>mixpch</code>, resembling the survival function in treatment group 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r0</code></td>
+<td>
+<p>Allocation ratio to group 0 (must be a number between 0 and 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eventEnd</code></td>
+<td>
+<p>Number of events, after which the study stops</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaRecr</code></td>
+<td>
+<p>Rate per day for recruiting patients, assuming recruitung follows a Poisson process</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaCens</code></td>
+<td>
+<p>Rate per day for random censoring, assuming censoring times are exponential</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxRecrCalendarTime</code></td>
+<td>
+<p>Maximal duration of recruitment in days</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxCalendar</code></td>
+<td>
+<p>Maximal total study duration in days, after which the study stops</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For simulating the data, patients are allocated randomly to either group (unrestricted randomization).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with each line representing data for one patient and the following columns:
+</p>
+
+<dl>
+<dt><code>group</code></dt>
+<dd>
+<p>Treatment group</p>
+</dd>
+<dt><code>inclusion</code></dt>
+<dd>
+<p>Start of observation in terms of calendar time</p>
+</dd>
+<dt><code>y</code></dt>
+<dd>
+<p>Observed survival/censored time</p>
+</dd>
+<dt><code>yCalendar</code></dt>
+<dd>
+<p>End of observation in terms of calendar time.</p>
+</dd>
+<dt><code>event</code></dt>
+<dd>
+<p>logical, <code>TRUE</code> indicates the observation ended with an event, <code>FALSE</code> corresponds to censored times</p>
+</dd>
+<dt><code>adminCens</code></dt>
+<dd>
+<p>logical, <code>True</code> indicates that the observation is subject to administrative censoring, i.e. the subject was observed until the
+end of the study without an event.</p>
+</dd>
+<dt><code>cumEvents</code></dt>
+<dd>
+<p>Cumulative number of events over calendar time of end of observation</p>
+</dd>
+</dl>
+<p>The data frame is ordered by <code>yCalendar</code>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Robin Ristl, <a href="mailto:robin.ristl@meduniwien.ac.at">robin.ristl@meduniwien.ac.at</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Robin Ristl, Nicolas Ballarini, Heiko Götte, Armin Schüler, Martin Posch, Franz König. Delayed treatment effects, treatment switching and
+heterogeneous patient populations: How to design and analyze RCTs in oncology. Pharmaceutical statistics. 2021; 20(1):129-145.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rSurv_fun</code>, <code>rSurv_conditional_fun</code>, <code>sample_conditional_fun</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">A &lt;- pop_pchaz(Tint = c(0, 90, 1500),
+  lambdaMat1 = matrix(c(0.2, 0.1, 0.4, 0.1), 2, 2) / 365,
+ lambdaMat2 = matrix(c(0.5, 0.2, 0.6, 0.2), 2, 2) / 365,
+ lambdaProg = matrix(c(0.5, 0.5, 0.4, 0.4), 2, 2) / 365,
+ p = c(0.8, 0.2), 
+ timezero = FALSE, discrete_approximation = TRUE)
+B &lt;- pop_pchaz(Tint = c(0, 90, 1500),
+  lambdaMat1 = matrix(c(0.2, 0.1, 0.4, 0.1), 2, 2) / 365,
+ lambdaMat2 = matrix(c(0.5, 0.1, 0.6, 0.1), 2, 2) / 365,
+ lambdaProg = matrix(c(0.5, 0.5, 0.04, 0.04), 2, 2) / 365,
+ p = c(0.8, 0.2), 
+ timezero = FALSE, discrete_approximation = TRUE)
+plot(A)
+plot(B, add = TRUE)
+dat &lt;- sample_fun(A, B, r0 = 0.5, eventEnd = 30, lambdaRecr = 0.5,
+  lambdaCens = 0.25 / 365, maxRecrCalendarTime = 2 * 365,
+  maxCalendar = 4 * 365)
+</code></pre>
+
+
+</div>

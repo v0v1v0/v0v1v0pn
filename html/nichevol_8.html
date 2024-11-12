@@ -1,0 +1,233 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>histograms_env</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Histograms of environmental conditions in M and for occurrences</h2>
+
+<h3>Description</h3>
+
+<p>histograms_env creates PDF files with histogram plots of
+environmental conditions in M, lines for the confidence limits of values in
+M, and the location of values in occurrence records. This is done using data
+read directly from a local directory, and can be applied to various species
+and multiple variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">histograms_env(M_folder, M_format, occ_folder, longitude, latitude,
+               var_folder, var_format, CL_lines = c(95, 99), col = NULL,
+               round = FALSE, round_names = NULL, multiplication_factor = 1,
+               save_ranges = FALSE, output_directory, overwrite = FALSE,
+               verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>M_folder</code></td>
+<td>
+<p>(character) name of the folder containing files representing
+the accessible area (M) for all species to be analyzed. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M_format</code></td>
+<td>
+<p>format of files representing the accessible area (M) for the
+species. Names of M files must match the ones for occurrence files in
+<code>occ_folder</code>. Format options are: "shp", "gpkg", or any of the options
+supported by <code>rast</code> (e.g., "tif" or "asc").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>occ_folder</code></td>
+<td>
+<p>(character) name of the folder containing csv files of
+occurrence data for all species. Names of csv files must match the ones of M
+files in <code>M_folder</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>longitude</code></td>
+<td>
+<p>(character) name of the column in occurrence files containing
+values of longitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latitude</code></td>
+<td>
+<p>(character) name of the column in occurrence files containing
+values of latitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_folder</code></td>
+<td>
+<p>(character) name of the folder containing layers to
+represent environmental variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_format</code></td>
+<td>
+<p>format of layers to represent environmental variables.
+Format options are all the ones supported by <code>rast</code>
+(e.g., "tif" or "asc").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CL_lines</code></td>
+<td>
+<p>(numeric) confidence limits of environmental values in M to
+be plotted as lines in the histograms. See details. Default = c(95, 99).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>colors for lines representing confidence limits. If NULL, colors
+are selected from a gray palette. Default = NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round</code></td>
+<td>
+<p>(logical) whether or not to round values of one or more
+variables after multiplying them times the value in <code>multiplication_factor</code>.
+Default = FALSE. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round_names</code></td>
+<td>
+<p>(character) names of the variables to be rounded.
+Default = NULL. If <code>round</code> = TRUE, names must be defined.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiplication_factor</code></td>
+<td>
+<p>(numeric) value to be used to multiply the
+variables defined in <code>round_names</code>. Default = 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save_ranges</code></td>
+<td>
+<p>(logical) whether or not to save the values identified as
+ranges considering the whole set of values and confidence limits defined in
+<code>CL_lines</code>. Default = FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_directory</code></td>
+<td>
+<p>(character) name of the folder in which results will
+be written.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>(logical) whether or not to overwrite existing results in
+<code>output_directory</code>. Default = FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>(logical) whether messages should be printed. Default = TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Coordinates in csv files in <code>occ_folder</code>, SpatVector-like files in
+<code>M_folder</code>, and raster layers in <code>var_folder</code> must coincide in the
+geographic projection in which they are represented. WGS84 with no planar
+projection is recommended.
+</p>
+<p>Accessible area (M) is understood as the geographic area that has been
+accessible for a species for relevant periods of time. Defining M is usually
+a hard task, but also a very important one, because it allows identifying
+uncertainties about the ability of a species to maintain populations under
+certain environmental conditions. For further details on this topic, see
+Barve et al. (2011) <a href="doi:10.1016/j.ecolmodel.2011.02.011">doi:10.1016/j.ecolmodel.2011.02.011</a>
+and Machado-Stredel et al. (2021) <a href="doi:10.21425/F5FBG48814">doi:10.21425/F5FBG48814</a>.
+</p>
+<p>Rounding variables may be useful when multiple variables are considered and
+the values of some or all of them are too small (e.g., when using principal
+components). To round specific variables arguments <code>round</code>,
+<code>round_names</code>, and <code>multiplication_factor</code>, must be used accordingly.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of data.frames containing intervals of environmental values in species
+occurrences and accessible areas (M), as well as values corresponding to the
+confidence limits defined in <code>CL_lines</code>. A folder named as
+in <code>output_directory</code> containing all resulting PDF files (one per
+variable) with histograms for all species. Files (csv) of ranges found during
+the analyses will be also written in <code>output_directory</code> if
+<code>save_ranges</code> is set as TRUE.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># preparing data and directories for examples
+## directories
+tempdir &lt;- file.path(tempdir(), "nevol_test")
+dir.create(tempdir)
+
+cvariables &lt;- paste0(tempdir, "/variables")
+dir.create(cvariables)
+
+records &lt;- paste0(tempdir, "/records")
+dir.create(records)
+
+m_areas &lt;- paste0(tempdir, "/M_areas")
+dir.create(m_areas)
+
+histdir &lt;- paste0(tempdir, "/Hists")
+
+## data
+data("occ_list", package = "nichevol")
+
+temp &lt;- system.file("extdata", "temp.tif", package = "nichevol")
+
+m_files &lt;- list.files(system.file("extdata", package = "nichevol"),
+                      pattern = "m\\d.gpkg", full.names = TRUE)
+
+## writing data in temporal directories
+spnames &lt;- sapply(occ_list, function (x) as.character(x[1, 1]))
+ocnames &lt;-  paste0(records, "/", spnames, ".csv")
+
+occs &lt;- lapply(1:length(spnames), function (x) {
+  write.csv(occ_list[[x]], ocnames[x], row.names = FALSE)
+})
+
+to_replace &lt;- paste0(system.file("extdata", package = "nichevol"), "/")
+
+otemp &lt;- gsub(to_replace, "", temp)
+file.copy(from = temp, to = paste0(cvariables, "/", otemp))
+
+file.copy(from = m_files, to = paste0(m_areas, "/", spnames, ".gpkg"))
+
+# running analysis to produce plots
+hists &lt;- histograms_env(M_folder = m_areas, M_format = "gpkg",
+                        occ_folder = records, longitude = "x",
+                        latitude = "y", var_folder = cvariables,
+                        var_format = "tif", output_directory = histdir)
+</code></pre>
+
+
+</div>

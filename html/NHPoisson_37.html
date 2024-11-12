@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>testlik.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Likelihood ratio test to compare two nested models</h2>
+
+<h3>Description</h3>
+
+<p>This function performs a likelihood ratio test, a test to compare 
+the fit of two models, where the first one (the null model ModR) is a particular case of the 
+other (the alternative model ModG).</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> testlik.fun(ModG, ModR) </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ModG</code></td>
+<td>
+<p>An object of class <code>mlePP-class</code>; usually,
+the output  from <code>fitPP.fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ModR</code></td>
+<td>
+<p>An object of class <code>mlePP-class</code>; usually,
+the output  from <code>fitPP.fun</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The test statistic is twice the difference in the log-likelihoods 
+of the models.
+Under the null, the  statistic follows a <code class="reqn">\chi^2</code> distribution with degrees 
+of freedom df2-df1,the number of parameters of modG and modR respectively.</p>
+
+
+<h3>Value</h3>
+
+<p> A list with elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pv</code></td>
+<td>
+<p>P-value of the likelihood ratio test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ModG</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ModR</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Casella, G. and Berger, R.L., (2002). <em>Statistical inference.</em> Brooks/Cole.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>fitPP.fun</code>,<code>LRTpv.fun</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+##The alternative model modB is specified  by the output fitPP.fun
+##The null model modBR is specified  by a list with elments llik and npar
+
+
+data(BarTxTn)
+
+covB&lt;-cbind(cos(2*pi*BarTxTn$dia/365), sin(2*pi*BarTxTn$dia/365), 
+	BarTxTn$TTx,BarTxTn$Txm31,BarTxTn$Txm31**2)
+
+
+modB&lt;-fitPP.fun(tind=TRUE,covariates=covB, 
+	POTob=list(T=BarTxTn$Tx, thres=318),
+	tim=c(1:8415), tit="BAR Tx; cos, sin, TTx, Txm31, Txm31**2", 
+	start=list(b0=-100,b1=1,b2=10,b3=0,b4=0,b5=0),dplot=FALSE,modCI=TRUE,	modSim=TRUE)
+
+
+
+modBR&lt;-fitPP.fun(tind=TRUE,covariates=covB[,1:4], 
+	POTob=list(T=BarTxTn$Tx, thres=318),
+	tim=c(1:8415), tit="BAR Tx; cos, sin, TTx, Txm31", 
+	start=list(b0=-100,b1=1,b2=10,b3=0,b4=0),dplot=FALSE,modCI=TRUE,	modSim=TRUE)
+
+
+aux&lt;-testlik.fun(ModG=modB,ModR=modBR)
+
+
+</code></pre>
+
+
+</div>

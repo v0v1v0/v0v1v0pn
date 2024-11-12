@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Build precision-recall curve</h2>
+
+<h3>Description</h3>
+
+<p>Builds a precision-recall curve for a 'nestedcv' model using <code>prediction()</code>
+and <code>performance()</code> functions from the ROCR package and returns an object of
+class 'prc' for plotting.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prc(...)
+
+## Default S3 method:
+prc(response, predictor, positive = 2, ...)
+
+## S3 method for class 'data.frame'
+prc(output, ...)
+
+## S3 method for class 'nestcv.glmnet'
+prc(object, ...)
+
+## S3 method for class 'nestcv.train'
+prc(object, ...)
+
+## S3 method for class 'nestcv.SuperLearner'
+prc(object, ...)
+
+## S3 method for class 'outercv'
+prc(object, ...)
+
+## S3 method for class 'repeatcv'
+prc(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+<p>binary factor vector of response of default order controls,
+cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictor</code></td>
+<td>
+<p>numeric vector of probabilities</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>positive</code></td>
+<td>
+<p>Either an integer 1 or 2 for the level of response factor
+considered to be 'positive' or 'relevant', or a character value for that
+factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>data.frame with columns <code>testy</code> containing observed response
+from test folds, and <code>predyp</code> predicted probabilities for classification</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a 'nestcv.glmnet', 'nestcv.train', 'nestcv.SuperLearn',
+'outercv' or 'repeatcv' S3 class results object.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of S3 class 'prc' containing the following fields:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>recall</code></td>
+<td>
+<p>vector of recall values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>precision</code></td>
+<td>
+<p>vector of precision values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auc</code></td>
+<td>
+<p>area under precision-recall curve value using trapezoid method</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseline</code></td>
+<td>
+<p>baseline precision value</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(mlbench)
+data(Sonar)
+y &lt;- Sonar$Class
+x &lt;- Sonar[, -61]
+
+fit1 &lt;- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1, cv.cores = 2)
+
+fit1$prc &lt;- prc(fit1)  # calculate precision-recall curve
+fit1$prc$auc  # precision-recall AUC value
+
+fit2 &lt;- nestcv.train(y, x, method = "gbm", cv.cores = 2)
+fit2$prc &lt;- prc(fit2)
+fit2$prc$auc
+
+plot(fit1$prc, ylim = c(0, 1))
+lines(fit2$prc, col = "red")
+
+res &lt;- nestcv.glmnet(y, x, family = "binomial", alphaSet = 1) |&gt;
+  repeatcv(n = 4, rep.cores = 2)
+
+res$prc &lt;- prc(res)  # precision-recall curve on repeated predictions
+plot(res$prc)
+
+</code></pre>
+
+
+</div>

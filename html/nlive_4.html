@@ -1,0 +1,203 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlive.pmma</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Automated Estimation of the Piecewise Linear Mixed Model with Abrupt Change</h2>
+
+<h3>Description</h3>
+
+<p>The nlive.pmma() function allows to fit a Piecewise Linear Mixed Models with abrupt
+change in the context of longitudinal Gaussian outcomes. This function was designed to
+be intuitive enough to the less sophisticated users, while using recent developments such
+as the stochastic approximation expectation-maximization (SAEM) algorithm for efficient
+estimation. It was designed to optimize the initial values of the main parameters and help
+interpretation of the output by providing different features such as annotated outputs and
+graphs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlive.pmma(
+  dataset,
+  ID,
+  outcome,
+  time,
+  var.all = NULL,
+  var.last.level = NULL,
+  var.slope1 = NULL,
+  var.slope2 = NULL,
+  var.changepoint = NULL,
+  start = NULL,
+  plot.xlabel = NULL,
+  plot.ylabel = NULL,
+  traj.marg = FALSE,
+  traj.marg.group = NULL,
+  traj.marg.title = NULL,
+  traj.marg.group.title = NULL,
+  traj.marg.group.val = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>data frame containing the variables ID, outcome, time, var.all, and all other var. arguments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ID</code></td>
+<td>
+<p>name of the variable representing the grouping structure specified with " (e.g., "ID" representing the unique identifier of participants).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcome</code></td>
+<td>
+<p>name of the time-varying variable representing the longitudinal outcome specified with " (e.g., "outcome").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>name of the variable representing the timescale specified with " (e.g., "time"), which can be negative or positive.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.all</code></td>
+<td>
+<p>optional vector indicating the name of the variable(s) that the four main parameters of the model will be adjusted to (e.g. var.all=c("X1","X2")). Default to NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.last.level</code></td>
+<td>
+<p>optional vector indicating the name of the variable(s) that the last level parameter of the model of interest will be adjusted to (e.g. var.last.level=c("X1","X2")). Default to NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.slope1</code></td>
+<td>
+<p>optional vector indicating the name of the variable(s) that the slope1 (before changepoint) parameter of the model of interest will be adjusted to (e.g. var.slope1=c("X1","X2"). Default to NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.slope2</code></td>
+<td>
+<p>optional vector indicating the name of the variable(s) that the slope2 (after changepoint) parameter of the model of interest will be adjusted to (e.g. var.slope2=c("X1","X2"). Default to NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.changepoint</code></td>
+<td>
+<p>optional vector indicating the name of the variable(s) that the changepoint parameter of the model of interest will be adjusted to (e.g. var.changepoint=c("X1","X2")). Default to NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>optional vector to override the specification of the four initial values for the main parameters - values must be included in the following order: intercept, slope before the changepoint, slope after the changepoint, changepoint. Default to NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.xlabel</code></td>
+<td>
+<p>optional text for the title of the x-axis of all plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.ylabel</code></td>
+<td>
+<p>optional text for the title of the y-axis of all plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traj.marg</code></td>
+<td>
+<p>optional logical indicating if the marginal estimated trajectory should be plotted for the most common profile of covariates, if any. Default to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traj.marg.group</code></td>
+<td>
+<p>optional name of the grouping variable listed in one of the predictor arguments to plot and contrast the estimated marginal trajectories between two specific groups, specified with " (e.g., traj.marg.group="X1"). If the variable is binary, the trajectories are contrasted between the two groups of interest. If the variable is continuous, the 10th and 90th percentile values will automatically be considered. The default value is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traj.marg.title</code></td>
+<td>
+<p>optional text for the title of the marginal estimated trajectory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traj.marg.group.title</code></td>
+<td>
+<p>optional text for the title of the marginal estimated trajectories contrasted between groups</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traj.marg.group.val</code></td>
+<td>
+<p>optional vector that can be used when <em>traj.marg.group</em> receives a quantitative variable and that allows to manually specify two percentile values to be considered for contrasting the traj.marg.group. The two values must be between 0 and 1 (e.g., traj.marg.group.val=c(0.2,0.8); for percentiles 20th and 80th). Default to 10th and 90th percentiles (i.e., traj.marg.group.val=c(0.1,0.9)).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>CAUTIONS REGARDING THE USE OF THE FUNCTION
+</p>
+<p>traj.marg: if "TRUE", this argument automatically plots the estimated marginal trajectories of the longitudinal outcome
+for the most common profile of covariates, if any (i.e., ref "1" for binary variables and mean values for continuous variables).
+Thus, users must ensure that continuous variables are centered on the mean.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class SaemixObject (from the existing <em>saemix</em> R package)
+containing the results of the fit of the data by the PMM-abrupt. The <em>nlive.pmma</em> function
+automatically provides the standard saemix output, including the fixed effects estimates,
+the variance of random effects, and Likelihood of the fitted model. The outputs are printed
+on the terminal and the numerical and graphical outputs are stored in a directory.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Maude Wagner, Ana W. Capuano, Emmanuelle Comets
+</p>
+<p><a href="mailto:maude_wagner@rush.edu">maude_wagner@rush.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Capuano AW, Wagner M. nlive: an R package to facilitate the application of the sigmoidal and random changepoint mixed models. BMC Medical Research Methodology. 2023;23(1):257.
+van den Hout A, Muniz-Terrera G, Matthews F. Smooth random change point models. Statistics in Medicine. 2011;30(6):599-610.
+Comets E, Lavenu A, Lavielle MM. Parameter estimation in nonlinear mixed effect models using saemix, an R implementation of the SAEM algorithm. Journal of Statistical Software. 2017;80(3):1-41.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#### Fitting a piecewise mixed model with abrupt change - with no covariate
+## Not run: 
+head(dataCog)
+pmm.abrupt.fit = nlive.pmma(dataset=dataCog, ID="ID", outcome="cognition", time="time")
+
+## End(Not run)
+#### plot(pmm.abrupt.fit): diagnostic plots to assess the goodness-of-fit of pmm.abrupt.fit
+#### psi(pmm.abrupt.fit): estimates of individual parameters
+
+
+</code></pre>
+
+
+</div>

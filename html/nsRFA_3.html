@@ -1,0 +1,199 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MSClaio2008</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model Selection Criteria</h2>
+
+<h3>Description</h3>
+
+<p>Model selection criteria for the frequency analysis of hydrological extremes, from Laio et al (2008).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> MSClaio2008 (sample, dist=c("NORM","LN","GUMBEL","EV2","GEV","P3","LP3"), 
+              crit=c("AIC", "AICc", "BIC", "ADC"))
+ ## S3 method for class 'MSClaio2008'
+ print(x, digits=max(3, getOption("digits") - 3), ...)
+ ## S3 method for class 'MSClaio2008'
+ summary(object, ...)
+ ## S3 method for class 'MSClaio2008'
+ plot(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sample</code></td>
+<td>
+<p>data sample</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>distributions: normal <code>"NORM"</code>, 2 parameter log-normal <code>"LN"</code>, Gumbel <code>"GUMBEL"</code>, Frechet <code>"EV2"</code>, Generalized Extreme Value <code>"GEV"</code>, Pearson type III <code>"P3"</code>, log-Pearson type III <code>"LP3"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crit</code></td>
+<td>
+<p>Model-selection criteria: Akaike Information Criterion <code>"AIC"</code>, Akaike Information Criterion corrected <code>"AICc"</code>, Bayesian Information Criterion <code>"BIC"</code>, Anderson-Darling Criterion <code>"ADC"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>MSClaio2008</code>, output of <code>MSClaio2008()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>MSClaio2008</code>, output of <code>MSClaio2008()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>minimal number of "significant" digits, see 'print.default'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The following lines are extracted from Laio et al. (2008). See the paper for more details and references.
+</p>
+<p><b>Model selection criteria</b>
+</p>
+<p>The problem of model selection can be formalized as follows: a sample of <code class="reqn">n</code> data, <code class="reqn">D=(x_1, \dots, x_n)</code>, arranged in ascending order is available, sampled from an unknown parent distribution <code class="reqn">f(x)</code>; 
+<code class="reqn">N_m</code> operating models, <code class="reqn">M_j</code>, <code class="reqn">j=1,\dots, N_m</code>, are used to represent the data. 
+The operating models are in the form of probability distributions, <code class="reqn">M_j = g_j(x,\hat{\theta})</code>, with parameters <code class="reqn">\hat{\theta}</code> estimated from the available data sample <code class="reqn">D</code>. 
+The scope of model selection is to identify the model <code class="reqn">M_{opt}</code> which is better suited to represent the data, i.e. the model which is closer in some sense to the parent distribution <code class="reqn">f(x)</code>. 
+</p>
+<p>Three different model selection criteria are considered here, namely, the Akaike Information Criterion (AIC), the Bayesian Information Criterion (BIC), and the Anderson-Darling Criterion (ADC).
+Of the three methods, the first two belong to the category of classical literature approaches, while the third derives from a heuristic interpretation of the results of a standard goodness-of-fit test (see Laio, 2004).
+</p>
+<p><b>Akalike Information Criterion</b>
+</p>
+<p>The Akaike information Criterion (AIC) for the j-th operational model can be computed as
+</p>
+<p style="text-align: center;"><code class="reqn">AIC_j = -2 ln (L_j(\hat{\theta})) + 2 p_j</code>
+</p>
+
+<p>where
+</p>
+<p style="text-align: center;"><code class="reqn">L_j(\hat{\theta}) = \prod_{i=1}^n g_j(x_i, \hat{\theta})</code>
+</p>
+
+<p>is the likelihood function, evaluated at the point <code class="reqn">\theta=\hat{\theta}</code> corresponding to the maximum likelihood estimator of the parameter vector <code class="reqn">\theta</code> and <code class="reqn">p_j</code> is the number of estimated parameter of the j-th operational model.
+In practice, after the computation of the <code class="reqn">AIC_j</code>, for all of the operating models, one selects the model with the minimum AIC value, <code class="reqn">AIC_{min}</code>.
+</p>
+<p>When the sample size, <code class="reqn">n</code>, is small, with respect to the number of estimated parameters, <code class="reqn">p</code>, the AIC may perform inadequately. In those cases a second-order variant of AIC, called AICc, should be used:
+</p>
+<p style="text-align: center;"><code class="reqn">AICc_j = -2 ln (L_j(\hat{\theta})) + 2 p_j (n/(n - p_j - 1))</code>
+</p>
+
+<p>Indicatively, AICc should be used when <code class="reqn">n/p &lt; 40</code>.
+</p>
+<p><b>Bayesian Information Criterion</b>
+</p>
+<p>The Bayesian Information Criterion (BIC) for the j-th operational model reads
+</p>
+<p style="text-align: center;"><code class="reqn">BIC_j = -2 ln (L_j(\hat{\theta})) + ln(n) p_j</code>
+</p>
+
+<p>In practical application, after the computation of the <code class="reqn">BIC_j</code>, for all of the operating models, one selects the model with the minimum BIC value, <code class="reqn">BIC_{min}</code>.
+</p>
+<p><b>Anderson-Darling Criterion</b>
+</p>
+<p>The Anderson-Darling criterion has the form:
+</p>
+<p style="text-align: center;"><code class="reqn">ADC_j = 0.0403 + 0.116 ((\Delta_{AD,j} - \epsilon_j)/\beta_j)^{(\eta_j/0.851)}</code>
+</p>
+
+<p>if <code class="reqn">1.2 \epsilon_j &lt; \Delta_{AD,j}</code>,
+</p>
+<p style="text-align: center;"><code class="reqn">ADC_j = [0.0403 + 0.116 ((0.2 \epsilon_j)/\beta_j)^{(\eta_j/0.851)}] (\Delta_{AD,j} - 0.2 \epsilon_j / \epsilon_j)</code>
+</p>
+
+<p>if <code class="reqn">1.2 \epsilon_j \ge \Delta_{AD,j}</code>,
+where <code class="reqn">\Delta_{AD,j}</code> is the discrepancy measure characterizing the criterion, the Anderson-Darling statistic <code>A2</code> in <code>GOFlaio2004</code>, and <code class="reqn">\epsilon_j</code>, <code class="reqn">\beta_j</code> and <code class="reqn">\eta_j</code> are distribution-dependent coefficients that are tabled by Laio [2004, Tables 3 and 5] for a set of seven distributions commonly employed for the frequency analysis of extreme events. 
+In practice, after the computation of the <code class="reqn">ADC_j</code>, for all of the operating models, one selects the model with the minimum ADC value, <code class="reqn">ADC_{min}</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>MSClaio2008</code> returns the value of the criteria <code>crit</code> (see Details) chosen applied to the <code>sample</code>, for every distribution <code>dist</code>.
+</p>
+<p><code>plot.MSClaio2008</code> plots the empirical distribution function of <code>sample</code> (Weibull plotting position) on a log-normal probability plot, plots the candidate distributions <code>dist</code> (whose parameters are evaluated with the maximum likelihood technique, see <code>MLlaio2004</code>, and highlights the ones chosen by the criteria <code>crit</code>.)
+</p>
+
+
+<h3>Note</h3>
+
+<p>For information on the package and the Author, and for all the references, see <code>nsRFA</code>.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>GOFlaio2004</code>, <code>MLlaio2004</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(FEH1000)
+
+sitedata &lt;- am[am[,1]==53004, ] # data of site 53004
+serieplot(sitedata[,4], sitedata[,3])
+MSC &lt;- MSClaio2008(sitedata[,4])
+MSC
+summary(MSC)
+plot(MSC)
+
+sitedata &lt;- am[am[,1]==69023, ]	# data of site 69023
+serieplot(sitedata[,4], sitedata[,3])
+MSC &lt;- MSClaio2008(sitedata[,4], crit=c("AIC", "ADC"))
+MSC
+summary(MSC)
+plot(MSC)
+
+sitedata &lt;- am[am[,1]==83802, ] # data of site 83802
+serieplot(sitedata[,4], sitedata[,3])
+MSC &lt;- MSClaio2008(sitedata[,4], dist=c("GEV", "P3", "LP3"))
+MSC
+summary(MSC)
+plot(MSC)
+
+# short sample, high positive L-CA
+sitedata &lt;- am[am[,1]==40012, ] # data of site 40012
+serieplot(sitedata[,4], sitedata[,3])
+MSC &lt;- MSClaio2008(sitedata[,4])
+MSC
+summary(MSC)
+plot(MSC)
+
+# negative L-CA
+sitedata &lt;- am[am[,1]==68002, ] # data of site 68002
+serieplot(sitedata[,4], sitedata[,3])
+MSC &lt;- MSClaio2008(sitedata[,4])
+MSC
+summary(MSC)
+plot(MSC)
+
+</code></pre>
+
+
+</div>

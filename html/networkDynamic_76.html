@@ -1,0 +1,294 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>networkDynamic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Convert various forms of network timing information into networkDynamic objects.
+</h2>
+
+<h3>Description</h3>
+
+<p>Converts various forms of temporal data (spell matrices, togles, lists of networks ) describing dynamics of vertices and edges into networkDynamic objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">networkDynamic(base.net = NULL, edge.toggles = NULL, vertex.toggles =NULL, 
+                 edge.spells = NULL, vertex.spells = NULL,
+                 edge.changes = NULL, vertex.changes = NULL,
+                 network.list = NULL, onsets = NULL, termini = NULL,
+                 vertex.pid = NULL, start = NULL, end = NULL, 
+                 net.obs.period=NULL,verbose=TRUE,create.TEAs = FALSE,
+                 edge.TEA.names=NULL,vertex.TEA.names=NULL,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>base.net</code></td>
+<td>
+
+<p>A network (or network-coearceable) object which will be used to define network-level properties (directedness,etc) of the output network. When constructing from toggles, the edges in base.net give the initially active set of edges and vertices that the activity states will be toggled from. Network and vertex attributes of <code>base.net</code> will be copied to output (unless they are overwritten by dynamic attributes with the same names) 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge.spells</code></td>
+<td>
+
+<p>A matrix or data.frame of spells specifying edge timing. Assumed to be [onset,terminus,tail vertex.id, head vertex.id]. Any additional columns can loaded as dynamic attributes (see <code>edge.TEA.names</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.spells</code></td>
+<td>
+
+<p>A matrix or data.frame of spells specifying vertex timing. Assumed to be [onset,terminus,vertex.id]
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge.toggles</code></td>
+<td>
+
+<p>A matrix or data.frame of toggles giving a sequence of activation and deactivation times for toggles.  Columns are assumed to be [toggle time, tail vertex id of the edge, head vertex id of the edge].
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.toggles</code></td>
+<td>
+
+<p>A matrix or data.frame of toggles giving a sequence of activation and deactivation times for vertices. Column order assumed to be [time,vertex.id] 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge.changes</code></td>
+<td>
+
+<p>A matrix or data.frame of edge changes with at least 4 columns, assumed to be [time, tail, head, direction]
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.changes</code></td>
+<td>
+
+<p>A matrix or data.frame of vertex changes with at least 3 columns, assumed to be [time, vertex.id,direction]
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network.list</code></td>
+<td>
+
+<p>a list of network objects assumed to describe sequential panels of network observations. Network sizes may vary if some vertices are only active in certain panels. See onsets, termini, vertex.pid. If base.net not specified, first element of list will be used as base.net. Network, vertex, and edge attributes will be converted to TEAs if <code>create.TEAs=TRUE</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>onsets</code></td>
+<td>
+
+<p>an optional array of onset times to be assigned to the network panels of network.list. defaults to seq(from=0,length=length(network.list)-1) 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>termini</code></td>
+<td>
+
+<p>an optional array of terminus times to be assigned to the network panels of network.list defaults to seq(from=1,length=length(network.list) 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.pid</code></td>
+<td>
+
+<p>an optional name of a vertex attribute to be used as a unique vertex identifier when constructing from a network list with different sized networks.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+
+<p>Optional argument to indicate the earliest time at which any changes in the network could have been observed or simulated; any spells before this time point are considered onset-censored.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end</code></td>
+<td>
+
+<p>Optional argument to indicate the latest time at which any changes in the network could have been observed or simulated; any spells after this time point are considered terminus-censored.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net.obs.period</code></td>
+<td>
+
+<p>Optional argument. A structured list for providing additional information about when and how the network was observed. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical, If TRUE (default), status message will be printed about the assumptions made in the conversion process. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>create.TEAs</code></td>
+<td>
+<p>If TRUE, Dynamic TEA attributes will be created corresponding to the static attributes appear on the network elements of <code>network.list</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge.TEA.names</code></td>
+<td>
+<p>an optional vector of names for the dynamic (TEA) edge attributes to be imported from the extra columns of <code>edge.spells</code> (if <code>create.TEAs=TRUE</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.TEA.names</code></td>
+<td>
+<p>an optional vector of names for the dynamic (TEA) vertex attributes to be imported from the extra columns of <code>vertex.spells</code> (if <code>create.TEAs=TRUE</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional arguments controlling the creating of the network or processing of attached data objects.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function provides ways to convert multiple forms of timing information for vertices and edges into network dynamic objects. 
+</p>
+
+
+<h4>Converting from lists of networks</h4>
+
+<p>If the timing information is provided in the form of a lists of networks (specified by the <code>network.list</code> argument ) the assumption is that each network is a discrete ‘panel’ observation indicating the active set vertices and edges.  By default, each observation is assumed to span a unit interval, (so the 1st goes from 0 to 1, 2nd from 1-2, etc). However, the onset and termini of each observation panel can be explicitly specified via the <code>onsets</code> and <code>termini</code> arguments. If the networks in <code>network.list</code> vary in size, the name of a vertex attribute to be used as a persistent id  must be specified using the <code>vertex.pid</code> attribute so that the vertices in each network can be matched up correctly.  If <code>create.TEAs=TRUE</code>, dynamic attributes will be created for any (non-default) attributes appearing in the list of networks.  Otherwise, network and vertex attributes will be copied from the network specified via <code>base.net</code>.  If <code>base.net</code> is not specified, the first element of <code>network.list</code> will be used.  A <code>net.obs.period</code> will be constructed to describe the range of observations used to construct the network, or one can be specified directly using the <code>net.obs.period</code> argument. 
+</p>
+
+
+
+<h4>Converting from matrices of spells, changes or toggles</h4>
+
+<p>Alternatively, timing information for edges and vertices can be provided separately as matrices or data.frames in the forms of tables of spells, changes, or toggles.  For vertices, the arguments are <code>vertex.spells</code>, <code>vertex.changes</code> or <code>vertex.toggles</code>. The columns for each argument have a specific order and function, indicated in the argument definitions above. Edge arguments are named similarly <code>edge.spells</code>, <code>edge.changes</code> or <code>edge.toggles</code>. The vertex ids and ‘head’ and ‘tail’ ids must be integer index ids.   Network properties (number of vertices, bipartite, directedness, etc) can currently be specified by including a <code>base.net</code> argument to be used as a template, network and vertex attributes will be copied from <code>base.net</code> as well.  If only edge information is provided, the network size will be imputed from the set of edge endpoints.  
+</p>
+<p>In the <code>edge.toggles</code> case, the edges present in <code>base.net</code> provide the initial state to be toggled from. If a <code>net.obs.period</code> is not specified directly using the <code>net.obs.period</code> argument one will be constructed.  Since the correct observation information is not known it may not describe the data accurately. Spells data will be assumed to be 'continuous' and where toggles and changes will be assumed to be 'discrete' and the <code>net.obs.period$observations</code> may include infinate values indicating unknown bounds.
+</p>
+<p>When constructing a network with separate sources of data for vertex and edge timing, edge and vertex activity will not be made consistent if input data is inconsistent – edges may be active when their incident vertices are inactive, etc.  These situations can be detected using the <code>network.dynamic.check</code> function and possible resolved using one of the <code>reconcile.activity</code> functions. 
+</p>
+<p>Curently, dynamic attributes (TEAs, see <code>attribute.activity.functions</code>) for edges or vertices (with onset and termination times matching those of the edge or vertex spell) can be loaded in by by setting <code>create.TEAs=TRUE</code> and including additional columns in the <code>edge.spells</code> or <code>vertex.spells</code> argument and specifying a vector of names for the attributes with <code>edge.TEA.names</code> or <code>vertex.TEA.names</code>. Note that when using a <code>data.frame</code> to pass in non-numeric attributes, the default behavior of converting strings to factors should be avoided.
+</p>
+
+
+
+
+<h3>Value</h3>
+
+<p>A networkDynamic object with vertex and edge timing specified by the input data. It will also print out information about the assumptions it makes while constructing the network.  
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function provides the features that were formerly (in versions &lt; 0.4) called using as.networkDynamic.* syntax. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Li Wang lxwang@uw.edu, skyebend, statnet team
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See Also as <code>get.edge.activity</code>,<code>get.vertex.activity</code>, <code>network.dynamic.check</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# construct network out of a list of panels of varying sizes
+# omiting missing day 25
+data(windsurferPanels)
+dynBeach&lt;-networkDynamic(network.list=beach[-25], vertex.pid="vertex.names",
+                        onsets=c(1:24,26:31),termini=c(2:25,27:32))
+
+# read in tsv files for vertex and edge spells and 
+# construct network of McFarland classroom interaction data
+# see ?cls33_10_16_96 for more info about this data set
+
+# read vertex data
+rawVerts&lt;-read.table(paste(path.package('networkDynamic'),
+   "/extdata/cls33_10_16_96_vertices.tsv",sep=''),header=TRUE)
+
+# peek at column headings to find ids and times
+names(rawVerts)
+
+# read in interation (edge) data
+rawEdges&lt;-read.table(paste(path.package('networkDynamic'),
+  "/extdata/cls33_10_16_96_edges.tsv",sep=''),header=TRUE)
+
+# peek at column headings to find ids and times
+names(rawEdges)
+
+
+# construct network using vertex and edge timing information
+cls33 &lt;-networkDynamic(vertex.spells=rawVerts[,c(3,4,1)],
+                       edge.spells=rawEdges[,c(3,4,1,2)])
+
+# add in the unchanging vertex attribute data
+set.vertex.attribute(cls33,"sex",as.vector(rawVerts$sex))
+set.vertex.attribute(cls33,"role",as.vector(rawVerts$role))
+
+ ## Not run:   # takes 5 seconds, too slow for CRAN checks
+# loop over edge data to add the dynamic attributes on the edge
+for(r in 1:nrow(rawEdges)){
+  # get the id of the edge from its tail and head
+  eid &lt;- get.edgeIDs(cls33,v=rawEdges$from_vertex_id[r],
+                     alter=rawEdges$to_vertex_id[r])
+  activate.edge.attribute(cls33,'interaction_type',rawEdges$interaction_type[r],
+          onset=rawEdges$start_minute[r],terminus=rawEdges$end_minute[r],e=eid)
+  activate.edge.attribute(cls33,'weight',rawEdges$weight[r],
+          onset=rawEdges$start_minute[r],terminus=rawEdges$end_minute[r],e=eid)
+}
+
+# convert the set of newcomb panels with rank weights
+data(newcomb)
+newRankDyn &lt;-networkDynamic(network.list=newcomb.rank)
+get.network.attribute.active(newRankDyn,'title',at=3)
+as.matrix(network.collapse(newRankDyn,at=5),attrname='rank')
+
+
+## End(Not run)
+
+
+</code></pre>
+
+
+</div>

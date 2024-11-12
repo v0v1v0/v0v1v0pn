@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>TransHazRateEst</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transformation Based Hazard Rate Estimator</h2>
+
+<h3>Description</h3>
+
+<p>Implements the transformated kernel hazard rate estimator of <a href="http://dx.doi.org/10.1080/10485250802440184">Bagkavos (2008)</a>. The estimate is expected to have less bias compared to the ordinary kernel estimate <code>HazardRateEst</code>. The estimate results by first transforming the data to a sample from the exponential distribution through the integrated hazard rate function, estimated by <code>iHazardRateEst</code> and uses the result as input to the classical kernel hazard rate estimate  <code>HazardRateEst</code>. An inverse transform turn the estimate to a hazard rate estimate of the original sample. See section "Details" below.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">TransHazRateEst(xin, xout, kfun, ikfun, h1, h2, ci)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p>A vector of data points.  Missing values not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xout</code></td>
+<td>
+<p>A vector of points at which the hazard rate function will be estimated. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kfun</code></td>
+<td>
+<p>Kernel function to use. Supported kernels: Epanechnikov, Biweight, Gaussian, Rectangular, Triangular, HigherOrder.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ikfun</code></td>
+<td>
+<p>An integrated kernel function to use. Supported kernels: Epanechnikov, Biweight, Gaussian, Rectangular, Triangular, HigherOrder.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h1</code></td>
+<td>
+<p>A scalar, pilot bandwidth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h2</code></td>
+<td>
+<p>A scalar, transformed kernel bandwidth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>A vector of censoring indicators: 1's indicate uncensored observations, 0's correspond to censored obs. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The transformed kernel hazard rate estimate of <a href="http://dx.doi.org/10.1080/10485250802440184">Bagkavos (2008)</a> is given by
+</p>
+<p style="text-align: center;"><code class="reqn">\hat \lambda_t(x;h_1, h_2) = \sum_{i=1}^n  \frac{K_{h_2}\left \{ (\hat \Lambda(x;h_1 ) - \hat \Lambda(X_{(i)};h_1 ) ) \right \}\delta_{(i)}}{n-i+1}\hat \lambda(x;h_1 ).</code>
+</p>
+
+<p>The estimate uses the classical kernel hazard rate estimate <code class="reqn">\lambda(x; h_1)</code> implemented in <code>HazardRateEst</code> and its integrated version
+</p>
+<p style="text-align: center;"><code class="reqn">\hat \Lambda(x; h_1) =  \sum_{i=1}^n \frac{k\left \{(x-X_{(i)})h_1^{-1}\right \}\delta_{(i)}}{n-i+1}</code>
+</p>
+
+<p>where
+<code class="reqn">k(x) = \int_{-\infty}^x K(y)\,dy</code>
+implemented in <code>iHazardRateEst</code>. The pilot bandwidth <code class="reqn">h_1</code> is determined by an optimal bandwidth rule such as <code>PlugInBand</code>.
+</p>
+
+<ul><li>
+<p> TO DO: Insert a  rule for the adaptive bandwidth  <code class="reqn">h_2</code>. </p>
+</li></ul>
+<h3>Value</h3>
+
+<p>A vector with the values of the function at the designated points xout.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="http://dx.doi.org/10.1080/10485250802440184">Bagkavos (2008), Transformations in hazard rate estimation, J. Nonparam. Statist., 20, 721-738</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>VarBandHazEst, HazardRateEst, PlugInBand </code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+plot(x, HazardRate(x, "weibull", .6, 1),  type="l",
+                   xlab = "x", ylab="Hazard rate") #plot true hazard rate function
+SampleSize &lt;- 100
+mat&lt;-matrix(nrow=SampleSize, ncol=20)
+for(i in 1:20)
+{ #Calculate the average of 20 estimates and draw on the screen
+ ti&lt;- rweibull(SampleSize, .6, 1)  #draw a random sample from the actual distribution
+ ui&lt;-rexp(SampleSize, .05)          #draw a random sample from the censoring distribution
+ cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+ x1&lt;-pmin(ti,ui)                   #this is the observed sample
+ cen&lt;-rep.int(1, SampleSize)       #censoring indicators
+ cen[which(ti&gt;ui)]&lt;-0              #censored values correspond to zero
+
+ h2&lt;-DefVarBandRule(ti, cen)     #Deafult Band. Rule - Weibull Reference
+ huse1&lt;- PlugInBand(x1, x,   cen, Biweight) #
+ mat[,i]&lt;-TransHazRateEst(x1,x,Epanechnikov,IntEpanechnikov,huse1,h2,cen)
+}
+lines(x, rowMeans(mat) , lty=2) #draw the average transformed estimate
+</code></pre>
+
+
+</div>

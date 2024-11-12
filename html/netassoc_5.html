@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>partial_correlation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Partial correlation coefficients
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the inverse covariance matrix then uses this matrix to calculate partial correlation coefficents.
+</p>
+<p>Assumes that matrix rows correspond to different variables of interest.
+</p>
+<p>The one exception is if <code>method="correlation"</code>; see below for details. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">partial_correlation(mat, method, verbose=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mat</code></td>
+<td>
+
+<p>Input matrix.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+
+<p>One of the following
+</p>
+<ul>
+<li>
+<p>"glasso" - L1-regularized estimation via graphical lasso. The analysis is run for a range of penalty parameters; then a single inverse covariance matrix is returned whose penalty parameter yields the with the best Extended Bayesian Information Criterion value. Uses <code>huge::huge</code> and <code>huge::huge.select</code>.
+</p>
+</li>
+<li>
+<p>"shrinkage" - Shrinkage estimate. The shrinkage parameter is estimated via an analytic formula. Uses <code>corpcor::invcov.shrink</code>.
+</p>
+</li>
+<li>
+<p>"exact" - Directly calculates inverse covariance matrix. Results may be sensitive to highly collinear inputs. Use not recommended. Uses <code>solve</code>.
+</p>
+</li>
+<li>
+<p>"correlation" - Directly calculates correlation matrix. Does not return partial correlation coefficients as in all other cases. Use not recommended. Uses <code>cor</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Binary flag determining whether diagnostic output is shown.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a m x m upper triangular matrix of partial correlation coefficients from an input m x n matrix. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load highly collinear economic data time series
+data(longley) 
+longley_ss &lt;- t(longley[,c(1:5,7)]) # put data in correct input format
+
+colors &lt;- colorRampPalette(c("red","white","blue"))(10)
+pc_shrinkage &lt;- partial_correlation(longley_ss,method="shrinkage")
+
+image(pc_shrinkage,zlim=c(-1,1),col=colors)
+</code></pre>
+
+
+</div>

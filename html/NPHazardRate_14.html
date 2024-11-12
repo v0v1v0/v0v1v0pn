@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DefVarBandRule</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Default adaptive bandwidth rule</h2>
+
+<h3>Description</h3>
+
+<p>Implements an adaptive variable bandwidth hazard rate rule for use with the <code>VarBandHazEst</code> based on the Weibull distribution, with parameters estimated by maximum likelihood
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DefVarBandRule(xin, cens)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xin</code></td>
+<td>
+<p>A vector of data points.  Missing values not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cens</code></td>
+<td>
+<p>A vector of censoring indicators: 1's  indicate uncensored observations, 0's correspond to censored obs.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The adaptive AMISE optimal bandwidth for the variable bandwidth hazard rate estimator <code>VarBandHazEst</code> is given by
+</p>
+<p style="text-align: center;"><code class="reqn"> h_2 =  \left [ \frac{R(K) M_2}{8n\mu_4^2(K) R(g)} \right ]^{1/14}</code>
+</p>
+
+<p>where
+</p>
+<p style="text-align: center;"><code class="reqn"> M_2 =   \int \frac{\lambda^{3/2}(x)}{1-F(x)} \,dx</code>
+</p>
+
+<p>and
+</p>
+<p style="text-align: center;"><code class="reqn"> g(x)=\frac{1}{24\lambda(x)^5} \Bigl (24{\lambda'(x)}^4-36{\lambda'(x)}^2{\lambda''(x)}^2\lambda(x)+6{\lambda''(x)}^2\lambda^2(x)
++ 8\lambda'(x)\lambda'''(x)\lambda^2(x) -\lambda^{(4)}(x)\lambda^3(x)\Bigr ) </code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>the value of the adaptive bandwidth
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="http://dx.doi.org/10.1080/03610920802364088">Bagkavos and Patil (2009), Variable Bandwidths for Nonparametric Hazard Rate Estimation, Communications in Statistics - Theory and Methods, 38:7, 1055-1078</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>HazardRateEst, TransHazRateEst, PlugInBand </code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(survival)
+x&lt;-seq(0, 5,length=100) #design points where the estimate will be calculated
+
+SampleSize &lt;- 100
+
+ti&lt;- rweibull(SampleSize, .6, 1)#draw a random sample from the actual distribution
+ui&lt;-rexp(SampleSize, .05)       #draw a random sample from the censoring distribution
+cat("\n AMOUNT OF CENSORING: ", length(which(ti&gt;ui))/length(ti)*100, "\n")
+x1&lt;-pmin(ti,ui)                 #this is the observed sample
+cen&lt;-rep.int(1, SampleSize)     #censoring indicators
+cen[which(ti&gt;ui)]&lt;-0            #censored values correspond to zero
+
+h2&lt;-DefVarBandRule(ti, cen)     #Deafult Band. Rule - Weibull Reference
+</code></pre>
+
+
+</div>

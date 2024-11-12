@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compute_draft_order</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute NFL Draft Order using Game Results and Divisional Rankings</h2>
+
+<h3>Description</h3>
+
+<p>Compute NFL Draft Order using Game Results and Divisional Rankings
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compute_draft_order(
+  teams,
+  games,
+  h2h = NULL,
+  tiebreaker_depth = 3,
+  .debug = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>teams</code></td>
+<td>
+<p>The division standings data frame including playoff seeds as
+computed by <code>compute_conference_seeds</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>games</code></td>
+<td>
+<p>A data frame containing real or simulated game scores. The
+following variables are required:
+</p>
+
+<dl>
+<dt>sim</dt>
+<dd>
+<p>A simulation ID. Normally 1 - n simulated seasons.</p>
+</dd>
+<dt>game_type</dt>
+<dd>
+<p>One of 'REG', 'WC', 'DIV', 'CON', 'SB' indicating if a game was a regular season game or one of the playoff rounds.</p>
+</dd>
+<dt>week</dt>
+<dd>
+<p>The week of the corresponding NFL season.</p>
+</dd>
+<dt>away_team</dt>
+<dd>
+<p>Team abbreviation of the away team (please see
+<code>divisions</code> for valid team abbreviations).</p>
+</dd>
+<dt>home_team</dt>
+<dd>
+<p>Team abbreviation of the home team (please see
+<code>divisions</code> for valid team abbreviations).</p>
+</dd>
+<dt>result</dt>
+<dd>
+<p>Equals home score - away score.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h2h</code></td>
+<td>
+<p>A data frame that is used for head-to-head tiebreakers across the
+tie-breaking functions. It is computed by the function
+<code>compute_division_ranks</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tiebreaker_depth</code></td>
+<td>
+<p>A single value equal to 1, 2, or 3. The default is 3. The
+value controls the depth of tiebreakers that shall be applied. The deepest
+currently implemented tiebreaker is strength of schedule. The following
+values are valid:
+</p>
+
+<dl>
+<dt>tiebreaker_depth = 1</dt>
+<dd>
+<p>Break all ties with a coinflip. Fastest variant.</p>
+</dd>
+<dt>tiebreaker_depth = 2</dt>
+<dd>
+<p>Apply head-to-head and division win percentage tiebreakers. Random if still tied.</p>
+</dd>
+<dt>tiebreaker_depth = 3</dt>
+<dd>
+<p>Apply all tiebreakers through strength of schedule. Random if still tied.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.debug</code></td>
+<td>
+<p>Either <code>TRUE</code> or <code>FALSE</code>. Controls whether additional
+messages are printed to the console showing what the tie-breaking algorithms
+are currently performing.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame of standings including the final draft pick number and
+the variable <code>exit</code> which indicates the week number of the teams final
+game (Super Bowl Winner is one week higher).
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The examples <a href="https://nflseedr.com/articles/articles/nflseedR.html">on the package website</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Change some options for better output
+old &lt;- options(list(digits = 3, tibble.print_min = 64))
+library(dplyr, warn.conflicts = FALSE)
+
+try({#to avoid CRAN test problems
+games &lt;-
+  nflseedR::load_sharpe_games() %&gt;%
+  dplyr::filter(season %in% 2018:2019) %&gt;%
+  dplyr::select(sim = season, game_type, week, away_team, home_team, result)
+
+games %&gt;%
+  nflseedR::compute_division_ranks() %&gt;%
+  nflseedR::compute_conference_seeds(h2h = .$h2h, playoff_seeds = 6) %&gt;%
+  nflseedR::compute_draft_order(games = games, h2h = .$h2h)
+})
+
+# Restore old options
+options(old)
+
+</code></pre>
+
+
+</div>

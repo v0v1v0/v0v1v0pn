@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pick_est</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Local Pickands' frontier estimator
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes the Pickands type of  estimator introduced by Gijbels and Peng (2000).  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pick_est(xtab, ytab, x, h, k, type="one-stage")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>determines the bandwidth at which the estimate will be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>a numeric vector of the same length as <code>x</code>, which determines the thresholds at which the Pickands' estimator will be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>a character equal to "one-stage" or "two-stage".</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The local Pickands' frontier estimator (option <code>type="one-stage"</code>), obtained by applying the well-known approach of Dekkers and de Haan (1989) 
+in conjunction with the transformed sample of <code class="reqn">z^{xh}_i</code>'s described in the function <code>loc_max</code>, is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">
+z^{xh}_{(n-k)} + \left(z^{xh}_{(n-k)}-z^{xh}_{(n-2k)}\right)\{2^{-\log\frac{z^{xh}_{(n-k)}-z^{xh}_{(n-2k)}}{z^{xh}_{(n-2k)}-z^{xh}_{(n-4k)}}/\log 2}-1\}^{-1}.
+</code>
+</p>
+
+<p>It is based on three upper order statistics <code class="reqn">z^{xh}_{(n-k)}</code>, <code class="reqn">z^{xh}_{(n-2k)}</code>, <code class="reqn">z^{xh}_{(n-4k)}</code>, and depends on <code class="reqn">h</code> (see <code>loc_max</code>)  
+as well as an intermediate sequence <code class="reqn">k=k(x,n)\to\infty</code> with <code class="reqn">k/n\to 0</code> as <code class="reqn">n\to\infty</code>. 
+The two smoothing parameters <code class="reqn">h</code> and <code class="reqn">k</code> have to be fixed in the 4th and 5th arguments of the function.
+</p>
+<p>Also, the user can replace each observation <code class="reqn">y_i</code> in  the strip of width <code class="reqn">2h</code> around <code class="reqn">x</code> by the resulting local Pickands', leaving all observations outside the strip unchanged.
+Then, one may apply the DEA estimator (see the function <code>dea_est</code>) to the obtained transformed data,
+giving the local DEA  estimator  (option  <code>type="two-stage"</code>). 
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Abdelaati Daouia and Thibault Laurent.
+</p>
+
+
+<h3>References</h3>
+
+<p>Dekkers, A.L.M. and L. de Haan (1989). On the estimation of extreme-value index and large quantiles estimation, <em>Annals of Statistics</em>, 17, 1795-1832.
+</p>
+<p>Gijbels, I. and Peng, L. (2000). Estimation of a support curve  via order statistics, <em>Extremes</em>, 3,  251-277. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dea_est</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data("green")
+plot(log(OUTPUT)~log(COST), data=green)
+x &lt;- seq(min(log(green$COST)), max(log(green$COST)), length.out=101)
+h=0.5
+nx&lt;-unlist(lapply(x,function(y) length(which(abs(log(green$COST)-y)&lt;=h))))
+k&lt;-trunc(nx^0.1)
+lines(x, pick_est(log(green$COST), log(green$OUTPUT), x, h=h, k=k), lty=1, col="red")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,202 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>replaceEmptyImageDimensions-methods</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Replace Subsetting from Empty Image Dimensions</h2>
+
+<h3>Description</h3>
+
+<p>Simple wrapper for subsetting an image with indices, 
+dropping empty dimensions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">replaceEmptyImageDimensions(
+  img,
+  inds,
+  target_dim,
+  value = 0,
+  reorient = FALSE,
+  ...
+)
+
+## S4 method for signature 'nifti'
+replaceEmptyImageDimensions(
+  img,
+  inds,
+  target_dim,
+  value = 0,
+  reorient = FALSE,
+  ...
+)
+
+## S4 method for signature 'character'
+replaceEmptyImageDimensions(
+  img,
+  inds,
+  target_dim,
+  value = 0,
+  reorient = FALSE,
+  ...
+)
+
+## S4 method for signature 'factor'
+replaceEmptyImageDimensions(
+  img,
+  inds,
+  target_dim,
+  value = 0,
+  reorient = FALSE,
+  ...
+)
+
+## S4 method for signature 'list'
+replaceEmptyImageDimensions(
+  img,
+  inds,
+  target_dim,
+  value = 0,
+  reorient = FALSE,
+  ...
+)
+
+## S4 method for signature 'array'
+replaceEmptyImageDimensions(
+  img,
+  inds,
+  target_dim,
+  value = 0,
+  reorient = FALSE,
+  ...
+)
+
+## S4 method for signature 'anlz'
+replaceEmptyImageDimensions(
+  img,
+  inds,
+  target_dim,
+  value = 0,
+  reorient = FALSE,
+  ...
+)
+
+## S4 method for signature 'ANY'
+replaceEmptyImageDimensions(
+  img,
+  inds,
+  target_dim,
+  value = 0,
+  reorient = FALSE,
+  ...
+)
+
+replace_empty_dim(img, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>image, nifti object, or array</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inds</code></td>
+<td>
+<p>indices of subset from <code>getEmptyImageDimensions</code> or
+<code>dropEmptyImageDimensions</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target_dim</code></td>
+<td>
+<p>Original dimension from which the data was subset,
+the final dimension of the output</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>value to replace in the image where outside the indices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reorient</code></td>
+<td>
+<p>Should image be reoriented if a filename?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Object of class <code>nifti</code> or <code>array</code> if <code>nifti</code>
+is not supplied
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>replace_empty_dim</code> is a shorthand for 
+<code>replaceEmptyImageDimensions</code> with all the same arguments.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getEmptyImageDimensions</code>, 
+<code>dropEmptyImageDimensions</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dims = rep(10, 3)
+arr = array(rnorm(prod(dims)), dim = dims)
+arr[,,10] = 0
+nim = oro.nifti::nifti(arr)
+rnifti = RNifti::asNifti(nim)
+timg = tempimg(nim)
+limg = list(factor(timg, timg))
+inds = getEmptyImageDimensions(nim)
+inds_arr = getEmptyImageDimensions(arr)
+testthat::expect_equal(inds, inds_arr)
+
+out = applyEmptyImageDimensions(nim, inds = inds)
+result = replaceEmptyImageDimensions(out, inds = inds,
+target_dim = dim(nim))
+testthat::expect_equal(array(result, dim = dim(result)), 
+array(nim, dim = dim(nim)))
+replace_empty_dim(out, inds = inds,
+target_dim = dim(nim))
+
+target_dim = dim(nim)
+
+arr = array(out, dim = dim(out))
+nim = oro.nifti::nifti(arr)
+rnifti = RNifti::asNifti(nim)
+timg = tempimg(nim)
+limg = list(factor(timg), factor(timg))
+func = function(...) replaceEmptyImageDimensions(..., 
+target_dim = target_dim, inds = inds)
+func(arr)
+func(nim)
+func(rnifti)
+func(timg)
+func(limg)
+</code></pre>
+
+
+</div>

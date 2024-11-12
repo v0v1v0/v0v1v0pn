@@ -1,0 +1,211 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cross_validate_concentration</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-validates The Concentration Parameter In A 3D Spherical Regression.</h2>
+
+<h3>Description</h3>
+
+<p>Returns a cross-validated value for the concentration parameter in
+a 3D regression, relating specific explanatory points to response
+ones, given a weighting scheme for the observed data set.
+This function supports the method for sphere-sphere regression
+proposed by Di Marzio et al. (2018).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cross_validate_concentration(
+  concentration_upper_bound = 10,
+  explanatory_points,
+  response_points,
+  weights_generator = weight_explanatory_points,
+  number_of_expansion_terms = 1,
+  number_of_iterations = 1,
+  allow_reflections = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>concentration_upper_bound</code></td>
+<td>
+<p>A scalar numeric value representing
+the upper end-point of the interval to be searched for the required minimizer.
+Defaults to <code>10</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>explanatory_points</code></td>
+<td>
+<p>An <em>m</em>-by-3 matrix whose rows contain
+the Cartesian coordinates of the explanatory points used to
+calculate the regression estimators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>response_points</code></td>
+<td>
+<p>An <em>m</em>-by-<em>3</em> matrix whose rows contain
+the Cartesian coordinates of the response points corresponding
+to the explanatory points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights_generator</code></td>
+<td>
+<p>A function that, given a matrix of <em>n</em>
+evaluation points, returns an <em>m</em>-by-<em>n</em> matrix whose
+<em>j</em>-th column contains
+the weights assigned to the explanatory points while analyzing the
+<em>j</em>-th evaluation point. Defaults to <code>weight_explanatory_points</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number_of_expansion_terms</code></td>
+<td>
+<p>The number of terms to be included
+in the expansion of the matrix exponential applied while
+approximating a local rotation matrix. Must be <code>1</code> or <code>2</code>.
+Defaults to <code>1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number_of_iterations</code></td>
+<td>
+<p>The number of
+rotation fitting steps to be executed.
+At each step, the points estimated during the previous step
+are exploited as the current explanatory points. Defaults to <code>1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow_reflections</code></td>
+<td>
+<p>A logical scalar value. If set to <code>TRUE</code> signals
+that reflections are allowed. Defaults to <code>FALSE</code>. It is ignored if
+<code>number_of_expansion_terms</code> is <code>2</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function <code>weights_generator</code> must be prototyped as having the
+following three arguments:
+</p>
+
+<dl>
+<dt><code>evaluation_points</code></dt>
+<dd>
+<p>a matrix whose <em>n</em> rows are the Cartesian coordinates of
+given evaluation points.</p>
+</dd>
+<dt><code>explanatory_points</code></dt>
+<dd>
+<p>a matrix whose <em>m</em> rows are the Cartesian coordinates of
+given explanatory points.</p>
+</dd>
+<dt><code>concentration</code></dt>
+<dd>
+<p>A non negative scalar whose reciprocal value
+is proportional to the bandwidth applied while estimating
+a spherical regression model.</p>
+</dd>
+</dl>
+<p>It is also expected that <code>weights_generator</code> will return
+a non <code>NULL</code> numerical <em>m</em>-by-<em>n</em> matrix whose <em>j</em>-th column contains
+the weights assigned to the explanatory points while analyzing the
+<em>j</em>-th evaluation point.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list having two components,
+<code>concentration</code>, a scalar, numeric value representing the cross-validated
+concentration for the specified 3D regression, and
+<code>objective</code>, the value of the cross-validating objective function at argument <code>concentration</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Marco Di Marzio, Agnese Panzera &amp; Charles C. Taylor (2018)
+Nonparametric rotations for sphere-sphere regression,
+Journal of the American Statistical Association,
+&lt;doi:10.1080/01621459.2017.1421542&gt;.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Regression functions: 
+<code>fit_regression()</code>,
+<code>get_equally_spaced_points()</code>,
+<code>get_skew_symmetric_matrix()</code>,
+<code>simulate_regression()</code>,
+<code>simulate_rigid_regression()</code>,
+<code>weight_explanatory_points()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nprotreg)
+
+# Define a matrix of explanatory points.
+
+number_of_explanatory_points &lt;- 50
+
+explanatory_points &lt;- get_equally_spaced_points(
+  number_of_explanatory_points)
+
+# Define a matrix of response points by simulation.
+
+local_rotation_composer &lt;- function(point) {
+  independent_components &lt;- (1 / 2) *
+    c(exp(2.0 * point[3]), - exp(2.0 * point[2]), exp(2.0 * point[1]))
+}
+
+local_error_sampler &lt;- function(point) {
+  rnorm(3)
+}
+
+response_points &lt;- simulate_regression(explanatory_points,
+                                       local_rotation_composer,
+                                       local_error_sampler)
+
+# Define an upper bound for concentration.
+
+concentration_upper_bound &lt;- 1
+
+# Use default weights generator.
+
+weights_generator &lt;- weight_explanatory_points
+
+# Cross-validate concentration parameter.
+
+cv_info &lt;- cross_validate_concentration(
+  concentration_upper_bound,
+  explanatory_points,
+  response_points,
+  weights_generator,
+  number_of_expansion_terms = 1,
+  number_of_iterations = 2,
+  allow_reflections = FALSE
+)
+
+# Get the cross-validated concentration value.
+
+cat("cross-validated concentration value: \n")
+print(cv_info$concentration)
+</code></pre>
+
+
+</div>

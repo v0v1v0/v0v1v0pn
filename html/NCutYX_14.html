@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pwncut</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cluster the Columns of X into K Clusters by Giving a Weighted Cluster Membership while shrinking
+Weights Towards Each Other.</h2>
+
+<h3>Description</h3>
+
+<p>This function will output K channels of variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pwncut(X, K = 2, B = 3000, L = 1000, scale = TRUE, lambda = 1,
+  epsilon = 0, nstarts = 3, start = "default", dist = "gaussian",
+  sigma = 0.1, beta = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>is a n x p matrix of p variables and n observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>is the number of clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>is the number of iterations in the simulated annealing algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>is the temperature coefficient in the simulated annealing algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>equals TRUE if data X is to be scaled with mean 0 and variance 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>the tuning parameter of the penalty. Larger values shrink the weighted
+cluster membership closer together (default = 1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>values in the similarity matrix less than epsilon are set to 0 (default = 0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nstarts</code></td>
+<td>
+<p>the number of starting values also corresponding how many times simulated
+annealing is run. Larger values provide better results but takes longer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>if it equals 'default' then the starting value for all weights is 1/K. If
+'random' then weights are sampled from a uniform distribution and then scaled to sum 1
+per variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>specifies the distance metric used for constructing the similarity matrix.
+Options are 'gaussian', 'correlation' and 'euclidean' (default = 'gaussian').</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>is the bandwidth parameter when the dist metric chosen is 'gaussian' (default = 0.1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>when dist='correlation', beta is the exponent applied to each entry of the
+similarity matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The algorithm minimizes a modified version of NCut through simulated annealing.
+The clusters correspond to partitions that minimize this objective function.
+</p>
+
+
+<h3>References</h3>
+
+<p>Sebastian J. Teran Hidalgo, Mengyun Wu and Shuangge Ma.
+Penalized and weighted clustering of gene expression data using PWNCut. (Submitted.)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># This sets up the initial parameters for the simulation.
+n &lt;- 100 # Sample size
+p &lt;- 100 # Number of columns of Y.
+K &lt;- 3
+
+C0            &lt;- matrix(0,p,K)
+C0[1:25,1]    &lt;- matrix(1,25,1)
+C0[26:75,1:3] &lt;- matrix(1/3,50,3)
+C0[76:100,3]  &lt;- matrix(1,25,1)
+
+A0 &lt;- C0[ ,1]%*%t(C0[ ,1]) + C0[ ,2]%*%t(C0[ ,2]) +
+      C0[ ,3]%*%t(C0[ ,3])
+A0 &lt;- A0 - diag(diag(A0)) + diag(p)
+
+Z1 &lt;- rnorm(n,0,2)
+Z2 &lt;- rnorm(n,0,2)
+Z3 &lt;- rnorm(n,0,2)
+
+Y &lt;- matrix(0,n,p)
+Y[ ,1:25]   &lt;-  matrix(rnorm(n*25, 0, 2), n, 25) + matrix(Z1, n, 25, byrow=FALSE)
+Y[ ,26:75]  &lt;-  matrix(rnorm(n*50, 0, 2), n, 50) + matrix(Z1, n, 50, byrow=FALSE) +
+                matrix(Z2, n, 50, byrow=FALSE) + matrix(Z3, n, 50, byrow=FALSE)
+Y[ ,76:100] &lt;-  matrix(rnorm(n*25, 0, 2), n, 25) + matrix(Z3, n, 25, byrow=FALSE)
+
+trial &lt;- pwncut(Y,
+                K       = 3,
+                B       = 10000,
+                L       = 1000,
+                lambda  = 1.5,
+                start   = 'default',
+                scale   = TRUE,
+                nstarts = 1,
+                epsilon = 0,
+                dist    = 'correlation',
+                sigma   = 10)
+
+A1 &lt;- trial[[2]][ ,1]%*%t(trial[[2]][ ,1]) +
+      trial[[2]][ ,2]%*%t(trial[[2]][ ,2]) +
+      trial[[2]][ ,3]%*%t(trial[[2]][ ,3])
+
+A1 &lt;- A1 - diag(diag(A1)) + diag(p)
+
+plot(trial[[1]], type='l')
+errorL &lt;- sum(abs(A0-A1))/p^2
+errorL
+</code></pre>
+
+
+</div>

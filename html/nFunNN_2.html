@@ -1,0 +1,85 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nFunNN_CR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Curve reconstruction</h2>
+
+<h3>Description</h3>
+
+<p>Curve reconstruction by the trained transformed functional autoassociative neural network.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nFunNN_CR(model, X_ob, L, t_grid)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>The trained transformed functional autoassociative neural network obtained from <code>nFunNNmodel</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X_ob</code></td>
+<td>
+<p>A <code>matrix</code> denoting the observed data from subjects that we aim to predict.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>An <code>integer</code> denoting the number of B-spline basis functions for the parameters in the network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t_grid</code></td>
+<td>
+<p>A <code>vector</code> denoting the observation time grids on <code>[0, 1]</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A torch tensor denoting the predicted values.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+n &lt;- 2000
+m &lt;- 51
+t_grid &lt;- seq(0, 1, length.out = m)
+m_est &lt;- 101
+t_grid_est &lt;- seq(0, 1, length.out = m_est)
+err_sd &lt;- 0.1
+Z_1a &lt;- stats::rnorm(n, 0, 3)
+Z_2a &lt;- stats::rnorm(n, 0, 2)
+Z_a &lt;- cbind(Z_1a, Z_2a)
+Phi &lt;- cbind(sin(2 * pi * t_grid), cos(2 * pi * t_grid))
+Phi_est &lt;- cbind(sin(2 * pi * t_grid_est), cos(2 * pi * t_grid_est))
+X &lt;- Z_a %*% t(Phi)
+X_to_est &lt;- Z_a %*% t(Phi_est)
+X_ob &lt;- X + matrix(stats::rnorm(n * m, 0, err_sd), nr = n, nc = m)
+L_smooth &lt;- 10
+L &lt;- 10
+J &lt;- 20
+K &lt;- 2
+R &lt;- 20
+nFunNN_res &lt;- nFunNNmodel(X_ob, t_grid, t_grid_est, L_smooth,
+L, J, K, R, lr = 0.001, n_epoch = 1500, batch_size = 100)
+model &lt;- nFunNN_res$model
+X_pre &lt;- nFunNN_CR(model, X_ob, L, t_grid)
+sqrt(torch::nnf_mse_loss(X_pre, torch::torch_tensor(X_to_est))$item())
+</code></pre>
+
+
+</div>

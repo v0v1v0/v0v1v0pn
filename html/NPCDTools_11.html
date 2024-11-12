@@ -1,0 +1,221 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>TSQE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Two-step Q-matrix Estimation Method</h2>
+
+<h3>Description</h3>
+
+<p>The function is used to estimate the Q-matrix based on the
+data (responses) using the two-step Q-matrix estimation method.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">TSQE(
+  Y,
+  K,
+  input.cor = c("tetrachoric", "Pearson"),
+  ref.method = c("QR", "GDI"),
+  GDI.model = c("DINA", "ACDM", "RRUM", "GDINA"),
+  cutoff = 0.8
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>A <code class="reqn">N \times J</code> binary data matrix consisting of responses
+from <code class="reqn">N</code> examinees to <code class="reqn">J</code> items</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>The number of attributes in the Q-matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input.cor</code></td>
+<td>
+<p>The type of correlation used to compute the input for the
+exploratory factor analysis. It could be the tetrachoric or Pearson correlation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref.method</code></td>
+<td>
+<p>The refinement method use to polish the provisional
+Q-matrix obtained from the EFA. Currently available methods include
+the Q-matrix refinement (QR) method and the G-DINA discrimination index (GDI).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>GDI.model</code></td>
+<td>
+<p>The CDM used in the GDI algorithm to fit the data. Currently
+available models include the DINA model, the ACDM, the RRUM, and the
+G-DINA model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff</code></td>
+<td>
+<p>The cutoff used to dichotomize the entries in the provisional
+Q-matrix</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function returns the estimated Q-matrix
+</p>
+
+
+<h3>Estimation Method</h3>
+
+<p>The TSQE method merges the Provisional Attribute Extraction (PAE) algorithm
+with a Q-matrix refinement-and-validation method
+including the Q-Matrix Refinement (QR) Method and the G-DINA Model
+Discrimination Index (GDI). Specifically, the PAE algorithm relies on
+classic exploratory factor analysis (EFA) combined with a unique stopping
+rule for identifying a provisional Q-matrix, and the resulting provisional
+Q-Matrix will be "polished" with a refinement method to derive the final
+estimation of Q-matrix.
+</p>
+
+
+<h3>The Provisional Attribute Extraction (PAE) Algorithm</h3>
+
+<p>The initial step of the algorithm is to aggregating the collected Q-Matrix
+into an inter-item tetrachoric correlation matrix. The reason for using
+tetrachoric correlation is that the examinee responses are binary, so it
+is more appropriate than the Pearson product moment correlation coefficient.
+See Chiu et al. (2022) for details. The next step is to use factor analysis
+on the item-correlation matrix, and treat the extracted factors as proxies
+for the latent attributes. The third step concerns identifying which specific
+attributes are required for which item:
+</p>
+
+<dl>
+<dt>(1)</dt>
+<dd>
+<p>Initialize the item index as <code class="reqn">j = 1</code>.</p>
+</dd>
+<dt>(2)</dt>
+<dd>
+<p>Let <code class="reqn">l_{jk}</code> denote the loading of item <code class="reqn">j</code> on factor <code class="reqn">k</code>, where <code class="reqn">k = 1,2,...,K</code>.</p>
+</dd>
+<dt>(3)</dt>
+<dd>
+<p>Arrange the loadings in descending order. Define a mapping
+function <code class="reqn">f(k) = t</code>, where <code class="reqn">t</code> is the order index.
+Hence, <code class="reqn">l_{j(1)}</code> will indicate the maximum loading,
+while <code class="reqn">l_{j(K)}</code> will indicate the minimum loading.</p>
+</dd>
+<dt>(4)</dt>
+<dd>
+<p>Define </p>
+<p style="text-align: center;"><code class="reqn">p_j(t) = \frac{\sum_{h=1}^t l_{j(h)}^2}{\sum_{k=1}^K l_{jk}^2}</code>
+</p>
+
+<p>as the proportion of the communality of item <code class="reqn">j</code> accounted for
+by the first <code class="reqn">t</code> factors.</p>
+</dd>
+<dt>(5)</dt>
+<dd>
+<p>Define </p>
+<p style="text-align: center;"><code class="reqn">K_j = \min \{ t \mid p_j(t) \geq \lambda \}</code>
+</p>
+<p>,
+where <code class="reqn">\lambda</code> is the cut-off value for the desired proportion
+of item variance-accounted-for. Then, the ordered entries of the
+provisional q-vector of item <code class="reqn">j</code> are obtained as
+</p>
+<p style="text-align: center;"><code class="reqn">q_{j(t)}^* = \begin{cases}
+      1 &amp; \text{if } t \leq K_j \\
+      0 &amp; \text{if } t &gt; K_j
+      \end{cases}</code>
+</p>
+<p>.</p>
+</dd>
+<dt>(6)</dt>
+<dd>
+<p>Identify <code class="reqn">q_j^* = (q_{j1}^*,q_{j2}^*,...,q_{jK}^*)</code>
+by rearranging the ordered entries of the q-vector using the inverse function <code class="reqn">k = f^{-1}(t)</code>.</p>
+</dd>
+<dt>(7)</dt>
+<dd>
+<p>Set <code class="reqn">j = j + 1</code> and repeat (2) to (6) until <code class="reqn">j = J</code>.
+Then denote the provisional Q-matrix as <code class="reqn">\mathbf{Q}^*</code>.</p>
+</dd>
+</dl>
+<h3>The Q-Matrix Refinment (QR) Method</h3>
+
+<p>This function implements the Q-matrix refinement method developed by
+Chiu (2013), which is also based on the aforementioned nonparametric
+classification methods (Chiu &amp; Douglas, 2013). This Q-matrix refinement
+method corrects potential misspecified entries of the Q-matrix through
+comparisons of the residual sum of squares computed from the observed
+and the ideal item responses.
+</p>
+<p>The algorithm operates by minimizing the RSS. Recall that <code class="reqn">Y_{ij}</code>
+is the observed response and <code class="reqn">\eta_{ij}</code> is the ideal response.
+Then the RSS of item <code class="reqn">j</code> for examinee <code class="reqn">i</code> is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">RSS_{ij} = (Y_{ij} - \eta_{ij})^2</code>
+</p>
+<p>.
+The RSS of item <code class="reqn">j</code> across all examinees is therefor
+</p>
+<p style="text-align: center;"><code class="reqn">RSS_{j} = \sum_{i=1}^{N} (Y_{ij} - \eta_{ij})^2 = \sum_{m=1}^{2^k} \sum_{i \in C_{m}} (Y_{ij} - \eta_{jm})^2</code>
+</p>
+
+<p>where <code class="reqn">C_m</code> is the latent proficiency-class <code class="reqn">m</code>,
+and <code class="reqn">N</code> is the number of examinees.
+Chiu(2013) proved that the expectation of <code class="reqn">RSS_j</code> is minimized for
+the correct q-vector among the <code class="reqn">2^K - 1</code> candidates. Please see  the
+paper for the justification.
+</p>
+
+
+<h3>The G-DINA Model Discrimination Index (GDI)</h3>
+
+<p>The GDI is an extension of de la Torre's (2008) <code class="reqn">\delta</code>-method,
+which has a limitation that it cannot be used with CDMs that
+devide examinees into more than two groups. In response to the limitation,
+de la Torre and Chiu (2016) porposed to select that item attribute vector
+which maximizes the weighted variance of the probabilities of a correct
+response for the different groups defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\zeta_j^2 = \sum_{l=1}^{2^{K_j}} P(\alpha_{lj}) \left[ P(Y_{ij} = 1 \mid \alpha_{lj}) - \bar{P}_{j} \right]^2</code>
+</p>
+
+<p>where <code class="reqn">P(\alpha_{lj})</code> is the posterior probability for the proficiency class
+<code class="reqn">\alpha_{lj}</code>, and <code class="reqn">\bar{P}_{j} =  \sum_{l=1}^{2^{K_j}} P(\alpha_{lj})P(Y_{ij} = 1 \mid \alpha_{lj})</code>,
+where <code class="reqn">l = 1,2,...,2^{K_j}</code>. De la Torre and Chiu (2016) called <code class="reqn">\zeta^2</code>
+the GDI, which can be applied to any CDM that can be reparameterized in
+terms of the G-DINA model.
+</p>
+
+
+<h3>References</h3>
+
+<p>Chiu, C. Y. (2013). Statistical Refinement of the Q-matrix in Cognitive Diagnosis. <em>Applied Psychological Measurement, 37(8)</em>, 598-618.
+</p>
+<p>Chiu, C. Y., &amp; Douglas, J. A. (2013). A nonparametric approach to cognitive diagnosis by proximity to ideal response patterns. <em>Journal of Classification 30(2)</em>, 225-250.
+</p>
+<p>de la Torre, J., &amp; Chiu, C.-Y. (2016) A general method of empirical Q-matrix validation. <em>Psychometrika, 81</em>, 253-73.
+</p>
+<p>de la Torre, J. (2008). An empirically based method of Q-matrix validation for the DINA model: Development and applications. <em>Journal of Educational Measurement, 45</em>, 343-362.
+</p>
+
+
+</div>

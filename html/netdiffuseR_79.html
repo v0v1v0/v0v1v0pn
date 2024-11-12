@@ -1,0 +1,284 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>edgelist_to_adjmat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Conversion between adjacency matrix and edgelist</h2>
+
+<h3>Description</h3>
+
+<p>Generates adjacency matrix from an edgelist and vice versa.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">edgelist_to_adjmat(
+  edgelist,
+  w = NULL,
+  t0 = NULL,
+  t1 = NULL,
+  t = NULL,
+  simplify = TRUE,
+  undirected = getOption("diffnet.undirected"),
+  self = getOption("diffnet.self"),
+  multiple = getOption("diffnet.multiple"),
+  keep.isolates = TRUE,
+  recode.ids = TRUE
+)
+
+adjmat_to_edgelist(
+  graph,
+  undirected = getOption("diffnet.undirected", FALSE),
+  keep.isolates = getOption("diffnet.keep.isolates", TRUE)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>edgelist</code></td>
+<td>
+<p>Two column matrix/data.frame in the form of ego -source- and
+alter -target- (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Numeric vector. Strength of ties (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t0</code></td>
+<td>
+<p>Integer vector. Starting time of the ties (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t1</code></td>
+<td>
+<p>Integer vector. Finishing time of the ties (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Integer scalar. Repeat the network <code>t</code> times (if no <code>t0,t1</code> are provided).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplify</code></td>
+<td>
+<p>Logical scalar. When TRUE and <code>times=NULL</code> it will return an adjacency
+matrix, otherwise an array of adjacency matrices.
+(see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>undirected</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> only the lower triangle of the adjacency matrix will considered (faster).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>self</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> autolinks (loops, self edges) are allowed (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiple</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> allows multiple edges.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.isolates</code></td>
+<td>
+<p>Logical scalar. When FALSE, rows with <code>NA/NULL</code> values
+(isolated vertices unless have autolink) will be droped (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recode.ids</code></td>
+<td>
+<p>Logical scalar. When TRUE ids are recoded using <code>as.factor</code>
+(see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>Any class of accepted graph format (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When converting from edglist to adjmat the function will <code>recode</code> the
+edgelist before starting. The user can keep track after the recording by checking
+the resulting adjacency matrices' <code>row.names</code>. In the case that the
+user decides skipping the recoding (because wants to keep vertices index numbers,
+implying that the resulting graph will have isolated vertices), he can override
+this by setting <code>recode.ids=FALSE</code> (see example).
+</p>
+<p>When multiple edges are included, <code>multiple=TRUE</code>,each vertex between <code class="reqn">\{i,j\}</code> will be counted
+as many times it appears in the edgelist. So if a vertex <code class="reqn">\{i,j\}</code> appears 2
+times, the adjacency matrix element <code>(i,j)</code> will be 2.
+</p>
+<p>Edges with incomplete information (missing data on <code>w</code> or <code>times</code>) are
+not included on the graph. Incomplete cases are tagged using <code>complete.cases</code>
+and can be retrieved by the user by accessing the attribute <code>incomplete</code>.
+</p>
+<p>Were the case that either ego or alter are missing (i.e. <code>NA</code> values), the
+function will either way include the non-missing vertex. See below for an example
+of this.
+</p>
+<p>The function performs several checks before starting to create the adjacency
+matrix. These are:
+</p>
+
+<ul>
+<li>
+<p>Dimensions of the inputs, such as number of columns and length of vectors
+</p>
+</li>
+<li>
+<p>Having complete cases. If anly edge has a non-numeric value such as NAs or
+NULL in either <code>times</code> or <code>w</code>, it will be
+removed. A full list of such edges can be retrieved from the attribute
+<code>incomplete</code>
+</p>
+</li>
+<li>
+<p>Nodes and times ids coding
+</p>
+</li>
+</ul>
+<p><code>recode.ids=FALSE</code> is useful when the vertices ids have already been
+coded. For example, after having use <code>adjmat_to_edgelist</code>, ids are
+correctly encoded, so when going back (using <code>edgelist_to_adjmat</code>)
+<code>recode.ids</code> should be FALSE.
+</p>
+
+
+<h3>Value</h3>
+
+<p>In the case of <code>edgelist_to_adjmat</code> either an adjacency matrix
+(if times is NULL) or an array of these (if times is not null). For
+<code>adjmat_to_edgelist</code> the output is an edgelist with the following columns:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>ego</code></td>
+<td>
+<p>Origin of the tie.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alter</code></td>
+<td>
+<p>Target of the tie.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>Value in the adjacency matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>Either a 1 (if the network is static) or the time stamp of the tie.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon &amp; Thomas W. Valente
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other data management functions: 
+<code>diffnet-class</code>,
+<code>egonet_attrs()</code>,
+<code>isolated()</code>,
+<code>survey_to_diffnet()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Base data
+set.seed(123)
+n &lt;- 5
+edgelist &lt;- rgraph_er(n, as.edgelist=TRUE, p=.2)[,c("ego","alter")]
+times &lt;- sample.int(3, nrow(edgelist), replace=TRUE)
+w &lt;- abs(rnorm(nrow(edgelist)))
+
+# Simple example
+edgelist_to_adjmat(edgelist)
+edgelist_to_adjmat(edgelist, undirected = TRUE)
+
+# Using w
+edgelist_to_adjmat(edgelist, w)
+edgelist_to_adjmat(edgelist, w, undirected = TRUE)
+
+# Using times
+edgelist_to_adjmat(edgelist, t0 = times)
+edgelist_to_adjmat(edgelist, t0 = times, undirected = TRUE)
+
+# Using times and w
+edgelist_to_adjmat(edgelist, t0 = times, w = w)
+edgelist_to_adjmat(edgelist, t0 = times, undirected = TRUE, w = w)
+
+# Not recoding ----------------------------------------------------
+# Notice that vertices 3, 4 and 5 are not present in this graph.
+graph &lt;- matrix(c(
+ 1,2,6,
+ 6,6,7
+), ncol=2)
+
+# Generates an adjmat of size 4 x 4
+edgelist_to_adjmat(graph)
+
+# Generates an adjmat of size 7 x 7
+edgelist_to_adjmat(graph, recode.ids=FALSE)
+
+# Dynamic with spells -------------------------------------------------------
+edgelist &lt;- rbind(
+   c(1,2,NA,1990),
+   c(2,3,NA,1991),
+   c(3,4,1991,1992),
+   c(4,1,1992,1993),
+   c(1,2,1993,1993)
+)
+
+graph &lt;- edgelist_to_adjmat(edgelist[,1:2], t0=edgelist[,3], t1=edgelist[,4])
+
+# Creating a diffnet object with it so we can apply the plot_diffnet function
+diffnet &lt;- as_diffnet(graph, toa=1:4)
+plot_diffnet(diffnet, label=rownames(diffnet))
+
+# Missing alter in the edgelist ---------------------------------------------
+data(fakeEdgelist)
+
+# Notice that edge 202 is isolated
+fakeEdgelist
+
+# The function still includes vertex 202
+edgelist_to_adjmat(fakeEdgelist[,1:2])
+
+edgelist
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,85 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lineup</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The line-up protocol.</h2>
+
+<h3>Description</h3>
+
+<p>In this protocol the plot of the real data is embedded amongst a field of
+plots of data generated to be consistent with some null hypothesis.
+If the observe can pick the real data as different from the others, this
+lends weight to the statistical significance of the structure in the plot.
+The protocol is described in Buja, Cook, Hofmann, Lawrence,
+Lee, Swayne, Wickham (2009) Statistical inference for exploratory data
+analysis and model diagnostics, Phil. Trans. R. Soc. A, 367, 4361-4383.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lineup(method, true = NULL, n = 20, pos = sample(n, 1), samples = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>method for generating null data sets</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>true</code></td>
+<td>
+<p>true data set. If <code>NULL</code>, <code>find_plot_data</code>
+will attempt to extract it from the current ggplot2 plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>total number of samples to generate (including true data)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pos</code></td>
+<td>
+<p>position of true data.  Leave missing to pick position at
+random.  Encryped position will be printed on the command line,
+<code>decrypt</code> to understand.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+<p>samples generated under the null hypothesis. Only specify
+this if you don't want lineup to generate the data for you.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Generate n - 1 null datasets and randomly position the true data.  If you
+pick the real data as being noticeably different, then you have formally
+established that it is different to with p-value 1/n.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(ggplot2)
+ggplot(lineup(null_permute('mpg'), mtcars), aes(mpg, wt)) +
+  geom_point() +
+  facet_wrap(~ .sample)
+ggplot(lineup(null_permute('cyl'), mtcars),
+       aes(mpg, .sample, colour = factor(cyl))) +
+       geom_point()
+</code></pre>
+
+
+</div>

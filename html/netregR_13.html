@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inputs_lmnet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Input preprocessing</h2>
+
+<h3>Description</h3>
+
+<p>Prepare covariates and optional response in adjacency matrix form. If undirected, the values are drawn from the lower triangle of the adjacency matrices.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inputs_lmnet(Xlist, Y = NULL, directed = TRUE, add_intercept = TRUE,
+  time_intercept = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Xlist</code></td>
+<td>
+<p>List of <code class="reqn">n \times n \times tmax</code> matrices, possibly containing response matrix labeled ‘Y’. Diagonals (self-loops) are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Optional <code class="reqn">n \times n \times tmax</code> response matrix. NAs in this matrix will be automatically removed. Diagonals (self-loops) are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>Optional logical indicator of whether input data is for a directed network, default is <code>TRUE</code>. Undirected data format is lower triangle of adjacencey matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add_intercept</code></td>
+<td>
+<p>Optional logical indicator of whether intercept should be added to X, default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_intercept</code></td>
+<td>
+<p>Optional logical indicator of whether separate intercept should be added to X for each observation of the relational matrix, default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function takes a list of network covariates (in adjacency matrix form) and prepares them for the regression code <code>lmnet</code>. Accomodates 3-dimensional relational arrays with <code>tmax</code> repeated observations of the network (over time or context). Typical network data with a single observation may be input as matrices, i.e. <code>tmax = 1</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Vector of responses (column-wise vectorization order) of appropriate length.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Matrix of covariates (column-wise vectorization order) of appropriate size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>2-column matrix (or 3-column for repeated observations) indicating directed relation pairs to which each entry in <code class="reqn">Y</code> and each row in <code class="reqn">X</code> corresponds.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>lmnet</code>, <code>vhat_exch</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># tmax = 1
+set.seed(1)
+n &lt;- 10
+Xlist &lt;- list(matrix(rnorm(n^2),n,n), matrix(sample(c(0,1), n^2, replace=TRUE),n,n))
+Xlist$Y &lt;- matrix(rnorm(n^2), n, n)
+Xlist$Y[1:5] &lt;- NA
+r &lt;- inputs_lmnet(Xlist)
+r
+lmnet(r$Y,r$X,nodes=r$nodes)
+
+# tmax = 4
+set.seed(1)
+n &lt;- 10
+tmax &lt;- 4
+X1 &lt;- array(rnorm(n^2*tmax),c(n,n,tmax))
+X2 &lt;- array(sample(c(0,1), n^2*tmax, replace=TRUE), c(n,n,tmax))
+Xlist &lt;- list(X1, X2)
+Xlist$Y &lt;- array(rnorm(n^2)*tmax, c(n, n, tmax))
+Xlist$Y[1:5] &lt;- NA
+r &lt;- inputs_lmnet(Xlist)
+head(r$nodes)
+
+</code></pre>
+
+
+</div>

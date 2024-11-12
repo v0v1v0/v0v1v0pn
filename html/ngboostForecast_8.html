@@ -1,0 +1,328 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NGBforecastCV</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>NGBoost forecasting model selection class</h2>
+
+<h3>Description</h3>
+
+<p>It is a wrapper for the sklearn GridSearchCV with TimeSeriesSplit.
+</p>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-NGBforecastCV-new"><code>NGBforecastCV$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-NGBforecastCV-tune"><code>NGBforecastCV$tune()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-NGBforecastCV-clone"><code>NGBforecastCV$clone()</code></a>
+</p>
+</li>
+</ul>
+<hr>
+<a id="method-NGBforecastCV-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Initialize an NGBforecastCV model.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>NGBforecastCV$new(
+  Dist = NULL,
+  Score = NULL,
+  Base = NULL,
+  natural_gradient = TRUE,
+  n_estimators = as.integer(500),
+  learning_rate = 0.01,
+  minibatch_frac = 1,
+  col_sample = 1,
+  verbose = TRUE,
+  verbose_eval = as.integer(100),
+  tol = 1e-04,
+  random_state = NULL
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>Dist</code></dt>
+<dd>
+<p>Assumed distributional form of <code>Y|X=x</code>. An output of
+<code>Dist</code> function, e.g. <code>Dist('Normal')</code></p>
+</dd>
+<dt><code>Score</code></dt>
+<dd>
+<p>Rule to compare probabilistic predictions to
+the observed data. A score from <code>Scores</code> function, e.g.
+<code>Scores(score = "LogScore")</code>.</p>
+</dd>
+<dt><code>Base</code></dt>
+<dd>
+<p>Base learner. An output of <code>sklearner</code> function,
+e.g. <code>sklearner(module = "tree", class = "DecisionTreeRegressor", ...)</code></p>
+</dd>
+<dt><code>natural_gradient</code></dt>
+<dd>
+<p>Logical flag indicating whether the natural
+gradient should be used</p>
+</dd>
+<dt><code>n_estimators</code></dt>
+<dd>
+<p>The number of boosting iterations to fit</p>
+</dd>
+<dt><code>learning_rate</code></dt>
+<dd>
+<p>The learning rate</p>
+</dd>
+<dt><code>minibatch_frac</code></dt>
+<dd>
+<p>The percent subsample of rows to use in each
+boosting iteration</p>
+</dd>
+<dt><code>col_sample</code></dt>
+<dd>
+<p>The percent subsample of columns to use in each
+boosting iteration</p>
+</dd>
+<dt><code>verbose</code></dt>
+<dd>
+<p>Flag indicating whether output should be printed
+during fitting. If TRUE it will print logs.</p>
+</dd>
+<dt><code>verbose_eval</code></dt>
+<dd>
+<p>Increment (in boosting iterations) at which
+output should be printed</p>
+</dd>
+<dt><code>tol</code></dt>
+<dd>
+<p>Numerical tolerance to be used in optimization</p>
+</dd>
+<dt><code>random_state</code></dt>
+<dd>
+<p>Seed for reproducibility.</p>
+</dd>
+</dl>
+</div>
+
+
+
+<h5>Returns</h5>
+
+<p>An NGBforecastCV object that can be fit.
+</p>
+
+
+<hr>
+<a id="method-NGBforecastCV-tune"></a>
+
+
+
+<h4>Method <code>tune()</code>
+</h4>
+
+<p>Tune ngboosForecast.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>NGBforecastCV$tune(
+  y,
+  max_lag = 5,
+  xreg = NULL,
+  seasonal = TRUE,
+  K = frequency(y)/2 - 1,
+  n_splits = NULL,
+  train_loss_monitor = NULL,
+  val_loss_monitor = NULL,
+  early_stopping_rounds = NULL
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>y</code></dt>
+<dd>
+<p>A time series (ts) object</p>
+</dd>
+<dt><code>max_lag</code></dt>
+<dd>
+<p>Maximum number of lags</p>
+</dd>
+<dt><code>xreg</code></dt>
+<dd>
+<p>Optional. A numerical matrix of external regressors,
+which must have the same number of rows as y.</p>
+</dd>
+<dt><code>seasonal</code></dt>
+<dd>
+<p>Boolean. If <code>seasonal = TRUE</code> the fourier terms
+will be used for modeling seasonality.</p>
+</dd>
+<dt><code>K</code></dt>
+<dd>
+<p>Maximum order(s) of Fourier terms, used only if
+<code>seasonal = TRUE</code>.</p>
+</dd>
+<dt><code>n_splits</code></dt>
+<dd>
+<p>Number of splits. Must be at least 2.</p>
+</dd>
+<dt><code>train_loss_monitor</code></dt>
+<dd>
+<p>A custom score or set of scores to track on the
+training set during training. Defaults to the score defined in the NGBoost
+constructor. Please do not modify unless you know what you are doing.</p>
+</dd>
+<dt><code>val_loss_monitor</code></dt>
+<dd>
+<p>A custom score or set of scores to track on the
+validation set during training. Defaults to the score defined in the
+NGBoost  constructor. Please do not modify unless you know what you are
+doing.</p>
+</dd>
+<dt><code>early_stopping_rounds</code></dt>
+<dd>
+<p>The number of consecutive boosting
+iterations during which the loss has to increase before the algorithm
+stops early.</p>
+</dd>
+<dt><code>test_size</code></dt>
+<dd>
+<p>The length of validation set.
+If it is NULL, then, it is automatically specified.</p>
+</dd>
+</dl>
+</div>
+
+
+
+<h5>Returns</h5>
+
+<p>A named list of best parameters.
+</p>
+
+
+<hr>
+<a id="method-NGBforecastCV-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>NGBforecastCV$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>Author(s)</h3>
+
+<p>Resul Akay
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://stanfordmlgroup.github.io/ngboost/2-tuning.html">https://stanfordmlgroup.github.io/ngboost/2-tuning.html</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+library(ngboostForecast)
+
+dists &lt;- list(Dist("Normal"))
+
+base_learners &lt;- list(sklearner(module = "tree", class = "DecisionTreeRegressor",
+                                max_depth = 1),
+                      sklearner(module = "tree", class = "DecisionTreeRegressor",
+                                max_depth = 2),
+                      sklearner(module = "tree", class = "DecisionTreeRegressor",
+                                max_depth = 3),
+                      sklearner(module = "tree", class = "DecisionTreeRegressor",
+                                max_depth = 4),
+                      sklearner(module = "tree", class = "DecisionTreeRegressor",
+                                max_depth = 5),
+                      sklearner(module = "tree", class = "DecisionTreeRegressor",
+                                max_depth = 6),
+                      sklearner(module = "tree", class = "DecisionTreeRegressor",
+                                max_depth = 7))
+
+scores &lt;-  list(Scores("LogScore"))
+
+model &lt;- NGBforecastCV$new(Dist = dists,
+                           Base = base_learners,
+                           Score = scores,
+                           natural_gradient = TRUE,
+                           n_estimators = list(10, 100),
+                           learning_rate = list(0.1, 0.2),
+                           minibatch_frac = list(0.1, 1),
+                           col_sample = list(0.3),
+                           verbose = FALSE,
+                           verbose_eval = 100,
+                           tol = 1e-5)
+
+params &lt;- model$tune(y = AirPassengers,
+seasonal = TRUE,
+max_lag = 12,
+xreg = NULL,
+early_stopping_rounds = NULL,
+n_splits = 4L)
+
+params
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

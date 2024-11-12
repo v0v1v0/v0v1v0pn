@@ -1,0 +1,64 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nuts_get_missing</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return missing NUTS codes in classified NUTS data</h2>
+
+<h3>Description</h3>
+
+<p><code>nuts_get_missing()</code> returns the classified data after running <code>nuts_classify()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nuts_get_missing(data)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A nuts.classified object returned by <code>nuts_classify()</code>.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>Console messages can be controlled with <code>rlang::local_options(nuts.verbose = "quiet")</code> to silence messages and
+<code>nuts.verbose = "verbose"</code> to switch messages back on.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A tibble listing missing NUTS codes for each group.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+
+# Load EUROSTAT data of manure storage deposits
+data(manure)
+
+# Classify version of NUTS 2 codes in Germany
+classified &lt;- manure %&gt;%
+   filter(nchar(geo) == 4) %&gt;%
+   filter(indic_ag == 'I07A_EQ_Y') %&gt;%
+   filter(grepl('^DE', geo)) %&gt;%
+   filter(time == 2003) %&gt;%
+   select(-indic_ag, -time) %&gt;%
+   # Data varies at the NUTS code level
+   nuts_classify(nuts_code = 'geo')
+
+nuts_get_missing(classified)
+
+</code></pre>
+
+
+</div>

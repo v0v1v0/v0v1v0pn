@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npmr-package</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nuclear penalized multinomial regression
+</h2>
+
+<h3>Description</h3>
+
+<p>As an alternative to an l1- or l2-penalty on multinomial logistic regression,
+this package fits multinomial regression with a penalty on the nuclear norm
+of the fitted regression coefficient matrix. The result is often a matrix of
+reduced rank, leveraging structure among the response classes so that the
+likelihood of one class informs the likelihood of other classes. Proximal
+gradient descent is used to solve the NPMR optimization problem.
+</p>
+
+
+<h3>Details</h3>
+
+<p>The primary functions in the package are <code>npmr</code>, which solves
+nuclear penalized multinomial regression for a sequence of input values for the
+regularization parameter lambda, and <code>cv.npmr</code>, which chooses the
+optimal value of the regularization parameter lambda via cross validation. Both
+<code>npmr</code> and <code>cv.npmr</code> have predict and plot methods.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Scott Powers, Trevor Hastie, Rob Tibshirani
+</p>
+<p>Maintainer: Scott Powers &lt;sspowers@stanford.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Scott Powers, Trevor Hastie and Rob Tibshirani (2016). “Nuclear penalized
+multinomial regression with an application to predicting at bat outcomes in
+baseball.” In prep.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#   Fit NPMR to simulated data
+
+K = 5
+n = 1000
+m = 10000
+p = 10
+r = 2
+
+# Simulated training data
+set.seed(8369)
+A = matrix(rnorm(p*r), p, r)
+C = matrix(rnorm(K*r), K, r)
+B = tcrossprod(A, C)            # low-rank coefficient matrix
+X = matrix(rnorm(n*p), n, p)    # covariate matrix with iid Gaussian entries
+eta = X 
+P = exp(eta)/rowSums(exp(eta))
+Y = t(apply(P, 1, rmultinom, n = 1, size = 1))
+
+# Simulate test data
+Xtest = matrix(rnorm(m*p), m, p)
+etatest = Xtest 
+Ptest = exp(etatest)/rowSums(exp(etatest))
+Ytest = t(apply(Ptest, 1, rmultinom, n = 1, size = 1))
+
+# Fit NPMR for a sequence of lambda values without CV:
+fit2 = npmr(X, Y, lambda = exp(seq(7, -2)))
+
+# Print the NPMR fit:
+fit2
+
+# Produce a biplot:
+plot(fit2, lambda = 20)
+
+# Compute mean test error using the predict function (for each value of lambda):
+getloss = function(pred, Y) {
+    -mean(log(rowSums(Y*pred)))
+}
+apply(predict(fit2, Xtest), 3, getloss, Ytest)
+</code></pre>
+
+
+</div>

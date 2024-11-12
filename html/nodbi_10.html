@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>docdb_update</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Update documents</h2>
+
+<h3>Description</h3>
+
+<p>Documents are updated by patching their JSON with
+<code>value</code>. Documents are identified by a <code>query</code>
+or by <code style="white-space: pre;">⁠_id⁠</code>'s in <code>value</code>, where the latter takes
+precedence. <code>value</code> can have multiple documents (with
+<code style="white-space: pre;">⁠_id⁠</code>'s), which then are iteratively updated.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">docdb_update(src, key, value, query, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>src</code></td>
+<td>
+<p>Source object, result of call to any of functions
+<code>src_mongo()</code>, <code>src_sqlite()</code>, <code>src_elastic()</code>, <code>src_couchdb()</code>
+<code>src_duckdb()</code> or <code>src_postgres()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>key</code></td>
+<td>
+<p>(character) The name of the container in the
+database backend (corresponds to <code>collection</code> for MongoDB,
+<code>dbname</code> for CouchDB, <code>index</code> for Elasticsearch, and to
+a table name for DuckDB, SQLite and PostgreSQL)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>The data to be created in the database:
+a single data.frame, a JSON string, a list, or a
+file name or URL that points to NDJSON documents</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>query</code></td>
+<td>
+<p>(character) A JSON query string, see examples.
+Can use comparisons / tests (<code style="white-space: pre;">⁠$lt⁠</code>, <code style="white-space: pre;">⁠$lte⁠</code>, <code style="white-space: pre;">⁠$gt⁠</code>, <code style="white-space: pre;">⁠$gte⁠</code>,
+<code style="white-space: pre;">⁠$ne⁠</code>, <code style="white-space: pre;">⁠$in⁠</code>, <code style="white-space: pre;">⁠$regex⁠</code>), with logic operators (<code style="white-space: pre;">⁠$and⁠</code>,
+<code style="white-space: pre;">⁠$or⁠</code>, <code>(</code>, <code style="white-space: pre;">⁠)⁠</code>), including nested queries, see examples.
+Specify as <code>'{}'</code> if <code>value</code> includes <code style="white-space: pre;">⁠_id⁠</code>'s.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Passed on to functions <code>elastic::docs_bulk_update()</code>,
+and <code>mongolite::mongo()</code>$update().</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Uses native functions in MongoDB (<code>mongolite::mongo()</code>$update()),
+SQLite (<code>jsonb_update()</code>), DuckDB (<code>jsonb_merge_patch()</code>),
+Elasticsearch (<code>elastic::docs_bulk_update()</code>);
+a <code>plpgsql</code> function added when calling <code>src_postgres()</code>,
+and a <code>jqr::jqr()</code> programme for CouchDB.
+</p>
+
+
+<h3>Value</h3>
+
+<p>(integer) Number of successfully updated documents
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+src &lt;- src_sqlite()
+docdb_create(src, "mtcars", mtcars)
+docdb_update(src, "mtcars", value = mtcars[3, 4:5], query = '{"gear": 3}')
+docdb_update(src, "mtcars", value = '{"carb":999}', query = '{"gear": 5}')
+docdb_update(src, "mtcars", value = '{"_id":"Fiat 128", "carb":888}', query = '{}')
+docdb_get(src, "mtcars")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

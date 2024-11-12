@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>graphrate.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot fitted and  empirical  PP occurrence rates</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the empirical  and the cumulative fitted occurrence rate
+of a PP  on overlapping or disjoint intervals and plot them versus time.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">graphrate.fun(objres = NULL, fittedlambda = NULL, emplambda = NULL, t = NULL, 
+lint = NULL, typeI = "Disjoint", tit = "", scax = NULL, scay = NULL, 
+xlegend = "topleft",histWgraph=TRUE)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>objres</code></td>
+<td>
+<p>Optional. A list with (at least) elements fittedlambda, emplambda, t, 
+and typeI. 
+For example, the output from <code>CalcRes.fun</code> or <code>CalcResD.fun</code>; 
+see those functions for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fittedlambda</code></td>
+<td>
+<p>Optional. Numeric vector of the  cumulative  
+fitted intensities <code class="reqn">\hat \lambda(t)</code> over the considered intervals
+(and usually divided by the length of the interval).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>emplambda</code></td>
+<td>
+<p>Optional. Numeric vector of the  empirical PP 
+occurrence rates estimated  over the considered intervals (usually divided by the
+length of the interval).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Optional. Time vector of the  PP observation period.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lint</code></td>
+<td>
+<p>Optional. Length of the  intervals used to calculate 
+the empirical and the (cumulative) fitted occurrence intensities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeI</code></td>
+<td>
+<p>Label indicating  the type ('Overlapping' or 'Disjoint') of  
+the intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tit</code></td>
+<td>
+<p>Character string. A title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scax</code></td>
+<td>
+<p>Optional. Vector of two values giving  the range of values for 
+the x-axis. An adequate range is selected by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scay</code></td>
+<td>
+<p>Optional. Vector of two values giving  the range of values for the 
+y-axis. An adequate range is selected by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlegend</code></td>
+<td>
+<p>Label indicating the position where the legend on 
+the graph will be located.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>histWgraph</code></td>
+<td>
+<p> Logical flag.  If it is TRUE,  a new graphical device is opened
+with the option <code>record=TRUE</code>. This option may not work on some platforms; 
+for example, RStudio does not allow  the user to open new  graphical devices.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Either the argument objres or the set of arguments (fittedlambda, emplambda, t) 
+must be specified. If objres is provided, fittedlambda, emplambda, t,lint and typeI  
+are ignored.
+</p>
+<p>In order to make comparable the empirical and the fitted occurrence rates,
+a cumulative fitted rate must be used. That means that argument fittedlambda 
+must be the  sum of the
+intensities fitted by the model  over  the same interval where the 
+empirical rates have been calculated.</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>CalcRes.fun</code>, <code>CalcResD.fun</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##plot of rates based on overlapping intervals
+graphrate.fun(emplambda=runif(500,0,1), fittedlambda=runif(500,0,1), 
+	t=c(1:500), lint=100, tit="Example", typeI="Overlapping")
+
+#plot of rates based on disjoint intervals
+graphrate.fun(emplambda=runif(50,0,1), fittedlambda=runif(50,0,1), 
+	t=c(1:50), lint=10, tit="Example", typeI="Disjoint")
+
+#Example using objres as input. In this example X1 has no influence on the rate;
+#consequently the fitted rate is almost a constant.
+
+X1&lt;-rnorm(1000)
+
+modE&lt;-fitPP.fun(tind=TRUE,covariates=cbind(X1), 
+	posE=round(runif(40,1,1000)), inddat=rep(1,1000),
+	tim=c(1:1000), tit="Simulated example", start=list(b0=1,b1=0),
+	modCI=FALSE,modSim=TRUE,dplot=FALSE)
+
+ResDE&lt;-CalcResD.fun(mlePP=modE,lint=50)
+
+graphrate.fun(ResDE, tit="Example")
+
+
+
+</code></pre>
+
+
+</div>

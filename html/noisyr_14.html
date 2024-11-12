@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>noisyr_transcript</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Run the noisyR pipeline for the transcript approach</h2>
+
+<h3>Description</h3>
+
+<p>Calls the functions to run each of the three steps of the pipeline
+(similarity calculation, noise quantification, noise removal), with the specified parameters.
+See the individual function documentation for more details and required arguments.
+Required steps: <code>calculate_expression_similarity_transcript</code>,
+<code>calculate_noise_threshold</code>. <code>remove_noise_from_bams</code>.
+Optional steps: <code>calculate_noise_threshold_method_statistics</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">noisyr_transcript(
+  bams = NULL,
+  path.bams = ".",
+  genes = NULL,
+  path.gtf = list.files(".", pattern = "\\.g[tf]f$"),
+  ncores = 1,
+  similarity.threshold = 0.25,
+  method.chosen = "Boxplot-IQR",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bams, path.bams</code></td>
+<td>
+<p>either a path to the directory where the BAM files are
+or a vector of paths to each individual file; if a path is specified,
+it extracts all files that end in .bam; looks in the working directory by default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genes</code></td>
+<td>
+<p>a tibble of the exons extracted from the gtf file;
+this is meant for speed if the output of <code>cast_gtf_to_genes</code> is already generated,
+or if the user wants to only calculate similarity for a subset of exons</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path.gtf</code></td>
+<td>
+<p>the path to the gtf/gff annotation file (only used if genes is not
+provided); if unspecified, looks for one in the working directory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Number of cores for parallel computation; defaults to sequential computation,
+but parallelisation is highly encouraged; it is set to detectCores() if higher</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>similarity.threshold, method.chosen</code></td>
+<td>
+<p>parameters passed on to
+<code>calculate_noise_threshold</code>; they can be single values or vectors;
+if they are vectors optimal values are computed by calling
+<code>calculate_noise_threshold_method_statistics</code> and
+minimising the coefficient of variation across samples; all possible values for
+method.chosen can be viewed by <code>get_methods_calculate_noise_threshold</code>;
+only boxplot based methods are accepted for the transcript approach due to the number of observations
+and high variance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments to be passed on to individual pipeline steps; see their documentation
+for more details and required arguments</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The denoised BAM files are created, as specified by the destination.files argument
+of remove_noise_from_bams()
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>noisyr</code>, <code>noisyr_counts</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">bams &lt;- rep(system.file("extdata", "ex1.bam", package="Rsamtools", mustWork=TRUE), 2)
+genes &lt;- data.frame("id" = 1:2,
+                    "gene_id" = c("gene1", "gene2"),
+                    "seqid" = c("seq1", "seq2"),
+                    "start" = 1,
+                    "end" = 1600)
+noisyr_transcript(
+  bams = bams,
+  genes = genes,
+  destination.files = paste0(tempdir(), "/", basename(bams), ".noisefiltered.bam")
+)
+</code></pre>
+
+
+</div>

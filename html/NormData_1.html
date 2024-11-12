@@ -1,0 +1,204 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Bootstrap.Stage.2.NormScore</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bootstraps a confidence interval for a percentile rank</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>Stage.2.NormScore()</code> can be used to convert a raw test score of a tested person <code class="reqn">Y_0</code> into a percentile rank <code class="reqn">\hat{\pi}_0</code> (taking into account specified values of the independent variables). The function <code>Bootstrap.Stage.2.NormScore()</code> can be used to obtain a confidence interval (CI) around the point estimate of the percentile rank <code class="reqn">\hat{\pi}_0</code>. A non-parametric bootstrap is used to compute a confidence interval (CI) around the estimated percentile rank (for details, see Chapter 8 in Van der Elst, 2023). 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Bootstrap.Stage.2.NormScore(Stage.2.NormScore, 
+CI=.99, Number.Bootstraps=2000, Seed=123, 
+Rounded=FALSE, Show.Fitted.Boot=FALSE, verbose=TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Stage.2.NormScore</code></td>
+<td>
+<p>A fitted object of class <code>Stage.2.NormScore</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>The desired CI around the percentile rank for the raw test score at hand. Default <code>CI=.99</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Number.Bootstraps</code></td>
+<td>
+<p>The number of bootstrap samples that are taken. Default <code>Number.Bootstraps=2000</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Seed</code></td>
+<td>
+<p>The seed to be used in the bootstrap (for repoducibility). Default <code>Seed = 123</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Rounded</code></td>
+<td>
+<p>Logical. Should the percentile rank be rounded to a whole number? Default <code>Rounded=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Show.Fitted.Boot</code></td>
+<td>
+<p>Logical. Should the fitted Stage 1 models for the bootstrap samples be printed? Default <code>Show.Fitted.Boot=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical value indicating whether verbose output should be generated.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details, see Chapter 8 in Van der Elst (2023).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>Stage.2.NormScore</code> with components,
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>CI.Percentile</code></td>
+<td>
+<p>The bootstrapped CI around the estimated percentile rank.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>The CI used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>All.Percentiles</code></td>
+<td>
+<p>All bootstrapped percentile ranks for the raw test score at hand.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Homoscedasticity</code></td>
+<td>
+<p>Logical. Was homoscedasticity assumed in the normative conversion? For details, see <code>Stage.2.NormScore</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Normality</code></td>
+<td>
+<p>Logical. Was normality assumed in the normative conversion? For details, see <code>Stage.2.NormScore</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Stage.2.NormScore</code></td>
+<td>
+<p>The fitted <code>Stage.2.NormScore</code> object used in the function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Percentile.Point.Estimate</code></td>
+<td>
+<p>The point estimate for the percentile rank (based on the original dataset).</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Wim Van der Elst
+</p>
+
+
+<h3>References</h3>
+
+<p>Van der Elst, W. (2024). <em>Regression-based normative data for psychological assessment: A hands-on approach using R.</em> Springer Nature. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Stage.2.NormScore</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> # Time-intensive part
+# Replicate the bootstrap results that were obtained in 
+# Case study 1 of Chapter 8 in Van der Elst (2023)
+# -----------------------------------------------------
+library(NormData) # load the NormData package
+data(GCSE)        # load the GCSE dataset
+
+# Fit the Stage 1 model
+Model.1.GCSE &lt;- Stage.1(Dataset=GCSE, 
+  Model=Science.Exam~Gender)
+
+# Stage 2: Convert a science exam score = 30 obtained by a 
+# female into a percentile rank (point estimate)
+Normed_Score &lt;- Stage.2.NormScore(Stage.1.Model=Model.1.GCSE,
+  Score=list(Science.Exam=30, Gender="F"), Rounded = FALSE)
+summary(Normed_Score)
+
+# Derive the 99pc CI around the point estimate 
+# using a bootstrap procedure
+Bootstrap_Normed_Score &lt;- Bootstrap.Stage.2.NormScore(
+  Stage.2.NormScore=Normed_Score)
+
+summary(Bootstrap_Normed_Score)
+
+plot(Bootstrap_Normed_Score)
+
+
+# Replicate the bootstrap results that were obtained in 
+# Case study 2 of Chapter 8 in Van der Elst (2023)
+# ------------------------------------------------
+library(NormData)   # load the NormData package
+data(Substitution)  # load the Substitution dataset
+
+# Make the new variable Age.C (= Age centered) that is 
+# needed to fit the final Stage 1 model, 
+# and add it to the Substitution dataset
+Substitution$Age.C &lt;- Substitution$Age - 50
+
+# Fit the final Stage 1 model
+Substitution.Model.9 &lt;- Stage.1(Dataset=Substitution, 
+  Alpha=0.005, Model=LDST~Age.C+LE, Order.Poly.Var=1) 
+summary(Substitution.Model.9)
+
+# Convert an LDST score = 40 obtained by a 
+# 20-year-old test participant with LE=Low 
+# into a percentile rank (point estimate)
+Normed_Score &lt;- Stage.2.NormScore(
+   Stage.1.Model=Substitution.Model.9, 
+   Score=list(LDST=40, Age.C=20-50, LE = "Low"), 
+   Rounded = FALSE)
+
+# Derive the 99pc CI around the point estimate 
+# using a bootstrap
+Bootstrap_Normed_Score &lt;- Bootstrap.Stage.2.NormScore(
+   Stage.2.NormScore = Normed_Score)
+summary(Bootstrap_Normed_Score)
+plot(Bootstrap_Normed_Score)
+
+</code></pre>
+
+
+</div>

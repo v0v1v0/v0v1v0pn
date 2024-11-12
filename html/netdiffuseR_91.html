@@ -1,0 +1,246 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bass</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bass Model</h2>
+
+<h3>Description</h3>
+
+<p>Fits the Bass Diffusion model. In particular, fits an observed curve of
+proportions of adopters to <code class="reqn">F(t)</code>, the proportion of adopters at time
+<code class="reqn">t</code>, finding the corresponding coefficients <code class="reqn">p</code>, Innovation rate,
+and <code class="reqn">q</code>, imitation rate.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fitbass(dat, ...)
+
+## S3 method for class 'diffnet'
+fitbass(dat, ...)
+
+## Default S3 method:
+fitbass(dat, ...)
+
+## S3 method for class 'diffnet_bass'
+plot(
+  x,
+  y = 1:length(x$m$lhs()),
+  add = FALSE,
+  pch = c(21, 24),
+  main = "Bass Diffusion Model",
+  ylab = "Proportion of adopters",
+  xlab = "Time",
+  type = c("b", "b"),
+  lty = c(2, 1),
+  col = c("black", "black"),
+  bg = c("lightblue", "gray"),
+  include.legend = TRUE,
+  ...
+)
+
+bass_F(Time, p, q)
+
+bass_dF(p, q, Time)
+
+bass_f(Time, p, q)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>Either a diffnet object, or a numeric vector.
+Observed cumulative proportion of adopters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to the method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>diffnet_bass</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Integer vector. Time (label).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>Passed to <code>matplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch</code></td>
+<td>
+<p>Passed to <code>matplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Passed to <code>matplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Character scalar. Label of the <code>y</code> axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Character scalar. Label of the <code>x</code> axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Passed to <code>matplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty</code></td>
+<td>
+<p>Passed to <code>matplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Passed to <code>matplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bg</code></td>
+<td>
+<p>Passed to <code>matplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.legend</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code>, draws a legend.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Time</code></td>
+<td>
+<p>Integer vector with values greater than 0. The <code class="reqn">t</code> parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Numeric scalar. Coefficient of innovation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>Numeric scalar. Coefficient of imitation.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function fits the bass model with parameters <code class="reqn">[p, q]</code> for
+values <code class="reqn">t = 1, 2, \dots, T</code>, in particular, it fits the following function:
+</p>
+<p style="text-align: center;"><code class="reqn">
+  F(t) = \frac{1 - \exp{-(p+q)t}}{1 + \frac{q}{p}\exp{-(p+q)t}}
+</code>
+</p>
+
+<p>Which is implemented in the <code>bass_F</code> function. The proportion of adopters
+at time <code class="reqn">t</code>, <code class="reqn">f(t)</code> is:
+</p>
+<p style="text-align: center;"><code class="reqn">
+  f(t) = \left\{\begin{array}{ll}
+  F(t), &amp; t = 1 \\
+  F(t) - F(t-1), &amp; t &gt; 1
+  \end{array}\right.
+</code>
+</p>
+
+<p>and it's implemented in the <code>bass_f</code> function.
+</p>
+<p>For testing purposes only, the gradient of <code class="reqn">F</code> with respect to <code class="reqn">p</code>
+and <code class="reqn">q</code> is implemented in <code>bass_dF</code>.
+</p>
+<p>The estimation is done using <code>nls</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>nls</code> and <code>diffnet_bass</code>. For more
+details, see <code>nls</code> in the <span class="pkg">stats</span> package.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>References</h3>
+
+<p>Bass's Basement Institute Institute. The Bass Model. (2010).
+Available at: <a href="https://web.archive.org/web/20220331222618/http://www.bassbasement.org/BassModel/">https://web.archive.org/web/20220331222618/http://www.bassbasement.org/BassModel/</a>.
+(accessed live for the last time on March 29th, 2017.)
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other statistics: 
+<code>classify_adopters()</code>,
+<code>cumulative_adopt_count()</code>,
+<code>dgr()</code>,
+<code>ego_variance()</code>,
+<code>exposure()</code>,
+<code>hazard_rate()</code>,
+<code>infection()</code>,
+<code>moran()</code>,
+<code>struct_equiv()</code>,
+<code>threshold()</code>,
+<code>vertex_covariate_dist()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Fitting the model for the Brazilian Farmers Data --------------------------
+data(brfarmersDiffNet)
+ans &lt;- fitbass(brfarmersDiffNet)
+
+# All the methods that work for the -nls- object work here
+ans
+summary(ans)
+coef(ans)
+vcov(ans)
+
+# And the plot method returns both, fitted and observed curve
+plot(ans)
+
+</code></pre>
+
+
+</div>

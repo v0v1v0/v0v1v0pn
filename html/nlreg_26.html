@@ -1,0 +1,313 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fit a Nonlinear Heteroscedastic Model via Maximum Likelihood        
+</h2>
+
+<h3>Description</h3>
+
+<p>Returns an object of class <code>nlreg</code> which represents a nonlinear
+heteroscedastic model fit of the data obtained by maximizing the
+corresponding likelihood function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlreg(formula, weights = NULL, data = sys.frame(sys.parent()), start, 
+      offset = NULL, subset = NULL, 
+      control = list(x.tol = 1e-06, rel.tol = 1e-06, 
+                     step.min = 1/2048, maxit = 100), trace = FALSE, 
+      hoa = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>a formula expression as for other nonlinear regression models, of 
+the form <code>response ~ f(predictor)</code> where <code>f</code> is a 
+nonlinear function of the predictor involving a number of 
+regression coefficients.  Only one predictor variable can be 
+included in the model formula.  Missing values are not allowed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>a formula expression of the form <code>~ V(predictor)</code> where 
+<code>V</code> is a nonlinear variance function involving the predictor
+or some transformation of it, variance parameters and/or 
+regression coefficients.  The error variance <code>nlreg</code> works 
+with is
+
+
+</p>
+<p><code>Var(error) = s^2 V(predictor)</code>
+</p>
+<p>where the constant term <code class="reqn">\sigma^2</code> is included by 
+default and must
+not be specified in the <code>weights</code> argument.  The <code>nlreg</code>
+routine treats it on the logarithmic scale and assigns to it the 
+parameter name <code>logs</code>.  By default, the error variance is 
+assumed to be constant.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame in which to interpret the variables 
+occurring in the model formula.  Missing values are not allowed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+
+<p>a numerical vector containing the starting values that initialize 
+the iterative estimating procedure.  Each component of the vector 
+must be named and represents one of the parameters included in
+the mean and, if defined, variance function.  Starting values have
+to be supplied for every model parameter, except for the constant
+term in the variance function which is included by default in the
+model.  See the <code>weights</code> argument above.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+
+<p>a numerical vector with a single named element.  The name 
+indicates the parameter of interest which will be fixed to the 
+value specified.  <code>logs</code> is used to identify the constant 
+term <code class="reqn">\sigma^2</code> which is included by default in the
+variance function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>expression saying which subset of the rows of the data should be 
+used in the fit.  This can be a logical vector or a numeric vector
+indicating which observation numbers are to be included.  All 
+observations are included by default. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>a list of iteration and algorithmic constants.  See the 
+<b>Details</b> section below for their definition. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+
+<p>logical flag.  If <code>TRUE</code>, details of the iterations are 
+printed.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hoa</code></td>
+<td>
+
+<p>logical flag.  If <code>TRUE</code>, the first and second derivatives of
+the mean and, if defined, variance functions are stored in the 
+fitted model object.  The default is <code>FALSE</code>. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A nonlinear heteroscedastic model representing the relationship
+between two scalar quantities is fitted.  The response is specified
+on the left-hand side of the <code>formula</code> argument.  The predictor
+appears in the right-hand side of the <code>formula</code> and, if 
+specified, <code>weights</code> arguments.  Only one predictor variable 
+can be included.  Missing values in the data are not allowed.
+</p>
+<p>The fitting criterion is maximum likelihood.  The core algorithm
+implemented in <code>nlreg</code> alternates minimization of minus the
+log likelihood with respect to the regression coefficients and the
+variance parameters.  The quasi-Newton optimizer 
+<code>optim</code> is used in both steps.  The constant 
+term <code class="reqn">\sigma^2</code> in 
+
+
+<code>Var(error) = s^2 V(predictor)</code> is included by default.  In 
+order to work with a real value, 
+<code class="reqn">\sigma^2</code> is estimated on the logarithmic scale, 
+that is, the model is reparametrized into 
+<code class="reqn">\log(\sigma^2)</code> which gives rise to the 
+parameter name <code>logs</code>.  If the errors are homoscedastic, the 
+second step is omitted and the algorithm switches automatically to
+<code>nls</code>.  If the <code>weights</code> argument is 
+omitted, homoscedasticity of the errors is assumed.
+</p>
+<p>Starting values for all parameters have to be passed through the
+<code>start</code> argument except for <code class="reqn">\sigma^2</code> for which
+the maximum likelihood estimate is available in closed form.  
+Starting values should be chosen carefully in order to avoid 
+convergence to a local maximum.  
+</p>
+<p>The algorithm iterates until convergence or until the maximum number
+of iterations defined by <code>maxit</code> is reached.  The stopping rule
+considers the relative difference between successive estimates and 
+the relative increment of the log likelihood.  These are governed by
+the parameters <code>x.tol</code> and <code>rel.tol</code>/<code>step.min</code>, 
+respectively.
+</p>
+<p>If convergence has been reached, the results are saved in an object
+of class <code>nlreg</code>.  The output can be examined by 
+<code>print</code> and <code>summary</code>.  
+Components can be extracted using <code>coef</code>,
+<code>param</code>, <code>fitted</code> 
+and <code>residuals</code>.  The model fit can be updated using
+<code>update</code>.  Profile plots and profile pair 
+sketches are provided by <code>profile</code>, and 
+<code>contour</code>.  Diagnostic plots are obtained from
+<code>nlreg.diag.plots</code> or simply 
+<code>plot</code>.
+</p>
+<p>The details are given in <cite>Brazzale (2000, Section 6.3.1)</cite>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>nlreg</code> is returned which inherits from 
+<code>nls</code>.  See <code>nlreg.object</code> for
+details.
+</p>
+
+
+<h3>Side Effects</h3>
+
+<p>If <code>trace = TRUE</code>, the iteration number and the corresponding
+log likelihood are printed. 
+</p>
+
+
+<h3>Note</h3>
+
+<p>The arguments <code>hoa</code> and <code>control</code> play an important role.
+The first forces the algorithm to save the derivatives of the mean 
+and variance functions in the fitted model object.  This is 
+imperative if one wants to save execution time, especially for 
+complex models.  Fine-tuning of the <code>control</code> argument which 
+controls the convergence criteria helps surrounding a well-known
+problem in nonlinear regression, that is, convergence failure in 
+cases where the likelihood is very flat.
+</p>
+<p>If the errors are homoscedastic, the <code>nlreg</code> routine switches 
+automatically to <code>nls</code> which, although rarely, 
+dumps because of convergence problems.  To avoid this, either 
+reparametrize the model (see <cite>Bates and Watts, 1988</cite>) or 
+choose starting values that are more realistic.  This advice also
+holds in case of convergence problems for models with non constant
+variance function.  Use the 
+<code>trace = TRUE</code> argument to gain insight into what goes on at 
+the different iteration steps. 
+</p>
+<p>The <code>weights</code> argument has a different meaning than in other 
+model fitting routines such as <code>lm</code> and 
+<code>glm</code>.  It defines the variance function of the 
+nonlinear model and not a vector of observation weights that are 
+multiplied into the squared residuals. 	
+</p>
+
+
+<h3>References</h3>
+
+<p>Bates, D. M. and Watts, D. G. (1988) <em>Nonlinear Regression 
+Analysis and Its Applications</em>. New York: Wiley.
+</p>
+<p>Brazzale, A. R. (2000) <em>Practical Small-Sample Parametric 
+Inference</em>.  Ph.D. Thesis N. 2230, Department of Mathematics, Swiss
+Federal Institute of Technology Lausanne.  
+</p>
+<p>Seber, G. A. F. and Wild, C. J. (1989) <em>Nonlinear Regression</em>.
+New York: Wiley.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nlreg.object</code>, <code>nls</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(boot)
+data(calcium)
+##
+## Homoscedastic model fit
+calcium.nl &lt;- nlreg( cal ~ b0*(1-exp(-b1*time)), start = c(b0 = 4, b1 = 0.1),
+                     data = calcium )
+##
+## Heteroscedastic model fit 
+calcium.nl &lt;- nlreg( cal ~ b0*(1-exp(-b1*time)), weights = ~ ( 1+time^g )^2,
+                     start = c(b0 = 4, b1 = 0.1, g = 1), data = calcium, 
+                     hoa = TRUE)
+## or
+calcium.nl &lt;- update(calcium.nl, weights = ~ (1+time^g)^2, 
+                     start = c(b0 = 4, b1 = 0.1, g = 1), hoa = TRUE )
+##
+##
+## Power-of-X (POX) variance function
+##
+data(metsulfuron)
+metsulfuron.nl &lt;- 
+    nlreg( log(area) ~ log( b1+(b2-b1) / (1+(dose/b4)^b3) ), 
+           weights = ~ ( 1+dose^exp(g) )^2, data = metsulfuron, 
+           start = c(b1 = 138, b2 = 2470, b3 = 2, b4 = 0.07, g = log(0.3)),
+           hoa = TRUE )
+##
+##
+## Power-of-mean (POM) variance function
+##
+data(ria)
+ria.nl &lt;- nlreg( count ~ b1+(b2-b1) / (1+(conc/b4)^b3), 
+                 weights = ~ ( b1+(b2-b1) / (1+(conc/b4)^b3) )^g, data = ria, 
+                 start = c(b1 = 1.6, b2 = 20, b3 = 2, b4 = 300, g = 2),
+                 hoa = TRUE, trace = TRUE )
+##
+##
+## Error-in-variables (EIV) variance function
+##
+data(chlorsulfuron)
+options( object.size = 10000000 )
+chlorsulfuron.nl &lt;- 
+    nlreg( log(area) ~ log( b1+(b2-b1) / (1+(dose/b4)^b3) ), 
+        weights = ~ ( 1+k*dose^g*(b2-b1)^2/(1+(dose/b4)^b3)^4*b3^2*dose^(2*b3-2)/
+                    b4^(2*b3)/(b1+(b2-b1)/(1+(dose/b4)^b3))^2 ),
+        start = c(b1 = 2.2, b2 = 1700, b3 = 2.8, b4 = 0.28, g = 2.7, k = 1), 
+        data = chlorsulfuron, hoa = TRUE, trace = TRUE,  
+        control = list(x.tol = 10^-12, rel.tol = 10^-12, step.min = 10^-12) )
+</code></pre>
+
+
+</div>

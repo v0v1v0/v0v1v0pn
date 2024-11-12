@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>overlap_network</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plots the overlap of multiple conditions as bipartite network</h2>
+
+<h3>Description</h3>
+
+<p>The function takes multiple netfacs objects and plots how different elements
+connect the conditions, based on the conditional probabilities that the
+element occurs in the condition and that the condition is seen when the
+element is present
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">overlap_network(
+  x,
+  min.prob = 0,
+  min.count = 5,
+  significance = 0.01,
+  specificity = 0.1,
+  ignore.element = NULL,
+  clusters = FALSE,
+  plot.bubbles = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>list of objects resulting from <code>specificity</code> or
+<code>netfacs</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.prob</code></td>
+<td>
+<p>minimum conditional probability that should be shown in the
+graph</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.count</code></td>
+<td>
+<p>minimum number of times that a combination should occur
+before being included in the graph</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>significance</code></td>
+<td>
+<p>sets the level of significance that combinations have to
+pass before added to the network</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>specificity</code></td>
+<td>
+<p>for the 'reduced' graph, select only elements that surpass
+this context specificity value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ignore.element</code></td>
+<td>
+<p>string vector, can be used to exclude certain elements
+when creating the plots</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusters</code></td>
+<td>
+<p>boolean; if TRUE, the cluster_fast_greedy algorithm is used
+to detect underlying community structure, based on the occurrence
+probability network</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.bubbles</code></td>
+<td>
+<p>if TRUE, then the nodes in the network plots will be
+surrounded by bubbles; if FALSE, the edges connect the names directly</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Function returns a <code>ggraph</code> plot where each
+condition is connected to those elements that occur significantly in this
+condition, and each element is connected to each condition under which it
+occurs significantly more than expected. Creates four graphs: context
+specificity, occurrence in that context, a combined graph, and a 'reduced'
+graph where edges are only included if they pass the 'specificity' value
+set by the user
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(emotions_set)
+emo.faces &lt;- netfacs_multiple(
+  data = emotions_set[[1]],
+  condition = emotions_set[[2]]$emotion,
+  ran.trials = 10,
+  combination.size = 2
+)
+# calculate element specificity
+spec &lt;- specificity(emo.faces)
+
+overlap &lt;- overlap_network(spec,
+                           min.prob = 0.01,
+                           min.count = 3,
+                           significance = 0.01,
+                           specificity = 0.5,
+                           ignore.element = "25",
+                           clusters = TRUE,
+                           plot.bubbles = TRUE)
+
+</code></pre>
+
+
+</div>

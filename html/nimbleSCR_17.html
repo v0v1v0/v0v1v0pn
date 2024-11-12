@@ -1,0 +1,202 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dcatState1Alive2Dead</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Density and random generation of a categorical distribution describing state transition with one alive and two dead states.</h2>
+
+<h3>Description</h3>
+
+<p>The <code>dcatState1Alive2Dead</code> distribution is a NIMBLE custom distribution which can be used to model and simulate
+individual state transition. This function can be used to model transitions from one alive and two dead states. 
+If z_i,t = 1, individual i can be recruited (transition to state 2) with probability prob1To2_t, so z_i,t+1 ~ dcat(1- prob1To2_t, prob1To2_t, 0,0 , 0) where prob1To2_t represent the probability of an unborn individual to be recruited.
+If z_i,t = 2, individual i can die from one cause of mortality (e.g. culling) and transition to z_i,t+1=3 with probability prob2To3, or die from another cause with probability prob2To4 z_i,t+1=4. 
+If the individual does not die it can survive and remain in state 2 with probability (1-(prob2To3+prob2To4)). 
+Individuals in dead states (z_i,t = 3 or 4) transition to z_i,t+1 = 4, the absorbing state, with probability 1.
+If transition probabilities are spatially variable, a probability vector containing the transition probability value in each habitat window can be provided using the "Hab" arguments (e.g. prob1To2Hab,prob2To3Hab).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dcatState1Alive2Dead(
+  x,
+  z,
+  prob1To2 = -999,
+  prob1To2Hab,
+  prob2To3 = -999,
+  prob2To3Hab,
+  prob2To4 = -999,
+  prob2To4Hab,
+  s,
+  habitatGrid,
+  log = 0
+)
+
+rcatState1Alive2Dead(
+  n,
+  z,
+  prob1To2 = -999,
+  prob1To2Hab,
+  prob2To3 = -999,
+  prob2To3Hab,
+  prob2To4 = -999,
+  prob2To4Hab,
+  s,
+  habitatGrid
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Scalar, individual state z_i,t+1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>Scalar, initial individual state z_i,t.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob1To2</code></td>
+<td>
+<p>scalar, probability to transition from state 1 to 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob1To2Hab</code></td>
+<td>
+<p>vector, Spatially-explicit probability to transition from state 2 to 3.  The length of the vector should be equal the number of habitat windows in <code>habitatGrid</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob2To3</code></td>
+<td>
+<p>scalar, probability to transition from state 2 to 3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob2To3Hab</code></td>
+<td>
+<p>vector, Spatially-explicit probability to transition from state 2 to 3.  The length of the vector should be equal the number of habitat windows in <code>habitatGrid</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob2To4</code></td>
+<td>
+<p>scalar, probability to transition from state 2 to 4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob2To4Hab</code></td>
+<td>
+<p>vector, Spatially-explicit probability to transition from state 2 to 4.  The length of the vector should be equal the number of habitat windows in <code>habitatGrid</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>Vector of x- and y-coordinates corresponding to the AC location of the individual. Used to extract transition spatially-explicit probabilities when they are provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>habitatGrid</code></td>
+<td>
+<p>Matrix of habitat window indices. Cell values should correspond to the 
+order of habitat windows in <code>prob1To2Hab</code>, <code>prob2To3Hab</code> and in <code>lowerCoords</code>  and <code>upperCoords</code> as used in the <code>dbernppAC</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical argument, specifying whether to return the log-probability of the distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Integer specifying the number of realizations to generate.  Only n = 1 is supported.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>dcatState1Alive2Dead</code> gives the (log) probability density of <code>x</code>. 
+<code>rcatState1Alive2Dead</code> gives a randomly generated individual states conditional on the initial state <code>z</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Cyril Milleret
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Use the distribution in R
+
+z &lt;- 2
+prob1To2 &lt;- 0.2
+prob2To3 &lt;- 0.4
+prob2To4 &lt;- 0.1
+
+lowerCoords &lt;- matrix(c(0, 0, 1, 0, 0, 1, 1, 1), nrow = 4, byrow = TRUE)
+upperCoords &lt;- matrix(c(1, 1, 2, 1, 1, 2, 2, 2), nrow = 4, byrow = TRUE)  
+logIntensities &lt;- log(rep(1,4))
+logSumIntensity &lt;- log(sum(c(1:4))) 
+habitatGrid &lt;- matrix(c(1:4), nrow = 2, byrow = TRUE)
+numGridRows &lt;- nrow(habitatGrid)
+numGridCols &lt;- ncol(habitatGrid)
+s &lt;- rbernppAC(n=1, lowerCoords, upperCoords, logIntensities, logSumIntensity, 
+                 habitatGrid, numGridRows, numGridCols)
+
+## No spatial mortality 
+zPlusOne &lt;- rcatState1Alive2Dead( z = z
+                                 , prob1To2 = prob1To2
+                                 , prob2To3 = prob2To3
+                                 , prob2To4 = prob2To4
+                                 , s = s
+                                 , habitatGrid = habitatGrid)
+   
+dcatState1Alive2Dead(  x = zPlusOne
+                     , z = z
+                     , prob1To2 = prob1To2
+                     , prob2To3 = prob2To3
+                     , prob2To4 = prob2To4
+                     , s = s
+                     , habitatGrid = habitatGrid)
+     
+##  With spatial mortality
+prob2To3Hab &lt;- c(0.10, 0.20, 0.15, 0.30)
+prob2To4Hab &lt;- c(0.13, 0.21, 0.12, 0.08)
+phiSpatial &lt;- 1-(prob2To3Hab+prob2To4Hab)
+zPlusOne &lt;- rcatState1Alive2Dead( z = z
+                                 , prob1To2Hab = prob1To2Hab
+                                 , prob2To3Hab =  prob2To3Hab
+                                 , prob2To4Hab = prob2To4Hab
+                                 , s = s
+                                 , habitatGrid = habitatGrid)
+
+dcatState1Alive2Dead(  x = zPlusOne
+                     , z = z
+                     , prob1To2Hab = prob1To2Hab
+                     , prob2To3Hab =  prob2To3Hab
+                     , prob2To4Hab = prob2To4Hab
+                     , s = s
+                     , habitatGrid = habitatGrid)
+
+
+
+
+</code></pre>
+
+
+</div>

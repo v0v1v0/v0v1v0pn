@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>updateRepresentation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Update Representation</h2>
+
+<h3>Description</h3>
+
+<p>Update an existing NGLVieweR representation in Shinymode.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">updateRepresentation(NGLVieweR_proxy, name, param = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>NGLVieweR_proxy</code></td>
+<td>
+<p>A NGLVieweR object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Name of representation to alter the color.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>Options for the different types of representations. Most common options are <code>name</code>, <code>opacity</code>, <code>colorScheme</code>, <code>colorValue</code> and <code>visibility</code>.
+For a full list of options, see the general "RepresentationParameters" method and type specific Label-, Structure- and Surface- RepresentationParameters in the official <a href="http://nglviewer.org/ngl/api/">NGL.js</a> manual.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>API call containing <code>NGLVieweR</code> <code>id</code> and list of message parameters.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>addSelection()</code> Add a new selection to a NGLVieweR object.
+</p>
+</li>
+<li> <p><code>addRepresentation()</code>
+</p>
+</li>
+<li> <p><code>NGLVieweR_example()</code> See example "updateRepresentation".
+</p>
+</li>
+</ul>
+<p>Other updates: 
+<code>updateColor()</code>,
+<code>updateStage()</code>,
+<code>updateVisibility()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+NGLVieweR_proxy("structure") %&gt;%
+  updateRepresentation("cartoon",
+    param = list(
+      name = "cartoon",
+      color = isolate(input$color),
+      opacity = isolate(input$opacity)
+    )
+  )
+
+## End(Not run)
+
+if (interactive()) {
+library(shiny)
+
+ui = fluidPage(
+  titlePanel("Viewer with API inputs"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("color", "Color", c("red", "white", "blue")),
+      sliderInput("opacity", "Opacity", 0, 1, 1),
+      actionButton("update", "Update"),
+    ),
+    mainPanel(
+      NGLVieweROutput("structure")
+    )
+  )
+)
+server = function(input, output) {
+  output$structure &lt;- renderNGLVieweR({
+    NGLVieweR("7CID") %&gt;%
+      addRepresentation("cartoon", 
+                        param = list(name = "cartoon", color="red"))
+  })
+observeEvent(input$update, {
+  NGLVieweR_proxy("structure") %&gt;%
+    updateRepresentation("cartoon",
+      param = list(
+        color = isolate(input$color),
+        opacity = isolate(input$opacity)
+      )
+    )
+})
+ }
+shinyApp(ui, server)
+}
+</code></pre>
+
+
+</div>

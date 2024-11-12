@@ -1,0 +1,100 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>function_</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Explicitly create closures.</h2>
+
+<h3>Description</h3>
+
+<p><code>function_</code> is a normally-evaluating version of <code>function</code>, which
+creates closures. A closure object has three components: the
+argument list, the body expression, and the enclosing environment.
+</p>
+<p><code>arglist()</code> is a helper that produces a named list of
+missing_values given a character vector of names.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">function_(args, body, env = arg_env(args, environment()))
+
+arglist(names, fill = missing_value())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>args</code></td>
+<td>
+<p>The argument list of the new function. NULL is accepted
+to make a function with no arguments. Arguments are specified as
+a named list; the list names become the argument names, and the
+list values become the default expressions. A value of
+<code>missing_value()</code> indicates no default. alist and arglist are
+useful for making argument lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>body</code></td>
+<td>
+<p>An expression for the body of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>The enclosing environment of the new function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>A character vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fill</code></td>
+<td>
+<p>The expression (default missing)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A closure.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>environment formals body
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f1 &lt;- function(x, y = x) { x + y }
+f2 &lt;- function_(alist(x = , y = x),
+                quote( { x + y } ),
+                environment())
+identical(f1, f2) # TRUE
+
+# `fn` makes a compact way to write functions;
+# `fn(x+y)` is equivalent to `function(x, y) x+y`
+fn &lt;- function(exp) {
+  exp_ &lt;- arg(exp)
+  nn &lt;- arglist(all.names(expr(exp_), functions=FALSE))
+  function_(nn, expr(exp_), env(exp_))
+}
+
+fn(x^2)
+fn(x+y)
+</code></pre>
+
+
+</div>

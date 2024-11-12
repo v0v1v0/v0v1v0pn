@@ -1,0 +1,88 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prob_cal</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Probabilities</h2>
+
+<h3>Description</h3>
+
+<p>Use Survival() function from 'rms' pacakge to calculate probabilities after lrm(), cph() or psm() regression. If you want to calculate lrm() probabilities, please leave linear.predictors be TRUE and times be missing. If you want to calculate cph() probabilites, please leave both linear.predictors and surv be TRUE.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prob_cal(reg, times, q, lp)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>reg</code></td>
+<td>
+<p>regression results after lrm(), cph() or psm() in 'rms' package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times</code></td>
+<td>
+<p>if you want to calculate probabilities for lrm() function, please left times missing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>quantile, for example 0.5</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lp</code></td>
+<td>
+<p>linear predictors</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>lieaner predictors and probabilities as a dataframe
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(2018)
+n &lt;-2019
+age &lt;- rnorm(n,60,20)
+sex &lt;- factor(sample(c('female','male'),n,TRUE))
+sex &lt;- as.numeric(sex)
+weight &lt;- sample(50:100,n,replace = TRUE)
+time &lt;- sample(50:800,n,replace = TRUE)
+units(time)="day"
+death &lt;- sample(c(1,0,0),n,replace = TRUE)
+df &lt;- data.frame(time,death,age,sex,weight)
+
+library(rms) #needed for lrm(), cph() and psm()
+ddist &lt;- datadist(df)
+oldoption &lt;- options(datadist='ddist')
+
+# lrm() function
+f &lt;- lrm(death~sex+age+weight,data=df,
+         linear.predictors = TRUE)
+head(prob_cal(reg = f))
+
+# cph() function
+f &lt;- cph(Surv(time,death)~sex+age+weight,data=df,
+         linear.predictors=TRUE,surv=TRUE)
+head(prob_cal(reg = f,times = c(365,365*2)))
+
+# psm() function
+f &lt;- psm(Surv(time,death)~sex+age+weight,data=df)
+head(prob_cal(reg = f,times = c(365,365*2)))
+</code></pre>
+
+
+</div>

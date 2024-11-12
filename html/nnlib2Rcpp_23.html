@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MAM-class</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Class <code>"MAM"</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>A single Matrix Associative Memory (MAM) implemented as a (supervised) NN.
+</p>
+
+
+<h3>Extends</h3>
+
+<p>Class <code>"RcppClass"</code>, directly.
+</p>
+<p>All reference classes extend and inherit methods from <code>"envRefClass"</code>.
+</p>
+
+
+<h3>Fields</h3>
+
+
+<dl>
+<dt>
+<code>.CppObject</code>:</dt>
+<dd>
+<p>Object of class <code>C++Object</code> ~~ </p>
+</dd>
+<dt>
+<code>.CppClassDef</code>:</dt>
+<dd>
+<p>Object of class <code>activeBindingFunction</code> ~~ </p>
+</dd>
+<dt>
+<code>.CppGenerator</code>:</dt>
+<dd>
+<p>Object of class <code>activeBindingFunction</code> ~~ </p>
+</dd>
+</dl>
+<h3>Methods</h3>
+
+
+<dl>
+<dt>
+<code>encode( data_in, data_out )</code>:</dt>
+<dd>
+<p> Setup a new MAM NN and encode input-output data pairs. Parameters are:
+</p>
+
+<ul>
+<li>
+<p><code>data_in</code>: numeric matrix, input data to be encoded in MAM, a numeric matrix (2d, of n rows). Each row will be paired to the corresponding data_out row, forming an input-output vector pair.
+</p>
+</li>
+<li>
+<p><code>data_out</code>: numeric matrix, output data to be encoded in MAM, a numeric matrix (2d, also of n rows). Each row will be paired to the corresponding data_in row, forming an input-output vector pair.
+</p>
+</li>
+</ul>
+<p>Note: to encode additional input-output vector pairs in an existing MAM, use <code>train_single</code> method (see below).
+</p>
+</dd>
+<dt>
+<code>recall(data)</code>:</dt>
+<dd>
+<p> Get output for a dataset (numeric matrix <code>data</code>) from the (trained) MAM NN. </p>
+</dd>
+<dt>
+<code>train_single (data_in, data_out)</code>:</dt>
+<dd>
+<p> Encode an input-output vector pair in the MAM NN. Vector sizes should be compatible to the current NN (as resulted from the <code>encode</code> method).</p>
+</dd>
+<dt>
+<code>print()</code>:</dt>
+<dd>
+<p> print NN structure. </p>
+</dd>
+<dt>
+<code>show()</code>:</dt>
+<dd>
+<p> print NN structure. </p>
+</dd>
+<dt>
+<code>load(filename)</code>:</dt>
+<dd>
+<p> retrieve the NN from specified file. </p>
+</dd>
+<dt>
+<code>save(filename)</code>:</dt>
+<dd>
+<p> save the NN to specified file. </p>
+</dd>
+</dl>
+<p>The following methods are inherited (from the corresponding class):
+objectPointer ("RcppClass"), initialize ("RcppClass"), show ("RcppClass")
+</p>
+
+
+<h3>Note</h3>
+
+<p>The NN in this module uses supervised training to store input-output vector pairs.
+</p>
+<p>(This function uses Rcpp to employ 'mam_nn' class in nnlib2.)
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vasilis N. Nikolaidis &lt;vnnikolaidis@gmail.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Pao Y (1989). Adaptive Pattern Recognition and Neural Networks. Reading, MA (US); Addison-Wesley Publishing Co., Inc.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>BP,LVQs</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">iris_s            &lt;- as.matrix(scale(iris[1:4]))
+class_ids         &lt;- as.integer(iris$Species)
+num_classes       &lt;- max(class_ids)
+
+# create output dataset to be used for training, Here we encode class as -1s and 1s
+iris_data_out &lt;- matrix( data = -1, nrow = nrow(iris_s), ncol = num_classes)
+
+# now for each case, assign a 1 to the column corresponding to its class
+for(r in 1:nrow(iris_data_out)) iris_data_out[r,class_ids[r]]=1
+
+# Finally apply MAM:
+# Encode train pairs in MAM and then get output dataset by recalling the test data.
+
+mam &lt;- new("MAM")
+
+mam$encode(iris_s,iris_data_out)
+
+# test the encoding by recalling the original input data...
+mam_data_out &lt;- mam$recall(iris_s)
+
+# find which MAM output has the largest value and use this as the final cluster tag.
+mam_recalled_cluster_ids = apply(mam_data_out,1,which.max)
+
+plot(iris_s, pch=mam_recalled_cluster_ids, main="MAM recalled Iris data classes")
+
+cat("MAM recalled these IDs:\n")
+print(mam_recalled_cluster_ids)
+</code></pre>
+
+
+</div>

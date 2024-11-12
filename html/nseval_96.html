@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>missing_value</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>R's missing value.</h2>
+
+<h3>Description</h3>
+
+<p><code>missing_value()</code> returns R's missing object; what R uses to
+represent a missing argument. It is distinct from either NULL or
+NA.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">missing_value(n)
+
+missing_(x, unwrap = TRUE)
+
+## Default S3 method:
+missing_(x, unwrap = TRUE)
+
+## S3 method for class 'dots'
+missing_(x, unwrap = TRUE)
+
+## S3 method for class 'quotation'
+missing_(x, unwrap = TRUE)
+
+list_missing(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Optional; a number. If provided, will return a list of
+missing values with this many elements.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a value, dots, or list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unwrap</code></td>
+<td>
+<p>Whether to descend recursively through unevaluated
+promises using <code>unwrap(x, TRUE)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments evaluated normally. except those which are missing.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The missing value occurs naturally in a quoted R expression that has an empty argument:
+</p>
+<pre>  exp &lt;- quote( x[1, ] )
+  identical(exp[[4]], missing_value()) #TRUE
+  is_missing(exp[[4]]) #also TRUE
+</pre>
+<p>So we can use <code>missing_value()</code> to help construct expressions:
+</p>
+<pre>  substitute(f[x, y], list(x = 1, y=missing_value()))
+</pre>
+<p>When such an expression is evaluated and starts a function call,
+the missing value winds up in the promise expression.
+</p>
+<pre>  f &lt;- function(x) arg_expr(x)
+  identical(f(), missing_value()) # TRUE
+</pre>
+<p>During "normal evaluation", finding a missing value in a
+variable raises an error.
+</p>
+<pre>  m &lt;- missing_value()
+  list(m) # raises error
+</pre>
+<p>This means that it's sometimes tricky to work with missings:
+</p>
+<pre>  exp &lt;- quote( x[1, ] )
+  cols &lt;- x[[4]]
+  x &lt;- list(missing_value(), 2, 3)     # this is ok, but...
+  a &lt;- missing_value(); b &lt;- 2; c &lt;- 3 # this stores missing in "cols",
+  x &lt;- list(a, b, c)                   # throws an error: "a" missing
+</pre>
+<p>Generally, keep your missing values wrapped up in lists or quotations,
+instead of assigning them to variables directly.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>missing_value</code> returns the symbol with empty name, or a
+list of such.
+</p>
+<p><code>missing_</code> returns a logical vector.
+</p>
+<p><code>list_missing</code> returns a list.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>missing is_missing
+</p>
+<p>missing is_missing
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># These expressions are equivalent:
+function(x, y=1) {x+y}
+function_(list(x=missing_value, y=1),
+          quote( {x+y} ))
+
+# These expressions are also equivalent:
+quote(df[,1])
+substitute(df[row,col],
+           list(row = missing_value(), col = 1))
+# How to do the trick of `[` where it can tell which arguments are
+# missing:
+`[.myclass` &lt;- function(x, ...) {
+   indices &lt;- list_missing(...)
+   kept.axes &lt;- which(missing_(indices))
+   cat(paste0("Keeping axes ", kept_axes, "\n"))
+   #...
+}
+ar &lt;- structure(array(1:24, c(2, 3, 4)))
+ar[, 3, ]
+</code></pre>
+
+
+</div>

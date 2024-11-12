@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simPassiveSonar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate A Sample Trajectory</h2>
+
+<h3>Description</h3>
+
+<p>The function generates a sample trajectory of the target and the corresponding observations with sensor locations at (0,0)
+and (20,0).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simPassiveSonar(nn = 200, q, r, start, seed)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nn</code></td>
+<td>
+<p>sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>contains the information about the covariance of the noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>contains the information about <code>V</code>, where <code>V*t(V)</code> is the covariance matrix of the observation noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>the initial value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>the seed of random number generator.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function returns a list with components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xx</code></td>
+<td>
+<p>the state data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yy</code></td>
+<td>
+<p>the observed data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H</code></td>
+<td>
+<p>the state coefficient matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+ <p><code>W*t(W)</code> is the state innovation covariance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>V</code></td>
+<td>
+<p><code>V*t(V)</code> is the observation noise covariance matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">s2 &lt;- 20 #second sonar location at (s2,0)
+q &lt;- c(0.03,0.03)
+r &lt;- c(0.02,0.02)
+nobs &lt;- 200
+start &lt;- c(10,10,0.01,0.01)
+H &lt;- c(1,0,1,0,0,1,0,1,0,0,1,0,0,0,0,1)
+H &lt;- matrix(H,ncol=4,nrow=4,byrow=TRUE)
+W &lt;- c(0.5*q[1], 0,0, 0.5*q[2],q[1],0,0,q[2])
+W &lt;- matrix(W,ncol=2,nrow=4,byrow=TRUE)
+V &lt;- diag(r)
+mu0 &lt;- start
+SS0 &lt;- diag(c(1,1,1,1))*0.01
+simu_out &lt;- simPassiveSonar(nobs,q,r,start,seed=20)
+yy&lt;- simu_out$yy
+tt&lt;- 100:200
+plot(simu_out$xx[1,tt],simu_out$xx[2,tt],xlab='x',ylab='y')
+</code></pre>
+
+
+</div>

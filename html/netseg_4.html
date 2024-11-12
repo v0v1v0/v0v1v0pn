@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>assort</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Assortativity Coefficient</h2>
+
+<h3>Description</h3>
+
+<p>Assortativity coefficient is a measure of segregation for social networks
+due to Newman &amp; Girvan (2002).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">assort(object, ...)
+
+## S3 method for class 'table'
+assort(object, ...)
+
+## S3 method for class 'igraph'
+assort(object, vattr, ...)
+
+## Default S3 method:
+assort(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>R object, see available methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments to/from other methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vattr</code></td>
+<td>
+<p>character, name of the vertex attribute for which the measure is
+to be calculated</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The measure evaluates the relative prevalence of within-group ties. It is
+based on the contact layer of the mixing matrix.
+</p>
+<p>Assortativity coefficient is 1 if all ties are within-group.
+The minimum can be negative, but not less than -1, and depends on the
+relative number of ties of nodes in different groups. If the network
+conforms to "proportionate mixing", the coefficient is 0.
+</p>
+<p>If <code>object</code> is a table it is interpreted as a mixing matrix.
+Two-dimensional table is interpreted as a contact layer. Three-dimensional
+table is interpreted as a full mixing matrix <code class="reqn">m_{ghy}</code>
+cross-classyfying all dyads, in which <code class="reqn">g</code> and <code class="reqn">h</code> correspond to
+group membership of ego and alter respectively. Layers <code class="reqn">y=1</code> and
+<code class="reqn">y=2</code> are assumed to be non-contact and contact layers respectively.
+</p>
+<p>If <code>object</code> is of class "igraph" it is required to supply <code>vattr</code>
+with the name of the vertex attribute to calculate intermediate mixing
+matrix.
+</p>
+<p>For any other classes, <code>object</code> is coerced to a table and the table
+method is called.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Numeric value of the index.
+</p>
+
+
+<h3>References</h3>
+
+<p>Newman, M. J. and Girvan, M. (2002) "Mixing patterns and
+community structure in networks", arXiv:cond-mat/0210146v1
+</p>
+<p>Newman, M. J. (2003) "Mixing patterns in networks" arXiv:cond-mat/0209450v2
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Mixing matrices: <code>mixingm()</code>
+</p>
+<p>Other segregation measures: 
+<code>coleman()</code>,
+<code>ei()</code>,
+<code>freeman()</code>,
+<code>gamix()</code>,
+<code>orwg()</code>,
+<code>smi()</code>,
+<code>ssi()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">assort(WhiteKinship, "gender")
+assort(EF3, "type")
+
+# Values of `assort()` for full networks of different sizes
+if( requireNamespace("igraph", quietly = TRUE) ) {
+  f &lt;- function(n) {
+    gfull &lt;- igraph::make_full_graph(n, directed=FALSE)
+    igraph::V(gfull)$type &lt;- rep(1:2, length = igraph::vcount(gfull))
+    assort(gfull, "type")
+  }
+  set.seed(1)
+  x &lt;- sort(sample(5:100, 25) * 2)
+  y &lt;- sapply(x, f)
+  plot(x, y, type="o",
+       xlab="Network size", ylab="Assortativity coefficient",
+       main="Assortativity coef. for full networks of different sizes")
+}
+</code></pre>
+
+
+</div>

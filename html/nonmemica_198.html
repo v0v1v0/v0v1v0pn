@@ -1,0 +1,55 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rosetta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Translate Parameter Names</h2>
+
+<h3>Description</h3>
+
+<p>Translate among various idioms for expressing parameter names
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(magrittr)
+options(project = system.file('project/model',package='nonmemica'))
+
+# we generate some nonmem parameter names in nonmem format
+1001 %&gt;% nms_nonmem -&gt; nonmem
+nonmem
+
+# from these we generate canonical and pmxTools equivalents
+canonical &lt;- nms_canonical(nonmem)
+pmxtools &lt;- nms_pmx(nonmem)
+canonical
+pmxtools
+
+# We demonstrate equivalence
+stopifnot(identical(nonmem, nms_nonmem(canonical)))
+stopifnot(identical(nonmem, nms_nonmem(pmxtools)))
+stopifnot(identical(canonical, nms_canonical(nonmem)))
+stopifnot(identical(canonical, nms_canonical(pmxtools)))
+stopifnot(identical(pmxtools, nms_pmx(nonmem)))
+stopifnot(identical(pmxtools, nms_pmx(canonical)))
+
+# on-the-fly conversions
+nonmem %&gt;% class
+nonmem %&gt;% nms_pmx
+nonmem %&gt;% nms_canonical
+nonmem %&gt;% nms_canonical %&gt;% nms_pmx
+nonmem %&gt;% nms_canonical %&gt;% nms_pmx %&gt;% nms_nonmem
+
+# comparison
+data.frame(
+ can = I(canonical),
+ non = I(nonmem),
+ pmx = I(pmxtools),
+ psn = I(nms_psn(1001))
+)
+</code></pre>
+
+
+</div>

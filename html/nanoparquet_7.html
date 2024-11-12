@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>parquet_options</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nanoparquet options</h2>
+
+<h3>Description</h3>
+
+<p>Create a list of nanoparquet options.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">parquet_options(
+  class = getOption("nanoparquet.class", "tbl"),
+  use_arrow_metadata = getOption("nanoparquet.use_arrow_metadata", TRUE),
+  write_arrow_metadata = getOption("nanoparquet.write_arrow_metadata", TRUE)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>class</code></td>
+<td>
+<p>The extra class or classes to add to data frames created
+in <code>read_parquet()</code>. By default nanoparquet adds the <code>"tbl"</code> class,
+so data frames are printed differently if the pillar package is
+loaded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use_arrow_metadata</code></td>
+<td>
+<p><code>TRUE</code> or <code>FALSE</code>. If <code>TRUE</code>, then
+<code>read_parquet()</code> and <code>parquet_column_types()</code> will make use of the Apache
+Arrow metadata to assign R classes to Parquet columns.
+This is currently used to detect factor columns, and to detect
+"difftime" columns.
+</p>
+<p>If this option is <code>FALSE</code>:
+</p>
+
+<ul>
+<li>
+<p> "factor" columns are read as character vectors.
+</p>
+</li>
+<li>
+<p> "difftime" columns are read as real numbers, meaning one
+of seconds, milliseconds, microseconds or nanoseconds. Impossible
+to tell which without using the Arrow metadata.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>write_arrow_metadata</code></td>
+<td>
+<p>Whether to add the Apache Arrow types as
+metadata to the file <code>write_parquet()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of nanoparquet options.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# the effect of using Arrow metadata
+tmp &lt;- tempfile(fileext = ".parquet")
+d &lt;- data.frame(
+  fct = as.factor("a"),
+  dft = as.difftime(10, units = "secs")
+)
+write_parquet(d, tmp)
+read_parquet(tmp, options = parquet_options(use_arrow_metadata = TRUE))
+read_parquet(tmp, options = parquet_options(use_arrow_metadata = FALSE))
+
+</code></pre>
+
+
+</div>

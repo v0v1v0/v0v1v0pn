@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>clusterInfectors</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Clusters the infectors based on their transmission probabilities</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>clusterInfectors</code> uses either kernel density estimation or
+hierarchical clustering to cluster the infectors for each infectee. This clustering
+provides a way to separate out the few top possible infectors for each infectee
+if there is such a cluster.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">clusterInfectors(
+  df,
+  indIDVar,
+  pVar,
+  clustMethod = c("n", "kd", "hc_absolute", "hc_relative"),
+  cutoff
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>The name of the dateset with transmission probabilities (column <code>pVar</code>),
+individual IDs (columns <code>&lt;indIDVar&gt;.1</code> and <code>&lt;indIDVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indIDVar</code></td>
+<td>
+<p>The name (in quotes) of the individual ID columns
+(data frame <code>df</code> must have variables called <code>&lt;indIDVar&gt;.1</code>
+and <code>&lt;indIDVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pVar</code></td>
+<td>
+<p>The name (in quotes) of the column with transmission probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clustMethod</code></td>
+<td>
+<p>The method used to cluster the infectors; 
+one of <code>"n", "kd", "hc_absolute", "hc_relative"</code> (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff</code></td>
+<td>
+<p>The cutoff for clustering (see details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function provides a way to find the most likely infectors for each infectee
+using various clustering methods indicated by the <code>clustmethod</code>.
+The methods can be one of <code>c("n", "kd", "hc_constant", "hc_relative")</code>.
+</p>
+<p>If <code>clustMethod == "n"</code> then this function simply assigns the top n possible 
+infectors in the top cluster where n is defined by the value of <code>cutoff</code>.
+</p>
+<p>If <code>clustMethod == "kd"</code> then kernel density estimation is used to split the infectors.
+The density for the probabilities for all infectors is estimated using a binwidth defined
+by the value of <code>cutoff</code>. If the density is made up of at least two separate curves
+(separated by a region where the density drops to 0) then the infectors with probabilities
+greater than the lowest 0 region are assigned to the high probability cluster. If the density of the
+probabilities does not drop to 0 then all infectors are assigned to the low probability cluster 
+(indicating no real clustering).
+</p>
+<p>If <code>clustMethod == "hc_absolute"</code> or <code>clustMethod == "hc_relative"</code>, then
+hierarchical clustering with minimum distance is used to split the possible infectors
+into two clusters. This method functionally splits the infectors by the largest gap
+in their probabilities.
+</p>
+<p>Then if <code>clustMethod == "hc_absolute"</code>, those infectees
+where the gap between the two clusters is less than <code>cutoff</code> have all of their
+possible infectors reassigned to the low probability cluster (indicating no real clustering).
+If <code>clustMethod == "hc_relative"</code>, then all infectees where the gap between the two
+clusters is less than <code>cutoff</code> times the second largest gap in probabilities
+are reassigned to the low probability cluster (indicating no real clustering).
+</p>
+
+
+<h3>Value</h3>
+
+<p>The original data frame (<code>df</code>) with a new column called <code>cluster</code>
+which is a factor variable with value <code>1</code> if the infector is in the high probability cluster
+or <code>2</code> if the infector is in the low probability cluster.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nbProbabilities</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Use the nbResults data frame included in the package which has the results
+## of the nbProbabilities() function on a TB-like outbreak.
+
+## Clustering using top n
+# High probability cluster includes infectors with highest 3 probabilities
+clust1 &lt;- clusterInfectors(nbResults, indIDVar = "individualID", pVar = "pScaled",
+                           clustMethod = "n", cutoff = 3)
+table(clust1$cluster)
+
+## Clustering using hierarchical clustering
+
+# Cluster all infectees, do not force gap to be certain size
+clust2 &lt;- clusterInfectors(nbResults, indIDVar = "individualID", pVar = "pScaled",
+                            clustMethod = "hc_absolute", cutoff = 0)
+table(clust2$cluster)
+
+
+# Absolute difference: gap between top and bottom clusters is more than 0.05
+clust3 &lt;- clusterInfectors(nbResults, indIDVar = "individualID", pVar = "pScaled",
+                           clustMethod = "hc_absolute", cutoff = 0.05)
+table(clust3$cluster)
+
+# Relative difference: gap between top and bottom clusters is more than double any other gap
+clust4 &lt;- clusterInfectors(nbResults, indIDVar = "individualID", pVar = "pScaled",
+                           clustMethod = "hc_relative", cutoff = 2)
+table(clust4$cluster)
+
+## Clustering using kernel density estimation
+# Using a small binwidth of 0.01
+clust5 &lt;- clusterInfectors(nbResults, indIDVar = "individualID", pVar = "pScaled",
+                           clustMethod = "kd", cutoff = 0.01)
+table(clust5$cluster)
+
+
+</code></pre>
+
+
+</div>

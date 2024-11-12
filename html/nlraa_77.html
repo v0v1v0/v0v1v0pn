@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_lm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate responses from a linear model <code>lm</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>simulate</code> does not consider the 
+uncertainty in the estimation of the model parameters. This function will attempt 
+to do this.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_lm(
+  object,
+  psim = 1,
+  nsim = 1,
+  resid.type = c("none", "resample", "normal", "wild"),
+  value = c("matrix", "data.frame"),
+  data = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>lm</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psim</code></td>
+<td>
+<p>parameter simulation level (an integer, 0, 1, 2, 3 or 4).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of simulations to perform</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid.type</code></td>
+<td>
+<p>type of residual to include (none, resample, normal or wild)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>either ‘matrix’ or ‘data.frame’</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data argument might be needed when using this function inside user defined functions.
+At least it is expected to be safer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (none used at the moment)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Simulate responses from a linear model <code>lm</code>
+</p>
+<p>These are the options that control the parameter simulation level
+</p>
+
+<dl>
+<dt>psim = 0</dt>
+<dd>
+<p>returns the fitted values</p>
+</dd>
+<dt>psim = 1</dt>
+<dd>
+<p>simulates a beta vector (mean response)</p>
+</dd>
+<dt>psim = 2</dt>
+<dd>
+<p>simulates a beta vector and adds resampled residuals (similar to observed data)</p>
+</dd>
+<dt>psim = 3</dt>
+<dd>
+<p>simulates a beta vector, considers uncertainty in the variance covariance matrix of beta and adds residuals (prediction)</p>
+</dd>
+<dt>psim = 4</dt>
+<dd>
+<p>only adds residuals according to resid.type (similar to simulate.lm)</p>
+</dd>
+</dl>
+<p>The residual type (resid.type) controls how the residuals are generated. 
+They are either resampled, simulated from a normal distribution or ‘wild’ where the
+Rademacher distribution is used (<a href="https://en.wikipedia.org/wiki/Rademacher_distribution">https://en.wikipedia.org/wiki/Rademacher_distribution</a>).
+Resampled and normal both assume iid, but ‘normal’ makes the stronger assumption of normality.
+When psim = 2 and resid.type = none, <code>simulate</code> is used instead.
+‘wild’ does not assume constant variance, but it assumes symmetry.
+</p>
+
+
+<h3>Value</h3>
+
+<p>matrix or data.frame with responses
+</p>
+
+
+<h3>References</h3>
+
+<p>See
+“Inference Based on the Wild Bootstrap” James G. MacKinnon
+<a href="https://www.math.kth.se/matstat/gru/sf2930/papers/wild.bootstrap.pdf">https://www.math.kth.se/matstat/gru/sf2930/papers/wild.bootstrap.pdf</a>
+“Bootstrap in Nonstationary Autoregression” Zuzana Praskova 
+<a href="https://dml.cz/bitstream/handle/10338.dmlcz/135473/Kybernetika_38-2002-4_1.pdf">https://dml.cz/bitstream/handle/10338.dmlcz/135473/Kybernetika_38-2002-4_1.pdf</a>
+“Jackknife, Bootstrap and other Resampling Methods in Regression Analysis” C. F. J. Wu.
+The Annals of Statistics. 1986. Vol 14. 1261-1295.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(ggplot2)
+data(Orange)
+fit &lt;- lm(circumference ~ age, data = Orange)
+sims &lt;- simulate_lm(fit, nsim = 100, value = "data.frame")
+
+ggplot(data = sims) + 
+  geom_line(aes(x = age, y = sim.y, group = ii), 
+            color = "gray", alpha = 0.5) + 
+  geom_point(aes(x = age, y = circumference)) 
+
+
+
+</code></pre>
+
+
+</div>

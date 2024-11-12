@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>testmz</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test of Maller-Zhou
+</h2>
+
+<h3>Description</h3>
+
+<p>This function carries out the nonparametric test of Maller and
+Zhou (1992).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">testmz(t, d, dataset)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>If <code>dataset</code> is missing, a numeric object giving the
+the observed times. If <code>dataset</code> is a data frame, it is
+interpreted as the name of the variable corresponding to the
+observed times in the data frame.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>If <code>dataset</code> is missing, an integer object giving the
+values of the uncensoring indicator. Censored observations must be
+coded as 0, uncensored ones as 1. If <code>dataset</code> is a data frame,
+it is interpreted as the name of the variable corresponding to the 
+uncensoring indicator.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>An optional data frame in which the variables named in
+<code>x</code>, <code>t</code> and <code>d</code> are interpreted. If it is missing,
+<code>x</code>, <code>t</code> and <code>d</code> must be objects of the workspace.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function implements Maller and Zhou's (1992) method to
+test the null hypothesis <code class="reqn">H_{0} : \tau_{F_{0}} &gt; \tau_{G}</code> vs. <code class="reqn">H_{1} : \tau_{F_{0}} \leq \tau_{G}</code>, where <code class="reqn">\tau_{F_{0}}</code> and
+<code class="reqn">\tau_{G}</code> are the supports of, respectively, the
+distribution function of the survival time of the uncured and the
+distribution function of the censoring time.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of S3 class 'npcure'. Formally, a list of components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>The constant character string c("test", "Maller-Zhou").
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvalue</code></td>
+<td>
+<p>The p-value of the test.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aux</code></td>
+<td>
+<p>A list of components: <code>statistic</code>, the test
+statistic, <code>n</code> the sample size, <code>delta</code>, the difference
+between the largest observed time <code class="reqn">t_{n}</code> and the largest
+uncensored time <code class="reqn">t_{n}^{\star}</code>, and <code>interval</code>, a
+vector giving the range between
+<code class="reqn">\max(0,t_{n}^{\star}-\texttt{delta})</code>
+and <code class="reqn">t_{n}^{\star}</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ignacio López-de-Ullibarri [aut, cre],
+Ana López-Cheda [aut],
+Maria Amalia Jácome [aut]
+</p>
+
+
+<h3>References</h3>
+
+<p>Maller R. A., Zhou S. (1992). Estimating the proportion of
+immunes in a censored sample. Biometrika, 79:
+731-739. <a href="https://doi.org/10.1093/biomet/79.4.731">https://doi.org/10.1093/biomet/79.4.731</a>. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>latency</code>, <code>probcure</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Some artificial data
+set.seed(123)
+n &lt;- 50
+y &lt;- qweibull(runif(n)*pweibull(2, shape = 2), shape = 2) ## True lifetimes
+c &lt;- qexp(runif(n)*pexp(2.5)) ## Censoring values
+u &lt;- runif(n)
+## Probability of being susceptible is constantly equal to .5
+t &lt;- ifelse(u &lt; .5, pmin(y, c), c) ## Observed times
+d &lt;- ifelse(u &lt; .5, ifelse(y &lt; c, 1, 0), 0) ## Uncensoring indicator
+data &lt;- data.frame(t = t, d = d)
+
+## Maller-Zhou test
+testmz(t, d, data)
+</code></pre>
+
+
+</div>

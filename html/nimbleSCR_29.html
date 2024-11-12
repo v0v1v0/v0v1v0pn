@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getLocalObjects</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Local Objects Identification</h2>
+
+<h3>Description</h3>
+
+<p>R utility function to identify all objects (e.g. traps) within a given radius dmax of each cell in a habitat mask.
+Used in the implementation of the local evaluation approach in SCR models (<code>dbinomLocal_normal</code>;<code>dpoisLocal_normal</code>).
+The distance to the activity center and the detection probability are then calculated for local objects only (i.e. the detection probability is assumed to be 0 
+for all other objects as they are far enough from the activity center).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getLocalObjects(habitatMask, coords, dmax, resizeFactor = 1, plot.check = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>habitatMask</code></td>
+<td>
+<p>a binary matrix object indicating which cells are considered as suitable habitat.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coords</code></td>
+<td>
+<p>A matrix giving the x- and y-coordinate of each object (i.e. trap). x- and y- coordinates should be scaled to the habitat (<code>scaleCoordsToHabitatGrid</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dmax</code></td>
+<td>
+<p>The maximal radius from a habitat cell center within which detection probability is evaluated locally for each trap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resizeFactor</code></td>
+<td>
+<p>An aggregation factor to reduce the number of habitat cells to retrieve local objects for. Defaults to 1; no aggregation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.check</code></td>
+<td>
+<p>A visualization option (if TRUE); displays which objects are considered "local objects" for a randomly chosen habitat cell.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>getLocalObjects</code> function is used in advance of model building.
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns a list of objects:
+</p>
+
+<ul>
+<li>
+<p> localIndices: a matrix with number of rows equal to the reduced number of habitat grid cells (following aggregation).
+Each row gives the id numbers of the local objects associated with this grid cell.
+</p>
+</li>
+<li>
+<p> habitatGrid: a matrix of habitat grid cells ID corresponding to the row indices in localIndices. 
+</p>
+</li>
+<li>
+<p> numLocalIndices: a vector of the number of local objects for each habitat grid cell in habitatGrid.
+</p>
+</li>
+<li>
+<p> numLocalIndicesMax: the maximum number of local objects for any habitat grid cell ; corresponds to the number of columns in habitatGrid.
+</p>
+</li>
+<li>
+<p> resizeFactor: the aggregation factor used to reduce the number of habitat grid cells.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Cyril Milleret and Pierre Dupont
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">colNum &lt;- sample(20:100,1)
+rowNum &lt;- sample(20:100,1)
+coords &lt;- expand.grid(list(x = seq(0.5, colNum, 1),
+                               y = seq(0.5, rowNum, 1)))
+
+habitatMask &lt;- matrix(rbinom(colNum*rowNum, 1, 0.8), ncol = colNum, nrow = rowNum)
+
+localObject.list &lt;- getLocalObjects(habitatMask, coords,  dmax = 7,resizeFactor = 1)
+
+</code></pre>
+
+
+</div>

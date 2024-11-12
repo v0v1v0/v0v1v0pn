@@ -1,0 +1,75 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nutriscore</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nutri-score survey</h2>
+
+<h3>Description</h3>
+
+<p>These data were collected after a survey on the nutri-score. Participants were asked various questions about their views on the nutri-score, and about their eating habits.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nutriscore
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 112 rows (participants) and 36 columns (questions).
+</p>
+
+
+<h3>Source</h3>
+
+<p>Anaëlle YANNIC and Jessie PICOT, students at l'Institut Agro Rennes-Angers
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+library(NaileR)
+library(FactoMineR)
+
+data(nutriscore)
+
+res_mca_nutriscore &lt;- MCA(nutriscore, quali.sup = 17:36,
+ncp = 15, level.ventil = 0.05, graph = FALSE)
+
+res_hcpc_nutriscore &lt;- HCPC(res_mca_nutriscore, nb.clust = 3,
+graph = FALSE)
+don_clust_nutriscore &lt;- res_hcpc_nutriscore$data.clust
+
+intro_nutri &lt;- 'These data were collected after a survey
+on the nutri-score. Participants were asked
+various questions about their views on the nutri-score,
+and about their eating habits.
+Participants were split into groups according to their answers.'
+intro_nutri &lt;- gsub('\n', ' ', intro_nutri) |&gt;
+stringr::str_squish()
+
+req_nutri &lt;- 'Please summarize the characteristics
+of each group. Then, give each group a new name,
+based on your conclusions.'
+req_nutri &lt;- gsub('\n', ' ', req_nutri)|&gt;
+stringr::str_squish()
+
+res_nutriscore &lt;- nail_catdes(don_clust_nutriscore, num.var = 37,
+introduction = intro_nutri, request = req_nutri,
+drop.negative = TRUE)
+
+cat(res_nutriscore$response)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

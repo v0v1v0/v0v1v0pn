@@ -1,0 +1,316 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>survey_to_diffnet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert survey-like data and edgelists to a <code>diffnet</code> object</h2>
+
+<h3>Description</h3>
+
+<p>These convenient functions turn network nomination datasets and edgelists with
+vertex attributes datasets into diffnet objects. Both work as wrappers of
+<code>edgelist_to_adjmat</code> and <code>new_diffnet</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">survey_to_diffnet(
+  dat,
+  idvar,
+  netvars,
+  toavar,
+  groupvar = NULL,
+  no.unsurveyed = TRUE,
+  timevar = NULL,
+  t = NULL,
+  undirected = getOption("diffnet.undirected", FALSE),
+  self = getOption("diffnet.self", FALSE),
+  multiple = getOption("diffnet.multiple", FALSE),
+  keep.isolates = TRUE,
+  recode.ids = TRUE,
+  warn.coercion = TRUE,
+  ...
+)
+
+edgelist_to_diffnet(
+  edgelist,
+  w = NULL,
+  t0 = NULL,
+  t1 = NULL,
+  dat,
+  idvar,
+  toavar,
+  timevar = NULL,
+  undirected = getOption("diffnet.undirected", FALSE),
+  self = getOption("diffnet.self", FALSE),
+  multiple = getOption("diffnet.multiple", FALSE),
+  fill.missing = NULL,
+  keep.isolates = TRUE,
+  recode.ids = TRUE,
+  warn.coercion = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>A data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idvar</code></td>
+<td>
+<p>Character scalar. Name of the id variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>netvars</code></td>
+<td>
+<p>Character vector. Names of the network nomination variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>toavar</code></td>
+<td>
+<p>Character scalar. Name of the time of adoption variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groupvar</code></td>
+<td>
+<p>Character scalar. Name of cohort variable (e.g. city).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.unsurveyed</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> the nominated individuals
+that do not show in <code>idvar</code> are set to <code>NA</code> (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timevar</code></td>
+<td>
+<p>Character sacalar. In the case of longitudinal data, name of the time var.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Integer scalar. Repeat the network <code>t</code> times (if no <code>t0,t1</code> are provided).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>undirected</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> only the lower triangle of the adjacency matrix will considered (faster).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>self</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> autolinks (loops, self edges) are allowed (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiple</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> allows multiple edges.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.isolates</code></td>
+<td>
+<p>Logical scalar. When FALSE, rows with <code>NA/NULL</code> values
+(isolated vertices unless have autolink) will be droped (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recode.ids</code></td>
+<td>
+<p>Logical scalar. When TRUE ids are recoded using <code>as.factor</code>
+(see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.coercion</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> warns coercion from numeric to integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to be passed to <code>new_diffnet</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edgelist</code></td>
+<td>
+<p>Two column matrix/data.frame in the form of ego -source- and
+alter -target- (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Numeric vector. Strength of ties (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t0</code></td>
+<td>
+<p>Integer vector. Starting time of the ties (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t1</code></td>
+<td>
+<p>Integer vector. Finishing time of the ties (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fill.missing</code></td>
+<td>
+<p>Character scalar. In the case of having unmatching ids
+between <code>dat</code> and <code>edgelist</code>, fills the data (see details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All of <code>netvars</code>, <code>toavar</code> and <code>groupvar</code>
+must be integers. Were these numeric they are coerced into integers, otherwise,
+when neither of both, the function returns with error. <code>idvar</code>, on the
+other hand, should only be integer when calling <code>survey_to_diffnet</code>,
+on the contrary, for <code>edgelist_to_diffnet</code>, <code>idvar</code> may be character.
+</p>
+<p>In field work it is not unusual that some respondents nominate unsurveyed
+individuals. In such case, in order to exclude them from the analysis,
+the user can set <code>no.unsurveyed=TRUE</code> (the default), telling the
+function to exclude such individuals from the adjacency matrix. This is
+done by setting variables in <code>netvars</code> equal to <code>NA</code> when the
+nominated id can't be found in <code>idvar</code>.
+</p>
+<p>If the network nomination process was done in different groups (location
+for example) the survey id numbers may be define uniquely within each group
+but not across groups (there may be many individuals with <code>id=1</code>,
+for example). To encompass this issue, the user can tell the function what
+variable can be used to distinguish between groups through the <code>groupvar</code>
+argument. When <code>groupvar</code> is provided, function redifines <code>idvar</code>
+and the variables in <code>netvars</code> as follows:
+</p>
+<pre>
+   dat[[idvar]] &lt;- dat[[idvar]] + dat[[groupvar]]*z
+</pre>
+<p>Where <code>z = 10^nchar(max(dat[[idvar]]))</code>.
+</p>
+<p>For longitudinal data, it is assumed that the <code>toavar</code> holds the same
+information through time, this is, time-invariable. This as the package does
+not yet support variable times of adoption.
+</p>
+<p>The <code>fill.missing</code> option can take any of these three values: <code>"edgelist"</code>,
+<code>"dat"</code>, or <code>"both"</code>. This argument works as follows:
+</p>
+
+<ol>
+<li>
+<p> When <code>fill.missing="edgelist"</code> (or <code>"both"</code>) the function
+will check which vertices show in <code>dat</code> but do not show in <code>edgelist</code>.
+If there is any, the function will include these in <code>edgelist</code> as ego to
+<code>NA</code> (so they have no link to anyone), and, if specified, will fill
+the <code>t0</code>, <code>t1</code> vectors with <code>NA</code>s for those cases. If
+<code>w</code> is also specified, the new vertices will be set to
+<code>min(w, na.rm=TRUE)</code>.
+</p>
+</li>
+<li>
+<p> When <code>fill.missing="dat"</code> (or <code>"both"</code>) the function
+checks which vertices show in <code>edgelist</code> but not in <code>dat</code>. If
+there is any, the function will include these in <code>dat</code> by adding
+one row per individual.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A <code>diffnet</code> object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vega Yon
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fakesurvey</code>, <code>fakesurveyDyn</code>
+</p>
+<p>Other data management functions: 
+<code>diffnet-class</code>,
+<code>edgelist_to_adjmat()</code>,
+<code>egonet_attrs()</code>,
+<code>isolated()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Loading a fake survey (data frame)
+data(fakesurvey)
+
+# Diffnet object keeping isolated vertices ----------------------------------
+dn1 &lt;- survey_to_diffnet(fakesurvey, "id", c("net1", "net2", "net3"), "toa",
+   "group", keep.isolates=TRUE)
+
+# Diffnet object NOT keeping isolated vertices
+dn2 &lt;- survey_to_diffnet(fakesurvey, "id", c("net1", "net2", "net3"), "toa",
+   "group", keep.isolates=FALSE)
+
+# dn1 has an extra vertex than dn2
+dn1
+dn2
+
+# Loading a longitudinal survey data (two waves) ----------------------------
+data(fakesurveyDyn)
+
+groupvar &lt;- "group"
+x &lt;- survey_to_diffnet(
+   fakesurveyDyn, "id", c("net1", "net2", "net3"), "toa", "group" ,
+   timevar = "time", keep.isolates = TRUE, warn.coercion=FALSE)
+
+plot_diffnet(x, vertex.label = rownames(x))
+
+# Reproducing medInnovationsDiffNet object ----------------------------------
+data(medInnovations)
+
+# What are the netvars
+netvars &lt;- names(medInnovations)[grepl("^net", names(medInnovations))]
+
+medInnovationsDiffNet2 &lt;- survey_to_diffnet(
+   medInnovations,
+   "id", netvars, "toa", "city",
+   warn.coercion=FALSE)
+
+medInnovationsDiffNet2
+
+# Comparing with the package's version
+all(diffnet.toa(medInnovationsDiffNet2) == diffnet.toa(medInnovationsDiffNet)) #TRUE
+all(
+   diffnet.attrs(medInnovationsDiffNet2, as.df = TRUE) ==
+   diffnet.attrs(medInnovationsDiffNet, as.df = TRUE),
+   na.rm=TRUE) #TRUE
+
+
+</code></pre>
+
+
+</div>

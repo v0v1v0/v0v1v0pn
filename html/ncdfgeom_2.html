@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>create_cell_geometry</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create Cell Geometry</h2>
+
+<h3>Description</h3>
+
+<p>Creates cell geometry from vectors of X and Y positions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">create_cell_geometry(
+  X_coords,
+  Y_coords,
+  prj,
+  geom = NULL,
+  buffer_dist = 0,
+  regularize = FALSE,
+  eps = 1e-10
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X_coords</code></td>
+<td>
+<p>numeric center positions of X axis indices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y_coords</code></td>
+<td>
+<p>numeric center positions of Y axis indices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prj</code></td>
+<td>
+<p>character proj4 string for x and y</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geom</code></td>
+<td>
+<p>sf data.frame with geometry that cell geometry should cover</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer_dist</code></td>
+<td>
+<p>numeric a distance to buffer the cell geometry in units of geom projection</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regularize</code></td>
+<td>
+<p>boolean if TRUE, grid spacing will be adjusted to be exactly
+equal. Only applies to 1-d coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>numeric sets tolerance for grid regularity.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Intersection is performed with cell centers then geometry is constructed.
+A buffer may be required to fully cover geometry with cells.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dir &lt;- tempdir()
+ncf &lt;- file.path(dir, "metdata.nc") 
+
+try(zip::unzip(system.file("extdata/metdata.zip", package = "ncdfgeom"), exdir = dir))
+
+if(file.exists(ncf)) {
+
+nc &lt;- RNetCDF::open.nc(ncf)
+ncmeta::nc_vars(nc)
+variable_name &lt;- "precipitation_amount"
+cv &lt;- ncmeta::nc_coord_var(nc, variable_name)
+
+x &lt;- RNetCDF::var.get.nc(nc, cv$X, unpack = TRUE)
+y &lt;- RNetCDF::var.get.nc(nc, cv$Y, unpack = TRUE)
+
+prj &lt;- ncmeta::nc_gm_to_prj(ncmeta::nc_grid_mapping_atts(nc))
+
+geom &lt;- sf::read_sf(system.file("shape/nc.shp", package = "sf"))
+geom &lt;- sf::st_transform(geom, 5070)
+
+cell_geometry &lt;- create_cell_geometry(x, y, prj, geom, 0)
+
+plot(sf::st_geometry(cell_geometry), lwd = 0.25)
+plot(sf::st_transform(sf::st_geometry(geom), prj), add = TRUE)
+
+}
+
+</code></pre>
+
+
+</div>

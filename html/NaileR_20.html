@@ -1,0 +1,353 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nail_textual</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Interpret a group based on answers to open-ended questions</h2>
+
+<h3>Description</h3>
+
+<p>Generate an LLM response to analyze a categorical latent variable, based on answers to open-ended questions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nail_textual(
+  dataset,
+  num.var,
+  num.text,
+  introduction = "",
+  request = NULL,
+  model = "llama3",
+  isolate.groups = TRUE,
+  generate = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>a data frame made up of at least one categorical variable and a textual variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.var</code></td>
+<td>
+<p>the index of the categorical variable to be characterized.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.text</code></td>
+<td>
+<p>the index of the textual variable that characterizes the categorical variable of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>introduction</code></td>
+<td>
+<p>the introduction for the LLM prompt.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>request</code></td>
+<td>
+<p>the request made to the LLM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the model name ('llama3' by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isolate.groups</code></td>
+<td>
+<p>a boolean that indicates whether to give the LLM a single prompt, or one prompt per category. Recommended with long catdes results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>generate</code></td>
+<td>
+<p>a boolean that indicates whether to generate the LLM response. If FALSE, the function only returns the prompt.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function directly sends a prompt to an LLM. Therefore, to get a consistent answer, we highly recommend to customize the parameters introduction and request and add all relevant information on your data for the LLM. We also recommend renaming the columns with clear, unshortened and unambiguous names.
+</p>
+<p>Additionally, if isolate.groups = TRUE, you will need an introduction and a request that take into account the fact that only one group is analyzed at a time.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame, or a list of data frames, containing the LLM's prompt and response (if generate = TRUE).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+### Example 1: Car alone survey ###
+library(NaileR)
+library(dplyr)
+data(car_alone)
+
+sampled_car_alone &lt;- car_alone %&gt;%
+group_by(car_alone_capable_restrictive) %&gt;%
+dplyr::sample_frac(0.5)
+sampled_car_alone &lt;- as.data.frame(sampled_car_alone)
+
+intro_car &lt;- "Knowing the impact on the climate,
+I have made these choices based on
+the following benefits and constraints..."
+intro_car &lt;- gsub('\n', ' ', intro_car) |&gt;
+stringr::str_squish()
+
+res_nail_textual &lt;- nail_textual(sampled_car_alone, num.var = 1,
+                                 num.text = 2,
+                                 introduction = intro_car,
+                                 request = NULL,
+                                 model = 'llama3', isolate.groups = TRUE,
+                                 generate = TRUE)
+res_nail_textual[[1]]$response |&gt; cat()
+res_nail_textual[[3]]$response |&gt; cat()
+res_nail_textual[[2]]$response |&gt; cat()
+res_nail_textual[[4]]$response |&gt; cat()
+
+### Example 2: Atomic habits survey ###
+library(NaileR)
+library(dplyr)
+data(atomic_habit_clust)
+
+intro_atomic &lt;- "These data were collected
+after a survey on atomic habits: we asked
+what people were prepared to change about their daily habits
+to make the world a better place,
+what habits they felt able to adopt,
+what habits were restrictive."
+intro_atomic &lt;- gsub('\n', ' ', intro_atomic) |&gt;
+stringr::str_squish()
+
+dta_plane &lt;- atomic_habit_clust[,c(32,51)] %&gt;%
+            filter(never_plane_text != 'THAT')
+
+sampled_dta_plane &lt;- dta_plane %&gt;%
+                    group_by(clust) %&gt;%
+                    dplyr::sample_frac(0.75)
+
+sampled_dta_plane &lt;- as.data.frame(sampled_dta_plane)
+summary(sampled_dta_plane)
+
+res_nail_textual_plane &lt;- nail_textual(sampled_dta_plane, num.var = 2,
+                                      num.text = 1,
+                                      introduction = intro_atomic,
+                                      request = NULL,
+                                      model = 'llama3',
+                                      isolate.groups = TRUE,
+                                      generate = TRUE)
+cat(res_nail_textual_plane[[1]]$prompt)
+cat(res_nail_textual_plane[[1]]$response)
+
+cat(res_nail_textual_plane[[2]]$prompt)
+cat(res_nail_textual_plane[[2]]$response)
+
+cat(res_nail_textual_plane[[3]]$prompt)
+cat(res_nail_textual_plane[[3]]$response)
+
+res_nail_textual_plane &lt;- nail_textual(sampled_dta_plane, num.var = 2,
+                                      num.text = 1,
+                                      introduction = intro_atomic,
+                                      request = NULL,
+                                      model = 'llama3',
+                                      isolate.groups = FALSE,
+                                      generate = TRUE)
+cat(res_nail_textual_plane$prompt)
+cat(res_nail_textual_plane$response)
+
+### Example 3: Car seat fabrics ###
+
+# Drivers of liking and disliking
+# isolate.groups = F
+
+intro_car &lt;- "In this consumer study, a number of car seat fabrics
+were rated by consumers who gave their reasons
+for liking or disliking the fabrics.
+Reasons for disliking the fabrics were reported in group '0',
+while reasons for liking the fabrics were reported in group '1'."
+intro_car &lt;- gsub('\n', ' ', intro_car) |&gt;
+stringr::str_squish()
+
+request_car &lt;- "Based on the comments provided by the consumers,
+please explain the reasons why
+the fabrics were not appreciated (group '0'),
+and the reasons why fabrics were appreciated (group '1').
+In other words, what are the drivers for disliking
+and liking the fabrics."
+request_car &lt;- gsub('\n', ' ', request_car) |&gt;
+stringr::str_squish()
+
+res_nail_textual_fabric &lt;- nail_textual(fabric, num.var = 4,
+                                        num.text = 3,
+                                        introduction = intro_car,
+                                        request = request_car,
+                                        model = 'llama3',
+                                        isolate.groups = FALSE,
+                                        generate = TRUE)
+
+cat(res_nail_textual_fabric$response)
+
+# Drivers of disliking with a specific prompt
+# isolate.groups = T
+
+intro_car_disliking &lt;- "In this consumer study, a range of car seat fabrics
+were rated by consumers who gave their reasons
+for disliking the fabrics.
+In these data, only the reasons for disliking the fabrics were reported."
+intro_car_disliking &lt;- gsub('\n', ' ', intro_car_disliking) |&gt;
+stringr::str_squish()
+
+request_car_disliking &lt;- "Based on the comments provided by the consumers,
+please explain the reasons why
+the fabrics were not appreciated.
+In other words, what are the drivers for disliking the fabrics."
+request_car_disliking &lt;- gsub('\n', ' ', request_car_disliking) |&gt;
+stringr::str_squish()
+
+res_nail_textual_fabric &lt;- nail_textual(fabric, num.var = 4,
+                                        num.text = 3,
+                                        introduction = intro_car_disliking,
+                                        request = request_car_disliking,
+                                        model = 'llama3',
+                                        isolate.groups = TRUE,
+                                        generate = FALSE)
+
+ppt &lt;- res_nail_textual_fabric$prompt[1]
+cat(ppt)
+
+res_disliking &lt;- ollamar::generate(model = 'llama3', prompt = ppt,
+                                   output = "df")
+cat(res_disliking$response)
+
+# Drivers of liking with a specific prompt
+# isolate.groups = T
+
+intro_car_liking &lt;- "In this consumer study, a range of car seat fabrics
+were rated by consumers who gave their reasons
+for liking the fabrics.
+In these data, only the reasons for liking the fabrics were reported."
+intro_car_liking &lt;- gsub('\n', ' ', intro_car_liking) |&gt;
+stringr::str_squish()
+
+request_car_liking &lt;- "Based on the comments provided by the consumers,
+please explain the reasons why
+the fabrics were appreciated.
+In other words, what are the drivers for liking the fabrics."
+request_car_liking &lt;- gsub('\n', ' ', request_car_liking) |&gt;
+stringr::str_squish()
+
+res_nail_textual_fabric &lt;- nail_textual(fabric, num.var = 4,
+                                        num.text = 3,
+                                        introduction = intro_car_liking,
+                                        request = request_car_liking,
+                                        model = 'llama3', isolate.groups = TRUE,
+                                        generate = FALSE)
+
+ppt &lt;- res_nail_textual_fabric$prompt[2]
+cat(ppt)
+
+res_liking &lt;- ollamar::generate(model = 'llama3', prompt = ppt,
+                                output = "df")
+cat(res_liking$response)
+
+### Example 4: Rorschach inkblots ###
+
+# Description of each inkblot
+# isolate.groups = TRUE
+
+intro_rorschach &lt;- "For this study,
+we asked sixty people to briefly describe
+one of the inkblots of the Rorschach test."
+intro_rorschach &lt;- gsub('\n', ' ', intro_rorschach) |&gt;
+stringr::str_squish()
+
+request_rorschach &lt;- "Based on the comments of the 60 people,
+please give me a description of that inkblot
+in terms of how it was perceived. Tell me if it was
+a rather positive or negative perception."
+request_rorschach &lt;- gsub('\n', ' ', request_rorschach) |&gt;
+stringr::str_squish()
+
+res_nail_textual_rorschach &lt;- nail_textual(rorschach, num.var = 2,
+                                           num.text = 5,
+                                           introduction = intro_rorschach,
+                                           request = request_rorschach,
+                                           model = 'llama3',
+                                           isolate.groups = TRUE,
+                                           generate = FALSE)
+
+cat(res_nail_textual_rorschach$prompt[[10]])
+
+ppt &lt;- gsub("## Group", "## Stimulus", res_nail_textual_rorschach$prompt[[10]])
+cat(ppt)
+
+res_inkblot_10 &lt;- ollamar::generate(model = 'llama3', prompt = ppt,
+                                    output = "df")
+cat(res_inkblot_10$response)
+
+cat(res_nail_textual_rorschach$prompt[[5]])
+
+ppt &lt;- gsub("## Group", "## Stimulus", res_nail_textual_rorschach$prompt[[5]])
+cat(ppt)
+
+res_inkblot_5 &lt;- ollamar::generate(model = 'llama3', prompt = ppt,
+                                   output = "df")
+cat(res_inkblot_5$response)
+
+
+#Comparison of panels
+
+rorschach_10 &lt;- droplevels(rorschach[rorschach$Inkblot=="10",])
+
+intro_rorschach &lt;- "For this study,
+we asked sixty people to briefly describe
+one of the inkblots of the Rorschach test.
+The sixty people belonged to three different panels,
+with 20 people per panel."
+intro_rorschach &lt;- gsub('\n', ' ', intro_rorschach) |&gt;
+stringr::str_squish()
+
+request_rorschach &lt;- "Based on the comments of the 60 people,
+please tell me what is common from panel to panel
+and what is specific to each panel
+in terms of the perception of the inkblot."
+request_rorschach &lt;- gsub('\n', ' ', request_rorschach) |&gt;
+stringr::str_squish()
+
+res_nail_textual_rorschach &lt;- nail_textual(rorschach_10, num.var = 1,
+                                           num.text = 5,
+                                           introduction = intro_rorschach,
+                                           request = request_rorschach,
+                                           model = 'llama3',
+                                           isolate.groups = FALSE,
+                                           generate = TRUE)
+
+cat(res_nail_textual_rorschach$prompt)
+cat(res_nail_textual_rorschach$response)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroKmeans</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+K-means clustering
+</h2>
+
+<h3>Description</h3>
+
+<p>K-means clustering for multi-dimensional data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroKmeans(data, k = 3, subsample = NULL, balance = 0, message = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A data frame or a matrix.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+
+<p>Number of centroids.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsample</code></td>
+<td>
+
+<p>Number of randomly selected rows used during a single training cycle.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>balance</code></td>
+<td>
+
+<p>Penalty parameter for size difference between clusters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>message</code></td>
+<td>
+
+<p>If positive, progress information is printed at the specified
+interval in seconds.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The K centroids are determined by Lloyd's algorithm with Euclidean
+distances or by using 1 - Pearson correlation as the distance measure.
+</p>
+<p>If <code>subsample</code> is less than the number of data rows, a random subset of
+the specified size is used for each training cycle. By default,
+<code>subsample</code> is set automatically depending on the size of the dataset. 
+</p>
+<p>If <code>balance = 0.0</code>, the algorithm is applied with no balancing,
+if <code>balance = 1.0</code> all the clusters will be forced to be of equal size.
+Intermediate values are permitted. Note that if subsampling is applied,
+balancing may become less accurate.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with named elements: <code>centroids</code> is a matrix of the
+main results, <code>layout</code> contains the best-matching centroid labels
+and model residuals for each usable data point and <code>history</code> is the
+chronological record of training errors. The subsampling parameter that was
+used during training is stored in the element <code>subsample</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Prepare training data.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- scale.default(dataset[,trvars]) 
+
+# Unbalanced K-means clustering.
+km0 &lt;- nroKmeans(data = trdata, k = 5, balance = 0.0)
+print(table(km0$layout$BMC))
+print(km0$centroids)
+
+# Balanced K-means clustering.
+km1 &lt;- nroKmeans(data = trdata, k = 5, balance = 1.0)
+print(table(km1$layout$BMC))
+print(km1$centroids)
+</code></pre>
+
+
+</div>

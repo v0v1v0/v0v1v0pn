@@ -1,0 +1,66 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_geometry</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read NetCDF-CF spatial geometries</h2>
+
+<h3>Description</h3>
+
+<p>Attempts to convert a NetCDF-CF DSG Simple Geometry file into a sf data.frame.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_geometry(nc_file)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>nc_file</code></td>
+<td>
+<p>character file path to the nc file to be read.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>sf <code>data.frame</code> containing spatial geometry of type found in the NetCDF-CF DSG file.
+</p>
+
+
+<h3>References</h3>
+
+<p>http://cfconventions.org/index.html
+</p>
+
+<ol><li> <p><a href="http://cfconventions.org/cf-conventions/cf-conventions.html#_features_and_feature_types">http://cfconventions.org/cf-conventions/cf-conventions.html#_features_and_feature_types</a>
+</p>
+</li></ol>
+<h3>Examples</h3>
+
+<pre><code class="language-R">huc_eta_nc &lt;- tempfile()
+file.copy(system.file('extdata','example_huc_eta.nc', package = 'ncdfgeom'), 
+         huc_eta_nc, overwrite = TRUE)
+         
+vars &lt;- ncmeta::nc_vars(huc_eta_nc)
+
+hucPolygons &lt;- sf::read_sf(system.file('extdata','example_huc_eta.json', package = 'ncdfgeom'))
+plot(sf::st_geometry(hucPolygons))
+names(hucPolygons)
+
+hucPolygons_nc &lt;- ncdfgeom::write_geometry(nc_file=huc_eta_nc, 
+                                          geom_data = hucPolygons, 
+                                          instance_dim_name = "station", 
+                                          variables = vars$name)
+huc_poly &lt;- read_geometry(huc_eta_nc)
+plot(sf::st_geometry(huc_poly))
+names(huc_poly)
+
+</code></pre>
+
+
+</div>

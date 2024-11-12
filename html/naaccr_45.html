@@ -1,0 +1,234 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_naaccr_plain</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read NAACCR records from a file</h2>
+
+<h3>Description</h3>
+
+<p>Read and parse cancer incidence records according to a NAACCR format from
+either fixed-width files (<code>read_naaccr</code> and <code>read_naaccr_plain</code>)
+or XML documents (<code>read_naaccr_xml</code> and <code>read_naaccr_xml_plain</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_naaccr_plain(
+  input,
+  version = NULL,
+  format = NULL,
+  keep_fields = NULL,
+  skip = 0,
+  nrows = Inf,
+  buffersize = 10000,
+  encoding = getOption("encoding")
+)
+
+read_naaccr(
+  input,
+  version = NULL,
+  format = NULL,
+  keep_fields = NULL,
+  keep_unknown = FALSE,
+  skip = 0,
+  nrows = Inf,
+  buffersize = 10000,
+  encoding = getOption("encoding"),
+  ...
+)
+
+read_naaccr_xml_plain(
+  input,
+  version = NULL,
+  format = NULL,
+  keep_fields = NULL,
+  as_text = FALSE,
+  encoding = getOption("encoding")
+)
+
+read_naaccr_xml(
+  input,
+  version = NULL,
+  format = NULL,
+  keep_fields = NULL,
+  keep_unknown = FALSE,
+  as_text = FALSE,
+  encoding = getOption("encoding"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>input</code></td>
+<td>
+<p>Either a string with a file name (containing no <code>\n</code>
+character), a <code>connection</code> object, or the text records
+themselves as a character vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+<p>An integer specifying the NAACCR format version for parsing
+the records. Use this or <code>format</code>, not both. If both <code>version</code>
+and <code>format</code> are <code>NULL</code> (default), the most recent NAACCR format
+will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format</code></td>
+<td>
+<p>A <code>record_format</code> object for parsing the records.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_fields</code></td>
+<td>
+<p>Character vector of XML field names to keep in the
+dataset. If <code>NULL</code> (default), all columns are kept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skip</code></td>
+<td>
+<p>An integer specifying the number of lines of the data file to
+skip before beginning to read data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrows</code></td>
+<td>
+<p>A number specifying the maximum number of records to read.
+<code>Inf</code> (the default) means "all records."</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffersize</code></td>
+<td>
+<p>Maximum number of lines to read at one time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>encoding</code></td>
+<td>
+<p>String giving the input's encoding. See the 'Encoding'
+section of <code>file</code> in the <span class="pkg">base</span> package.
+For <code>read_naaccr_xml</code> and <code>read_naaccr_xml_plain</code>, this is a
+<em>backup</em> encoding. If the XML document includes an encoding
+specification, that will be used. Otherwise, <code>encoding</code> will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_unknown</code></td>
+<td>
+<p>Logical indicating whether values of "unknown" should be
+a level in the factor or <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed onto <code>as.naaccr_record</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as_text</code></td>
+<td>
+<p>Logical indicating (if <code>TRUE</code>) that <code>input</code> is a
+character string containing XML or (if <code>FALSE</code>) it is the path to a
+file with XML content.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>read_naaccr</code> and <code>read_naaccr_xml</code> return data sets suited for
+analysis in R.
+<code>read_naaccr_plain</code> and <code>read_naaccr_xml_plain</code> return data sets
+with the unchanged record values.
+</p>
+<p>Anyone who wants to analyze the records in R should use <code>read_naaccr</code>
+or <code>read_naaccr_xml</code>.
+In the returned <code>naaccr_record</code>, columns are of appropriate
+classes, coded values are replaced with factors, and unknowns are replaced
+with <code>NA</code>.
+</p>
+<p><code>read_naaccr_plain</code> and <code>read_naaccr_xml_plain</code> is a "format strict"
+way to read incidence records.
+All values returned are the literal character values from the records.
+The only processing done is that leading and trailing whitespace is trimmed.
+This is useful if the values will be passed to other software that expects
+the plain NAACCR values.
+</p>
+<p>For <code>read_naaccr_plain</code> and <code>read_naaccr</code>, if the <code>version</code>
+and <code>format</code> arguments are left <code>NULL</code>, the default format is
+version 18. This was the last format to be used for fixed-width files.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>read_naaccr</code>, a <code>data.frame</code> of the records.
+The columns included depend on the NAACCR <code>record_format</code> version.
+Columns are atomic vectors; there are too many to describe them all.
+</p>
+<p>For <code>read_naaccr_plain</code>, a <code>data.frame</code> based on the
+<code>record_format</code> specified by either the <code>version</code> or
+<code>format</code> argument.
+The names of the columns will be those in the format's <code>name</code> column.
+All columns are character vectors.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Some of the parameter text was shamelessly copied from the
+<code>read.table</code> and <code>read.fwf</code> help
+pages.
+</p>
+
+
+<h3>References</h3>
+
+<p>North American Association of Central Cancer Registries (October 2018).
+Standards for Cancer Registries Volume II: Data Standards and Data Dictionary.
+Twenty first edition.
+<a href="https://apps.naaccr.org/data-dictionary/">https://apps.naaccr.org/data-dictionary/</a>.
+</p>
+<p>North American Association of Central Cancer Registries (April 2019).
+NAACCR XML Data Exchange Standard. Version 1.4.
+<a href="https://www.naaccr.org/xml-data-exchange-standard/">https://www.naaccr.org/xml-data-exchange-standard/</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>naaccr_record</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  # This file has synthetic abstract records
+  incfile &lt;- system.file(
+    "extdata", "synthetic-naaccr-18-abstract.txt",
+    package = "naaccr"
+  )
+  fields &lt;- c("ageAtDiagnosis", "sex", "sequenceNumberCentral")
+  read_naaccr(incfile, version = 18, keep_fields = fields)
+  recs &lt;- read_naaccr_plain(incfile, version = 18, keep_fields = fields)
+  recs
+  # Note sequenceNumberCentral has been split in two: a number and a flag
+  summary(recs[["sequenceNumberCentral"]])
+  summary(recs[["sequenceNumberCentralFlag"]])
+</code></pre>
+
+
+</div>

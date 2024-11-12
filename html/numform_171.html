@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>f_title</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert First Letter of Words to Title Case</h2>
+
+<h3>Description</h3>
+
+<p>A wrapper for <code>toTitleCase</code> converting text to title case.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">f_title(x, upper = NULL, lower = NULL, ...)
+
+ff_title(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of text strings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+<p>A vector of regular expression to convert to upper case that
+would otherwise be lower cased (this should be targeted at the initial output,
+not the input).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+<p>A vector of regular expression to convert to lower case that
+would otherwise be upper cased (this should be targeted at the initial output,
+not the input).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a string vector with characters replaced.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>toTitleCase</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f_title('i love this title')
+f_title(f_replace('Cool_Variable'))
+
+f_title(c('select', 'group by', 'My ascii'))
+f_title(c('select', 'group by', 'My ascii'), upper = c('Ascii'))
+f_title(c('select', 'group by', 'My ascii'), upper = c('Ascii', 'b(?=y\\b)'))
+
+## Not run: 
+library(tidyverse)
+
+set.seed(10)
+dat &lt;- data_frame(
+    level = c("not_involved", "somewhat_involved_single_group",
+        "somewhat_involved_multiple_groups", "very_involved_one_group",
+        "very_involved_multiple_groups"
+    ),
+    n = sample(1:10, length(level))
+) %&gt;%
+    mutate(
+        level = factor(level, levels = unique(level)),
+        `%` = n/sum(n)
+    )
+
+gridExtra::grid.arrange(
+
+    gridExtra::arrangeGrob(
+
+        dat %&gt;%
+            ggplot(aes(level, `%`)) +
+                geom_col() +
+                labs(title = 'Very Sad', y = NULL) +
+                theme(
+                    axis.text = element_text(size = 7),
+                    title = element_text(size = 9)
+                ),
+
+       dat %&gt;%
+            ggplot(aes(level, `%`)) +
+                geom_col() +
+                scale_x_discrete(labels = function(x) f_replace(x, '_', '\n')) +
+                scale_y_continuous(labels = ff_prop2percent(digits = 0))  +
+                labs(title = 'Underscore Split (Readable)', y = NULL) +
+                theme(
+                    axis.text = element_text(size = 7),
+                    title = element_text(size = 9)
+                ),
+
+
+        ncol = 2
+
+    ),
+    gridExtra::arrangeGrob(
+
+       dat %&gt;%
+            ggplot(aes(level, `%`)) +
+                geom_col() +
+                scale_x_discrete(labels = function(x) f_title(f_replace(x))) +
+                scale_y_continuous(labels = ff_prop2percent(digits = 0))  +
+                labs(title = 'Underscore Replaced &amp; Title (Capitalized Sadness)', y = NULL) +
+                theme(
+                    axis.text = element_text(size = 7),
+                    title = element_text(size = 9)
+                ),
+
+        dat %&gt;%
+            ggplot(aes(level, `%`)) +
+                geom_col() +
+                scale_x_discrete(labels = function(x) f_wrap(f_title(f_replace(x)))) +
+                scale_y_continuous(labels = ff_prop2percent(digits = 0))  +
+                labs(title = 'Underscore Replaced, Title, &amp; Wrapped (Happy)', y = NULL) +
+                theme(
+                    axis.text = element_text(size = 7),
+                    title = element_text(size = 9)
+                ),
+
+        ncol = 2
+
+    ), ncol = 1
+
+)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

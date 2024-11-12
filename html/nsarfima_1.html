@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>arfima.sim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate ARFIMA Process</h2>
+
+<h3>Description</h3>
+
+<p>Simulates a series under the given ARFIMA model by applying an MA filter to a series of innovations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">arfima.sim(
+  n,
+  d = 0,
+  ar = numeric(),
+  ma = numeric(),
+  mu = 0,
+  sig2 = 1,
+  stat.int = FALSE,
+  n.burn,
+  innov,
+  exact.innov = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Desired series length.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Fractional differencing parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ar</code></td>
+<td>
+<p>Vector of autoregressive parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ma</code></td>
+<td>
+<p>Vector of moving average parameters, following the same sign convention as <code>arima</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>Mean of process. By default, added after integer integration but before burn-in truncation (see <code>stat.int</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sig2</code></td>
+<td>
+<p>Innovation variance if innovations not provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat.int</code></td>
+<td>
+<p>Controls integration for non-stationary values of <code>d</code> (<em>i.e.</em> <code>d&gt;=0.5</code>). If <code>TRUE</code>, <code>d</code> split into integer part and stationary part, which will result in a trend when <code>d&gt;=0.5</code> and <code>mu!=0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.burn</code></td>
+<td>
+<p>Number of burn-in steps. If not given, chosen based off presence of long memory (<em>i.e.</em> <code>d&gt;0</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>innov</code></td>
+<td>
+<p>Series of innovations. Drawn from normal distribution if not given.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exact.innov</code></td>
+<td>
+<p>Whether to force the exact innovation series to be used. If <code>FALSE</code>, innovations will be prepended with resampled points as needed to match <code>n+n.burn</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The model is defined by values for the AR and MA parameters (<code class="reqn">\phi</code> and <code class="reqn">\theta</code>, respectively), along with the fractional differencing parameter <em>d</em>. When <code class="reqn">d\geq 0.5</code>, then the integer part is taken as <code class="reqn">m=\lfloor d+0.5\rfloor</code>, and the remainder (between -0.5 and 0.5) stored as <em>d</em>. For <code class="reqn">m=0</code>, the model is:
+</p>
+<p style="text-align: center;"><code class="reqn">\left(1 - \sum_{i=1}^p \phi_i B^i\right)\left(1 - B\right)^d (y_t - \mu)=\left(1 + \sum_{i=1}^q \theta_i B^i\right) \epsilon_t</code>
+</p>
+
+<p>where <em>B</em> is the backshift operator (<code class="reqn">B y_t = y_{t-1}</code>) and <code class="reqn">\epsilon_t</code> is the innovation series. When <code class="reqn">m &gt; 0</code>, the model is defined by:
+</p>
+<p style="text-align: center;"><code class="reqn">y_t = (1 - B)^{-m}x_t</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\left(1 - \sum_{i=1}^p \phi_i B^i\right)(1 - B)^d (x_t - \mu)=\left(1 + \sum_{i=1}^q \theta_i B^i\right) \epsilon_t</code>
+</p>
+
+<p>When <code>stat.int = FALSE</code>, the differencing filter applied to the innovations is not split into parts, and the series model follows the first equation regardless of the value of <em>d</em>. This means that <code class="reqn">\mu</code> is added to the series after filtering and before any truncation. When <code>stat.int = TRUE</code>, <code class="reqn">x_t - \mu</code> is generated from filtered residuals, <code class="reqn">\mu</code> is added, and the result is cumulatively summed <em>m</em> times. For non-zero mean and <code class="reqn">m&gt;0</code>, this will yield a polynomial trend in the resulting data.
+</p>
+<p>Note that the burn-in length may affect the distribution of the sample mean, variance, and autocovariance. Consider this when generating ensembles of simulated data
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric vector of length n.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Generate ARFIMA(1,d,0) series with Gaussian innovations
+x &lt;- arfima.sim(1000, d=0.6, ar=c(-0.4)) 
+
+## Generate ARFIMA(1,d,0) series with uniform innovations.
+innov.series &lt;- runif(1000, -1, 1)
+x &lt;- arfima.sim(1000, d=0.6, ar=c(-0.4), innov=innov.series, exact.innov=TRUE)
+</code></pre>
+
+
+</div>

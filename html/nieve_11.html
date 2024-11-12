@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>poisGP2PP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transform Poisson-GP Parameters into Point-Process Parameters</h2>
+
+<h3>Description</h3>
+
+<p>Transform Poisson-GP parameters into Point-Process
+(PP) parameters. In the POT Poisson-GP framework the three
+parameters are the rate <code>lambda</code> <code class="reqn">\lambda_u</code>
+of the Poisson process in time and the two GP parameters:
+<code>scale</code> <code class="reqn">\sigma_u</code> and <code>shape</code>
+<code class="reqn">\xi</code>. The vector <code>loc</code> contains the fixed
+threshold <code class="reqn">u</code>, and <code>w</code> the fixed block
+duration. These parameters are converted into the vector of
+three parameters of the GEV distribution for the maximum of
+the marks <code class="reqn">Y_i</code> on a time interval with duration
+<code>w</code>, the number <code class="reqn">N</code> of these marks being a r.v. with
+Poisson distribution. More precisely, the GEV distribution
+applies when <code class="reqn">N &gt; 0</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">poisGP2PP(lambda, loc = 0.0, scale = 1.0, shape = 0.0, w =
+    1.0, deriv = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>A numeric vector containing the Poisson rate(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc</code></td>
+<td>
+<p>A numeric vector containing the Generalized Pareto
+location, i.e. the threshold in the POT framework.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale, shape</code></td>
+<td>
+<p>Numeric vectors containing the Generalized
+Pareto scale and shape parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>The block duration. Its physical dimension is time and
+the product <code class="reqn">\lambda_u \times w</code> is
+dimensionless.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deriv</code></td>
+<td>
+<p>Logical. If <code>TRUE</code> the derivative (Jacobian) of
+the transformation is computed and returned as an attribute
+named <code>"gradient"</code> of the attribute.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The three PP parameters <code class="reqn">\mu^\star_w</code>,
+<code class="reqn">\sigma^\star_w</code> and <code class="reqn">\xi^\star</code>
+relate to the Poisson-GP parameters according to
+</p>
+<p style="text-align: center;"><code class="reqn">\left\{ \begin{array}{c c l} \mu^\star_w &amp;=&amp; u +
+        \frac{(\lambda_u w)^\xi - 1}{\xi} \, \sigma_u, \\
+        \sigma^\star_w &amp;=&amp; (\lambda_u w)^\xi \, \sigma_u,\\
+        \xi^\star &amp;=&amp; \xi, \end{array} \right.</code>
+</p>
+
+<p>the fraction <code class="reqn">[(\lambda_u w)^\xi - 1] / \xi</code> of the first
+equation being to be replaced for <code class="reqn">\xi = 0</code> by its limit
+<code class="reqn">\log(\lambda_u w)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric matrix with three columns representing the
+Point-Process parameters <code>loc</code>
+<code class="reqn">\mu^\star_w</code>, <code>scale</code>
+<code class="reqn">\sigma^\star_w</code> and <code>shape</code>
+<code class="reqn">\xi^\star</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function is essentially a re-implementation in C of the
+function <code>Ren2gev</code> of <b>Renext</b>. As a
+major improvement, this function is "vectorized" w.r.t. the
+parameters so it can transform efficiently a large number of
+Poisson-GP parameter vectors as can be required e.g. in a MCMC
+Bayesian inference. Note also that this function copes with
+values near zero for the shape parameter: it suitably computes
+then both the function value and its derivatives.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>PP2poisGP</code> for the reciprocal
+transformation.
+</p>
+
+
+</div>

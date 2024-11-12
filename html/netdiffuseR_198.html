@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rgraph_ba</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Scale-free and Homophilic Random Networks</h2>
+
+<h3>Description</h3>
+
+<p>Generates a scale-free random graph based on Bollabas et al. (2001), also know as
+<em>Linearized Chord Diagram</em> (LCD) which has nice mathematical propoerties.
+And also scale-free homophilic networks when an vertex attribute <code>eta</code> is
+passed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rgraph_ba(m0 = 1L, m = 1L, t = 10L, graph = NULL, self = TRUE, eta = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>m0</code></td>
+<td>
+<p>Integer scalar. Number of initial vertices in the graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>Integer scalar. Number of new edges per vertex added.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Integer scalar. Number of time periods (steps).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>Any class of accepted graph format (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>self</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> autolinks (loops, self edges) are allowed (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>Numeric vector of length <code>t+m0</code>. When specified, it generates
+a scale-free homophilic network (see details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Based on Ballobás et al. (2001) creates a directed random graph of size
+<code>t + m0</code>. A big difference with B-A model
+is that this allows for loops (self/auto edges) and further multiple links,
+nevertheless, as <code class="reqn">t</code> increases, the number of such cases reduces.
+</p>
+<p>By default, the degree of the first <code>m0</code> vertices is set to be 2 (loops).
+When <code>m&gt;1</code>, as described in the paper, each new link from the new vertex
+is added one at a time
+“counting ‘outward half’ of the edge being added as already contributing to the degrees”.
+</p>
+<p>When <code>self=FALSE</code>, the generated graph is created without autolinks. This
+means that at the beginning, if the number of links equals zero, all vertices
+have the same probability of receiving a new link.
+</p>
+<p>When <code>eta</code> is passed, it implements the model specified in De Almeida et al.
+(2013), a scale-free homophilic network. To do so <code>eta</code> is rescaled to
+be between 0 and 1 and the probability that the node <code class="reqn">i</code> links to node <code class="reqn">j</code>
+is as follows:
+</p>
+<p style="text-align: center;"><code class="reqn">
+\frac{(1-A_{ij})k_j}{\sum_j (1-A_{ij})k_j}
+</code>
+</p>
+
+<p>Where <code class="reqn">A_{ij} = |\eta_i - \eta_j|</code> and
+<code class="reqn">k_j</code> is the degree of the <code class="reqn">j</code>-th vertex.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>graph</code> is not provided, a static graph, otherwise an expanded
+graph (<code>t</code> aditional vertices) of the same class as <code>graph</code>.
+</p>
+<p>The resulting graph will have <code>graph$meta$undirected = FALSE</code> if it is of
+class <code>diffnet</code> and <code>attr(graph, "undirected")=FALSE</code> otherwise.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>References</h3>
+
+<p>Bollobás, B´., Riordan, O., Spencer, J., &amp; Tusnády, G. (2001). The degree
+sequence of a scale-free random graph process. Random Structures &amp; Algorithms,
+18(3), 279–290. <a href="https://doi.org/10.1002/rsa.1009">doi:10.1002/rsa.1009</a>
+</p>
+<p>Albert-László Barabási, &amp; Albert, R. (1999). Emergence of Scaling in Random
+Networks. Science, 286(5439), 509–512. <a href="https://doi.org/10.1126/science.286.5439.509">doi:10.1126/science.286.5439.509</a>
+</p>
+<p>Albert-László Barabási. (2016). Network Science: (1st ed.). Cambridge University Press.
+Retrieved from <a href="https://barabasi.com/book/network-science">https://barabasi.com/book/network-science</a>
+</p>
+<p>De Almeida, M. L., Mendes, G. A., Madras Viswanathan, G., &amp; Da Silva, L. R. (2013).
+Scale-free homophilic network. European Physical Journal B, 86(2).
+<a href="https://doi.org/10.1140/epjb/e2012-30802-x">doi:10.1140/epjb/e2012-30802-x</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other simulation functions: 
+<code>permute_graph()</code>,
+<code>rdiffnet()</code>,
+<code>rewire_graph()</code>,
+<code>rgraph_er()</code>,
+<code>rgraph_ws()</code>,
+<code>ring_lattice()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Using another graph as a base graph ---------------------------------------
+graph &lt;- rgraph_ba()
+graph
+
+graph &lt;- rgraph_ba(graph=graph)
+
+# Generating a scale-free homophilic graph (no loops) -----------------------
+set.seed(112)
+eta &lt;- rep(c(1,1,1,1,2,2,2,2), 20)
+ans &lt;- rgraph_ba(t=length(eta) - 1, m=3, self=FALSE, eta=eta)
+
+# Converting it to igraph (so we can plot it)
+ig  &lt;- igraph::graph_from_adjacency_matrix(ans)
+
+# Neat plot showing the output
+oldpar &lt;- par(no.readonly = TRUE)
+par(mfrow=c(1,2))
+plot(ig, vertex.color=c("red","blue")[factor(eta)], vertex.label=NA,
+    vertex.size=5, main="Scale-free homophilic graph")
+suppressWarnings(plot(dgr(ans), main="Degree distribution"))
+par(oldpar)
+
+</code></pre>
+
+
+</div>

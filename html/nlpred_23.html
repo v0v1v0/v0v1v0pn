@@ -1,0 +1,239 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cv_auc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimates of CVAUC</h2>
+
+<h3>Description</h3>
+
+<p>This function computes K-fold cross-validated estimates of the area under
+the receiver operating characteristics (ROC) curve (hereafter, AUC). This
+quantity can be interpreted as the probability that a randomly selected 
+case will have higher predicted risk than a randomly selected control.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cv_auc(
+  Y,
+  X,
+  K = 10,
+  learner = "glm_wrapper",
+  nested_cv = TRUE,
+  nested_K = K - 1,
+  parallel = FALSE,
+  max_cvtmle_iter = 10,
+  cvtmle_ictol = 1/length(Y),
+  prediction_list = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>A numeric vector of outcomes, assume to equal <code>0</code> or <code>1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A <code>data.frame</code> or <code>matrix</code> of variables for prediction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>The number of cross-validation folds (default is <code>10</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>learner</code></td>
+<td>
+<p>A wrapper that implements the desired method for building a 
+prediction algorithm. See See <code>?glm_wrapper</code> or read the package vignette
+for more information on formatting <code>learner</code>s.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nested_cv</code></td>
+<td>
+<p>A boolean indicating whether nested cross validation should
+be used to estimate the distribution of the prediction function. Default (<code>TRUE</code>)
+is best choice for aggressive <code>learner</code>'s, while <code>FALSE</code> is reasonable
+for smooth <code>learner</code>'s (e.g., logistic regression).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nested_K</code></td>
+<td>
+<p>If nested cross validation is used, how many inner folds should 
+there be? Default (<code>K-1</code>) affords quicker computation by reusing training
+fold learner fits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>A boolean indicating whether prediction algorithms should be 
+trained in parallel. Default to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_cvtmle_iter</code></td>
+<td>
+<p>Maximum number of iterations for the bias correction
+step of the CV-TMLE estimator (default <code>10</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvtmle_ictol</code></td>
+<td>
+<p>The CV-TMLE will iterate <code>max_cvtmle_iter</code> is reached 
+or mean of cross-validated efficient influence function is less than 
+<code>cvtmle_ictol</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prediction_list</code></td>
+<td>
+<p>For power users: a list of predictions made by <code>learner</code>
+that has a format compatible with <code>cvauc</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments, not currently used</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To estimate the AUC of a particular prediction algorithm, K-fold cross-validation
+is commonly used: data are partitioned into K distinct groups and the
+prediction algorithm is developed using K-1 of these groups. In standard K-fold
+cross-validation, the AUC of this prediction algorithm is estimated using
+the remaining fold. This can be problematic when the number of observations is 
+small or the number of cross-validation folds is large. 
+</p>
+<p>Here, we estimate relevant nuisance parameters in the training sample and use
+the validation sample to perform some form of bias correction – either through
+cross-validated targeted minimum loss-based estimation, estimating equations, 
+or one-step estimation. When aggressive learning algorithms are applied, it is
+necessary to use an additional layer of cross-validation in the training sample
+to estimate the nuisance parameters. This is controlled via the <code>nested_cv</code>
+option below.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>"cvauc"</code>. </p>
+
+<dl>
+<dt><code>est_cvtmle</code></dt>
+<dd>
+<p>cross-validated targeted minimum loss-based estimator of K-fold CV AUC</p>
+</dd>
+<dt><code>iter_cvtmle</code></dt>
+<dd>
+<p>iterations needed to achieve convergence of CVTMLE algorithm</p>
+</dd>
+<dt><code>cvtmle_trace</code></dt>
+<dd>
+<p>the value of the CVTMLE at each iteration of the targeting algorithm</p>
+</dd>
+<dt><code>se_cvtmle</code></dt>
+<dd>
+<p>estimated standard error based on targeted nuisance parameters</p>
+</dd>
+<dt><code>est_init</code></dt>
+<dd>
+<p>plug-in estimate of CV AUC where nuisance parameters are estimated
+in the training sample</p>
+</dd>
+<dt><code>est_empirical</code></dt>
+<dd>
+<p>the standard K-fold CV AUC estimator</p>
+</dd>
+<dt><code>se_empirical</code></dt>
+<dd>
+<p>estimated standard error for the standard estimator</p>
+</dd>
+<dt><code>est_onestep</code></dt>
+<dd>
+<p>cross-validated one-step estimate of K-fold CV AUC</p>
+</dd>
+<dt><code>se_onestep</code></dt>
+<dd>
+<p>estimated standard error for the one-step estimator</p>
+</dd>
+<dt><code>est_esteq</code></dt>
+<dd>
+<p>cross-validated estimating equations estimate of K-fold CV AUC</p>
+</dd>
+<dt><code>se_esteq</code></dt>
+<dd>
+<p>estimated standard error for the estimating equations estimator 
+(same as for one-step)</p>
+</dd>
+<dt><code>folds</code></dt>
+<dd>
+<p>list of observation indexes in each validation fold</p>
+</dd>
+<dt><code>ic_cvtmle</code></dt>
+<dd>
+<p>influence function evaluated at the targeted nuisance parameter
+estimates</p>
+</dd>
+<dt><code>ic_onestep</code></dt>
+<dd>
+<p>influence function evaluated at the training-fold-estimated
+nuisance parameters</p>
+</dd>
+<dt><code>ic_esteq</code></dt>
+<dd>
+<p>influence function evaluated at the training-fold-estimated 
+nuisance parameters</p>
+</dd>
+<dt><code>ic_empirical</code></dt>
+<dd>
+<p>influence function evaluated at the validation-fold 
+estimated nuisance parameters</p>
+</dd>
+<dt><code>prediction_list</code></dt>
+<dd>
+<p>a list of output from the cross-validated model training; 
+see the individual wrapper function documentation for further details</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># simulate data
+n &lt;- 200
+p &lt;- 10
+X &lt;- data.frame(matrix(rnorm(n*p), nrow = n, ncol = p))
+Y &lt;- rbinom(n, 1, plogis(X[,1] + X[,10]))
+
+# get cv auc estimates for logistic regression
+cv_auc_ests &lt;- cv_auc(Y = Y, X = X, K = 5, learner = "glm_wrapper")
+
+# get cv auc estimates for random forest
+# using nested cross-validation for nuisance parameter estimation
+
+fit &lt;- cv_auc(Y = Y, X = X, K = 5, 
+              learner = "randomforest_wrapper", 
+              nested_cv = TRUE)
+
+</code></pre>
+
+
+</div>

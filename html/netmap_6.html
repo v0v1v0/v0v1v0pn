@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ggnetmap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fortify a network over a map</h2>
+
+<h3>Description</h3>
+
+<p>Link a <code>network</code> or <code>igraph</code> and a <code>sf</code> object in a
+<code>data.frame</code> for subsequent representation on a plot using <code>ggplot2</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ggnetmap(
+  n,
+  m,
+  lkp = NULL,
+  m_name = NULL,
+  n_name = "vertex.names",
+  scale = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>A <code>network</code> or <code>igraph</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>A <code>sf</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lkp</code></td>
+<td>
+<p>An optional lookup table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m_name</code></td>
+<td>
+<p>Optional <code>character</code>, name of field in <code>m</code> and of
+column in <code>lkp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_name</code></td>
+<td>
+<p>Optional <code>character</code>, name of vertex attribute in <code>n</code>
+and of column in <code>lkp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>Whether coordinates should be scaled (defaults to FALSE since the
+network should be overlayed with the non-scaled <code>sf</code> object).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters passed to <code>fortify</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Using a <code>network</code> or <code>igraph</code> and a <code>sf</code> object as inputs,
+with an optional lookup table (a <code>data.frame</code>) in case the IDs don't
+match, produces a <code>data.frame</code> that can be used with <code>ggnetwork</code>'s
+<code>geom_edges</code> and <code>geom_nodes</code>
+functions to represent the network as overlayed on a <code>sf</code> object in a
+<code>ggplot2</code> graph. Only vertices with a corresponding feature in the
+<code>sf</code> object are included.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame, produced by <code>fortify</code>, which can be
+used as data source in <code>ggplot2</code> graphs.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">net=network::network(matrix(c(0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0), nrow=4, byrow=TRUE))
+network::set.vertex.attribute(net, "name", value=c("a", "b", "c", "d"))
+wkb = structure(list("01010000204071000000000000801A064100000000AC5C1641",
+"01010000204071000000000000801A084100000000AC5C1441",
+"01010000204071000000000000801A044100000000AC5C1241",
+"01010000204071000000000000801A024100000000AC5C1841"), class = "WKB")
+map=sf::st_sf(id=c("a1", "b2", "c3", "d4"), sf::st_as_sfc(wkb, EWKB=TRUE))
+lkptbl=data.frame(id=c("a1", "b2", "c3", "d4"), name=c("a", "b", "c", "d"))
+ggnetmap(net, map, lkptbl, "id", "name")
+</code></pre>
+
+
+</div>

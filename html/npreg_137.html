@@ -1,0 +1,621 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ss</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fit a Smoothing Spline
+</h2>
+
+<h3>Description</h3>
+
+<p>Fits a smoothing spline with the smoothing parameter selected via one of eight methods: GCV, OCV, GACV, ACV, REML, ML, AIC, or BIC.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ss(x, y = NULL, w = NULL, df, spar = NULL, lambda = NULL,
+   method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"), 
+   m = 2L, periodic = FALSE, all.knots = FALSE, nknots = .nknots.smspl, 
+   knots = NULL, keep.data = TRUE, df.offset = 0, penalty = 1, 
+   control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE,
+   xmin = NULL, xmax = NULL, homosced = TRUE, iter.max = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Predictor vector of length <code class="reqn">n</code>. Can also input a list or a two-column matrix specifying x and y.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>Response vector of length <code class="reqn">n</code>. If y is missing or NULL, the responses are assumed to be specified by x, with x the index vector.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+
+<p>Weights vector of length <code class="reqn">n</code>. Defaults to all 1.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+
+<p>Equivalent degrees of freedom (trace of the smoother matrix). Must be in <code class="reqn">[m,nx]</code>, where <code class="reqn">nx</code> is the number of unique x values, see below.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spar</code></td>
+<td>
+
+<p>Smoothing parameter. Typically (but not always) in the range <code class="reqn">(0,1]</code>. If specified <code>lambda = 256^(3*(spar-1))</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+
+<p>Computational smoothing parameter. This value is weighted by <code class="reqn">n</code> to form the penalty coefficient (see Details). Ignored if <code>spar</code> is provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Method for selecting the smoothing parameter. Ignored if <code>spar</code> or <code>lambda</code> is provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+
+<p>Penalty order (integer). The penalty functional is the integrated squared <code class="reqn">m</code>-th derivative of the function. Defaults to <code class="reqn">m = 2</code>, which is a cubic smoothing spline. Set <code class="reqn">m = 1</code> for a linear smoothing spline or <code class="reqn">m = 3</code> for a quintic smoothing spline.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>periodic</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, the estimated function <code class="reqn">f(x)</code> is constrained to be periodic, i.e., <code class="reqn">f(a) = f(b)</code> where <code class="reqn">a = \min(x)</code> and <code class="reqn">b = \max(x)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.knots</code></td>
+<td>
+
+<p>If <code>TRUE</code>, all distinct points in x are used as knots. If <code>FALSE</code> (default), a sequence knots is placed at the quantiles of the unique x values; in this case, the input <code>nknots</code> specifies the number of knots in the sequence. Ignored if the knot values are input using the <code>knots</code> argument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nknots</code></td>
+<td>
+
+<p>Positive integer or function specifying the number of knots. Ignored if either <code>all.knots = TRUE</code> or the knot values are input using the <code>knots</code> argument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knots</code></td>
+<td>
+
+<p>Vector of knot values for the spline. Should be unique and within the range of the x values (to avoid a warning). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.data</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, the original data as a part of the output object.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.offset</code></td>
+<td>
+
+<p>Allows the degrees of freedom to be increased by <code>df.offset</code> in the GCV criterion.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+
+<p>The coefficient of the penalty for degrees of freedom in the GCV criterion.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.spar</code></td>
+<td>
+
+<p>Optional list with named components controlling the root finding when the smoothing parameter spar is computed, i.e., missing or NULL, see below.
+</p>
+<p><b>Note</b> that spar is only searched for in the interval <code class="reqn">[lower, upper]</code>.
+</p>
+
+<dl>
+<dt>lower:</dt>
+<dd>
+<p>lower bound for spar; defaults to -1.5
+</p>
+</dd>
+<dt>upper:</dt>
+<dd>
+<p>upper bound for spar; defaults to 1.5
+</p>
+</dd>
+<dt>tol:</dt>
+<dd>
+<p>the absolute precision (<b>tol</b>erance) used by <code>optimize</code>; defaults to 1e-8.
+</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+
+<p>Tolerance for same-ness or uniqueness of the x values. The values are binned into bins of size tol and values which fall into the same bin are regarded as the same. Must be strictly positive (and finite).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bernoulli</code></td>
+<td>
+
+<p>If <code>TRUE</code>, scaled Bernoulli polynomials are used for the basis and penalty functions. If <code>FALSE</code>, produces the "classic" definition of a smoothing spline, where the function estimate is a piecewise polynomial function with pieces of degree <code class="reqn">2m - 1</code>. See <code>polynomial</code> for details.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xmin</code></td>
+<td>
+
+<p>Minimum x value used to transform predictor scores to [0,1]. If NULL,  <code>xmin = min(x)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xmax</code></td>
+<td>
+
+<p>Maximum x value used to transform predictor scores to [0,1]. If NULL,  <code>xmax = max(x)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>homosced</code></td>
+<td>
+
+<p>Are error variances homoscedastic? If <code>FALSE</code>, variance weights are (iteratively?) estimated from the data.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter.max</code></td>
+<td>
+
+<p>Maximum number of iterations for variance weight estimation. Ignored if <code>homosced = TRUE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Inspired by the <code>smooth.spline</code> function in R's <b>stats</b> package.
+</p>
+<p>Neither <code>x</code> nor <code>y</code> are allowed to containing missing or infinite values.
+</p>
+<p>The <code>x</code> vector should contain at least <code class="reqn">2m</code> distinct values. 'Distinct' here is controlled by <code>tol</code>: values which are regarded as the same are replaced by the first of their values and the corresponding <code>y</code> and <code>w</code> are pooled accordingly.
+</p>
+<p>Unless <code>lambda</code> has been specified instead of <code>spar</code>, the computational <code class="reqn">\lambda</code> used (as a function of <code>spar</code>) is <code class="reqn">\lambda = 256^{3(s - 1)}</code>, where <code class="reqn">s = </code> <code>spar</code>.
+</p>
+<p>If <code>spar</code> and <code>lambda</code> are missing or <code>NULL</code>, the value of <code>df</code> is used to determine the degree of smoothing. If <code>df</code> is missing as well, the specified <code>method</code> is used to determine <code class="reqn">\lambda</code>. 
+</p>
+<p>Letting <code class="reqn">f_i = f(x_i)</code>, the function is represented as </p>
+<p style="text-align: center;"><code class="reqn">f = X \beta + Z \alpha</code>
+</p>
+<p> where the basis functions in <code class="reqn">X</code> span the null space (i.e., functions with <code class="reqn">m</code>-th derivative of zero), and <code class="reqn">Z</code> contains the reproducing kernel function of the contrast space evaluated at all combinations of observed data points and knots, i.e., <code class="reqn">Z[i,j] = R(x_i, k_j)</code> where <code class="reqn">R</code> is the kernel function and <code class="reqn">k_j</code> is the <code class="reqn">j</code>-th knot. The vectors <code class="reqn">\beta</code> and <code class="reqn">\alpha</code> contain unknown basis function coefficients. 
+Letting <code class="reqn">M =  (X, Z)</code> and <code class="reqn">\gamma = (\beta', \alpha')'</code>, the penalized least squares problem has the form
+</p>
+<p style="text-align: center;"><code class="reqn">
+(y - M \gamma)' W (y - M \gamma) + n \lambda \alpha' Q \alpha
+</code>
+</p>
+
+<p>where <code class="reqn">W</code> is a diagonal matrix containg the weights, and <code class="reqn">Q</code> is the penalty matrix. Note that <code class="reqn">Q[i,j] = R(k_i, k_j)</code> contains the reproducing kernel function evaluated at all combinations of knots. The optimal coefficients are the solution to 
+</p>
+<p style="text-align: center;"><code class="reqn">
+(M' W M + n \lambda P) \gamma = M' W y
+</code>
+</p>
+
+<p>where <code class="reqn">P</code> is the penalty matrix <code class="reqn">Q</code> augmented with zeros corresponding to the <code class="reqn">\beta</code> in <code class="reqn">\gamma</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "ss" with components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>the distinct <code>x</code> values in increasing order; see Note.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>the fitted values corresponding to <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>the weights used at the unique values of <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yin</code></td>
+<td>
+<p>the <code>y</code> values used at the unique <code>y</code> values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>the <code>tol</code> argument (whose default depends on <code>x</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>only if keep.data = TRUE: itself a list with components <code>x</code>, <code>y</code> and <code>w</code> (if applicable). These are the original <code class="reqn">(x_i,y_i,w_i), i = 1, \ldots, n</code>, values where <code>data$x</code> may have repeated values and hence be longer than the above <code>x</code> component; see details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lev</code></td>
+<td>
+<p>leverages, the diagonal values of the smoother matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv.crit</code></td>
+<td>
+<p>cross-validation score.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen.crit</code></td>
+<td>
+<p>the penalized criterion, a non-negative number; simply the (weighted) residual sum of squares (RSS).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crit</code></td>
+<td>
+<p>the criterion value minimized in the underlying <code>df2lambda</code> function. When <code>df</code> is provided, the criterion is <code class="reqn">[tr(S_{\lambda}) - df]^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>equivalent degrees of freedom used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.residual</code></td>
+<td>
+<p>the residual degrees of freedom = <code>nobs - df</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spar</code></td>
+<td>
+<p>the value of <code>spar</code> computed or given, i.e., <code class="reqn">s = 1 + \log_{256}(\lambda)/3</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>the value of <code class="reqn">\lambda</code> corresponding to <code>spar</code>, i.e., <code class="reqn">\lambda = 256^{3(s-1)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>list for use by <code>predict.ss</code>, with components
+</p>
+
+<dl>
+<dt>n:</dt>
+<dd>
+<p>number of observations.</p>
+</dd>
+<dt>knot:</dt>
+<dd>
+<p>the knot sequence.</p>
+</dd>
+<dt>nk:</dt>
+<dd>
+<p>number of coefficients (# knots plus <code class="reqn">m</code>).</p>
+</dd>
+<dt>coef:</dt>
+<dd>
+<p>coefficients for the spline basis used.</p>
+</dd>
+<dt>min, range:</dt>
+<dd>
+<p>numbers giving the corresponding quantities of <code>x</code></p>
+</dd>
+<dt>m:</dt>
+<dd>
+<p>spline penalty order (same as input <code>m</code>)</p>
+</dd>
+<dt>periodic:</dt>
+<dd>
+<p>is spline periodic?</p>
+</dd>
+<dt>cov.sqrt</dt>
+<dd>
+<p>square root of covariance matrix of <code>coef</code> such that <code>tcrossprod(coef)</code> reconstructs the covariance matrix.</p>
+</dd>
+<dt>weighted</dt>
+<dd>
+<p>were weights <code>w</code> used in fitting?</p>
+</dd>
+<dt>df.offset</dt>
+<dd>
+<p>same as input</p>
+</dd>
+<dt>penalty</dt>
+<dd>
+<p>same as input</p>
+</dd>
+<dt>control.spar</dt>
+<dd>
+<p>control parameters for smoothing parameter selection</p>
+</dd>
+<dt>bernoulli</dt>
+<dd>
+<p>were Bernoulli polynomials used in fitting?</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the matched call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>estimated error standard deviation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logLik</code></td>
+<td>
+<p>log-likelihood (if <code>method</code> is REML or ML).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aic</code></td>
+<td>
+<p>Akaike's Information Criterion (if <code>method</code> is AIC).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bic</code></td>
+<td>
+<p>Bayesian Information Criterion (if <code>method</code> is BIC).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>smoothness penalty <code class="reqn">\alpha' Q \alpha</code>, which is the integrated squared <code class="reqn">m</code>-th derivative of the estimated function <code class="reqn">f(x)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>smoothing parameter selection method. Will be <code>NULL</code> if <code>df</code>, <code>spar</code>, or <code>lambda</code> is provided.</p>
+</td>
+</tr>
+</table>
+<h3>Methods </h3>
+
+<p>The smoothing parameter can be selected using one of eight methods: <br>
+Generalized Cross-Validation (GCV) <br>
+Ordinary Cross-Validation (OCV) <br>
+Generalized Approximate Cross-Validation (GACV) <br>
+Approximate Cross-Validation (ACV) <br>
+Restricted Maximum Likelihood (REML) <br>
+Maximum Likelihood (ML) <br>
+Akaike's Information Criterion (AIC) <br>
+Bayesian Information Criterion (BIC)
+</p>
+
+
+<h3>Note</h3>
+
+<p>The number of unique x values, nx, are determined by the tol argument, equivalently to
+</p>
+<p><code>nx &lt;- sum(!duplicated( round((x - mean(x)) / tol) ))</code>
+</p>
+<p>In this case where not all unique x values are used as knots, the result is not a smoothing spline in the strict sense, but very close unless a small smoothing parameter (or large <code>df</code>) is used.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>https://stat.ethz.ch/R-manual/R-devel/library/stats/html/smooth.spline.html
+</p>
+<p>Berry, L. N., &amp; Helwig, N. E. (2021). Cross-validation, information theory, or maximum likelihood? A comparison of tuning methods for penalized splines. <em>Stats, 4</em>(3), 701-724. <a href="https://doi.org/10.3390/stats4030042">doi:10.3390/stats4030042</a>
+</p>
+<p>Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. <em>Numerische Mathematik, 31</em>, 377-403. <a href="https://doi.org/10.1007/BF01404567">doi:10.1007/BF01404567</a>
+</p>
+<p>Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), <em>SAGE Research Methods Foundations.</em> <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+<p>Helwig, N. E. (2021). Spectrally sparse nonparametric regression via elastic net regularized smoothers. <em>Journal of Computational and Graphical Statistics, 30</em>(1), 182-191. <a href="https://doi.org/10.1080/10618600.2020.1806855">doi:10.1080/10618600.2020.1806855</a>
+</p>
+<p>Wahba, G. (1985). A comparison of GCV and GML for choosing the smoothing parameters in the generalized spline smoothing problem. <em>The Annals of Statistics, 4</em>, 1378-1402. <a href="https://doi.org/10.1214/aos/1176349743">doi:10.1214/aos/1176349743</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><b>Related Modeling Functions</b>: 
+</p>
+<p><code>sm</code> for fitting smooth models with multiple predictors of mixed types (Gaussian response). 
+</p>
+<p><code>gsm</code> for fitting generalized smooth models with multiple predictors of mixed types (non-Gaussian response). <br></p>
+<p><b>S3 Methods and Related Functions for "ss" Objects</b>:
+</p>
+<p><code>boot.ss</code> for bootstrapping <code>ss</code> objects.
+</p>
+<p><code>coef.ss</code> for extracting coefficients from <code>ss</code> objects.
+</p>
+<p><code>cooks.distance.ss</code> for calculating Cook's distances from <code>ss</code> objects.
+</p>
+<p><code>cov.ratio</code> for computing covariance ratio from <code>ss</code> objects.
+</p>
+<p><code>deviance.ss</code> for extracting deviance from <code>ss</code> objects.
+</p>
+<p><code>dfbeta.ss</code> for calculating DFBETA from <code>ss</code> objects.
+</p>
+<p><code>dfbetas.ss</code> for calculating DFBETAS from <code>ss</code> objects.
+</p>
+<p><code>diagnostic.plots</code> for plotting regression diagnostics from <code>ss</code> objects.
+</p>
+<p><code>fitted.ss</code> for extracting fitted values from <code>ss</code> objects.
+</p>
+<p><code>hatvalues.ss</code> for extracting leverages from <code>ss</code> objects.
+</p>
+<p><code>model.matrix.ss</code> for constructing model matrix from <code>ss</code> objects.
+</p>
+<p><code>plot.ss</code> for plotting predictions from <code>ss</code> objects.
+</p>
+<p><code>plot.boot.ss</code> for plotting <code>boot.ss</code> objects.
+</p>
+<p><code>predict.ss</code> for predicting from <code>ss</code> objects.
+</p>
+<p><code>residuals.ss</code> for extracting residuals from <code>ss</code> objects.
+</p>
+<p><code>rstandard.ss</code> for computing standardized residuals from <code>ss</code> objects.
+</p>
+<p><code>rstudent.ss</code> for computing studentized residuals from <code>ss</code> objects.
+</p>
+<p><code>smooth.influence</code> for calculating basic influence information from <code>ss</code> objects.
+</p>
+<p><code>smooth.influence.measures</code> for convenient display of influential observations from <code>ss</code> objects.
+</p>
+<p><code>summary.ss</code> for summarizing <code>ss</code> objects.
+</p>
+<p><code>vcov.ss</code> for extracting coefficient covariance matrix from <code>ss</code> objects.
+</p>
+<p><code>weights.ss</code> for extracting prior weights from <code>ss</code> objects.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+fx &lt;- 2 + 3 * x + sin(2 * pi * x)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# GCV selection (default)
+ss.GCV &lt;- ss(x, y, nknots = 10)
+ss.GCV
+
+# OCV selection
+ss.OCV &lt;- ss(x, y, method = "OCV", nknots = 10)
+ss.OCV
+
+# GACV selection
+ss.GACV &lt;- ss(x, y, method = "GACV", nknots = 10)
+ss.GACV
+
+# ACV selection
+ss.ACV &lt;- ss(x, y, method = "ACV", nknots = 10)
+ss.ACV
+
+# ML selection
+ss.ML &lt;- ss(x, y, method = "ML", nknots = 10)
+ss.ML
+
+# REML selection
+ss.REML &lt;- ss(x, y, method = "REML", nknots = 10)
+ss.REML
+
+# AIC selection
+ss.AIC &lt;- ss(x, y, method = "AIC", nknots = 10)
+ss.AIC
+
+# BIC selection
+ss.BIC &lt;- ss(x, y, method = "BIC", nknots = 10)
+ss.BIC
+
+# compare results
+mean( ( fx - ss.GCV$y )^2 )
+mean( ( fx - ss.OCV$y )^2 )
+mean( ( fx - ss.GACV$y )^2 )
+mean( ( fx - ss.ACV$y )^2 )
+mean( ( fx - ss.ML$y )^2 )
+mean( ( fx - ss.REML$y )^2 )
+mean( ( fx - ss.AIC$y )^2 )
+mean( ( fx - ss.BIC$y )^2 )
+
+# plot results
+plot(x, y)
+rlist &lt;- list(ss.GCV, ss.OCV, ss.GACV, ss.ACV,
+              ss.REML, ss.ML, ss.AIC, ss.BIC)
+for(j in 1:length(rlist)){
+   lines(rlist[[j]], lwd = 2, col = j)
+}
+
+</code></pre>
+
+
+</div>

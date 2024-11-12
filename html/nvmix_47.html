@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>riskmeasures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Risk measures for normal variance mixtures</h2>
+
+<h3>Description</h3>
+
+<p>Estimation of value-at-risk and expected shortfall for univariate
+normal variance mixtures
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">VaR_nvmix(level, qmix, loc = 0, scale = 1, control = list(), verbose = TRUE, ...)
+ES_nvmix(level, qmix, loc = 0, scale = 1, control = list(), verbose = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p><code class="reqn">n</code>-<code>vector</code> of confidence levels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmix</code></td>
+<td>
+<p>see <code>pnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc</code></td>
+<td>
+<p><code>numeric</code> location, see also <code>pnvmix()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p><code>numeric</code> scale, see also <code>pnvmix()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p><code>list</code> specifying algorithm specific
+parameters; see <code>get_set_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p><code>logical</code>
+indicating whether a warning is given if the required precision
+has not been reached.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (for example, parameters) passed to
+the underlying mixing distribution when <code>qmix</code> is a
+<code>character</code> string or <code>function</code>, see also
+<code>pnvmix()</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>VaR_nvmix</code> calls <code>qnvmix()</code>.
+</p>
+<p>The function <code>ES_nvmix()</code> estimates the expected shortfall using a
+randomized quasi Monte Carlo procedure by sampling from the mixing variable
+specified via <code>qmix</code> and and using the identity
+<code class="reqn">\int_k^{\infty} x\phi(x)dx=\phi(k)</code> where <code class="reqn">\phi(x)</code> denotes the
+density of a standard normal distribution.
+Algorithm specific paramaters (such as tolerances) can be conveniently passed
+via the <code>control</code> argument, see <code>get_set_param()</code> for more
+details.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>VaR_nvmix()</code> and <code>ES_nvmix()</code> return
+a <code>numeric</code> <code class="reqn">n</code>-vector with the computed
+risk measures and in case of <code>ES_nvmix()</code> corresponding attributes
+<code>"abs. error"</code> and <code>"rel. error"</code>(error estimates of the RQMC estimator)
+and <code>"numiter"</code> (number of iterations).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dnvmix()</code>, <code>pnvmix()</code>, <code>qnvmix()</code>,
+<code>rnvmix()</code>, <code>get_set_param()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Example for inverse-gamma mixture (resulting in a t distribution) for
+## which the expected shortfall admits a closed formula
+set.seed(42) # reproducibility
+level &lt;- seq(from = 0.9, to = 0.95, by = 0.01)
+df &lt;- 4
+## If 'qmix' is provided as string, ES_nvmix() uses the closed formula
+ES1 &lt;- ES_nvmix(level, qmix = "inverse.gamma", df = df)
+## If 'qmix' is provided as function, the expected shortfall is estimated
+ES2 &lt;- ES_nvmix(level, qmix = function(u, df) 1/qgamma(1-u, shape = df/2, rate = df/2),
+       df = df)
+stopifnot(all.equal(ES1, ES2, tol = 1e-2, check.attributes = FALSE))
+</code></pre>
+
+
+</div>

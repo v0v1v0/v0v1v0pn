@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.HessMLP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot method for the HessMLP Class</h2>
+
+<h3>Description</h3>
+
+<p>Plot the sensitivities and sensitivity metrics of a <code>HessMLP</code> object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'HessMLP'
+plot(
+  x,
+  plotType = c("sensitivities", "time", "features", "matrix", "interactions"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>HessMLP</code> object created by <code>HessianMLP</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotType</code></td>
+<td>
+<p><code>character</code> specifying which type of plot should be created. It can be:
+</p>
+
+<ul>
+<li>
+<p> "sensitivities" (default): use <code>HessianMLP</code> function
+</p>
+</li>
+<li>
+<p> "time": use <code>SensTimePlot</code> function
+</p>
+</li>
+<li>
+<p> "features": use  <code>HessFeaturePlot</code> function
+</p>
+</li>
+<li>
+<p> "matrix": use <code>SensMatPlot</code> function to show the values
+of second partial derivatives
+</p>
+</li>
+<li>
+<p> "interactions": use <code>SensMatPlot</code> function to show the
+values of second partial derivatives and the first partial derivatives in the diagonal
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional parameters passed to plot function of the <code>NeuralSens</code> package</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>list of graphic objects created by <code>ggplot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#' ## Load data -------------------------------------------------------------------
+data("DAILY_DEMAND_TR")
+fdata &lt;- DAILY_DEMAND_TR
+
+## Parameters of the NNET ------------------------------------------------------
+hidden_neurons &lt;- 5
+iters &lt;- 250
+decay &lt;- 0.1
+
+################################################################################
+#########################  REGRESSION NNET #####################################
+################################################################################
+## Regression dataframe --------------------------------------------------------
+# Scale the data
+fdata.Reg.tr &lt;- fdata[,2:ncol(fdata)]
+fdata.Reg.tr[,3] &lt;- fdata.Reg.tr[,3]/10
+fdata.Reg.tr[,1] &lt;- fdata.Reg.tr[,1]/1000
+
+# Normalize the data for some models
+preProc &lt;- caret::preProcess(fdata.Reg.tr, method = c("center","scale"))
+nntrData &lt;- predict(preProc, fdata.Reg.tr)
+
+#' ## TRAIN nnet NNET --------------------------------------------------------
+# Create a formula to train NNET
+form &lt;- paste(names(fdata.Reg.tr)[2:ncol(fdata.Reg.tr)], collapse = " + ")
+form &lt;- formula(paste(names(fdata.Reg.tr)[1], form, sep = " ~ "))
+
+set.seed(150)
+nnetmod &lt;- nnet::nnet(form,
+                           data = nntrData,
+                           linear.output = TRUE,
+                           size = hidden_neurons,
+                           decay = decay,
+                           maxit = iters)
+# Try HessianMLP
+sens &lt;- NeuralSens::HessianMLP(nnetmod, trData = nntrData, plot = FALSE)
+
+plot(sens)
+plot(sens,"time")
+
+</code></pre>
+
+
+</div>

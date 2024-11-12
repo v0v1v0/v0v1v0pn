@@ -1,0 +1,724 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kernel Regression with Mixed Data Types</h2>
+
+<h3>Description</h3>
+
+<p><code>npreg</code> computes a kernel regression estimate of a one
+(1) dimensional dependent variable on <code class="reqn">p</code>-variate explanatory
+data, given a set of evaluation points, training points (consisting of
+explanatory data and dependent data), and a bandwidth specification
+using the method of Racine and Li (2004) and Li and Racine (2004). A
+bandwidth specification can be a <code>rbandwidth</code> object, or a
+bandwidth vector, bandwidth type and kernel type.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npreg(bws, ...)
+
+## S3 method for class 'formula'
+npreg(bws, data = NULL, newdata = NULL, y.eval =
+FALSE, ...)
+
+## S3 method for class 'call'
+npreg(bws, ...)
+
+## Default S3 method:
+npreg(bws, txdat, tydat, ...)
+
+## S3 method for class 'rbandwidth'
+npreg(bws,
+      txdat = stop("training data 'txdat' missing"),
+      tydat = stop("training data 'tydat' missing"),
+      exdat,
+      eydat,
+      gradients = FALSE,
+      residuals = FALSE,
+      ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as a <code>rbandwidth</code>
+object returned from an invocation of <code>npregbw</code>, or
+as a vector of bandwidths, with each element <code class="reqn">i</code> corresponding
+to the bandwidth for column <code class="reqn">i</code> in <code>txdat</code>. If specified as
+a vector, then additional arguments will need to be supplied as
+necessary to specify the bandwidth type, kernel types, and so on.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the regression type,
+bandwidth type, kernel types, training data, and so on, detailed
+below. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(bws)</code>, typically the environment from which
+<code>npregbw</code> was called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, the training data are used.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y.eval</code></td>
+<td>
+
+<p>If <code>newdata</code> contains dependent data and <code>y.eval = TRUE</code>,
+<code>np</code> will compute goodness of fit statistics on these
+data and return them. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>txdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data (training data) used to
+calculate the regression estimators. Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>txdat</code>. Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of points on which the regression will be
+estimated (evaluation data). By default,
+evaluation takes place on the data provided by <code>txdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of the true values
+of the dependent variable. Optional, and used only to calculate the
+true errors. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradients</code></td>
+<td>
+
+<p>a logical value indicating that you want gradients computed and
+returned in the resulting <code>npregression</code> object. Defaults to
+<code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+
+<p>a logical value indicating that you want residuals computed and
+returned in the resulting <code>npregression</code> object. Defaults to
+<code>FALSE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Typical usages are (see below for a complete list of options and also
+the examples at the end of this help file)
+</p>
+<pre>
+    Usage 1: first compute the bandwidth object via npregbw and then
+    compute the conditional mean:
+    
+    bw &lt;- npregbw(y~x)
+    ghat &lt;- npreg(bw)
+    
+    Usage 2: alternatively, compute the bandwidth object indirectly:
+    
+    ghat &lt;- npreg(y~x)
+    
+    Usage 3: modify the default kernel and order:
+    
+    ghat &lt;- npreg(y~x, ckertype="epanechnikov", ckerorder=4)
+
+    Usage 4: use the data frame interface rather than the formula
+    interface:
+
+    ghat &lt;- npreg(tydat=y, txdat=x, ckertype="epanechnikov", ckerorder=4)
+  </pre>
+<p><code>npreg</code> implements a variety of methods for regression on
+multivariate (<code class="reqn">p</code>-variate) data, the types of which are possibly
+continuous and/or discrete (unordered, ordered). The approach is
+based on Li and Racine (2003) who employ ‘generalized product kernels’
+that admit a mix of continuous and discrete data types.
+</p>
+<p>Three classes of kernel estimators for the continuous data types are
+available: fixed, adaptive nearest-neighbor, and generalized
+nearest-neighbor. Adaptive nearest-neighbor bandwidths change with
+each sample realization in the set, <code class="reqn">x_i</code>, when estimating the
+density at the point <code class="reqn">x</code>. Generalized nearest-neighbor bandwidths change
+with the point at which the density is estimated, <code class="reqn">x</code>. Fixed bandwidths
+are constant over the support of <code class="reqn">x</code>.
+</p>
+<p>Data contained in the data frame <code>txdat</code> may be a mix of
+continuous (default), unordered discrete (to be specified in the data
+frame <code>txdat</code> using <code>factor</code>), and ordered discrete
+(to be specified in the data frame <code>txdat</code> using
+<code>ordered</code>). Data can be entered in an arbitrary order and
+data types will be detected automatically by the routine (see
+<code>np</code> for details).
+</p>
+<p>A variety of kernels may be specified by the user. Kernels implemented
+for continuous data types include the second, fourth, sixth, and eighth
+order Gaussian and Epanechnikov kernels, and the uniform
+kernel. Unordered discrete data types use a variation on Aitchison and
+Aitken's (1976) kernel, while ordered data types use a variation of the
+Wang and van Ryzin (1981) kernel.
+</p>
+<p>The use of compactly supported kernels or the occurrence of small
+bandwidths can lead to numerical problems for the local linear
+estimator when computing the locally weighted least squares
+solution. To overcome this problem we rely on a form or
+‘ridging’ proposed by Cheng, Hall, and Titterington (1997),
+modified so that we solve the problem pointwise rather than globally
+(i.e. only when it is needed).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npreg</code> returns a <code>npregression</code> object.
+The generic
+functions <code>fitted</code>, <code>residuals</code>,
+<code>se</code>, <code>predict</code>, and
+<code>gradients</code>, extract (or generate) estimated values,
+residuals, asymptotic standard
+errors on estimates, predictions, and gradients, respectively, from
+the returned object. Furthermore, the functions <code>summary</code>
+and <code>plot</code> support objects of this type. The returned object
+has the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p> evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean</code></td>
+<td>
+<p> estimates of the regression function (conditional mean) at the
+evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>merr</code></td>
+<td>
+<p> standard errors of the regression function estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grad</code></td>
+<td>
+<p> estimates of the gradients at each evaluation point </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gerr</code></td>
+<td>
+<p> standard errors of the gradient estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid</code></td>
+<td>
+<p> if <code>residuals = TRUE</code>, in-sample or out-of-sample
+residuals where appropriate (or possible) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R2</code></td>
+<td>
+<p> coefficient of determination (Doksum and Samarov (1995))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MSE</code></td>
+<td>
+<p> mean squared error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MAE</code></td>
+<td>
+<p> mean absolute error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MAPE</code></td>
+<td>
+<p> mean absolute percentage error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CORR</code></td>
+<td>
+<p> absolute value of Pearson's correlation coefficient </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SIGN</code></td>
+<td>
+<p> fraction of observations where fitted and observed values
+agree in sign </p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Cheng, M.-Y. and P. Hall and D.M. Titterington (1997), “On the
+shrinkage of local linear curve estimators,” Statistics and Computing,
+7, 11-17.
+</p>
+<p>Doksum, K. and A. Samarov (1995), “Nonparametric estimation of
+global functionals and a measure of the explanatory power of
+covariates in regression,” The Annals of Statistics, 23 1443-1473.  
+</p>
+<p>Hall, P. and Q. Li and J.S. Racine (2007), “Nonparametric
+estimation of regression functions in the presence of irrelevant
+regressors,” The Review of Economics and Statistics, 89, 784-789.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics: Theory
+and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2004), “Cross-validated local linear
+nonparametric regression,” Statistica Sinica, 14, 485-512.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em>
+Cambridge University Press.
+</p>
+<p>Racine, J.S. and Q. Li (2004), “Nonparametric estimation of
+regression functions with both categorical and continuous data,”
+Journal of Econometrics, 119, 99-130.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth
+estimators for discrete distributions,” Biometrika, 68, 301-309.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>loess</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA): For this example, we compute a
+# bivariate nonparametric regression estimate for Giovanni Baiocchi's
+# Italian income panel (see Italy for details)
+
+data("Italy")
+attach(Italy)
+
+# First, compute the least-squares cross-validated bandwidths for the
+# local constant estimator (default).
+
+bw &lt;- npregbw(formula=gdp~ordered(year))
+
+# Now take these bandwidths and fit the model and gradients
+
+model &lt;- npreg(bws = bw, gradients = TRUE)
+
+summary(model)
+
+# Use plot() to visualize the regression function, add bootstrap
+# error bars, and overlay the data on the same plot.
+
+# Note - this may take a minute or two depending on the speed of your
+# computer due to bootstrapping being conducted (&lt;ctrl&gt;-C will
+# interrupt). Note - nothing will appear in the graphics window until
+# all computations are completed (if you use
+# plot.errors.method="asymptotic" the figure will instantly appear).
+
+plot(bw, plot.errors.method="bootstrap")
+points(ordered(year), gdp, cex=.2, col="red")
+
+detach(Italy)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): For this example, we compute a
+# bivariate nonparametric regression estimate for Giovanni Baiocchi's
+# Italian income panel (see Italy for details)
+
+data("Italy")
+attach(Italy)
+
+# First, compute the least-squares cross-validated bandwidths for the
+# local constant estimator (default).
+
+bw &lt;- npregbw(xdat=ordered(year), ydat=gdp)
+
+# Now take these bandwidths and fit the model and gradients
+
+model &lt;- npreg(bws = bw, gradients = TRUE)
+
+summary(model)
+
+# Use plot() to visualize the regression function, add bootstrap
+# error bars, and overlay the data on the same plot.
+
+# Note - this may take a minute or two depending on the speed of your
+# computer due to bootstrapping being conducted (&lt;ctrl&gt;-C will
+# interrupt). Note - nothing will appear in the graphics window until
+# all computations are completed (if you use
+# plot.errors.method="asymptotic" the figure will instantly appear).
+
+plot(bw, plot.errors.method="bootstrap")
+points(ordered(year), gdp, cex=.2, col="red")
+
+detach(Italy)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# EXAMPLE 2 (INTERFACE=FORMULA): For this example, we compute a local
+# linear fit using the AIC_c bandwidth selection criterion. We then plot
+# the estimator and its gradient using asymptotic standard errors.
+
+data("cps71")
+attach(cps71)
+
+bw &lt;- npregbw(logwage~age, regtype="ll", bwmethod="cv.aic")
+
+# Next, plot the regression function...
+
+plot(bw, plot.errors.method="asymptotic")
+points(age, logwage, cex=.2, col="red")
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Next, plot the derivative...
+
+plot(bw, plot.errors.method="asymptotic", gradient=TRUE)
+
+detach(cps71)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# EXAMPLE 2 (INTERFACE=DATA FRAME): For this example, we compute a local
+# linear fit using the AIC_c bandwidth selection criterion. We then plot
+# the estimator and its gradient using asymptotic standard errors.
+
+data("cps71")
+attach(cps71)
+
+bw &lt;- npregbw(xdat=age, ydat=logwage, regtype="ll", bwmethod="cv.aic")
+
+# Next, plot the regression function...
+
+plot(bw, plot.errors.method="asymptotic")
+points(age, logwage, cex=.2, col="red")
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Next, plot the derivative...
+
+plot(bw, plot.errors.method="asymptotic", gradient=TRUE)
+
+detach(cps71)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# EXAMPLE 3 (INTERFACE=FORMULA): For this example, we replicate the
+# nonparametric regression in Maasoumi, Racine, and Stengos
+# (2007) (see oecdpanel for details). Note that X is multivariate
+# containing a mix of unordered, ordered, and continuous data types. Note
+# - this may take a few minutes depending on the speed of your computer.
+
+data("oecdpanel")
+attach(oecdpanel)
+
+bw &lt;- npregbw(formula=growth~
+              factor(oecd)+
+              factor(year)+
+              initgdp+
+              popgro+
+              inv+
+              humancap)
+
+plot(bw, plot.errors.method="asymptotic")
+
+detach(oecdpanel)
+
+# EXAMPLE 3 (INTERFACE=DATA FRAME): For this example, we replicate the
+# nonparametric regression in Maasoumi, Racine, and Stengos
+# (2007) (see oecdpanel for details). Note that X is multivariate
+# containing a mix of unordered, ordered, and continuous data types. Note
+# - this may take a few minutes depending on the speed of your computer.
+
+data("oecdpanel")
+attach(oecdpanel)
+
+y &lt;- growth
+X &lt;- data.frame(factor(oecd), factor(year), initgdp, popgro, inv, humancap)
+
+bw &lt;- npregbw(xdat=X, ydat=y)
+
+plot(bw, plot.errors.method="asymptotic")
+
+detach(oecdpanel)
+
+
+# EXAMPLE 4 (INTERFACE=FORMULA): Experimental data - the effect of
+# vitamin C on tooth growth in guinea pigs
+#
+# Description:
+#
+#     The response is the length of odontoblasts (teeth) in each of 10
+#     guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and
+#     2 mg) with each of two delivery methods (orange juice or ascorbic
+#     acid).
+#
+# Usage:
+#
+#     ToothGrowth
+#
+# Format:
+#
+#     A data frame with 60 observations on 3 variables.
+#
+#       [,1]  len   numeric  Tooth length
+#       [,2]  supp  factor   Supplement type (VC or OJ).
+#       [,3]  dose  numeric  Dose in milligrams.
+
+library("datasets")
+attach(ToothGrowth)
+
+# Note - in this example, there are six cells. 
+
+bw &lt;- npregbw(formula=len~factor(supp)+ordered(dose))
+
+# Now plot the partial regression surfaces with bootstrapped
+# nonparametric confidence bounds
+
+plot(bw, plot.errors.method="bootstrap", plot.errors.type="quantile")
+
+detach(ToothGrowth)
+
+# EXAMPLE 4 (INTERFACE=DATA FRAME): Experimental data - the effect of
+# vitamin C on tooth growth in guinea pigs
+#
+# Description:
+#
+#     The response is the length of odontoblasts (teeth) in each of 10
+#     guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and
+#     2 mg) with each of two delivery methods (orange juice or ascorbic
+#     acid).
+#
+# Usage:
+#
+#     ToothGrowth
+#
+# Format:
+#
+#     A data frame with 60 observations on 3 variables.
+#
+#       [,1]  len   numeric  Tooth length
+#       [,2]  supp  factor   Supplement type (VC or OJ).
+#       [,3]  dose  numeric  Dose in milligrams.
+
+library("datasets")
+attach(ToothGrowth)
+
+# Note - in this example, there are six cells. 
+
+y &lt;- len
+X &lt;- data.frame(supp=factor(supp), dose=ordered(dose))
+
+bw &lt;- npregbw(X, y)
+
+# Now plot the partial regression surfaces with bootstrapped
+# nonparametric confidence bounds
+
+plot(bw, plot.errors.method="bootstrap", plot.errors.type="quantile")
+
+detach(ToothGrowth)
+
+# EXAMPLE 5 (INTERFACE=FORMULA): a pretty 2-d smoothing example adapted
+# from the R mgcv library which was written by Simon N. Wood.
+
+set.seed(12345)
+
+# This function generates a smooth nonlinear DGP
+
+dgp.func &lt;- function(x, z, sx=0.3, sz=0.4)
+  { (pi**sx*sz)*(1.2*exp(-(x-0.2)^2/sx^2-(z-0.3)^2/sz^2)+
+                 0.8*exp(-(x-0.7)^2/sx^2-(z-0.8)^2/sz^2))
+  }
+
+# Generate 500 observations, compute the true DGP (i.e., no noise), 
+# then a noisy sample
+
+n &lt;- 500
+
+x &lt;- runif(n)
+z &lt;- runif(n)
+
+xs &lt;- seq(0, 1, length=30)
+zs &lt;- seq(0, 1, length=30)
+
+X.eval &lt;- data.frame(x=rep(xs, 30), z=rep(zs, rep(30, 30)))
+
+dgp &lt;- matrix(dgp.func(X.eval$x, X.eval$z), 30, 30)
+
+y &lt;- dgp.func(x, z)+rnorm(n)*0.1
+
+# Prepare the screen for output... first, plot the true DGP
+
+split.screen(c(2, 1))
+
+screen(1)
+
+persp(xs, zs, dgp, xlab="x1", ylab="x2", zlab="y", main="True DGP")
+
+# Next, compute a local linear fit and plot that
+
+bw &lt;- npregbw(formula=y~x+z, regtype="ll", bwmethod="cv.aic")
+fit &lt;- fitted(npreg(bws=bw, newdata=X.eval))
+fit.mat &lt;- matrix(fit, 30, 30)
+
+screen(2)
+
+persp(xs, zs, fit.mat, xlab="x1", ylab="x2", zlab="y",
+      main="Local linear estimate")
+
+# EXAMPLE 5 (INTERFACE=DATA FRAME): a pretty 2-d smoothing example
+# adapted from the R mgcv library which was written by Simon N. Wood.
+
+set.seed(12345)
+
+# This function generates a smooth nonlinear DGP
+
+dgp.func &lt;- function(x, z, sx=0.3, sz=0.4)
+  { (pi**sx*sz)*(1.2*exp(-(x-0.2)^2/sx^2-(z-0.3)^2/sz^2)+
+                 0.8*exp(-(x-0.7)^2/sx^2-(z-0.8)^2/sz^2))
+  }
+
+# Generate 500 observations, compute the true DGP (i.e., no noise), 
+# then a noisy sample
+
+n &lt;- 500
+
+x &lt;- runif(n)
+z &lt;- runif(n)
+
+xs &lt;- seq(0, 1, length=30)
+zs &lt;- seq(0, 1, length=30)
+
+X &lt;- data.frame(x, z)
+X.eval &lt;- data.frame(x=rep(xs, 30), z=rep(zs, rep(30, 30)))
+
+dgp &lt;- matrix(dgp.func(X.eval$x, X.eval$z), 30, 30)
+
+y &lt;- dgp.func(x, z)+rnorm(n)*0.1
+
+# Prepare the screen for output... first, plot the true DGP
+
+split.screen(c(2, 1))
+
+screen(1)
+
+persp(xs, zs, dgp, xlab="x1", ylab="x2", zlab="y", main="True DGP")
+
+# Next, compute a local linear fit and plot that
+
+bw &lt;- npregbw(xdat=X, ydat=y, regtype="ll", bwmethod="cv.aic")
+fit &lt;- fitted(npreg(exdat=X.eval, bws=bw))
+fit.mat &lt;- matrix(fit, 30, 30)
+
+screen(2)
+
+persp(xs, zs, fit.mat, xlab="x1", ylab="x2", zlab="y",
+      main="Local linear estimate")
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

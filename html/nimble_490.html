@@ -1,0 +1,248 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>waic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Using WAIC</h2>
+
+<h3>Description</h3>
+
+<p>Details of the WAIC measure for comparing models. NIMBLE implements an online
+WAIC algorithm, computed during the course of the MCMC iterations.
+</p>
+
+
+<h3>Details</h3>
+
+<p>To obtain WAIC, set <code>WAIC = TRUE</code> in nimbleMCMC. If using a more
+customized workflow, set <code>enableWAIC = TRUE</code> in <code>configureMCMC</code>
+or (if skipping <code>configureMCMC</code>) in <code>buildMCMC</code>, followed by
+setting <code>WAIC = TRUE</code> in <code>runMCMC</code>, if using runMCMC to manage
+sample generation.
+</p>
+<p>By default, NIMBLE calculates WAIC using an online algorithm that updates
+required summary statistics at each post-burnin iteration of the MCMC.
+</p>
+<p>One can also use <code>calculateWAIC</code> to run an offline version of the
+WAIC algorithm after all MCMC sampling has been done. This allows calculation
+of WAIC from a matrix (or dataframe) of posterior samples and also retains
+compatibility with WAIC in versions of NIMBLE before 0.12.0. However, the
+offline algorithm is less flexible than the online algorithm and only
+provides conditional WAIC without the ability to group data points. See
+<code>help(calculateWAIC)</code> for details.
+</p>
+
+
+<h3>
+<code>controlWAIC</code> list</h3>
+
+<p>The <code>controlWAIC</code> argument is a list that controls the behavior of the
+WAIC algorithm and is passed to either <code>configureMCMC</code> or (if not using
+<code>configureMCMC</code>) <code>buildMCMC</code>. One can supply any of the following
+optional components:
+</p>
+<p><code>online</code>: Logical value indicating whether to calculate WAIC during the
+course of the MCMC. Default is <code>TRUE</code> and setting to <code>FALSE</code> is
+primarily for backwards compatibility to allow use of the old
+<code>calculateWAIC</code> method that calculates WAIC from monitored values after
+the MCMC finishes.
+</p>
+<p><code>dataGroups</code>: Optional list specifying grouping of data nodes,
+one element per group, with each list element containing the node names
+for the data nodes in that group. If provided, the predictive density values
+computed will be the joint density values, one joint density per group.
+Defaults to one data node per 'group'. See details.
+</p>
+<p><code>marginalizeNodes</code>: Optional set of nodes (presumably latent nodes)
+over which to marginalize to compute marginal WAIC (i.e., WAIC based on a
+marginal likelihood), rather than the default conditional WAIC (i.e., WAIC
+conditioning on all parent nodes of the data nodes). See details.
+</p>
+<p><code>niterMarginal</code>: Number of Monte Carlo iterations to use when
+marginalizing (default is 1000).
+</p>
+<p><code>convergenceSet</code>: Optional vector of numbers between 0 and 1 that
+specify a set of shorter Monte Carlo simulations for marginal WAIC
+calculation as fractions of the full (<code>niterMarginal</code>) Monte Carlo
+simulation. If not provided, NIMBLE will use 0.25, 0.50, and 0.75.
+NIMBLE will report the WAIC, lppd, and pWAIC that would have been obtained
+for these smaller Monte Carlo simulations, allowing assessment of the number
+of Monte Carlo samples needed for stable calculation of WAIC.
+</p>
+<p><code>thin</code>: Logical value for specifying whether to do WAIC calculations
+only on thinned samples (default is <code>FALSE</code>). Likely only useful for
+reducing computation when using marginal WAIC.
+</p>
+<p><code>nburnin_extra</code>: Additional number of pre-thinning MCMC iterations
+to discard before calculating online WAIC. This number is discarded in
+addition to the usual MCMC burnin, <code>nburnin</code>. The purpose of this
+option is to allow a user to retain some samples for inspection without
+having those samples used for online WAIC calculation (default = 0).
+</p>
+
+
+<h3>Extracting WAIC</h3>
+
+<p>The calculated WAIC and related quantities can be obtained in various ways
+depending on how the MCMC is run. If using <code>nimbleMCMC</code> and setting
+<code>WAIC = TRUE</code>, see the <code>WAIC</code> component of the output list. If using
+<code>runMCMC</code> and setting <code>WAIC = TRUE</code>, either see the <code>WAIC</code>
+component of the output list or use the <code>getWAIC</code> method of the MCMC
+object (in the latter case <code>WAIC = TRUE</code> is not required). If using
+the <code>run</code> method of the MCMC object, use the <code>getWAIC</code> method of
+the MCMC object.
+</p>
+<p>The output of running WAIC (unless one sets <code>online = FALSE</code>) is a list
+containing the following components:
+</p>
+<p><code>WAIC</code>: The computed WAIC, on the deviance scale. Smaller values are
+better when comparing WAIC for two models.
+</p>
+<p><code>lppd</code>: The log predictive density component of WAIC.
+</p>
+<p><code>pWAIC</code>: The pWAIC estimate of the effective number of parameters,
+computed using the <em>p</em>WAIC2 method of Gelman et al. (2014).
+</p>
+<p>To get further information, one can use the <code>getWAICdetails</code> method
+of the MCMC object.  The result of running <code>getWAICdetails</code> is a list
+containing the following components:
+</p>
+<p><code>marginal</code>: Logical value indicating whether marginal (<code>TRUE</code>) or
+conditional (<code>FALSE</code>) WAIC was calculated.
+</p>
+<p><code>niterMarginal</code>: Number of Monte Carlo iterations used in computing
+marginal likelihoods if using marginal WAIC.
+</p>
+<p><code>thin</code>: Whether WAIC was calculated based only on thinned samples.
+</p>
+<p><code>online</code>: Whether WAIC was calculated during MCMC sampling.
+</p>
+<p><code>nburnin_extra</code>: Number of additional iterations discarded as burnin,
+in addition to original MCMC burnin.
+</p>
+<p><code>WAIC_partialMC</code>, <code>lppd_partialMC</code>, <code>pWAIC_partialMC</code>: The
+computed marginal WAIC, lppd, and pWAIC based on fewer Monte Carlo
+simulations, for use in assessing the sensitivity of the WAIC calculation
+to the number of Monte Carlo iterations.
+</p>
+<p><code>niterMarginal_partialMC</code>: Number of Monte Carlo iterations used for the
+values in <code>WAIC_partialMC</code>, <code>lppd_partialMC</code>, <code>pWAIC_partialMC</code>.
+</p>
+<p><code>WAIC_elements</code>, <code>lppd_elements</code>, <code>pWAIC_elements</code>: Vectors of
+individual WAIC, lppd, and pWAIC values, one element per data node (or group
+of nodes in the case of specifying <code>dataGroups</code>). Of use in computing
+the standard error of the difference in WAIC between two models, following
+Vehtari et al. (2017).
+</p>
+
+
+<h3>Online WAIC</h3>
+
+<p>As of version 0.12.0, NIMBLE provides enhanced WAIC functionality, with user
+control over whether to use conditional or marginal versions of WAIC and
+whether to group data nodes. In addition, users are no longer required to
+carefully choose MCMC monitors. WAIC by default is now calculated in an online
+manner (updating the required summary statistics at each MCMC iteration),
+using all post-burnin samples. The WAIC (Watanabe, 2010) is calculated from
+Equations 5, 12, and 13 in Gelman et al. (2014) (i.e., using 'pWAIC2').
+</p>
+<p>Note that there is not a unique value of WAIC for a model. By default, WAIC
+is calculated conditional on the parent nodes of the data nodes, and the
+density values used are the individual density values of the data nodes.
+However, by modifying the <code>marginalizeNodes</code> and <code>dataGroups</code>
+elements of the control list, users can request a marginal WAIC (using a
+marginal likelihood that integrates over user-specified latent nodes) and/or
+a WAIC based on grouping observations (e.g., all observations in a cluster)
+to use joint density values. See the MCMC Chapter of the NIMBLE
+<a href="https://r-nimble.org/html_manual/cha-mcmc.html">User Manual</a>
+for more details.
+</p>
+<p>For more detail on the use of different predictive distributions, see Section
+2.5 from Gelman et al. (2014) or Ariyo et al. (2019).
+</p>
+<p>Note that based on a limited set of simulation experiments in Hug and Paciorek
+(2021) our tentative recommendation is that users only use marginal WAIC if
+also using grouping.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Joshua Hug and Christopher Paciorek
+</p>
+
+
+<h3>References</h3>
+
+<p>Watanabe, S. (2010). Asymptotic equivalence of Bayes cross validation and
+widely applicable information criterion in singular learning theory.
+<em>Journal of Machine Learning Research</em> 11: 3571-3594.
+</p>
+<p>Gelman, A., Hwang, J. and Vehtari, A. (2014). Understanding predictive
+information criteria for Bayesian models.
+<em>Statistics and Computing</em> 24(6): 997-1016.
+</p>
+<p>Ariyo, O., Quintero, A., Munoz, J., Verbeke, G. and Lesaffre, E. (2019).
+Bayesian model selection in linear mixed models for longitudinal data.
+<em>Journal of Applied Statistics</em> 47: 890-913.
+</p>
+<p>Vehtari, A., Gelman, A. and Gabry, J. (2017). Practical Bayesian model
+evaluation using leave-one-out cross-validation and WAIC.
+<em>Statistics and Computing</em> 27: 1413-1432.
+</p>
+<p>Hug, J.E.  and Paciorek, C.J. (2021). A numerically stable online
+implementation and exploration of WAIC through variations of the
+predictive density, using NIMBLE. <em>arXiv e-print</em> &lt;arXiv:2106.13359&gt;.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>calculateWAIC</code> <code>configureMCMC</code>
+<code>buildMCMC</code> <code>runMCMC</code> <code>nimbleMCMC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">code &lt;- nimbleCode({
+  for(j in 1:J) {
+    for(i in 1:n) 
+      y[j, i] ~ dnorm(mu[j], sd = sigma)
+    mu[j] ~ dnorm(mu0, sd = tau)
+  }
+  sigma ~ dunif(0, 10)
+  tau ~ dunif(0, 10)
+})
+J &lt;- 5
+n &lt;- 10
+groups &lt;- paste0('y[', 1:J, ', 1:', n, ']') 
+y &lt;- matrix(rnorm(J*n), J, n)
+Rmodel &lt;- nimbleModel(code, constants = list(J = J, n = n), data = list(y = y),
+                      inits = list(tau = 1, sigma = 1))
+
+## Various versions of WAIC available via online calculation.
+## Conditional WAIC without data grouping:
+conf &lt;- configureMCMC(Rmodel, enableWAIC = TRUE)
+## Conditional WAIC with data grouping
+conf &lt;- configureMCMC(Rmodel, enableWAIC = TRUE, controlWAIC = list(dataGroups = groups))
+## Marginal WAIC with data grouping:
+conf &lt;- configureMCMC(Rmodel, enableWAIC = TRUE, controlWAIC =
+            list(dataGroups = groups, marginalizeNodes = 'mu'))
+## Not run: 
+Rmcmc &lt;- buildMCMC(conf)
+Cmodel &lt;- compileNimble(Rmodel)
+Cmcmc &lt;- compileNimble(Rmcmc, project = Rmodel)
+output &lt;- runMCMC(Cmcmc, niter = 1000, WAIC = TRUE)
+output$WAIC              # direct access
+## Alternatively call via the `getWAIC` method; this doesn't require setting
+## `waic=TRUE` in `runMCMC`
+Cmcmc$getWAIC()          
+Cmcmc$getWAICdetails()
+
+## End(Not run)
+</code></pre>
+
+
+</div>

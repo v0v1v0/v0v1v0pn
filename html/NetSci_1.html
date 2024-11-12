@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>avr_proximity_multiple_target_sets</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>avr_proximity_multiple_target_sets</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the average proximity from a set of targets to a set of source nodes.
+It is calculate using a degree preserving randomization. It is calculated as described in
+Guney, E. et al (2016) &lt;doi.org:10.1038/ncomms10331&gt;
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">avr_proximity_multiple_target_sets(
+  set,
+  G,
+  ST,
+  source,
+  N = 1000,
+  bins = 100,
+  min_per_bin = 20,
+  weighted = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>set</code></td>
+<td>
+<p>Name of the sets you have targets for. (In a drug-target setup, those would be the drugs of interest).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>G</code></td>
+<td>
+<p>The original graph (often an interactome).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ST</code></td>
+<td>
+<p>Set-Target data. It is a data.frame with two columns. ID and Target.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>source</code></td>
+<td>
+<p>The source nodes (disease genes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>Number of randomizations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bins</code></td>
+<td>
+<p>the number os bins for the degree preserving randomization.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_per_bin</code></td>
+<td>
+<p>the minimum size of each bin.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighted</code></td>
+<td>
+<p>consider a weighted graph? TRUE/FALSE</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>proximity and its significance based on the degree preserving randomization.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(666)
+net  = data.frame(
+Node.1 = sample(LETTERS[1:15], 15, replace = TRUE),
+Node.2 = sample(LETTERS[1:10], 15, replace = TRUE))
+net$value = 1
+net =  CoDiNA::OrderNames(net)
+net = unique(net)
+net$weight = runif(nrow(net))
+
+g &lt;- igraph::graph_from_data_frame(net, directed = FALSE )
+S = c("N", "A", "F", "I")
+T1 = data.frame(ID = "T1", Target = c("H", "M"))
+T2 = data.frame(ID = "T2", Target = c("G", "O"))
+
+avr_proximity_multiple_target_sets(set = c('T1', 'T2'),
+G = g,
+ source = S,
+ ST = rbind(T1,T2),
+ bins = 1,
+ min_per_bin = 2)
+
+# In a weighted graph
+# avr_proximity_multiple_target_sets(set = c('T1', 'T2'),
+# G = g,
+#  source = S,
+#  ST = rbind(T1,T2),
+#  bins = 1,
+#  min_per_bin = 2,
+#  weighted = TRUE)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,459 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>t_neat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Difference of Two Means and Area Under the Curve</h2>
+
+<h3>Description</h3>
+
+<p>Welch's <code>t-test</code> results including
+Cohen's d with confidence interval (CI),
+<code>Bayes factor</code> (BF), and
+<code>area under the receiver operating characteristic
+curve</code> (AUC). For non-parametric version,
+<code>Wilcoxon test</code> results (Mann–Whitney U test,
+aka "Wilcoxon rank-sum test", for independent samples; Wilcoxon signed-rank
+test for paired samples; including nonparametric "location difference
+estimate" (see <code>stats::wilcox.test</code>); along
+with corresponding rank-based BFs as per van Doorn et al., 2020).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">t_neat(
+  var1,
+  var2,
+  pair = FALSE,
+  nonparametric = FALSE,
+  greater = NULL,
+  norm_tests = "latent",
+  norm_plots = FALSE,
+  ci = NULL,
+  bf_added = FALSE,
+  bf_rscale = sqrt(0.5),
+  bf_sample = 1000,
+  auc_added = FALSE,
+  cutoff = NULL,
+  r_added = TRUE,
+  for_table = FALSE,
+  test_title = NULL,
+  round_descr = 2,
+  round_auc = 3,
+  auc_greater = "1",
+  cv_rep = FALSE,
+  cv_fold = 10,
+  hush = FALSE,
+  plots = FALSE,
+  rug_size = 4,
+  aspect_ratio = 1,
+  y_label = "density estimate",
+  x_label = "\nvalues",
+  factor_name = NULL,
+  var_names = c("1", "2"),
+  reverse = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var1</code></td>
+<td>
+<p>Numeric vector; numbers of the first variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var2</code></td>
+<td>
+<p>Numeric vector; numbers of the second variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pair</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, all tests (t, BF, AUC) are conducted for
+paired samples. If <code>FALSE</code> (default) for independent samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonparametric</code></td>
+<td>
+<p>Logical (<code>FALSE</code> by default). If <code>TRUE</code>, uses
+nonparametric (rank-based, "Wilcoxon") t-tests (including BFs; see Notes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>greater</code></td>
+<td>
+<p><code>NULL</code> or string (or number); optionally specifies
+one-sided tests (t and BF): either "1" (<code>var1</code> mean expected to be
+greater than <code>var2</code> mean) or "2" (<code>var2</code> mean expected to be
+greater than <code>var1</code> mean). If <code>NULL</code> (default), the test is
+two-sided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm_tests</code></td>
+<td>
+<p>Normality tests. Any or all of the following character input
+is accepted (as a single string or a character vector; case-insensitive):
+<code>"W"</code> (Shapiro-Wilk), <code>"K2"</code> (D'Agostino), <code>"A2"</code>
+(Anderson-Darling), <code>"JB"</code> (Jarque-Bera); see Notes. Two other options
+are <code>"all"</code> (same as <code>TRUE</code>; to choose all four previous tests at
+the same time) or <code>"latent"</code> (default value; prints all tests only if
+<code>nonparametric</code> is set to <code>FALSE</code> and any of the four tests gives
+a p value below .05). Each normality test is performed for the difference
+values between the two variables in case of paired samples, or for each of
+the two variables for unpaired samples. Set to <code>"none"</code> to disable
+(i.e., not to perform any normality tests).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm_plots</code></td>
+<td>
+<p>If <code>TRUE</code>, displays density, histogram, and Q-Q plots
+(and scatter plots for paired tests) for each of the two variable (and
+differences for pairwise observations, in case of paired samples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>Numeric; confidence level for returned CIs for Cohen's d and AUC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bf_added</code></td>
+<td>
+<p>Logical. If <code>TRUE</code> (default), Bayes factor is calculated
+and displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bf_rscale</code></td>
+<td>
+<p>The scale of the prior distribution (<code>0.707</code> by
+default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bf_sample</code></td>
+<td>
+<p>Number of samples used to estimate Bayes factor (<code>1000</code>
+by default). More samples (e.g. <code>10000</code>) take longer time but give more
+stable BF.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auc_added</code></td>
+<td>
+<p>Logical (<code>FALSE</code> by default). If <code>TRUE</code>, AUC is
+calculated and displayed. Includes TPR and TNR, i.e., true positive and true
+negative rates, i.e. sensitivity and specificity, using an optimal
+value, i.e. threshold, that provides maximal TPR and TNR. These values may
+be cross-validated: see <code>cv_rep</code>. (Note that what is designated as
+"positive" or "negative" depends on the scenario: this function always
+assumes <code>var1</code> as positive and <code>var2</code> as negative. If your
+scenario or preference differs, you can simply switch the names or values
+when reporting the results.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff</code></td>
+<td>
+<p>Numeric. Custom cutoff value for AUC TPR and TNR, also to be
+depicted in the plot. In case of multiple given, the first is used for
+calculations, but all will be depicted in the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r_added</code></td>
+<td>
+<p>Logical. If <code>TRUE</code> (default), Pearson correlation is
+calculated and displayed in case of paired comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>for_table</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, omits the confidence level display
+from the printed text.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test_title</code></td>
+<td>
+<p><code>NULL</code> or string. If not <code>NULL</code>, simply displayed
+in printing preceding the statistics. (Useful e.g. to distinguish several
+different comparisons inside a <code>function</code> or a <code>for</code> loop.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round_descr</code></td>
+<td>
+<p>Number <code>to round</code> to the descriptive
+statistics (means and SDs).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round_auc</code></td>
+<td>
+<p>Number <code>to round</code> to the AUC and its CI.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auc_greater</code></td>
+<td>
+<p>String (or number); specifies which variable is expected to
+have greater values for 'cases' as opposed to 'controls': "1" (default;
+<code>var1</code> expected to be greater for 'cases' than <code>var2</code> mean) or "2"
+(<code>var2</code> expected to be greater for 'cases' than <code>var1</code>). Not to be
+confused with one-sided tests; see Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv_rep</code></td>
+<td>
+<p><code>FALSE</code> (default), <code>TRUE</code>, or numeric. If <code>TRUE</code>
+or numeric, a cross-validation is performed for the calculation of TPRs and
+TNRs. Numeric value specifies the number of repetitions, while, if
+<code>TRUE</code>, it defaults to <code>100</code> repetitions. In each repetition, the
+data is divided into <code>k</code> random parts ("folds"; see <code>cv_fold</code>),
+and the optimal accuracy is obtained k times from a k-1 training set
+(<code>var1</code> and <code>var2</code> truncated to equal length, if needed, in each
+case within each repetition), and the TPR and TNR are calculated from the
+remaining test set (different each time).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv_fold</code></td>
+<td>
+<p>Numeric. The number of folds into which the data is divided for
+cross-validation (default: 10).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hush</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, prevents printing any details to console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+<p>Logical (or <code>NULL</code>). If <code>TRUE</code>, creates a combined
+density plot (i.e., <code>Gaussian kernel density
+estimates</code>) from the two variables. Includes dashed vertical lines to
+indicate means of each of the two variables. If <code>nonparametric</code> is set
+to <code>TRUE</code>, medians are calculated for these dashed lines instead of
+means. When <code>auc_added</code> is <code>TRUE</code> (and the AUC is at least .5),
+the best threshold value for classification (maximal differentiation
+accuracy using Youden's index) is added to the plot as solid vertical line.
+(In case of multiple best thresholds with identical overall accuracy, all
+are added.) If <code>NULL</code>, same as if <code>TRUE</code> except that histogram is
+added to the background.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rug_size</code></td>
+<td>
+<p>Numeric (<code>4</code> by default): size of the rug ticks below the
+density plot. Set to <code>0</code> (zero) to omit rug plotting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aspect_ratio</code></td>
+<td>
+<p>Aspect ratio of the plots: <code>1</code> (<code>1</code>/<code>1</code>) by
+default. (Set to <code>NULL</code> for dynamic aspect ratio.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_label</code></td>
+<td>
+<p>String or <code>NULL</code>; the label for the <code>y</code> axis.
+(Default: <code>"density estimate"</code>.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_label</code></td>
+<td>
+<p>String or <code>NULL</code>; the label for the <code>x</code> axis.
+(Default: <code>"values"</code>.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factor_name</code></td>
+<td>
+<p>String or <code>NULL</code>; factor legend title. (Default:
+<code>NULL</code>.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_names</code></td>
+<td>
+<p>A vector of two strings; the variable names to be displayed
+in the legend. (Default: <code>c("1", "2")</code>.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reverse</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, reverses the order of variable names
+displayed in the legend.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Bayes factor (BF) supporting null hypothesis is denoted as BF01, while
+that supporting alternative hypothesis is denoted as BF10. When the BF is
+smaller than 1 (i.e., supports null hypothesis), the reciprocal is calculated
+(hence, BF10 = BF, but BF01 = 1/BF). When the BF is greater than or equal to
+10000, scientific (exponential) form is reported for readability. (The
+original full BF number is available in the returned named vector as
+<code>bf</code>.)
+</p>
+<p>For simplicity, Cohen's d is reported for nonparametric tests too: you may
+however want to consider reporting alternative effect sizes in this case.
+</p>
+<p>The original <code>pROC::auc</code> function, by default, always
+returns an AUC greater than (or equal to) .5, assuming that the prediction
+based on values in the expected direction work correctly at least at chance
+level. This however may be confusing. Consider an example where we measure the
+heights of persons in a specific small sample and expect that greater height
+predicts masculine gender. The results are, say, 169, 175, 167, 164 (cm) for
+one gender, and 176, 182, 179, 165 for the other. If the expectation is
+correct (the second, greater values are for males), the AUC is .812. However,
+if in this particular population females are actually taller than males, the
+AUC is in fact .188. To keep things clear, the <code>t_neat</code> function always
+makes an assumption about which variable is expected to be greater for correct
+classification ("1" by default; i.e., <code>var1</code>; to be specified as
+<code>auc_greater = "2"</code> for <code>var2</code> to be expected as greater). For this
+example, if the first (smaller) variables are given as <code>var1</code> for
+females, and second (larger), variables are given as <code>var2</code> for males, we
+have to specify <code>auc_greater = "2"</code> to indicate the expectation of larger
+values for males. (Or, easier, just add the expected larger values as
+<code>var1</code>.)
+</p>
+
+
+<h3>Value</h3>
+
+<p>Prints t-test statistics (including Cohen's d with CI, BF, and AUC, as
+specified via the corresponding parameters) in APA style. Furthermore, when
+assigned, returns a list, that contains a named vector '<code>stats</code>' with
+the following elements: <code>t</code> (t value), <code>p</code> (p value), <code>d</code>
+(Cohen's d), <code>bf</code> (Bayes factor), <code>auc</code> (AUC), <code>accuracy</code>
+(overall accuracy using the optimal classification threshold), and
+<code>youden</code> (Youden's index: <code>specificity + sensitivity - 1</code>). The
+latter three are <code>NULL</code> when <code>auc_added</code> is <code>FALSE</code>. When
+<code>auc_added</code> is <code>TRUE</code>, there are also two or three additional
+elements of the list. One is '<code>roc_obj</code>', which is a
+<code>roc</code> object, to be used e.g. with the
+<code>roc_neat</code> function. Another is '<code>best_thresholds</code>', which
+contains the best threshold value(s) for classification, along with
+corresponding specificity and sensitivity. The third '<code>cv_results</code>'
+contains the results, if any, of the cross-validation of TPRs and TNRs
+(means per repetition). Finally, if <code>plots</code> is <code>TRUE</code> (or
+<code>NULL</code>), the plot is displayed as well as returned as a
+<code>ggplot</code> object, named <code>t_plot</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The Welch's t-test is calculated via
+<code>stats::t.test</code>.
+</p>
+<p>#'Normality tests are all calculated via
+<code>fBasics::NormalityTests</code>, selected based
+on the recommendation of Lakens (2015), quoting Yap and Sim (2011, p. 2153):
+"If the distribution is symmetric with low kurtosis values (i.e. symmetric
+short-tailed distribution), then the D'Agostino and Shapiro-Wilkes tests have
+good power. For symmetric distribution with high sample kurtosis (symmetric
+long-tailed), the researcher can use the JB, Shapiro-Wilkes, or
+Anderson-Darling test." See urlhttps://github.com/Lakens/perfect-t-test for
+more details.
+</p>
+<p>Cohen's d and its confidence interval are calculated, using the t value, via
+<code>MBESS::ci.smd</code> for independent samples (as
+standardized mean difference) and via <code>MBESS::ci.sm</code>
+for paired samples (as standardized mean).
+</p>
+<p>The parametric Bayes factor is calculated via
+<code>BayesFactor::ttestBF</code>. The nonparametric
+(rank-based) Bayes factor is a contribution by Johnny van Doorn; the original
+source code is available via <a href="https://osf.io/gny35/">https://osf.io/gny35/</a>.
+</p>
+<p>The correlation and its CI are calculated via
+<code>stats::cor.test</code>, and is always two-sided, always
+with 95 percent CI. For more, use <code>corr_neat</code>.
+</p>
+<p>The AUC and its CI are calculated via <code>pROC::auc</code>, and
+the accuracy at optimal threshold via <code>pROC::coords</code>
+(<code>x = "best"</code>); both using the object <code>pROC::roc</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Delacre, M., Lakens, D., &amp; Leys, C. (2017). Why psychologists should by
+default use Welch's t-test instead of Student's t-test. International Review
+of Social Psychology, 30(1). <a href="https://doi.org/10.5334/irsp.82">doi:10.5334/irsp.82</a>
+</p>
+<p>Kelley, K. (2007). Methods for the behavioral, educational, and social
+sciences: An R package. Behavior Research Methods, 39(4), 979-984.
+<a href="https://doi.org/10.3758/BF03192993">doi:10.3758/BF03192993</a>
+</p>
+<p>Lakens, D. (2015). The perfect t-test (version 1.0.0). Retrieved from
+https://github.com/Lakens/perfect-t-test.
+<a href="https://doi.org/10.5281/zenodo.17603">doi:10.5281/zenodo.17603</a>
+</p>
+<p>Robin, X., Turck, N., Hainard, A., Tiberti, N., Lisacek, F., Sanchez, J. C., &amp;
+Muller, M. (2011). pROC: an open-source package for R and S+ to analyze and
+compare ROC curves. BMC bioinformatics, 12(1), 77.
+<a href="https://doi.org/10.1186/1471-2105-12-77">doi:10.1186/1471-2105-12-77</a>
+</p>
+<p>van Doorn, J., Ly, A., Marsman, M., &amp; Wagenmakers, E.-J. (2020). Bayesian
+rank-based hypothesis testing for the rank sum test, the signed rank test, and
+Spearman’s rho. Journal of Applied Statistics, 1–23.
+<a href="https://doi.org/10.1080/02664763.2019.1709053">doi:10.1080/02664763.2019.1709053</a>
+</p>
+<p>Yap, B. W., &amp; Sim, C. H. (2011). Comparisons of various types of normality
+tests. Journal of Statistical Computation and Simulation, 81(12), 2141–2155.
+<a href="https://doi.org/10.1080/00949655.2010.520163">doi:10.1080/00949655.2010.520163</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>corr_neat</code>, <code>roc_neat</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># assign two variables (numeric vectors)
+v1 = c(191, 115, 129, 43, 523,-4, 34, 28, 33,-1, 54)
+v2 = c(4,-2, 23, 13, 32, 16, 3, 29, 37,-4, 65)
+
+t_neat(v1, v2) # prints results as independent samples
+t_neat(v1, v2, pair = TRUE) # as paired samples (r added by default)
+t_neat(v1, v2, pair = TRUE, greater = "1") # one-sided
+t_neat(v1, v2, pair = TRUE, auc_added = TRUE ) # AUC included
+
+# print results and assign returned list
+results = t_neat(v1, v2, pair = TRUE)
+
+results$stats['bf'] # get precise BF value
+
+</code></pre>
+
+
+</div>

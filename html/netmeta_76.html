@@ -1,0 +1,284 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hatmatrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Derive hat matrix from network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>Auxiliary function to derive hat matrix from network meta-analysis
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hatmatrix(
+  x,
+  method = "Ruecker",
+  type,
+  common = x$common,
+  random = x$random,
+  nchar.trts = x$nchar.trts,
+  nchar.studlab = x$nchar.studlab
+)
+
+## S3 method for class 'hatmatrix'
+print(
+  x,
+  common = x$x$common,
+  random = x$x$random,
+  nchar.trts = x$x$nchar.trts,
+  nchar.studlab = x$x$nchar.studlab,
+  digits = gs("digits"),
+  legend = TRUE,
+  legend.studlab = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>netmeta</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character string indicating which method is used to
+derive the hat matrix. Either <code>"Ruecker"</code>, <code>"Krahn"</code> or
+<code>"Davies"</code> (can be abbreviated, see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A character string indicating which specific hat matrix
+should be derived (can be abbreviated, see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether a hat matrix should be
+printed for the common effects network meta-analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether a hat matrix should be
+printed for the random effects network meta-analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.trts</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique treatment names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.studlab</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique study labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>A logical indicating whether a legend should be
+printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend.studlab</code></td>
+<td>
+<p>A logical indicating whether a legend should
+be printed for abbreviated study labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments (ignored).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This auxiliary function can be used to derive various hat matrices
+from a network meta-analysis object.
+</p>
+
+
+<h4>Hat matrix by Rücker (2012)</h4>
+
+<p>This hat matrix is estimated if <code>method = "Ruecker"</code>.
+</p>
+<p>Let <em>n</em> be the number of different treatments (nodes,
+vertices) in a network and let <em>m</em> be the number of existing
+comparisons (edges) between the treatments. If there are only
+two-arm studies, <em>m</em> is equal to the number of studies,
+<em>k</em>. Let seTE.adj.common and seTE.adj.random be the vectors of
+adjusted standard errors under the common and random effects model
+(see <code>netmeta</code>). Let <strong>W</strong> be the <em>m</em> x
+<em>m</em> diagonal matrix that contains the inverse variance 1 /
+seTE.adj.common<code class="reqn">^2</code> or 1 / seTE.adj.random<code class="reqn">^2</code>.
+</p>
+<p>The given comparisons define the network structure. Therefrom an
+<em>m</em> x <em>n</em> design matrix X (edge-vertex incidence matrix) is
+formed; for more precise information, see Rücker (2012). Moreover,
+the <em>n</em> x <em>n</em> Laplacian matrix <strong>L</strong> and its
+Moore-Penrose pseudoinverse <strong>L</strong><code class="reqn">^+</code> are calculated (both
+matrices play an important role in graph theory and electrical
+network theory). Using these matrices, the variances based on both
+direct and indirect comparisons can be estimated. The hat matrix
+<strong>H</strong> is estimated by <strong>H =
+XL</strong><code class="reqn">^+</code><strong>X</strong><code class="reqn">^T</code><strong>W = X(X</strong><code class="reqn">^T</code><strong>W
+X)</strong><code class="reqn">^+</code><strong>X</strong><code class="reqn">^T</code><strong>W</strong>.
+</p>
+
+
+
+<h4>Hat matrices by Krahn et al. (2013)</h4>
+
+<p>One of the following hat matrices is estimated if <code>method
+= "Krahn"</code>.
+</p>
+<p>Use of <code>type = "design"</code> (default) results in a hat matrix of
+dimension <em>n(n-1)/2</em> x <em>s</em>, where <em>s</em> is the sum of
+the number of independent comparisons from each design.
+</p>
+<p>Use of <code>type = "studies"</code> results in a hat matrix of dimension
+<em>n(n-1)/2</em> x <em>l</em>, where <em>l</em> is the number of
+independent pairwise comparisons, i.e., a three-arm study
+contributes two pairwise comparisons.
+</p>
+
+
+
+<h4>Hat matrices by Davies et al. (2022)</h4>
+
+<p>One of three hat matrices is estimated if <code>method = "Davies"</code>.
+</p>
+<p>Here, we focus on the hat matrix of the aggregate (two-step)
+version of the graph theoretical NMA model. In the first step, a
+pairwise meta-analysis is performed across each edge using the
+adjusted weights (these account for correlations due to multi-arm
+trials). From this we obtain direct treatment effect estimates (and
+corresponding aggregate weights) associated with each edge. In step
+two, we combine these direct estimates in a network meta analysis
+to obtain the network estimates.  This is done using weighted least
+squares regression. The hat matrix associated with this second step
+is called the <em>aggregate hat matrix</em>.
+</p>
+<p>All three versions of the aggregate hat matrix contain the same
+information: the second two can be derived directly from the
+first. They differ in their dimensionality.
+</p>
+<p>Each row of the hat matrix that represents a treatment comparison
+(<em>ij</em>) describes the flow of evidence through each edge for
+that comparison. This defines a directed acyclic 'flow graph' from
+node <em>i</em> to node <em>j</em>.
+</p>
+<p>(1) Use of <code>type = "short"</code> (default) results in a hat matrix
+of dimension <em>e</em> x <em>e</em>, where <em>e</em> is the number of
+(unique) edges (direct comparisons) in the network. This is the
+aggregate hat matrix described in Davies et al. (2022). Each row
+and column represents a pair of treatments for which there is at
+least one direct comparison.
+</p>
+<p>(2) Use of <code>type = "long"</code> results in a hat matrix of
+dimension <em>n(n-1)/2</em> x <em>e</em>. There is a row for every
+possible pair of treatments in the network - regardless of whether
+there is direct evidence for this comparison. Each column
+represents a pair of treatments for which there is at least one
+direct comparison. The extra rows can be calculated from the short
+hat matrix using consistency equations.
+</p>
+<p>(3) Use of <code>type = "full"</code> results in a hat matrix of
+dimension <em>n(n-1)/2</em> x <em>n(n-1)/2</em>. In comparison to the
+long hat matrix, columns of zeroes are added for comparisons that
+do not have any direct evidence. Therefore, there is a row and
+column for every pair of treatments in the network. This hat matrix
+is used to calculate the transition matrices for the random walk in
+<code>netcontrib</code>.
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>A list with two hat matrices: <code>common</code> (common effects model)
+and <code>random</code> (random effects model).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Davies AL, Papakonstantinou T, Nikolakopoulou A, Rücker G, Galla T
+(2022):
+Network meta-analysis and random walks.
+<em>Statistics in Medicine</em>,
+<b>41</b>, 2091–2114
+</p>
+<p>Krahn U, Binder H, König J (2013):
+A graphical tool for locating inconsistency in network meta-analyses.
+<em>BMC Medical Research Methodology</em>,
+<b>13</b>, 35
+</p>
+<p>Rücker G (2012):
+Network meta-analysis, electrical networks and graph theory.
+<em>Research Synthesis Methods</em>,
+<b>3</b>, 312–24
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>netcontrib</code>,
+<code>netheat</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Dong2013)
+# Only consider first ten studies for concise output
+first10 &lt;- subset(Dong2013, id &lt;= 10)
+p1 &lt;- pairwise(treatment, death, randomized, studlab = id,
+  data = first10, sm = "OR")
+net1 &lt;- netmeta(p1, common = FALSE)
+
+hatmatrix(net1)
+hatmatrix(net1, method = "k")
+hatmatrix(net1, method = "k", type = "studies")
+hatmatrix(net1, method = "d")
+hatmatrix(net1, method = "d", type = "long")
+hatmatrix(net1, method = "d", type = "full")
+
+</code></pre>
+
+
+</div>

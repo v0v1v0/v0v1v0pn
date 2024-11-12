@@ -1,0 +1,226 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_diffnet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot the diffusion process</h2>
+
+<h3>Description</h3>
+
+<p>Creates a colored network plot showing the structure of the graph through time
+(one network plot for each time period)  and the set of adopter and non-adopters
+in the network.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_diffnet(...)
+
+## S3 method for class 'diffnet'
+plot_diffnet(graph, ...)
+
+## Default S3 method:
+plot_diffnet(
+  graph,
+  cumadopt,
+  slices = NULL,
+  vertex.color = c("white", "tomato", "steelblue"),
+  vertex.shape = c("square", "circle", "circle"),
+  vertex.size = "degree",
+  mfrow.par = NULL,
+  main = c("Network in period %s", "Diffusion Network"),
+  legend.args = list(),
+  minmax.relative.size = getOption("diffnet.minmax.relative.size", c(0.01, 0.04)),
+  background = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to be passed to <code>plot.igraph</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>A dynamic graph (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cumadopt</code></td>
+<td>
+<p><code class="reqn">n\times T</code> matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slices</code></td>
+<td>
+<p>Integer vector. Indicates what slices to plot. By default all are plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.color</code></td>
+<td>
+<p>A character vector of size 3 with colors names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.shape</code></td>
+<td>
+<p>A character vector of size 3 with shape names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.size</code></td>
+<td>
+<p>Either a numeric scalar or vector of size <code class="reqn">n</code>, or any
+of the following values: "indegree", "degree", or "outdegree" (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mfrow.par</code></td>
+<td>
+<p>Vector of size 2 with number of rows and columns to be passed to <code>par.</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Character scalar. A title template to be passed to <code>sprintf.</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend.args</code></td>
+<td>
+<p>List of arguments to be passed to <code>legend</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minmax.relative.size</code></td>
+<td>
+<p>Passed to <code>rescale_vertex_igraph</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>background</code></td>
+<td>
+<p>Either a function to be called before plotting each slice, a color
+to specify the backgroupd color, or <code>NULL</code> (in which case nothing is done).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Plotting is done via the function <code>plot.igraph</code>.
+</p>
+<p>When <code>vertex.size</code> is either of <code>"degree"</code>, <code>"indegree"</code>, or
+<code>"outdegree"</code>, <code>vertex.size</code> will be replace with <code>dgr(.,cmode = )</code>
+so that the vertex size reflects the desired degree.
+</p>
+<p>The argument <code>minmax.relative.size</code> is passed to <code>rescale_vertex_igraph</code>
+which adjusts <code>vertex.size</code> so that the largest and smallest vertices
+have a relative size of <code>minmax.relative.size[2]</code> and
+<code>minmax.relative.size[1]</code> respectively with respect to the x-axis.
+</p>
+<p>Plotting is done via the function <code>plot.igraph</code>.
+</p>
+<p>In order to center the attention on the diffusion process itself, the
+positions of each vertex are computed only once by aggregating the networks
+through time, this is, instead of computing the layout for each time <code class="reqn">t</code>,
+the function creates a new graph accumulating links through time.
+</p>
+<p>The <code>mfrow.par</code> sets how to arrange the plots on the device. If <code class="reqn">T=5</code>
+and <code>mfrow.par=c(2,3)</code>, the first three networks will be in the top
+of the device and the last two in the bottom.
+</p>
+<p>The argument <code>vertex.color</code> contains the colors of non-adopters, new-adopters,
+and adopters respectively. The new adopters (default color <code>"tomato"</code>) have a different
+color that the adopters when the graph is at their time of adoption, hence,
+when the graph been plotted is in <code class="reqn">t=2</code> and <code class="reqn">toa=2</code> the vertex will
+be plotted in red.
+</p>
+<p><code>legend.args</code> has the following default parameter:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+  <code>x</code> </td>
+<td style="text-align: left;"> <code>"bottom"</code> </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  <code>legend</code> </td>
+<td style="text-align: left;"> <code>c("Non adopters", "New adopters","Adopters")</code> </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  <code>pch</code> </td>
+<td style="text-align: left;"> <code>sapply(vertex.shape, switch, circle = 21, square = 22, 21)</code> </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  <code>bty</code> </td>
+<td style="text-align: left;"> <code>"n"</code> </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  <code>horiz</code> </td>
+<td style="text-align: left;"> <code>TRUE</code> </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Calculated coordinates for the grouped graph (invisible).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other visualizations: 
+<code>dgr()</code>,
+<code>diffusionMap()</code>,
+<code>drawColorKey()</code>,
+<code>grid_distribution()</code>,
+<code>hazard_rate()</code>,
+<code>plot_adopters()</code>,
+<code>plot_diffnet2()</code>,
+<code>plot_infectsuscep()</code>,
+<code>plot_threshold()</code>,
+<code>rescale_vertex_igraph()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generating a random graph
+set.seed(1234)
+n &lt;- 6
+nper &lt;- 5
+graph &lt;- rgraph_er(n,nper, p=.3, undirected = FALSE)
+toa &lt;- sample(2000:(2000+nper-1), n, TRUE)
+adopt &lt;- toa_mat(toa)
+
+plot_diffnet(graph, adopt$cumadopt)
+</code></pre>
+
+
+</div>

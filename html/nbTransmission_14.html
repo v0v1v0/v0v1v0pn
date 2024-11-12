@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>performNB</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Performs naive bayes classification</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>performNB</code> Calculates the posterior probabilities of a dichotomous class
+variable given a set of covariates using Bayes rule.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">performNB(training, prediction, obsIDVar, goldStdVar, covariates, l = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>training</code></td>
+<td>
+<p>The training dataset name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prediction</code></td>
+<td>
+<p>The prediction dataset name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obsIDVar</code></td>
+<td>
+<p>The variable name (in quotes) of the observation ID variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>goldStdVar</code></td>
+<td>
+<p>The variable name (in quotes) of the outcome in the training dataset
+(needs to be a logical variable with value <code>TRUE</code> for observations with
+the outcome of interest.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariates</code></td>
+<td>
+<p>A character vector containing the covariate variable names.
+All covariates need to be categorical factor variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>l</code></td>
+<td>
+<p>Laplace smoothing parameter that is added to each cell
+(a value of 0 indicates no smoothing).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The main purpose of this function is to be used by <code>nbProbabilities</code> to 
+estimate the relative transmission probability between individuals in an infectious
+disease outbreak. However, it can be used more generally to estimate the probability
+of any dichotomous outcome given a set of categorical covariates.
+</p>
+<p>The function needs a training dataset with the outcome variable (<code>goldStdVar</code>)
+which is <code>TRUE</code> for those who have the value of interest and <code>FALSE</code>
+for those who do not. The probability of having the outcome 
+(<code>&lt;goldStdVar&gt; = TRUE</code>) is predicted in the prediction dataset.
+</p>
+
+
+<h3>Value</h3>
+
+<p>List containing two dataframes: 
+</p>
+
+<ol>
+<li> <p><code>probabilities</code> - a dataframe combining <code>training</code> and <code>prediction</code>
+with predictied probabilities for the <code>prediction</code> dataframe. Column names:
+</p>
+
+<ul>
+<li> <p><code>&lt;obsIDVar&gt;</code> - the observation ID with the name specified
+</p>
+</li>
+<li> <p><code>p</code> - the probability that <code>&lt;goldStdVar&gt; = TRUE</code> for observations in the
+<code>prediction</code> dataset.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>estimates</code> - a dataframe with the effect estimates derived from the training dataset.
+Column names:
+</p>
+
+<ul>
+<li> <p><code>level</code> - the covariate name and level
+</p>
+</li>
+<li> <p><code>est</code> - the log odds ratio for this covariate and level
+</p>
+</li>
+<li> <p><code>se</code> - the standard error of the log odds ratio
+</p>
+</li>
+</ul>
+</li>
+</ol>
+<h3>See Also</h3>
+
+<p><code>nbProbabilities</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Use iris dataset and predict if a flower is of the specices "virginica".
+
+data(iris)
+irisNew &lt;- iris
+## Creating an id variable
+irisNew$id &lt;- seq(1:nrow(irisNew))
+## Creating logical variable indicating if the flower is of the species virginica
+irisNew$spVirginica &lt;- irisNew$Species == "virginica"
+
+## Creating categorical/factor versions of the covariates
+irisNew$Sepal.Length.Cat &lt;- factor(cut(irisNew$Sepal.Length, c(0, 5, 6, 7, Inf)),
+                                 labels = c("&lt;=5.0", "5.1-6.0", "6.1-7.0", "7.1+"))
+
+irisNew$Sepal.Width.Cat &lt;- factor(cut(irisNew$Sepal.Width, c(0, 2.5, 3, 3.5, Inf)),
+                                 labels = c("&lt;=2.5", "2.6-3.0", "3.1-3.5", "3.6+"))
+
+irisNew$Petal.Length.Cat &lt;- factor(cut(irisNew$Petal.Length, c(0, 2, 4, 6, Inf)),
+                                 labels = c("&lt;=2.0", "2.1-4.0", "4.1-6.0", "6.0+"))
+
+irisNew$Petal.Width.Cat &lt;- factor(cut(irisNew$Petal.Width, c(0, 1, 2, Inf)),
+                               labels = c("&lt;=1.0", "1.1-2.0", "2.1+"))
+
+## Using NB to predict if the species is virginica
+## (training and predicting on same dataset)
+pred &lt;- performNB(irisNew, irisNew, obsIDVar = "id",
+                    goldStdVar = "spVirginica",
+                    covariates = c("Sepal.Length.Cat", "Sepal.Width.Cat",
+                                   "Petal.Length.Cat", "Petal.Width.Cat"), l = 1)
+irisResults &lt;- merge(irisNew, pred$probabilities, by = "id")
+tapply(irisResults$p, irisResults$Species, summary)
+
+</code></pre>
+
+
+</div>

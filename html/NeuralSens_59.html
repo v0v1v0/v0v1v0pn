@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SensMatPlot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot sensitivities of a neural network model</h2>
+
+<h3>Description</h3>
+
+<p>Function to plot the sensitivities created by <code>HessianMLP</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SensMatPlot(
+  hess,
+  sens = NULL,
+  output = 1,
+  metric = c("mean", "std", "meanSensSQ"),
+  senstype = c("matrix", "interactions"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>hess</code></td>
+<td>
+<p><code>HessMLP</code> object created by <code>HessianMLP</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens</code></td>
+<td>
+<p><code>SensMLP</code> object created by <code>SensAnalysisMLP</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p><code>numeric</code> or <code>character</code> specifying the output neuron or output name to be plotted.
+By default is the first output (<code>output = 1</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metric</code></td>
+<td>
+<p><code>character</code> specifying the metric to be plotted. It can be "mean",
+"std" or "meanSensSQ".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>senstype</code></td>
+<td>
+<p><code>character</code> specifying the type of plot to be plotted. It can be "matrix" or
+"interactions". If type = "matrix", only the second derivatives are plotted. If type = "interactions"
+the main diagonal are the first derivatives respect each input variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further argument passed similar to <code>ggcorrplot</code> arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Most of the code of this function is based on
+<code>ggcorrplot()</code> function from package <code>ggcorrplot</code>. However, due to the
+inhability of changing the limits of the color scale, it keeps giving a warning
+if that function is used and the color scale overwritten.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of <code>ggplot</code>s, one for each output neuron.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load data -------------------------------------------------------------------
+data("DAILY_DEMAND_TR")
+fdata &lt;- DAILY_DEMAND_TR
+## Parameters of the NNET ------------------------------------------------------
+hidden_neurons &lt;- 5
+iters &lt;- 100
+decay &lt;- 0.1
+
+################################################################################
+#########################  REGRESSION NNET #####################################
+################################################################################
+## Regression dataframe --------------------------------------------------------
+# Scale the data
+fdata.Reg.tr &lt;- fdata[,2:ncol(fdata)]
+fdata.Reg.tr[,3] &lt;- fdata.Reg.tr[,3]/10
+fdata.Reg.tr[,1] &lt;- fdata.Reg.tr[,1]/1000
+
+# Normalize the data for some models
+preProc &lt;- caret::preProcess(fdata.Reg.tr, method = c("center","scale"))
+nntrData &lt;- predict(preProc, fdata.Reg.tr)
+
+#' ## TRAIN nnet NNET --------------------------------------------------------
+# Create a formula to train NNET
+form &lt;- paste(names(fdata.Reg.tr)[2:ncol(fdata.Reg.tr)], collapse = " + ")
+form &lt;- formula(paste(names(fdata.Reg.tr)[1], form, sep = " ~ "))
+
+set.seed(150)
+nnetmod &lt;- nnet::nnet(form,
+                      data = nntrData,
+                      linear.output = TRUE,
+                      size = hidden_neurons,
+                      decay = decay,
+                      maxit = iters)
+# Try HessianMLP
+H &lt;- NeuralSens::HessianMLP(nnetmod, trData = nntrData, plot = FALSE)
+NeuralSens::SensMatPlot(H)
+S &lt;- NeuralSens::SensAnalysisMLP(nnetmod, trData = nntrData, plot = FALSE)
+NeuralSens::SensMatPlot(H, S, senstype = "interactions")
+</code></pre>
+
+
+</div>

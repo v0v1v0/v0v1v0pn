@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>chisq_test_vs_external_estimate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test of differences in survey percentages relative to external estimates</h2>
+
+<h3>Description</h3>
+
+<p>Compare estimated percentages from the present survey to external estimates from a benchmark source.
+A Chi-Square test with Rao-Scott's second-order adjustment is used to evaluate whether the survey's estimates differ from the external estimates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">chisq_test_vs_external_estimate(survey_design, y_var, ext_ests, na.rm = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>survey_design</code></td>
+<td>
+<p>A survey design object created with the <code>survey</code> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_var</code></td>
+<td>
+<p>Name of dependent categorical variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ext_ests</code></td>
+<td>
+<p>A numeric vector containing the external estimate of the percentages for each category.
+The vector must have names, each name corresponding to a given category.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>Whether to drop cases with missing values</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Please see svygofchisq for details of how the Rao-Scott second-order adjusted test is conducted.
+The test statistic, <code>statistic</code> is obtained by calculating the Pearson Chi-squared statistic for the estimated table of population totals. The reference distribution is a Satterthwaite approximation. The p-value is obtained by comparing <code>statistic</code>/<code>scale</code> to a Chi-squared distribution with <code>df</code> degrees of freedom.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame containing the results of the Chi-Square test(s) of whether survey-based estimates systematically differ from external estimates.
+<br><br>
+The columns of the output dataset include: <br></p>
+
+<ul>
+<li> <p><code>statistic</code>: The value of the test statistic <br></p>
+</li>
+<li> <p><code>df</code>: Degrees of freedom for the reference Chi-Squared distribution <br></p>
+</li>
+<li> <p><code>scale</code>: Estimated scale parameter.
+</p>
+</li>
+<li> <p><code>p_value</code>: The p-value of the test of independence <br></p>
+</li>
+<li> <p><code>test_method</code>: Text giving the name of the statistical test
+</p>
+</li>
+<li> <p><code>variance_method</code>: Text describing the method of variance estimation
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul><li>
+<p> Rao, JNK, Scott, AJ (1984) "On Chi-squared Tests For Multiway Contigency Tables with Proportions Estimated From Survey Data" Annals of Statistics 12:46-60. <br></p>
+</li></ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(survey)
+
+# Create a survey design ----
+data("involvement_survey_pop", package = "nrba")
+data("involvement_survey_str2s", package = "nrba")
+
+involvement_survey_sample &lt;- svydesign(
+  data = involvement_survey_str2s,
+  weights = ~BASE_WEIGHT,
+  strata = ~SCHOOL_DISTRICT,
+  ids = ~ SCHOOL_ID + UNIQUE_ID,
+  fpc = ~ N_SCHOOLS_IN_DISTRICT + N_STUDENTS_IN_SCHOOL
+)
+
+# Subset to only include survey respondents ----
+
+involvement_survey_respondents &lt;- subset(
+  involvement_survey_sample,
+  RESPONSE_STATUS == "Respondent"
+)
+
+# Test whether percentages of categorical variable differ from benchmark ----
+
+parent_email_benchmark &lt;- c(
+  "Has Email" = 0.85,
+  "No Email" = 0.15
+)
+
+chisq_test_vs_external_estimate(
+  survey_design = involvement_survey_respondents,
+  y_var = "PARENT_HAS_EMAIL",
+  ext_ests = parent_email_benchmark
+)
+
+</code></pre>
+
+
+</div>

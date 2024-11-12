@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>knn</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find K nearest neighbours for multiple query points</h2>
+
+<h3>Description</h3>
+
+<p>Find K nearest neighbours for multiple query points
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">knn(data, query = data, k, eps = 0, searchtype = 1L, radius = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Mxd matrix of M target points with dimension d</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>query</code></td>
+<td>
+<p>Nxd matrix of N query points with dimension d (nb <code>data</code> 
+and <code>query</code> must have same dimension). If missing defaults to 
+<code>data</code> i.e. a self-query.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>an integer number of nearest neighbours to find</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>An approximate error bound. The default of 0 implies exact 
+matching.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>searchtype</code></td>
+<td>
+<p>A character vector or integer indicating the search type. 
+The default value of <code>1L</code> is equivalent to "auto". See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radius</code></td>
+<td>
+<p>Maximum radius search bound. The default of 0 implies no radius
+bound.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>searchtype="auto"</code>, the default, knn uses a k-d tree with a
+linear heap when <code>k &lt; 30</code> nearest neighbours are requested (equivalent
+to <code>searchtype="kd_linear_heap"</code>), a k-d tree with a tree heap 
+otherwise (equivalent to <code>searchtype="kd_tree_heap"</code>). 
+<code>searchtype="brute"</code> checks all point combinations and is intended for
+validation only.
+</p>
+<p>Integer values of searchtype should be the 1-indexed position in the vector
+<code>c("auto", "brute", "kd_linear_heap", "kd_tree_heap")</code>, i.e. a value 
+between 1L and 4L.
+</p>
+<p>The underlying <a href="https://github.com/ethz-asl/libnabo">libnabo</a> does not
+have a signalling value to identify indices for invalid query points (e.g. 
+those containing an <code>NA</code>). In this situation, the index returned by 
+libnabo will be 0 and <code>knn</code> will therefore return an index of 1. 
+However the distance will be <code>Inf</code> signalling a failure to find a 
+nearest neighbour.
+</p>
+<p>When radius&gt;0.0 and no point is found within the search bound, the index 
+returned will be 0 but the reported distance will be Inf (in contrast 
+RANN::nn2 returns 1.340781e+154).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements <code>nn.idx</code> (1-indexed indices) and 
+<code>nn.dists</code> (distances), both of which are N x k matrices. See details
+for the results obtained with1 invalid inputs.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Basic usage
+# load sample data consisting of list of 3 separate 3d pointets
+data(kcpoints)
+
+# Nearest neighbour in first pointset of all points in second pointset 
+nn1 &lt;- knn(data=kcpoints[[1]], query=kcpoints[[2]], k=1)
+str(nn1)
+
+# 5 nearest neighbours
+nn5 &lt;-knn(data=kcpoints[[1]], query=kcpoints[[2]], k=5)
+str(nn5)
+
+# Self match within first pointset, all distances will be 0
+nnself1 &lt;- knn(data=kcpoints[[1]], k=1)
+str(nnself1)
+
+# neighbour 2 will be the nearest point 
+nnself2 &lt;- knn(data=kcpoints[[1]], k=2)
+
+## Advanced usage
+# nearest neighbour with radius bound
+nn1.rad &lt;- knn(data=kcpoints[[1]], query=kcpoints[[2]], k=1, radius=5)
+str(nn1.rad)
+
+# approximate nearest neighbour with 10% error bound
+nn1.approx &lt;- knn(data=kcpoints[[1]], query=kcpoints[[2]], k=1, eps=0.1)
+str(nn1.approx)
+
+# 5 nearest neighbours, brute force search
+nn5.b &lt;-knn(data=kcpoints[[1]], query=kcpoints[[2]], k=5, searchtype='brute')
+stopifnot(all.equal(nn5.b, nn5))
+
+# 5 nearest neighbours, brute force search (specified by int)
+nn5.b2 &lt;-knn(data=kcpoints[[1]], query=kcpoints[[2]], k=5, searchtype=2L)
+stopifnot(all.equal(nn5.b2, nn5.b))
+</code></pre>
+
+
+</div>

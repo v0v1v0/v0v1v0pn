@@ -1,0 +1,252 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netcox_cv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>cross-validation for <code>netcox</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Conduct cross-validation (cv) for <code>netcox</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netcox_cv(
+  x,
+  ID,
+  time,
+  time2,
+  event,
+  lambda,
+  group,
+  group_variable,
+  penalty_weights,
+  par_init,
+  nfolds = 10,
+  stepsize_init = 1,
+  stepsize_shrink = 0.8,
+  tol = 1e-05,
+  maxit = 1000L,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Predictor matrix with dimension <code class="reqn">nm * p</code>, where <code class="reqn">n</code> is the number of subjects, <code class="reqn">m</code> is the maximum observation time, and <code class="reqn">p</code> is the number of predictors. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ID</code></td>
+<td>
+<p>The ID of each subjects, each subject has one ID (many rows in <code>x</code> share one <code>ID</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>Represents the start of each time interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time2</code></td>
+<td>
+<p>Represents the stop of each time interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>Indicator of event. <code>event = 1</code> when event occurs and <code>event = 0</code> otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Sequence of regularization coefficients <code class="reqn">\lambda</code>'s.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p><code class="reqn">G * G</code> matrix describing the relationship between the groups of variables, where <code class="reqn">G</code> represents the number of groups. Denote the <code class="reqn">i</code>-th group of variables by <code class="reqn">g_i</code>. The <code class="reqn">(i,j)</code> entry is <code>1</code> if and only if <code class="reqn">i\neq j</code> and <code class="reqn">g_i</code> is a child group (subset) of <code class="reqn">g_j</code>, and is <code>0</code> otherwise. See Examples and Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_variable</code></td>
+<td>
+<p><code class="reqn">p * G</code> matrix describing the relationship between the groups and the variables. The <code class="reqn">(i,j)</code> entry is <code>1</code> if and only if variable <code class="reqn">i</code> is in group <code class="reqn">g_j</code>, but not in any child group of <code class="reqn">g_j</code>, and is <code>0</code> otherwise. See Examples and Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty_weights</code></td>
+<td>
+<p>Optional, vector of length <code class="reqn">G</code> specifying the group-specific penalty weights. If not specified, the default value is <code class="reqn">\mathbf{1}_G</code>. Modify with caution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par_init</code></td>
+<td>
+<p>Optional, vector of initial values of the optimization algorithm. Default initial value is zero for all <code class="reqn">p</code> variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfolds</code></td>
+<td>
+<p>Optional, the folds of cross-validation. Default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stepsize_init</code></td>
+<td>
+<p>Initial value of the stepsize of the optimization algorithm. Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stepsize_shrink</code></td>
+<td>
+<p>Factor in <code class="reqn">(0,1)</code> by which the stepsize shrinks in the backtracking linesearch. Default is 0.8.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Convergence criterion. Algorithm stops when the <code class="reqn">l_2</code> norm of the difference between two consecutive updates is smaller than <code>tol</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>Maximum number of iterations allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical, whether progress is printed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For each lambda, 10 folds cross-validation (by default) is performed. The cv error is defined as follows. Suppose we perform <code class="reqn">K</code>-fold cross-validation, denote <code class="reqn">\hat{\beta}^{-k}</code> by the estimate obtained from the rest of <code class="reqn">K-1</code> folds (training set). The error of the <code class="reqn">k</code>-th fold (test set) is defined as <code class="reqn">2(P-Q)</code> divided by <code class="reqn">R</code>, where <code class="reqn">P</code> is the log partial likelihood evaluated at  <code class="reqn">\hat{\beta}^{-k}</code> using the entire dataset, Q is the log partial likelihood evaluated at <code class="reqn">\hat{\beta}^{-k}</code> using the training set, and R is the number of events in the test set. We do not use the negative log partial likelihood evaluated at <code class="reqn">\hat{\beta}^{-k}</code> using the test set because the former definition can efficiently use the risk set, and thus it is more stable when the number of events in each test set is small (think of leave-one-out). The cv error is used in parameter tuning. To account for balance in outcomes among the randomly formed test set, we divide the deviance <code class="reqn">2(P-Q)</code> by R. 
+To get the estimated coefficients that has the minimum cv error, use <code>netcox()$Estimates[netcox()$Lambdas==netcox_cv()$lambda.min]</code>. To apply the 1-se rule, use <code>netcox()$Estimates[netcox()$Lambdas==netcox_cv()$lambda.1se]</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambdas</code></td>
+<td>
+<p>A vector of lambda used for each cross-validation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvm</code></td>
+<td>
+<p>The cv error averaged across all folds for each lambda.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvsd</code></td>
+<td>
+<p>The standard error of the cv error for each lambda.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvup</code></td>
+<td>
+<p>The cv error plus its standard error for each lambda.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvlo</code></td>
+<td>
+<p>The cv error minus its standard error for each lambda.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nzero</code></td>
+<td>
+<p>The number of non-zero coefficients at each lambda.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>netcox.fit</code></td>
+<td>
+<p>A netcox fit for the full data at all lambdas.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.min</code></td>
+<td>
+<p>The lambda such that the <code>cvm</code> reach its minimum.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.1se</code></td>
+<td>
+<p>The maximum of lambda such that the <code>cvm</code> is less than the minimum the <code>cvup</code> (the minmum of <code>cvm</code> plus its standard error).</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>netcox</code>, <code>plot_netcox_cv</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">grp &lt;- matrix(c(0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                1, 1, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 1, 0, 1, 0),
+              ncol = 5, byrow = TRUE)
+grp.var &lt;- matrix(c(1, 0, 0, 0, 0, #A1
+                    1, 0, 0, 0, 0, #A2
+                    0, 0, 0, 1, 0, #C1
+                    0, 0, 0, 1, 0, #C2
+                    0, 1, 0, 0, 0, #B
+                    0, 0, 1, 0, 0, #A1B
+                    0, 0, 1, 0, 0, #A2B
+                    0, 0, 0, 0, 1, #C1B
+                    0, 0, 0, 0, 1  #C2B
+                   ), ncol = 5, byrow = TRUE)
+eta_g &lt;- rep(1, 5)
+x &lt;- as.matrix(sim[, c("A1","A2","C1","C2","B",
+                       "A1B","A2B","C1B","C2B")])
+lam.seq &lt;- 10^seq(0, -2, by = -0.2)
+
+cv &lt;- netcox_cv(x = x,
+                ID = sim$Id,
+                time = sim$Start,
+                time2 = sim$Stop,
+                event = sim$Event,
+                lambda = lam.seq,
+                group = grp,
+                group_variable = grp.var,
+                penalty_weights = eta_g,
+                nfolds = 5,
+                tol = 1e-4,
+                maxit = 1e3,
+                verbose = FALSE)
+                
+</code></pre>
+
+
+</div>

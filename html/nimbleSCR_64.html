@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dpoisppAC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Poisson point process for the distribution of activity centers</h2>
+
+<h3>Description</h3>
+
+<p>Density and random generation functions of the Poisson point process for the distribution of activity centers. 
+The <code>dpoisppAC</code> distribution is a NIMBLE custom distribution which 
+can be used to model and simulate activity center locations (<em>x</em>) of multiple individual in 
+continuous space over a set of habitat windows defined by their upper and lower coordinates (<em>lowerCoords,upperCoords</em>). 
+The distribution assumes that activity centers follow a Poisson point process with intensity = exp(logIntensities).  
+All coordinates (<em>s</em> and <em>trapCoords</em>) should be scaled to the habitat (<code>scaleCoordsToHabitatGrid</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dpoisppAC(
+  x,
+  lowerCoords,
+  upperCoords,
+  logIntensities,
+  sumIntensity,
+  habitatGrid,
+  numGridRows,
+  numGridCols,
+  numPoints,
+  log = 0
+)
+
+rpoisppAC(
+  n,
+  lowerCoords,
+  upperCoords,
+  logIntensities,
+  sumIntensity,
+  habitatGrid,
+  numGridRows,
+  numGridCols,
+  numPoints
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Matrix of x- and y-coordinates of a set of spatial points (AC locations) scaled to the habitat (<code>scaleCoordsToHabitatGrid</code>). Each row corresponds to a point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lowerCoords, upperCoords</code></td>
+<td>
+<p>Matrices of lower and upper x- and y-coordinates of all detection windows scaled to the habitat (see (<code>scaleCoordsToHabitatGrid</code>). One row for each window. Each window should be of size 1x1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logIntensities</code></td>
+<td>
+<p>Vector of log habitat intensities for all habitat windows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sumIntensity</code></td>
+<td>
+<p>Sum of the habitat intensities over all windows. Provided as an argument for computational speed, instead of calculating it in the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>habitatGrid</code></td>
+<td>
+<p>Matrix of habitat window indices. Cell values should correspond to the order of habitat windows in
+<code>lowerCoords</code>, <code>upperCoords</code>, and <code>logIntensities</code>. 
+When the habitat grid only consists of a single row or column of windows, an additional row or column of dummy indices has to be added because the <code>nimble</code> model code requires a matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numGridRows, numGridCols</code></td>
+<td>
+<p>Numbers of rows and columns of the habitat grid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numPoints</code></td>
+<td>
+<p>Number of points in the Poisson point process. This value (non-negative integer) is used to truncate <code>x</code> 
+so that extra rows beyond <code>numPoints</code> are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical argument, specifying whether to return the log-probability of the distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Integer specifying the number of realisations to generate. Only n = 1 is supported.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>dpoisppAC</code> gives the (log) probability density of the observation matrix <code>x</code>. 
+<code>rpoisppAC</code> gives coordinates of a set of randomly generated spatial points.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Wei Zhang
+</p>
+
+
+<h3>References</h3>
+
+<p>W. Zhang, J. D. Chipperfield, J. B. Illian, P. Dupont, C. Milleret, P. de Valpine and R. Bischof. 2020. 
+A hierarchical point process model for spatial capture-recapture data. bioRxiv. DOI 10.1101/2020.10.06.325035
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">lowerCoords &lt;- matrix(c(0, 0, 1, 0, 0, 1, 1, 1), nrow = 4, byrow = TRUE)
+upperCoords &lt;- matrix(c(1, 1, 2, 1, 1, 2, 2, 2), nrow = 4, byrow = TRUE)
+logIntensities &lt;- log(c(1:4))
+logSumIntensity &lt;- sum(exp(logIntensities))
+habitatGrid &lt;- matrix(c(1:4), nrow = 2, byrow = TRUE)
+numGridRows &lt;- nrow(habitatGrid)
+numGridCols &lt;- ncol(habitatGrid)
+#Simulate data
+x &lt;- rpoisppAC(1, lowerCoords, upperCoords, logIntensities, logSumIntensity, habitatGrid,
+               numGridRows, numGridCols, -1)
+numPoints &lt;- nrow(x)
+dpoisppAC(x, lowerCoords, upperCoords, logIntensities, logSumIntensity,
+          habitatGrid, numGridRows, numGridCols, numPoints, log = TRUE)
+          
+</code></pre>
+
+
+</div>

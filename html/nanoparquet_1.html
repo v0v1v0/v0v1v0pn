@@ -1,0 +1,257 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nanoparquet-package</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>nanoparquet: Read and Write 'Parquet' Files</h2>
+
+<h3>Description</h3>
+
+<p>Self-sufficient reader and writer for flat 'Parquet' files. Can read most 'Parquet' data types. Can write many 'R' data types, including factors and temporal types. See docs for limitations.
+</p>
+
+
+<h3>Details</h3>
+
+<p><code>nanoparquet</code> is a reader and writer for a common subset of Parquet files.
+</p>
+
+
+<h4>Features:</h4>
+
+
+<ul>
+<li>
+<p> Read and write flat (i.e. non-nested) Parquet files.
+</p>
+</li>
+<li>
+<p> Can read most <a href="https://r-lib.github.io/nanoparquet/reference/nanoparquet-types.html">Parquet data types</a>.
+</p>
+</li>
+<li>
+<p> Can write many R data types, including factors and temporal types
+to Parquet.
+</p>
+</li>
+<li>
+<p> Completely dependency free.
+</p>
+</li>
+<li>
+<p> Supports Snappy, Gzip and Zstd compression.
+</p>
+</li>
+</ul>
+<h4>Limitations:</h4>
+
+
+<ul>
+<li>
+<p> Nested Parquet types are not supported.
+</p>
+</li>
+<li>
+<p> Some Parquet logical types are not supported: <code>FLOAT16</code>, <code>INTERVAL</code>,
+<code>UNKNOWN</code>.
+</p>
+</li>
+<li>
+<p> Only Snappy, Gzip and Zstd compression is supported.
+</p>
+</li>
+<li>
+<p> Encryption is not supported.
+</p>
+</li>
+<li>
+<p> Reading files from URLs is not supported.
+</p>
+</li>
+<li>
+<p> Being single-threaded and not fully optimized, nanoparquet is probably
+not suited well for large data sets. It should be fine for a couple of
+gigabytes. Reading or writing a ~250MB file that has 32 million rows and 14 columns takes about 10-15 seconds on an M2 MacBook Pro.
+For larger files, use Apache Arrow or DuckDB.
+</p>
+</li>
+</ul>
+<h4>Installation</h4>
+
+<p>Install the R package from CRAN:
+</p>
+<div class="sourceCode r"><pre>install.packages("nanoparquet")
+</pre></div>
+
+
+
+<h4>Usage</h4>
+
+
+
+<h5>Read</h5>
+
+<p>Call <code>read_parquet()</code> to read a Parquet file:
+</p>
+<div class="sourceCode r"><pre>df &lt;- nanoparquet::read_parquet("example.parquet")
+</pre></div>
+<p>To see the columns of a Parquet file and how their types are mapped to
+R types by <code>read_parquet()</code>, call <code>parquet_column_types()</code> first:
+</p>
+<div class="sourceCode r"><pre>nanoparquet::parquet_column_types("example.parquet")
+</pre></div>
+<p>Folders of similar-structured Parquet files (e.g. produced by Spark)
+can be read like this:
+</p>
+<div class="sourceCode r"><pre>df &lt;- data.table::rbindlist(lapply(
+  Sys.glob("some-folder/part-*.parquet"),
+  nanoparquet::read_parquet
+))
+</pre></div>
+
+
+
+<h5>Write</h5>
+
+<p>Call <code>write_parquet()</code> to write a data frame to a Parquet file:
+</p>
+<div class="sourceCode r"><pre>nanoparquet::write_parquet(mtcars, "mtcars.parquet")
+</pre></div>
+<p>To see how the columns of the data frame will be mapped to Parquet types
+by <code>write_parquet()</code>, call <code>parquet_column_types()</code> first:
+</p>
+<div class="sourceCode r"><pre>nanoparquet::parquet_column_types(mtcars)
+</pre></div>
+
+
+
+<h5>Inspect</h5>
+
+<p>Call <code>parquet_info()</code>, <code>parquet_column_types()</code>, <code>parquet_schema()</code> or
+<code>parquet_metadata()</code> to see various kinds of metadata from a Parquet
+file:
+</p>
+
+<ul>
+<li> <p><code>parquet_info()</code> shows a basic summary of the file.
+</p>
+</li>
+<li> <p><code>parquet_column_types()</code> shows the leaf columns, these are are the ones
+that <code>read_parquet()</code> reads into R.
+</p>
+</li>
+<li> <p><code>parquet_schema()</code> shows all columns, including non-leaf columns.
+</p>
+</li>
+<li> <p><code>parquet_metadata()</code> shows the most complete metadata information:
+file meta data, the schema, the row groups and column chunks of the
+file.
+</p>
+</li>
+</ul>
+<div class="sourceCode r"><pre>nanoparquet::parquet_info("mtcars.parquet")
+nanoparquet::parquet_column_types("mtcars.parquet")
+nanoparquet::parquet_schema("mtcars.parquet")
+nanoparquet::parquet_metadata("mtcars.parquet")
+</pre></div>
+<p>If you find a file that should be supported but isn't, please open an
+issue here with a link to the file.
+</p>
+
+
+
+
+<h4>Options</h4>
+
+<p>See also <code>?parquet_options()</code>.
+</p>
+
+<ul>
+<li> <p><code>nanoparquet.class</code>: extra class to add to data frames returned by
+<code>read_parquet()</code>. If it is not defined, the default is <code>"tbl"</code>,
+which changes how the data frame is printed if the pillar package is
+loaded.
+</p>
+</li>
+<li> <p><code>nanoparquet.use_arrow_metadata</code>: unless this is set to <code>FALSE</code>,
+<code>read_parquet()</code> will make use of Arrow metadata in the Parquet file.
+Currently this is used to detect factor columns.
+</p>
+</li>
+<li> <p><code>nanoparquet.write_arrow_metadata</code>: unless this is set to <code>FALSE</code>,
+<code>write_parquet()</code> will add Arrow metadata to the Parquet file.
+This helps preserving classes of columns, e.g. factors will be read
+back as factors, both by nanoparquet and Arrow.
+</p>
+</li>
+</ul>
+<h4>License</h4>
+
+<p>MIT
+</p>
+
+
+
+<h3>Author(s)</h3>
+
+<p><strong>Maintainer</strong>: Gábor Csárdi <a href="mailto:csardi.gabor@gmail.com">csardi.gabor@gmail.com</a>
+</p>
+<p>Authors:
+</p>
+
+<ul><li>
+<p> Hannes Mühleisen (<a href="https://orcid.org/0000-0001-8552-0029">ORCID</a>) [copyright holder]
+</p>
+</li></ul>
+<p>Other contributors:
+</p>
+
+<ul>
+<li>
+<p> Google Inc. [copyright holder]
+</p>
+</li>
+<li>
+<p> Apache Software Foundation [copyright holder]
+</p>
+</li>
+<li>
+<p> Posit Software, PBC [copyright holder]
+</p>
+</li>
+<li>
+<p> RAD Game Tools [copyright holder]
+</p>
+</li>
+<li>
+<p> Valve Software [copyright holder]
+</p>
+</li>
+<li>
+<p> Tenacious Software LLC [copyright holder]
+</p>
+</li>
+<li>
+<p> Facebook, Inc. [copyright holder]
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Useful links:
+</p>
+
+<ul>
+<li> <p><a href="https://github.com/r-lib/nanoparquet">https://github.com/r-lib/nanoparquet</a>
+</p>
+</li>
+<li> <p><a href="https://r-lib.github.io/nanoparquet/">https://r-lib.github.io/nanoparquet/</a>
+</p>
+</li>
+<li>
+<p> Report bugs at <a href="https://github.com/r-lib/nanoparquet/issues">https://github.com/r-lib/nanoparquet/issues</a>
+</p>
+</li>
+</ul>
+</div>

@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mixed-Mode Analysis</h2>
+
+<h3>Description</h3>
+
+<p>Mixes chemical and petrographic matrices.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mix(x, y, ...)
+
+## S4 method for signature 'matrix,matrix'
+mix(x, y, lambda = 1, ...)
+
+## S4 method for signature 'dist,dist'
+mix(x, y, mu = 0.5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>matrix</code> of chemical compositional data or a
+dissimilarity matrix for these chemical compositional data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A <code>matrix</code> of coded mineralogical binary data or a
+dissimilarity matrix for these mineralogical data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Extra parameters to be passed to <code>cluster::daisy()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>A length-one <code>numeric</code> vector giving a weighting factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>A length-one <code>numeric</code> vector that lies between 0 and 1 giving
+the mixing parameter.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A stats::dist object.
+</p>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>mix(x = matrix, y = matrix)</code>: First approach of mixed-mode analysis.
+</p>
+</li>
+<li> <p><code>mix(x = dist, y = dist)</code>: Second approach of mixed-mode analysis.
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p><strong>Experimental.</strong>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>N. Frerebeau
+</p>
+
+
+<h3>References</h3>
+
+<p>Baxter, M. J., Beardah, C. C., Papageorgiou, I., Cau, M. A., Day, P. M. &amp;
+Kilikoglou, V. (2008). On Statistical Approaches to the Study of Ceramic
+Artefacts Using Geochemical and Petrographic Data. <em>Archaeometry</em>, 50(1):
+142-157. <a href="https://doi.org/10.1111/j.1475-4754.2007.00359.x">doi:10.1111/j.1475-4754.2007.00359.x</a>.
+</p>
+<p>Beardah, C. C., Baxter, M. J., Papageorgiou, I. &amp; Cau, M. A. (2003).
+"Mixed-Mode" Approaches to the Grouping of Ceramic Artefacts Using S-Plus.
+In M. Doerr and A. Sarris, <em>The Digital Heritage of Archaeology</em>, p. 261-266.
+Athens: Archive of Monuments and Publications, Hellenic Ministry of Culture.
+</p>
+<p>Gower, J. C. (1971). A general coefficient of similarity and some of its
+properties. <em>Biometrics</em>, 27(4):857-874. <a href="https://doi.org/10.2307/2528823">doi:10.2307/2528823</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Can Sora datasets
+## Data from Cau (1999) and Cau et al. (2007)
+path_chem &lt;- system.file("extdata", "cansora_chemistry.csv", package = "nexus")
+chemistry &lt;- read.csv(path_chem, header = TRUE, row.names = 1)
+path_petro &lt;- system.file("extdata", "cansora_petrography.csv", package = "nexus")
+petrography &lt;- read.csv(path_petro, header = TRUE, row.names = 1)
+
+## Prepare chemical data
+major &lt;- c("Fe2O3", "Al2O3", "MnO", "P2O5", "TiO2",
+           "MgO", "CaO", "Na2O", "K2O", "SiO2")
+chem &lt;- chemistry[-1, major]
+
+## Prepare petrographic data
+petro &lt;- petrography[-c(7, 8), -1]
+petro &lt;- cdt(petro) # Get the complete disjunctive table
+
+## First approach
+mix1 &lt;- mix(as.matrix(chem), as.matrix(petro), lambda = 2)
+mds1 &lt;- stats::cmdscale(mix1) # Multi-Dimensional Scaling
+plot(mds1)
+
+</code></pre>
+
+
+</div>

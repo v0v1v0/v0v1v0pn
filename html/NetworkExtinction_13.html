@@ -1,0 +1,192 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RandomExtinctions</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Random extinction</h2>
+
+<h3>Description</h3>
+
+<p>Generates a null model by generating random extinction histories and calculating the mean and standard deviation of the accumulated secondary extinctions developed by making n random extinction histories.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RandomExtinctions(
+  Network,
+  nsim = 10,
+  Record = FALSE,
+  plot = FALSE,
+  SimNum = NULL,
+  NetworkType = "Trophic",
+  clust.method = "cluster_infomap",
+  parallel = FALSE,
+  ncores,
+  IS = 0,
+  Rewiring = FALSE,
+  RewiringDist = NULL,
+  RewiringProb = 0.5,
+  verbose = TRUE,
+  forceFULL = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Network</code></td>
+<td>
+<p>a network representation as a an adjacency matrix, edgelist,
+or a network object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>numeric, number of simulations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Record</code></td>
+<td>
+<p>logical, if TRUE, records every simulation and you can read the
+raw results in the object FullSims</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical if TRUE, will add a graph to the results</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SimNum</code></td>
+<td>
+<p>numeric, how many nodes to register for primary extinction. By default sets all of them.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NetworkType</code></td>
+<td>
+<p>a character with the options Trophic and Mutualistic - is used to calculate secondary extinctions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clust.method</code></td>
+<td>
+<p>a character with the options cluster_edge_betweenness,
+cluster_label_prop or cluster_infomap, defaults to cluster_infomap</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>if TRUE, it will use parallel procesing, if FALSE (default) it will run
+sequentially</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>numeric, number of cores to use if using parallel procesing</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IS</code></td>
+<td>
+<p>either numeric or a named vector of numerics. Identifies the threshold of relative interaction strength which species require to not be considered secondarily extinct (i.e. IS = 0.3 leads to removal of all nodes which lose 70 precent of their interaction strength in the Network argument). If a named vector, names must correspond to vertex names in Network argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Rewiring</code></td>
+<td>
+<p>either a function or a named vector of functions. Signifies how rewiring probabilities are calculated from the RewiringDist argument. If FALSE, no rewiring is carried out.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RewiringDist</code></td>
+<td>
+<p>a numeric matrix of NxN dimension (N... number of nodes in Network). Contains, for example, phylogenetic or functional trait distances between nodes in Network which are used by the Rewiring argument to calculate rewiring probabilities. If Rewiring == function(x)x, this matrix is expected to contain probabilities of a connection being present between species-pairs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RewiringProb</code></td>
+<td>
+<p>a numeric which identifies the threshold at which to assume rewiring potential is met.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical. Whether to report on function progress or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>forceFULL</code></td>
+<td>
+<p>Logical. Whether to continue removal of nodes after initial order has been depleted. This will force the simulations to execute extinctions and check for secondary extinctions/new links until the network does not change anylonger.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>"Note: When using the pre-defined order of nodes for primary
+removals option in the random extinction scenario, it is possible
+that some of the species in the predefined order may be lost as
+secondary extinctions. As such, they should not be counted as
+primary removals. For example, if a network has five species A,B,
+,D,E and a pre-defined "random" order of removal C,A,B,E,D with
+removal of C causing the additional loss of A and removal of B
+causing the additional loss of E and D, only two primary removals
+(C and B) would be required for total network collapse, even though
+the algorithm would terminate at the third element of the removal
+vector, i.e., C,A,B."
+</p>
+<p>When NetworkType = Trophic, secondary extinctions only occur for any predator, but not producers. If NetworkType = Mutualistic, secondary extinctions occur for all species in the network.
+</p>
+<p>When clust.method = cluster_edge_betweenness computes the network modularity using cluster_edge_betweenness methods from igraph to detect communities
+When clust.method = cluster_label_prop computes the network modularity using cluster_label_prop methods from igraph to detect communities
+When clust.method = cluster_infomap computes the network modularity using cluster_infomap methods from igraph to detect communities, here the number of nb.trials are equal to the network size
+</p>
+
+
+<h3>Value</h3>
+
+<p>exports list containing a data frame with the characteristics of the network after every extinction, a network object containing the final network, and a graph with the mean and 95percent interval. The resulting data frame contains 11 columns that incorporate the topological index, the secondary extinctions, predation release, and total extinctions of the network in each primary extinction.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Derek Corcoran &lt;derek.corcoran.barrios@gmail.com&gt;
+</p>
+<p>M. Isidora Ávila-Thieme &lt;msavila@uc.cl&gt;
+</p>
+<p>Erik Kusch &lt;erik.kusch@bio.au.dk&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#first example
+## Not run: 
+data("More_Connected")
+RandomExtinctions(Network = More_Connected, nsim = 20)
+
+# Using parallel procesing
+## Detect your number of cores divide by 2
+
+cores &lt;- ceiling(parallel::detectCores()/2)
+
+RandomExtinctions(Network = More_Connected, nsim = 20, parallel = TRUE, ncores = cores)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

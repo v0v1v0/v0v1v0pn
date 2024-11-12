@@ -1,0 +1,264 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dHMM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hidden Markov Model distribution for use in <code>nimble</code> models</h2>
+
+<h3>Description</h3>
+
+<p><code>dHMM</code> and <code>dHMMo</code> provide hidden Markov model distributions that
+can be used directly from R or in <code>nimble</code> models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dHMM(x, init, probObs, probTrans, len = 0, checkRowSums = 1, log = 0)
+
+dHMMo(x, init, probObs, probTrans, len = 0, checkRowSums = 1, log = 0)
+
+rHMM(n, init, probObs, probTrans, len = 0, checkRowSums = 1)
+
+rHMMo(n, init, probObs, probTrans, len = 0, checkRowSums = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of observations, each one a positive integer corresponding to
+an observation state (one value of which could can correspond to "not
+observed", and another value of which can correspond to "dead" or "removed
+from system").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>vector of initial state probabilities. Must sum to 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probObs</code></td>
+<td>
+<p>time-independent matrix (<code>dHMM</code> and <code>rHMM</code>) or
+time-dependent array (<code>dHMMo</code> and <code>rHMMo</code>) of observation
+probabilities. First two dimensions of <code>probObs</code> are of size x (number
+of possible system states) x (number of possible observation classes).
+<code>dDHMMo</code> and <code>rDHMMo</code> expects an additional third dimension of
+size (number of observation times). probObs[i, j (,t)] is the probability
+that an individual in the ith latent state is recorded as being in the jth
+detection state (at time t). See Details for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probTrans</code></td>
+<td>
+<p>time-independent matrix of state transition probabilities.
+probTrans[i,j] is the probability that an individual in latent state i
+transitions to latent state j at the next timestep. See Details for more
+information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>len</code></td>
+<td>
+<p>length of <code>x</code> (see below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>checkRowSums</code></td>
+<td>
+<p>should validity of <code>probObs</code> and <code>probTrans</code> be
+checked?  Both of these are required to have each set of probabilities sum
+to 1 (over each row, or second dimension). If <code>checkRowSums</code> is
+non-zero (or <code>TRUE</code>), these conditions will be checked within a
+tolerance of 1e-6.  If it is 0 (or <code>FALSE</code>), they will not be checked.
+Not checking should result in faster execution, but whether that is
+appreciable will be case-specific.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>TRUE or 1 to return log probability. FALSE or 0 to return
+probability.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of random draws, each returning a vector of length
+<code>len</code>. Currently only <code>n = 1</code> is supported, but the argument
+exists for standardization of "<code>r</code>" functions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>These nimbleFunctions provide distributions that can be used
+directly in R or in <code>nimble</code> hierarchical models (via
+<code>nimbleCode</code> and <code>nimbleModel</code>).
+</p>
+<p>The distribution has two forms, <code>dHMM</code> and <code>dHMMo</code>. Define S as
+the number of latent state categories (maximum possible value for elements
+of <code>x</code>), O as the number of possible observation state categories, and
+T as the number of observation times (length of <code>x</code>). In <code>dHMM</code>,
+<code>probObs</code> is a time-independent observation probability matrix with
+dimension S x O.  In <code>dHMMo</code>, <code>probObs</code> is a three-dimensional
+array of time-dependent observation probabilities with dimension S x O x T.
+The first index of <code>probObs</code> indexes the true latent state.  The
+second index of <code>probObs</code> indexes the observed state.  For example, in
+the time-dependent case, <code>probObs[i, j, t]</code> is the probability at time
+<code>t</code> that an individual in state <code>i</code> is observed in state
+<code>j</code>.
+</p>
+<p><code>probTrans</code> has dimension S x S. <code>probTrans</code>[i, j] is the
+time-independent probability that an individual in state <code>i</code> at time
+<code>t</code> transitions to state <code>j</code> time <code>t+1</code>.
+</p>
+<p><code>init</code> has length S. <code>init[i]</code> is the probability of being in
+state <code>i</code> at the first observation time. That means that the first
+observations arise from the initial state probabilities.
+</p>
+<p>For more explanation, see package vignette
+(<code>vignette("Introduction_to_nimbleEcology")</code>).
+</p>
+<p>Compared to writing <code>nimble</code> models with a discrete latent state and a
+separate scalar datum for each observation time, use of these distributions
+allows one to directly sum (marginalize) over the discrete latent state and
+calculate the probability of all observations for one individual (or other
+HMM unit) jointly.
+</p>
+<p>These are <code>nimbleFunction</code>s written in the format of user-defined
+distributions for NIMBLE's extension of the BUGS model language. More
+information can be found in the NIMBLE User Manual at
+<a href="https://r-nimble.org">https://r-nimble.org</a>.
+</p>
+<p>When using these distributions in a <code>nimble</code> model, the left-hand side
+will be used as <code>x</code>, and the user should not provide the <code>log</code>
+argument.
+</p>
+<p>For example, in <code>nimble</code> model code,
+</p>
+<p><code>observedStates[i, 1:T] ~ dHMM(initStates[1:S], observationProbs[1:S,
+  1:O], transitionProbs[1:S, 1:S], 1, T)</code>
+</p>
+<p>declares that the <code>observedStates[i, 1:T]</code> (observation history for
+individual <code>i</code>, for example) vector follows a hidden Markov model
+distribution with parameters as indicated, assuming all the parameters have
+been declared elsewhere in the model. As above, <code>S</code> is the number of
+system state categories, <code>O</code> is the number of observation state
+categories, and <code>T</code> is the number of observation occasions. This will
+invoke (something like) the following call to <code>dHMM</code> when
+<code>nimble</code> uses the model such as for MCMC:
+</p>
+<p><code>dHMM(observedStates[1:T], initStates[1:S], observationProbs[1:S,
+  1:O], transitionProbs[1:S, 1:S], 1, T, log = TRUE)</code>
+</p>
+<p>If an algorithm using a <code>nimble</code> model with this declaration needs to
+generate a random draw for <code>observedStates[1:T]</code>, it will make a
+similar invocation of <code>rHMM</code>, with <code>n = 1</code>.
+</p>
+<p>If the observation probabilities are time-dependent, one would use:
+</p>
+<p><code>observedStates[1:T] ~ dHMMo(initStates[1:S], observationProbs[1:S,
+  1:O, 1:T], transitionProbs[1:S, 1:S], 1, T)</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>dHMM</code> and <code>dHMMo</code>: the probability (or likelihood) or
+log probability of observation vector <code>x</code>.
+</p>
+<p>For <code>rHMM</code> and <code>rHMMo</code>: a simulated detection history, <code>x</code>.
+</p>
+
+
+<h3>Notes for use with automatic differentiation</h3>
+
+<p>The <code>dHMM[o]</code> distributions should work for models and algorithms that
+use nimble's automatic differentiation (AD) system. In that system, some
+kinds of values are "baked in" (cannot be changed) to the AD calculations
+from the first call, unless and until the AD calculations are reset. For the
+<code>dHMM[o]</code> distributions, the sizes of the inputs and the data (<code>x</code>)
+values themselves are baked in. These can be different for different
+iterations through a for loop (or nimble model declarations with different
+indices, for example), but the sizes and data values for each specific
+iteration will be "baked in" after the first call. <b>In other words, it
+is assumed that <code>x</code> are data and are not going to change.</b>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ben Goldstein, Perry de Valpine, and Daniel Turek
+</p>
+
+
+<h3>References</h3>
+
+<p>D. Turek, P. de Valpine and C. J. Paciorek. 2016. Efficient
+Markov chain Monte Carlo sampling for hierarchical hidden Markov models.
+Environmental and Ecological Statistics 23:549–564. DOI
+10.1007/s10651-016-0353-z
+</p>
+
+
+<h3>See Also</h3>
+
+<p>For dynamic hidden Markov models with time-dependent transitions,
+see <code>dDHMM</code> and <code>dDHMMo</code>. For simple
+capture-recapture, see <code>dCJS</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Set up constants and initial values for defining the model
+len &lt;- 5 # length of dataset
+dat &lt;- c(1,2,1,1,2) # A vector of observations
+init &lt;- c(0.4, 0.2, 0.4) # A vector of initial state probabilities
+probObs &lt;- t(array( # A matrix of observation probabilities
+       c(1, 0,
+         0, 1,
+         0.2, 0.8), c(2, 3)))
+probTrans &lt;- t(array( # A matrix of transition probabilities
+        c(0.6, 0.3, 0.1,
+          0, 0.7, 0.3,
+          0, 0, 1), c(3,3)))
+
+# Define code for a nimbleModel
+ nc &lt;- nimbleCode({
+   x[1:5] ~ dHMM(init[1:3], probObs = probObs[1:3,1:2],
+                 probTrans = probTrans[1:3, 1:3], len = 5, checkRowSums = 1)
+
+   for (i in 1:3) {
+     for (j in 1:3) {
+       probTrans[i,j] ~ dunif(0,1)
+     }
+
+     probObs[i, 1] ~ dunif(0,1)
+     probObs[i, 2] &lt;- 1 - probObs[i, 1]
+   }
+ })
+
+# Build the model
+HMM_model &lt;- nimbleModel(nc,
+                         data = list(x = dat),
+                         inits = list(init = init,
+                                      probObs = probObs,
+                                      probTrans = probTrans))
+# Calculate log probability of data from the model
+HMM_model$calculate()
+# Use the model for a variety of other purposes...
+</code></pre>
+
+
+</div>

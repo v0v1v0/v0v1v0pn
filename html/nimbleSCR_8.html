@@ -1,0 +1,182 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dbernppDetection_normal</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bernoulli point process detection model</h2>
+
+<h3>Description</h3>
+
+<p>Density and random generation functions of the Bernoulli point process for detection.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dbernppDetection_normal(
+  x,
+  lowerCoords,
+  upperCoords,
+  s,
+  sd,
+  baseIntensities,
+  numWindows,
+  indicator,
+  log = 0
+)
+
+rbernppDetection_normal(
+  n,
+  lowerCoords,
+  upperCoords,
+  s,
+  sd,
+  baseIntensities,
+  numWindows,
+  indicator
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector with three elements representing the x- and y-coordinates and the id of the corresponding detection window for a single spatial point (detection location) scaled to the habitat (see (<code>scaleCoordsToHabitatGrid</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lowerCoords, upperCoords</code></td>
+<td>
+<p>Matrices of lower and upper x- and y-coordinates of all detection windows scaled to the habitat (see (<code>scaleCoordsToHabitatGrid</code>). One row for each window. Each window should be of size 1x1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>VVector of x- and y-coordinates of the isotropic bivariate normal distribution mean (i.e. the AC location)..</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd</code></td>
+<td>
+<p>Standard deviation of the isotropic bivariate normal distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseIntensities</code></td>
+<td>
+<p>Vector of baseline detection intensities for all detection windows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numWindows</code></td>
+<td>
+<p>Number of detection windows. This value (positive integer) is used to truncate <code>lowerCoords</code> and <code>upperCoords</code> 
+so that extra rows beyond <code>numWindows</code> are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indicator</code></td>
+<td>
+<p>Binary argument specifying whether the individual is available for detection (indicator = 1) or not (indicator = 0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical argument, specifying whether to return the log-probability of the distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Integer specifying the number of realisations to generate.  Only n = 1 is supported.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>dbernppDetection_normal</code> distribution is a NIMBLE custom distribution which can be used to model and simulate
+Bernoulli observations (<em>x</em>) of a single individual in continuous space over a set of detection windows defined by their upper and lower
+coordinates (<em>lowerCoords,upperCoords</em>). The distribution assumes that an individual’s detection probability 
+follows an isotropic multivariate normal centered on the individual's activity center (<em>s</em>) with standard deviation (<em>sd</em>).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>dbernppDetection_normal</code> gives the (log) probability density of the observation vector <code>x</code>. 
+<code>rbernppDetection_normal</code> gives coordinates of a randomly generated spatial point.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Wei Zhang and Cyril Milleret
+</p>
+
+
+<h3>References</h3>
+
+<p>W. Zhang, J. D. Chipperfield, J. B. Illian, P. Dupont, C. Milleret, P. de Valpine and R. Bischof. 2020. 
+A hierarchical point process model for spatial capture-recapture data. bioRxiv. DOI 10.1101/2020.10.06.325035
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">coordsHabitatGridCenter &lt;- matrix(c(0.5, 3.5,
+                                    1.5, 3.5,
+                                    2.5, 3.5,
+                                    3.5, 3.5,
+                                    0.5, 2.5,
+                                    1.5, 2.5,
+                                    2.5, 2.5,
+                                    3.5, 2.5,
+                                    0.5, 1.5,
+                                    1.5, 1.5,
+                                    2.5, 1.5,
+                                    3.5, 1.5,
+                                    0.5, 0.5,
+                                    1.5, 0.5,
+                                    2.5, 0.5,
+                                    3.5, 0.5), ncol = 2,byrow = TRUE)
+colnames(coordsHabitatGridCenter) &lt;- c("x","y")
+# Create observation windows
+ lowerCoords &lt;- matrix(c(0, 0, 1, 0, 0, 1, 1, 1), nrow = 4, byrow = TRUE)
+ upperCoords &lt;- matrix(c(1, 1, 2, 1, 1, 2, 2, 2), nrow = 4, byrow = TRUE)
+ colnames(lowerCoords) &lt;- colnames(upperCoords) &lt;- c("x","y")
+# Rescale coordinates
+ScaledLowerCoords &lt;- scaleCoordsToHabitatGrid(coordsData =  lowerCoords,
+                                              coordsHabitatGridCenter = coordsHabitatGridCenter)
+ScaledUpperCoords &lt;- scaleCoordsToHabitatGrid(coordsData =  upperCoords,
+                                              coordsHabitatGridCenter = coordsHabitatGridCenter)
+ScaledUpperCoords$coordsDataScaled[,2] &lt;- ScaledUpperCoords$coordsDataScaled[,2] + 1.5
+ScaledLowerCoords$coordsDataScaled[,2] &lt;- ScaledLowerCoords$coordsDataScaled[,2] - 1.5
+
+
+s &lt;- c(1, 1)
+sd &lt;- 0.1
+baseIntensities &lt;- c(1:4)
+windowIndex &lt;- 4
+numPoints &lt;- 1
+numWindows &lt;- 4
+indicator &lt;- 1
+x &lt;- c(0.5, 2)
+windowIndex &lt;- getWindowIndex(curCoords = x,
+                              lowerCoords = ScaledLowerCoords$coordsDataScaled,
+                              upperCoords =ScaledUpperCoords$coordsDataScaled)
+x &lt;- c(x, windowIndex)
+
+dbernppDetection_normal(x, lowerCoords, upperCoords,
+                        s, sd, baseIntensities
+                        , numWindows,
+                        indicator, log = TRUE)
+</code></pre>
+
+
+</div>

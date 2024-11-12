@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generateStructure</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate a Factor Structure Matrix</h2>
+
+<h3>Description</h3>
+
+<p>The <code>generateStructure</code> function returns a <em>mjc</em> factor structure matrix.
+The number of variables per major factor <em>pmjc</em> is equal for each factor.
+The argument <em>pmjc</em> must be divisible by <em>nVar</em>.
+The arguments are strongly inspired from Zick and Velicer (1986, p. 435-436) methodology.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generateStructure(var, mjc, pmjc, loadings, unique)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>numeric: number of variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mjc</code></td>
+<td>
+<p>numeric: number of major factors (factors with practical significance)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmjc</code></td>
+<td>
+<p>numeric: number of variables that load significantly on each major factor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loadings</code></td>
+<td>
+<p>numeric: loadings on the significant variables on each major factor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unique</code></td>
+<td>
+<p>numeric: loadings on the non significant variables on each major factor</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>values  numeric matrix: factor structure
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gilles Raiche <br> Centre sur les Applications des Modeles de
+Reponses aux Items (CAMRI) <br> Universite du Quebec a Montreal<br><a href="mailto:raiche.gilles@uqam.ca">raiche.gilles@uqam.ca</a>
+<br><br> David Magis <br> Departement de mathematiques <br> Universite de Liege
+<br><a href="mailto:David.Magis@ulg.ac.be">David.Magis@ulg.ac.be</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Raiche, G., Walls, T. A., Magis, D., Riopel, M. and Blais, J.-G. (2013). Non-graphical solutions
+for Cattell's scree test. Methodology, 9(1), 23-29.
+</p>
+<p>Zwick, W. R. and Velicer, W. F. (1986). Comparison of five rules for
+determining the number of components to retain. <em>Psychological Bulletin, 99</em>, 432-442.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>principalComponents</code>, <code>iterativePrincipalAxis</code>, <code>rRecovery</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># .......................................................
+# Example inspired from Zwick and Velicer (1986, table 2, p. 437)
+## ...................................................................
+unique=0.2; loadings=0.5
+zwick1 &lt;- generateStructure(var=36, mjc=6, pmjc= 6, loadings=loadings,
+                           unique=unique)
+zwick2 &lt;- generateStructure(var=36, mjc=3, pmjc=12, loadings=loadings,
+                           unique=unique)
+zwick3 &lt;- generateStructure(var=72, mjc=9, pmjc= 8, loadings=loadings,
+                           unique=unique)
+zwick4 &lt;- generateStructure(var=72, mjc=6, pmjc=12, loadings=loadings,
+                           unique=unique)
+sat=0.8
+## ...................................................................
+zwick5 &lt;- generateStructure(var=36, mjc=6, pmjc= 6, loadings=loadings,
+                           unique=unique)
+zwick6 &lt;- generateStructure(var=36, mjc=3, pmjc=12, loadings=loadings,
+                           unique=unique)
+zwick7 &lt;- generateStructure(var=72, mjc=9, pmjc= 8, loadings=loadings,
+                           unique=unique)
+zwick8 &lt;- generateStructure(var=72, mjc=6, pmjc=12, loadings=loadings,
+                          unique=unique)
+## ...................................................................
+
+# nsubjects &lt;- c(72, 144, 180, 360)
+# require(psych)
+# Produce an usual correlation matrix from a congeneric model
+nsubjects &lt;- 72
+mzwick5   &lt;- psych::sim.structure(fx=as.matrix(zwick5), n=nsubjects)
+mzwick5$r
+
+# Factor analysis: recovery of the factor structure
+iterativePrincipalAxis(mzwick5$model, nFactors=6,
+                      communalities="ginv")$loadings
+iterativePrincipalAxis(mzwick5$r    , nFactors=6,
+                      communalities="ginv")$loadings
+factanal(covmat=mzwick5$model,         factors=6)
+factanal(covmat=mzwick5$r    ,         factors=6)
+
+# Number of components to retain
+eigenvalues  &lt;- eigen(mzwick5$r)$values
+aparallel    &lt;- parallel(var      = length(eigenvalues),
+                        subject  = nsubjects,
+                        rep      = 30,
+                        quantile = 0.95,
+                        model="components")$eigen$qevpea
+results &lt;- nScree(x         = eigenvalues,
+                 aparallel = aparallel)
+results$Components
+plotnScree(results)
+
+# Number of factors to retain
+eigenvalues.fa  &lt;- eigen(corFA(mzwick5$r))$values
+aparallel.fa    &lt;- parallel(var      = length(eigenvalues.fa),
+                           subject  = nsubjects,
+                           rep      = 30,
+                           quantile = 0.95,
+                           model="factors")$eigen$qevpea
+results.fa &lt;- nScree(x      = eigenvalues.fa,
+                    aparallel = aparallel.fa,
+                    model     ="factors")
+results.fa$Components
+plotnScree(results.fa)
+# ......................................................
+
+
+</code></pre>
+
+
+</div>

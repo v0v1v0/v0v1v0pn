@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Marginal locus calculation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Estimation of parameters for specific allele frequencies </h2>
+
+<h3>Description</h3>
+
+ 
+<p>This function computes some parameters of interest 
+(mean phenotype, genetic variance, additive variance, and evolutionary change in additive variance)
+for a combination of allele frequencies, based on a genotype-phenotype map.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">marginallocus(gmap, freq=NULL, what="mean", definition=11, mc.cores=1, ...)
+## S3 method for class 'noia.marloc'
+plot(x, xlab=NULL, ylim=NULL, ylab=attr(x, "what"), ...)
+## S3 method for class 'noia.marloc'
+image(x, xlab=NULL, ylab=NULL, zlim=NULL, 
+      main=attr(x, "what"), col.max="red", col.min="blue", col.zero="white", 
+      n.cols=1000, zeropart=0.01, contour.levels=10, contour.options=list(), ...) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>gmap</code></td>
+<td>
+<p> Either an object of class <code>noia.gpmap</code>, or a vector of phenotypic values in the order defined as in <code>genotypesNames</code> </p>
+</td>
+</tr></table>
+<p>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>freq</code></td>
+<td>
+<p> A vector indicating the loci that should be analysed. See Details. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+<p> A character string among "mean", "varA", "varG", or "dvarA.dt". </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>definition</code></td>
+<td>
+<p> The number of allele frequencies to try for each locus. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mc.cores</code></td>
+<td>
+<p> If more than 1, the calculation is run on <code>mc.cores</code> cores via the library <code>parallel</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> An object of class <code>noia.marloc</code> obtained after running <code>marginallocus</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.max, col.min, col.zero</code></td>
+<td>
+<p> Colors standing for the maximal, minimal, and nil values, respectively. Setting <code>col.zero</code> to <code>NULL</code> generates a color gradient between <code>col.min</code> and <code>col.max</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.cols</code></td>
+<td>
+<p> Number of colors in the gradient. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zeropart</code></td>
+<td>
+<p> Width (relative to the full amplitude) of the region around zero which will be colored as <code>col.zero</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contour.levels</code></td>
+<td>
+<p> Number of contour lines. Setting this to 0 leads to no contour lines. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contour.options</code></td>
+<td>
+<p> List of additional options to the <code>contour</code> function. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab, ylab, ylim, zlim, main</code></td>
+<td>
+<p> Classical parameters passed to <code>plot</code> and <code>image</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Additional parameters to internal functions. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>marginallocus</code> computes a population parameter for a series of allele frequencies. The loci under investigation are provided through the <code>freq</code> vector, which need to have as many elements as loci in the system. Values of the <code>freq</code> vector indicate fixed allele frequencies, while <code>NA</code> indicate loci under investigation. For instance, <code>freq=c(NA, 1, NA, 0.5)</code>, will investigate the effect of varying loci 1 and 3, while keeping loci 2 and 4 at constant allele frequencies. The population is assumed to be at Hardy-Weinberg frequencies. If <code>freq</code> is not provided, all loci will be investigated.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>marginallocus</code> returns an array with as many dimensions as loci under investigation. This array is an object of class <code>"noia.marloc"</code> which can be graphically illustrated through the provided <code>plot</code> (for 1-dimensional data) and <code>image</code> (for 2-dimensional data). Arrays of higher dimensionality cannot be represented graphically.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Arnaud Le Rouzic </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>linearGPmapanalysis</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+map &lt;- c(0.25, -0.75, -0.75, -0.75, 2.25, 2.25, -0.75, 2.25, 2.25)
+
+mrg2D &lt;- marginallocus(map)
+mrg1D &lt;- marginallocus(map, freq=c(NA, 0)) # the second locus is fixed for allele 1
+
+image(mrg2D)
+plot(mrg1D)
+</code></pre>
+
+
+</div>

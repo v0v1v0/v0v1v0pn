@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>%*%</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Matrix multiplication</h2>
+
+<h3>Description</h3>
+
+<p>Matrix multiplication methods, including <code>diffnet</code>
+objects. This function creates a generic method for <code>%*%</code>
+allowing for multiplying diffnet objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">x %*% y
+
+## Default S3 method:
+x %*% y
+
+## S3 method for class 'diffnet'
+x %*% y
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Numeric or complex matrices or vectors, or <code>diffnet</code> objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Numeric or complex matrices or vectors, or <code>diffnet</code> objects.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function can be usefult to generate alternative graphs, for
+example, users could compute the n-steps graph by doing <code>net %*% net</code>
+(see examples).
+</p>
+
+
+<h3>Value</h3>
+
+<p>In the case of <code>diffnet</code> objects performs matrix multiplication
+via <code>mapply</code> using <code>x$graph</code> and <code>y$graph</code> as arguments,
+returnling a <code>diffnet</code>. Otherwise returns the default according to
+<code>%*%</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other diffnet methods: 
+<code>as.array.diffnet()</code>,
+<code>c.diffnet()</code>,
+<code>diffnet-arithmetic</code>,
+<code>diffnet-class</code>,
+<code>diffnet_index</code>,
+<code>plot.diffnet()</code>,
+<code>summary.diffnet()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Finding the Simmelian Ties network ----------------------------------------
+
+# Random diffnet graph
+set.seed(773)
+net &lt;- rdiffnet(100, 4, seed.graph='small-world', rgraph.args=list(k=8))
+netsim &lt;- net
+
+# According to Dekker (2006), Simmelian ties can be computed as follows
+netsim &lt;- net * t(net) # Keeping mutal
+netsim &lt;- netsim * (netsim %*% netsim)
+
+# Checking out differences (netsim should have less)
+nlinks(net)
+nlinks(netsim)
+
+mapply(`-`, nlinks(net), nlinks(netsim))
+
+</code></pre>
+
+
+</div>

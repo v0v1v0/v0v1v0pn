@@ -1,0 +1,318 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>GAopt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Optimisation with a Genetic Algorithm
+</h2>
+
+<h3>Description</h3>
+
+<p>A simple Genetic Algorithm for minimising a function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">GAopt (OF, algo = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>OF</code></td>
+<td>
+<p>The objective function, to be minimised. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algo</code></td>
+<td>
+<p>A list with the settings for algorithm. See Details and Examples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other pieces of data required to evaluate the objective function. See Details and Examples.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function implements a simple Genetic Algorithm (<abbr><span class="acronym">GA</span></abbr>). A
+<abbr><span class="acronym">GA</span></abbr> evolves a collection of solutions (the so-called
+population), all of which are coded as vectors containing only zeros
+and ones. (In <code>GAopt</code>, solutions are of mode <code>logical</code>.)
+The algorithm starts with randomly-chosen or user-supplied population
+and aims to iteratively improve this population by mixing solutions
+and by switching single bits in solutions, both at random. In each
+iteration, such randomly-changed solutions are compared with the
+original population and better solutions replace inferior
+ones. In <code>GAopt</code>, the population size is kept constant.
+</p>
+<p><abbr><span class="acronym">GA</span></abbr> language: iterations are called generations; new solutions
+are called offspring or children (and the existing solutions, from which
+the children are created, are parents); the objective function is called
+a fitness function; mixing solutions is a crossover; and randomly
+changing solutions is called mutation. The choice which solutions remain in
+the population and which ones are discarded is called selection. In
+<code>GAopt</code>, selection is pairwise: a given child is compared with a
+given parent; the better of the two is kept.  In this way, the best
+solution is automatically retained in the population.
+</p>
+<p>To allow for constraints, the evaluation works as follows: after new
+solutions are created, they are (i) repaired, (ii) evaluated through the
+objective function, (iii) penalised. Step (ii) is done by a call to
+<code>OF</code>; steps (i) and (iii) by calls to <code>algo$repair</code> and
+<code>algo$pen</code>. Step (i) and (iii) are optional, so the respective
+functions default to <code>NULL</code>. A penalty can also be directly written
+in the <code>OF</code>, since it amounts to a positive number added to the
+‘clean’ objective function value; but a separate function is
+often clearer. A separate penalty function is advantagous if either only
+the objective function or only the penalty function can be vectorised.
+</p>
+<p>Conceptually a <abbr><span class="acronym">GA</span></abbr> consists of two loops: one loop across the
+generations and, in any given generation, one loop across the solutions.
+This is the default, controlled by the variables <code>algo$loopOF</code>,
+<code>algo$loopRepair</code> and <code>algo$loopPen</code>, which all default to
+<code>TRUE</code>. But it does not matter in what order the solutions are
+evaluated (or repaired or penalised), so the second loop can be
+vectorised. The respective <code>algo$loopFun</code> must then be set to
+<code>FALSE</code>. (See also the examples for <code>DEopt</code> and
+<code>PSopt</code>.)
+</p>
+<p>The evaluation of the objective function in a given generation can even
+be distributed. For this, an argument <code>algo$methodOF</code> needs to be
+set; see below for details (and Schumann, 2011, for examples).
+</p>
+<p>All objects that are passed through <code>...</code> will be passed to the
+objective function, to the repair function and to the penalty function.
+</p>
+<p>The list <code>algo</code> contains the following items:
+</p>
+
+<dl>
+<dt><code>nB</code></dt>
+<dd>
+<p>number of bits per solution. Must be specified.</p>
+</dd>
+<dt><code>nP</code></dt>
+<dd>
+<p>population size. Defaults to 50. Using default
+settings may not be a good idea.</p>
+</dd>
+<dt><code>nG</code></dt>
+<dd>
+<p>number of iterations (‘generations’).
+Defaults to 300. Using default settings may not be a good idea.</p>
+</dd>
+<dt><code>crossover</code></dt>
+<dd>
+<p>The crossover method. Default is
+<code>"onePoint"</code>; also possible is “uniform”.</p>
+</dd>
+<dt><code>prob</code></dt>
+<dd>
+<p>The probability for switching a single
+bit. Defaults to 0.01; typically a small number.</p>
+</dd>
+<dt><code>pen</code></dt>
+<dd>
+<p>a penalty function. Default is <code>NULL</code> (no
+penalty).</p>
+</dd>
+<dt><code>repair</code></dt>
+<dd>
+<p>a repair function. Default is <code>NULL</code> (no
+repairing).</p>
+</dd>
+<dt><code>initP</code></dt>
+<dd>
+<p>optional: the initial population. A logical
+matrix of size <code>length(algo$nB)</code> times <code>algo$nP</code>, or a
+function that creates such a matrix. If a function, it must take
+no arguments. If <code>mode(mP)</code> is not <code>logical</code>, then
+<code>storage.mode(mP)</code> will be tried (and a warning will be
+issued).</p>
+</dd>
+<dt><code>loopOF</code></dt>
+<dd>
+<p>logical. Should the <code>OF</code> be evaluated
+through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>loopPen</code></dt>
+<dd>
+<p>logical. Should the penalty function (if
+specified) be evaluated through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>loopRepair</code></dt>
+<dd>
+<p>logical. Should the repair function (if
+specified) be evaluated through a loop? Defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>methodOF</code></dt>
+<dd>
+<p><code>loop</code> (the default), <code>vectorised</code>,
+<code>snow</code> or <code>multicore</code>. Setting <code>vectorised</code> is
+equivalent to having <code>algo$loopOF</code> set to <code>FALSE</code> (and
+<code>methodOF</code> overrides <code>loopOF</code>). <code>snow</code> and
+<code>multicore</code> use functions <code>clusterApply</code> and
+<code>mclapply</code>, respectively. For <code>snow</code>, an object
+<code>algo$cl</code> needs to be specified (see below). For
+<code>multicore</code>, optional arguments can be passed through
+<code>algo$mc.control</code> (see below).</p>
+</dd>
+<dt><code>cl</code></dt>
+<dd>
+<p>a cluster object or the number of cores. See
+documentation of package <code>parallel</code>.</p>
+</dd>
+<dt><code>mc.control</code></dt>
+<dd>
+<p>a list of named elements; optional settings
+for <code>mclapply</code> (for instance,
+</p>
+<p><code>list(mc.set.seed = FALSE)</code>)</p>
+</dd>
+<dt><code>printDetail</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), information
+is printed.</p>
+</dd>
+<dt><code>printBar</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), a
+<code>txtProgressBar</code> is printed.</p>
+</dd>
+<dt><code>storeF</code></dt>
+<dd>
+<p>If <code>TRUE</code> (the default), the objective
+function values for every solution in every generation are stored
+and returned as matrix <code>Fmat</code>.</p>
+</dd>
+<dt><code>storeSolutions</code></dt>
+<dd>
+<p>If <code>TRUE</code>, the solutions (ie,
+binary strings) in every generation are stored and returned as a
+list <code>P</code> in list <code>xlist</code> (see Value section below). To
+check, for instance, the solutions at the end of the <code>i</code>th
+generation, retrieve <code>xlist[[c(1L, i)]]</code>. This will be a
+matrix of size <code>algo$nB</code> times <code>algo$nP</code>.</p>
+</dd>
+<dt><code>classify</code></dt>
+<dd>
+<p>Logical; default is
+<code>FALSE</code>. If <code>TRUE</code>, the result will
+have a class attribute <code>TAopt</code>
+attached. This feature is <strong>experimental</strong>:
+the supported methods may change without
+warning.</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>A list:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xbest</code></td>
+<td>
+<p>the solution (the best member of the population)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OFvalue</code></td>
+<td>
+<p>objective function value of best solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>popF</code></td>
+<td>
+<p>a vector. The objective function values in the final population.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fmat</code></td>
+<td>
+<p>if <code>algo$storeF</code> is <code>TRUE</code>, a matrix of size
+<code>algo$nG</code> times <code>algo$nP</code> containing
+the objective function values of all solutions over the generations;
+else <code>NA</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlist</code></td>
+<td>
+<p>if <code>algo$storeSolutions</code> is <code>TRUE</code>, a list that
+contains a list <code>P</code> of matrices and a matrix <code>initP</code> (the
+initial solution); else <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.state</code></td>
+<td>
+<p>the value of <code>.Random.seed</code>
+when the function was called.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>DEopt</code>, <code>PSopt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## a *very* simple problem (why?):
+## match a binary (logical) string y
+
+size &lt;- 20L  ### the length of the string
+OF &lt;- function(x, y) sum(x != y)
+y &lt;- runif(size) &gt; 0.5
+x &lt;- runif(size) &gt; 0.5
+OF(y, y)     ### the optimum value is zero
+OF(x, y)
+algo &lt;- list(nB = size, nP = 20L, nG = 100L, prob = 0.002)
+sol &lt;- GAopt(OF, algo = algo, y = y)
+
+## show differences (if any: marked by a '^')
+cat(as.integer(y), "\n", as.integer(sol$xbest), "\n",
+    ifelse(y == sol$xbest , " ", "^"), "\n", sep = "")
+
+algo$nP &lt;- 3L  ### that shouldn't work so well
+sol2 &lt;- GAopt(OF, algo = algo, y = y)
+
+## show differences (if any: marked by a '^')
+cat(as.integer(y), "\n", as.integer(sol2$xbest), "\n",
+    ifelse(y == sol2$xbest , " ", "^"), "\n", sep = "")
+</code></pre>
+
+
+</div>

@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_cumulative_estimates</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate cumulative estimates of a mean/proportion</h2>
+
+<h3>Description</h3>
+
+<p>Calculates estimates of a mean/proportion which are cumulative with respect
+to a predictor variable, such as week of data collection or number of contact attempts.
+This can be useful for examining whether estimates are affected by decisions such as
+whether to extend the data collection period or make additional contact attempts.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_cumulative_estimates(
+  survey_design,
+  y_var,
+  y_var_type = NULL,
+  predictor_variable
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>survey_design</code></td>
+<td>
+<p>A survey design object created with the <code>survey</code> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_var</code></td>
+<td>
+<p>Name of a variable whose mean or proportion is to be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_var_type</code></td>
+<td>
+<p>Either <code>NULL</code>, <code>"categorical"</code> or <code>"numeric"</code>.
+For <code>"categorical"</code>, proportions are estimated. For <code>"numeric"</code>, means are estimated.
+For <code>NULL</code> (the default), then proportions are estimated if <code>y_var</code> is a factor or character variable.
+Otherwise, means are estimated. The data will be subset to remove any missing values in this variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictor_variable</code></td>
+<td>
+<p>Name of a variable for which cumulative estimates of <code>y_var</code>
+will be calculated. This variable should either be numeric or have categories which when sorted
+by their label are arranged in ascending order. The data will be subset to remove
+any missing values of the predictor variable.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A dataframe of cumulative estimates. The first column–whose name matches <code>predictor_variable</code>–gives
+describes the values of <code>predictor_variable</code> for which a given estimate was computed.
+The other columns of the result include the following:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>outcome</code></td>
+<td>
+<p>The name of the variable for which estimates are computed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcome_category</code></td>
+<td>
+<p>For a categorical variable, the category of that variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimate</code></td>
+<td>
+<p>The estimated mean or proportion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>std_error</code></td>
+<td>
+<p>The estimated standard error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>respondent_sample_size</code></td>
+<td>
+<p>The number of cases used to produce the estimate (excluding missing values)</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>See Maitland et al. (2017) for an example of a level-of-effort analysis
+based on this method.
+</p>
+
+<ul><li>
+<p> Maitland, A. et al. (2017). <em>A Nonresponse Bias Analysis
+of the Health Information National Trends Survey (HINTS)</em>.
+Journal of Health Communication 22, 545-553.
+doi:10.1080/10810730.2017.1324539
+</p>
+</li></ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Create an example survey design
+# with a variable representing number of contact attempts
+library(survey)
+data(involvement_survey_srs, package = "nrba")
+
+
+survey_design &lt;- svydesign(
+  weights = ~BASE_WEIGHT,
+  id = ~UNIQUE_ID,
+  fpc = ~N_STUDENTS,
+  data = involvement_survey_srs
+)
+
+# Cumulative estimates from respondents for average student age ----
+get_cumulative_estimates(
+  survey_design = survey_design |&gt;
+    subset(RESPONSE_STATUS == "Respondent"),
+  y_var = "STUDENT_AGE",
+  y_var_type = "numeric",
+  predictor_variable = "CONTACT_ATTEMPTS"
+)
+
+# Cumulative estimates from respondents for proportions of categorical variable ----
+get_cumulative_estimates(
+  survey_design = survey_design |&gt;
+    subset(RESPONSE_STATUS == "Respondent"),
+  y_var = "WHETHER_PARENT_AGREES",
+  y_var_type = "categorical",
+  predictor_variable = "CONTACT_ATTEMPTS"
+)
+
+</code></pre>
+
+
+</div>

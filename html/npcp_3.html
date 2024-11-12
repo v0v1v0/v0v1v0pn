@@ -1,0 +1,199 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cpAutocop</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test for Change-Point Detection in Univariate Observations
+Sensitive to Changes in the Autocopula</h2>
+
+<h3>Description</h3>
+
+<p>Nonparametric test for change-point detection particularly sensitive
+to changes in the autocopula of univariate continuous observations.
+Approximate p-values for the test statistic are obtained by means of a
+<em>multiplier</em> approach. Details can be found in the first reference.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cpAutocop(x, lag = 1, b = NULL, bivariate = FALSE,
+          weights = c("parzen", "bartlett"), m = 5,
+          N = 1000, init.seq = NULL, include.replicates = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a one-column matrix containing continuous observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lag</code></td>
+<td>
+<p>an integer specifying at which lag to consider the
+autocopula; the autocopula is a (<code>lag+1</code>)-dimensional copula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>strictly positive integer specifying the value of the
+bandwidth parameter determining the serial dependence when
+generating dependent multiplier sequences using the 'moving average
+approach'; see Section 5 of the second reference. If set to
+<code>NULL</code>, <code>b</code> will be estimated using the
+function <code>bOptEmpProc()</code>; see the first reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bivariate</code></td>
+<td>
+<p>a logical specifying whether the test should focus
+only on the bivariate margin of the (<code>lag+1</code>)-dimensional autocopula
+obtained from the first and the last dimension.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>a string specifying the kernel for creating the
+weights used in the generation of dependent multiplier sequences within the
+'moving average approach'; see Section 5 of the second reference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>a strictly positive integer specifying the number of points of the
+uniform grid on <code class="reqn">(0,1)</code> involved in the estimation of the bandwidth
+parameter; see Section 5 of the second reference. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>number of multiplier replications.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.seq</code></td>
+<td>
+<p>a sequence of independent standard normal variates of
+length <code>N * (nrow(x) - lag  + 2 * (b - 1))</code> used to generate dependent
+multiplier sequences.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.replicates</code></td>
+<td>
+<p>a logical specifying whether the
+object of <code>class</code> <code>htest</code> returned by the function
+(see below) will include the multiplier replicates.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The approximate p-value is computed as
+</p>
+<p style="text-align: center;"><code class="reqn">(0.5 +\sum_{i=1}^N\mathbf{1}_{\{S_i\ge S\}})/(N+1),</code>
+</p>
+
+<p>where <code class="reqn">S</code> and <code class="reqn">S_i</code> denote the test statistic and
+a multiplier replication, respectively. This ensures that the
+approximate p-value is a number strictly between 0 and 1, which is
+sometimes necessary for further treatments.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of <code>class</code> <code>htest</code> which is a list,
+some of the components of which are
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>value of the test statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>corresponding approximate p-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvm</code></td>
+<td>
+<p>the values of the <code>length(x)-lag-1</code> intermediate
+Cramér-von Mises change-point statistics; the test
+statistic is defined as the maximum of those.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>the value of parameter <code>b</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>This is a tests for a continuous univariate time series.
+</p>
+
+
+<h3>References</h3>
+
+<p>A. Bücher, J.-D. Fermanian and I. Kojadinovic (2019),
+Combining cumulative sum change-point detection tests for assessing
+the stationarity of univariate time series, <em>Journal of Time
+Series Analysis</em> <b>40</b>, pages 124-150,
+<a href="https://arxiv.org/abs/1709.02673">https://arxiv.org/abs/1709.02673</a>.
+</p>
+<p>A. Bücher and I. Kojadinovic (2016), A dependent multiplier
+bootstrap for the sequential empirical copula process under strong
+mixing, <em>Bernoulli</em> <b>22:2</b>, pages 927-968,
+<a href="https://arxiv.org/abs/1306.3930">https://arxiv.org/abs/1306.3930</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cpAutocov()</code> for a related test based on
+the autocovariance.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## AR1 example
+n &lt;- 200
+k &lt;- n/2 ## the true change-point
+x &lt;- matrix(c(arima.sim(list(ar = -0.5), n = k),
+              arima.sim(list(ar = 0.5), n = n - k)))
+cp &lt;- cpAutocop(x)
+cp
+## Estimated change-point
+which(cp$cvm == max(cp$cvm))
+
+## AR2 example
+n &lt;- 200
+k &lt;- n/2 ## the true change-point
+x &lt;- matrix(c(arima.sim(list(ar = c(0,-0.5)), n = k),
+              arima.sim(list(ar = c(0,0.5)), n = n - k)))
+cpAutocop(x)
+cpAutocop(x, lag = 2)
+cpAutocop(x, lag = 2, bivariate = TRUE)
+</code></pre>
+
+
+</div>

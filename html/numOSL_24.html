@@ -1,0 +1,239 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>decomp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+OSL decay curve decomposition
+</h2>
+
+<h3>Description</h3>
+
+<p>Decomposing a CW-OSL or LM-OSL decay curve to a given number of first-order exponential components using
+a combination of differential evolution and Levenberg-Marquardt algorithm suggested by Bluszcz and Adamiec (2006).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">decomp(Sigdata, delay.off = c(0,0), ncomp = 2, 
+       constant = TRUE, typ = "cw", control.args = list(), 
+       weight = FALSE, plot = TRUE, log = "x", lwd = 2, 
+       curve.no = NULL, SAR.Cycle = NULL, irr.dose = NULL, 
+       outfile = NULL, transf = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Sigdata</code></td>
+<td>
+<p>matrix(<b>required</b>): a two-column matrix (i.e., stimulation time and photon count values)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delay.off</code></td>
+<td>
+<p>vector(with default): a two-elment vector indicating the "Delay" and "Off"<br>
+values of the decay curves, i.e., <code>delay.off[1]=Delay</code>,<code>delay.off[2]=Off</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncomp</code></td>
+<td>
+<p>integer(with default): number of decomposed components</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constant</code></td>
+<td>
+<p>logical(with default): logical value indicating if a constant component should be subtracted from the decay curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typ</code></td>
+<td>
+<p>character(with default): type of a decay curve (i.e., <code>typ="cw"</code> or <code>typ="lm"</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.args</code></td>
+<td>
+<p>list(with default): arguments used in the differential evolution algorithm, see details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>logical(with default): logical value indicating if the fit should be performed using a weighted procedure</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical(with default): logical value indicating if the results should be plotted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>character(with default): a character string which contains "x" if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic and "xy" or "yx" if both axes are to be logarithmic</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>numeric(with default): width of curves (lines)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>curve.no</code></td>
+<td>
+<p>numeric(optional): decay curve number</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SAR.Cycle</code></td>
+<td>
+<p>numeric(optional): SAR cycle of the decay curve, Example: <code>SAR.Cycle="R1"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>irr.dose</code></td>
+<td>
+<p>numeric(optional): irradiation dose of the decay curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outfile</code></td>
+<td>
+<p>character(optional): if specified, decomposed signal values will be written to a CSV file named <code>"outfile"</code> and saved to the current work directory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transf</code></td>
+<td>
+<p>logical(with default): do not use (for backward compatibility purpose)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function decomp decomposes an OSL decay curve to a specified number of components using a combination of differential evolution and Levenberg-Marquardt algorithm. Both CW-OSL and LM-OSL decay curves can be decomposed.<br><br>
+For a CW-OSL decay curve, the fitting model (Bluszcz and Adamiec, 2006) is:<br><code>I(t)=a1*b1*exp(-b1*t)+...+ak*bk*exp(-bk*t)</code>,<br>
+where <code>k=1, 2, ..., 7</code>, <code>I(t)</code> is the luminescence intensity as a function of time, <code>a</code> is the number of trapped electrons, and <code>b</code> is the detrapping rate. The constant component is <code>c</code> if <code>constant=TRUE</code>.<br><br>
+For a LM-OSL decay curve, the fitting model (Bulur, 2000) is:<br><code>I(t)=a1*b1*(t/P)*exp[-b1*t^2/(2*P)]+...+ak*bk*(t/P)*exp[-bk*t^2/(2*P)]</code>,<br>
+where <code>k=1, 2, ..., 7</code>, and <code>I(t)</code> is the luminescence intensity as a function of time, <code>P</code> is the total stimulation time, <code>a</code> is the number of trapped electrons, and <code>b</code> is the detrapping rate. The constant component is <code>c*(t/P)</code> if <code>constant=TRUE</code>.<br><br>
+Parameters are initialized using a differential evolution method suggested by Bluszcz and Adamiec (2006), then the Levenberg-Marquardt algorithm (minpack: Fortran 90 version by John Burkardt, freely available at <a href="https://people.sc.fsu.edu/~jburkardt/f_src/minpack/minpack.html">https://people.sc.fsu.edu/~jburkardt/f_src/minpack/minpack.html</a>) will be performed to optimize the parameters. If <code>weight=TRUE</code>, the photon counts will be assumed to follow a Possion distribution with a standard error equal to the square root of the number of photon counts, and the decay curve will be fitted using a weighted procedure. Setting <code>weight=TRUE</code> gives more weight to photon counts from slower decaying components.<br><br>
+Arguments in <code>control.args</code> that control the differential evolution algorithm include:<br><b>(1)</b> <em>factor</em>: the number of population members, <code>np=factor*ncomp</code>, default <code>factor=20</code>; <br><b>(2)</b> <em>f</em>: a weighting factor that lies between <code>0</code> and <code>1.2</code>, default <code>f=0.5</code>; <br><b>(3)</b> <em>cr</em>: a crossover constant that lies between <code>0</code> and <code>1</code>, default <code>cr=0.99</code>; <br><b>(4)</b> <em>maxiter</em>: maximum number of iterations, default <code>maxiter=500</code>; <br><b>(5)</b> <em>tol</em>: tolerance for stopping the iteration, the procedure will be terminated if <br>
+all relative standard deviations of parameters are smaller than <code>tol</code>, defalut <code>tol=0.1</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Return an invisible list containing the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>message</code></td>
+<td>
+<p>return 0 if fit succeeds, else 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comp.sig</code></td>
+<td>
+<p>a matrix containing time, signal, and fitted signal values for each component</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LMpars</code></td>
+<td>
+<p>optimized parameters for the decay curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constant</code></td>
+<td>
+<p>estimated constant component, it returns <code>0</code> if <code>constant=FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>minimized objective for the decay curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FOM</code></td>
+<td>
+<p>figure of merit value for the decay curve in percent</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Arguments <code>curve.no</code>, <code>SAR.Cycle</code>, and <code>irr.dose</code> have nothing to do with decay curve fitting. They are used only for plotting purpose.<br><br>
+The model to be optimized should not be underdetermined. This means that the number of data points should exceed (or at least be equal to) the number of parameters. For a given model, this routine will return an error if any standard errors of parameters cannot be estimated by numerical difference-approximation. Function <code>decompc</code> in previous versions was bundled to function decomp.<br><br>
+We would like to thank Professor Andrzej Bluszcz who helps us a lot during the programming of this function. Dr Jeong-Heon Choi is thanked for providing published data sets to test this routine.
+</p>
+
+
+<h3>References</h3>
+
+<p>Bluszcz A, 1996. Exponential function fitting to TL growth data and similar applications. Geochronometria, 13: 135-141.
+</p>
+<p>Bluszcz A, Adamiec G, 2006. Application of differential evolution to fitting OSL decay curves. Radiation Measurements, 41(7-8): 886-891.
+</p>
+<p>Bulur E, 2000. A simple transformation for converting CW-OSL curves to LM-OSL curves. Radiation Measurements, 32(2): 141-145.
+</p>
+<p>Differential evolution algorithm, <a href="https://en.wikipedia.org/wiki/Differential_evolution">https://en.wikipedia.org/wiki/Differential_evolution</a>
+</p>
+<p>Jain M, Murray AS, Boetter-Jensen L, 2003. Characterisation of blue-light stimulated luminescence components in different quartz samples: 
+implications for dose measurement. Radiation Measurements, 37(4-5): 441-449.
+</p>
+<p>More JJ, 1978. "The Levenberg-Marquardt algorithm: implementation and theory," in Lecture Notes in Mathematics: Numerical Analysis, 
+Springer-Verlag: Berlin. 105-116.
+</p>
+<p><b>Further reading</b> 
+</p>
+<p>Adamiec G, 2005. OSL decay curves-relationship between single- and multiple-grain aliquots. Radiation Measurements, 39(1): 63-75.
+</p>
+<p>Balian HG, Eddy NW, 1977. Figure-of-merit (FOM), an improved criterion over the normalized chi-squared test for assessing 
+goodness-of-fit of gamma-ray spectral peaks. Nuclear Instruments and Methods, 145(2): 389-95.
+</p>
+<p>Choi JH, Duller GAT, Wintle AG, 2006. Analysis of quartz LM-OSL curves. Ancient TL, 24(1): 9-20.
+</p>
+<p>Li SH, Li B, 2006. Dose measurement using the fast component of LM-OSL signals from quartz. Radiation Measurements, 41(5): 534-541.
+</p>
+<p>Peng J, Dong ZB, Han FQ, Han YH, Dai XL, 2014. Estimating the number of components in an OSL decay curve using the Bayesian Information Criterion. 
+Geochronometria, 41(4): 334-341.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Signaldata; pickBINdata; fastED
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> ### Example 1:
+ data(Signaldata)
+ decomp(Signaldata$lm,ncomp=3,typ="lm",
+        control.args=list(maxiter=10))
+
+ ### Example 2 (not run):
+ # data(BIN)
+ # obj_pickBIN &lt;- pickBINdata(BIN, Position=2, Run=2, view=TRUE,
+ #                            LType="OSL", force.matrix=TRUE)
+ # decomp(obj_pickBIN$BINdata[[1]], ncomp=2, log="xy")
+</code></pre>
+
+
+</div>

@@ -1,0 +1,174 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>f_weekday</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Format Weekdays to One Letter Abbreviation</h2>
+
+<h3>Description</h3>
+
+<p>Format long weekday name, integer, or date formats to a single capital letter.
+Useful for plot scales as a way to save space.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">f_weekday(x, distinct = FALSE, ...)
+
+## Default S3 method:
+f_weekday(x, distinct = FALSE, ...)
+
+## S3 method for class 'numeric'
+f_weekday(x, distinct = FALSE, ...)
+
+## S3 method for class 'Date'
+f_weekday(x, distinct = FALSE, ...)
+
+## S3 method for class 'POSIXt'
+f_weekday(x, distinct = FALSE, ...)
+
+## S3 method for class 'hms'
+f_weekday(x, distinct = FALSE, ...)
+
+ff_weekday(distinct = FALSE, ...)
+
+f_weekday_name(x, ...)
+
+## Default S3 method:
+f_weekday_name(x, ...)
+
+## S3 method for class 'numeric'
+f_weekday_name(x, ...)
+
+## S3 method for class 'Date'
+f_weekday_name(x, ...)
+
+## S3 method for class 'POSIXt'
+f_weekday_name(x, ...)
+
+## S3 method for class 'hms'
+f_weekday_name(x, ...)
+
+ff_weekday_name(...)
+
+f_weekday_abbreviation(x, ...)
+
+## Default S3 method:
+f_weekday_abbreviation(x, ...)
+
+## S3 method for class 'numeric'
+f_weekday_abbreviation(x, ...)
+
+## S3 method for class 'Date'
+f_weekday_abbreviation(x, ...)
+
+## S3 method for class 'POSIXt'
+f_weekday_abbreviation(x, ...)
+
+## S3 method for class 'hms'
+f_weekday_abbreviation(x, ...)
+
+ff_weekday_abbreviation(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of weekday names, integers 1-12, or dates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distinct</code></td>
+<td>
+<p>logical.  If <code>TRUE</code> Sunday will be presented as <code>Su</code>
+and Thursday as <code>Th</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a single letter month abbreviation atomic vector.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f_weekday(weekdays(x=as.Date(seq(7), origin="1950-01-07")))
+f_weekday(weekdays(x=as.Date(seq(7), origin="1950-01-07")), TRUE)
+
+f_weekday(1:7)
+f_weekday(1:7, TRUE)
+
+days &lt;- seq(as.Date("2000/1/2"), by = "day", length.out = 7)
+f_weekday(days)
+f_weekday(days, TRUE)
+
+## Not run: 
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse)
+
+set.seed(11)
+data_frame(
+    date = sample(seq(as.Date("1990/1/1"), by = "day", length.out = 2e4), 12)
+) %&gt;%
+    mutate(
+        year_4 = f_year(date, 2),
+        year_2 = f_year(date, 4),
+        quarter = f_quarter(date),
+        month_name = f_month_name(date) %&gt;%
+            as_factor(),
+        month_abbreviation = f_month_abbreviation(date) %&gt;%
+            as_factor(),
+        month_short = f_month(date),
+        weekday_name = f_weekday_name(date),
+        weekday_abbreviation = f_weekday_abbreviation(date),
+       weekday_short = f_weekday(date),
+        weekday_short_distinct = f_weekday(date, distinct = TRUE)
+    )
+
+
+set.seed(10)
+dat &lt;- data_frame(
+    day = sample(weekdays(days), 10000, TRUE),
+    area =  sample(LETTERS[1:15], 10000, TRUE)
+) %&gt;%
+    count(day, area) %&gt;%
+    ungroup() %&gt;%
+    mutate(
+        day = factor(day, levels = weekdays(days))
+    )
+
+## without date formatting
+ggplot(dat, aes(day, n)) +
+    geom_bar(stat = 'identity') +
+    facet_wrap(~area)
+
+## with date formatting
+ggplot(dat, aes(day, n)) +
+    geom_bar(stat = 'identity') +
+    facet_wrap(~area) +
+    scale_x_discrete(labels = f_weekday)
+
+## with date formatting
+ggplot(dat, aes(day, n)) +
+    geom_bar(stat = 'identity') +
+    facet_wrap(~area) +
+    scale_x_discrete(labels = ff_weekday(distinct = TRUE))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

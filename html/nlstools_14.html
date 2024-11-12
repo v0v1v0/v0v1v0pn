@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>michaelismodels</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Michaelis-Menten model and derived equations to model competitive and non-competitive inhibition </h2>
+
+<h3>Description</h3>
+
+<p>Formula of Michaelis-Menten model commonly used to describe enzyme kinetics, and derived formulas taking into account the 
+effect of a competitive or a non-competitive inhibitor
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  michaelis
+  compet_mich
+  non_compet_mich
+</code></pre>
+
+
+<h3>Details</h3>
+
+<p>These models describe the evolution of the reaction rate (v) as a function
+of the concentration of substrate (S) and the concentration of inhibitor (I) for <code>compet_mich</code> and <code>non_compet_mich</code>.
+</p>
+<p><code>michaelis</code> is the classical Michaelis-Menten model (Dixon, 1979)  with two parameters (Km, Vmax) :
+</p>
+<p style="text-align: center;"><code class="reqn">v = \frac{S}{S+K_m} V_{max}</code>
+</p>
+ <p><br><br><code>compet_mich</code> is the Michaelis-Menten derived model with three parameters (Km, Vmax, Ki), describing
+a competitive inhibition : </p>
+<p style="text-align: center;"><code class="reqn">v = \frac{S}{S + K_m (1+\frac{I}{K_i})} V_{max}</code>
+</p>
+ <p><br><br><code>non_compet_mich</code> is the Michaelis-Menten derived model with three parameters (Km, Vmax, Ki), describing
+a non-competitive inhibition : </p>
+<p style="text-align: center;"><code class="reqn">v = \frac{S}{(S+K_m)(1+\frac{I}{Ki})} V_{max}</code>
+</p>
+ <p><br><br></p>
+
+
+<h3>Value</h3>
+
+<p>A formula</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Florent Baty, Marie-Laure Delignette-Muller</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Dixon M and Webb EC (1979) <em>Enzymes</em>, Academic Press, New York.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1
+
+data(vmkm)
+nls1 &lt;- nls(michaelis,vmkm,list(Km=1,Vmax=1))
+plotfit(nls1, smooth = TRUE)
+
+# Example 2
+
+data(vmkmki)
+def.par &lt;- par(no.readonly = TRUE)
+par(mfrow = c(2,2))
+
+nls2_c &lt;- nls(compet_mich, vmkmki, list(Km=1,Vmax=20,Ki=0.5))
+plotfit(nls2_c, variable=1)
+overview(nls2_c)
+res2_c &lt;- nlsResiduals(nls2_c)
+plot(res2_c, which=1)
+
+nls2_nc &lt;- nls(non_compet_mich, vmkmki, list(Km=1, Vmax=20, Ki=0.5))
+plotfit(nls2_nc, variable=1)
+overview(nls2_nc)
+res2_nc &lt;- nlsResiduals(nls2_nc)
+plot(res2_nc, which=1)
+
+par(def.par)
+</code></pre>
+
+
+</div>

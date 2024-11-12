@@ -1,0 +1,176 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nsp_poly_ar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Narrowest Significance Pursuit algorithm for piecewise-polynomial signals with autoregression</h2>
+
+<h3>Description</h3>
+
+<p>This function runs the Narrowest Significance Pursuit (NSP) algorithm on a data sequence <code>y</code> believed to follow the model
+Phi(B)y_t = f_t + z_t, where f_t is a piecewise polynomial of degree <code>deg</code>, Phi(B) is a characteristic polynomial of autoregression of order
+<code>ord</code> with unknown coefficients, and z_t is noise. The function returns localised regions (intervals) of the domain, such that each interval
+must contain a change-point in the parameters of the polynomial f_t, or in the autoregressive parameters,
+at the global significance level <code>alpha</code>.
+For any interval considered by the algorithm,
+significant departure from parameter constancy is achieved if the multiscale
+deviation measure (see Details for the literature reference) exceeds a threshold, which is either provided as input
+or determined from the data (as a function of <code>alpha</code>). The function works best when the errors z_t are independent and
+identically distributed Gaussians.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nsp_poly_ar(
+  y,
+  ord = 1,
+  M = 1000,
+  thresh.type = "univ",
+  thresh.val = NULL,
+  sigma = NULL,
+  alpha = 0.1,
+  deg = 0,
+  power = 1/2,
+  min.size = 20,
+  overlap = FALSE,
+  buffer = ord
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A vector containing the data sequence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ord</code></td>
+<td>
+<p>The assumed order of the autoregression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>The minimum number of intervals considered at each recursive stage, unless the number of all intervals is smaller, in which case all intervals
+are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh.type</code></td>
+<td>
+<p><code>"univ"</code> if the significance threshold is to be determined as in Kabluchko (2007); <code>"sim"</code> for the degree-dependent
+threshold determined
+by simulation (this is only available if the length of <code>y</code> does not exceed 2150; for longer sequences obtain a suitable threshold by running
+<code>cov_dep_multi_norm_poly</code> first).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh.val</code></td>
+<td>
+<p>Numerical value of the significance threshold (lambda in the paper); or <code>NULL</code> if the threshold is to be determined from
+the data (see <code>thresh.type</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>The standard deviation of the errors z_t; if <code>NULL</code> then will be estimated from the data via the MOLS estimator described in the paper.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Desired maximum probability of obtaining an interval that does not contain a change-point (the significance threshold will be
+determined as a function of this parameter).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deg</code></td>
+<td>
+<p>The degree of the polynomial pieces in f_t (0 for the piecewise-constant model; 1 for piecewise-linearity, etc.).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>power</code></td>
+<td>
+<p>A parameter for the MOLS estimator of sigma; the span of the moving window in the MOLS estimator is <code>min(n, max(round(n^power), min.size))</code>,
+where <code>n</code> is the length of <code>y</code> (minus <code>ord</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.size</code></td>
+<td>
+<p>(See immediately above.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlap</code></td>
+<td>
+<p>If <code>FALSE</code>, then on discovering a significant interval, the search continues recursively to the left and to the right of that
+interval. If <code>TRUE</code>, then the search continues to the left and to the right of the midpoint of that interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>A non-negative integer specifying how many observations to leave out immediately to the left and to the right of a detected interval of
+significance before recursively continuing the search
+for the next interval.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The NSP algorithm is described in P. Fryzlewicz (2021) "Narrowest Significance Pursuit: inference for multiple change-points in linear
+models", preprint. For how to determine the <code>"univ"</code> threshold, see Kabluchko, Z. (2007) "Extreme-value analysis of standardized Gaussian increments".
+Unpublished.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>intervals</code></td>
+<td>
+<p>A data frame containing the estimated intervals of significance: <code>starts</code> and <code>ends</code> is where the intervals start and end,
+respectively; <code>values</code> are the values of the deviation measure on each given interval; <code>midpoints</code> are their midpoints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold.used</code></td>
+<td>
+<p>The threshold value.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Piotr Fryzlewicz, <a href="mailto:p.fryzlewicz@lse.ac.uk">p.fryzlewicz@lse.ac.uk</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nsp</code>, <code>nsp_poly</code>, <code>nsp_tvreg</code>, <code>nsp_selfnorm</code>, <code>nsp_poly_selfnorm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+g &lt;- c(rep(0, 100), rep(10, 100), rep(0, 100))
+nsp_poly_ar(stats::filter(g + 2 * stats::rnorm(300), .5, "recursive"), thresh.type="sim")
+</code></pre>
+
+
+</div>

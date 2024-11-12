@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>chmAddUWOT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add UWOT::UMAP coordinates to an NG-CHM.</h2>
+
+<h3>Description</h3>
+
+<p>Add UWOT::UMAP coordinates as hidden covariate bars to an axis of an NG-CHM.  One hidden
+covariate bar is added for each UMAP coordinate.  Coordinates have names 'BASENAME.coordinate.N',
+where BASENAME is specified by the parameter basename (default UMAP) and N ranges from 1 to the number of
+added covariate bars.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">chmAddUWOT(hm, axis, uwot, pointIds, basename = "UMAP")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>hm</code></td>
+<td>
+<p>The NGCHM to add the coordinates to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>axis</code></td>
+<td>
+<p>The NGCHM axis ("row" or "column") to add the coordinates to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uwot</code></td>
+<td>
+<p>UMAP coordinates (output of <a href="https://CRAN.R-project.org/package=uwot">uwot::umap()</a>) for the specified NGCHM axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pointIds</code></td>
+<td>
+<p>The NGCHM names for the data points in uwot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>basename</code></td>
+<td>
+<p>The prefix to use for the coordinate names.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>pointIds is required because <a href="https://CRAN.R-project.org/package=uwot">uwot::umap()</a> does not preserve the rownames of the data matrix it was applied to.
+Their values must match those on that axis of the NGCHM, but their order must match those in the data
+matrix passed to <a href="https://CRAN.R-project.org/package=uwot">uwot::umap()</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The NGCHM with added coordinates.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>chmAddPCA()</code>
+</p>
+<p><code>chmAddTSNE()</code>
+</p>
+<p><code>chmAddUMAP()</code>
+</p>
+<p><code>chmAddReducedDim()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Examples using `chmNew()` require git to be installed.
+## Not run: 
+  # If the NGCHMDemoData package is installed, use it to demo usage
+  if (requireNamespace("NGCHMDemoData", quietly = TRUE)) {
+    data(TCGA.GBM.EXPR, package = "NGCHMDemoData")
+    umc &lt;- uwot::umap(t(TCGA.GBM.EXPR[1:50, 1:50]))
+    hm &lt;- chmNew("gbm", TCGA.GBM.EXPR[1:50, 1:50])
+    hm &lt;- chmAddUWOT(hm, "column", umc, colnames(TCGA.GBM.EXPR[1:50, 1:50]))
+  }
+  # Small example not requiring NGCHMDemoData
+  matrix &lt;- matrix(rnorm(100),
+    nrow = 10, ncol = 10,
+    dimnames = list(paste0("r", 1:10), paste0("c", 1:10))
+  )
+  umc &lt;- uwot::umap(t(matrix), n_neighbors = 8)
+  hm &lt;- chmNew("Demo UMAP", matrix)
+  hm &lt;- chmAddUWOT(hm, "column", umc, colnames(matrix))
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

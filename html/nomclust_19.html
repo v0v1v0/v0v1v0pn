@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nomprox</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hierarchical Clustering of Nominal Data Based on a Proximity Matrix</h2>
+
+<h3>Description</h3>
+
+<p>The function performs hierarchical cluster analysis based on a dissimilarity matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nomprox(
+  diss,
+  data = NULL,
+  method = "average",
+  clu.high = 6,
+  eval = TRUE,
+  prox = 100
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>diss</code></td>
+<td>
+<p>A proximity matrix or a dist object calculated based on the dataset defined in a parameter <code>data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data.frame or a matrix with cases in rows and variables in columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character string defining the clustering method. The following methods can be used: <code>"average"</code>, <code>"complete"</code>, <code>"single"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clu.high</code></td>
+<td>
+<p>A numeric value that expresses the maximal number of clusters for which the cluster membership variables are produced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p>A logical operator; if TRUE, evaluation of clustering results is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prox</code></td>
+<td>
+<p>A logical operator or a numeric value. If a logical value TRUE indicates that the proximity matrix is a part of the output. A numeric value (integer) of this argument indicates the maximal number of cases in a dataset for which a proximity matrix will occur in the output.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function performs hierarchical cluster analysis in situations when the proximity (dissimilarity) matrix was calculated externally. For instance, in a different R package, in an own-created function, or in other software.
+It offers three linkage methods that can be used for categorical data. The obtained clusters can be evaluated by up to 13 evaluation criteria (Sulc et al., 2018) and (Corter and Gluck, 1992).
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function returns a list with up to six components:
+<br><br>
+The <code>mem</code> component contains cluster membership partitions for the selected numbers of clusters in the form of a list.
+<br><br>
+The <code>eval</code> component contains up to 13 evaluation criteria as vectors in a list. Namely, Within-cluster mutability coefficient (WCM), Within-cluster entropy coefficient (WCE),
+Pseudo F Indices based on the mutability (PSFM) and the entropy (PSFE), Bayesian (BIC), and Akaike (AIC) information criteria for categorical data, the BK index, Category Utility (CU), Category Information (CI), Hartigan Mutability (HM), Hartigan Entropy (HE) and, if the prox component is present, the silhouette index (SI) and the Dunn index (DI).
+<br><br>
+The <code>opt</code> component is present in the output together with the <code>eval</code> component. It displays the optimal number of clusters for the evaluation criteria from the <code>eval</code> component, except for WCM and WCE, where the optimal number of clusters is based on the elbow method.
+<br><br>
+The <code>dend</code> component can be found in the output only together with the <code>prox</code> component. It contains all the necessary information for dendrogram creation.
+<br><br>
+The <code>prox</code> component contains the dissimilarity matrix in the form of the "dist" object.
+<br><br>
+The <code>call</code> component contains the function call.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Zdenek Sulc. <br> Contact: <a href="mailto:zdenek.sulc@vse.cz">zdenek.sulc@vse.cz</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Corter J.E., Gluck M.A. (1992). Explaining basic categories: Feature predictability and information. Psychological Bulletin 111(2), p. 291–303.
+<br><br>
+Sulc Z., Cibulkova J., Prochazka J., Rezankova H. (2018). Internal Evaluation Criteria for Categorical Data in Hierarchical Clustering: Optimal Number of Clusters Determination, Metodoloski Zveski, 15(2), p. 1-20.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nomclust</code>, <code>evalclust</code>, <code>eval.plot</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># sample data
+data(data20)
+
+# computation of a dissimilarity matrix using the iof similarity measure
+diss.matrix &lt;- iof(data20)
+
+# creating an object with results of hierarchical clustering 
+hca.object &lt;- nomprox(diss = diss.matrix, data = data20, method = "complete",
+ clu.high = 5, eval = TRUE, prox = FALSE)
+ 
+# quick clustering summary
+summary(hca.object)
+
+# quick cluster quality evaluation
+print(hca.object)
+
+# visualization of the evaluation criteria
+eval.plot(hca.object)
+
+# a dendrogram can be displayed if the object contains the prox component
+hca.object &lt;- nomprox(diss = diss.matrix, data = data20, method = "complete",
+ clu.high = 5, eval = TRUE, prox = TRUE)
+
+# a quick dendrogram
+plot(hca.object)
+
+# a dendrogram with three designated clusters
+dend.plot(hca.object, clusters = 3)
+
+
+</code></pre>
+
+
+</div>

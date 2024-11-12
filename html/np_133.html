@@ -1,0 +1,384 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npuniden.boundary</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Bounded Univariate Density Estimation Via Boundary Kernel
+Functions </h2>
+
+<h3>Description</h3>
+
+<p><code>npuniden.boundary</code> computes kernel univariate unconditional
+density estimates given a vector of continuously distributed training
+data and, optionally, a bandwidth (otherwise least squares
+cross-validation is used for its selection). Lower and upper bounds
+[<code>a</code>,<code>b</code>] can be supplied (default is the empirical support 
+<code class="reqn">[min(X),max(X)]</code>) and if <code>a</code>
+is set to <code>-Inf</code> there is only one bound on the right, while if
+<code>b</code> is set to <code>Inf</code> there is only one bound on the left. If
+<code>a</code> is set to <code>-Inf</code> and <code>b</code> to <code>Inf</code> and the
+Gaussian type 1 kernel function is used, this will deliver the
+standard unadjusted kernel density estimate.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npuniden.boundary(X = NULL,
+                  Y = NULL,
+                  h = NULL,
+                  a = min(X),
+                  b = max(X),
+                  bwmethod = c("cv.ls","cv.ml"),
+                  cv = c("grid-hybrid","numeric"),
+                  grid = NULL,
+                  kertype = c("gaussian1","gaussian2",
+                            "beta1","beta2",
+                            "fb","fbl","fbu",
+                            "rigaussian","gamma"),
+                  nmulti = 5,
+                  proper = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>a required numeric vector of training data lying in <code class="reqn">[a,b]</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+
+<p>an optional numeric vector of evaluation data lying in <code class="reqn">[a,b]</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+
+<p>an optional bandwidth (&gt;0)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+
+<p>an optional lower bound (defaults to lower bound of empirical support <code class="reqn">min(X)</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+
+<p>an optional upper bound (defaults to upper bound of empirical support <code class="reqn">max(X)</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bwmethod</code></td>
+<td>
+
+<p>whether to conduct bandwidth search via least squares cross-validation
+(<code>"cv.ls"</code>) or likelihood cross-validation (<code>"cv.ml"</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv</code></td>
+<td>
+
+<p>an optional argument for search (default is likely more reliable in the
+presence of local maxima)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid</code></td>
+<td>
+
+<p>an optional grid used for the initial grid search when <code>cv="grid-hybrid"</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kertype</code></td>
+<td>
+
+<p>an optional kernel specification (defaults to "gaussian1")
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmulti</code></td>
+<td>
+
+<p>number of multi-starts used when <code>cv="numeric"</code> (defaults to 5)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proper</code></td>
+<td>
+
+<p>an optional logical value indicating whether to enforce proper density
+and distribution function estimates over the range <code class="reqn">[a,b]</code>
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Typical usages are (see below for a complete list of options and also
+the examples at the end of this help file)
+</p>
+<pre>
+    model &lt;- npuniden.boundary(X,a=-2,b=3)
+  </pre>
+<p><code>npuniden.boundary</code> implements a variety of methods for
+estimating a univariate density function defined over a continuous
+random variable in the presence of bounds via the use of so-called
+boundary or edge kernel functions.
+</p>
+<p>The kernel functions <code>"beta1"</code> and <code>"beta2"</code> are Chen's
+(1999) type 1 and 2 kernel functions with biases of <code class="reqn">O(h)</code>, the
+<code>"gamma"</code> kernel function is from Chen (2000) with a bias of
+<code class="reqn">O(h)</code>, <code>"rigaussian"</code> is the reciprocal inverse Gaussian
+kernel function (Scaillet (2004), Igarashi &amp; Kakizawa (2014)) with
+bias of <code class="reqn">O(h)</code>, and <code>"gaussian1"</code> and <code>"gaussian2"</code> are
+truncated Gaussian kernel functions with biases of <code class="reqn">O(h)</code> and
+<code class="reqn">O(h^2)</code>, respectively. The kernel functions <code>"fb"</code>,
+<code>"fbl"</code> and <code>"fbu"</code> are floating boundary polynomial
+biweight kernels with biases of <code class="reqn">O(h^2)</code> (Scott (1992), Page
+146). Without exception, these kernel functions are asymmetric in
+general with shape that changes depending on where the density is
+being estimated (i.e., how close the estimation point <code class="reqn">x</code> in
+<code class="reqn">\hat f(x)</code> is to a boundary). This function is written purely in
+R, so to see the exact form for each of these kernel functions, simply
+enter the name of this function in R (i.e., enter
+<code>npuniden.boundary</code> after loading this package) and scroll up for
+their definitions.
+</p>
+<p>The kernel functions <code>"gamma"</code>, <code>"rigaussian"</code>, and
+<code>"fbl"</code> have support <code class="reqn">[a,\infty]</code>. The kernel function
+<code>"fbu"</code> has support <code class="reqn">[-\infty,b]</code>. The rest have support on
+<code class="reqn">[a,b]</code>.  Note that the two sided support default values are
+<code>a=0</code> and <code>b=1</code>. When estimating a variable on
+<code class="reqn">[0,\infty)</code> the default lower bound can be used but when
+estimating a variable on <code class="reqn">(-\infty,0]</code> you must manually set the
+upper bound to <code>b=0</code>.
+</p>
+<p>Note that data-driven bandwidth selection is more nuanced in bounded
+settings, therefore it would be prudent to manually select a bandwidth
+that is, say, 1/25th of the range of the data and manually inspect the
+estimate (say <code>h=0.05</code> when <code class="reqn">X\in [0,1]</code>). Also, it may be
+wise to compare the density estimate with that from a histogram with
+the option <code>breaks=25</code>. Note also that the kernel functions
+<code>"gaussian2"</code>, <code>"fb"</code>, <code>"fbl"</code> and <code>"fbu"</code> can
+assume negative values leading to potentially negative density
+estimates, and must be trimmed when conducting likelihood
+cross-validation which can lead to oversmoothing. Least squares
+cross-validation is unaffected and appears to be more reliable in such
+instances hence is the default here.
+</p>
+<p>Scott (1992, Page 149) writes “While boundary kernels can be
+very useful, there are potentially serious problems with real
+data. There are an infinite number of boundary kernels reflecting the
+spectrum of possible design constraints, and these kernels are not
+interchangeable. Severe artifacts can be introduced by any one of them
+in inappropriate situations. Very careful examination is required to
+avoid being victimized by the particular boundary kernel
+chosen. Artifacts can unfortunately be introduced by the choice of the
+support interval for the boundary kernel.”
+</p>
+<p>Note that since some kernel functions can assume negative values, this
+can lead to improper density estimates. The estimated distribution
+function is obtained via numerical integration of the estimated
+density function and may itself not be proper even when evaluated on
+the full range of the data <code class="reqn">[a,b]</code>. Setting the option
+<code>proper=TRUE</code> will render the density and distribution estimates
+proper over the full range of the data, though this may not in
+general be a mean square error optimal strategy.
+</p>
+<p>Finally, note that this function is pretty bare-bones relative to
+other functions in this package. For one, at this time there is no
+automatic print support so kindly see the examples for illustrations
+of its use, among other differences.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npuniden.boundary</code> returns the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p> estimated density at the points X </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F</code></td>
+<td>
+<p> estimated distribution at the points X (numeric integral of f) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd.f</code></td>
+<td>
+<p> asymptotic standard error of the estimated density at the points X </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd.F</code></td>
+<td>
+<p> asymptotic standard error of the estimated distribution at the points X </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p> bandwidth used </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmulti</code></td>
+<td>
+<p> number of multi-starts used </p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bouezmarni, T. and Rolin, J.-M. (2003). “Consistency of the
+beta kernel density function estimator,”  The Canadian Journal of
+Statistics / La Revue Canadienne de Statistique, 31(1):89-98.
+</p>
+<p>Chen, S. X. (1999). “Beta kernel estimators for density
+functions,” Computational Statistics &amp; Data Analysis, 31(2):131-145.
+</p>
+<p>Chen, S. X. (2000). “Probability density function estimation
+using gamma kernels,” Annals of the Institute of Statistical
+Mathematics, 52(3):471-480.
+</p>
+<p>Diggle, P. (1985). “A kernel method for smoothing point process
+data,” Journal of the Royal Statistical Society. Series C (Applied
+Statistics), 34(2):138-147.
+</p>
+<p>Igarashi, G. and Y. Kakizawa (2014). “Re-formulation of inverse
+Gaussian, reciprocal inverse Gaussian, and Birnbaum-Saunders kernel
+estimators,” Statistics &amp; Probability Letters, 84:235-246.
+</p>
+<p>Igarashi, G. and Y. Kakizawa (2015). “Bias corrections for some
+asymmetric kernel estimators,” Journal of Statistical Planning and
+Inference, 159:37-63.
+</p>
+<p>Igarashi, G. (2016). “Bias reductions for beta kernel
+estimation,” Journal of Nonparametric Statistics, 28(1):1-30.
+</p>
+<p>Scaillet, O. (2004). “Density estimation using inverse and
+reciprocal inverse Gaussian kernels,” Journal of Nonparametric
+Statistics, 16(1-2):217-226.
+</p>
+<p>Scott, D. W. (1992). “Multivariate density estimation: Theory,
+practice, and visualization,” New York: Wiley.
+</p>
+<p>Zhang, S. and R. J. Karunamuni (2010). “Boundary performance of
+the beta kernel estimators,” Journal of Nonparametric Statistics,
+22(1):81-104.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The <span class="pkg">Ake</span>, <span class="pkg">bde</span>, and <span class="pkg">Conake</span> packages and the function <code>npuniden.reflect</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Example 1: f(0)=0, f(1)=1, plot boundary corrected density,
+## unadjusted density, and DGP
+set.seed(42)
+n &lt;- 100
+X &lt;- sort(rbeta(n,5,1))
+dgp &lt;- dbeta(X,5,1)
+model.g1 &lt;- npuniden.boundary(X,kertype="gaussian1")
+model.g2 &lt;- npuniden.boundary(X,kertype="gaussian2")
+model.b1 &lt;- npuniden.boundary(X,kertype="beta1")
+model.b2 &lt;- npuniden.boundary(X,kertype="beta2")
+model.fb &lt;- npuniden.boundary(X,kertype="fb")
+model.unadjusted &lt;- npuniden.boundary(X,a=-Inf,b=Inf)
+ylim &lt;- c(0,max(c(dgp,model.g1$f,model.g2$f,model.b1$f,model.b2$f,model.fb$f)))
+plot(X,dgp,ylab="Density",ylim=ylim,type="l")
+lines(X,model.g1$f,lty=2,col=2)
+lines(X,model.g2$f,lty=3,col=3)
+lines(X,model.b1$f,lty=4,col=4)
+lines(X,model.b2$f,lty=5,col=5)
+lines(X,model.fb$f,lty=6,col=6)
+lines(X,model.unadjusted$f,lty=7,col=7)
+rug(X)
+legend("topleft",c("DGP",
+                   "Boundary Kernel (gaussian1)",
+                   "Boundary Kernel (gaussian2)",
+                   "Boundary Kernel (beta1)",
+                   "Boundary Kernel (beta2)",
+                   "Boundary Kernel (floating boundary)",
+                   "Unadjusted"),col=1:7,lty=1:7,bty="n")
+
+## Example 2: f(0)=0, f(1)=0, plot density, distribution, DGP, and
+## asymptotic point-wise confidence intervals
+set.seed(42)
+X &lt;- sort(rbeta(100,5,3))
+model &lt;- npuniden.boundary(X)
+par(mfrow=c(1,2))
+ylim=range(c(model$f,model$f+1.96*model$sd.f,model$f-1.96*model$sd.f,dbeta(X,5,3)))
+plot(X,model$f,ylim=ylim,ylab="Density",type="l",)
+lines(X,model$f+1.96*model$sd.f,lty=2)
+lines(X,model$f-1.96*model$sd.f,lty=2)
+lines(X,dbeta(X,5,3),col=2)
+rug(X)
+legend("topleft",c("Density","DGP"),lty=c(1,1),col=1:2,bty="n")
+
+plot(X,model$F,ylab="Distribution",type="l")
+lines(X,model$F+1.96*model$sd.F,lty=2)
+lines(X,model$F-1.96*model$sd.F,lty=2)
+lines(X,pbeta(X,5,3),col=2)
+rug(X)
+legend("topleft",c("Distribution","DGP"),lty=c(1,1),col=1:2,bty="n")
+
+## Example 3: Age for working age males in the cps71 data set bounded
+## below by 21 and above by 65
+data(cps71)
+attach(cps71)
+model &lt;- npuniden.boundary(age,a=21,b=65)
+par(mfrow=c(1,1))
+hist(age,prob=TRUE,main="")
+lines(age,model$f)
+lines(density(age,bw=model$h),col=2)
+legend("topright",c("Boundary Kernel","Unadjusted"),lty=c(1,1),col=1:2,bty="n")
+detach(cps71)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

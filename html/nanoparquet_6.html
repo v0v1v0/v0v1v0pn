@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>parquet_metadata</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read the metadata of a Parquet file</h2>
+
+<h3>Description</h3>
+
+<p>This function should work on all files, even if <code>read_parquet()</code> is
+unable to read them, because of an unsupported schema, encoding,
+compression or other reason.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">parquet_metadata(file)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>Path to a Parquet file.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A named list with entries:
+</p>
+
+<ul>
+<li> <p><code>file_meta_data</code>: a data frame with file meta data:
+</p>
+
+<ul>
+<li> <p><code>file_name</code>: file name.
+</p>
+</li>
+<li> <p><code>version</code>: Parquet version, an integer.
+</p>
+</li>
+<li> <p><code>num_rows</code>: total number of rows.
+</p>
+</li>
+<li> <p><code>key_value_metadata</code>: list column of a data frames with two
+character columns called <code>key</code> and <code>value</code>. This is the key-value
+metadata of the file. Arrow stores its schema here.
+</p>
+</li>
+<li> <p><code>created_by</code>: A string scalar, usually the name of the software
+that created the file.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>schema</code>:
+data frame, the schema of the file. It has one row for
+each node (inner node or leaf node). For flat files this means one
+root node (inner node), always the first one, and then one row for
+each "real" column. For nested schemas, the rows are in depth-first
+search order. Most important columns are:
+</p>
+
+<ul>
+<li> <p><code>file_name</code>: file name.
+</p>
+</li>
+<li> <p><code>name</code>: column name.
+</p>
+</li>
+<li> <p><code>type</code>: data type. One of the low level data types.
+</p>
+</li>
+<li> <p><code>type_length</code>: length for fixed length byte arrays.
+</p>
+</li>
+<li> <p><code>repettion_type</code>: character, one of <code>REQUIRED</code>, <code>OPTIONAL</code> or
+<code>REPEATED</code>.
+</p>
+</li>
+<li> <p><code>logical_type</code>: a list column, the logical types of the columns.
+An element has at least an entry called <code>type</code>, and potentially
+additional entries, e.g. <code>bit_width</code>, <code>is_signed</code>, etc.
+</p>
+</li>
+<li> <p><code>num_children</code>: number of child nodes. Should be a non-negative
+integer for the root node, and <code>NA</code> for a leaf node.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code style="white-space: pre;">⁠$row_groups⁠</code>: a data frame, information about the row groups.
+</p>
+</li>
+<li> <p><code style="white-space: pre;">⁠$column_chunks⁠</code>: a data frame, information about all column chunks,
+across all row groups. Some important columns:
+</p>
+
+<ul>
+<li> <p><code>file_name</code>: file name.
+</p>
+</li>
+<li> <p><code>row_group</code>: which row group this chunk belongs to.
+</p>
+</li>
+<li> <p><code>column</code>: which leaf column this chunks belongs to. The order is
+the same as in <code style="white-space: pre;">⁠$schema⁠</code>, but only leaf columns (i.e. columns with
+<code>NA</code> children) are counted.
+</p>
+</li>
+<li> <p><code>file_path</code>: which file the chunk is stored in. <code>NA</code> means the
+same file.
+</p>
+</li>
+<li> <p><code>file_offset</code>: where the column chunk begins in the file.
+</p>
+</li>
+<li> <p><code>type</code>: low level parquet data type.
+</p>
+</li>
+<li> <p><code>encodings</code>: encodings used to store this chunk. It is a list
+column of character vectors of encoding names. Current possible
+encodings: "PLAIN", "GROUP_VAR_INT", "PLAIN_DICTIONARY", "RLE", "BIT_PACKED", "DELTA_BINARY_PACKED", "DELTA_LENGTH_BYTE_ARRAY", "DELTA_BYTE_ARRAY", "RLE_DICTIONARY", "BYTE_STREAM_SPLIT".
+</p>
+</li>
+<li> <p><code>path_in_scema</code>: list column of character vectors. It is simply
+the path from the root node. It is simply the column name for
+flat schemas.
+</p>
+</li>
+<li> <p><code>codec</code>: compression codec used for the column chunk. Possible
+values are: "UNCOMPRESSED", "SNAPPY", "GZIP", "LZO", "BROTLI", "LZ4", "ZSTD".
+</p>
+</li>
+<li> <p><code>num_values</code>: number of values in this column chunk.
+</p>
+</li>
+<li> <p><code>total_uncompressed_size</code>: total uncompressed size in bytes.
+</p>
+</li>
+<li> <p><code>total_compressed_size</code>: total compressed size in bytes.
+</p>
+</li>
+<li> <p><code>data_page_offset</code>: absolute position of the first data page of
+the column chunk in the file.
+</p>
+</li>
+<li> <p><code>index_page_offset</code>: absolute position of the first index page of
+the column chunk in the file, or <code>NA</code> if there are no index pages.
+</p>
+</li>
+<li> <p><code>dictionary_page_offset</code>: absolute position of the first
+dictionary page of the column chunk in the file, or <code>NA</code> if there
+are no dictionary pages.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>parquet_info()</code> for a much shorter summary.
+<code>parquet_column_types()</code> and <code>parquet_schema()</code> for column information.
+<code>read_parquet()</code> to read, <code>write_parquet()</code> to write Parquet files,
+nanoparquet-types for the R &lt;-&gt; Parquet type mappings.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">file_name &lt;- system.file("extdata/userdata1.parquet", package = "nanoparquet")
+nanoparquet::parquet_metadata(file_name)
+</code></pre>
+
+
+</div>

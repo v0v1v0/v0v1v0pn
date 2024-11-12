@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gen.wgt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Weight Function Generation</h2>
+
+<h3>Description</h3>
+
+<p>Generate commonly used weight functions for <code>MaxLRtest</code>
+function or <code>pwr2n.NPH</code> function
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gen.wgt(method = c("LR"), param, theta = 0.5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a vector of text specifying the method(s). The method(s)
+must be one or some of c(<code>"LR"</code>, <code>"FH"</code>, <code>"Wilcoxon"</code>,
+<code>"Tarone"</code>,<code>"Maxcombo"</code>,<code>"Maxcross"</code>).  Default: c("LR")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>a vector of length 2. If <code>FH</code> method is selected,
+<code class="reqn">\rho</code> and <code class="reqn">\gamma</code> parameters must be provided, Default: 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>a value within (0,1). If method <code>Maxcross</code> is selected,
+<code>theta</code> should be specified. See details. Default: 0.5</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The weight function for Fleming-Harrington (FH) test is <code class="reqn">S(t)^\rho(1-S(t)^\gamma)</code>.
+If <code>FH</code> test is specified, both <code class="reqn">\rho</code> and <code class="reqn">\gamma</code> should be provided.
+The weight for Tarone and Ware test is <code class="reqn">y(t)^{1/2}</code>, where <code class="reqn">y(t)</code> is number
+of subjects at risk. The weight for Wilcoxon test is <code class="reqn">y(t)</code>. See Klein (2003) for
+more details about all those tests. Both Maxcombo test and test proposed by
+Cheng and He (2021)
+need four weight functions. Cheng's method is more sensitive in detecting
+crossing hazards. A nuisance parameter <code>theta</code> is required to be
+specified. Parameter <code>theta</code> represents the Cumulative Density Function
+(CDF) at the crossing time point.
+If the hazards crossing
+occurs when few events occur yet, a small value should be chosen. The
+default value is 0.5.
+</p>
+<p>Function <code>MaxLRtest</code> supports different base functions including pooled
+Kaplan-Meier (K-M) version of CDF functions rather than K-M survival functions.
+Therefore, if a F(0,1) test is requested, the returned function is
+<code>function(x) {x}</code>, where x denotes the estimated CDF for
+<code>KM</code> base. All the supported
+base functions are increasing over time.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of weight function(s).
+</p>
+
+
+<h3>References</h3>
+
+<p>Klein, J. P., &amp; Moeschberger, M. L. (2003). Survival analysis: techniques for
+censored and truncated data (Vol. 1230). New York: Springer.
+</p>
+<p>Cheng, H., &amp; He, J. (2021). A Maximum Weighted Logrank Test in Detecting
+Crossing Hazards. arXiv preprint arXiv:2110.03833.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>MaxLRtest</code>, <code>pwr2n.NPH</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#logrank test
+gen.wgt(method="LR")
+# FH and logrank test
+  fn &lt;- gen.wgt(method=c("FH","LR"), param = c(1,1))
+# maximum weighted logrank test proposed by Cheng, including weight
+# for detecting crossing hazards
+  wcross &lt;- gen.wgt(method="Maxcross", theta = c(0.2))
+</code></pre>
+
+
+</div>

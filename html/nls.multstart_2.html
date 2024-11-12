@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nls_multstart</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Finds the best fit of non-linear model based on AIC score</h2>
+
+<h3>Description</h3>
+
+<p>Finds the best estimated model using non-linear least squares regression
+using nlsLM(). The best fit is determined using AIC scores.
+</p>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a non-linear model formula, with the response on the left of a
+~ operator and an expression involving parameters on the right.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>(optional) data.frame, list or environment in which to evaluate
+the variables in <code>formula</code> and <code>modelweights</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>number of combinations of starting parameters which will be tried
+. If a single value is provided, then a shotgun/random-search approach will
+be used to sample starting parameters from a uniform distribution within
+the starting parameter bounds. If a vector of the same length as the number
+of parameters is provided, then a gridstart approach will be used to define
+each combination of that number of equally spaced intervals across each of
+the starting parameter bounds respectively. Thus, c(5,5,5) for three fitted
+parameters yields 125 model fits.  Supplying a vector for <code>iter</code> will
+override <code>convergence_count</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start_lower</code></td>
+<td>
+<p>lower boundaries for the start parameters. If missing,
+this will default to -1e+10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start_upper</code></td>
+<td>
+<p>upper boundaries for the start parameters. If missing,
+this will default to 1e+10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>supp_errors</code></td>
+<td>
+<p>if <code>supp_errors = 'Y'</code>, then warning messages will be
+suppressed and no error messages from <code>nlsLM</code> will
+be shown, reducing the number of error messages printed while the model
+attempts to converge using poor starting parameters. We advise to only use
+<code>supp_errors = 'Y'</code> when confident in the bounds of your starting
+parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convergence_count</code></td>
+<td>
+<p>The number of counts that the winning model should
+be undefeated for before it is declared the winner. This argument defaults
+to 100. If specified as <code>FALSE</code>, then all of the iterations will be
+fitted, and the best model selected. Note that <code>convergence_count</code> can
+only be used with a shotgun/random-search approach, and not with a
+gridstart approach. This argument will be ignored if a gridstart approach
+is specified by a vector input for <code>iter</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>specific control can be specified using
+<code>nls.lm.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelweights</code></td>
+<td>
+<p>Optional model weights for the nls. If <code>data</code> is
+specified, then this argument should be the name of the numeric weights
+vector within the <code>data</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Extra arguments to pass to <code>nlsLM</code> if
+necessary.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>returns a nls object of the best estimated model fit.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Useful additional arguments for <code>nlsLM</code>
+include: <code>na.action = na.omit</code>, <code>lower/upper = c()</code> where these
+represent upper and lower boundaries for parameter estimates.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Padfield
+</p>
+<p>Granville Matheson
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nlsLM</code> for details on additional arguments
+to pass to the nlsLM function.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load in data
+
+data("Chlorella_TRC")
+Chlorella_TRC_test &lt;- Chlorella_TRC[Chlorella_TRC$curve_id == 1,]
+
+# run nls_multstart()
+
+# define the Sharpe-Schoolfield equation
+schoolfield_high &lt;- function(lnc, E, Eh, Th, temp, Tc) {
+ Tc &lt;- 273.15 + Tc
+ k &lt;- 8.62e-5
+ boltzmann.term &lt;- lnc + log(exp(E/k*(1/Tc - 1/temp)))
+ inactivation.term &lt;- log(1/(1 + exp(Eh/k*(1/Th - 1/temp))))
+ return(boltzmann.term + inactivation.term)
+}
+
+fits &lt;- nls_multstart(ln.rate ~ schoolfield_high(lnc, E, Eh, Th, temp = K, Tc = 20),
+                data = Chlorella_TRC_test,
+                iter = 500,
+                start_lower = c(lnc=-10, E=0.1, Eh=0.5, Th=285),
+                start_upper = c(lnc=10, E=2, Eh=5, Th=330),
+                lower = c(lnc=-10, E=0, Eh=0, Th=0),
+                supp_errors = 'Y')
+
+</code></pre>
+
+
+</div>

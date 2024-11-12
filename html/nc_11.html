@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>capture_melt_single</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Capture and melt into a single column</h2>
+
+<h3>Description</h3>
+
+<p>Match a regex to column names of a wide data frame (many
+columns/few rows), then melt/reshape the matching columns into a
+single result column in a taller/longer data table (fewer columns/more
+rows). It is for the common case of melting several columns of
+the same type in a "wide" input data table which has several
+distinct pieces of information encoded in each column name. For
+melting into several result columns of possibly different types,
+see <code>capture_melt_multiple</code>.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">capture_melt_single(..., 
+    value.name = "value", 
+    na.rm = TRUE, verbose = getOption("datatable.verbose"))</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>First argument must be a data frame to melt/reshape; column names
+of this data frame will be used as the subjects for regex
+matching. Other arguments (regex/conversion/engine) are passed to
+<code>capture_first_vec</code> along with nomatch.error=FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value.name</code></td>
+<td>
+<p>Name of the column in output which has values taken from
+melted/reshaped column values of input (passed to
+<code>melt.data.table</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>remove missing values from melted data? (passed to
+<code>melt.data.table</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Print <code>verbose</code> output messages? (passed to
+<code>melt.data.table</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data table of reshaped/melted/tall/long data, with a new column
+for each named argument in the pattern, and additionally
+variable/value columns.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre]</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data.table::setDTthreads(1)
+
+## Example 1: melt iris data and barplot for each numeric variable.
+(iris.tall &lt;- nc::capture_melt_single(
+  iris,
+  part=".*",
+  "[.]",
+  dim=".*",
+  value.name="cm"))
+## Histogram of cm for each variable.
+if(require("ggplot2")){
+  ggplot()+
+    theme_bw()+
+    theme(panel.spacing=grid::unit(0, "lines"))+
+    facet_grid(part ~ dim)+
+    geom_bar(aes(cm), data=iris.tall)
+}
+
+## Example 2: melt who data and use type conversion functions for
+## year limits (e.g. for censored regression).
+if(requireNamespace("tidyr")){
+  data(who, package="tidyr", envir=environment())
+  ##2.1 just extract diagnosis and gender to chr columns.
+  new.diag.gender &lt;- list(#save pattern as list for re-use later.
+    "new_?",
+    diagnosis=".*",
+    "_",
+    gender=".")
+  who.tall.chr &lt;- nc::capture_melt_single(who, new.diag.gender, na.rm=TRUE)
+  print(head(who.tall.chr))
+  str(who.tall.chr)
+  ##2.2 also extract ages and convert to numeric output columns.
+  who.tall.num &lt;- nc::capture_melt_single(
+    who,
+    new.diag.gender,#previous pattern for matching diagnosis and gender.
+    ages=list(#new pattern for matching age range.
+      min.years="0|[0-9]{2}", as.numeric,#in-line type conversion functions.
+      max.years="[0-9]{0,2}", function(x)ifelse(x=="", Inf, as.numeric(x))),
+    value.name="count",
+    na.rm=TRUE)
+  print(head(who.tall.num))
+  str(who.tall.num)
+  ##2.3 compute total count for each age range then display the
+  ##subset with max.years lower than a threshold.
+  who.age.counts &lt;- who.tall.num[, .(
+    total=sum(count)
+  ), by=.(min.years, max.years)]
+  print(who.age.counts[max.years &lt; 50])
+}
+
+## Example 3: pepseq data.
+if(requireNamespace("R.utils")){#for reading gz files with data.table
+  pepseq.dt &lt;- data.table::fread(
+    system.file("extdata", "pepseq.txt", package="nc", mustWork=TRUE))
+  u.pepseq &lt;- pepseq.dt[, unique(names(pepseq.dt)), with=FALSE]
+  nc::capture_melt_single(
+    u.pepseq,
+    "^",
+    prefix=".*?",
+    nc::field("D", "", ".*?"),
+    "[.]",
+    middle=".*?",
+    "[.]",
+    "[0-9]+",
+    suffix=".*",
+    "$")
+}
+
+</code></pre>
+
+
+</div>

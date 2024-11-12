@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>R2M</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>R-squared for nonlinear mixed models</h2>
+
+<h3>Description</h3>
+
+<p>R-squared ‘modified’ for nonlinear (mixed) models
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">R2M(x, ...)
+
+## S3 method for class 'nls'
+R2M(x, ...)
+
+## S3 method for class 'lm'
+R2M(x, ...)
+
+## S3 method for class 'gls'
+R2M(x, ...)
+
+## S3 method for class 'gnls'
+R2M(x, ...)
+
+## S3 method for class 'lme'
+R2M(x, ...)
+
+## S3 method for class 'nlme'
+R2M(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class ‘lm’, ‘nls’, ‘gls’, ‘gnls’, 
+‘lme’ or ‘nlme’ .</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (none use at the moment).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>I have read some papers about computing an R-squared for (non)linear (mixed) models
+and I am not sure that it makes sense at all. However, here they are and
+the method is general enough that it extends to nonlinear mixed models. What do
+these numbers mean and why would you want to compute them are good questions to 
+ponder... <br></p>
+<p>Recommended reading: <br>
+Nakagawa and Schielzeth Methods in Ecology and Evolution <a href="https://doi.org/10.1111/j.2041-210x.2012.00261.x">doi:10.1111/j.2041-210x.2012.00261.x</a> <br></p>
+<p><a href="https://stats.oarc.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/">https://stats.oarc.ucla.edu/other/mult-pkg/faq/general/faq-what-are-pseudo-r-squareds/</a> <br></p>
+<p>Spiess, AN., Neumeyer, N. An evaluation of R2 as an inadequate measure for nonlinear models in 
+pharmacological and biochemical research: a Monte Carlo approach. BMC Pharmacol 10, 6 (2010). 
+<a href="https://doi.org/10.1186/1471-2210-10-6">doi:10.1186/1471-2210-10-6</a> <br></p>
+<p><a href="https://stat.ethz.ch/pipermail/r-sig-mixed-models/2010q1/003363.html">https://stat.ethz.ch/pipermail/r-sig-mixed-models/2010q1/003363.html</a> <br></p>
+<p><a href="https://blog.minitab.com/en/adventures-in-statistics-2/why-is-there-no-r-squared-for-nonlinear-regression">https://blog.minitab.com/en/adventures-in-statistics-2/why-is-there-no-r-squared-for-nonlinear-regression</a> <br></p>
+<p><a href="https://stats.stackexchange.com/questions/111150/calculating-r2-in-mixed-models-using-nakagawa-schielzeths-2013-r2glmm-me/225334#225334">https://stats.stackexchange.com/questions/111150/calculating-r2-in-mixed-models-using-nakagawa-schielzeths-2013-r2glmm-me/225334#225334</a> <br></p>
+<p>Other R pacakges which calculate some version of an R-squared: performance, rcompanion, MuMIn
+</p>
+
+
+<h3>Value</h3>
+
+<p>it returns a list with the following structure: <br>
+for an object of class ‘lm’, ‘nls’, ‘gls’ or ‘gnls’, <br>
+R2: R-squared <br>
+var.comp: variance components with var.fixed and var.resid <br>
+var.perc: variance components percents (should add up to 100) <br>
+for an object of class ‘lme’ or ‘nlme’ in addition it also returns: <br>
+R2.marginal: marginal R2 which only includes the fixed effects <br>
+R2.conditional: conditional R2 which includes both the fixed and random effects <br>
+var.random: the variance contribution of the random effects
+</p>
+
+
+<h3>Note</h3>
+
+<p>The references here strongly discourage the use of R-squared in anything
+but linear models.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IA_tab</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(nlme)
+data(barley, package = "nlraa")
+fit2 &lt;- lme(yield ~ NF + I(NF^2), random = ~ 1 | year, data = barley)
+R2M(fit2)
+## Nonlinear Mixed Model
+barleyG &lt;- groupedData(yield ~ NF | year, data = barley)
+fit3L &lt;- nlsLMList(yield ~ SSquadp3(NF, a, b, c), data = barleyG)
+fit3 &lt;- nlme(fit3L, random = pdDiag(a + b ~ 1))
+R2M(fit3)
+
+</code></pre>
+
+
+</div>

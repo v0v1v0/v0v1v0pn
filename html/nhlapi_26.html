@@ -1,0 +1,62 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nhl_plot_rink</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot an NHL rink</h2>
+
+<h3>Description</h3>
+
+<p>Initialize a plot in base graphics with
+a to-scale NHL rink as the background
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nhl_plot_rink()
+</code></pre>
+
+
+<h3>Details</h3>
+
+<p>The placement of rink features &amp; their sizes
+are exact according to the NHL rule book; see citation.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+  # Retrieve some game feed data
+  gameFeeds &lt;- lapply(
+   2019010001:2019010010,
+   nhlapi::nhl_games_feed
+  )
+
+  # Create a data.frame with plays
+  getPlaysDf &lt;- function(gm) {
+    playsRes &lt;- try(gm[[1L]][["liveData"]][["plays"]][["allPlays"]])
+    if (inherits(playsRes, "try-error")) data.frame() else playsRes
+  }
+  plays &lt;- lapply(gameFeeds, getPlaysDf)
+  plays &lt;- nhlapi:::util_rbindlist(plays)
+  plays &lt;- plays[!is.na(plays$coordinates.x), ]
+
+  # Move the coordinates to non-negative values before plotting
+  plays$coordx &lt;- plays$coordinates.x + abs(min(plays$coordinates.x))
+  plays$coordy &lt;- plays$coordinates.y + abs(min(plays$coordinates.y))
+
+  # Select goals only
+  goals &lt;- plays[plays$result.event == "Goal", ]
+
+  # Create the plot and add goals
+  nhlapi::plot_rink()
+  points(goals$coordinates.x, goals$coordinates.y)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

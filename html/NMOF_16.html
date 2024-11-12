@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>xwGauss</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Integration of Gauss-type
+</h2>
+
+<h3>Description</h3>
+
+<p>Compute nodes and weights for Gauss integration.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">xwGauss(n, method = "legendre")
+changeInterval(nodes, weights, oldmin, oldmax, newmin, newmax)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>number of nodes
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>character. default is <code>"legendre"</code>; also possible are
+<code>"laguerre"</code> and <code>"hermite"</code>
+</p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+
+<p>the nodes (a numeric vector)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>the weights (a numeric vector)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oldmin</code></td>
+<td>
+
+<p>the minimum of the interval (typically as tabulated)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oldmax</code></td>
+<td>
+
+<p>the maximum of the interval (typically as tabulated)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newmin</code></td>
+<td>
+
+<p>the desired minimum of the interval
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newmax</code></td>
+<td>
+
+<p>the desired maximum of the interval
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>xwGauss</code> computes nodes and weights for integration for the
+interval -1 to 1. It uses the method of Golub and Welsch (1969).
+</p>
+<p><code>changeInterval</code> is a utility that transforms nodes and weights
+to an arbitrary interval.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list with two elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>a numeric vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodes</code></td>
+<td>
+<p>a numeric vector</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Golub, G.H. and Welsch, J.H. (1969). Calculation of Gauss Quadrature Rules. <em>Mathematics of Computation</em>,
+<b>23</b>(106), pp. 221–230+s1–s10.
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>callHestoncf</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## examples from Gilli/Maringer/Schumann (2019), ch. 17
+
+## a test function
+f1 &lt;- function(x) exp(-x)
+m &lt;- 5; a &lt;- 0; b &lt;- 5
+h &lt;- (b - a)/m
+
+## rectangular rule -- left
+w &lt;- h; k &lt;- 0:(m-1); x &lt;- a + k * h
+sum(w * f1(x))
+
+## rectangular rule -- right
+w &lt;- h; k &lt;- 1:m ; x &lt;- a + k * h
+sum(w * f1(x))
+
+## midpoint rule
+w &lt;- h; k &lt;- 0:(m-1); x &lt;- a + (k + 0.5)*h
+sum(w * f1(x))
+
+## trapezoidal rule
+w &lt;- h
+k &lt;- 1:(m-1)
+x &lt;- c(a, a + k*h, b)
+aux &lt;- w * f1(x)
+sum(aux) - (aux[1] + aux[length(aux)])/2
+
+## R's integrate (from package stats)
+integrate(f1, lower = a,upper = b)
+
+## Gauss--Legendre
+temp &lt;- xwGauss(m)
+temp &lt;- changeInterval(temp$nodes, temp$weights,
+                       oldmin = -1, oldmax = 1, newmin =  a, newmax = b)
+x &lt;- temp$nodes; w &lt;- temp$weights
+sum(w * f1(x))
+</code></pre>
+
+
+</div>

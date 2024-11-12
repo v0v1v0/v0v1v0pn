@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>visualClusterInBipartite</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot the bipartite graph with color coding for different clusters in both parts</h2>
+
+<h3>Description</h3>
+
+<p>The Sankey diagram is used to depict the connections between clusters within each part of the bipartite network. The display is also interactive, and by grouping nodes within each cluster as "summary" nodes, this function emphasizes how clusters of each part are connected together.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">visualClusterInBipartite(
+  data,
+  community_left,
+  community_right,
+  name_left = "Left",
+  name_right = "Right"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame or matrix object as an edge list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>community_left</code></td>
+<td>
+<p>An igraph community object, one projection of the bipartite network to be showed on the left side.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>community_right</code></td>
+<td>
+<p>An igraph community object, the other projection of the bipartite network to be showed on the right side.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name_left</code></td>
+<td>
+<p>A string value, the name of left community.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name_right</code></td>
+<td>
+<p>A string value, the name of right community.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A customized Sankey plot with a data frame containing the cluster pairwise relationship with the sum of weight values in the weighted bipartite network.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot_ly</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load part of the beatAML data
+beatAML_data &lt;- NIMAA::beatAML[1:1000,]
+
+# convert to incidence matrix
+beatAML_incidence_matrix &lt;- nominalAsBinet(beatAML_data)
+
+# extract the Recetengular_element_max submatrix
+sub_matrices &lt;- extractSubMatrix(beatAML_incidence_matrix,
+col.vars = "patient_id", row.vars = "inhibitor",
+shape = c("Rectangular_element_max"))
+
+# do clustering analysis
+cls1 &lt;- findCluster(sub_matrices$Rectangular_element_max,
+part = 1, comparison = FALSE)
+
+cls2 &lt;- findCluster(sub_matrices$Rectangular_element_max,
+part = 2, comparison = FALSE)
+
+visualClusterInBipartite(data = beatAML_data,
+community_left = cls2$leading_eigen,
+community_right = cls1$fast_greedy,
+name_left = 'patient_id',
+name_right = 'inhibitor')
+</code></pre>
+
+
+</div>

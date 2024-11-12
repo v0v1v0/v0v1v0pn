@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim.mutants</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate data for a random transposon mutagenesis experiment</h2>
+
+<h3>Description</h3>
+
+<p>Simulate data for a random transposon mutagenesis experiment.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim.mutants(n.sites, essential, n.sites2 = NULL, n.mutants)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n.sites</code></td>
+<td>
+<p>A vector specifying the number of transposon insertion sites
+in each gene.  All elements must by strictly positive.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>essential</code></td>
+<td>
+<p>A vector containing 1's (indicating that the corresponding
+gene is essential) and 0's (indicating that the corresponding gene is not
+essential). Must be the same length as <code>n.sites</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.sites2</code></td>
+<td>
+<p>A vector specfying the number of transposon insertion sites
+shared by adjacent genes.  The <em>i</em>th element is the number of insertion
+sites shared by genes <em>i</em> and <em>i</em>+1.  The last element is for
+sites shared by genes <em>N</em> and 1.  If missing, these are assumed to be
+all 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.mutants</code></td>
+<td>
+<p>Number of mutants to simulate.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If <code>n.sites2</code> is missing or contains all 0's, a vector is
+returned containing the number of mutants observed for each gene.
+</p>
+<p>If <code>n.sites2</code> is not missing and has some positive entries, a matrix
+with two columns is returned.  The first column contains the number of
+mutants observed for each gene alone; the second column contains the number
+of mutants observed shared by adjacent genes.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Karl W Broman, <a href="mailto:broman@wisc.edu">broman@wisc.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Blades, N. J. and Broman, K. W. (2002) Estimating the number of
+essential genes in a genome by random transposon mutagenesis.  Technical
+Report MS02-20, Department of Biostatistics, Johns Hopkins University,
+Baltimore, MD.
+<a href="https://www.biostat.wisc.edu/~kbroman/publications/ms0220.pdf">https://www.biostat.wisc.edu/~kbroman/publications/ms0220.pdf</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>negenes::negenes()</code>, <code>negenes::Mtb80()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: data(Mtb80)
+
+# simulate 44% of genes to be essential
+essential &lt;- rep(0,nrow(Mtb80))
+essential[sample(1:nrow(Mtb80),ceiling(nrow(Mtb80)*0.44))] &lt;- 1
+
+# simulate 759 mutants
+counts &lt;- sim.mutants(Mtb80[,1], essential, Mtb80[,2], 759)
+
+# run the Gibbs sampler
+output &lt;- negenes(Mtb80[,1], counts[,1], Mtb80[,2], counts[,2])
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tidy.nested_model_fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Turn a nested model into a tidy tibble</h2>
+
+<h3>Description</h3>
+
+<p>Use broom functions on fitted nested models.
+</p>
+<p><code>tidy.nested_model_fit()</code> summarises components of each model within a
+nested model fit, indicating which nested data frame each row corresponds
+to.
+</p>
+<p><code>glance.nested_model_fit()</code> summarises a nested model, returning a
+<code>tibble::tibble()</code> with 1 row.
+</p>
+<p><code>glance_nested()</code> summarises each model within a nested model fit,
+returning a <code>tibble::tibble()</code> with the same number of rows as the number
+of inner models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nested_model_fit'
+tidy(x, ...)
+
+## S3 method for class 'nested_model_fit'
+glance(x, ...)
+
+glance_nested(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>nested_model_fit</code> object produced by <code>fit.nested_model()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed into their respective functions.
+(e.g. for <code>tidy.nested_model_fit()</code>, <code>parsnip::tidy.model_fit()</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>generics::glance()</code> states that <code>glance()</code> methods should always return 1
+row outputs for non-empty inputs. The 'nestedmodels' package is no
+exception: <code>glance()</code> methods will combine rows to produce a result with a
+single row. Specifically:
+</p>
+
+<ul>
+<li>
+<p> If a column contains 1 unique value, that value is used.
+</p>
+</li>
+<li>
+<p> If a column is numeric, the mean will be calculated.
+</p>
+</li>
+<li>
+<p> Otherwise, the results will be combined into a list.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A <code>tibble::tibble()</code>. With <code>glance.nested_model_fit()</code>, the
+tibble will have 1 row.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>generics::tidy()</code> <code>generics::glance()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+library(dplyr)
+library(parsnip)
+library(broom)
+
+data &lt;- filter(example_nested_data, id %in% 1:5)
+
+model &lt;- linear_reg() %&gt;%
+  set_engine("lm") %&gt;%
+  nested()
+
+fit &lt;- fit(
+  model, z ~ x + y + a + b,
+  group_by(data, id)
+)
+
+tidy(fit)
+glance(fit)
+glance_nested(fit)
+
+</code></pre>
+
+
+</div>

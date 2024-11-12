@@ -1,0 +1,175 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.ncvsurv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model predictions based on a fitted <code>ncvsurv</code> object.</h2>
+
+<h3>Description</h3>
+
+<p>Similar to other predict methods, this function returns predictions from a
+fitted <code>ncvsurv</code> object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ncvsurv'
+predict(
+  object,
+  X,
+  type = c("link", "response", "survival", "hazard", "median", "coefficients", "vars",
+    "nvars"),
+  lambda,
+  which = 1:length(object$lambda),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Fitted <code>"ncvsurv"</code> model object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Matrix of values at which predictions are to be made.  Not used for
+<code>type="coefficients"</code> or for some of the <code>type</code> settings in
+<code>predict</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of prediction:
+</p>
+
+<ul>
+<li> <p><code>link</code> returns the linear predictors
+</p>
+</li>
+<li> <p><code>response</code> gives the risk (i.e., exp(link))
+</p>
+</li>
+<li> <p><code>survival</code> returns the estimated survival function
+</p>
+</li>
+<li> <p><code>median</code> estimates median survival times
+The other options are all identical to their <code>ncvreg()</code> counterparts:
+</p>
+</li>
+<li> <p><code>coefficients</code> returns the coefficients
+</p>
+</li>
+<li> <p><code>vars</code> returns a list containing the indices and names of the nonzero variables at each value of <code>lambda</code>
+</p>
+</li>
+<li> <p><code>nvars</code> returns the number of nonzero coefficients at each value of <code>lambda</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Values of the regularization parameter <code>lambda</code> at which
+predictions are requested.  For values of <code>lambda</code> not in the sequence
+of fitted models, linear interpolation is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+<p>Indices of the penalty parameter <code>lambda</code> at which predictions
+are required. By default, all indices are returned. If <code>lambda</code> is
+specified, this will override <code>which</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Not used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Estimation of baseline survival function conditional on the estimated values
+of <code>beta</code> is carried out according to the method described in Chapter
+4.3 of Kalbfleish and Prentice.  In particular, it agrees exactly the
+results returned by <code>survfit.coxph(..., type='kalbfleisch-prentice')</code>
+in the <code>survival</code> package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The object returned depends on type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Patrick Breheny <a href="mailto:patrick-breheny@uiowa.edu">patrick-breheny@uiowa.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Breheny P and Huang J. (2011) Coordinate descent algorithms for nonconvex
+penalized regression, with applications to biological feature selection.
+<em>Annals of Applied Statistics</em>, <strong>5</strong>: 232-253. <a href="https://doi.org/10.1214/10-AOAS388">doi:10.1214/10-AOAS388</a>
+</p>
+</li>
+<li>
+<p> Kalbfleish JD and Prentice RL (2002). <em>The Statistical Analysis of Failure
+Time Data</em>, 2nd edition. Wiley.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>ncvsurv()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Lung)
+X &lt;- Lung$X
+y &lt;- Lung$y
+
+fit &lt;- ncvsurv(X,y)
+coef(fit, lambda=0.05)
+head(predict(fit, X, type="link", lambda=0.05))
+head(predict(fit, X, type="response", lambda=0.05))
+
+# Survival function
+S &lt;- predict(fit, X[1,], type="survival", lambda=0.05)
+S(100)
+S &lt;- predict(fit, X, type="survival", lambda=0.05)
+plot(S, xlim=c(0,200))
+
+# Medians
+predict(fit, X[1,], type="median", lambda=0.05)
+M &lt;- predict(fit, X, type="median")
+M[1:10, 1:10]
+
+# Nonzero coefficients
+predict(fit, type="vars", lambda=c(0.1, 0.01))
+predict(fit, type="nvars", lambda=c(0.1, 0.01))
+</code></pre>
+
+
+</div>

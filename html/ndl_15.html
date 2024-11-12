@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>modelStatistics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calculate a range of goodness of fit measures for an object fitted with some multivariate statistical method that yields probability estimates for outcomes.
+</h2>
+
+<h3>Description</h3>
+
+<p><code>modelStatistics</code> calculates a range of goodness of fit
+measures.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  modelStatistics(observed, predicted, frequency=NA, p.values,
+     n.data, n.predictors, outcomes=levels(as.factor(observed)),
+     p.normalize=TRUE, cross.tabulation=TRUE, 
+     p.zero.correction=1/(NROW(p.values)*NCOL(p.values))^2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>observed</code></td>
+<td>
+<p>observed values of the response variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predicted</code></td>
+<td>
+<p>predicted values of the response variable; typically the outcome estimated to have the highest probability</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frequency</code></td>
+<td>
+<p>frequencies of observed and predicted values; if <code>NA</code>, frequencies equal to 1 for all observed and predicted values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.values</code></td>
+<td>
+<p>matrix of probabilities for all values of the response variable (i.e outcomes)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.data</code></td>
+<td>
+<p>sum frequency of data points in model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.predictors</code></td>
+<td>
+<p>number of predictor levels in model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcomes</code></td>
+<td>
+<p>a vector with the possible values of the response variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.normalize</code></td>
+<td>
+<p>if <code>TRUE</code>, probabilities are normalized so that <code>sum(P)</code> of all outcomes for each datapoint is equal to 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cross.tabulation</code></td>
+<td>
+<p>if <code>TRUE</code>, statistics on the crosstabulation of observed and predicted response values are calculated with <code>crosstableStatistics</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.zero.correction</code></td>
+<td>
+<p>a function to adjust slightly response/outcome-specific probability estimates which are exactly P=0; necessary for the proper calculation of pseudo-R-squared statistics; by default calculated on the basis of the dimensions of the matrix of probabilities <code>p.values</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p> A list with the following components: </p>
+
+<dl>
+<dt><code>loglikelihood.null</code></dt>
+<dd>
+<p>Loglikelihood for null model</p>
+</dd>
+<dt><code>loglikelihood.model</code></dt>
+<dd>
+<p>Loglikelihood for fitted model</p>
+</dd>
+<dt><code>deviance.null</code></dt>
+<dd>
+<p>Null deviance</p>
+</dd>
+<dt><code>deviance.model</code></dt>
+<dd>
+<p>Model deviance</p>
+</dd>
+<dt><code>R2.likelihood</code></dt>
+<dd>
+<p>(McFadden's) R-squared</p>
+</dd>
+<dt><code>R2.nagelkerke</code></dt>
+<dd>
+<p>Nagelkerke's R-squared</p>
+</dd>
+<dt><code>AIC.model</code></dt>
+<dd>
+<p>Akaike's Information Criterion</p>
+</dd>
+<dt><code>BIC.model</code></dt>
+<dd>
+<p>Bayesian Information Criterion</p>
+</dd>
+<dt><code>C</code></dt>
+<dd>
+<p>index of concordance C (for binary response variables only)</p>
+</dd>
+<dt><code>crosstable</code></dt>
+<dd>
+<p>Crosstabulation of observed and predicted
+outcomes, if <code>cross.tabulation=TRUE</code></p>
+</dd>
+<dt><code>crosstableStatistics(crosstable)</code></dt>
+<dd>
+<p>Various statistics
+calculated on <code>crosstable</code> with <code>crosstableStatistics</code>, if
+<code>cross.tabulation=TRUE</code></p>
+</dd> </dl>
+<h3>Author(s)</h3>
+
+<p>Antti Arppe and Harald Baayen
+</p>
+
+
+<h3>References</h3>
+
+<p>Arppe, A. 2008. Univariate, bivariate and multivariate methods in
+corpus-based lexicography – a study of synonymy. Publications of the
+Department of General Linguistics, University of Helsinki,
+No. 44. URN: http://urn.fi/URN:ISBN:978-952-10-5175-3.
+</p>
+<p>Arppe, A., and Baayen, R. H. (in prep.) Statistical modeling and the
+principles of human learning.
+</p>
+<p>Hosmer, David W., Jr., and Stanley Lemeshow 2000. Applied Regression Analysis 
+(2nd edition). New York: Wiley.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See also <code>ndlClassify</code>, <code>ndlStatistics</code>, <code>crosstableStatistics</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(think)
+think.ndl &lt;- ndlClassify(Lexeme ~ Agent + Patient, data=think)
+probs &lt;- acts2probs(think.ndl$activationMatrix)$p
+preds &lt;- acts2probs(think.ndl$activationMatrix)$predicted
+n.data &lt;- nrow(think)
+n.predictors &lt;- nrow(think.ndl$weightMatrix) *
+   ncol(think.ndl$weightMatrix)
+modelStatistics(observed=think$Lexeme, predicted=preds, p.values=probs,
+   n.data=n.data, n.predictors=n.predictors)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ngrams_segmentation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Segmenting sequences with n-grams.</h2>
+
+<h3>Description</h3>
+
+<p><code>ngrams_segmentation</code> segments input sequence into possible segmented
+text based on n-grams segmentation approach.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ngrams_segmentation(
+  sequences,
+  ngrams_dictionary,
+  retrieve = "most-scored",
+  simplify = TRUE,
+  omit_zero = TRUE,
+  score_formula = "points / words.number ^ 2"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sequences</code></td>
+<td>
+<p>character vector, sequence to be segmented
+(e.g., hashtag) or without it.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ngrams_dictionary</code></td>
+<td>
+<p>data.frame, containing ids, n-grams to search, words
+to use for segmentation, and their points. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>retrieve</code></td>
+<td>
+<p>character vector of length 1, with formula
+to calculate score.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplify</code></td>
+<td>
+<p>logical, if adjacent numbers should be merged into one,
+and underscores removed. See simplification section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omit_zero</code></td>
+<td>
+<p>logical, if words with 0 points should be omitted
+from word count. See simplification section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score_formula</code></td>
+<td>
+<p>character vector of length 1, with formula
+to calculate score.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The output always will be data.frame. If <code>retrieve='all'</code>
+is used, then the return will include all possible segmentation
+of the given sequence.<br>
+If <code>retrieve='first-shortest'</code> is used, the first of the shortest
+segmentations (with respect to the order of word's appearance
+in the dictionary, 1 row).<br>
+If <code>retrieve='most-pointed'</code> is used, segmentation with most total
+points is returned (1 row).<br>
+If <code>retrieve='most-scored'</code> is used, segmentation with the highest
+score calculated as
+<br><code class="reqn">score = points / words.number ^ 2</code> (or as specified by the user).
+<br><strong>The output is not in the input order. If needed, use
+lapply</strong>
+</p>
+
+
+<h3>ngrams_dictionary</h3>
+
+<p>Dictionary has to be data.frame with four named columns: 1) to_search,
+2) to_replace, 3) id, 4) points.<br>
+'to_search' should be column of type character, containing n-grams to
+look for. Word case might be used.<br>
+'to_replace' should be column of type character, containing n-grams that
+should be used for creating segmentation vector, if 'to_search' matches
+text. <br>
+'id' should be column of type numeric, containing id of unigram.<br>
+'points' should be column of type numeric, containing number of points
+for the word - the higher, the better. Unigrams with 0 points might be
+removed from the word count with omit_zero argument. ngrams_dictionary
+might be created with ngrams_dictionary.
+</p>
+
+
+<h3>Simplification</h3>
+
+<p>Two arguments are possible for simplification:<br></p>
+
+<ul>
+<li>
+<p> simplify - removes spaces between numbers and removes underscores,<br></p>
+</li>
+<li>
+<p> omit_zero - removes ids of 0-pointed unigrams,
+and omits them in the word count.<br>
+By default segmented sequence will be simplified,
+and numbers and underscores will be removed from word count
+for score computing, since they are neutral as they are necessary.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">texts &lt;- c("this is science",
+           "science is #fascinatingthing",
+           "this is a scientific approach",
+           "science is everywhere",
+           "the beauty of science")
+ndict &lt;- ngrams_dictionary(texts)
+ngrams_segmentation("thisisscience", ndict)
+ngrams_segmentation("this_is_science", ndict)
+ngrams_segmentation("ThisIsScience", ndict)
+ngrams_segmentation("thisisscience",
+                    ndict,
+                    simplify=FALSE,
+                    omit_zero=FALSE)
+
+</code></pre>
+
+
+</div>

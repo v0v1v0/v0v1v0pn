@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nmm_fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fitting IPW or AIPW Estimators under Nonmonotone Missing at Random Data</h2>
+
+<h3>Description</h3>
+
+<p>nmm_fit is the main function used to fit IPW or AIPW estimators under nonmonotone missing at random data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nmm_fit(
+  data,
+  O,
+  AIPW = FALSE,
+  formula = NULL,
+  func = NULL,
+  weights = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data.frame to fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>O</code></td>
+<td>
+<p>missing indicator</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AIPW</code></td>
+<td>
+<p>indicator if fitting augmented IPW</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>optional formula specified to fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>func</code></td>
+<td>
+<p>optional fitting function, currently support 'lm' and 'glm'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>optional weights used in the estimation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to func, e.g. family = 'quasibinomial' for glm</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>NMMIPW returns an object of class "NMMIPW".
+An object of class "NMMIPW" is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>the fitted values, only reported when formula and func are given</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coef_sd</code></td>
+<td>
+<p>the standard deviations of coefficients, only reported when formula and func are given</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coef_IF</code></td>
+<td>
+<p>the influnece function of coefficients, only reported when formula and func are given</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma_para</code></td>
+<td>
+<p>the first step fitted valus</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AIPW</code></td>
+<td>
+<p>an indicator of whether AIPW is fitted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>second_step</code></td>
+<td>
+<p>an indicator of whether the second step is fitted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>second_fit</code></td>
+<td>
+<p>if second step fitted, we report the fit object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by_prod</code></td>
+<td>
+<p>a list of by products that might be useful for users, including first step IF, jacobian matrices</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">n = 100
+X = rnorm(n, 0, 1)
+Y = rnorm(n, 1 * X, 1)
+O1 = rbinom(n, 1, 1/(1 + exp(- 1 - 0.5 * X)))
+O2 = rbinom(n, 1, 1/(1 + exp(+ 0.5 + 1 * Y)))
+O = cbind(O1, O2)
+df &lt;- data.frame(Y = Y, X = X)
+fit &lt;- nmm_fit(data = df, O = O, formula = Y ~ X, func = lm)
+</code></pre>
+
+
+</div>

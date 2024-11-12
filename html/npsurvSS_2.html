@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>create_arm_lachin</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a 'lachin' object</h2>
+
+<h3>Description</h3>
+
+<p>Create an object of class 'lachin' by specifying the trial parameters for
+a single arm, including the sample size, accrual distribution,
+survival distribution, loss to follow-up distribution, and study duration.
+'Lachin' objects are also 'arm' objects, but with accrual limited
+to the uniform and truncated exponential distributions, and survival and
+loss to follow-up limited to the exponential distribution. 'Lachin' objects
+have the advantage that expectations for certain counting processes have
+closed form equations and can therefore be calculated more efficiently
+(Lachin and Foulkes, 1986).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">create_arm_lachin(
+  size,
+  accr_time,
+  accr_dist = "pieceuni",
+  accr_param = NA,
+  surv_median = NA,
+  surv_exphazard = NA,
+  surv_milestone = NA,
+  loss_median = NA,
+  loss_exphazard = NA,
+  loss_milestone = NA,
+  follow_time = Inf,
+  total_time = Inf
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>sample size. If total sample size is unknown, provide
+the integer sample size relative to the opposing arm, e.g. 1 for
+1:2 randomization ratio or 2 for 2:3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>accr_time</code></td>
+<td>
+<p>accrual duration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>accr_dist</code></td>
+<td>
+<p>accrual distribution. Default is uniform (piecewise uniform
+with one interval). Alternatively, 'truncexp' allows for a truncated
+exponential distribution as proposed by Lachin and Foulkes (1986).
+Depending on the value of <code>accr_param</code>, this distribution can be
+either convex or concave.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>accr_param</code></td>
+<td>
+<p>additional accrual parameter for <code>accr_dist</code>='truncexp'.
+<code>accr_param</code>&gt;0 specifies a convex distribution and <code>accr_param</code>&lt;0
+specifies a concave distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_median</code></td>
+<td>
+<p>median survival.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_exphazard</code></td>
+<td>
+<p>exponential hazard rate for the survival distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_milestone</code></td>
+<td>
+<p>a tuple c(milestone, probability) that uniquely defines the
+exponential survival distribution, e.g. c(12, 0.8) corresponds to the exponential
+distribution with 80% survival rate at 12 months.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loss_median</code></td>
+<td>
+<p>median loss to follow-up.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loss_exphazard</code></td>
+<td>
+<p>exponential hazard rate for the loss to follow-up distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loss_milestone</code></td>
+<td>
+<p>a tuple c(milestone, probability) that uniquely defines the
+exponential loss to follow-up distribution, e.g. c(12, 0.99) corresponds to the
+exponential distribution with 1% loss to follow-up at 12 months.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>follow_time</code></td>
+<td>
+<p>Follow-up duration. Either <code>follow_time</code> or
+<code>total_time</code> (below) should be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>total_time</code></td>
+<td>
+<p>Total study duration. Either <code>follow_time</code> (above) or
+<code>total_time</code> should be specified.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list containing assumptions of size, accrual, censoring, survival, and
+follow-up for a single arm.
+</p>
+
+
+<h3>References</h3>
+
+<p>Lachin, J. M. and Foulkes, M. A. (1986) Evaluation of sample size and power for analyses of
+survival with allowance for nonuniform patient entry, losses to follow-up,
+noncompliance, and stratification. <em>Biometrics</em>, <strong>42</strong>, 507-519.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>create_arm</code> for creating an object of class 'arm'.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># 3 arms with similar survival and loss to follow-up
+create_arm_lachin(size=120, accr_time=6,
+  surv_median=14,
+  loss_median=140,
+  follow_time=12)
+create_arm_lachin(size=120, accr_time=6,
+  surv_exphazard=0.05,
+  loss_exphazard=0.005,
+  follow_time=12)
+create_arm_lachin(size=120, accr_time=6,
+  accr_dist="truncexp",
+  accr_param=0.1,
+  surv_milestone=c(14, 0.5),
+  loss_milestone=c(140, 0.5),
+  total_time=18)
+</code></pre>
+
+
+</div>

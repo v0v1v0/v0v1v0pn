@@ -1,0 +1,79 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_waterbody_index</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Waterbody Index</h2>
+
+<h3>Description</h3>
+
+<p>given an sf point geometry column, return waterbody id, and
+COMID of dominant artificial path
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_waterbody_index(waterbodies, points, flines = NULL, search_radius = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>waterbodies</code></td>
+<td>
+<p>sf data.frame of type POLYGON or MULTIPOLYGON including
+COMID attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points</code></td>
+<td>
+<p>sfc of type POINT</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flines</code></td>
+<td>
+<p>sf data.frame of type LINESTRING or MULTILINESTRING including
+COMID, WBAREACOMI, and Hydroseq attributes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>search_radius</code></td>
+<td>
+<p>units class with a numeric value indicating how far to
+search for a waterbody boundary in units of provided projection. Set units with
+set_units.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data.frame with two columns, COMID, in_wb_COMID, near_wb_COMID,
+near_wb_dist, and outlet_fline_COMID. Distance is in units of provided projection.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+source(system.file("extdata/sample_data.R", package = "nhdplusTools"))
+
+waterbodies &lt;- sf::st_transform(
+  sf::read_sf(sample_data, "NHDWaterbody"), 5070)
+
+points &lt;- sf::st_transform(
+  sf::st_sfc(sf::st_point(c(-89.356086, 43.079943)),
+             crs = 4326), 5070)
+
+get_waterbody_index(waterbodies, points,
+                    search_radius = units::set_units(500, "m"))
+
+</code></pre>
+
+
+</div>

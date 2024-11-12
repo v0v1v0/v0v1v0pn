@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lav2nlsem</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a structural equation model from lavaan syntax</h2>
+
+<h3>Description</h3>
+
+<p>Create model matrices from a string specifying a structural equation
+model in lavaan syntax.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  lav2nlsem(model, constraints=c("indirect", "direct1", "direct2"),
+            class.spec="class")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A description of the user-specified model. The model is
+described using the lavaan model syntax. See Details in
+<code>?model.syntax</code> in lavaan for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraints</code></td>
+<td>
+<p>which should be set for a model with more than one
+latent class. See Details in <code>?specify_sem</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>class.spec</code></td>
+<td>
+<p>String used to specify latent classes. Can be any
+string e.g. ‘class’, ‘mixture’, etc. Default is ‘class’.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>nlsem can only fit a certain group of models and it is only feasible to
+specify models in the lavaan syntax that can be fitted with nlsem; that
+means models with latent variables and latent interactions only.
+</p>
+<p>Parameter restrictions in lavaan style can be used to some extent; meaning
+parameters can be fixed to a certain value with <code>1*x1</code>. Equality
+restrictions are handled via the <code>constraints</code> argument and will be
+ignored in the lavaan syntax.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Gives back an object of class <code>singleClass</code>, <code>semm</code>, or
+<code>nsemm</code> which can be fitted using <code>em</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Rosseel, Y. (2012). lavaan: An R Package for Structural Equation
+Modeling. <em>Journal of Statistical Software, 48(2)</em>, 1 - 36.
+doi:http://dx.doi.org/10.18637/jss.v048.i02
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>specify_sem</code>, <code>create_sem</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># create model with three latent classes
+lav.model &lt;- '
+          class: 1
+          eta =~ y1 + y2 + y3 + y4
+          xi1 =~ x1 + x2 + x3 + x4 + x5
+          xi2 =~ x6 + x7 + x8 + x9 + x10 + x11
+
+          eta ~ xi1 + xi2 + xi1:xi1
+
+          class: 2
+          eta =~ y1 + y2 + y3 + y4
+          xi1 =~ x1 + x2 + x3 + x4 + x5
+          xi2 =~ x6 + x7 + x8 + x9 + x10 + x11
+
+          eta ~ xi1 + xi2 + xi1:xi2 + xi1:xi1
+
+          class: 3
+          eta =~ y1 + y2 + y3 + y4
+          xi1 =~ x1 + x2 + x3 + x4 + x5
+          xi2 =~ x6 + x7 + x8 + x9 + x10 + x11
+
+          eta ~ xi1 + xi2 + xi1:xi2'
+
+model &lt;- lav2nlsem(lav.model, constraints = "direct1", class.spec = "class")
+</code></pre>
+
+
+</div>

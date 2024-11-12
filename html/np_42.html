@@ -1,0 +1,218 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npdeneqtest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Consistent Density Equality Test with Mixed Data Types </h2>
+
+<h3>Description</h3>
+
+<p><code>npdeneqtest</code> implements a consistent integrated squared
+difference test for equality of densities as described in Li, Maasoumi,
+and Racine (2009).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npdeneqtest(x = NULL,
+            y = NULL,
+            bw.x = NULL,
+            bw.y = NULL,
+            boot.num = 399,
+            random.seed = 42,
+            ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x,y</code></td>
+<td>
+
+<p>data frames for the two samples for which one wishes to
+test equality of densities. The variables in each data
+frame must be the same (i.e. have identical names).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw.x,bw.y</code></td>
+<td>
+
+<p>optional bandwidth objects for <code>x,y</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+
+<p>an integer value specifying the number of bootstrap
+replications to use. Defaults to <code>399</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+
+<p>an integer used to seed R's random number generator. This is to
+ensure replicability. Defaults to 42.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> additional arguments supplied to specify the bandwidth
+type, kernel types, and so on.  This is used if you do not pass in
+bandwidth objects and you do not desire the default behaviours. To
+do this, you may specify any of <code>bwscaling</code>, <code>bwtype</code>,
+<code>ckertype</code>, <code>ckerorder</code>, <code>ukertype</code>,
+<code>okertype</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npdeneqtest</code> computes the integrated squared density difference
+between the estimated densities/probabilities of two samples having
+identical variables/datatypes. See Li, Maasoumi, and Racine (2009) for
+details.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npdeneqtest</code> returns an object of type <code>deneqtest</code> with the
+following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Tn</code></td>
+<td>
+<p> the (standardized) statistic <code>Tn</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>In</code></td>
+<td>
+<p> the (unstandardized) statistic <code>In</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tn.bootstrap</code></td>
+<td>
+<p> contains the bootstrap replications of <code>Tn</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>In.bootstrap</code></td>
+<td>
+<p> contains the bootstrap replications of <code>In</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tn.P</code></td>
+<td>
+<p> the P-value of the <code>Tn</code> statistic </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>In.P</code></td>
+<td>
+<p> the P-value of the <code>In</code> statistic </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+<p> number of bootstrap replications </p>
+</td>
+</tr>
+</table>
+<p><code>summary</code> supports object of type <code>deneqtest</code>.
+</p>
+
+
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+<p>It is crucial that both data frames have the same variable names.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Li, Q. and E. Maasoumi and J.S. Racine (2009), “A Nonparametric
+Test for Equality of Distributions with Mixed Categorical and
+Continuous Data,” Journal of Econometrics, 148, pp 186-200.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npdeptest,npsdeptest,npsymtest,npunitest</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+set.seed(1234)
+
+## Distributions are equal
+
+n &lt;- 250
+
+sample.A &lt;- data.frame(x=rnorm(n))
+sample.B &lt;- data.frame(x=rnorm(n))
+
+npdeneqtest(sample.A,sample.B,boot.num=99)
+
+Sys.sleep(5)
+
+## Distributions are unequal
+
+sample.A &lt;- data.frame(x=rnorm(n))
+sample.B &lt;- data.frame(x=rchisq(n,df=5))
+
+npdeneqtest(sample.A,sample.B,boot.num=99)
+
+## Mixed datatypes, distributions are equal
+
+sample.A &lt;- data.frame(a=rnorm(n),b=factor(rbinom(n,2,.5)))
+sample.B &lt;- data.frame(a=rnorm(n),b=factor(rbinom(n,2,.5)))
+
+npdeneqtest(sample.A,sample.B,boot.num=99)
+
+Sys.sleep(5)
+
+## Mixed datatypes, distributions are unequal
+
+sample.A &lt;- data.frame(a=rnorm(n),b=factor(rbinom(n,2,.5)))
+sample.B &lt;- data.frame(a=rnorm(n,sd=10),b=factor(rbinom(n,2,.25)))
+
+npdeneqtest(sample.A,sample.B,boot.num=99)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

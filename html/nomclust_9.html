@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>evalclust</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cluster Quality Evaluation of Nominal Data Hierarchical Clustering</h2>
+
+<h3>Description</h3>
+
+<p>The function evaluates clustering results by a set of evaluation criteria (cluster validity indices).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">evalclust(data, clusters, diss = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data.frame or a matrix with cases in rows and variables in columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusters</code></td>
+<td>
+<p>A data.frame or a list of cluster memberships obtained based on the dataset defined in the parameter <code>data</code> in the form of a sequence from the two-cluster solution to the maximal-cluster solution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diss</code></td>
+<td>
+<p>An optional parameter. A matrix or a dist object containing dissimilarities calculated based on the dataset defined in the parameter <code>data</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function calculates a set of evaluation criteria if the original dataset and the cluster membership variables are provided. 
+The function calculates up to 13 evaluation criteria described by (Sulc et al., 2018) and (Corter and Gluck, 1992) and provides the optimal number of clusters based on these criteria. 
+It is primarily focused on evaluating hierarchical clustering results obtained by similarity measures different from those that occur in the nomclust package. 
+Thus, it can serve for the comparison of various similarity measures for categorical data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function returns a list with three components.
+<br><br>
+The <code>eval</code> component contains up to 13 evaluation criteria as vectors in a list. Namely, Within-cluster mutability coefficient (WCM), Within-cluster entropy coefficient (WCE),
+Pseudo F Indices based on the mutability (PSFM) and the entropy (PSFE), Bayesian (BIC), and Akaike (AIC) information criteria for categorical data, the BK index, Category Utility (CU), Category Information (CI), Hartigan Mutability (HM), Hartigan Entropy (HE) and, if the prox component is present, the silhouette index (SI) and the Dunn index (DI).
+<br><br>
+The <code>opt</code> component is present in the output together with the <code>eval</code> component. It displays the optimal number of clusters for the evaluation criteria from the <code>eval</code> component, except for WCM and WCE, where the optimal number of clusters is based on the elbow method.
+<br><br>
+The <code>call</code> component contains the function call.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Zdenek Sulc. <br> Contact: <a href="mailto:zdenek.sulc@vse.cz">zdenek.sulc@vse.cz</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Corter J.E., Gluck M.A. (1992). Explaining basic categories: Feature predictability and information. Psychological Bulletin 111(2), p. 291–303.
+<br><br>
+Sulc Z., Cibulkova J., Prochazka J., Rezankova H. (2018). Internal Evaluation Criteria for Categorical Data in Hierarchical Clustering: Optimal Number of Clusters Determination, Metodoloski Zveski, 15(2), p. 1-20.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nomclust</code>, <code>nomprox</code>, <code>eval.plot</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># sample data
+data(data20)
+
+# creating an object with results of hierarchical clustering
+hca.object &lt;- nomclust(data20, measure = "iof", method = "average", clu.high = 7)
+
+# the cluster memberships
+data20.clu &lt;- hca.object$mem
+
+# obtaining evaluation criteria for the provided dataset and cluster memberships
+data20.eval &lt;- evalclust(data20, clusters = data20.clu)
+
+# visualization of the evaluation criteria
+eval.plot(data20.eval)
+
+# silhouette index can be calculated if the dissimilarity matrix is provided
+data20.eval &lt;- evalclust(data20, clusters = data20.clu, diss = hca.object$prox)
+eval.plot(data20.eval, criteria = "SI")
+
+</code></pre>
+
+
+</div>

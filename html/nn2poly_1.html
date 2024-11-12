@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add_constraints</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add constraints to a neural network</h2>
+
+<h3>Description</h3>
+
+<p>This function sets up a neural network object with the constraints required
+by the <code>nn2poly</code> algorithm. Currently supported neural network
+frameworks are <code>keras/tensorflow</code> and <code>luz/torch</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">add_constraints(object, type = c("l1_norm", "l2_norm"), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A neural network object in sequential form from one of the
+supported frameworks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Constraint type. Currently, <code>l1_norm</code> and <code>l2_norm</code> are supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments (unused).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Constraints are added to the model object using callbacks in their specific
+framework. These callbacks are used during training when calling fit on the
+model. Specifically we are using callbacks that are applied at the end of
+each train batch.
+</p>
+<p>Models in <code>luz/torch</code> need to use the <code>luz_model_sequential</code>
+helper in order to have a sequential model in the appropriate form.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>nn2poly</code> neural network object.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>luz_model_sequential()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+if (requireNamespace("keras", quietly=TRUE)) {
+  # ---- Example with a keras/tensorflow network ----
+  # Build a small nn:
+  nn &lt;- keras::keras_model_sequential()
+  nn &lt;- keras::layer_dense(nn, units = 10, activation = "tanh", input_shape = 2)
+  nn &lt;- keras::layer_dense(nn, units = 1, activation = "linear")
+
+  # Add constraints
+  nn_constrained &lt;- add_constraints(nn, constraint_type = "l1_norm")
+
+  # Check that class of the constrained nn is "nn2poly"
+  class(nn_constrained)[1]
+}
+
+if (requireNamespace("luz", quietly=TRUE)) {
+  # ---- Example with a luz/torch network ----
+
+  # Build a small nn
+  nn &lt;- luz_model_sequential(
+    torch::nn_linear(2,10),
+    torch::nn_tanh(),
+    torch::nn_linear(10,1)
+  )
+
+  # With luz/torch we need to setup the nn before adding the constraints
+  nn &lt;- luz::setup(module = nn,
+    loss = torch::nn_mse_loss(),
+    optimizer = torch::optim_adam,
+  )
+
+  # Add constraints
+  nn &lt;- add_constraints(nn)
+
+  # Check that class of the constrained nn is "nn2poly"
+  class(nn)[1]
+}
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

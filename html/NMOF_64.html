@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>repairMatrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Repair an Indefinite Correlation Matrix
+</h2>
+
+<h3>Description</h3>
+
+<p>The function ‘repairs’ an indefinite correlation
+matrix by replacing its negative eigenvalues by zero.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">repairMatrix(C, eps = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>a correlation matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>a small number</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function ‘repairs’ a correlation matrix: it
+replaces negative eigenvalues with <code>eps</code> and rescales
+the matrix such that all elements on the main diagonal
+become unity again.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric matrix.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function may help to cure a numerical problem, but it will rarely
+help to cure an empirical problem. (Garbage in, garbage out.)
+</p>
+<p>See also the function <code>nearPD</code> in the <span class="pkg">Matrix</span> package.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Rebonato, R. and Jaeckel, P. (1999) The most general methodology to
+create a valid correlation matrix for risk management and option
+pricing purposes.
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## example: build a portfolio of three assets
+C &lt;- c(1,.9,.9,.9,1,.2,.9,.2,1)
+dim(C) &lt;- c(3L, 3L)
+eigen(C, only.values = TRUE)
+
+vols &lt;- c(.3, .3, .3)      ## volatilities
+S &lt;- C * outer(vols,vols)  ## covariance matrix
+w &lt;- c(-1, 1, 1)           ## a portfolio
+w %*% S %*% w          ## variance of portfolio is negative!
+sqrt(as.complex(w %*% S %*% w))
+
+S &lt;- repairMatrix(C) * outer(vols,vols)
+w %*% S %*% w          ## more reasonable
+sqrt(w %*% S %*% w)
+</code></pre>
+
+
+</div>

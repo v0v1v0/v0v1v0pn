@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>approx_geodesic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Approximate Geodesic Distances</h2>
+
+<h3>Description</h3>
+
+<p>Computes approximate geodesic distance matrix using graph powers and keeping
+the amount of memory used low.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">approx_geodesic(graph, n = 6L, warn = FALSE)
+
+approx_geodist(graph, n = 6L, warn = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>Any class of accepted graph format (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Integer scalar. Degree of approximation. Bigger values increase
+precision (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code>, it warns if the algorithm
+performs less steps than required.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>While both <span class="pkg">igraph</span> and <span class="pkg">sna</span> offer very good and computationally
+efficient routines for computing geodesic distances, both functions return
+dense matrices, i.e. not sparse, which can be troublesome. Furthermore,
+from the perspective of social network analysis, path lengths of more than 6 steps,
+for example, may not be meaningful, or at least, relevant for the researcher.
+In such cases, <code>approx_geodesic</code> serves as a solution to this problem,
+computing geodesics up to the number of steps, <code>n</code>, desired, hence,
+if <code>n = 6</code>, once the algorithm finds all paths of 6 or less steps it
+will stop, returning a sparse matrix with zeros for those pairs of
+vertices for which it was not able to find a path with less than <code>n</code>
+steps.
+</p>
+<p>Depending on the graph size and density, <code>approx_geodesic</code>'s performance
+can be compared to that of <code>sna::geodist</code>. Although,
+as <code>n</code> increases, <code>geodist</code> becomes a better alternative.
+</p>
+<p>The algorithm was implemented using power graphs. At each itereation i the
+power graph of order <code>i</code> is computed, and its values are compared
+to the current values of the geodesic matrix (which is initialized in zero).
+</p>
+
+<ol>
+<li>
+<p> Initialize the output <code>ans(n, n)</code>
+</p>
+</li>
+<li>
+<p> For <code>i=1</code> to <code>i &lt; n</code> do
+</p>
+
+<ol>
+<li>
+<p> Iterate through the edges of <code>G^i</code>, if <code>ans</code> has a zero
+value in the corresponding row+column, replace it with <code>i</code>
+</p>
+</li>
+<li>
+<p> next
+</p>
+</li>
+</ol>
+</li>
+<li>
+<p> Replace all diagonal elements with a zero and return.
+</p>
+</li>
+</ol>
+<p>This implementation can be more memory efficient that the aforementioned ones,
+but at the same time it can be significant slower.
+</p>
+<p><code>approx_geodist</code> is just an allias for <code>approx_geodesic</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A sparse matrix of class <code>dgCMatrix</code> of size
+<code>nnodes(graph)^2</code> with geodesic distances up to <code>n</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># A very simple example -----------------------------------------------------
+g &lt;- ring_lattice(10, 3)
+approx_geodesic(g, 6)
+sna::geodist(as.matrix(g))[[2]]
+igraph::distances(
+  igraph::graph_from_adjacency_matrix(g, mode = "directed"),
+  mode = "out"
+)
+
+</code></pre>
+
+
+</div>

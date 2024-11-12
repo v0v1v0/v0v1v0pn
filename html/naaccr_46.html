@@ -1,0 +1,388 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>record_format</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Define custom fields for NAACCR records</h2>
+
+<h3>Description</h3>
+
+<p>Create a <code>record_format</code> object, which is used to read NAACCR records.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">record_format(
+  name,
+  item,
+  start_col = NA_integer_,
+  end_col = NA_integer_,
+  type = "character",
+  alignment = "left",
+  padding = " ",
+  parent = "Tumor",
+  cleaner = list(NULL),
+  unknown_finder = list(NULL),
+  name_literal = NA_character_,
+  width = NA_integer_
+)
+
+as.record_format(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Item name appropriate for a <code>data.frame</code> column name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item</code></td>
+<td>
+<p>NAACCR item number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start_col</code></td>
+<td>
+<p>First column of the field in a fixed-width record.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end_col</code></td>
+<td>
+<p>*Deprecated: Use the <code>width</code> parameter instead.*
+Last column of the field in a fixed-width record.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Name of the column class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alignment</code></td>
+<td>
+<p>Alignment of the field in fixed-width files. Either
+<code>"left"</code> (default) or <code>"right"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>padding</code></td>
+<td>
+<p>Single-character strings to use for padding in fixed-width
+files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parent</code></td>
+<td>
+<p>Name of the parent node to include this field under when
+writing to an XML file.
+Values can be <code>"NaaccrData"</code>, <code>"Patient"</code>, <code>"Tumor"</code>, or
+<code>NA</code> (default).
+Fields with <code>NA</code> for parent won't be included in an XML file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cleaner</code></td>
+<td>
+<p>(Optional) List of functions to handle special cases of
+cleaning field data (e.g., convert all values to uppercase).
+Values of <code>NULL</code> (the default) mean the default cleaning function for
+the <code>type</code> is used.
+The value can also be the name of a function to retrieve with
+<code>getFunction</code>.
+See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unknown_finder</code></td>
+<td>
+<p>(Optional) List of functions to detect when codes mean
+the actual values are unknown or not applicable.
+Values of <code>NULL</code> (the default) mean the default unknown finding
+function for the <code>type</code> is used.
+The value can also be the name of a function to retrieve with
+<code>getFunction</code>.
+See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name_literal</code></td>
+<td>
+<p>(Optional) Item name in plain language.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width</code></td>
+<td>
+<p>(Optional) Item width in characters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Object to be coerced to a <code>record_format</code>, usually a
+<code>data.frame</code> or <code>list</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed to <code>record_format</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To define registry-specific fields in addition to the standard fields, create
+a <code>record_format</code> object for the registry-specific fields and combine it
+with one of the formats provided with the package using <code>rbind</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>"record_format"</code> which has the following
+columns:
+</p>
+
+<dl>
+<dt><code>name</code></dt>
+<dd>
+<p>(<code>character</code>) XML field name.
+</p>
+</dd>
+<dt><code>item</code></dt>
+<dd>
+<p>(<code>integer</code>) Field item number.
+</p>
+</dd>
+<dt><code>start_col</code></dt>
+<dd>
+<p>(<code>integer</code>) First column of the field in a fixed-width text file.
+If <code>NA</code>, the field will not be read from or written to fixed-width
+files. They will included in XML files.
+</p>
+</dd>
+<dt><code>end_col</code></dt>
+<dd>
+<p>(<code>integer</code>) (*Deprecated: Use <code>width</code> instead.*)
+Last column of the field in a fixed-width text file.
+If <code>NA</code>, the field will not be read from or written to fixed-width
+files. This is the norm for fields only found in XML formats.
+</p>
+</dd>
+<dt><code>type</code></dt>
+<dd>
+<p>(<code>factor</code>) R class for the column vector.
+</p>
+</dd>
+<dt><code>alignment</code></dt>
+<dd>
+<p>(<code>factor</code>) Alignment of the field's values in a fixed-width
+text file.
+</p>
+</dd>
+<dt><code>padding</code></dt>
+<dd>
+<p>(<code>character</code>) String used for padding field values in a
+fixed-width text file.
+</p>
+</dd>
+<dt><code>parent</code></dt>
+<dd>
+<p>(<code>factor</code>) Parent XML node for the field. One of
+<code>"NaaccrData"</code>, <code>"Patient"</code>, or <code>"Tumor"</code>.
+</p>
+</dd>
+<dt><code>cleaner</code></dt>
+<dd>
+<p>(<code>list</code> of <code>function</code> objects) Function to prepare the
+field's values for analysis.
+Values of <code>NULL</code> will use the standard cleaner functions for the
+<code>type</code> (see below).
+</p>
+</dd>
+<dt><code>unknown_finder</code></dt>
+<dd>
+<p>(<code>list</code> of <code>function</code> objects) Function to detect codes
+meaning the actual values are missing or unknown for the field.
+</p>
+</dd>
+<dt><code>name_literal</code></dt>
+<dd>
+<p>(<code>character</code>) Field name in plain language.
+</p>
+</dd>
+<dt><code>width</code></dt>
+<dd>
+<p>(<code>integer</code>) Character width of the field values.
+Mostly meant for reading and writing flat files.
+</p>
+</dd>
+</dl>
+<h3>Format Types</h3>
+
+<p>The levels <code>type</code> can take, along with the functions used to process
+them when reading a file:
+</p>
+
+<dl>
+<dt><code>address</code></dt>
+<dd>
+<p>(<code>clean_address_number_and_street</code>)
+Street number and street name parts of an address.
+</p>
+</dd>
+<dt><code>age</code></dt>
+<dd>
+<p>(<code>clean_age</code>)
+Age in years.
+</p>
+</dd>
+<dt><code>boolean01</code></dt>
+<dd>
+<p>(<code>naaccr_boolean</code>, with <code>false_value = "0"</code>)
+True/false, where <code>"0"</code> means false and <code>"1"</code> means true.
+</p>
+</dd>
+<dt><code>boolean12</code></dt>
+<dd>
+<p>(<code>naaccr_boolean</code>, with <code>false_value = "1"</code>)
+True/false, where <code>"1"</code> means false and <code>"2"</code> means true.
+</p>
+</dd>
+<dt><code>census_block</code></dt>
+<dd>
+<p>(<code>clean_census_block</code>)
+Census Block ID number.
+</p>
+</dd>
+<dt><code>census_tract</code></dt>
+<dd>
+<p>(<code>clean_census_tract</code>)
+Census Tract ID number.
+</p>
+</dd>
+<dt><code>character</code></dt>
+<dd>
+<p>(<code>clean_text</code>)
+Miscellaneous text.
+</p>
+</dd>
+<dt><code>city</code></dt>
+<dd>
+<p>(<code>clean_address_city</code>)
+City name.
+</p>
+</dd>
+<dt><code>count</code></dt>
+<dd>
+<p>(<code>clean_count</code>)
+Integer count.
+</p>
+</dd>
+<dt><code>county</code></dt>
+<dd>
+<p>(<code>clean_county_fips</code>)
+County FIPS code.
+</p>
+</dd>
+<dt><code>Date</code></dt>
+<dd>
+<p>(<code>as.Date</code>, with <code>format = "%Y%m%d"</code>)
+NAACCR-formatted date (YYYYMMDD).
+</p>
+</dd>
+<dt><code>datetime</code></dt>
+<dd>
+<p>(<code>as.POSIXct</code>, with <code>format = "%Y%m%d%H%M%S"</code>)
+NAACCR-formatted datetime (YYYYMMDDHHMMSS)
+</p>
+</dd>
+<dt><code>facility</code></dt>
+<dd>
+<p>(<code>clean_facility_id</code>)
+Facility ID number.
+</p>
+</dd>
+<dt><code>icd_9</code></dt>
+<dd>
+<p>(<code>clean_icd_9_cm</code>)
+ICD-9-CM code.
+</p>
+</dd>
+<dt><code>icd_code</code></dt>
+<dd>
+<p>(<code>clean_icd_code</code>)
+ICD-9 or ICD-10 code.
+</p>
+</dd>
+<dt><code>integer</code></dt>
+<dd>
+<p>(<code>as.integer</code>)
+Miscellaneous whole number.
+</p>
+</dd>
+<dt><code>numeric</code></dt>
+<dd>
+<p>(<code>as.numeric</code>)
+Miscellaneous decimal number.
+</p>
+</dd>
+<dt><code>override</code></dt>
+<dd>
+<p>(<code>naaccr_override</code>)
+Field describing why another field's value was over-ridden.
+</p>
+</dd>
+<dt><code>physician</code></dt>
+<dd>
+<p>(<code>clean_physician_id</code>)
+Physician ID number.
+</p>
+</dd>
+<dt><code>postal</code></dt>
+<dd>
+<p>(<code>clean_postal</code>)
+Postal code for an address (a.k.a. ZIP code in the United States).
+</p>
+</dd>
+<dt><code>ssn</code></dt>
+<dd>
+<p>(<code>clean_ssn</code>)
+Social Security Number.
+</p>
+</dd>
+<dt><code>telephone</code></dt>
+<dd>
+<p>(<code>clean_telephone</code>)
+10-digit telephone number.
+</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">  my_fields &lt;- record_format(
+    name      = c("foo", "bar", "baz"),
+    item      = c(2163, 1180, 1181),
+    start_col = c(975, 1381, NA),
+    width     = c(1, 55, 4),
+    type      = c("numeric", "facility", "character"),
+    parent    = c("Patient", "Tumor", "Tumor"),
+    cleaner   = list(NULL, NULL, trimws)
+  )
+  my_format &lt;- rbind(naaccr_format_16, my_fields)
+</code></pre>
+
+
+</div>

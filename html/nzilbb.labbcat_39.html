@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getMatchingParticipantIds</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Gets a list of IDs of participants that match a particular pattern.</h2>
+
+<h3>Description</h3>
+
+<p>Gets a list of IDs of participants that match a particular pattern.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getMatchingParticipantIds(
+  labbcat.url,
+  expression,
+  page.length = NULL,
+  page.number = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>labbcat.url</code></td>
+<td>
+<p>URL to the LaBB-CAT instance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expression</code></td>
+<td>
+<p>An expression that determines which participants match</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>page.length</code></td>
+<td>
+<p>The maximum number of IDs to return, or null to return all</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>page.number</code></td>
+<td>
+<p>The zero-based page number to return, or null to return the first page</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The results can be exhaustive, by omitting page.length and
+page.number, or they  can be a subset (a 'page') of results, by
+given page.length and page.number values.
+</p>
+<p>The expression language is currently not well defined, but is based on JavaScript
+syntax.
+</p>
+
+<ul>
+<li>
+<p>The <em>labels</em> function can be used to represent a list of all the annotation
+labels on a given layer. For example, each participant can have multiple
+corpora, so the corpus labels (names) are represented by:  
+<em>labels('corpus')</em>
+</p>
+</li>
+<li>
+<p>Use the <em>includes</em> function on a list to test whether the list contains a
+given element. e.g. to match participants that include the corpus 'QB' use:  
+<em>labels('corpus').includes('QB')</em>
+</p>
+</li>
+<li>
+<p>Use the <em>first</em> function to identify the first (or the only) annotation on
+a given layer. e.g. the annotation representing the participant's gender is:  
+<em>first('participant_gender')</em>
+</p>
+</li>
+<li>
+<p>Single annotations have various attributes, including 'id', 'label', 'ordinal', etc.
+e.g. the label of the participant's gender is:  
+<em>first('participant_gender').label</em>
+</p>
+</li>
+<li>
+<p>Regular expressions can be matched by using expressions like
+'/regex/.test(str)', e.g. to test if the ID starts with 'BR' use:  
+<em>/^BR.+/.test(id)</em>  
+or to test if the participant's gender includes 'binary' use:  
+<em>/.*binary.*/.test(first('participant_gender').label)</em>
+</p>
+</li>
+</ul>
+<p>Expressions such as those in the examples can be used.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of paricipant IDs
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## define the LaBB-CAT URL
+labbcat.url &lt;- "https://labbcat.canterbury.ac.nz/demo/"
+
+## Get all participants whose IDs start with "BR"
+participants &lt;- getMatchingParticipantIds(labbcat.url, "/^BR.+/.test(id)")
+
+## Get the first twenty transcripts in the "QB" corpus
+participants &lt;- getMatchingParticipantIds(
+        labbcat.url, "labels('corpus').includes('QB')", 20, 0)
+
+## Get all participants in the "QB" corpus that have "Jacqui" as part of the ID
+participants &lt;- getMatchingTranscriptParticipantIds(
+        labbcat.url, "labels('corpus').includes('QB') &amp;&amp; /^BR.+/.test(id)")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

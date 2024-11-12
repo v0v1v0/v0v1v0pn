@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate.mmsbm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate a complete sociomatrix from an <code>mmsbm</code> object</h2>
+
+<h3>Description</h3>
+
+<p>The function generates one sample network from the posterior predictive of the model represented by a fitted <code>mmsbm</code> object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'mmsbm'
+simulate(
+  object,
+  nsim = 1,
+  seed = NULL,
+  new.data.dyad = NULL,
+  new.data.monad = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of class <code>mmsbm</code>, a result of a call to <code>mmsbm</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Number of networks to simulate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>RNG seed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new.data.dyad</code></td>
+<td>
+<p>An optional <code>data.frame</code> object. If not <code>NULL</code>, use these 
+dyadic predictor values instead of those used to fit the original model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new.data.monad</code></td>
+<td>
+<p>An optional <code>data.frame</code> object. See <code>new.data.dyad</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently ignored</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of length <code>nsim</code> of simulated networks. 
+If <code>new.data.dyad = NULL</code>, each element is a vector of length <code>nrow(object$dyadic.data)</code>. 
+Else, vector of length <code>nrow(new.data.dyad)</code>. If <code>seed</code> is not NULL, return object
+includes its value as attribute "seed".
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Santiago Olivella (olivella@unc.edu), Adeline Lo (aylo@wisc.edu), Tyler Pratt (tyler.pratt@yale.edu), Kosuke Imai (imai@harvard.edu)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NetMix)
+## Load datasets
+data("lazega_dyadic")
+data("lazega_monadic")
+## Estimate model with 2 groups
+lazega_mmsbm &lt;- mmsbm(SocializeWith ~ Coworkers,
+                      ~  School + Practice + Status,
+                      senderID = "Lawyer1",
+                      receiverID = "Lawyer2",
+                      nodeID = "Lawyer",
+                      data.dyad = lazega_dyadic,
+                      data.monad = lazega_monadic,
+                      n.blocks = 2,
+                      mmsbm.control = list(seed = 123, 
+                                           conv_tol = 1e-2,
+                                           hessian = FALSE))
+
+## Simulate 5 new networks
+lazega_sim &lt;- simulate(lazega_mmsbm, nsim = 5, seed = 123)
+
+</code></pre>
+
+
+</div>

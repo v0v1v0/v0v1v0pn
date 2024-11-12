@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PP2poisGP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transform Point-Process Parameters into Poisson-GP
+Parameters</h2>
+
+<h3>Description</h3>
+
+<p>Transform Point Process (PP) parameters into
+Poisson-GP parameters. The provided parameters are GEV
+parameters: location <code class="reqn">\mu^\star</code>, scale
+<code class="reqn">\sigma^\star_w</code> and shape
+<code class="reqn">\xi^\star</code>. They are assumed to describe (the
+tail of) the distribution for a maximum on a time-interval
+with given duration <code class="reqn">w</code>. For a given threshold <code class="reqn">u</code>
+chosen to be in the interior of the support of the GEV
+distribution, there exists a unique vector of three Poisson-GP
+parameters such that the maximum <code class="reqn">M</code> of the marks on an
+interval with duration <code>w</code> has the prescribed GEV
+tail. Remind that the three Poisson-GP parameters are the rate
+of the Poisson process in time: <code class="reqn">\lambda_u</code>, and the two
+GP parameters: <code>scale</code> <code class="reqn">\sigma_u</code> and <code>shape</code>
+<code class="reqn">\xi</code>. The shape parameters <code class="reqn">\xi^\star</code> and
+<code class="reqn">\xi</code> are identical.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PP2poisGP(locStar = 0.0, scaleStar = 1.0, shapeStar = 0.0,
+          threshold,
+          w = 1.0, deriv = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>locStar, scaleStar, shapeStar</code></td>
+<td>
+<p>Numeric vectors containing the
+GEV location, scale and shape parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>Numeric vector containing the thresholds of the
+Poisson-GP model, i.e. the location of the Generalised Pareto
+Distribution. <em>The threshold must be an interior point of the
+support of the corresponding GEV distribution</em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>The block duration. Its physical dimension is time and
+the product <code class="reqn">\lambda \times w</code> is dimensionless.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deriv</code></td>
+<td>
+<p>Logical. If <code>TRUE</code> the derivative (Jacobian) of
+the transformation is computed and returned as an attribute named
+<code>"gradient"</code> of the attribute.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Poisson-GP parameters are obtained by 
+</p>
+<p style="text-align: center;"><code class="reqn">\left\{
+         \begin{array}{c c l}
+             \sigma_u &amp;=&amp; \sigma_w^\star + \xi^\star \left[ u - \mu_w^\star \right],\\
+             \lambda_u &amp;=&amp; w^{-1} \, \left[\sigma_u / \sigma_w^\star \right]^{-1/ \xi^\star},\\
+             \xi &amp;=&amp; \xi^\star, 
+          \end{array}\right.</code>
+</p>
+
+<p>the second equation becomes <code class="reqn">\lambda_u = w^{-1}</code> for
+<code class="reqn">\xi^\star = 0</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix with three columns representing the Poisson-GP
+parameters <code>lambda</code>, <code>scale</code> and <code>shape</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function is essentially a re-implementation in C of the
+function <code>gev2Ren</code> of <b>Renext</b>.  As a
+major improvement, this function is "vectorized" w.r.t. the
+parameters so it can transform efficiently a large number of PP
+parameter vectors as it can be required e.g. in a MCMC Bayesian
+inference. Note also that this function copes with values near
+zero for the shape parameter: it suitably computes then both the
+function value and its derivatives.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>poisGP2PP</code> for the reciprocal
+transformation.
+</p>
+
+
+</div>

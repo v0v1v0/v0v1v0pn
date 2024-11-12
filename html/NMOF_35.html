@@ -1,0 +1,188 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>greedySearch</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Greedy Search
+</h2>
+
+<h3>Description</h3>
+
+<p>Greedy Search
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">greedySearch(OF, algo, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>OF</code></td>
+<td>
+
+<p>The objective function, to be minimised. Its first
+argument needs to be a solution; <code>...</code>
+arguments are also passed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algo</code></td>
+<td>
+
+<p>List of settings. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Other variables to be passed to the objective
+function and to the neighbourhood function. See
+Details.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A greedy search works starts at a provided initial
+solution (called the current solution) and searches a
+defined neighbourhood for the best possible
+solution. If this best neighbour is not better than
+the current solution, the search stops.  Otherwise,
+the best neighbour becomes the current solution, and
+the search is repeated.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xbest</code></td>
+<td>
+<p>best solution found.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OFvalue</code></td>
+<td>
+<p>objective function value
+associated with best solution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fmat</code></td>
+<td>
+<p>a matrix with two
+columns. <code>Fmat[ ,1L]</code> contains the proposed
+solution over all iterations; <code>Fmat[ ,2L]</code>
+contains the accepted solutions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlist</code></td>
+<td>
+<p>a list</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.state</code></td>
+<td>
+<p>the value of
+<code>.Random.seed</code> when the function was
+called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x0</code></td>
+<td>
+<p>the initial solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>the number of iterations
+after which the search stopped</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>LSopt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">na &lt;- 100
+inc &lt;- 5
+R &lt;- randomReturns(na = na,
+                   ns = 1000,
+                   sd = seq(0.01, 0.02, length.out = 100),
+                   rho = 0.5)
+S &lt;- cov(R)
+OF &lt;- function(x, S, ...) {
+    w &lt;- 1/sum(x)
+    sum(w * w * S[x, x])
+}
+
+x &lt;- logical(na)
+x[1:inc] &lt;- TRUE
+
+
+all.neighbours &lt;- function(x, ...) {
+    true  &lt;- which( x)
+    false &lt;- which(!x)
+    ans &lt;- list()
+    for (i in true) {
+        for (j in false) {
+            ans1 &lt;- x
+            ans1[i] &lt;- !x[i]
+            ans1[j] &lt;- !x[j]
+            ans &lt;- c(ans, list(ans1))
+        }
+    }
+    ans
+}
+
+algo &lt;- list(loopOF = TRUE,
+             maxit = 1000,
+             all.neighbours = all.neighbours,
+             x0 = x)
+
+system.time(sol.gs &lt;- greedySearch(OF, algo = algo, S = S))
+sqrt(sol.gs$OFvalue)
+</code></pre>
+
+
+</div>

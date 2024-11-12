@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nmarank</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Probabilities of treatment hierarchies</h2>
+
+<h3>Description</h3>
+
+<p>Specifies the frequencies of hierarchies along with their estimated
+probabilities and the probability that a specified criterion holds.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nmarank(
+  TE.nma,
+  condition = NULL,
+  text.condition = "",
+  VCOV.nma = NULL,
+  pooled,
+  nsim = 10000,
+  small.values
+)
+
+## S3 method for class 'nmarank'
+print(
+  x,
+  text.condition = x$text.condition,
+  nrows = 10,
+  digits = gs("digits.prop"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>TE.nma</code></td>
+<td>
+<p>Either a <code>netmeta</code> object or a matrix
+with network estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>condition</code></td>
+<td>
+<p>Defines the conditions that should be satisfied by
+the treatments in the network. Multiple conditions can be
+combined with special operators into any decision tree. See
+<code>condition</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.condition</code></td>
+<td>
+<p>Optional descriptive text for the condition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>VCOV.nma</code></td>
+<td>
+<p>Variance-covariance matrix for network estimates
+(only considered if argument <code>TE.nma</code> isn't a
+<code>netmeta</code> object).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pooled</code></td>
+<td>
+<p>A character string indicating whether the hierarchy
+is calculated for the common effects (<code>"common"</code>) or random
+effects model (<code>"random"</code>). Can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Number of simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>small.values</code></td>
+<td>
+<p>A character string specifying whether small
+treatment effects indicate a "desirable" or "undesirable" effect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>nmarank</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrows</code></td>
+<td>
+<p>Number of hierarchies to print.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits for proportions,
+see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A simulation method is used to derive the relative frequency of all
+possible hierarchies in a network of interventions. Users can also
+define the set of all possible hierarchies that satisfy a specified
+criterion, for example that a specific order among treatments is
+retained in the network and/or a treatment is in a specific
+position, and the sum of their frequencies constitute the certainty
+around the criterion.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>"nmarank"</code> with corresponding <code>print</code>
+function. The object is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>hierarchies</code></td>
+<td>
+<p>A list of the most frequent hierarchies along
+with their estimated probability of occurrence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probabilityOfSelection</code></td>
+<td>
+<p>Combined probability of all
+hierarchies that satisfy the defined condition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE.nma, condition, VCOV.nma,</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pooled, nsim, small.values</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>condition</code>, <code>netmeta</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("Woods2010", package = "netmeta")
+p1 &lt;- pairwise(treatment, event = r, n = N, studlab = author,
+               data = Woods2010, sm = "OR")
+net1 &lt;- netmeta(p1, small.values = "good")
+
+nmarank(net1, nsim = 100)
+
+criterionA &lt;-
+ condition("sameHierarchy",
+           c("SFC", "Salmeterol", "Fluticasone", "Placebo"))
+nmarank(net1, criterionA, nsim = 100)
+
+</code></pre>
+
+
+</div>

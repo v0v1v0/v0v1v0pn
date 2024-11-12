@@ -1,0 +1,258 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>banks00_07</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>U.S. Commercial Banks Data</h2>
+
+<h3>Description</h3>
+
+<p><code>banks00_07</code> data frame contains selected variables for 500 (randomly sampled from around 5000) U.S. commercial banks from data of Koetter et al. (2012) for years 2000-2007.  This data are used for illustrution purposes and are not suitable for research purposes. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data(banks00_07)</code></pre>
+
+
+<h3>Format</h3>
+
+<p>This data frame contains the following variables (columns):
+</p>
+
+<dl>
+<dt><code>year</code></dt>
+<dd>
+<p>Year.</p>
+</dd>
+<dt><code>id</code></dt>
+<dd>
+<p>Entity ID.</p>
+</dd>
+<dt><code>TA</code></dt>
+<dd>
+<p>Gross total assets.</p>
+</dd>
+<dt><code>LLP</code></dt>
+<dd>
+<p>Loan loss provisions.</p>
+</dd>
+<dt><code>Y1</code></dt>
+<dd>
+<p>Total securities (in thousands of US dollars).</p>
+</dd>
+<dt><code>Y2</code></dt>
+<dd>
+<p>Total loans and leases (in thousands of US dollars).</p>
+</dd>
+<dt><code>W1</code></dt>
+<dd>
+<p>Cost of fixed assets divided by the cost of borrowed funds.</p>
+</dd>
+<dt><code>W2</code></dt>
+<dd>
+<p>Cost of labor (in thousands of US dollars) divided by the cost of borrowed funds.</p>
+</dd>
+<dt><code>ER</code></dt>
+<dd>
+<p>Gross total equity to gross total assets ratio.</p>
+</dd>
+<dt><code>TC</code></dt>
+<dd>
+<p>Total operating cost.</p>
+</dd>
+<dt><code>LA</code></dt>
+<dd>
+<p>Total loans and leases to gross total assets ratio.</p>
+</dd>
+<dt><code>Ti</code></dt>
+<dd>
+<p>Times bank is observed.</p>
+</dd>
+<dt><code>TA_ave</code></dt>
+<dd>
+<p>Mean value of TA.</p>
+</dd>
+<dt><code>TA_initial</code></dt>
+<dd>
+<p>Value of TA in the first observed year.</p>
+</dd>
+<dt><code>LLP_ave</code></dt>
+<dd>
+<p>Mean value of LLP.</p>
+</dd>
+<dt><code>LLP_initial</code></dt>
+<dd>
+<p>Value of LLP in the first observed year.</p>
+</dd>
+<dt><code>ER_ave</code></dt>
+<dd>
+<p>Mean value of ER.</p>
+</dd>
+<dt><code>ER_initial</code></dt>
+<dd>
+<p>Value of ER in the first observed year.</p>
+</dd>
+<dt><code>LA_ave</code></dt>
+<dd>
+<p>Mean value of LA.</p>
+</dd>
+<dt><code>LA_initial</code></dt>
+<dd>
+<p>Value of LA in the first observed year.</p>
+</dd>
+</dl>
+<h3>Details</h3>
+
+<p>The data were sampled and generated as shown in section "Examples".
+</p>
+
+
+<h3>Source</h3>
+
+<p><a href="http://qed.econ.queensu.ca/jae/2014-v29.2/restrepo-tobon-kumbhakar/">http://qed.econ.queensu.ca/jae/2014-v29.2/restrepo-tobon-kumbhakar/</a>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Koetter, M., Kolari, J., and Spierdijk, L. (2012), Enjoying the quiet life under deregulation? Evidence from adjusted Lerner indices for U.S. banks. <em>Review of Economics and Statistics</em>, <b>94</b>, 2, 462–480.
+</p>
+<p>Restrepo-Tobon, D. and Kumbhakar, S. (2014), Enjoying the quiet life under deregulation? Not Quite. <em>Journal of Applied Econometrics</em>, <b>29</b>, 2, 333–343.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+
+# Download data from the link in "Source"
+
+banks00_07 &lt;- read.delim("2b_QLH.txt")
+
+# rename 'entity' to 'id'
+colnames(banks00_07) [colnames(banks00_07) == "entity"] &lt;- "id"
+
+table(banks00_07$year)
+# keep if 2000 -- 2007
+
+banks00_07 &lt;- 
+ banks00_07[(banks00_07$year &gt;= 2000 &amp; banks00_07$year &lt;= 2007),]
+dim(banks00_07)
+
+q1q3 &lt;- quantile(banks00_07$TA, probs = c(.25,.75))
+
+banks00_07 &lt;- 
+ banks00_07[(banks00_07$TA &gt;= q1q3[1] &amp; banks00_07$TA &lt;= q1q3[2]),]
+dim(banks00_07)
+
+
+# generate required variables
+banks00_07$TC &lt;-banks00_07$TOC
+banks00_07$ER &lt;- banks00_07$Z / banks00_07$TA
+banks00_07$LA &lt;- banks00_07$Y2 / banks00_07$TA
+
+banks00_07 &lt;- 
+ banks00_07[, colnames(banks00_07) 
+ c("id", "year", "Ti", "TC", "Y1", "Y2", "W1","W2", "ER", "LA", "TA", "LLP")]
+dim(banks00_07)
+
+t0 &lt;- as.vector( by(data = banks00_07$id, 
+                    INDICES = banks00_07$id, 
+                    FUN = function(qq) length(qq)) )
+banks00_07$Ti &lt;- rep(t0, times = t0)
+banks00_07 &lt;- banks00_07[banks00_07$Ti &gt; 4,]
+
+# complete observations
+banks00_07 &lt;- banks00_07[complete.cases(banks00_07),]
+dim(banks00_07)
+
+id_names &lt;- unique(banks00_07$id)
+N_total &lt;- length(id_names)
+set.seed(816376586)
+ids_n2choose &lt;- sample(1:N_total, 500)
+ids2choose &lt;- id_names[ids_n2choose]
+banks00_07 &lt;- banks00_07[banks00_07$id 
+dim(banks00_07)
+
+t0 &lt;- as.vector( by(data = banks00_07$id, 
+                    INDICES = banks00_07$id, 
+                    FUN = function(qq) length(qq)) )
+length(rep(t0, times = t0))
+
+banks00_07$Ti &lt;- rep(t0, times = t0)
+
+banks00_07[1:50,c("id","year","Ti")]
+
+# keep if Ti &gt; 4
+
+banks00_07 &lt;- banks00_07[banks00_07$Ti &gt; 4,]
+dim(banks00_07)
+
+# sort
+banks00_07 &lt;- banks00_07[order(banks00_07$id, banks00_07$year),]
+
+# TC = TOC
+#
+# ER = Z / TA
+# Gross total equity to gross total assets ratio.
+#
+# LA = Y2 / TA
+# Total loans and leases to gross total assets ratio.
+
+banks00_07$TA_ave &lt;- 
+ rep(as.vector( by(data = banks00_07$TA,
+                   INDICES = banks00_07$id, 
+                   FUN = function(qq) mean(qq))), times = t0)
+
+banks00_07$TA_initial &lt;- 
+ rep(as.vector( by(data = banks00_07$TA, 
+                   INDICES = banks00_07$id,
+                   FUN = function(qq) qq[1])), times = t0)
+
+banks00_07$LLP_ave &lt;- 
+ rep(as.vector( by(data = banks00_07$LLP,
+                   INDICES = banks00_07$id,
+                   FUN = function(qq) mean(qq))), times = t0)
+
+banks00_07$LLP_initial &lt;- 
+ rep(as.vector( by(data = banks00_07$LLP, 
+                   INDICES = banks00_07$id, 
+                   FUN = function(qq) qq[1])), times = t0)
+
+banks00_07$ER_ave &lt;- 
+ rep(as.vector( by(data = banks00_07$ER, 
+                   INDICES = banks00_07$id, 
+                   FUN = function(qq) mean(qq))), times = t0)
+
+banks00_07$ER_initial &lt;- 
+ rep(as.vector( by(data = banks00_07$ER, 
+                   INDICES = banks00_07$id, 
+                   FUN = function(qq) qq[1])), times = t0)
+
+banks00_07$LA_ave &lt;- 
+ rep(as.vector( by(data = banks00_07$LA, 
+                   INDICES = banks00_07$id, 
+                   FUN = function(qq) mean(qq))), times = t0)
+
+banks00_07$LA_initial &lt;- 
+ rep(as.vector( by(data = banks00_07$LA, 
+                   INDICES = banks00_07$id, 
+                   FUN = function(qq) qq[1])), times = t0)
+
+cols2export &lt;- c("id","year","Ti","TA","TA_ave",
+                 "TA_initial","LLP","LLP_ave",
+                 "LLP_initial","ER_ave","ER_initial","LA_ave","LA_initial")
+
+write.table(x = banks00_07, file = "banks00_07.txt", row.names = FALSE)
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

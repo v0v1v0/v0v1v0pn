@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Effect.nestedLogit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Effect Displays for Nested Logit Models</h2>
+
+<h3>Description</h3>
+
+<p>Computes effects (in the sense of the <span class="pkg">effects</span> package—see, in
+particular, <code>Effect</code>)—for <code>"nestedLogit"</code> models, which then
+can be used with other functions in the <span class="pkg">effects</span> package, for example,
+<code>predictorEffects</code> and to produce effect plots.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nestedLogit'
+Effect(
+  focal.predictors,
+  mod,
+  confidence.level = 0.95,
+  fixed.predictors = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>focal.predictors</code></td>
+<td>
+<p>a character vector of the names of one or more of
+the predictors in the model, for which the effect display should be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod</code></td>
+<td>
+<p>a <code>"nestedLogit"</code> model object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confidence.level</code></td>
+<td>
+<p>for point-wise confidence bands around the effects
+(the default is <code>0.95</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.predictors</code></td>
+<td>
+<p>controls the values at which other predictors are fixed;
+see <code>Effect</code> for details; if <code>NULL</code> (the default),
+numeric predictors are set to their means, factors to their distribution in the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments to be passed to the <code>Effect</code> method for
+binary logit models (fit by the <code>glm</code> function).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of class <code>"effpoly"</code> (see <code>Effect</code>).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>John Fox
+</p>
+
+
+<h3>References</h3>
+
+<p>John Fox and Sanford Weisberg (2019). <em>An R Companion to Applied Regression</em>,
+3rd Edition. Sage, Thousand Oaks, CA.
+</p>
+<p>John Fox, Sanford Weisberg (2018). Visualizing Fit and Lack of Fit in Complex
+Regression Models with Predictor Effect Plots and Partial Residuals.
+<em>Journal of Statistical Software</em>, 87(9), 1-27.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Effect</code>, <code>plot.effpoly</code>,
+<code>predictorEffects</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("Womenlf", package = "carData")
+comparisons &lt;- logits(work=dichotomy("not.work",
+                                     working=c("parttime", "fulltime")),
+                      full=dichotomy("parttime", "fulltime"))
+m &lt;- nestedLogit(partic ~ hincome + children,
+                   dichotomies = comparisons,
+                   data=Womenlf)
+peff.women &lt;- effects::predictorEffects(m)
+plot(peff.women)
+plot(peff.women, axes=list(y=list(style="stacked")))
+summary(peff.women)
+
+dichots &lt;- logits(AB_CD = dichotomy(c("A", "B"), c("C", "D")),
+                  A_B   = dichotomy("A", "B"),
+                  C_D   = dichotomy("C", "D"))
+m.health &lt;- nestedLogit(product4 ~ age + gender*household + position_level,
+                        dichotomies = dichots, data = HealthInsurance)
+eff.gen.hh &lt;- effects::Effect(c("gender", "household"), m.health,
+                              xlevels=list(household=0:7))
+eff.gen.hh
+plot(eff.gen.hh, axes=list(x=list(rug=FALSE)))
+plot(eff.gen.hh, axes=list(x=list(rug=FALSE), 
+                           y=list(style="stacked")))
+</code></pre>
+
+
+</div>

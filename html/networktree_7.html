@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>networktree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>networktree: Partitioning of network models</h2>
+
+<h3>Description</h3>
+
+<p>Computes a tree model with networks at the end of branches. Can use
+model-based recursive partitioning or conditional inference.
+</p>
+<p>Wraps the mob() and ctree() functions from the partykit package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">networktree(...)
+
+## Default S3 method:
+networktree(
+  nodevars,
+  splitvars,
+  method = c("mob", "ctree"),
+  model = "correlation",
+  transform = c("cor", "pcor", "glasso"),
+  na.action = na.omit,
+  weights = NULL,
+  ...
+)
+
+## S3 method for class 'formula'
+networktree(
+  formula,
+  data,
+  transform = c("cor", "pcor", "glasso"),
+  method = c("mob", "ctree"),
+  na.action = na.omit,
+  model = "correlation",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments passed to <code>mob_control</code> (mob) 
+or <code>ctree_control</code> (ctree)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodevars</code></td>
+<td>
+<p>the variables with which to compute the network. Can be vector, matrix, or dataframe</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splitvars</code></td>
+<td>
+<p>the variables with which to test split the network. Can be vector, matrix, or dataframe</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>"mob" or "ctree"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>can be any combination of c("correlation", "mean", "variance")
+splits are determined based on the specified characteristics</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform</code></td>
+<td>
+<p>should stored correlation matrices be transformed to partial correlations
+or a graphical lasso for plotting? Can be set to "cor" (default), "pcor", or "glasso"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function which indicates what should happen when the data
+contain missing values (<code>NA</code>s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A symbolic description of the model to be fit. This
+should either be of type <code>y1 + y2 + y3 ~ x1 + x2</code> with node
+vectors <code>y1</code>, <code>y2</code>, and <code>y3</code> or <code>y ~ x1 + x2</code>
+with a matrix response y. <code>x1</code> and <code>x2</code> are used as
+partitioning variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame containing the variables in the model</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Jones, P.J., Mair, P., Simon, T., Zeileis, A. (2020). Network trees: A method for recursively partitioning covariance structures. Psychometrika, 85(4), 926-945. https://doi.org/10.1007/s11336-020-09731-4
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(1)
+d &lt;- data.frame(trend = 1:200, foo = runif(200, -1, 1))
+d &lt;- cbind(d, rbind(
+  mvtnorm::rmvnorm(100, mean = c(0, 0, 0),
+          sigma = matrix(c(1, 0.5, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 1), ncol = 3)),
+  mvtnorm::rmvnorm(100, mean = c(0, 0, 0),
+          sigma = matrix(c(1, 0, 0.5, 0, 1, 0.5, 0.5, 0.5, 1), ncol = 3))
+))
+colnames(d)[3:5] &lt;- paste0("y", 1:3)
+
+## Now use the function
+tree1 &lt;- networktree(nodevars=d[,3:5], splitvars=d[,1:2])
+
+## Formula interface
+tree2 &lt;- networktree(y1 + y2 + y3 ~ trend + foo, data=d)
+
+## plot 
+plot(tree2)
+plot(tree2, terminal_panel = "box")
+plot(tree2, terminal_panel = "matrix")
+
+
+## Conditional version
+tree3 &lt;- networktree(nodevars=d[,3:5], splitvars=d[,1:2], 
+                     method="ctree")
+
+## Change control arguments
+tree4 &lt;- networktree(nodevars=d[,3:5], splitvars=d[,1:2],
+                     alpha=0.01)
+
+</code></pre>
+
+
+</div>

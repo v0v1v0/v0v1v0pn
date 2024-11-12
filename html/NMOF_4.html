@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bracketing</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Zero-Bracketing
+</h2>
+
+<h3>Description</h3>
+
+<p>Bracket the zeros (roots) of a univariate function
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bracketing(fun, interval, ...,
+           lower = min(interval), upper = max(interval),
+           n = 20L,
+           method = c("loop", "vectorised", "multicore", "snow"),
+           mc.control = list(), cl = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+
+<p>a univariate function; it will be called as <code>fun(x, ...)</code> with
+<code>x</code> being a numeric vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+
+<p>a numeric vector, containing the end-points of the interval to be searched
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>further arguments passed to <code>fun</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+
+<p>lower end-point. Ignored if <code>interval</code> is specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+
+<p>upper end-point. Ignored if <code>interval</code> is specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>the number of function evaluations. Must be at least 2 (in which
+case <code>fun</code> is evaluated only at the end-points); defaults to 20.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>can be <code>loop</code> (the default), <code>vectorised</code>, <code>multicore</code>
+or <code>snow</code>. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mc.control</code></td>
+<td>
+
+<p>a list containing settings that will be passed to <code>mclapply</code> if
+<code>method</code> is <code>multicore</code>. Must be a list of named
+elements. See the documentation of <code>mclapply</code> in package <span class="pkg">parallel</span>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+<p>default is <code>NULL</code>. If <code>method</code> is <code>snow</code>, this must be a
+cluster object or an integer (the number of cores to be used). See the
+documentation of packages <span class="pkg">parallel</span> and <span class="pkg">snow</span>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>bracketing</code> evaluates <code>fun</code> at equal-spaced values of <code>x</code>
+between (and including) <code>lower</code> and <code>upper</code>. If the sign of
+<code>fun</code> changes between two consecutive <code>x</code>-values,
+<code>bracketing</code> reports these two <code>x</code>-values as containing (‘bracketing’)
+a root. There is no guarantee that there is only one root
+within a reported interval. <code>bracketing</code> will not narrow the chosen intervals.
+</p>
+<p>The argument <code>method</code> determines how <code>fun</code> is
+evaluated. Default is <code>loop</code>. If <code>method</code> is
+<code>"vectorised"</code>, <code>fun</code> must be written such that it can be
+evaluated for a vector <code>x</code> (see Examples). If <code>method</code> is
+<code>multicore</code>, function <code>mclapply</code> from package <span class="pkg">parallel</span>
+is used. Further settings for <code>mclapply</code> can be passed through
+the list <code>mc.control</code>. If <code>multicore</code> is chosen but the
+functionality is not available (eg, currently on Windows), then
+<code>method</code> will be set to <code>loop</code> and a warning is issued. If
+<code>method</code> is <code>snow</code>, function <code>clusterApply</code> from
+package <span class="pkg">parallel</span> is used. In this case, the argument <code>cl</code>
+must either be a cluster object (see the documentation of
+<code>clusterApply</code>) or an integer. If an integer, a cluster will be
+set up via <code>makeCluster(c(rep("localhost", cl)), type = "SOCK")</code>,
+and <code>stopCluster</code> is called when the function is exited. If
+<code>snow</code> is chosen but the package is not available or <code>cl</code> is
+not specified, then <code>method</code> will be set to <code>loop</code> and a
+warning is issued. In case that <code>cl</code> is a cluster object,
+<code>stopCluster</code> will not be called automatically.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric matrix with two columns, named <em>lower</em> and
+<em>upper</em>. Each row contains one interval
+that contains at least one root. If no roots were found, the matrix
+has zero rows.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Enrico Schumann
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>uniroot</code> (in package <span class="pkg">stats</span>)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Gilli/Maringer/Schumann (2011), p. 290
+testFun &lt;- function(x)
+    cos(1/x^2)
+
+bracketing(testFun, interval = c(0.3, 0.9), n = 26L)
+bracketing(testFun, interval = c(0.3, 0.9), n = 26L, method = "vectorised")
+</code></pre>
+
+
+</div>

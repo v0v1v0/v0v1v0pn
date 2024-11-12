@@ -1,0 +1,255 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cv.ncvreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-validation for ncvreg/ncvsurv</h2>
+
+<h3>Description</h3>
+
+<p>Performs k-fold cross validation for MCP- or SCAD-penalized regression
+models over a grid of values for the regularization parameter lambda.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cv.ncvreg(
+  X,
+  y,
+  ...,
+  cluster,
+  nfolds = 10,
+  seed,
+  fold,
+  returnY = FALSE,
+  trace = FALSE
+)
+
+cv.ncvsurv(
+  X,
+  y,
+  ...,
+  cluster,
+  nfolds = 10,
+  seed,
+  fold,
+  se = c("quick", "bootstrap"),
+  returnY = FALSE,
+  trace = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>The design matrix, without an intercept, as in <code>ncvreg()</code> or <code>ncvsurv()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>The response, as in <code>ncvreg()</code> or <code>ncvsurv()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to <code>ncvreg()</code> or <code>ncvsurv()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p><code>cv.ncvreg()</code> and <code>cv.ncvsurv()</code> can be run in parallel
+across a cluster using the <strong>parallel</strong> package. The cluster must be set
+up in advance using the <code>parallel::makeCluster()</code> function from that package.
+The cluster must then be passed to <code>cv.ncvreg()</code> or <code>cv.ncvsurv()</code> (see example).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfolds</code></td>
+<td>
+<p>The number of cross-validation folds.  Default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>You may set the seed of the random number generator in order to obtain reproducible results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fold</code></td>
+<td>
+<p>Which fold each observation belongs to. By default the observations are randomly assigned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnY</code></td>
+<td>
+<p>Should <code>cv.ncvreg()</code>/<code>cv.ncvsurv()</code> return the linear predictors
+from the cross-validation folds?  Default is <code>FALSE</code>; if <code>TRUE</code>, this will
+return a matrix in which the element for row i, column j is the fitted
+value for observation i from the fold in which observation i was excluded
+from the fit, at the jth value of lambda. NOTE: For <code>cv.ncvsurv()</code>, the
+rows of <code>Y</code> are ordered by time on study, and therefore will not correspond
+to the original order of observations pased to <code>cv.ncvsurv()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>If set to <code>TRUE</code>, inform the user of progress by announcing
+the beginning of each CV fold. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>For <code>cv.ncvsurv()</code>, the method by which the cross-valiation
+standard error (CVSE) is calculated. The 'quick' approach is based on a
+rough approximation, but can be calculated more or less instantly.  The
+'bootstrap' approach is more accurate, but requires additional computing time.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function calls <code>ncvreg</code>/<code>ncvsurv</code> <code>nfolds</code> times, each
+time leaving out 1/<code>nfolds</code> of the data.  The cross-validation error is
+based on the deviance; <a href="https://pbreheny.github.io/ncvreg/articles/web/models.html">see here for more details</a>.
+</p>
+<p>For <code>family="binomial"</code> models, the cross-validation fold assignments are
+balanced across the 0/1 outcomes, so that each fold has the same proportion
+of 0/1 outcomes (or as close to the same proportion as it is possible to
+achieve if cases do not divide evenly).
+</p>
+<p>For Cox models, <code>cv.ncvsurv()</code> uses the approach of calculating the full
+Cox partial likelihood using the cross-validated set of linear predictors.
+Other approaches to cross-validation for the Cox regression model have been
+proposed in the literature; the strengths and weaknesses of the various
+methods for penalized regression in the Cox model are the subject of current
+research.  A simple approximation to the standard error is provided,
+although an option to bootstrap the standard error (<code>se='bootstrap'</code>) is also
+available.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object with S3 class <code>cv.ncvreg</code> or <code>cv.ncvsurv</code> containing:
+</p>
+
+<dl>
+<dt>cve</dt>
+<dd>
+<p>The error for each value of <code>lambda</code>, averaged across the cross-
+validation folds.</p>
+</dd>
+<dt>cvse</dt>
+<dd>
+<p>The estimated standard error associated with each value of for <code>cve</code>.</p>
+</dd>
+<dt>fold</dt>
+<dd>
+<p>The fold assignments for cross-validation for each observation;
+note that for <code>cv.ncvsurv()</code>, these are in terms of the ordered observations,
+not the original observations.</p>
+</dd>
+<dt>lambda</dt>
+<dd>
+<p>The sequence of regularization parameter values along which
+the cross-validation error was calculated.</p>
+</dd>
+<dt>fit</dt>
+<dd>
+<p>The fitted <code>ncvreg()</code> or <code>ncvsurv()</code> object for the whole data.</p>
+</dd>
+<dt>min</dt>
+<dd>
+<p>The index of <code>lambda</code> corresponding to <code>lambda.min</code>.</p>
+</dd>
+<dt>lambda.min</dt>
+<dd>
+<p>The value of <code>lambda</code> with the minimum cross-validation error.</p>
+</dd>
+<dt>null.dev</dt>
+<dd>
+<p>The deviance for the intercept-only model. If you have supplied
+your own <code>lambda</code> sequence, this quantity may not be meaningful.</p>
+</dd>
+<dt>Bias</dt>
+<dd>
+<p>The estimated bias of the minimum cross-validation error, as in
+Tibshirani and Tibshirani (2009) <a href="https://doi.org/10.1214/08-AOAS224">doi:10.1214/08-AOAS224</a></p>
+</dd>
+<dt>pe</dt>
+<dd>
+<p>If <code>family="binomial"</code>, the cross-validation prediction error for
+each value of <code>lambda</code>.</p>
+</dd>
+<dt>Y</dt>
+<dd>
+<p>If <code>returnY=TRUE</code>, the matrix of cross-validated fitted values (see above).</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Patrick Breheny; Grant Brown helped with the parallelization support
+</p>
+
+
+<h3>References</h3>
+
+<p>Breheny P and Huang J. (2011) Coordinate descent algorithms for nonconvex
+penalized regression, with applications to biological feature selection.
+<em>Annals of Applied Statistics</em>, <strong>5</strong>: 232-253. <a href="https://doi.org/10.1214/10-AOAS388">doi:10.1214/10-AOAS388</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ncvreg()</code>, <code>plot.cv.ncvreg()</code>, <code>summary.cv.ncvreg()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Prostate)
+
+cvfit &lt;- cv.ncvreg(Prostate$X, Prostate$y)
+plot(cvfit)
+summary(cvfit)
+
+fit &lt;- cvfit$fit
+plot(fit)
+beta &lt;- fit$beta[,cvfit$min]
+
+## requires loading the parallel package
+## Not run: 
+library(parallel)
+X &lt;- Prostate$X
+y &lt;- Prostate$y
+cl &lt;- makeCluster(4)
+cvfit &lt;- cv.ncvreg(X, y, cluster=cl, nfolds=length(y))
+## End(Not run)
+
+# Survival
+data(Lung)
+X &lt;- Lung$X
+y &lt;- Lung$y
+
+cvfit &lt;- cv.ncvsurv(X, y)
+summary(cvfit)
+plot(cvfit)
+plot(cvfit, type="rsq")
+</code></pre>
+
+
+</div>

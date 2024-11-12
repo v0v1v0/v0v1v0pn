@@ -1,0 +1,71 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>alternatives</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>alternatives</h2>
+
+<h3>Description</h3>
+
+<p>Make a pattern that matches one of the specified alternatives. The
+<code>altlist</code> function can be helpful for defining named sub-patterns
+that are used in several alternatives.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">alternatives(...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Each argument is a different alternative pattern.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>Pattern list.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre]</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## simple example.
+subject &lt;- c("foooo1", "barrr2")
+str(foo.or.bar &lt;- nc::alternatives(bar="bar+", foo="fo+"))
+str(foo.or.bar &lt;- list(bar="bar+", "|", foo="fo+"))#same
+nc::capture_first_vec(subject, foo.or.bar, number="[12]")
+
+## More complicated regular expression for matching the JobID column
+## of SLURM sacct output.
+JobID &lt;- c(
+  "13937810_25", "13937810_25.batch",
+  "13937810_25.extern", "14022192_[1-3]", "14022204_[4]")
+int.pattern &lt;- list("[0-9]+", as.integer)
+## Match the whole range inside square brackets.
+range.pattern &lt;- list(
+  "[[]",
+  task.start=int.pattern,
+  nc::quantifier("-", task.end=int.pattern, "?"),
+  "[]]")
+nc::capture_first_vec(JobID, range.pattern, nomatch.error=FALSE)
+
+## Match either a single task ID or a range, after an underscore.
+task.pattern &lt;- list(job="[0-9]+", "_", nc::alternatives(
+  task.id=int.pattern,
+  range.pattern))
+nc::capture_first_vec(JobID, task.pattern)
+
+</code></pre>
+
+
+</div>

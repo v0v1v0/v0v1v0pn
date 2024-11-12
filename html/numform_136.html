@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>f_month</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Format Months to One Letter Abbreviation</h2>
+
+<h3>Description</h3>
+
+<p>Format long month name, integer, or date formats to a single capital letter.
+Useful for plot scales as a way to save space.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">f_month(x, ...)
+
+## Default S3 method:
+f_month(x, ...)
+
+## S3 method for class 'numeric'
+f_month(x, ...)
+
+## S3 method for class 'Date'
+f_month(x, ...)
+
+## S3 method for class 'POSIXt'
+f_month(x, ...)
+
+## S3 method for class 'hms'
+f_month(x, ...)
+
+ff_month(...)
+
+f_month_name(x, ...)
+
+## Default S3 method:
+f_month_name(x, ...)
+
+## S3 method for class 'numeric'
+f_month_name(x, ...)
+
+## S3 method for class 'Date'
+f_month_name(x, ...)
+
+## S3 method for class 'POSIXt'
+f_month_name(x, ...)
+
+## S3 method for class 'hms'
+f_month_name(x, ...)
+
+ff_month_name(...)
+
+f_month_abbreviation(x, ...)
+
+## Default S3 method:
+f_month_abbreviation(x, ...)
+
+## S3 method for class 'numeric'
+f_month_abbreviation(x, ...)
+
+## S3 method for class 'Date'
+f_month_abbreviation(x, ...)
+
+## S3 method for class 'POSIXt'
+f_month_abbreviation(x, ...)
+
+## S3 method for class 'hms'
+f_month_abbreviation(x, ...)
+
+ff_month_abbreviation(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of month names, integers 1-12, or dates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a single letter month abbreviation atomic vector.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f_month(month.name)
+
+f_month(1:12)
+
+dates &lt;- seq(as.Date("2000/1/1"), by = "month", length.out = 12)
+f_month(dates)
+## Not run: 
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse)
+
+set.seed(11)
+data_frame(
+    date = sample(seq(as.Date("1990/1/1"), by = "day", length.out = 2e4), 12)
+) %&gt;%
+    mutate(
+        year_4 = f_year(date, 2),
+        year_2 = f_year(date, 4),
+        quarter = f_quarter(date),
+        month_name = f_month_name(date) %&gt;%
+            as_factor(),
+        month_abbreviation = f_month_abbreviation(date) %&gt;%
+            as_factor(),
+        month_short = f_month(date),
+        weekday_name = f_weekday_name(date),
+        weekday_abbreviation = f_weekday_abbreviation(date),
+       weekday_short = f_weekday(date),
+        weekday_short_distinct = f_weekday(date, distinct = TRUE)
+    )
+
+
+set.seed(10)
+dat &lt;- data_frame(
+    month = sample(month.name, 1000, TRUE),
+    area =  sample(LETTERS[1:5], 1000, TRUE)
+) %&gt;%
+    count(month, area) %&gt;%
+    ungroup() %&gt;%
+    mutate(month = factor(month, levels = constant_months))
+
+## without date formatting
+ggplot(dat, aes(month, n)) +
+    geom_bar(stat = 'identity') +
+    facet_wrap(~ area)
+
+## with date formatting
+ggplot(dat, aes(month, n)) +
+    geom_bar(stat = 'identity') +
+    facet_wrap(~ area) +
+    scale_x_discrete(labels = f_month)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

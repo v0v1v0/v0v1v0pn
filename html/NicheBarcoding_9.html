@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>niche.PCA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Principal component analysis of ecological niche among unknown species and
+the potential species to which they may belong</h2>
+
+<h3>Description</h3>
+
+<p>Determine whether unknown species belong to a known species
+through principal component analysis of ecological niche according to their
+distribution information.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">niche.PCA(ref.lonlat, que.lonlat, en.vir = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ref.lonlat</code></td>
+<td>
+<p>Data frame, longitude and latitude of the known species.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>que.lonlat</code></td>
+<td>
+<p>Data frame, longitude and latitude of unknown species.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>en.vir</code></td>
+<td>
+<p>RasterBrick, the globle bioclimate data obtained from
+"raster::getData" function.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing inportance and loadings of the components.
+</p>
+<p>A dataframe of points that within the 95% confidence interval of
+the reference dataset ecological space.
+</p>
+<p>A figure shows whether the query points (blue solid circles) are
+located in the 95%CI range of the niche space of reference species.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Cai-qing YANG (Email: yangcq_ivy(at)163.com) and Ai-bing ZHANG
+(Email:zhangab2008(at)cnu.edu.cn), Capital Normal University (CNU), Beijing,
+CHINA.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(en.vir)
+#envir&lt;-raster::getData("worldclim",download=FALSE,var="bio",res=2.5)
+#en.vir&lt;-raster::brick(envir)
+
+data(LappetMoths)
+ref.infor&lt;-LappetMoths$ref.infor
+que.infor&lt;-LappetMoths$que.infor
+
+#windows() # open a new plot window when the image format is abnormal
+nPCA&lt;-niche.PCA(ref.lonlat=ref.infor[,3:5],
+                que.lonlat=que.infor[,c(2,4:5)],
+                en.vir=en.vir)
+nPCA$summary
+nPCA$que.CI
+
+
+data&lt;-data.frame(species=rep("Acosmeryx anceus",3),
+                 Lon=c(145.380,145.270,135.461),
+                 Lat=c(-16.4800,-5.2500,-16.0810))
+simuSites&lt;-pseudo.present.points(data,500,4,2,en.vir)
+ref.lonlat&lt;-simuSites[1:480,]
+que.lonlat&lt;-simuSites[481:500,]
+
+#windows() # open a new plot window when the image format is abnormal
+nPCA2&lt;-niche.PCA(ref.lonlat,que.lonlat,en.vir=en.vir)
+nPCA2$summary
+nPCA2$que.CI
+</code></pre>
+
+
+</div>

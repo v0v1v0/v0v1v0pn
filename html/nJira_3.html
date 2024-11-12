@@ -1,0 +1,81 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>jira.query</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Jira Query Interface</h2>
+
+<h3>Description</h3>
+
+<p>Query Jira using SQL like query syntax.
+The query response from Jira REST API is returned as a dataframe.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">jira.query(table, fields = NULL, where = NULL, groupby = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>table</code></td>
+<td>
+<p>Name of Jira table from which data will be fetched.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fields</code></td>
+<td>
+<p>Comma separated names of the fields from the specified table whose values will be fetched.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>where</code></td>
+<td>
+<p>specifies the where clause of the query. You can also pass your Jira JQL as-is in the where clause.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groupby</code></td>
+<td>
+<p>specifies the list of fields on which the data is grouped.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For querying Jira 'history' table, the where clause must specify issue 'id' <br>
+Example : <code>where = "id = 'HIVE-22692'"</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>Data frame of results returned by the Jira query.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">issues &lt;- jira.query(table = "issues", fields = "id AS IssueId, Created, Status, Priority", 
+where = "project = 'HIVE' AND created &gt;= '2019-01-01' AND created &lt;= '2019-12-31' AND 
+Status IN ('Open', 'Closed', 'Resolved')")
+
+issues &lt;- jira.query(table = "issues", fields = "id AS IssueId, Created", 
+where = "'cf[10021]' = 'ABCD' AND Created &gt; '2019-01-01'")
+
+history &lt;- jira.query(table = "history", where = "id = 'HIVE-22692'")
+
+history &lt;- jira.query(table = "history", fields = "id AS IssueId, toString AS Status, 
+COUNT(fromString) AS Count", where = "id = 'HIVE-22692' AND field = 'status'", 
+groupby = "id,toString")
+
+</code></pre>
+
+
+</div>

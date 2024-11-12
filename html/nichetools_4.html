@@ -1,0 +1,177 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>extract_layman</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>extract Layman metrics</h2>
+
+<h3>Description</h3>
+
+<p>Extract Bayesian estimates for the following six layman metrics,
+<code class="reqn">\delta^{13}</code>C range,  <code class="reqn">\delta^{15}</code>N range, total area (TA),
+distance to centroid (CD), distance to the nearest neighbour (NND), and
+the standard deviation of the distance to the nearest neighbour (SDNND)
+from data objects created by
+<a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>. To learn
+more about the following metrics please review
+<a href="https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/0012-9658%282007%2988%5B42%3ACSIRPF%5D2.0.CO%3B2">Layman et al. (2008)</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">extract_layman(
+  data,
+  type = NULL,
+  community_df = NULL,
+  data_format = NULL,
+  isotope_x = NULL,
+  isotope_y = NULL,
+  element_x = NULL,
+  element_y = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a <code>list</code> created by the function <code>bayesianLayman()</code> from the package
+<a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>a <code>character</code> that is either <code>"bay"</code> or <code>"ml"</code> which indicates
+whether the community metrics to be extracted are from a Bayesian analysis or
+a maximum-likelihood.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>community_df</code></td>
+<td>
+<p>a two column data frame. One of the columns has to be named
+<code>community</code> and the data in the column will be <code>numerics</code> as a <code>character</code>
+string(e.g., <code style="white-space: pre;">⁠"1", "2", "3"⁠</code>). This is the order of the community names
+and will be used to join the actual community names to the correct data.
+These are the same class and values required by the function, <code>createSiberObject()</code>
+from <a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>.
+The second column contains the actual names of the communities
+that the user is working with (e.g., <code>"region"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_format</code></td>
+<td>
+<p>a <code>character</code> string that decides whether the returned object is
+in long or wide format. Default is <code>"long"</code>, with the alternative supplied being <code>"wide"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isotope_x</code></td>
+<td>
+<p>a <code>numeric</code> that will be used in the labeling processes for
+the range of the x. Default is <code>13</code> (e.g., <code class="reqn">\delta</code>^13 C).
+This will create a column called <code>labels</code>, that will only be created when <code>data_format</code>
+is set to <code>long</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isotope_y</code></td>
+<td>
+<p>a <code>numeric</code> that will be used in the labeling processes for
+the range of the y isotope. Default is <code>15</code> (e.g., <code class="reqn">\delta</code>^15 N).
+#' This will create a column called <code>labels</code>, that will only be created when <code>data_format</code>
+is set to <code>long</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>element_x</code></td>
+<td>
+<p>a <code>character</code> that will be used in the labeling process for the range of the x
+isotope. Default is <code>C</code> (e.g., <code class="reqn">\delta</code>^13 C).
+This will create a column called <code>labels</code>, that will only be created when <code>data_format</code>
+is set to <code>long</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>element_y</code></td>
+<td>
+<p>a <code>character</code> that will be used in the labeling process for the range of the y
+isotope. Default is <code>N</code> (e.g., <code class="reqn">\delta</code>^13 N).
+#' This will create a column called <code>labels</code>, that will only be created when <code>data_format</code>
+is set to <code>long</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>tibble</code> containing four rows when <code>data_format</code> is set to its
+default which is <code>long</code>. These four rows are the following, <code>community</code>,
+<code>the_name_of_the_communities</code>, <code>metric</code> and <code>post_est</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>SIBER::bayesianLayman()</code> and <code>SIBER::createSiberObject()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(SIBER)
+
+# ---- bring in SIBER demo data ----
+# uncomenet to use
+# str(demo.siber.data)
+
+# ---- create community names data frame ----
+# uncomment to use
+# str(demo.siber.data.2)
+
+demo.siber.data.2$group_name &lt;- as.factor(demo.siber.data.2$group)
+
+demo.siber.data.2$group &lt;- as.numeric(demo.siber.data.2$group_name) |&gt;
+as.character()
+
+demo.siber.data.2$community_names &lt;- as.factor(demo.siber.data.2$community)
+
+demo.siber.data.2$community &lt;- as.numeric(demo.siber.data.2$community_names) |&gt;
+as.character()
+c_names &lt;- demo.siber.data.2 |&gt;
+dplyr::distinct(community, community_names)
+
+
+demo.siber.data_2 &lt;- demo.siber.data.2[,1:4]
+# ---- create the siber object ----
+siber.example &lt;- createSiberObject(demo.siber.data_2)
+
+# ---- view Bayesian estimates of mu and sigma produced by SIBER ---
+# uncomment to use
+# str(post_sam_siber)
+
+# ---- extract posterior estimates of mu -----
+
+mu_post &lt;- extractPosteriorMeans(siber.example, post_sam_siber)
+
+# ---- Bayesian estimates of layman metrics using SIBER ----
+
+layman_b &lt;- bayesianLayman(mu.post = mu_post)
+
+# ---- use nichetools to extract Bayesian estimates of Layman metrics ----
+
+layman_be &lt;- extract_layman(layman_b, community_df = c_names)
+
+layman_be
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rankSample</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generates a weighted sample (with replacement) of ranks</h2>
+
+<h3>Description</h3>
+
+<p>Takes a set of non-negative <code>weights</code> (do not need to sum to 1) and 
+returns a sample with <code>size</code> elements of the integers <code>1:length(weights)</code>, where the probability of being sampled is proportional
+to the value of <code>weights</code>. An important note is that the output vector
+will be sorted in ascending order. Also, right now it works slightly odd syntax (see example below). Later releases of NIMBLE will contain more natural syntax.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rankSample(weights, size, output, silent = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A vector of numeric weights. Does not need to sum to 1, but must be non-negative</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>Size of sample</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>An R object into which the values will be placed. See example below for proper use</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>Logical indicating whether to suppress logging information</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If invalid weights provided (i.e. negative weights or weights sum to 1), sets output = rep(1, size) and prints warning. 
+<code>rankSample</code> can be used inside nimble functions.
+</p>
+<p><code>rankSample</code> first samples from the joint distribution <code>size</code> uniform(0,1) distributions by conditionally sampling from the rank statistics. This leads to 
+a sorted sample of uniform(0,1)'s. Then, a cdf vector is constructed from weights. Because the sample of uniforms is sorted, <code>rankSample</code> walks
+down the cdf in linear time and fills out the sample.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+sampInts = NA	#sampled integers will be placed in sampInts
+rankSample(weights = c(1, 1, 2), size = 10, sampInts)
+sampInts
+# [1] 1 1 2 2 2 2 2 3 3 3
+rankSample(weights = c(1, 1, 2), size = 10000, sampInts)
+table(sampInts)
+#sampInts
+#   1    2    3 
+#2434 2492 5074 
+
+#Used in a nimbleFunction
+sampGen &lt;- nimbleFunction(setup = function(){
+	x = 1:2
+},
+run = function(weights = double(1), k = integer() ){
+	rankSample(weights, k, x)
+	returnType(integer(1))
+	return(x)
+})
+rSamp &lt;- sampGen()
+rSamp$run(1:4, 5)
+#[1] 3 3 4 4 4
+</code></pre>
+
+
+</div>

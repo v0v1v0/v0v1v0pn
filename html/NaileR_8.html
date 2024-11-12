@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>boss</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Ideal boss survey</h2>
+
+<h3>Description</h3>
+
+<p>These data were collected after a Q-method-like survey on participants' perception of an "ideal boss".
+Participants had to rank how much they agreed with 30 statements about an ideal boss; then, they were asked personal questions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">boss
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 73 rows (participants) and 39 columns (questions):
+</p>
+
+<ul>
+<li>
+<p> columns 1-30: statements about the ideal boss
+</p>
+</li>
+<li>
+<p> columns 31-39: personal information
+</p>
+</li>
+</ul>
+<h3>Source</h3>
+
+<p>Florian LECLERE and Marianne ANDRE, students at l'Institut Agro Rennes-Angers
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+library(FactoMineR)
+library(NaileR)
+data(boss)
+res_mca_boss &lt;- MCA(boss, quali.sup = 31:39,
+ncp = 30, level.ventil = 0.05, graph = FALSE)
+res_hcpc_boss &lt;- HCPC(res_mca_boss, nb.clust = 4, graph = FALSE)
+don_clust_boss &lt;- res_hcpc_boss$data.clust
+
+intro_boss &lt;- 'A study on "the ideal boss" was led on 73 participants.
+The study had 2 parts. In the first part,
+participants were given statements about the ideal boss
+(starting with "My ideal boss...").
+They had to rate, on a scale from 1 to 5,
+how much they agreed with the statements;
+1 being "Strongly disagree", 3 being "neutral"
+and 5 being "Strongly agree".
+In the second part, they were asked for personal information:
+work experience, age, etc.
+Participants were then split into groups based on their answers.'
+intro_boss &lt;- gsub('\n', ' ', intro_boss) |&gt;
+stringr::str_squish()
+
+req_boss &lt;- "Please describe, for each group, their ideal boss.
+Then, give each group a new name, based on your conclusions."
+req_boss &lt;- gsub('\n', ' ', req_boss) |&gt;
+stringr::str_squish()
+
+
+res_boss &lt;- nail_catdes(don_clust_boss, num.var = 40,
+introduction = intro_boss, request = req_boss,
+isolate.groups = FALSE, drop.negative = TRUE)
+res_boss$response |&gt; cat()
+
+## End(Not run)
+</code></pre>
+
+
+</div>

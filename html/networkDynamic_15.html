@@ -1,0 +1,167 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add.methods</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+PID-aware versions of functions for adding edges and vertices to networkDynamic objects
+</h2>
+
+<h3>Description</h3>
+
+<p>The methods (<code>add.vertices.networkDynamic</code>, <code>add.edge.networkDynamic</code>, <code>add.edges.networkDynamic</code>) override their network-package counterparts in order to permit assigning persistent.ids to newly-added elements if the pid is defined.  They can be defined by the user with the <code>vertex.pids</code> argument, or, if not specified, a unique random id will be generated. (Note that any new values added by default to a <code>vertex.names</code> pid will not be numeric.)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'networkDynamic'
+add.vertices(x, nv, vattr = NULL, last.mode = TRUE, 
+    vertex.pid = NULL, ...)
+
+## S3 method for class 'networkDynamic'
+add.edges(x, tail, head, names.eval = NULL, vals.eval = NULL, 
+    edge.pid = NULL, ...)
+    
+## S3 method for class 'networkDynamic'
+add.edge(x, tail, head, names.eval = NULL, vals.eval = NULL, 
+    edge.check = FALSE, edge.pid = NULL, ...)    
+    
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class <code>network</code> or <code>networkDynamic</code> (see <code>add.vertices</code> in network)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nv</code></td>
+<td>
+<p>number of vertices to be added. (see <code>add.vertices</code> in network)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vattr</code></td>
+<td>
+<p>optionally, a list of attributes with one entry per new vertex. (see <code>add.vertices</code> in network), not interpreted as a dynamic attribute</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>last.mode</code></td>
+<td>
+<p>logical; should the new vertices be added to the last (rather than the first) mode of a bipartite network? (see <code>add.vertices</code> in network)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.pid</code></td>
+<td>
+<p>a vector of vertex.pids to be assigned to the newly-added vertices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge.pid</code></td>
+<td>
+<p>a vector of edge.pids to be assigned to the newly-added edges</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names.eval</code></td>
+<td>
+<p>see <code>add.edges</code> in network), not interpreted as a dynamic attribute</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vals.eval</code></td>
+<td>
+<p>see <code>add.edges</code> in network), not interpreted as a dynamic attribute</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge.check</code></td>
+<td>
+<p>see <code>add.edges</code> in network)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>head</code></td>
+<td>
+<p>see <code>add.edges</code> in network)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tail</code></td>
+<td>
+<p>see <code>add.edges</code> in network)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>possible additional arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The networkDynamic versions of these methods call the network versions internally. See persistent.ids for additional details about the PID mechanism. 
+</p>
+
+
+<h3>Value</h3>
+
+
+<ul>
+<li>
+<p><code>add.verticies</code> (invisibly) returns a reference to the network with the new vertices added. Pids will be added/created if a <code>vertex.pid</code> attribute is set.
+</p>
+</li>
+<li>
+<p><code>add.edge</code> and <code>add.edges</code> (invisibly) return a reference to the network with the new edges added. Pids will be added/created if a <code>vertex.pid</code> attribute is set.
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>Adding edges via the extraction/replacement operators <code>[,]</code> bypasses the pid code and will break the edge pids defined for the network. Similarly, <code>add.vertices.active</code> and <code>add.edges.active</code> do not yet support including pids. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>lxwang, skyebend, the statnet team
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See also <code>persistent.ids</code>, <code>add.vertices</code>, <code>add.edge</code>, <code>add.edges</code> in network.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># add vertices while using vertex.names as pids
+nd &lt;- as.networkDynamic(network.initialize(3))
+set.network.attribute(nd,"vertex.pid","vertex.names")
+add.vertices(nd,nv=2,vertex.pid=c(4,5)) # specify pids for two new vertices
+network.vertex.names(nd) # peek at pids
+
+# add vertices and edges w/ auto-generated pids
+nd &lt;- as.networkDynamic(network.initialize(3))
+initialize.pids(nd)
+get.vertex.attribute(nd,'vertex.pid') # peek at pids
+add.vertices(nd,nv=2) # silently generate pids for vertices
+get.vertex.attribute(nd,'vertex.pid') # peek at pids
+add.edges(nd,1,2) # silently generate a pid for the edge
+get.edge.attribute(nd,'edge.pid')
+
+</code></pre>
+
+
+</div>

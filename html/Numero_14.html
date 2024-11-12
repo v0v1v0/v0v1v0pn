@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroTrain</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Train self-organizing map
+</h2>
+
+<h3>Description</h3>
+
+<p>Iterative algorithm to adapt a self-organizing map (SOM) to a set of
+multivariable data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroTrain(map, data, subsample = NULL, balance = 0, message = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>map</code></td>
+<td>
+
+<p>A list object as returned by <code>nroKohonen()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A matrix or a data frame.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsample</code></td>
+<td>
+
+<p>Number of rows used during a single training cycle.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>balance</code></td>
+<td>
+
+<p>Penalty parameter for variation in the numbers of resident
+samples across disctricts, see <code>nroKmeans()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>message</code></td>
+<td>
+
+<p>If positive, progress information is printed at the specified
+interval in seconds.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The map is fitted according to columns that are found both in the
+SOM centroids and the input data.
+</p>
+<p>If <code>subsample</code> is less than the number of data rows, a random subset of
+the specified size is used for each training cycle. By default,
+<code>subsample</code> is set automatically depending on the size of the dataset. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A copy of the list object <code>map</code>, where the element <code>centroids</code> is
+updated according to the data patterns. The quantization errors during
+training are stored in the element <code>history</code>. The subsampling
+parameter that was used during training is stored in the element
+<code>subsample</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Prepare training data.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- scale.default(dataset[,trvars]) 
+
+# K-means clustering.
+km &lt;- nroKmeans(data = trdata)
+
+# Train with full data.
+sm &lt;- nroKohonen(seeds = km)
+sm &lt;- nroTrain(map = sm, data = trdata, subsample = nrow(trdata))
+print(sm$history)
+
+# Train with subsampling.
+sm &lt;- nroKohonen(seeds = km)
+sm &lt;- nroTrain(map = sm, data = trdata, subsample = 200)
+print(sm$history)
+</code></pre>
+
+
+</div>

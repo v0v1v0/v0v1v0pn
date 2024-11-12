@@ -1,0 +1,549 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>findAssociatedSeqs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Identify TCR/BCR Sequences Associated With a Binary Variable
+</h2>
+
+<h3>Description</h3>
+
+<p>Part of the workflow
+<a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/associated_clusters.html">Searching for Associated TCR/BCR Clusters</a>.
+</p>
+<p>Given multiple samples of bulk Adaptive Immune Receptor Repertoire Sequencing
+(AIRR-Seq) data and a binary variable of interest such as a disease condition,
+treatment or clinical outcome, identify receptor sequences that exhibit a
+statistically significant difference in frequency between the two levels of the
+binary variable.
+</p>
+<p><code>findAssociatedSeqs()</code> is designed for use when each sample is stored in a
+separate file. <code>findAssociatedSeqs2()</code> is designed for use with a single data
+frame containing all samples.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">findAssociatedSeqs(
+  ## Input ##
+  file_list,
+  input_type,
+  data_symbols = NULL,
+  header, sep, read.args,
+  sample_ids = deprecated(),
+  subject_ids = NULL,
+  group_ids,
+  groups = deprecated(),
+  seq_col,
+  freq_col = NULL,
+
+  ## Search Criteria ##
+  min_seq_length = 7,
+  drop_matches = "[*|_]",
+  min_sample_membership = 5,
+  pval_cutoff = 0.05,
+
+  ## Output ##
+  outfile = NULL,
+  verbose = FALSE
+)
+
+
+findAssociatedSeqs2(
+  ## Input ##
+  data,
+  seq_col,
+  sample_col,
+  subject_col = sample_col,
+  group_col,
+  groups = deprecated(),
+  freq_col = NULL,
+
+  ## Search Criteria ##
+  min_seq_length = 7,
+  drop_matches = "[*|_]",
+  min_sample_membership = 5,
+  pval_cutoff = 0.05,
+
+  ## Ouptut ##
+  outfile = NULL,
+  verbose = FALSE
+)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file_list</code></td>
+<td>
+
+<p>A character vector of file paths, or a list containing
+<code>connections</code> and file paths.
+Each element corresponds to a single file containing the data
+for a single sample.
+Passed to <code>loadDataFromFileList()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input_type</code></td>
+<td>
+
+<p>A character string specifying the file format of the sample data files.
+Options are <code>"table"</code>, <code>"txt"</code>, <code>"tsv"</code>, <code>"csv"</code>,
+<code>"rds"</code> and <code>"rda"</code>.
+Passed to <code>loadDataFromFileList()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_symbols</code></td>
+<td>
+
+<p>Used when <code>input_type = "rda"</code>. Specifies the name of each sample's data
+frame within its respective Rdata file.  Passed to
+<code>loadDataFromFileList()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>header</code></td>
+<td>
+
+<p>For values of <code>input_type</code> other than <code>"rds"</code> and <code>"rda"</code>,
+this argument can be used to specify a non-default value of the <code>header</code>
+argument to <code>read.table()</code>,
+<code>read.csv()</code>, etc.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+
+<p>For values of <code>input_type</code> other than <code>"rds"</code> and <code>"rda"</code>,
+this argument can be used to specify a non-default value of the <code>sep</code>
+argument to <code>read.table()</code>,
+<code>read.csv()</code>, etc.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>read.args</code></td>
+<td>
+
+<p>For values of <code>input_type</code> other than <code>"rds"</code> and <code>"rda"</code>,
+this argument can be used to specify non-default values of optional
+arguments to <code>read.table()</code>,
+<code>read.csv()</code>, etc.
+Accepts a named list of argument values.
+Values of <code>header</code> and <code>sep</code>
+in this list take precedence over values specified via the <code>header</code>
+and <code>sep</code> arguments.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_ids</code></td>
+<td>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a>
+Does nothing.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subject_ids</code></td>
+<td>
+
+<p>A character or numeric vector of subject IDs, whose length matches that of
+<code>file_list</code>. Only relevant when the binary variable of interest is
+subject-specific and multiple samples belong to the same subject.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_ids</code></td>
+<td>
+
+<p>A character or numeric vector of group IDs containing exactly two unique values
+and with length matching that of <code>file_list</code>. The two groups correspond to
+the two values of the binary variable of interest.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a>
+Does nothing.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq_col</code></td>
+<td>
+
+<p>Specifies the column of each sample's data frame containing the TCR/BCR sequences.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freq_col</code></td>
+<td>
+
+<p>Optional. Specifies the column of each sample's data frame containing the clone
+frequency (i.e., clone count divided by the sum of the clone counts across all
+clones in the sample).
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+If this
+argument is specified, the maximum clone frequency (across all samples) for
+each associated sequence will be included in the content of the <code>label</code>
+variable of the returned data frame.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_seq_length</code></td>
+<td>
+
+<p>Controls the minimum TCR/BCR sequence length considered when searching for
+associated sequences. Passed to <code>filterInputData()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_matches</code></td>
+<td>
+
+<p>Passed to <code>filterInputData()</code>.
+Accepts a character string containing
+a regular expression (see <code>regex</code>). Checks TCR/BCR sequences
+for a pattern match using <code>grep()</code>. Those returning a match are
+excluded from consideration as associated sequences. It is recommended to
+filter out sequences containing special characters that are invalid for use
+in file names. By default, sequences containing any of the characters
+<code>*</code>, <code>|</code> or <code>_</code> are dropped.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_sample_membership</code></td>
+<td>
+
+<p>Controls the minimum number of samples in which a TCR/BCR sequence must be
+present in order to be considered when searching for associated sequences.
+Setting this value to <code>NULL</code> bypasses the check.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval_cutoff</code></td>
+<td>
+
+<p>Controls the P-value cutoff below which an association is detected by Fisher's
+exact test (see details).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outfile</code></td>
+<td>
+
+<p>A file path for saving the output (using <code>write.csv()</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A data frame containing the combined AIRR-seq data for all samples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_col</code></td>
+<td>
+
+<p>The column of <code>data</code> containing the sample IDs.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subject_col</code></td>
+<td>
+
+<p>Optional. The column of <code>data</code> containing the subject IDs.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+Only relevant when the binary variable of interest
+is subject-specific and multiple samples belong to the same subject.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_col</code></td>
+<td>
+
+<p>The column of <code>data</code> containing the group IDs.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+The groups correspond to the two values of the binary variable
+of interest. Thus there should be exactly two unique values in this column.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The TCR/BCR sequences from all samples are first filtered according to minimum
+sequence length and sequence content based on the specified values in
+<code>min_seq_length</code> and <code>drop_matches</code>, respectively. The sequences
+are further filtered based on sample membership, removing sequences appearing
+in fewer than <code>min_sample_membership</code> samples.
+</p>
+<p>For each remaining TCR/BCR sequence, a P-value is computed for Fisher's exact
+test of independence between the binary variable of interest and the presence
+of the sequence within a repertoire. The samples/subjects are divided into two
+groups based on the levels of the binary variable. If subject IDs are provided,
+then the test is based on the number of subjects in each group for whom the
+sequence appears in one of their samples. Without subject IDs, the test is
+based on the number of samples possessing the sequence in each group.
+</p>
+<p>Fisher's exact test is performed using
+<code>fisher.test()</code>. TCR/BCR
+sequences with a <code class="reqn">P</code>-value below <code>pval_cutoff</code> are sorted by <code class="reqn">P</code>-value
+and returned along with some additional information.
+</p>
+<p>The returned ouput is intended for use with the
+<code>findAssociatedClones()</code>
+function. See the
+<a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/associated_clusters.html">Searching for Associated TCR/BCR Clusters</a>
+article on the package website.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame containing the TCR/BCR sequences found to be associated with
+the binary variable using Fisher's exact test (see details). Each row corresponds
+to a unique TCR/BCR sequence and includes the following variables:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>ReceptorSeq</code></td>
+<td>
+
+<p>The unique receptor sequence.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fisher_pvalue</code></td>
+<td>
+
+<p>The P-value on Fisher's exact test for independence between the receptor
+sequence and the binary variable of interest.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shared_by_n_samples</code></td>
+<td>
+
+<p>The number of samples in which the sequence was observed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples_g0</code></td>
+<td>
+
+<p>Of the samples in which the sequence was observed, the number of samples
+belonging to the first group.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples_g1</code></td>
+<td>
+
+<p>Of the samples in which the sequence was observed, the number of samples
+belonging to the second group.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shared_by_n_subjects</code></td>
+<td>
+
+<p>The number of subjects in which the sequence was observed (only present if
+subject IDs are specified).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subjects_g0</code></td>
+<td>
+
+<p>Of the subjects in which the sequence was observed, the number of subjects
+belonging to the first group (only present if subject IDs are specified).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subjects_g1</code></td>
+<td>
+
+<p>Of the subjects in which the sequence was observed, the number of subjects
+belonging to the second group (only present if subject IDs are specified).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_freq</code></td>
+<td>
+
+<p>The maximum clone frequency across all samples.
+Only present if <code>freq_col</code> is non-null.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+
+<p>A character string summarizing the above information. Also includes the
+maximum in-sample clone frequency across all samples, if available.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/associated_clusters.html">Searching for Associated TCR/BCR Clusters article on package website</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>findAssociatedClones()</code>
+<code>buildAssociatedClusterNetwork()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+
+## Simulate 30 samples from two groups (treatment/control) ##
+n_control &lt;- n_treatment &lt;- 15
+n_samples &lt;- n_control + n_treatment
+sample_size &lt;- 30 # (seqs per sample)
+base_seqs &lt;- # first five are associated with treatment
+  c("CASSGAYEQYF", "CSVDLGKGNNEQFF", "CASSIEGQLSTDTQYF",
+    "CASSEEGQLSTDTQYF", "CASSPEGQLSTDTQYF",
+    "RASSLAGNTEAFF", "CASSHRGTDTQYF", "CASDAGVFQPQHF")
+# Relative generation probabilities by control/treatment group
+pgen_c &lt;- matrix(rep(c(rep(1, 5), rep(30, 3)), times = n_control),
+                 nrow = n_control, byrow = TRUE)
+pgen_t &lt;- matrix(rep(c(1, 1, rep(1/3, 3), rep(2, 3)), times = n_treatment),
+                 nrow = n_treatment, byrow = TRUE)
+pgen &lt;- rbind(pgen_c, pgen_t)
+simulateToyData(
+  samples = n_samples,
+  sample_size = sample_size,
+  prefix_length = 1,
+  prefix_chars = c("", ""),
+  prefix_probs = cbind(rep(1, n_samples), rep(0, n_samples)),
+  affixes = base_seqs,
+  affix_probs = pgen,
+  num_edits = 0,
+  output_dir = tempdir(),
+  no_return = TRUE
+)
+
+## Step 1: Find Associated Sequences ##
+sample_files &lt;-
+  file.path(tempdir(),
+            paste0("Sample", 1:n_samples, ".rds")
+  )
+group_labels &lt;- c(rep("reference", n_control),
+                  rep("comparison", n_treatment))
+associated_seqs &lt;-
+  findAssociatedSeqs(
+    file_list = sample_files,
+    input_type = "rds",
+    group_ids = group_labels,
+    seq_col = "CloneSeq",
+    min_seq_length = NULL,
+    drop_matches = NULL,
+    min_sample_membership = 0,
+    pval_cutoff = 0.1
+  )
+head(associated_seqs[, 1:5])
+
+## Step 2: Find Associated Clones ##
+dir_step2 &lt;- tempfile()
+findAssociatedClones(
+  file_list = sample_files,
+  input_type = "rds",
+  group_ids = group_labels,
+  seq_col = "CloneSeq",
+  assoc_seqs = associated_seqs$ReceptorSeq,
+  min_seq_length = NULL,
+  drop_matches = NULL,
+  output_dir = dir_step2
+)
+
+## Step 3: Global Network of Associated Clusters ##
+associated_clusters &lt;-
+  buildAssociatedClusterNetwork(
+    file_list = list.files(dir_step2,
+                           full.names = TRUE
+    ),
+    seq_col = "CloneSeq",
+    size_nodes_by = 1.5,
+    print_plots = TRUE
+  )
+
+
+</code></pre>
+
+
+</div>

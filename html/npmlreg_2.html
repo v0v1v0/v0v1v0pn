@@ -1,0 +1,654 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>alldist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> NPML estimation or Gaussian quadrature for overdispersed GLM's and variance component models</h2>
+
+<h3>Description</h3>
+
+<p> Fits a random effect model using Gaussian quadrature (Hinde, 1982) or nonparametric maximum likelihood (Aitkin, 1996a).  
+The function <code>alldist</code> is designed to account for overdispersion, while <code>allvc</code> fits variance component models. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">alldist(formula, 
+        random = ~1, 
+        family = gaussian(), 
+        data,
+        k = 4, 
+        random.distribution = "np", 
+        tol = 0.5, 
+        offset, 
+        weights, 
+        pluginz, 
+        na.action, 
+        EMmaxit = 500, 
+        EMdev.change = 0.001, 
+        lambda = 0, 
+        damp = TRUE, 
+        damp.power = 1, 
+        spike.protect = 0, 
+        sdev,
+        shape, 
+        plot.opt = 3, 
+        verbose = TRUE,
+        ...)
+        
+allvc(formula, 
+        random = ~1, 
+        family = gaussian(), 
+        data, 
+        k = 4, 
+        random.distribution = "np", 
+        tol = 0.5, 
+        offset, 
+        weights, 
+        pluginz, 
+        na.action, 
+        EMmaxit = 500, 
+        EMdev.change = 0.001, 
+        lambda=0,
+        damp = TRUE, 
+        damp.power = 1, 
+        spike.protect=0,
+        sdev,
+        shape, 
+        plot.opt = 3, 
+        verbose = TRUE,
+        ...)        
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula defining the response and the fixed effects (e.g. <code>y ~ x</code>).   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>a formula defining the random model. In the case of <code>alldist</code>,  set <code>random = ~1</code> to model overdispersion, and for instance <code>random = ~x</code> to introcude a random coefficient <code>x</code>.  
+In the case of <code>allvc</code>,  set <code>random=~1|PSU</code> to model
+overdispersion on the upper level, where PSU is a <b>factor</b> for
+the primary sampling units, e.g. groups, clusters, classes, or
+individuals in longitudinal data, and define random coefficients
+accordingly.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>conditional distribution of responses: "gaussian",
+"poisson", "binomial", "Gamma", or "inverse.gaussian" can be set. If
+"gaussian", "Gamma", or "inverse.gaussian", then equal component
+dispersion parameters are assumed, except if the optional parameter
+<code>lambda</code> is modified. The same link functions as for function
+<code>glm</code> are supported. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data frame (mandatory, even if it is attached to the workspace!). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number of mass points/integration points 
+(supported are up to 600 mass points).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.distribution</code></td>
+<td>
+<p>the mixing distribution, Gaussian Quadrature (<code>gq</code>) or NPML (<code>np</code>) can be set.   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>the tol scalar (usually, <code class="reqn">0&lt;</code><code>tol</code> <code class="reqn">\le 1</code>)   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>an optional offset to be included in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>optional prior weights for the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pluginz</code></td>
+<td>
+<p>optional numerical vector of length <code>k</code> specifying the starting mass points of the EM algorithm.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function indicating what should happen when <code>NA</code>'s occur,
+with possible arguments <code>na.omit</code> and <code>na.fail</code>. The default is set
+by the <code>na.action</code> setting in <code>options()</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EMmaxit</code></td>
+<td>
+<p>maximum number of EM iterations.   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EMdev.change</code></td>
+<td>
+<p>stops EM algorithm when deviance change falls below this value.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>only applicable for Gaussian, Gamma, and Inverse Gaussian mixtures. If set, standard 
+deviations/ shape parameters are calculated smoothly across components via 
+an Aitchison-Aitken kernel (<code>dkern</code>) with parameter <code>lambda</code>. 
+The setting <code>lambda= 0</code> is automatically mapped to <code>lambda =1/k</code> and 
+corresponds to the case 'maximal smoothing' (i.e. equal component dispersion parameters), 
+while <code>lambda=1</code> means 'no smoothing' (unequal disp. param.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>damp</code></td>
+<td>
+<p>switches EM damping on or off.   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>damp.power</code></td>
+<td>
+<p>steers degree of damping applied on dispersion parameter according 
+to formula <code>1-(1-tol)^(damp.power*iter+1)</code>, see Einbeck &amp; Hinde (2006).  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spike.protect</code></td>
+<td>
+<p>for Gaussian, Gamma, and Inverse Gaussian mixtures with unequal or
+smooth component standard deviations: protects algorithm to converge into likelihood spikes  
+by stopping the EM algorithm if one of the component standard deviations 
+(shape parameters, resp.), divided by the fitted mass points, falls below
+(exceeds, resp.) a certain threshold, which is <code>0.000001*spike.protect</code> 
+(<code>10^6*spike.protect</code>, resp.) Setting <code>spike.protect=0</code> means 
+disabling the spike protection. If set, then <code>spike.protect=1</code>
+is recommended. Note that the displayed disparity may not be correct 
+when convergence is not achieved. This can be checked with <code>EMconverged</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sdev</code></td>
+<td>
+<p>optional; specifies standard deviation for normally distributed response.
+If unspecified, it will be estimated from the data. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>optional; specifies shape parameter for Gamma-and IG-distributed response.
+For Gamma, setting <code>shape=1</code> gives an exponential distribution. If unspecified,
+it will be estimated from the data. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.opt</code></td>
+<td>
+<p>if equal to zero, then no graphical output is given. 
+For <code>plot.opt=1</code> the development of the disparity <code class="reqn">-2\log L</code> over 
+iteration number is plotted, for <code>plot.opt=2</code> the EM trajectories are plotted,
+and for <code>plot.opt=3</code> both plots are shown.   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>if set to <code>FALSE</code>, no printed output is given during 
+function execution. Useful for <code>tolfind</code>.   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> generic options for the <code>glm</code> function. Not all options may
+be supported under any circumstances.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The nonparametric maximum likelihood (NPML) approach was introduced in Aitkin (1996) 
+as a tool to fit overdispersed generalized linear models. The idea is to approximate 
+the unknown and unspecified distribution of the random effect by a discrete mixture 
+of exponential family densities, leading to a simple expression of the marginal 
+likelihood which can then be maximized using a standard EM algorithm.
+</p>
+<p>Aitkin (1999) extended this method to generalized linear models with shared 
+random effects arising through variance component or repeated measures 
+structure. Applications are two-stage sample designs, when firstly the 
+primary sampling units (the upper-level units, e.g. classes) and then the 
+secondary sampling units (lower-level units, e.g. students) are selected, or 
+longitudinal data. Models of this type have also been referred to as multi-level 
+models (Goldstein, 2003). <code>allvc</code> is restricted to 2-level models. 
+</p>
+<p>The number of components <code>k</code> of the finite mixture has to be specified beforehand.
+When option <code>'gq'</code> is set, then Gauss-Hermite masses and mass points are used, 
+assuming implicitly a normally distributed random effect. 
+When option <code>'np'</code> is chosen, the EM algorithm uses the Gauss-Hermite masses 
+and mass points as starting points. The position of the starting points can 
+be concentrated or extended by setting <code>tol</code> smaller or larger than one,
+respectively. 
+</p>
+<p>Fitting random coefficient models (Aitkin, Francis &amp; Hinde, 2009, pp. 496, p. 514) is 
+possible by specifying the random term explicitly. Note that the setting 
+<code>random= ~ x</code> gives a model with a random slope and a random
+intercept, and 
+that only one random coefficient can be specified. The option
+<code>random.distribution</code> is restricted to <code>np</code> in this case,
+i.e. Gaussian Quadrature is not supported for random coefficient
+models (see also Aitkin, Francis &amp; Hinde (2005), page 475 bottom).
+</p>
+<p>As for <code>glm</code>, there are three different ways of specifying a
+binomial model, namley through
+</p>
+
+<ul>
+<li>
+<p> a two-column matrix before the '~' symbol, specifying the counts of
+successes and non-successes.
+</p>
+</li>
+<li>
+<p> a vector of proportions of successes before the '~' symbol, and the
+associated number of trials provided in the <code>weights</code> argument.
+</p>
+</li>
+<li>
+<p> a two-level factor  before the '~' symbol (only for Bernoulli-response).
+</p>
+</li>
+</ul>
+<p>The weights have to be understood as frequency weights, i.e. setting all weights in 
+<code>alldist</code> equal to 2 will duplicate each data point and hence double the 
+disparity and deviance.  
+</p>
+<p>The Inverse Gaussian (IG) response distribution is parametrized as usual through the
+mean and a scaling parameter. We refer to the latter, which is the
+inverse of the dispersion parameter in exponential family formulation,
+as <code>shape</code>.  The canonical "1/mu^2" link is supported, but it is
+quite tenuous since the linear predictor is likely to become negative
+after adding the random effect. The <code>log</code> link behaves more
+reliably for this distribution.
+</p>
+<p>For <code>k</code> <code class="reqn">\ge 54</code>, mass points with negligible mass
+(i.e. &lt; 1e-50) are omitted.  The maximum number of 'effective' mass points
+is then 198.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function alldist produces an object of class <code>glmmNPML</code> 
+(if <code>random.distributon</code> is set to ‘np’)  or <code>glmmGQ</code> 
+(‘gq’).  Both objects contain the following 29 components: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>a named vector of coefficients (including the mass points). 
+In case of Gaussian quadrature, the coefficient given at <code>z</code>  
+corresponds to the standard deviation of the mixing distribution. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>the difference between the true response and the empirical Bayes predictions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.values</code></td>
+<td>
+<p>the empirical Bayes predictions (Aitkin, 1996b) on the scale of the responses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>the ‘family’ object used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linear.predictors</code></td>
+<td>
+<p>the extended linear predictors <code class="reqn">\hat{\eta}_{ik}</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>disparity</code></td>
+<td>
+<p>the disparity (<code>-2logL</code>) of the fitted mixture regression model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deviance</code></td>
+<td>
+<p>the deviance of the fitted mixture regression model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.deviance</code></td>
+<td>
+<p>the deviance for the null model (just containing an intercept), comparable with
+<code>deviance</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.residual</code></td>
+<td>
+<p>the residual degrees of freedom of the fitted model (including the random part).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.null</code></td>
+<td>
+<p>the residual degrees of freedom for the null model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>the (extended) response vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the matched call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>the formula supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>the random term of the model formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the (extended) design matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>the case weights initially supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>the offset initially supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mass.points</code></td>
+<td>
+<p>the fitted mass points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>masses</code></td>
+<td>
+<p>the mixture probabilities corresponding to the mass points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sdev</code></td>
+<td>
+<p>a list of the two elements <code>sdev$sdev</code> and <code>sdev$sdevk</code>. 
+The former is the estimated standard deviation of the
+Gaussian mixture components (estimated over all mixture components), and the latter 
+gives the unequal or smooth component-specific standard deviations. 
+All values are equal if <code>lambda=0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>a list of the two elements <code>shape$shape</code> and <code>shape$shapek</code>, 
+to be interpreted in analogy to sdev.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rsdev</code></td>
+<td>
+<p>estimated random effect standard deviation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>post.prob</code></td>
+<td>
+<p>a matrix of posteriori probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>post.int</code></td>
+<td>
+<p>a vector of ‘posteriori intercepts’ (as in Sofroniou et al. (2006)).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ebp</code></td>
+<td>
+<p>the empirical Bayes Predictions on the scale of the linear predictor. 
+For compatibility with older versions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EMiter</code></td>
+<td>
+<p>gives the number of iterations of the EM algorithm. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EMconverged</code></td>
+<td>
+<p>logical value indicating if the EM algorithm converged. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lastglm</code></td>
+<td>
+<p>the fitted <code>glm</code> object from the last EM iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Misc</code></td>
+<td>
+<p>contains additional information relevant for the summary and plot functions,
+in particular the disparity trend and the EM trajectories. </p>
+</td>
+</tr>
+</table>
+<p>If a binomial model is specified by giving a two-column response, 
+the weights returned by <code>weights</code> are the total numbers of cases 
+(factored by the supplied case weights) and the component <code>y</code> 
+of the result is the proportion of successes. 
+</p>
+<p>As a by-product, <code>alldist</code> produces a plot showing the disparity
+in dependence of the iteration number. Further, a plot with the EM trajectories
+is given. The x-axis corresponds  to the iteration number, and the y-axis
+to the value of the mass points at a particular iteration. 
+This plot is not produced for GQ. 
+</p>
+
+
+<h3>Note</h3>
+
+ 
+<p>In contrast to the GLIM 4 version, this <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> implementation 
+uses for Gaussian (as well Gamma  and IG) mixtures by default a damping procedure in the
+first cycles of the EM algorithm (Einbeck &amp; Hinde, 2006), which stabilizes
+the algorithm and makes it less sensitive to the optimal 
+choice of <code>tol</code>. If <code>tol</code> is very small
+(i.e. less than 0.1), it can be useful  to set <code>damp.power</code> to values 
+larger than 1 in order to accelerate convergence. 
+Do not use <code>damp.power=0</code>, as this would mean permanent damping during EM. 
+Using the option <code>pluginz</code>, one  can to some extent circumvent the 
+necessity to  specify <code>tol</code> by giving the starting points explicitly. 
+However, when using <code>pluginz</code> for normal, Gamma- or IG- distributed response, 
+damping will be strictly necessary to ensure that the imposed starting points
+don't get blurred immediately due to initial fluctuations, implying that 
+<code>tol</code> still plays a role in this case. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Originally translated from the GLIM 4 functions <code>alldist</code> and 
+<code>allvc</code> (Aitkin &amp; Francis, 1995) to <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> by Ross Darnell (2002). Modified, 
+extended, and prepared for publication by Jochen Einbeck &amp; John Hinde (2006). 
+</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Aitkin, M. and Francis, B. (1995). Fitting overdispersed generalized linear models by nonparametric maximum likelihood. GLIM Newsletter 25, 37-45. 
+</p>
+<p>Aitkin, M. (1996a). A general maximum likelihood analysis of overdispersion in generalized linear models. Statistics and Computing 6, 251-262. 
+</p>
+<p>Aitkin, M. (1996b). Empirical Bayes shrinkage using posterior random effect means from nonparametric maximum likelihood estimation in general random effect models. Statistical Modelling: Proceedings of the 11th IWSM 1996, 87-94. 
+</p>
+<p>Aitkin, M. (1999). A general maximum likelihood analysis of variance components in generalized linear models. Biometrics 55, 117-128. 
+</p>
+<p>Aitkin, M., Francis, B. and Hinde, J. (2009). Statistical Modelling in R. Oxford Statistical Science Series, Oxford, UK. 
+</p>
+<p>Einbeck, J. &amp; Hinde, J. (2006). A note on NPML estimation for exponential family regression models with unspecified dispersion parameter. Austrian Journal of Statistics 35, 233-243. 
+</p>
+<p>Goldstein, H. (2003). Multilevel Statistical Models (3rd edition). Arnold, London, UK.
+</p>
+<p>Hinde, J. (1982). Compound Poisson regression models. Lecture Notes in Statistics 14, 109-121. 
+</p>
+<p>Sofroniou, N., Einbeck, J., and Hinde, J. (2006). Analyzing Irish suicide rates with mixture models. Proceedings of the 21st International Workshop on Statistical Modelling in Galway, Ireland, 2006. 
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>glm</code>, <code>summary.glmmNPML</code>, 
+<code>predict.glmmNPML</code> <code>family.glmmNPML</code>, 
+<code>plot.glmmNPML</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# The first three examples (galaxy data, toxoplasmosis data , fabric faults) 
+# are based on GLIM examples in Aitkin et al. (2005), and the forth example using
+# the Hospital-Stay-Data (Rosner, 2000) is taken from Einbeck &amp; Hinde (2006).
+# The fifth data example using the Oxford boys is again inspired by Aitkin et al. (2005).
+# The sixth example on Irish suicide rates is taken from Sofroniou et al. (2006).
+  
+
+# The galaxy data   
+  data(galaxies, package="MASS")
+  gal&lt;-as.data.frame(galaxies)
+  galaxy.np6 &lt;- alldist(galaxies/1000~1, random=~1, random.distribution="np", 
+      data=gal, k=6)
+  galaxy.np8u &lt;- alldist(galaxies/1000~1, random=~1, random.distribution="np", 
+      data=gal, k=8, lambda=0.99)
+  round(galaxy.np8u$sdev$sdevk, digits=3)
+  # [1]  0.912 0.435 0.220 0.675 1.214 0.264 0.413 0.297
+
+# The toxoplasmosis data 
+  data(rainfall)
+  rainfall$x&lt;-rainfall$Rain/1000  
+  rainfall$x2&lt;- rainfall$x^2; rainfall$x3&lt;- rainfall$x^3
+  toxo.np3&lt;- alldist(cbind(Cases,Total-Cases) ~ x+x2+x3, random=~1, 
+      random.distribution="np", family=binomial(link=logit), data=rainfall, k=3)
+  toxo.np3x&lt;- alldist(cbind(Cases,Total-Cases) ~ x, random=~x, 
+      random.distribution="np", family=binomial(link=logit), data=rainfall, k=3)
+  # is the same as 
+  toxo.np3x&lt;- alldist(Cases/Total ~ x, random = ~x, weights=Total, 
+      family=binomial(link=logit), data=rainfall, k=3)
+  # or
+  toxo.np3x&lt;-update(toxo.np3, .~.-x2-x3, random = ~x)
+
+# The fabric faults data
+  data(fabric)
+  coefficients(alldist(y ~ x, random=~1, family=poisson(link=log), 
+      random.distribution="gq", data= fabric, k=3, verbose=FALSE))
+  # (Intercept)           x           z 
+  #  -3.3088663   0.8488060   0.3574909
+  
+# The Pennsylvanian hospital stay data
+  data(hosp)
+  fitnp3&lt;-  alldist(duration~age+temp1, data=hosp, k=3, family=Gamma(link=log),
+      tol=0.5) 
+  fitnp3$shape$shape
+  # [1] 50.76636
+  fitnp3&lt;-  alldist(duration~age+temp1, data=hosp, k=3, family=Gamma(link=log),
+      tol=0.5, lambda=0.9) 
+  fitnp3$shape$shapek
+  # [1]  49.03101  42.79522 126.64077
+  
+# The Oxford boys data
+  data(Oxboys, package="nlme")
+  Oxboys$boy &lt;- gl(26,9)
+  allvc(height~age, random=~1|boy, data=Oxboys, random.distribution='gq', k=20)
+  allvc(height~age, random=~1|boy, data=Oxboys,random.distribution='np',k=8) 
+  # with random coefficients:
+  allvc(height~age,random=~age|boy, data=Oxboys, random.distribution='np', k=8)
+    
+# Irish suicide data
+  data(irlsuicide)
+  # Crude rate model:
+  crude&lt;- allvc(death~sex* age, random=~1|ID, offset=log(pop), 
+      k=3, data=irlsuicide, family=poisson) 
+  crude$disparity 
+  # [1] 654.021
+  # Relative risk model:
+  relrisk&lt;- allvc(death~1, random=~1|ID, offset=log(expected), 
+      k=3, data=irlsuicide, family=poisson) 
+  relrisk$disparity    
+  # [1] 656.4955
+  
+</code></pre>
+
+
+</div>

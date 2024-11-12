@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict_nls</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Average predictions from several (non)linear models based on IC weights</h2>
+
+<h3>Description</h3>
+
+<p>Computes weights based on AIC, AICc, or BIC and it generates weighted predictions by
+the relative value of the IC values
+</p>
+<p>predict function for objects of class <code>gam</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">predict_nls(
+  ...,
+  criteria = c("AIC", "AICc", "BIC"),
+  interval = c("none", "confidence", "prediction"),
+  level = 0.95,
+  nsim = 1000,
+  resid.type = c("none", "resample", "normal", "wild"),
+  newdata = NULL,
+  weights
+)
+
+predict2_gam(
+  ...,
+  criteria = c("AIC", "AICc", "BIC"),
+  interval = c("none", "confidence", "prediction"),
+  level = 0.95,
+  nsim = 1000,
+  resid.type = c("none", "resample", "normal", "wild"),
+  newdata = NULL,
+  weights
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>‘nls’ or ‘lm’ objects (‘glm’ and ‘gam’ objects inherit ‘lm’).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criteria</code></td>
+<td>
+<p>either ‘AIC’, ‘AICc’ or ‘BIC’.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>either ‘none’, ‘confidence’ or ‘prediction’.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>probability level for the interval (default 0.95)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of simulations to perform for intervals. Default 1000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid.type</code></td>
+<td>
+<p>either ‘none’, “resample”, “normal” or “wild”.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>new data frame for predictions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>vector of weights of the same length as the number of models. It should sum up to one and 
+it will override the information-criteria based weights. The weights should match the order of the models.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>numeric vector of the same length as the fitted object when interval is equal to ‘none’. Otherwise,
+a data.frame with columns named (for a 0.95 level) ‘Estimate’, ‘Est.Error’, ‘Q2.5’ and ‘Q97.5’
+</p>
+
+
+<h3>Note</h3>
+
+<p>all the objects should be fitted to the same data. Weights are
+based on the chosen IC value (exp(-0.5 * delta IC)). 
+For models of class <code>gam</code> there is very limited support.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.lm</code>, <code>predict.nls</code>, <code>predict.gam</code>, <code>simulate_nls</code>, <code>simulate_gam</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Example
+require(ggplot2)
+require(mgcv)
+data(barley, package = "nlraa")
+
+fm.L &lt;- lm(yield ~ NF, data = barley)
+fm.Q &lt;- lm(yield ~ NF + I(NF^2), data = barley)
+fm.A &lt;- nls(yield ~ SSasymp(NF, Asym, R0, lrc), data = barley)
+fm.LP &lt;- nls(yield ~ SSlinp(NF, a, b, xs), data = barley)
+fm.QP &lt;- nls(yield ~ SSquadp3(NF, a, b, c), data = barley)
+fm.BL &lt;- nls(yield ~ SSblin(NF, a, b, xs, c), data = barley)
+fm.G &lt;- gam(yield ~ s(NF, k = 6), data = barley)
+
+## Print the table with weights
+IC_tab(fm.L, fm.Q, fm.A, fm.LP, fm.QP, fm.BL, fm.G)
+
+## Each model prediction is weighted according to their AIC values
+prd &lt;- predict_nls(fm.L, fm.Q, fm.A, fm.LP, fm.QP, fm.BL, fm.G)
+
+ggplot(data = barley, aes(x = NF, y = yield)) + 
+  geom_point() + 
+  geom_line(aes(y = fitted(fm.L), color = "Linear")) +
+  geom_line(aes(y = fitted(fm.Q), color = "Quadratic")) +
+  geom_line(aes(y = fitted(fm.A), color = "Asymptotic")) +  
+  geom_line(aes(y = fitted(fm.LP), color = "Linear-plateau")) + 
+  geom_line(aes(y = fitted(fm.QP), color = "Quadratic-plateau")) + 
+  geom_line(aes(y = fitted(fm.BL), color = "Bi-linear")) + 
+  geom_line(aes(y = fitted(fm.G), color = "GAM")) + 
+  geom_line(aes(y = prd, color = "Avg. Model"), linewidth = 1.2)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nest_group_by</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Group nested data frames by one or more variables</h2>
+
+<h3>Description</h3>
+
+<p><code>nest_group_by()</code> takes a set of nested tbls and converts it to a set of
+nested grouped tbls where operations are performed "by group".
+<code>nest_ungroup()</code> removes grouping.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nest_group_by(.data, .nest_data, ..., .add = FALSE, .drop = TRUE)
+
+nest_ungroup(.data, .nest_data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>A data frame, data frame extension (e.g., a tibble), or a lazy
+data frame (e.g., from dbplyr or dtplyr).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.nest_data</code></td>
+<td>
+<p>A list-column containing data frames</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>In <code>nest_group_by()</code>, variables or computations to group by.
+Computations are always done on the ungrouped data frames. To perform
+computations on the grouped data, you need to use a separate <code>mutate()</code>
+step after the <code>group_by()</code>.
+In <code>nest_ungroup()</code>, variables to remove from the grouping.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.add</code></td>
+<td>
+<p>When <code>FALSE</code> (the default), <code>nest_group_by()</code> will override the
+existing groups. To add to the existing groups, use <code>.add = TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.drop</code></td>
+<td>
+<p>Drop groups formed by factor levels that don't appear in the
+data? The default is <code>TRUE</code> except when <code>.nest_data</code> has been previously
+grouped with <code>.drop = FALSE</code>. See <code>dplyr::group_by_drop_default()</code> for
+details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>nest_group_by()</code> and <code>nest_ungroup()</code> are largely wrappers for
+<code>dplyr::group_by()</code> and <code>dplyr::ungroup()</code> and maintain the functionality of
+<code>group_by()</code> and <code>ungroup()</code> within each nested data frame. For more
+information on <code>group_by()</code> or <code>ungroup()</code>, please refer to the documentation
+in <a href="https://dplyr.tidyverse.org/"><code>dplyr</code></a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of the same type as <code>.data</code>. Each object in the column <code>.nest_data</code>
+will be returned as a grouped data frame with class <code>grouped_df</code>, unless the
+combination of <code>...</code> and <code>.add</code> yields an empty set of grouping columns, in
+which case a tibble will be returned.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">gm_nest &lt;- gapminder::gapminder %&gt;% tidyr::nest(country_data = -continent)
+
+# grouping doesn't change .nest_data, just .nest_data class:
+gm_nest_grouped &lt;-
+  gm_nest %&gt;%
+  nest_group_by(country_data, year)
+
+gm_nest_grouped
+
+# It changes how it acts with other nplyr verbs:
+gm_nest_grouped %&gt;%
+  nest_summarise(
+    country_data,
+    lifeExp = mean(lifeExp),
+    pop = mean(pop),
+    gdpPercap = mean(gdpPercap)
+  )
+
+# ungrouping removes variable groups:
+gm_nest_grouped %&gt;% nest_ungroup(country_data)
+</code></pre>
+
+
+</div>

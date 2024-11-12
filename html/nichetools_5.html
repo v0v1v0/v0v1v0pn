@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>extract_mu</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>extract <code class="reqn">\mu</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Extract Bayesian estimates of <code class="reqn">\mu</code> from data objects created by
+<a href="https://cran.r-project.org/package=nicheROVER">nicheROVER</a> or
+<a href="https://cran.r-project.org/package=SIBER">SIBER</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">extract_mu(
+  data,
+  pkg = NULL,
+  isotope_names = NULL,
+  data_format = NULL,
+  community_df = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a <code>list</code> created by the function <code>niw.post()</code> or <code>siberMVN()</code>
+in the package
+<a href="https://cran.r-project.org/package=nicheROVER">nicheROVER</a>
+or <a href="https://cran.r-project.org/package=SIBER">SIBER</a>, respectfully.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pkg</code></td>
+<td>
+<p>a <code>character</code> string that is the name of the package that
+you're using. Defaults to <code>"nicheROVER"</code>.
+Alternatively the user can supply the argument with <code>"SIBER"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isotope_names</code></td>
+<td>
+<p>is a vector of <code>character</code> string used change the column name
+of isotopes used in the analysis. Defaults to <code>c("d13c", "d15n")</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_format</code></td>
+<td>
+<p>a <code>character</code> string that decides whether the returned object is
+in long or wide format. Default is <code>"long"</code>, with the alternative supplied
+being <code>"wide"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>community_df</code></td>
+<td>
+<p>a four column data frame. One of the columns has to be named
+<code>community</code> and the data in the column will be <code>numeric</code> as a <code>character</code>
+string(e.g., <code style="white-space: pre;">⁠"1", "2", "3"⁠</code>). This is the order of the community names
+and will be used to join the actual community names to the correct data.
+These are the same class and values required by the function, <code>createSiberObject()</code>
+from <a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>.
+The second column will be the names of the groups that are needed to supply
+required by the function, <code>createSiberObject()</code>
+from <a href="https://CRAN.R-project.org/package=SIBER">SIBER</a>.
+The third and fourth columns contains the actual names of the communities
+and groups the user is working with (e.g., <code>"region"</code>, <code>"common_name"</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a <code>tibble</code> of extracted estimates of <code class="reqn">\mu</code> created by the
+function <code>niw.post()</code> or <code>siberMVN()</code> in the packages
+<a href="https://cran.r-project.org/package=nicheROVER">nicheROVER</a>.
+and <a href="https://cran.r-project.org/package=SIBER">SIBER</a>.
+</p>
+<p>The <code>tibble</code> will contain five columns in the following order, <code>metric</code>,
+<code>sample_name</code>, <code>sample_number</code>, and the names of the isotope
+columns supplied to <code>niw.post()</code> or  <code>siberMVN()</code> (e.g., <code>d13c</code> and  <code>d15n</code> ).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nicheROVER::niw.post()</code> and <code>SIBER::siberMVN()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">extract_mu(
+data = niw_fish_post
+)
+
+library(SIBER)
+
+# ---- create community names data frame ----
+# uncomment to use
+# str(demo.siber.data.2)
+
+demo.siber.data.2$group_name &lt;- as.factor(demo.siber.data.2$group)
+
+demo.siber.data.2$group &lt;- as.numeric(demo.siber.data.2$group_name) |&gt;
+as.character()
+
+demo.siber.data.2$community_name &lt;- as.factor(demo.siber.data.2$community)
+
+demo.siber.data.2$community &lt;- as.numeric(demo.siber.data.2$community_name) |&gt;
+as.character()
+
+cg_name &lt;- demo.siber.data.2 |&gt;
+dplyr::distinct(community, group, community_name, group_name)
+
+
+extract_mu(
+data = post_sam_siber,
+pkg = "SIBER",
+community_df = cg_name
+)
+
+</code></pre>
+
+
+</div>

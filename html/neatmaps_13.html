@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neatmap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Explore Multi-Network Data</h2>
+
+<h3>Description</h3>
+
+<p><code>neatmap</code> produces a heatmap of multi-network data and identifies stable
+clusters in its variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neatmap(df, scale_df, link_method = "average",
+  dist_method = "euclidean", max_k = 10, reps = 1000, p_var = 1,
+  p_net = 0.8, cc_seed = 100, main_title = "", xlab, ylab,
+  xlab_cex = 1, ylab_cex = 1, heatmap_margins = c(50, 50, 50, 100))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>a dataframe of network attributes containing only numeric values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale_df</code></td>
+<td>
+<p>A string indicating whether the columns of the data frame
+should be scaled, and, if so, which method should be used. The options are
+"none", "ecdf", "normalize" and "percentize". If "none" is selected, then
+the columns are not scaled.  If "ecdf" is selected, then the columns are
+transformed into their empirical cumulative distribution. If "normalize" is
+selected, each column is centered to have a mean of 0 and scaled to have a
+standard deviation of 1. If "percentize" is selected, column values are 
+transformed into percentiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link_method</code></td>
+<td>
+<p>The agglomeration method to be used for hierarchical 
+clustering. Defaults to the average linkage method. See other methods in
+<code>hclust</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+<p>The distance measure to be used between columns and 
+between rows of the dataframe. Distance is used as a measure of similarity.
+Defaults to euclidean distance. See other options in 
+<code>dist</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_k</code></td>
+<td>
+<p>The maximum number of clusters to consider in the consensus
+clustering step. Consensus clustering will be performed for max_k-1 
+iterations, i.e. for 2, 3, ..., max_k clusters. Defaults to 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+<p>The number of subsamples taken at each iteration of the consensus
+cluster algorithm. Defaults to 1000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_var</code></td>
+<td>
+<p>The proportion of network variables to be subsampled during 
+consensus clustering. Defaults to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_net</code></td>
+<td>
+<p>The proportion of networks to be subsampled during consensus
+clustering. Defaults to 0.8.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cc_seed</code></td>
+<td>
+<p>The seed used to ensure the reproducibility of the consensus 
+clustering. Defaults to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main_title</code></td>
+<td>
+<p>The title of the heatmap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>The x axis label of the heatmap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>The y axis label of the heatmap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab_cex</code></td>
+<td>
+<p>The font size of the elements on the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab_cex</code></td>
+<td>
+<p>The font size of the elements on the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>heatmap_margins</code></td>
+<td>
+<p>The size of the margins for the heatmap. 
+See <code>heatmaply</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function allows users to efficiently explore their multi-network data
+by visualizing their data with a heatmap and assessing the stability of the
+associations presented within it. <code>neatmap</code> requires that the data 
+frame be processed into an appropriate format prior to use. Data is then 
+scaled (if necessary) using of the built in methods. See (list functions) for
+further details on how to prepare multi-network data for use with 
+<code>neatmap</code>. The heatmap is created using
+<code>heatmaply</code> and the consensus clustering is performed
+using <code>ConsensusClusterPlus</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named list containing the heatmap of the multi-network data and a
+list of length max_k-1 where each element is a list containing the
+consensus matrix, the consensus hierarchical clustering results and the
+consensus class assignments. The list of results produced by the consensus
+clustering can be parsed using following functions in the
+<code>neatmaps</code> package: <code>consClustResTable</code>,
+<code>consensusECDF</code> and <code>consensusChangeECDF</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Philippe Boileau, <a href="mailto:philippe_boileau@berkeley.edu">philippe_boileau@berkeley.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>For more information on the consensus clustering, see
+<a href="https://link.springer.com/article/10.1023%2FA%3A1023949509487">Monti et al.</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># create the data frame using the network, node and edge attributes
+df &lt;- netsDataFrame(network_attr_df,
+                    node_attr_df,
+                    edge_df)
+
+# run the neatmap code on df
+neat_res &lt;- neatmap(df, scale_df = "ecdf", max_k = 3, reps = 100, 
+                    xlab = "vars", ylab = "nets", xlab_cex = 1, ylab_cex = 1)
+
+# extract the heatmap
+heatmap &lt;- neat_res$heatmap
+
+# extract the consensus clustering results
+consensus_res &lt;- neat_res$consensus_clust
+
+</code></pre>
+
+
+</div>

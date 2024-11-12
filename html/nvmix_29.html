@@ -1,0 +1,373 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>copula</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Functionalities for Normal Variance Mixture Copulas</h2>
+
+<h3>Description</h3>
+
+<p>Evaluate the density / distribution function of normal variance mixture
+copulas (including Student <em>t</em> and normal copula) and generate vectors
+of random variates from normal variance mixture copulas.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dnvmixcopula(u, qmix, scale = diag(d), factor = NULL, control = list(),
+             verbose = FALSE, log = FALSE, ...)
+pnvmixcopula(upper, lower = matrix(0, nrow = n, ncol = d), qmix, scale = diag(d),
+             control = list(), verbose = FALSE, ...)
+rnvmixcopula(n, qmix, scale = diag(2), factor = NULL,
+             method = c("PRNG", "sobol", "ghalton"), skip = 0,
+             control = list(), verbose = FALSE, ...)
+
+dStudentcopula(u, df, scale = diag(d), factor = NULL, log = FALSE, verbose = TRUE)
+pStudentcopula(upper, lower = matrix(0, nrow = n, ncol = d), df, scale = diag(d),
+               control = list(), verbose = TRUE)
+rStudentcopula(n, df, scale = diag(2), method = c("PRNG", "sobol", "ghalton"),
+               skip = 0)
+
+pgStudentcopula(upper, lower = matrix(0, nrow = n, ncol = d), groupings = 1:d,
+                df, scale = diag(d), control = list(), verbose = TRUE)
+dgStudentcopula(u, groupings = 1:d, df, scale = diag(d), factor = NULL,
+                factor.inv = NULL, control = list(), verbose = TRUE, log = FALSE)
+rgStudentcopula(n, groupings = 1:d, df, scale = diag(2), factor = NULL,
+                method = c("PRNG", "sobol", "ghalton"), skip = 0)
+
+fitgStudentcopula(x, u, df.init = NULL, scale = NULL, groupings = rep(1, d),
+                  df.bounds = c(0.5, 30), fit.method = c("joint-MLE",
+                  "groupewise-MLE"), control = list(), verbose = TRUE)
+fitStudentcopula(u, fit.method = c("Moment-MLE", "EM-MLE", "Full-MLE"),
+                 df.init = NULL, df.bounds = c(0.1, 30), control = list(),
+                 verbose = TRUE)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p><code class="reqn">(n, d)</code>-<code>matrix</code> of evaluation points or data;
+Have to be in <code class="reqn">(0,1)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper, lower</code></td>
+<td>
+<p><code class="reqn">(n, d)</code>-<code>matrix</code> of upper/lower evaluation
+limits. Have to be in <code class="reqn">(0,1)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>sample size <code class="reqn">n</code> (positive integer).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmix</code></td>
+<td>
+<p>specification of the mixing variable <code class="reqn">W</code>; see
+<code>pnvmix()</code> for the ungrouped and <code>pgnvmix()</code> for the
+grouped case.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groupings</code></td>
+<td>
+<p>see <code>pgnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>positive degress of freedom; can also be <code>Inf</code> in which
+case the copula is interpreted as the Gaussian copula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>scale matrix (a covariance matrix entering the
+distribution as a parameter) of dimension <code class="reqn">(d, d)</code> (defaults to
+<code class="reqn">d = 2</code>);
+this equals the covariance matrix of a random vector following
+the specified normal variance mixture distribution divided by
+the expecation of the mixing variable <code class="reqn">W</code> if and only if the
+former exists.
+Note that <code>scale</code> must be positive definite; sampling from
+singular ungrouped normal variance mixtures can be achieved by providing
+<code>factor</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factor</code></td>
+<td>
+
+<p><code class="reqn">(d, k)</code>-<code>matrix</code> such that
+<code>factor %*% t(factor)</code> equals <code>scale</code>; the non-square
+case <code class="reqn">k \neq d</code> can be used to sample from singular
+normal variance mixtures. For <code>dnvmixcopula()</code>, this has to be
+a square matrix. Note that this notation coincides with
+McNeil et al. (2015, Chapter 6). If not provided, <code>factor</code> is
+internally determined via <code>chol()</code> (and multiplied
+from the right to an <code class="reqn">(n, k)</code>-matrix of independent
+standard normals to obtain a sample from a multivariate normal
+with zero mean vector and covariance matrix <code>scale</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factor.inv</code></td>
+<td>
+<p>inverse of <code>factor</code>; if not provided, computed via
+<code>solve(factor)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>see <code>rnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skip</code></td>
+<td>
+<p>see <code>rnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.init</code></td>
+<td>
+<p><code>NULL</code> or vector with initial estimates for <code>df</code>;
+can contain NAs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.bounds</code></td>
+<td>
+<p><code class="reqn">2</code>-<code>vector</code> with the lower/upper bounds on
+the degree-of-freedom parameter for the fitting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.method</code></td>
+<td>
+<p><code>character</code> indicating which fitting method is to
+be used; see details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code class="reqn">(n, d)</code>-<code>matrix</code> data matrix of which the underlying
+copula is to be estimated. See also details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p><code>list</code> specifying algorithm specific
+parameters; see <code>get_set_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p><code>logical</code>
+indicating whether a warning is given if the required precision
+<code>abstol</code> has not been reached.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p><code>logical</code> indicating whether the logarithmic
+density is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (for example, parameters) passed to the
+underlying mixing distribution when <code>rmix</code> or <code>qmix</code> is a
+<code>character</code> string or <code>function</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Functionalities for normal variance mixture copulas provided here
+essentially call <code>pnvmix()</code>, <code>dnvmix()</code> and
+<code>rnvmix()</code> as well as <code>qnvmix()</code>, see their
+documentations for more details.
+</p>
+<p>We remark that computing normal variance mixtures is a challenging
+task; evaluating normal variance mixture copulas additionally requires
+the approximation of a univariate quantile function so that for large
+dimensions and sample sizes, these procedures can be fairly slow. As
+there are approximations on many levels, reported error estimates for
+the copula versions of <code>pnvmix</code>() and <code>dnvmix</code>() can be
+flawed.
+</p>
+<p>The functions <code>[d/p/r]Studentcopula()</code> are user-friendly wrappers for
+<code>[d/p/r]nvmixcopula(, qmix = "inverse.gamma")</code>, designed for the imporant
+case of a t copula with degrees-of-freedom <code>df</code>.
+</p>
+<p>The function <code>fitgStudentcopula()</code> can be used to estimate the matrix
+<code>scale</code> and the degrees-of-freedom for grouped t-copulas. The matrix
+<code>scale</code>, if not provided, is estimated non-parametrically. Initial values
+for the degrees-of-freedom are estimated for each group separately (by fitting
+the corresponding marginal t copula). Using these initial values, the joint
+likelihood over all (<code>length(unique(groupings))</code>-many) degrees-of-freedom
+parameters is optimized via <code>optim()</code>. For small dimensions,
+the results are satisfactory but the optimization becomes extremely challenging
+when the dimension is large, so care should be taking when interpreting the
+results.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The values returned by <code>dnvmixcopula()</code>, <code>rnvmixcopula()</code> and
+<code>pnvmixcopula()</code> are similar to the ones returned by their
+non-copula alternatives <code>dnvmix()</code>, <code>rnvmix()</code>
+and <code>pnvmix()</code>.
+</p>
+<p>The function <code>fitgStudentcopula()</code> returns an S3 object of
+<code>class</code> <code>"fitgStudentcopula"</code>, basically a <code>list</code>
+which contains, among others, the components
+</p>
+
+<dl>
+<dt><code>df</code></dt>
+<dd>
+<p>Estimated degrees-of-freedom for each group.</p>
+</dd>
+<dt><code>scale</code></dt>
+<dd>
+<p>Estimated or provided <code>scale</code> matrix.</p>
+</dd>
+<dt><code>max.ll</code></dt>
+<dd>
+<p>Estimated log-likelihood at reported estimates.</p>
+</dd>
+<dt><code>df.init</code></dt>
+<dd>
+<p>Initial estimate for the degrees-of-freedom.</p>
+</dd>
+</dl>
+<p>The methods <code>print()</code> and <code>summary()</code> are defined for the class
+<code>"fitgStudentcopula"</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2020),
+Grouped Normal Variance Mixtures.
+<em>Risks</em> 8(4), 103.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+<p>McNeil, A. J., Frey, R. and Embrechts, P. (2015).
+<em>Quantitative Risk Management: Concepts, Techniques, Tools</em>.
+Princeton University Press.
+</p>
+<p>Luo, X. and Shevchenko, P. (2010).
+The <em>t</em> copula with multiple parameters of degrees of freedom: bivariate
+characteristics and application to risk management.
+<em>Quantitative Finance</em> 10(9),
+1039-1054.
+</p>
+<p>Daul, S., De Giorgi, E. G., Lindskog, F. and McNeil, A (2003).
+The grouped <em>t</em> copula with an application to credit risk.
+<em>Available at SSRN 1358956</em>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dnvmix()</code>, <code>pnvmix()</code>, <code>qnvmix()</code>,
+<code>rnvmix()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Generate a random correlation matrix in d dimensions
+d &lt;- 2 # dimension
+set.seed(42) # for reproducibility
+rho &lt;- runif(1, min = -1, max = 1)
+P &lt;- matrix(rho, nrow = d, ncol = d) # build the correlation matrix P
+diag(P) &lt;- 1
+## Generate two random evaluation points:
+u &lt;- matrix(runif(2*d), ncol = d)
+## We illustrate using a t-copula
+df = 2.1
+## Define quantile function which is inverse-gamma here:
+qmix. &lt;- function(u) 1/qgamma(1-u, shape = df/2, rate = df/2)
+
+
+### Example for dnvmixcopula() ####################################################
+
+## If qmix = "inverse.gamma", dnvmix() calls qt and dt:
+d1 &lt;- dnvmixcopula(u, qmix = "inverse.gamma", scale = P, df = df)
+## Same can be obtained using 'dStudentcopula()'
+d2 &lt;- dStudentcopula(u, scale = P, df = df)
+stopifnot(all.equal(d1, d2))
+## Use qmix. to force the algorithm to use a rqmc procedure:
+d3 &lt;- dnvmixcopula(u, qmix = qmix., scale = P)
+stopifnot(all.equal(d1, d3, tol = 1e-3, check.attributes = FALSE))
+
+
+### Example for pnvmixcopula() ####################################################
+
+## Same logic as above:
+p1 &lt;- pnvmixcopula(u, qmix = "inverse.gamma", scale = P, df = df)
+p2 &lt;- pnvmixcopula(u, qmix = qmix., scale = P)
+stopifnot(all.equal(p1, p2, tol = 1e-3, check.attributes = FALSE))
+
+
+### Examples for rnvmixcopula() ###################################################
+
+## Draw random variates and compare
+n &lt;- 60
+set.seed(1)
+X  &lt;- rnvmixcopula(n, qmix = "inverse.gamma", df = df, scale = P) # with scale
+set.seed(1)
+X. &lt;- rnvmixcopula(n, qmix = "inverse.gamma", df = df, factor = t(chol(P))) # with factor
+stopifnot(all.equal(X, X.))
+
+
+### Example for the grouped case ##################################################
+
+d &lt;- 4 # dimension
+set.seed(42) # for reproducibility
+P &lt;- matrix(runif(1, min = -1, max = 1), nrow = d, ncol = d) # build the correlation matrix P
+diag(P) &lt;- 1
+groupings &lt;- c(1, 1, 2, 2) # two groups of size two each
+df &lt;- c(1, 4) # dof for each of the two groups
+U &lt;- rgStudentcopula(n, groupings = groupings, df = df, scale = P)
+(fit &lt;- fitgStudentcopula(u = U, groupings = groupings, verbose = FALSE))
+</code></pre>
+
+
+</div>

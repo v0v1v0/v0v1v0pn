@@ -1,0 +1,866 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fit a Smooth Model
+</h2>
+
+<h3>Description</h3>
+
+<p>Fits a semi- or nonparametric regression model with the smoothing parameter(s) selected via one of eight methods: GCV, OCV, GACV, ACV, REML, ML, AIC, or BIC.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sm(formula, data, weights, types = NULL, tprk = TRUE, knots = NULL,
+   skip.iter = TRUE, df, spar = NULL, lambda = NULL, control = list(),
+   method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"),
+   xrange = NULL, thetas = NULL, mf = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>Object of class "formula" (or one that can be coerced to that class): a symbolic description of the model to be fitted. Uses the same syntax as <code>lm</code> and <code>glm</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>Optional data frame, list or environment (or object coercible by <code>as.data.frame</code> to a data frame) containing the variables in the model. If not found in data, the variables are taken from <code>environment(formula)</code>, typically the environment from which <code>sm</code> is called.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>Optional vector of weights to be used in the fitting process. If provided, weighted least squares is used. Defaults to all 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>types</code></td>
+<td>
+
+<p>Named list giving the type of smooth to use for each predictor. If <code>NULL</code>, the type is inferred from the data. See "Types of Smooths" section for details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tprk</code></td>
+<td>
+
+<p>Logical specifying how to parameterize smooth models with multiple predictors. If <code>TRUE</code> (default), a <b>t</b>ensor <b>p</b>roduct <b>r</b>eproducing <b>k</b>ernel function is used to represent the function. If <code>FALSE</code>, a tensor product of marginal kernel functions is used to represent the function. See the "Multiple Smooths" section for details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knots</code></td>
+<td>
+
+<p>Spline knots for the estimation of the nonparametric effects. For models with multiple predictors, the knot specification will depend on the <code>tprk</code> input. See the "Choosing Knots" section for details
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skip.iter</code></td>
+<td>
+
+<p>Set to <code>FALSE</code> for deep tuning of the hyperparameters. Only applicable when multiple smooth terms are included. See the "Parameter Tuning" section for details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+
+<p>Equivalent degrees of freedom (trace of the smoother matrix). Must be in <code class="reqn">[m,n]</code> where <code class="reqn">m</code> is the number of columns of the null space basis function matrix <code class="reqn">X</code>, and <code class="reqn">n</code> is the number of observations. Will be approximate if <code>skip.iter = FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spar</code></td>
+<td>
+
+<p>Smoothing parameter. Typically (but not always) in the range <code class="reqn">(0,1]</code>. If specified <code>lambda = 256^(3*(spar-1))</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+
+<p>Computational smoothing parameter. This value is weighted by <code class="reqn">n</code> to form the penalty coefficient (see Details). Ignored if <code>spar</code> is provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>Optional list with named components that control the optimization specs for the smoothing parameter selection routine.
+</p>
+<p><b>Note</b> that spar is only searched for in the interval <code class="reqn">[lower, upper]</code>.
+</p>
+
+<dl>
+<dt>lower:</dt>
+<dd>
+<p>lower bound for spar; defaults to -1.5</p>
+</dd>
+<dt>upper:</dt>
+<dd>
+<p>upper bound for spar; defaults to 1.5</p>
+</dd>
+<dt>tol:</dt>
+<dd>
+<p>the absolute precision (<b>tol</b>erance) used by <code>optimize</code> and <code>nlm</code>; defaults to 1e-8.</p>
+</dd>
+<dt>iterlim:</dt>
+<dd>
+<p>the iteration limit used by <code>nlm</code>; defaults to 5000.</p>
+</dd>
+<dt>print.level:</dt>
+<dd>
+<p>the print level used by <code>nlm</code>; defaults to 0 (no printing).</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Method for selecting the smoothing parameter. Ignored if <code>lambda</code> is provided and <code>skip.iter = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xrange</code></td>
+<td>
+
+<p>Optional named list containing the range of each predictor. If <code>NULL</code>, the ranges are calculated from the input <code>data</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thetas</code></td>
+<td>
+
+<p>Optional vector of hyperparameters to use for smoothing. If <code>NULL</code>, these are tuned using the requested <code>method</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mf</code></td>
+<td>
+
+<p>Optional model frame constructed from <code>formula</code> and <code>data</code> (and potentially <code>weights</code>).
+</p>
+</td>
+</tr>
+</table>
+<p>Note: the last two arguments are not intended to be called by the typical user of this function. These arguments are included primarily for internal usage by the <code>boot.sm</code> function.
+</p>
+
+
+<h3>Details</h3>
+
+<p>Letting <code class="reqn">f_i = f(x_i)</code> with <code class="reqn">x_i = (x_{i1}, \ldots, x_{ip})</code>, the function is represented as </p>
+<p style="text-align: center;"><code class="reqn">f = X \beta + Z \alpha</code>
+</p>
+<p> where the basis functions in <code class="reqn">X</code> span the null space (i.e., parametric effects), and <code class="reqn">Z</code> contains the kernel function(s) of the contrast space (i.e., nonparametric effects) evaluated at all combinations of observed data points and knots. The vectors <code class="reqn">\beta</code> and <code class="reqn">\alpha</code> contain unknown basis function coefficients.
+</p>
+<p>Letting <code class="reqn">M =  (X, Z)</code> and <code class="reqn">\gamma = (\beta', \alpha')'</code>, the penalized least squares problem has the form
+</p>
+<p style="text-align: center;"><code class="reqn">
+(y - M \gamma)' W (y - M \gamma) + n \lambda \alpha' Q \alpha
+</code>
+</p>
+
+<p>where <code class="reqn">W</code> is a diagonal matrix containg the weights, and <code class="reqn">Q</code> is the penalty matrix. The optimal coefficients are the solution to 
+</p>
+<p style="text-align: center;"><code class="reqn">
+(M' W M + n \lambda P) \gamma = M' W y
+</code>
+</p>
+
+<p>where <code class="reqn">P</code> is the penalty matrix <code class="reqn">Q</code> augmented with zeros corresponding to the <code class="reqn">\beta</code> in <code class="reqn">\gamma</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "sm" with components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fitted.values</code></td>
+<td>
+<p>the fitted values, i.e., predictions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se.fit</code></td>
+<td>
+<p>the standard errors of the fitted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sse</code></td>
+<td>
+<p>the sum-of-squared errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv.crit</code></td>
+<td>
+<p>the cross-validation criterion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsdf</code></td>
+<td>
+<p>the degrees of freedom (Df) for the null space.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>the estimated degrees of freedom (Df) for the fit model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.residual</code></td>
+<td>
+<p>the residual degrees of freedom = <code>nobs - df</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.squared</code></td>
+<td>
+<p>the observed coefficient of multiple determination.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>the estimate of the error standard deviation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logLik</code></td>
+<td>
+<p>the log-likelihood (if <code>method</code> is REML or ML).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aic</code></td>
+<td>
+<p>Akaike's Information Criterion (if <code>method</code> is AIC).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bic</code></td>
+<td>
+<p>Bayesian Information Criterion (if <code>method</code> is BIC).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spar</code></td>
+<td>
+<p>the value of <code>spar</code> computed or given, i.e., <code class="reqn">s = 1 + \log_{256}(\lambda)/3</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>the value of <code class="reqn">\lambda</code> corresponding to <code>spar</code>, i.e., <code class="reqn">\lambda = 256^{3(s-1)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>the smoothness penalty <code class="reqn">\alpha' Q \alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>the basis function coefficients used for the fit model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cov.sqrt</code></td>
+<td>
+<p>the square-root of the covariance matrix of <code>coefficients</code>. Note: <code>tcrossprod(cov.sqrt)</code> reconstructs the covariance matrix. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>the number of iterations used by <code>nlm</code> (if applicable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>specs</code></td>
+<td>
+<p>a list with information used for prediction purposes:
+</p>
+
+<dl>
+<dt>knots</dt>
+<dd>
+<p>the spline knots used for each predictor.</p>
+</dd>
+<dt>thetas</dt>
+<dd>
+<p>the "extra" tuning parameters used to weight the penalties.</p>
+</dd>
+<dt>xrng</dt>
+<dd>
+<p>the ranges of the predictor variables.</p>
+</dd>
+<dt>xlev</dt>
+<dd>
+<p>the factor levels of the predictor variables (if applicable).</p>
+</dd>
+<dt>tprk</dt>
+<dd>
+<p>logical controlling the formation of tensor product smooths.</p>
+</dd>
+<dt>skip.iter</dt>
+<dd>
+<p>logical controlling the parameter tuning (same as input).</p>
+</dd>
+<dt>control</dt>
+<dd>
+<p>the <code>control</code> options use for tuning.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data used to fit the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>types</code></td>
+<td>
+<p>the type of smooth used for each predictor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>the terms included in the fit model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the <code>method</code> used for smoothing parameter selection. Will be <code>NULL</code> if <code>lambda</code> was provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>the formula specifying the fit model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>the weights used for fitting (if applicable)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the matched call.</p>
+</td>
+</tr>
+</table>
+<h3>Methods </h3>
+
+<p>The smoothing parameter can be selected using one of eight methods: <br>
+Generalized Cross-Validation (GCV) <br>
+Ordinary Cross-Validation (OCV) <br>
+Generalized Approximate Cross-Validation (GACV) <br>
+Approximate Cross-Validation (ACV) <br>
+Restricted Maximum Likelihood (REML) <br>
+Maximum Likelihood (ML) <br>
+Akaike's Information Criterion (AIC) <br>
+Bayesian Information Criterion (BIC)
+</p>
+
+
+<h3>Types of Smooths </h3>
+
+<p>The following codes specify the spline types:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+par </td>
+<td style="text-align: left;"> Parametric effect (factor, integer, or numeric). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+ran </td>
+<td style="text-align: left;"> Random effect/intercept (unordered factor). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+nom </td>
+<td style="text-align: left;"> Nominal smoothing spline (unordered factor). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+ord </td>
+<td style="text-align: left;"> Ordinal smoothing spline (ordered factor). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+lin </td>
+<td style="text-align: left;"> Linear smoothing spline (integer or numeric). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+cub </td>
+<td style="text-align: left;"> Cubic smoothing spline (integer or numeric). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+qui </td>
+<td style="text-align: left;"> Quintic smoothing spline (integer or numeric). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+per </td>
+<td style="text-align: left;"> Periodic smoothing spline (integer or numeric).</td>
+</tr>
+<tr>
+<td style="text-align: left;">  
+sph </td>
+<td style="text-align: left;"> Spherical spline (matrix with <code class="reqn">d = 2</code> columns: lat, long). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+tps </td>
+<td style="text-align: left;"> Thin plate spline (matrix with <code class="reqn">d \ge 1</code> columns).
+</td>
+</tr>
+</table>
+<p>For finer control of some specialized spline types:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+per.lin </td>
+<td style="text-align: left;"> Linear periodic spline (<code class="reqn">m = 1</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+per.cub </td>
+<td style="text-align: left;"> Cubic periodic spline (<code class="reqn">m = 2</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+per.qui </td>
+<td style="text-align: left;"> Quintic periodic spline (<code class="reqn">m = 3</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+sph.2 </td>
+<td style="text-align: left;"> Linear spherical spline (<code class="reqn">m = 2</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+sph.3 </td>
+<td style="text-align: left;"> Cubic spherical spline (<code class="reqn">m = 3</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+sph.4 </td>
+<td style="text-align: left;"> Quintic spherical spline (<code class="reqn">m = 4</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+tps.lin </td>
+<td style="text-align: left;"> Linear thin plate spline (<code class="reqn">m = 1</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+tps.cub </td>
+<td style="text-align: left;"> Cubic thin plate spline (<code class="reqn">m = 2</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+tps.qui </td>
+<td style="text-align: left;"> Quintic thin plate spline (<code class="reqn">m = 3</code>). </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<p>For details on the spline kernel functions, see <code>basis.nom</code> (nominal), <code>basis.ord</code> (ordinal), <code>basis.poly</code> (polynomial), <code>basis.sph</code> (spherical), and <code>basis.tps</code> (thin plate).
+</p>
+<p>Note: "ran" is default for unordered factors when the number of levels is 20 or more, whereas "nom" is the default for unordered factors otherwise. 
+</p>
+
+
+<h3>Choosing Knots </h3>
+
+<p>If <code>tprk = TRUE</code>, the four options for the <code>knots</code> input include: 
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+1. </td>
+<td style="text-align: left;"> a scalar giving the total number of knots to sample </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+2. </td>
+<td style="text-align: left;"> a vector of integers indexing which rows of data are the knots </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+3. </td>
+<td style="text-align: left;"> a list with named elements giving the marginal knot values for each predictor (to be combined via <code>expand.grid</code>) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+4. </td>
+<td style="text-align: left;"> a list with named elements giving the knot values for each predictor (requires the same number of knots for each predictor)
+</td>
+</tr>
+</table>
+<p>If <code>tprk = FALSE</code>, the three options for the <code>knots</code> input include:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+1. </td>
+<td style="text-align: left;"> a scalar giving the common number of knots for each continuous predictor </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+2. </td>
+<td style="text-align: left;"> a list with named elements giving the number of marginal knots for each predictor </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+3. </td>
+<td style="text-align: left;"> a list with named elements giving the marginal knot values for each predictor
+</td>
+</tr>
+</table>
+<h3>Multiple Smooths </h3>
+
+<p>Suppose <code>formula = y ~ x1 + x2</code> so that the model contains additive effects of two predictor variables. 
+</p>
+<p>The <code class="reqn">k</code>-th predictor's marginal effect can be denoted as </p>
+<p style="text-align: center;"><code class="reqn">f_k = X_k \beta_k + Z_k \alpha_k</code>
+</p>
+<p> where <code class="reqn">X_k</code> is the <code class="reqn">n</code> by <code class="reqn">m_k</code> null space basis function matrix, and <code class="reqn">Z_k</code> is the <code class="reqn">n</code> by <code class="reqn">r_k</code> contrast space basis function matrix. 
+</p>
+<p>If <code>tprk = TRUE</code>, the null space basis function matrix has the form <code class="reqn">X = [1, X_1, X_2]</code> and the contrast space basis function matrix has the form </p>
+<p style="text-align: center;"><code class="reqn">Z = \theta_1 Z_1 + \theta_2 Z_2</code>
+</p>
+<p> where the <code class="reqn">\theta_k</code> are the "extra" smoothing parameters. Note that <code class="reqn">Z</code> is of dimension <code class="reqn">n</code> by <code class="reqn">r = r_1 = r_2</code>.
+</p>
+<p>If <code>tprk = FALSE</code>, the null space basis function matrix has the form <code class="reqn">X = [1, X_1, X_2]</code>, and the contrast space basis function matrix has the form </p>
+<p style="text-align: center;"><code class="reqn">Z = [\theta_1 Z_1, \theta_2 Z_2]</code>
+</p>
+<p> where the <code class="reqn">\theta_k</code> are the "extra" smoothing parameters. Note that <code class="reqn">Z</code> is of dimension <code class="reqn">n</code> by <code class="reqn">r = r_1 + r_2</code>.
+</p>
+
+
+<h3>Parameter Tuning </h3>
+
+<p>When multiple smooth terms are included in the model, there are smoothing (hyper)parameters that weight the contribution of each combination of smooth terms. These hyperparameters are distinct from the overall smoothing parameter <code>lambda</code> that weights the contribution of the penalty. 
+</p>
+<p><code>skip.iter = TRUE</code> (default) estimates the smoothing hyperparameters using Algorithm 3.2 of Gu and Wahba (1991), which typically provides adequate results when the model form is correctly specified. The <code>lambda</code> parameter is tuned via the specified smoothing parameter selection <code>method</code>.
+</p>
+<p><code>skip.iter = FALSE</code> uses Algorithm 3.2 as an initialization, and then the <code>nlm</code> function is used to tune the hyperparameters via the specified smoothing parameter selection <code>method</code>. Setting <code>skip.iter = FALSE</code> can (substantially) increase the model fitting time, but should produce better results—particularly if the model <code>formula</code> is misspecified.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Berry, L. N., &amp; Helwig, N. E. (2021). Cross-validation, information theory, or maximum likelihood? A comparison of tuning methods for penalized splines. <em>Stats, 4</em>(3), 701-724. <a href="https://doi.org/10.3390/stats4030042">doi:10.3390/stats4030042</a>
+</p>
+<p>Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. <em>Numerische Mathematik, 31</em>, 377-403. <a href="https://doi.org/10.1007/BF01404567">doi:10.1007/BF01404567</a>
+</p>
+<p>Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. <em>SIAM Journal on Scientific and Statistical Computing, 12(2)</em>, 383-398. <a href="https://doi.org/10.1137/0912021">doi:10.1137/0912021</a>
+</p>
+<p>Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, &amp; R. A. Williams (Eds.), SAGE Research Methods Foundations. <a href="https://doi.org/10.4135/9781526421036885885">doi:10.4135/9781526421036885885</a>
+</p>
+<p>Helwig, N. E. (2021). Spectrally sparse nonparametric regression via elastic net regularized smoothers. <em>Journal of Computational and Graphical Statistics, 30</em>(1), 182-191. <a href="https://doi.org/10.1080/10618600.2020.1806855">doi:10.1080/10618600.2020.1806855</a>
+</p>
+
+
+
+<h3>See Also</h3>
+
+<p><b>Related Modeling Functions</b>: 
+</p>
+<p><code>ss</code> for fitting a smoothing spline with a single predictor (Gaussian response).
+</p>
+<p><code>gsm</code> for fitting generalized smooth models with multiple predictors of mixed types (non-Gaussian response). <br></p>
+<p><b>S3 Methods and Related Functions for "sm" Objects</b>:
+</p>
+<p><code>boot.sm</code> for bootstrapping <code>sm</code> objects.
+</p>
+<p><code>coef.sm</code> for extracting coefficients from <code>sm</code> objects.
+</p>
+<p><code>cooks.distance.sm</code> for calculating Cook's distances from <code>sm</code> objects.
+</p>
+<p><code>cov.ratio</code> for computing covariance ratio from <code>sm</code> objects.
+</p>
+<p><code>deviance.sm</code> for extracting deviance from <code>sm</code> objects.
+</p>
+<p><code>dfbeta.sm</code> for calculating DFBETA from <code>sm</code> objects.
+</p>
+<p><code>dfbetas.sm</code> for calculating DFBETAS from <code>sm</code> objects.
+</p>
+<p><code>diagnostic.plots</code> for plotting regression diagnostics from <code>sm</code> objects.
+</p>
+<p><code>fitted.sm</code> for extracting fitted values from <code>sm</code> objects.
+</p>
+<p><code>hatvalues.sm</code> for extracting leverages from <code>sm</code> objects.
+</p>
+<p><code>model.matrix.sm</code> for constructing model matrix from <code>sm</code> objects.
+</p>
+<p><code>plot.sm</code> for plotting effects from <code>sm</code> objects.
+</p>
+<p><code>predict.sm</code> for predicting from <code>sm</code> objects.
+</p>
+<p><code>residuals.sm</code> for extracting residuals from <code>sm</code> objects.
+</p>
+<p><code>rstandard.sm</code> for computing standardized residuals from <code>sm</code> objects.
+</p>
+<p><code>rstudent.sm</code> for computing studentized residuals from <code>sm</code> objects.
+</p>
+<p><code>smooth.influence</code> for calculating basic influence information from <code>sm</code> objects.
+</p>
+<p><code>smooth.influence.measures</code> for convenient display of influential observations from <code>sm</code> objects.
+</p>
+<p><code>summary.sm</code> for summarizing <code>sm</code> objects.
+</p>
+<p><code>vcov.sm</code> for extracting coefficient covariance matrix from <code>sm</code> objects.
+</p>
+<p><code>weights.sm</code> for extracting prior weights from <code>sm</code> objects.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##########   EXAMPLE 1   ##########
+### 1 continuous predictor
+
+# generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+fx &lt;- 2 + 3 * x + sin(2 * pi * x)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# fit sm with 10 knots (tprk = TRUE)
+sm.ssa &lt;- sm(y ~ x, knots = 10)
+
+# fit sm with 10 knots (tprk = FALSE)
+sm.gam &lt;- sm(y ~ x, knots = 10, tprk = FALSE)
+
+# print both results (note: they are identical)
+sm.ssa
+sm.gam
+
+# plot both results (note: they are identical)
+plot(sm.ssa)
+plot(sm.gam)
+
+# summarize both results (note: they are identical)
+summary(sm.ssa)
+summary(sm.gam)
+
+# compare true MSE values (note: they are identical) 
+mean( ( fx - sm.ssa$fit )^2 )
+mean( ( fx - sm.gam$fit )^2 )
+
+
+
+##########   EXAMPLE 2   ##########
+### 1 continuous and 1 nominal predictor
+### additive model
+
+# generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+z &lt;- factor(sample(letters[1:3], size = n, replace = TRUE))
+fun &lt;- function(x, z){
+  mu &lt;- c(-2, 0, 2)
+  zi &lt;- as.integer(z)
+  fx &lt;- mu[zi] + 3 * x + sin(2 * pi * x)
+}
+fx &lt;- fun(x, z)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# define marginal knots
+probs &lt;- seq(0, 0.9, by = 0.1)
+knots &lt;- list(x = quantile(x, probs = probs),
+              z = letters[1:3])
+
+# fit sm with specified knots (tprk = TRUE)
+sm.ssa &lt;- sm(y ~ x + z, knots = knots)
+
+# fit sm with specified knots (tprk = FALSE)
+sm.gam &lt;- sm(y ~ x + z, knots = knots, tprk = FALSE)
+
+# print both results (note: they are identical)
+sm.ssa
+sm.gam
+
+# plot both results (note: they are identical)
+plot(sm.ssa)
+plot(sm.gam)
+
+# summarize both results (note: they are almost identical)
+summary(sm.ssa)
+summary(sm.gam)
+
+# compare true MSE values (note: they are identical) 
+mean( ( fx - sm.ssa$fit )^2 )
+mean( ( fx - sm.gam$fit )^2 )
+
+
+
+##########   EXAMPLE 3   ##########
+### 1 continuous and 1 nominal predictor
+### interaction model
+
+# generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+z &lt;- factor(sample(letters[1:3], size = n, replace = TRUE))
+fun &lt;- function(x, z){
+  mu &lt;- c(-2, 0, 2)
+  zi &lt;- as.integer(z)
+  fx &lt;- mu[zi] + 3 * x + sin(2 * pi * x + mu[zi]*pi/4)
+}
+fx &lt;- fun(x, z)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# define marginal knots
+probs &lt;- seq(0, 0.9, by = 0.1)
+knots &lt;- list(x = quantile(x, probs = probs),
+              z = letters[1:3])
+
+# fit sm with specified knots (tprk = TRUE)
+sm.ssa &lt;- sm(y ~ x * z, knots = knots)
+
+# fit sm with specified knots (tprk = FALSE)
+sm.gam &lt;- sm(y ~ x * z, knots = knots, tprk = FALSE)
+
+# print both results (note: they are slightly different)
+sm.ssa
+sm.gam
+
+# plot both results (note: they are slightly different)
+plot(sm.ssa)
+plot(sm.gam)
+
+# summarize both results (note: they are slightly different)
+summary(sm.ssa)
+summary(sm.gam)
+
+# compare true MSE values (note: they are slightly different) 
+mean( ( fx - sm.ssa$fit )^2 )
+mean( ( fx - sm.gam$fit )^2 )
+
+
+
+##########   EXAMPLE 4   ##########
+### 4 continuous predictors
+### additive model
+
+# generate data
+set.seed(1)
+n &lt;- 100
+fun &lt;- function(x){
+  sin(pi*x[,1]) + sin(2*pi*x[,2]) + sin(3*pi*x[,3]) + sin(4*pi*x[,4])
+}
+data &lt;- as.data.frame(replicate(4, runif(n)))
+colnames(data) &lt;- c("x1v", "x2v", "x3v", "x4v")
+fx &lt;- fun(data)
+y &lt;- fx + rnorm(n)
+
+# define marginal knots
+knots &lt;- list(x1v = quantile(data$x1v, probs = seq(0, 1, length.out = 10)),
+              x2v = quantile(data$x2v, probs = seq(0, 1, length.out = 10)),
+              x3v = quantile(data$x3v, probs = seq(0, 1, length.out = 10)),
+              x4v = quantile(data$x4v, probs = seq(0, 1, length.out = 10)))
+              
+# define ssa knot indices
+knots.indx &lt;- c(bin.sample(data$x1v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x2v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x3v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x4v, nbin = 10, index.return = TRUE)$ix)
+
+# fit sm with specified knots (tprk = TRUE)
+sm.ssa &lt;- sm(y ~ x1v + x2v + x3v + x4v, data = data, knots = knots.indx)
+
+# fit sm with specified knots (tprk = FALSE)
+sm.gam &lt;- sm(y ~ x1v + x2v + x3v + x4v, data = data, knots = knots, tprk = FALSE)
+
+# print both results (note: they are slightly different)
+sm.ssa
+sm.gam
+
+# plot both results (note: they are slightly different)
+plot(sm.ssa)
+plot(sm.gam)
+
+# summarize both results (note: they are slightly different)
+summary(sm.ssa)
+summary(sm.gam)
+
+# compare true MSE values (note: they are slightly different) 
+mean( ( fx - sm.ssa$fit )^2 )
+mean( ( fx - sm.gam$fit )^2 )
+
+</code></pre>
+
+
+</div>

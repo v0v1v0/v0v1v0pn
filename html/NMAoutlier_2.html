@@ -1,0 +1,139 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fwdplot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forward plot(s) to monitor selected statistic(s)/method(s)</h2>
+
+<h3>Description</h3>
+
+<p>This function generates forward plot(s) to monitor selected
+statistic(s) and/or method(s). The function creates a plot of the
+selected monitoring measure throughout the iterations of the Forward Search
+algorithm. Candidate statistics to be monitored can be: P-score;
+z-values by back-calculation method to derive indirect estimates
+from direct pairwise comparisons and network estimates;
+standardized residuals; heterogeneity variance estimator; Cook's
+distance; ratio of variances; Q statistics (Overall heterogeneity /
+inconsistency Q statistic (<code>Q</code>), overall heterogeneity Q
+statistic (<code>Q</code>), between-designs Q statistic (<code>Q</code>), based
+on a random effects design-by-treatment interaction model).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fwdplot(x, stat, select.st = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class NMAoutlier (mandatory).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat</code></td>
+<td>
+<p>statistical measure to be monitored in forward plot(s)
+(mandatory), available choices are: "pscore", "nsplit", "estand",
+"heterog", "cook", "ratio", or "Q" (can be abbreviated).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select.st</code></td>
+<td>
+<p>selected statistic (pscore/nsplit/estand) for
+selected treatment(s)/comparison(s)/study</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Plot of statistical measures for each iteration of search.
+Vertical axis provides the FS iterations. Horizontal axis
+provides the values of the monitoring statistical measure.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Maria Petropoulou &lt;petropoulou@imbi.uni-freiburg.de&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data(smokingcessation, package = "netmeta")
+smokingcessation$id &lt;- 1:nrow(smokingcessation)
+
+study912 &lt;- subset(smokingcessation, id %in% 9:12)
+p1 &lt;- netmeta::pairwise(list(treat1, treat2, treat3),
+                        list(event1, event2, event3),
+                        list(n1, n2, n3),
+                        data = study912,
+                        sm = "OR")
+
+# Forward search algorithm
+#
+FSresult &lt;- NMAoutlier(p1, P = 1, small.values = "bad", n_cores = 2)
+
+# forward plot for Cook's distance
+fwdplot(FSresult, "cook")
+
+data(smokingcessation, package = "netmeta")
+
+# Transform data from arm-based to contrast-based format
+# Use 'sm' argument for odds ratios.
+# Use function pairwise from netmeta package
+
+p1 &lt;- netmeta::pairwise(list(treat1, treat2, treat3),
+                        list(event1, event2, event3),
+                        list(n1, n2, n3),
+                        data=smokingcessation,
+                        sm="OR")
+
+# Forward Search algorithm
+FSresult &lt;- NMAoutlier(p1, small.values = "bad")
+FSresult
+
+# forward plot for Cook's distance
+fwdplot(FSresult, "cook")
+
+# forward plot for ratio of variances
+fwdplot(FSresult, "ratio")
+
+# forward plot for heterogeneity estimator
+fwdplot(FSresult, "heterog")
+
+# forward plot for Q statistics
+fwdplot(FSresult, "Q")
+
+# forward plot for P-scores
+fwdplot(FSresult, "pscore")
+
+# forward plot monitoring P-scores for treatment A
+fwdplot(FSresult,"pscore", "A")
+
+# forward plot for z-values of disagreement of direct and indirect evidence
+fwdplot(FSresult, "nsplit")
+
+# forward plot for z-values of disagreement of direct and indirect evidence
+# monitoring treatment comparison A versus B
+fwdplot(FSresult, "nsplit", "A:B")
+
+# forward plot for standardized residual for study 4
+fwdplot(FSresult, "estand", 4)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

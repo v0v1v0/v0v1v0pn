@@ -1,0 +1,210 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nc_estimate_links</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute model estimates between an external (exposure or outcome) variable
+and a network.</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>This is the main function that identifies potential links between external factors
+and the network. There are two functions to estimate and classify links:
+</p>
+
+<ul>
+<li> <p><code>nc_estimate_exposure_links()</code>: Computes the model estimates for the exposure side.
+</p>
+</li>
+<li> <p><code>nc_estimate_outcome_links()</code>: Computes the model estimates for the exposure side.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">nc_estimate_exposure_links(
+  data,
+  edge_tbl,
+  exposure,
+  adjustment_vars = NA,
+  model_function,
+  model_arg_list = NULL,
+  exponentiate = FALSE,
+  classify_option_list = classify_options()
+)
+
+nc_estimate_outcome_links(
+  data,
+  edge_tbl,
+  outcome,
+  adjustment_vars = NA,
+  model_function,
+  model_arg_list = NULL,
+  exponentiate = FALSE,
+  classify_option_list = classify_options()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The data.frame or tibble that contains the variables of interest,
+including the variables used to make the network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge_tbl</code></td>
+<td>
+<p>Output graph object from <code>nc_estimate_network()</code>, converted
+to an edge table using <code>as_edge_tbl()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exposure, outcome</code></td>
+<td>
+<p>Character. The exposure or outcome variable of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjustment_vars</code></td>
+<td>
+<p>Optional. Variables to adjust for in the models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_function</code></td>
+<td>
+<p>A function for the model to use (e.g. <code>stats::lm()</code>,
+<code>stats::glm()</code>, survival::coxph()). Can be any model as long as the
+function has the arguments <code>formula</code> and <code>data</code>. Type in the model function
+as a bare object (without <code style="white-space: pre;">⁠()⁠</code>, for instance as <code>lm</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_arg_list</code></td>
+<td>
+<p>Optional. A list containing the named arguments that
+will be passed to the model function. A simple example would be
+<code>list(family = binomial(link = "logit"))</code> to specify that the <code>glm</code> model
+is a logistic model and not a linear one. See the examples for more on the
+usage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exponentiate</code></td>
+<td>
+<p>Logical. Whether to exponentiate the log estimates, as
+computed with e.g. logistic regression models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classify_option_list</code></td>
+<td>
+<p>A list with classification options for direct, ambigious, or no
+effects. Used with the <code>classify_options()</code> function with the arguments:
+</p>
+
+<ul>
+<li> <p><code>single_metabolite_threshold</code>: Default of 0.05. P-values from models with
+only the index metabolite (no neighbour adjustment) are classified as effects if
+below this threshold. For larger sample sizes and networks, we recommend lowering
+the threshold to reduce risk of false positives.
+</p>
+</li>
+<li> <p><code>network_threshold</code>: Default of 0.1. P-values from any models that have
+direct neighbour adjustments are classified as effects if below this threshold.
+This is assumed as a one-sided p-value threshold. Like the threshold above,
+a lower value should be used for larger sample sizes and networks.
+</p>
+</li>
+<li> <p><code>direct_effect_adjustment</code>: Default is NA. After running the algorithm once,
+sometimes it's useful to adjust for the direct effects identified to confirm
+whether other links exist.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Outputs a tibble that contains the model
+estimates from either the exposure or outcome side of the network as well
+as the effect classification. Each row represents the "no neighbour node
+adjusted" model and has the results for the outcome/exposure to index node
+pathway.
+Columns for the outcome are:
+</p>
+
+<ul>
+<li> <p><code>outcome</code> or <code>exposure</code>: The name of the variable used as the external variable.
+</p>
+</li>
+<li> <p><code>index_node</code>: The name of the metabolite used as the index node from the network.
+In combination with the outcome/exposure variable, they represent the individual
+model used for the classification.
+</p>
+</li>
+<li> <p><code>estimate</code>: The estimate from the outcome/exposure and index node model.
+</p>
+</li>
+<li> <p><code>std_error</code>: The standard error from the outcome/exposure and index node model.
+</p>
+</li>
+<li> <p><code>fdr_p_value</code>: The False Discovery Rate-adjusted p-value from the
+outcome/exposure and index node model.
+</p>
+</li>
+<li> <p><code>effect</code>: The NetCoupler classified effect between the index node and the
+outcome/exposure. Effects are classified as "direct" (there is a probable link
+based on the given thresholds), "ambigious" (there is a potential link but
+not all thresholds were passed), and "none" (no potential link seen).
+</p>
+</li>
+</ul>
+<p>The tibble output also has an attribute that contains all the models
+generated <em>before</em> classification. Access it with <code>attr(output, "all_models_df")</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>vignette("examples")</code> article has more
+details on how to use NetCoupler with different models.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+standardized_data &lt;- simulated_data %&gt;%
+    nc_standardize(starts_with("metabolite"))
+
+metabolite_network &lt;- simulated_data %&gt;%
+    nc_standardize(starts_with("metabolite"),
+                   regressed_on = "age") %&gt;%
+    nc_estimate_network(starts_with("metabolite"))
+edge_table &lt;- as_edge_tbl(metabolite_network)
+
+results &lt;- standardized_data %&gt;%
+  nc_estimate_exposure_links(
+    edge_tbl = edge_table,
+    exposure = "exposure",
+    model_function = lm
+   )
+results
+
+# Get results of all models used prior to classification
+
+
+</code></pre>
+
+
+</div>

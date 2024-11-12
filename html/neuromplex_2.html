@@ -1,0 +1,237 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dapp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Dynamic Admixture of Poisson Process</h2>
+
+<h3>Description</h3>
+
+<p>Fits the DAPP model to binned spiking data</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> 
+dapp(spike.counts, lengthScale = NULL, lsPrior = NULL,
+     hyper = list(prec = c(1,1), sig0 = 1.87, w=c(1,1)),
+     burnIn = 1e3, nsamp = 1e3, thin = 4,
+     verbose = TRUE, remove.zeros = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>spike.counts</code></td>
+<td>
+<p>A list with the following items. 'Acounts': binned spike counts under condition A presented as a matrix. Rows are bins, columns are replicates (trials). 'Bcount': binned spike counts under condition B. 'ABcounts': binned spike counts under condition AB. 'bin.mids': an array giving the mid-points of the time bins. 'bin.width': a scalar giving the bin width.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lengthScale</code></td>
+<td>
+<p>an array giving the length scale parameter values to be used for Gaussian process prior. Defaults to <code>sort(0.16 * resp.horiz / c(4, 3, 2, 1, 0.5, 0.1))</code> where <code>resp.horiz</code> is the time horizon of the response period.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lsPrior</code></td>
+<td>
+<p>an array of the same length as <code>lengthScale</code> giving the prior probabilities of the length scale values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyper</code></td>
+<td>
+<p>a list of hyper parameters with the following iterms. 'prec': a 2-vector giving the shape and rate parameters of the gamma distribution on the Dirichlet precision parameter. 'sig0': a scalaer giving the scale of the (centered) logistic distribution used in transforming the Gaussian random curves into curves restricted between 0 and 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnIn</code></td>
+<td>
+<p>number of MCMC iterations to discard as burn-in.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsamp</code></td>
+<td>
+<p>number of MCMC draws to be saved for posterior inference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+<p>the thinning rate at which MCMC draws are to be saved. The total number of iterations equals <code>burnIn + nsamp * thin</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical indicating if some fit details should be printed during the course of the MCMC</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove.zeros</code></td>
+<td>
+<p>logical indicating if trials with zero spike count shuold be removed from the analysis</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a list of class "dapp" containting the following items.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>lsProb</code></td>
+<td>
+<p>posterior preditctive draws of length scale</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.A</code></td>
+<td>
+<p>posterior draws of lambda.A at bin mid-points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.B</code></td>
+<td>
+<p>posterior draws of lambda.B at bin mid-points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>posterior draws of the alpha curves at bin mid-points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>posterior draws of the latent variable A which gives the AB spike counts (by bin) that are to be attributed to signal A (the remaining are attributed to signal B)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prec</code></td>
+<td>
+<p>posterior draws of precision</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.pred</code></td>
+<td>
+<p>posterior predictive draws of alpha (of a future trial)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psl.pred</code></td>
+<td>
+<p>posterior predictive draw of the feature parameters (phi, psi, ell) (of a future trial)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>mcmc details given as an array of <code>c(niter, nsamp, burnIn, thin, MH acceptance rate)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyper</code></td>
+<td>
+<p>hyper parameters used in model fitting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lengthScale</code></td>
+<td>
+<p>length scale set used in model fitting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lsPrior</code></td>
+<td>
+<p>length scale prior</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin.mids</code></td>
+<td>
+<p>bin mid-points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin.width</code></td>
+<td>
+<p>bin width</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mcmc</code></td>
+<td>
+<p>mcmc controls (burn-in length, thinning rate and number of saved draws)</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Glynn, C., Tokdar, S.T., Zaman, A., Caruso, V.C., Mohl, J.T., Willett, S.M., and Groh, J.M. (2020+). Analyzing second order stochasticity of neural spiking under stimuli-bundle exposure. The Annals of Applied Statistics. Accepted.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.dapp</code>, <code>summary.dapp</code> and <code>predict.dapp</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Note:
+  #### The example below uses a simpler synthetic data, a wider bin-width
+  #### and a shorter MCMC run to keep the run length less than 5s
+  #### Use ?plot.dapp or ?plot.summary for a more realistic example
+  
+  ## Generate 30 A and 30 B trials with rate functions
+  ##    lambda.A(t) = 160*exp(-2*t/1000) + 40*exp(-0.2*t/1000)
+  ##    lambda.B(t) = 40*exp(-2*t/1000)
+  ## where time t is measured in ms. Then, generate 25 AB trials,
+  ## roughly 2/3 with flat weight curves with a constant intensity
+  ## either close to A, or close to B (equally likely). The 
+  ## remaining 1/3 curves are sinusoidal that snake between 0.01 and 0.99 
+  ## with a period randomly drawn between 400 and 1000
+  
+  ntrials &lt;- c(nA=30, nB=30, nAB=25)
+  flat.range &lt;- list(A=c(0.85, 0.95),
+                     B=c(0.05, 0.15))
+  flat.mix &lt;- c(A=1/2, B=1/2)
+  wavy.span &lt;- c(0.01, 0.99)
+  wavy.period &lt;- c(400, 1000)
+  
+  T.horiz &lt;- 1000
+  rateB &lt;- 40 * exp(-2*(1:T.horiz)/T.horiz)
+  rateA &lt;- 4*rateB + 40 * exp(-0.2*(1:T.horiz)/T.horiz)
+  
+  synth.data &lt;- synthesis.dapp(ntrials = ntrials, pr.flat = 2/3,
+                               intervals = flat.range, wts = flat.mix,
+                               span = wavy.span, period.range = wavy.period,
+                               lambda.A=rateA, lambda.B=rateB)
+  
+  ## Generate binned spike counts witb 100 ms bins
+  spike.counts &lt;- mplex.preprocess(synth.data$spiketimes, bw=100, visualize=FALSE)
+  
+  ## Fit the DAPP model to data
+  #### A short MCMC run is done below to keep the run length short.
+  #### Use default or larger values for burn, nsamp and thin
+  #### for more reliable estimation
+  fit.post &lt;- dapp(spike.counts, burn=10, nsamp=90, thin=1, verbose=FALSE)
+  
+  ## Visualize model fit
+  plot(fit.post)
+  
+  ## Post process results to assign second order stochasticity labels
+  summary(fit.post)
+</code></pre>
+
+
+</div>

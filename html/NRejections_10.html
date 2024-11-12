@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>resample_resid</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Resample residuals for OLS</h2>
+
+<h3>Description</h3>
+
+<p>Implements the residual resampling OLS algorithm described in Mathur &amp; VanderWeele (in preparation). 
+Specifically, the design matrix is fixed while the resampled outcomes are set equal to the original fitted values
+plus a vector of residuals sampled with replacement.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">resample_resid(
+  d,
+  X,
+  C = NA,
+  Ys,
+  alpha,
+  resid,
+  bhat.orig,
+  B = 2000,
+  cores = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Dataframe</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Single quoted name of covariate of interest</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>Vector of quoted covariate names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ys</code></td>
+<td>
+<p>Vector of quoted outcome names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Alpha level for individual tests</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resid</code></td>
+<td>
+<p>Residuals from original sample (W X B matrix)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bhat.orig</code></td>
+<td>
+<p>Estimated coefficients for covariate of interest in original sample (W-vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>Number of resamples to generate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Number of cores available for parallelization</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a list containing the number of rejections in each resample, a matrix of p-values
+in the resamples, and a matrix of t-statistics in the resamples.
+</p>
+
+
+<h3>References</h3>
+
+<p>Mathur, M.B., &amp; VanderWeele, T.J. (in preparation). New metrics for multiple testing with correlated
+outcomes.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">samp.res = dataset_result( X = "complaints",
+                C = c("privileges", "learning"),
+                Ys = c("rating", "raises"),
+                d = attitude,
+                center.stats = FALSE,
+                bhat.orig = NA,  # bhat.orig is a single value now for just the correct Y
+                alpha = 0.05 )
+
+resamps = resample_resid(  X = "complaints",
+                  C = c("privileges", "learning"),
+                  Ys = c("rating", "raises"),
+                  d = attitude,
+                  alpha = 0.05,
+                  resid = samp.res$resid,
+                  bhat.orig = samp.res$b,
+                  B=20,
+                  cores = 2)
+</code></pre>
+
+
+</div>

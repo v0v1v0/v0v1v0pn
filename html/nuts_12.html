@@ -1,0 +1,75 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nuts_test_multiple_versions</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Helper function to test for multiple versions</h2>
+
+<h3>Description</h3>
+
+<p><code>nuts_test_multiple_versions</code> is called from either <code>nuts_convert_version</code> or <code>nuts_aggregate</code>
+to selects the most frequent version within groups or throw an error.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nuts_test_multiple_versions(group_vars, multiple_versions, data_versions, data)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>group_vars</code></td>
+<td>
+<p>Variable name(s) for classification within groups. Always computes overlap within country. <code>NULL</code> by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiple_versions</code></td>
+<td>
+<p>By default equal to <code>'error'</code>, when providing multiple NUTS versions within groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_versions</code></td>
+<td>
+<p>Data versions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A nuts.classified object returned by <code>nuts_classify()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A tibble containing NUTS codes, the potential number of rows dropped and a message with the results of the test.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+df &lt;- manure %&gt;%
+  filter(nchar(geo) == 5) %&gt;%
+  select(geo, indic_ag, values) %&gt;%
+  distinct(geo,  .keep_all = TRUE) %&gt;%
+  nuts_classify(nuts_code = "geo",
+                group_vars = "indic_ag",
+                data = .)
+
+nuts_test_multiple_versions(group_vars = "indic_ag",
+                            multiple_versions = "most_frequent",
+                            data_versions = df$versions_data,
+                            data = df$data)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,299 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cnmms</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum Likelihood Estimation of a Semiparametric Mixture Model</h2>
+
+<h3>Description</h3>
+
+<p>Functions <code>cnmms</code>, <code>cnmpl</code> and <code>cnmap</code> can be used to compute
+the maximum likelihood estimate of a semiparametric mixture model that has a
+one-dimensional mixing parameter. The types of mixture models that can be
+computed include finite, nonparametric and semiparametric ones.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cnmms(x, init=NULL, maxit=1000, model=c("spmle","npmle"), tol=1e-6,
+     grid=100, kmax=Inf, plot=c("null", "gradient", "probability"),
+     verbose=0)
+cnmpl(x, init=NULL, tol=1e-6, tol.npmle=tol*1e-4, grid=100, maxit=1000,
+     plot=c("null", "gradient", "probability"), verbose=0)
+cnmap(x, init=NULL, maxit=1000, tol=1e-6, grid=100, plot=c("null",
+     "gradient"), verbose=0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data object of some class that can be defined fully by the user</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>list of user-provided initial values for the mixing distribution
+<code>mix</code> and the structural parameter <code>beta</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>maximum number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the type of model that is to estimated: non-parametric MLE
+(<code>npmle</code>) or semi-parametric MLE (<code>spmle</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>a tolerance value that is used to terminate an algorithm.
+Specifically, the algorithm is terminated, if the relative increase of the
+log-likelihood value after an iteration is less than <code>tol</code>. If an
+algorithm converges rapidly enough, then <code>-log10(tol)</code> is roughly the
+number of accurate digits in log-likelihood.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid</code></td>
+<td>
+<p>number of grid points that are used by the algorithm to locate
+all the local maxima of the gradient function. A larger number increases the
+chance of locating all local maxima, at the expense of an increased
+computational cost. The locations of the grid points are determined by the
+function <code>gridpoints</code> provided by each individual mixture family, and
+they do not have to be equally spaced. If needed, an individual
+<code>gridpoints</code> function may return a different number of grid points than
+specified by <code>grid</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kmax</code></td>
+<td>
+<p>upper bound on the number of support points. This is
+particularly useful for fitting a finite mixture model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>whether a plot is produced at each iteration. Useful for
+monitoring the convergence of the algorithm. If <code>null</code>, no plot is
+produced. If <code>gradient</code>, it plots the gradient curves and if
+<code>probability</code>, the <code>plot</code> function defined by the user of the
+class is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>verbosity level for printing intermediate results in each
+iteration, including none (= 0), the log-likelihood value (= 1), the maximum
+gradient (= 2), the support points of the mixing distribution (= 3), the
+mixing proportions (= 4), and if available, the value of the structural
+parameter beta (= 5).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol.npmle</code></td>
+<td>
+<p>a tolerance value that is used to terminate the computing
+of the NPMLE internally.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function <code>cnmms</code> can also be used to compute the maximum likelihood
+estimate of a finite or nonparametric mixture model.
+</p>
+<p>A finite mixture model has a density of the form
+</p>
+<p style="text-align: center;"><code class="reqn">f(x; \pi, \theta, \beta) = \sum_{j=1}^k \pi_j f(x; \theta_j,
+\beta).</code>
+</p>
+
+<p>where <code class="reqn">pi_j \ge 0</code> and <code class="reqn">\sum_{j=1}^k pi_j </code><code class="reqn"> =1</code>.
+</p>
+<p>A nonparametric mixture model has a density of the form
+</p>
+<p style="text-align: center;"><code class="reqn">f(x; G) = \int f(x; \theta) d G(\theta),</code>
+</p>
+<p> where <code class="reqn">G</code> is a mixing distribution that is
+completely unspecified. The maximum likelihood estimate of the nonparametric
+<code class="reqn">G</code>, or the NPMLE of $<code class="reqn">G</code>, is known to be a discrete distribution
+function.
+</p>
+<p>A semiparametric mixture model has a density of the form
+</p>
+<p style="text-align: center;"><code class="reqn">f(x; G, \beta) = \int f(x; \theta, \beta) d G(\theta),</code>
+</p>
+
+<p>where <code class="reqn">G</code> is a mixing distribution that is completely unspecified and
+<code class="reqn">\beta</code> is the structural parameter.
+</p>
+<p>Of the three functions, <code>cnmms</code> is recommended for most problems; see
+Wang (2010).
+</p>
+<p>Functions <code>cnmms</code>, <code>cnmpl</code> and <code>cnmap</code> implement the
+algorithms CNM-MS, CNM-PL and CNM-AP that are described in Wang (2010).
+Their implementations are generic using S3 object-oriented programming, in
+the sense that they can work for an arbitrary family of mixture models that
+is defined by the user. The user, however, needs to supply the
+implementations of the following functions for their self-defined family of
+mixture models, as they are needed internally by the functions above:
+</p>
+<p><code>initial(x, beta, mix, kmax)</code>
+</p>
+<p><code>valid(x, beta)</code>
+</p>
+<p><code>logd(x, beta, pt, which)</code>
+</p>
+<p><code>gridpoints(x, beta, grid)</code>
+</p>
+<p><code>suppspace(x, beta)</code>
+</p>
+<p><code>length(x)</code>
+</p>
+<p><code>print(x, ...)</code>
+</p>
+<p><code>weight(x, ...)</code>
+</p>
+<p>While not needed by the algorithms, one may also implement
+</p>
+<p><code>plot(x, mix, beta, ...)</code>
+</p>
+<p>so that the fitted model can be shown graphically in a way that the user
+desires.
+</p>
+<p>For creating a new class, the user may consult the implementations of these
+functions for the families of mixture models included in the package, e.g.,
+<code>cvp</code> and <code>mlogit</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>the class of the mixture family that is used to fit to the
+data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.iterations</code></td>
+<td>
+<p>Number of iterations required by the algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grad</code></td>
+<td>
+<p>For <code>cnmms</code>, it contains the values of the gradient
+function at the support points and the first derivatives of the
+log-likelihood with respect to theta and beta. For <code>cnmpl</code>, it contains
+only the first derivatives of the log-likelihood with respect to beta. For
+<code>cnmap</code>, it contains only the gradient of <code>beta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.gradient</code></td>
+<td>
+<p>Maximum value of the gradient function, evaluated at the
+beginning of the final iteration. It is only given by function
+<code>cnmap</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convergence</code></td>
+<td>
+<p>convergence code. <code>=0</code> means a success, and
+<code>=1</code> reaching the maximum number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ll</code></td>
+<td>
+<p>log-likelihood value at convergence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mix</code></td>
+<td>
+<p>MLE of the mixing distribution, being an object of the class
+<code>disc</code> for discrete distributions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>MLE of the structural parameter</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Yong Wang &lt;yongwang@auckland.ac.nz&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Wang, Y. (2007). On fast computation of the non-parametric maximum
+likelihood estimate of a mixing distribution. <em>Journal of the Royal
+Statistical Society, Ser. B</em>, <b>69</b>, 185-198.
+</p>
+<p>Wang, Y. (2010). Maximum likelihood computation for fitting semiparametric
+mixture models. <em>Statistics and Computing</em>, <b>20</b>, 75-86
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nnls</code>, <code>cnm</code>, <code>cvp</code>,
+<code>cvps</code>, <code>mlogit</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Compute the MLE of a finite mixture
+x = rnpnorm(100, disc(c(0,4), c(0.7,0.3)), sd=1)
+for(k in 1:6) plot(cnmms(x, kmax=k), x, add=(k&gt;1), comp="null", col=k+1,
+                  main="Finite Normal Mixtures")
+legend("topright", 0.3, leg=paste0("k = ",1:6), lty=1, lwd=2, col=2:7)
+
+## Compute a semiparametric MLE
+# Common variance problem 
+x = rcvps(k=50, ni=5:10, mu=c(0,4), pr=c(0.7,0.3), sd=3)
+cnmms(x)              # CNM-MS algorithm
+cnmpl(x)              # CNM-PL algorithm
+cnmap(x)              # CNM-AP algorithm
+
+# Logistic regression with a random intercept
+x = rmlogit(k=30, gi=3:5, ni=6:10, pt=c(0,4), pr=c(0.7,0.3),
+           beta=c(0,3))
+cnmms(x)
+
+data(toxo)            # k = 136
+cnmms(mlogit(toxo))
+
+</code></pre>
+
+
+</div>

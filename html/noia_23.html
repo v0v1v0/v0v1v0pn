@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Simulate population</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Simulates a Population from a Genotype-Phenotype Map </h2>
+
+<h3>Description</h3>
+
+<p>The <code>simulatePop</code> function takes a Genotype-to-Phenotype map (i.e. a vector
+defining the genotypic value of all possible genotypes) and 
+returns a data frame containing the simulated population. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulatePop(gmap, N = 100, sigmaE = 1, type = "F2", freqmat=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>gmap</code></td>
+<td>
+<p> The Genotype-to-phenotype map: a vector of size <code class="reqn">3^L</code>, where L is
+the number of loci. The vector should be named with the code of each genotype
+(see <code>genNames</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p> Number of individuals. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmaE</code></td>
+<td>
+<p> Standard deviation of the environmental noise (normally
+distributed). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p> Type of population. <code>"F2"</code>, <code>"Finf"</code>, <code>"F1"</code>, <code>"UWR"</code>, <code>"G2A"</code>, and <code>"noia"</code> are possible. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freqmat</code></td>
+<td>
+<p> For <code>type="G2A"</code>: A vector of length <code>nloc</code> containing allele frequencies such that 
+<code>freqmat[i]=frequency(allele 1)</code> for locus <code>i</code>.
+</p>
+<p>For <code>type="noia"</code>: A <code>(nloc x 3)</code> matrix of genotype frequencies such that 
+<code>freqmat[i,]=[frequency(1) frequency(2) frequency(3)]</code> for locus <code>i</code>. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The type of population refers to the expected allelic and genotypic frequences:
+</p>
+
+<ul>
+<li>
+<p>"F1"First generation of an intercross between two parental populations fixed for alleles A and B respectively; expected genotypic frequencies are: AA: 0, AB: 1, BB: 0.
+</p>
+</li>
+<li>
+<p>"F2"Second generation of an intercross between two parental populations fixed for alleles A and B respectively; expected genotypic frequencies are AA: 0.25, AB: 0.5, BB: 0.25.
+</p>
+</li>
+<li>
+<p>"Finf"Theoretical population from an infinite number of generations after an intercross between two parental populations fixed for alleles A and B respectively; expected genotypic frequencies are AA: 0.5, AB: 0, BB: 0.5.
+</p>
+</li>
+<li>
+<p>"UWR"Theoretical population corresponding to ideal (but experimentally unrealistic) equal genotypic frequencies; expected genotypic frequencies are AA: 0.333, AB: 0.333, BB: 0.333. In such a population, the "UnWeighted Regression model" (UWR) by Cheverud and Routman 1995 provides orthogonal estimates.
+</p>
+</li>
+<li>
+<p>"G2A"Population at Hardy-Weinberg frequencies; expected genotypic frequencies are: AA: p*p, AB: 2p(1-p), BB: (1-p)(1-p), the frequency of allele A (p) at locus i being provided by the i-th element of vector <code>freqmat</code>. "G2A" is the name of the statistical model by Zeng et al. (2005) in which genetic effects estimated from such a population are orthogonal.
+</p>
+</li>
+<li>
+<p>"noia"Population in which genotypic frequencies are arbitrary; expected genotypic frequencies are: AA: pAA, AB: pAB, BB: pBB, frequences pAA, pAB, and pBB at locus i being provided by the i-th line of matrix <code>freqmat</code>. "noia" is the name of the statistical model by Alvarez-Castro and Carlborg (2007) in which genetic effects estimated from such a population are orthogonal. In all populations, loci are considered as independent and are at linkage equilibrium.         
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>Returns a data frame, in which the first column (<code>$phen</code>) contains the 
+phenotypes, and the following ones (<code>$Loc1</code>, <code>$loc2</code>, etc) the 
+genotypes of all individuals.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Arnaud Le Rouzic, Arne B. Gjuvsland </p>
+
+
+<h3>References</h3>
+
+    
+<p>Alvarez-Castro JM, Carlborg O. (2007). A unified model for functional 
+and statistical epistasis and its application in quantitative trait 
+loci analysis. Genetics 176(2):1151-1167.
+</p>
+<p>Cheverud JM, Routman, EJ. (1995). Epistasis and its contribution to 
+genetic variance components. Genetics 139:1455-1461.
+</p>
+<p>Le Rouzic A, Alvarez-Castro JM. (2008). Estimation of genetic effects and
+genotype-phenotype maps. Evolutionary Bioinformatics, 4. 
+</p>
+<p>Zeng ZB, Wang T, Zou W. (2005). Modelling quantitative trait loci and 
+interpretation of models. Genetics 169: 1711-1725. 
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>GPmap</code>,   <code>genNames</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123456789)
+
+map &lt;- c(0.25, -0.75, -0.75, -0.75, 2.25, 2.25, -0.75, 2.25, 2.25)
+pop &lt;- simulatePop(map, N=500, sigmaE=0.2, type="F2")
+str(pop)
+
+## Create a "noia" population with genotype frequencies 1/3,1/3,1/3 for locus 1 
+## and 0.2,0.6,0.2 for locus 2
+pop = simulatePop(map, N=1000, sigma=1, type='noia', 
+  freqmat=matrix(c(1/3,1/3,1/3,0.2,0.6,0.2),nrow=2, byrow=TRUE))
+</code></pre>
+
+
+</div>

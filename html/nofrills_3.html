@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>curry</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Curry a function</h2>
+
+<h3>Description</h3>
+
+<p><code>curry()</code> <a href="https://en.wikipedia.org/wiki/Currying">curries</a> functions—it
+reconstitutes a function as a succession of single-argument functions. For
+example, <code>curry()</code> produces the the function</p>
+<pre>function(x) {
+  function(y) {
+    function(z) {
+      x * y * z
+    }
+  }
+}
+</pre>
+<p>from the function <code>function(x, y, z) x * y * z</code>.
+<br><br><code>curry_fn()</code> produces a curried function from an <code>fn()</code>-style function
+declaration, which supports quasiquotation of a
+function’s body and (default) argument values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">curry(f, env = environment(f))
+
+curry_fn(..., ..env = parent.frame())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>Function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>Environment of the curried function or <code>NULL</code>. If <code>NULL</code>, the
+environment of the curried function is the calling environment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Function declaration, which supports
+quasiquotation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>..env</code></td>
+<td>
+<p>Environment in which to create the function (i.e., the
+function’s enclosing environment).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Dots (<code>...</code>) are treated as a unit when currying. For example,
+<code>curry()</code> transforms <code>function(x, ...) list(x, ...)</code> to
+<code>function(x) { function(...) list(x, ...) }</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A function of nested single-argument functions.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fn()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">curry(function(x, y, z = 0) x + y + z)
+double &lt;- curry(`*`)(2)
+double(3)  # 6
+
+curry_fn(x, y, z = 0 ~ x + y + z)
+curry_fn(target, ... ~ identical(target, ...))
+
+## Delay unquoting to embed argument values into the innermost function
+compare_to &lt;- curry_fn(target, x ~ identical(x, QUQ(target)))
+is_this &lt;- compare_to("this")
+is_this("that")  # FALSE
+is_this("this")  # TRUE
+classify_as &lt;- curry_fn(class, x ~ `class&lt;-`(x, QUQ(class)))
+as_this &lt;- classify_as("this")
+as_this("Some object")  # String of class "this"
+
+</code></pre>
+
+
+</div>

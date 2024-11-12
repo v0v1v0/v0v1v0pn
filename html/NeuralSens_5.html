@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ChangeBootAlpha</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Change significance of boot SensMLP Class</h2>
+
+<h3>Description</h3>
+
+<p>For a SensMLP Class object, change the significance level of the statistical tests
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ChangeBootAlpha(x, boot.alpha)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>SensMLP</code> object created by <code>SensAnalysisMLP</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.alpha</code></td>
+<td>
+<p><code>float</code> significance level</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>SensMLP</code> object with changed significance level. All boot related
+metrics are changed
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Load data -------------------------------------------------------------------
+data("DAILY_DEMAND_TR")
+fdata &lt;- DAILY_DEMAND_TR
+
+## Parameters of the NNET ------------------------------------------------------
+hidden_neurons &lt;- 5
+iters &lt;- 250
+decay &lt;- 0.1
+
+################################################################################
+#########################  REGRESSION NNET #####################################
+################################################################################
+## Regression dataframe --------------------------------------------------------
+# Scale the data
+fdata.Reg.tr &lt;- fdata[,2:ncol(fdata)]
+fdata.Reg.tr[,3] &lt;- fdata.Reg.tr[,3]/10
+fdata.Reg.tr[,1] &lt;- fdata.Reg.tr[,1]/1000
+
+
+## TRAIN nnet NNET --------------------------------------------------------
+
+set.seed(150)
+nnetmod &lt;- caret::train(DEM ~ .,
+                 data = fdata.Reg.tr,
+                 method = "nnet",
+                 tuneGrid = expand.grid(size = c(1), decay = c(0.01)),
+                 trControl = caret::trainControl(method="none"),
+                 preProcess = c('center', 'scale'),
+                 linout = FALSE,
+                 trace = FALSE,
+                 maxit = 300)
+# Try SensAnalysisMLP
+sens &lt;- NeuralSens::SensAnalysisMLP(nnetmod, trData = fdata.Reg.tr,
+                                    plot = FALSE, boot.R=2, output_name='DEM')
+NeuralSens::ChangeBootAlpha(sens, boot.alpha=0.1)
+
+</code></pre>
+
+
+</div>

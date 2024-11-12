@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>autotune_mice</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Automatical tuning of parameters and imputation using mice package.</h2>
+
+<h3>Description</h3>
+
+<p>Function impute missing data using mice functions. First perform  random search using linear models (generalized linear models if only
+categorical values are available). Using glm its problematic. Function allows users to skip optimization in that case but it can lead to errors.
+Function optimize prediction matrix and method. Other mice parameters like number of sets(m) or max number of iterations(maxit) should be set
+as hight as possible for best results(higher values are required more time to perform imputation). If u chose to use one inputted dataset m is not important. More information can be found in <code>random_param_mice_search</code> and <code>formula_creating</code> and <code>mice</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">autotune_mice(
+  df,
+  m = 5,
+  maxit = 5,
+  col_miss = NULL,
+  col_no_miss = NULL,
+  col_type = NULL,
+  set_cor = 0.5,
+  set_method = "pmm",
+  percent_of_missing = NULL,
+  low_corr = 0,
+  up_corr = 1,
+  methods_random = c("pmm"),
+  iter = 5,
+  random.seed = 123,
+  optimize = TRUE,
+  correlation = TRUE,
+  return_one = TRUE,
+  col_0_1 = FALSE,
+  verbose = FALSE,
+  out_file = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data frame for imputation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>number of sets produced by mice.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>maximum number of iteration for mice.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_miss</code></td>
+<td>
+<p>name of columns with missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_no_miss</code></td>
+<td>
+<p>character vector. Names of columns without NA.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_type</code></td>
+<td>
+<p>character vector. Vector containing column type names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>set_cor</code></td>
+<td>
+<p>Correlation or fraction of featurs using if optimize= False</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>set_method</code></td>
+<td>
+<p>Method used if optimize=False. If NULL default method is used (more in methods_random section ).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percent_of_missing</code></td>
+<td>
+<p>numeric vector. Vector contatining percent of missing data in columns for example  c(0,1,0,0,11.3,..)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>low_corr</code></td>
+<td>
+<p>double betwen 0,1 default 0 lower boundry of correlation set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>up_corr</code></td>
+<td>
+<p>double between 0,1 default 1 upper boundary of correlation set. Both of these parameters work the same for a fraction of features.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methods_random</code></td>
+<td>
+<p>set of methods to chose. Default 'pmm'. If seted on NULL this methods are used predictive mean matching (numeric data) logreg, logistic regression imputation (binary data, factor with 2 levels) polyreg, polytomous regression imputation for unordered categorical data (factor &gt; 2 levels) polr, proportional odds model for (ordered, &gt; 2 levels).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>number of iteration for randomSearch.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+<p>random seed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optimize</code></td>
+<td>
+<p>if user wont to optimize.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correlation</code></td>
+<td>
+<p>If True correlation is using if Fales fraction of features. Default True.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_one</code></td>
+<td>
+<p>One or many imputed sets will be returned. Default True.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_0_1</code></td>
+<td>
+<p>Decaid if add bonus column informing where imputation been done. 0 - value was in dataset, 1 - value was imputed. Default False. (Works only for returning one dataset).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If FALSE function didn't print on console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out_file</code></td>
+<td>
+<p>Output log file location if file already exists log message will be added. If NULL no log will be produced.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return imputed datasets or mids object containing multi imputation datasets.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Stef van Buuren, Karin Groothuis-Oudshoorn (2011).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">{
+  raw_data &lt;- mice::nhanes2
+
+  col_type &lt;- 1:ncol(raw_data)
+  for (i in col_type) {
+    col_type[i] &lt;- class(raw_data[, i])
+  }
+
+  percent_of_missing &lt;- 1:ncol(raw_data)
+  for (i in percent_of_missing) {
+    percent_of_missing[i] &lt;- 100 * (sum(is.na(raw_data[, i])) / nrow(raw_data))
+  }
+  col_no_miss &lt;- colnames(raw_data)[percent_of_missing == 0]
+  col_miss &lt;- colnames(raw_data)[percent_of_missing &gt; 0]
+  imp_data &lt;- autotune_mice(raw_data, optimize = FALSE, iter = 2,
+   col_type = col_type, percent_of_missing = percent_of_missing,
+   col_no_miss = col_no_miss, col_miss = col_miss)
+
+  # Check if all missing value was imputed
+  sum(is.na(imp_data)) == 0
+  # TRUE
+}
+</code></pre>
+
+
+</div>

@@ -1,0 +1,260 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_infectsuscep</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot distribution of infect/suscep</h2>
+
+<h3>Description</h3>
+
+<p>After calculating infectiousness and susceptibility of each individual on the
+network, it creates an <code>nlevels</code> by <code>nlevels</code> matrix indicating the
+number of individuals that lie within each cell, and draws a heatmap.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_infectsuscep(
+  graph,
+  toa,
+  t0 = NULL,
+  normalize = TRUE,
+  K = 1L,
+  r = 0.5,
+  expdiscount = FALSE,
+  bins = 20,
+  nlevels = round(bins/2),
+  h = NULL,
+  logscale = TRUE,
+  main = "Distribution of Infectiousness and\nSusceptibility",
+  xlab = "Infectiousness of ego",
+  ylab = "Susceptibility of ego",
+  sub = ifelse(logscale, "(in log-scale)", NA),
+  color.palette = function(n) viridisLite::viridis(n),
+  include.grid = TRUE,
+  exclude.zeros = FALSE,
+  valued = getOption("diffnet.valued", FALSE),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>A dynamic graph (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>toa</code></td>
+<td>
+<p>Integer vector of length <code class="reqn">n</code> with the times of adoption.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t0</code></td>
+<td>
+<p>Integer scalar. See <code>toa_mat</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalize</code></td>
+<td>
+<p>Logical scalar.  Passed to infection/susceptibility.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>Integer scalar.  Passed to infection/susceptibility.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>Numeric scalar.  Passed to infection/susceptibility.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expdiscount</code></td>
+<td>
+<p>Logical scalar.  Passed to infection/susceptibility.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bins</code></td>
+<td>
+<p>Integer scalar. Size of the grid (<code class="reqn">n</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlevels</code></td>
+<td>
+<p>Integer scalar. Number of levels to plot (see <code>filled.contour</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>Numeric vector of length 2. Passed to <code>kde2d</code> in the <span class="pkg">MASS</span> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logscale</code></td>
+<td>
+<p>Logical scalar. When TRUE the axis of the plot will be presented in log-scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Character scalar. Title of the graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Character scalar. Title of the x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Character scalar. Title of the y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sub</code></td>
+<td>
+<p>Character scalar. Subtitle of the graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color.palette</code></td>
+<td>
+<p>a color palette function to be used to assign colors in the plot (see <code>filled.contour</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.grid</code></td>
+<td>
+<p>Logical scalar. When TRUE, the grid of the graph is drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude.zeros</code></td>
+<td>
+<p>Logical scalar. When TRUE, observations with zero values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valued</code></td>
+<td>
+<p>Logical scalar. When FALSE non-zero values in the adjmat are set to one.
+in infect or suscept are excluded from the graph. This is done explicitly when <code>logscale=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters to be passed to <code>filled.contour.</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This plotting function was inspired by Aral, S., &amp; Walker, D. (2012).
+</p>
+<p>By default the function will try to apply a kernel smooth function via
+<code>kde2d</code>. If not possible (because not enought data points), then
+the user should try changing the parameter <code>h</code> or set it equal to zero.
+</p>
+<p><code>toa</code> is passed to <code>infection/susceptibility</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with three elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>infect</code></td>
+<td>
+<p>A numeric vector of size <code class="reqn">n</code> with infectiousness levels</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suscep</code></td>
+<td>
+<p>A numeric vector of size <code class="reqn">n</code> with susceptibility levels</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coords</code></td>
+<td>
+<p>A list containing the class marks and counts used to draw the
+plot via <code>filled.contour</code> (see <code>grid_distribution</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>complete</code></td>
+<td>
+<p>A logical vector with <code>TRUE</code> when the case was included in
+the plot. (this is relevant whenever <code>logscale=TRUE</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>References</h3>
+
+<p>Aral, S., &amp; Walker, D. (2012). "Identifying Influential and Susceptible Members
+of Social Networks". Science, 337(6092), 337–341.
+<a href="https://doi.org/10.1126/science.1215842">doi:10.1126/science.1215842</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Infectiousness and susceptibility are computed via <code>infection</code> and
+<code>susceptibility</code>.
+</p>
+<p>Other visualizations: 
+<code>dgr()</code>,
+<code>diffusionMap()</code>,
+<code>drawColorKey()</code>,
+<code>grid_distribution()</code>,
+<code>hazard_rate()</code>,
+<code>plot_adopters()</code>,
+<code>plot_diffnet2()</code>,
+<code>plot_diffnet()</code>,
+<code>plot_threshold()</code>,
+<code>rescale_vertex_igraph()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generating a random graph -------------------------------------------------
+set.seed(1234)
+n &lt;- 100
+nper &lt;- 20
+graph &lt;- rgraph_er(n,nper, p=.2, undirected = FALSE)
+toa &lt;- sample(1:(1+nper-1), n, TRUE)
+
+# Visualizing distribution of suscep/infect
+out &lt;- plot_infectsuscep(graph, toa, K=3, logscale = FALSE)
+</code></pre>
+
+
+</div>

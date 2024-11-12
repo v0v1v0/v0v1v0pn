@@ -1,0 +1,423 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>internalNBC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>NBC algorithm source code</h2>
+
+<h3>Description</h3>
+
+<p>Performs Naive Bayes Classification given train and test (validation) datasets, as well as
+additional information for the train and test data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">internalNBC(train, test, known = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>train</code></td>
+<td>
+<p>Dataframe of verbal autopsy train data (See <a href="https://rrwen.github.io/nbc4va/data">Data documentation</a>).
+</p>
+
+<ul>
+<li>
+<p> Columns (in order): ID, Cause, Symptom-1 to Symptom-n..
+</p>
+</li>
+<li>
+<p> ID (vectorof char): unique case identifiers
+</p>
+</li>
+<li>
+<p> Cause (vectorof char): observed causes for each case
+</p>
+</li>
+<li>
+<p> Symptom-n.. (vectorsof (1 OR 0)): 1 for presence, 0 for absence, other values are treated as unknown
+</p>
+</li>
+<li>
+<p> Unknown symptoms are imputed randomly from distributions of 1s and 0s per symptom column; if no 1s or 0s exist then the column is removed
+</p>
+</li>
+</ul>
+<p>Example:
+</p>
+
+<table>
+<tr>
+<td style="text-align: center;">
+  ID </td>
+<td style="text-align: center;"> Cause </td>
+<td style="text-align: center;"> S1 </td>
+<td style="text-align: center;"> S2 </td>
+<td style="text-align: center;"> S3 </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "a1" </td>
+<td style="text-align: center;"> "HIV" </td>
+<td style="text-align: center;"> 1 </td>
+<td style="text-align: center;"> 0 </td>
+<td style="text-align: center;"> 0</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "b2" </td>
+<td style="text-align: center;"> "Stroke" </td>
+<td style="text-align: center;"> 0 </td>
+<td style="text-align: center;"> 0 </td>
+<td style="text-align: center;"> 1</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+  "c3" </td>
+<td style="text-align: center;"> "HIV" </td>
+<td style="text-align: center;"> 1 </td>
+<td style="text-align: center;"> 1 </td>
+<td style="text-align: center;"> 0
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>Dataframe of verbal autopsy test data in the same format as <em>train</em> except if causes are not known:
+</p>
+
+<ul><li>
+<p> The 2nd column (Cause) can be omitted if <em>known</em> is FALSE
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>known</code></td>
+<td>
+<p>TRUE to indicate that the <em>test</em> causes are available in the 2nd column and FALSE to indicate that they are not known</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function was built on code provided by <a href="https://bmcmedicine.biomedcentral.com/articles/10.1186/s12916-015-0521-2">Miasnikof <em>et al</em> (2015)</a>.
+Edits to the code included the following improvements:
+</p>
+
+<ul>
+<li>
+<p> Causes can be character type
+</p>
+</li>
+<li>
+<p> Matrix operations for speed
+</p>
+</li>
+<li>
+<p> Removal of order dependence for causes
+</p>
+</li>
+<li>
+<p> Refactoring of variable names for clarity
+</p>
+</li>
+<li>
+<p> Included list structure of model data and details
+</p>
+</li>
+<li>
+<p> Argument validation
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>out The result list object containing:
+</p>
+
+<ul>
+<li>
+<p> $prob.causes (vectorof double): the probabilities for each test case prediction by case id
+</p>
+</li>
+<li>
+<p> $pred.causes (vectorof char): the predictions for each <em>test</em> case by case id
+</p>
+</li>
+<li>
+<p> Additional values:
+</p>
+
+<ul>
+<li>
+<p> * indicates that the value is only available if <em>test</em> causes are known
+</p>
+</li>
+<li>
+<p> $train (dataframe): the input <em>train</em> data
+</p>
+</li>
+<li>
+<p> $train.ids (vectorof char): the ids of the <em>train</em> data
+</p>
+</li>
+<li>
+<p> $train.causes (vectorof char): the causes of the <em>train</em> data by case id
+</p>
+</li>
+<li>
+<p> $train.samples (double): the number of input <em>train</em> samples
+</p>
+</li>
+<li>
+<p> $test (dataframe): the input <em>test</em> data
+</p>
+</li>
+<li>
+<p> $test.ids (vectorof char): the ids of the <em>test</em> data
+</p>
+</li>
+<li>
+<p> $test.causes* (vectorof char): the causes of the <em>test</em> data by case id
+</p>
+</li>
+<li>
+<p> $test.samples (double): the number of input <em>test</em> samples
+</p>
+</li>
+<li>
+<p> $test.known (logical): whether the <em>test</em> causes are known
+</p>
+</li>
+<li>
+<p> $symptoms (vectorof char): all unique symptoms in order
+</p>
+</li>
+<li>
+<p> $causes (vectorof char): all possible unique causes of death
+</p>
+</li>
+<li>
+<p> $causes.train (vectorof char): all unique causes of death in the <em>train</em> data
+</p>
+</li>
+<li>
+<p> $causes.test* (vectorof char): all unique causes of death in the <em>test</em> data
+</p>
+</li>
+<li>
+<p> $causes.pred (vectorof char): all unique causes of death in the predicted cases
+</p>
+</li>
+<li>
+<p> $causes.obs* (vectorof char): all unique causes of death in the observed cases
+</p>
+</li>
+<li>
+<p> $pred (dataframe): a table of predictions for each <em>test</em> case, sorted by probability
+</p>
+
+<ul>
+<li>
+<p> Columns (in order): CaseID, TrueCause, Prediction-1 to Prediction-n..
+</p>
+</li>
+<li>
+<p> CaseID (vectorof char): case identifiers
+</p>
+</li>
+<li>
+<p> TrueCause* (vectorof char): the observed causes of death
+</p>
+</li>
+<li>
+<p> Prediction-n.. (vectorsof char): the predicted causes of death,
+where Prediction1 is the most probable cause, and Prediction-n is the least probable cause
+</p>
+</li>
+</ul>
+<p>Example:
+</p>
+
+<table>
+<tr>
+<td style="text-align: center;">
+      CaseID </td>
+<td style="text-align: center;"> Prediction1 </td>
+<td style="text-align: center;"> Prediction2 </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "a1" </td>
+<td style="text-align: center;"> "HIV" </td>
+<td style="text-align: center;"> "Stroke" </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "b2" </td>
+<td style="text-align: center;"> "Stroke" </td>
+<td style="text-align: center;"> "HIV" </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "c3" </td>
+<td style="text-align: center;"> "HIV" </td>
+<td style="text-align: center;"> "Stroke"
+    </td>
+</tr>
+</table>
+</li>
+<li>
+<p> $obs* (dataframe): a table of observed causes matching <em>$pred</em> for each <em>test</em> case
+</p>
+
+<ul>
+<li>
+<p> Columns (in order): CaseID, TrueCause
+</p>
+</li>
+<li>
+<p> CaseID (vectorof char): case identifiers
+</p>
+</li>
+<li>
+<p> TrueCause (vectorof char): the actual cause of death if applicable
+</p>
+</li>
+</ul>
+<p>Example:
+</p>
+
+<table>
+<tr>
+<td style="text-align: center;">
+      CaseID </td>
+<td style="text-align: center;"> TrueCause </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "a1" </td>
+<td style="text-align: center;"> "HIV" </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "b2" </td>
+<td style="text-align: center;"> "Stroke" </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "c3" </td>
+<td style="text-align: center;"> "HIV"
+    </td>
+</tr>
+</table>
+</li>
+<li>
+<p> $obs.causes* (vectorof char): all observed causes of death by case id
+</p>
+</li>
+<li>
+<p> $prob (dataframe): a table of probabilities of each cause for each test case
+</p>
+
+<ul>
+<li>
+<p> Columns (in order): CaseID, Cause-1 to Cause-n..
+</p>
+</li>
+<li>
+<p> CaseID (vectorof char): case identifiers
+</p>
+</li>
+<li>
+<p> Cause-n.. (vectorsof double): probabilies for each cause of death
+</p>
+</li>
+</ul>
+<p>Example:
+</p>
+
+<table>
+<tr>
+<td style="text-align: center;">
+      CaseID </td>
+<td style="text-align: center;"> HIV </td>
+<td style="text-align: center;"> Stroke </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "a1" </td>
+<td style="text-align: center;"> 0.5 </td>
+<td style="text-align: center;"> 0.5 </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "b2" </td>
+<td style="text-align: center;"> 0.3 </td>
+<td style="text-align: center;"> 0.7 </td>
+</tr>
+<tr>
+<td style="text-align: center;">
+      "c3" </td>
+<td style="text-align: center;"> 0.9 </td>
+<td style="text-align: center;"> 0.1
+    </td>
+</tr>
+</table>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Pierre Miasnikof (Original), Vasily Giannakeas (Original), Richard Wen (Edits) &lt;<a href="mailto:wenr@smh.ca">wenr@smh.ca</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+
+<ul><li>
+<p> Miasnikof P, Giannakeas V, Gomes M, Aleksandrowicz L, Shestopaloff AY, Alam D, Tollman S, Samarikhalaj, Jha P. Naive Bayes classifiers for verbal autopsies: comparison to physician-based classification for 21,000 child and adult deaths. BMC Medicine. 2015;13:286. doi:10.1186/s12916-015-0521-2.
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p>Other internal functions: 
+<code>internalGetCSMFAcc()</code>,
+<code>internalGetCSMFMaxError()</code>,
+<code>internalGetCauseMetrics()</code>,
+<code>internalGetMetrics()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nbc4va)
+data(nbc4vaData)
+
+# Create naive bayes classifier on random train and test data
+# Set "known" to indicate whether or not "test" causes are known
+train &lt;- nbc4vaData[1:50, ]
+test &lt;- nbc4vaData[51:100, ]
+results &lt;- nbc4va::internalNBC(train, test, known=TRUE)
+
+# Obtain the probabilities and predictions
+prob &lt;- results$prob.causes
+pred &lt;- results$pred.causes
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>var_cov</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Variance Covariance matrix of for g(n)ls and (n)lme models</h2>
+
+<h3>Description</h3>
+
+<p>Extracts the variance covariance matrix (residuals, random or all)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">var_cov(
+  object,
+  type = c("residual", "random", "all", "conditional", "marginal"),
+  aug = FALSE,
+  sparse = FALSE,
+  data = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object which inherits class <code>lm</code>, <code>gls</code> or <code>lme</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>“residual” for the variance-covariance for the residuals, “random”
+for the variance-covariance of the random effects or “all” for the sum of both.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aug</code></td>
+<td>
+<p>whether to augment the matrix of the random effects to the dimensions of the data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sparse</code></td>
+<td>
+<p>whether to return a sparse matrix (default is FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>optional passing of ‘data’, probably needed when using this function inside other functions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Variance Covariance matrix for (non)linear mixed models
+</p>
+
+
+<h3>Value</h3>
+
+<p>It returns a <code>matrix</code> or a sparse matrix <code>Matrix</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>See Chapter 5 of Pinheiro and Bates. This returns potentially a very large 
+matrix of N x N, where N is the number of rows in the data.frame. 
+The function <code>getVarCov</code> only works well for  
+<code>lme</code> objects. <br>
+The equivalence is more or less: <br>
+getVarCov type = “random.effects” equivalent to var_cov type = “random”. <br>
+getVarCov type = “conditional” equivalent to var_cov type = “residual”. <br>
+getVarCov type = “marginal” equivalent to var_cov type = “all”. <br>
+The difference is that getVarCov has an argument that specifies the individual 
+for which the matrix is being retrieved and var_cov returns the full matrix only.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getVarCov</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(graphics)
+require(nlme)
+data(ChickWeight)
+## First a linear model
+flm &lt;- lm(weight ~ Time, data = ChickWeight)
+vlm &lt;- var_cov(flm)
+## First model with no modeling of the Variance-Covariance
+fit0 &lt;- gls(weight ~ Time, data = ChickWeight)
+v0 &lt;- var_cov(fit0)
+## Only modeling the diagonal (weights)
+fit1 &lt;- gls(weight ~ Time, data = ChickWeight, weights = varPower())
+v1 &lt;- var_cov(fit1)
+## Only the correlation structure is defined and there are no groups
+fit2 &lt;- gls(weight ~ Time, data = ChickWeight, correlation = corAR1())
+v2 &lt;- var_cov(fit2)
+## The correlation structure is defined and there are groups present
+fit3 &lt;- gls(weight ~ Time, data = ChickWeight, correlation = corCAR1(form = ~ Time | Chick))
+v3 &lt;- var_cov(fit3)
+## There are both weights and correlations
+fit4 &lt;- gls(weight ~ Time, data = ChickWeight, 
+            weights = varPower(),
+            correlation = corCAR1(form = ~ Time | Chick))
+v4 &lt;- var_cov(fit4)
+## Tip: you can visualize these matrices using
+image(log(v4[,ncol(v4):1]))
+
+</code></pre>
+
+
+</div>

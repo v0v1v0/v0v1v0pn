@@ -1,0 +1,185 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>quad_spline_est</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Quadratic spline frontiers 
+</h2>
+
+<h3>Description</h3>
+
+<p>This function is an implementation of the (un)constrained quadratic spline smoother proposed by Daouia, Noh and Park (2016).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">quad_spline_est(xtab, ytab, x, kn = ceiling((length(xtab))^(1/4)), method= "u", 
+ all.dea = FALSE, control = list("tm_limit" = 700))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kn</code></td>
+<td>
+<p>an integer specifying the number of inter-knot segments used in the computation of the spline estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a character equal to "u" (unconstrained estimator), "m" (under the monotonicity constraint) or "mc" (under simultaneous monotonicity and concavity constraints).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.dea</code></td>
+<td>
+<p>a boolean.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of parameters to the GLPK solver. See *Details* of help(Rglpk_solve_LP).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">a</code> and <code class="reqn">b</code> be, respectively, the minimum and maximum of the design points <code class="reqn">x_1,\ldots,x_n</code>.  
+Denote a partition of <code class="reqn">[a,b]</code> by <code class="reqn">a=t_0&lt;t_1&lt;\cdots&lt;t_{k_n}=b</code> (see below the selection process).
+Let <code class="reqn">N=k_n+1</code> and <code class="reqn">\pi(x)=(\pi_1(x),\ldots,\pi_N(x))^T</code> be the vector of normalized 
+B-splines of order 3 based on the knot mesh <code class="reqn">\{t_j\}</code> (see, <em>e.g.</em>, Schumaker (2007)).
+When the true frontier <code class="reqn">\varphi(x)</code> is known or required to be monotone nondecreasing (option <code>cv=0</code>), 
+its constrained quadratic spline estimate is defined by  <code class="reqn">\hat\varphi_n(x)=\pi(x)^T \hat\alpha</code>, where <code class="reqn">\hat\alpha</code> minimizes
+</p>
+<p style="text-align: center;"><code class="reqn">\int_{0}^1\pi(x)^T \alpha \,dx = \sum_{j=1}^N \alpha_j \int_{0}^1\pi_j(x) \,dx</code>
+</p>
+
+<p>over <code class="reqn">\alpha\in\R^N</code> subject to the envelopment and monotonicity constraints
+<code class="reqn">\pi(x_i)^T \alpha\geq y_i</code>,  <code class="reqn">i=1,\ldots,n</code>, and <code class="reqn">\pi'(t_j)^T \alpha\geq 0</code>, <code class="reqn">j=0,1,\ldots,k_n</code>, 
+with <code class="reqn">\pi'</code> being the derivative of <code class="reqn">\pi</code>.
+</p>
+<p>Considering the special connection of the spline smoother <code class="reqn">\hat \varphi_n</code> with the traditional FDH frontier
+<code class="reqn">\varphi_n</code> (see the function <code>dea_est</code>),
+Daouia et al. (2015) propose an easy way of choosing the knot mesh.
+Let <code class="reqn">(\mathcal{X}_1,\mathcal{Y}_1),\ldots, (\mathcal{X}_\mathcal{N},\mathcal{Y}_\mathcal{N})</code> 
+be the observations <code class="reqn">(x_i,y_i)</code> lying on the FDH boundary (<em>i.e.</em> <code class="reqn">y_i=\varphi_n(x_i)</code>).
+The basic idea is to pick out a set of knots equally spaced in percentile ranks 
+among the <code class="reqn">\mathcal{N}</code> FDH points <code class="reqn">(\mathcal{X}_{\ell},\mathcal{Y}_{\ell})</code> by
+taking <code class="reqn">t_j = {\mathcal{X}_{[j \mathcal{N}/k_n]}}</code>, the <code class="reqn">j/k_n</code>th quantile 
+of the values of <code class="reqn">\mathcal{X}_{\ell}</code> for <code class="reqn">j=1,\ldots,k_n-1</code>.
+The choice of the number of internal knots is then viewed as model selection 
+through the minimization of the AIC and BIC information criteria (see the function <code>quad_spline_kn</code>).
+</p>
+<p>When the monotone boundary <code class="reqn">\varphi(x)</code>  is also believed to be concave (option <code>cv=1</code>),
+its constrained fit is defined as <code class="reqn">\hat\varphi^{\star}_n(x)=\pi(x)^T \hat\alpha^{\star}</code>, where <code class="reqn">\hat\alpha^{\star}\in\R^N</code> 
+minimizes the same objective function as <code class="reqn">\hat\alpha</code> subject to the same envelopment 
+and monotonicity constraints and the additional concavity constraints
+<code class="reqn">\pi''(t^*_j)^T \alpha\leq 0</code>, <code class="reqn">j=1,\ldots,k_n,</code>
+where <code class="reqn">\pi''</code> is the constant second derivative of <code class="reqn">\pi</code> on each inter-knot interval  and <code class="reqn">t^*_j</code> is the midpoint of <code class="reqn">(t_{j-1},t_j]</code>.
+</p>
+<p>Regarding the choice of knots, the same scheme as for <code class="reqn">\hat\varphi_n</code> can be applied by replacing 
+the FDH points <code class="reqn">(\mathcal{X}_1,\mathcal{Y}_1),\ldots, (\mathcal{X}_\mathcal{N},\mathcal{Y}_\mathcal{N})</code>   
+with the DEA points <code class="reqn">(\mathcal{X}^*_1,\mathcal{Y}^*_1),\ldots, (\mathcal{X}^*_\mathcal{M},\mathcal{Y}^*_\mathcal{M})</code>, that is, 
+the observations <code class="reqn">(x_i,y_i)</code> lying on the piecewise linear DEA frontier  (see the function <code>dea_est</code>). 
+Alternatively, the strategy of just using all the DEA points as knots is also 
+working quite well for datasets of modest size as shown in Daouia et al. (2016). 
+In this case, the user has to choose the option <code>all.dea=TRUE</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>. Returns a vector of NA if no solution has been found by the solver (GLPK). 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hohsuk Noh.
+</p>
+
+
+<h3>References</h3>
+
+<p>Daouia, A., Noh, H. and Park, B.U. (2016). Data Envelope fitting with constrained polynomial splines. <em>Journal of the Royal Statistical Society: Series B</em>, <b>78</b>(1), 3-30. doi:10.1111/rssb.12098.
+</p>
+<p>Schumaker, L.L. (2007). <em>Spline Functions: Basic Theory</em>, 3rd edition, Cambridge University Press.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>quad_spline_kn</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data("green")
+x.green &lt;- seq(min(log(green$COST)), max(log(green$COST)), length.out=101)
+# 1. Unconstrained quadratic spline fits
+# Optimal number of inter-knot segments via the BIC criterion
+(kn.bic.green.u&lt;-quad_spline_kn(log(green$COST), 
+ log(green$OUTPUT), method="u", type="BIC"))
+# Unconstrained spline estimate
+y.quad.green.u&lt;-quad_spline_est(log(green$COST), 
+ log(green$OUTPUT), x.green, kn=kn.bic.green.u, method="u")
+
+# 2. Monotonicity constraint
+# Optimal number of inter-knot segments via the BIC criterion
+(kn.bic.green.m&lt;-quad_spline_kn(log(green$COST), 
+ log(green$OUTPUT), method="m", type="BIC"))
+# Monotonic splines estimate
+y.quad.green.m&lt;-quad_spline_est(log(green$COST), 
+ log(green$OUTPUT), x.green, kn=kn.bic.green.m, method="m") 
+   
+# 3. Monotonicity and Concavity constraints
+# Optimal number of inter-knot segments via the BIC criterion
+(kn.bic.green.mc&lt;-quad_spline_kn(log(green$COST), 
+ log(green$OUTPUT), method="mc", type="BIC"))
+# Monotonic/Concave splines estimate 
+y.quad.green.mc&lt;-quad_spline_est(log(green$COST), 
+ log(green$OUTPUT), x.green, kn=kn.bic.green.mc, 
+ method="mc", all.dea=TRUE)
+
+# Representation 
+plot(x.green, y.quad.green.u, lty=1, lwd=4, col="green", 
+ type="l", xlab="log(COST)", ylab="log(OUTPUT)")   
+lines(x.green, y.quad.green.m, lty=2, lwd=4, col="cyan")
+lines(x.green, y.quad.green.mc, lwd=4, lty=3, col="magenta")   
+points(log(OUTPUT)~log(COST), data=green)
+legend("topleft", col=c("green","cyan","magenta"), 
+lty=c(1,2,3), legend=c("unconstrained", "monotone", 
+ "monotone + concave"), lwd=4, cex=0.8) 
+
+## End(Not run)   
+</code></pre>
+
+
+</div>

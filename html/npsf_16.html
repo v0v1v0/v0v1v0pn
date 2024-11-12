@@ -1,0 +1,756 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Stochastic Frontier Models Using Cross-Sectional and Panel Data
+</h2>
+
+<h3>Description</h3>
+
+<p><code>sf</code> performs maximum likelihood estimation of the parameters and technical or cost efficiencies in cross-sectional stochastic (production or cost) frontier models with half-normal or truncated normal distributional assumption imposed on inefficiency error component. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sf(formula, data, it = NULL, subset,
+ prod = TRUE, model = "K1990", distribution = c("h"),
+ eff.time.invariant = FALSE, 
+ mean.u.0i.zero     = FALSE,
+ mean.u.0i          = NULL,
+ ln.var.u.0i        = NULL,
+ ln.var.v.0i        = NULL,
+ ln.var.v.it        = NULL,  
+ simtype = c("halton", "rnorm"), halton.base = NULL, R = 500,
+ simtype_GHK = c("halton", "runif"), R_GHK = 500,
+ random.primes = FALSE,
+ cost.eff.less.one  = FALSE, level = 95, marg.eff = FALSE,
+ start.val = NULL, maxit = 199, report.ll.optim = 10, 
+ reltol = 1e-8, lmtol = sqrt(.Machine$double.eps),
+ digits = 4, print.level = 4, seed = 17345168,
+ only.data = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>an object of class “formula” (or one that can be coerced to that class): a symbolic description of the model. The details of model specification are given under ‘Details’.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame containing variables in the model. If not found in data, the variables are taken from environment (<code>formula</code>), typically the environment from which <code>sf</code> is called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>it</code></td>
+<td>
+
+<p>vector with two character entries.  E.g., c("ID", "TIME"), where "ID" defines individuals that are observed in time periods defined by "TIME". The default is <code>NULL</code>.  At default, cross-sectional model will be estimated. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>an optional vector specifying a subset of observations for which technical or cost efficiencies are to be computed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prod</code></td>
+<td>
+
+<p>logical. If <code>TRUE</code>, the estimates of parameters of stochastic production frontier model and of technical efficiencies are returned; if <code>FALSE</code>, the estimates of parameters of stochastic cost frontier model and of cost efficiencies are returned.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>character. Five panel data models are estimated for now. "K1990" and "K1990modified" (see Kumbhakar, 1990), "BC1992" (see Battese and Coelli, 1992), "4comp" (see Badunenko and Kumbhakar (2016) and Filippini and Greene, 2016). They specify common evolution of inefficiency.  Deffault is "K1990". The time functions are "( 1 + exp(b*t + c*t^2) )^-1", "1 + d*(t-T_i) + e*(t-T_i)^2", and "exp( -f*(t-T_i) )", respectively.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+
+<p>either <code>"h"</code> (half-normal), <code>"t"</code> (truncated normal), or <code>"e"</code> (exponential, only crosssectional models), specifying the distribution of inefficiency term.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eff.time.invariant</code></td>
+<td>
+
+<p>logical. If <code>TRUE</code>, the 1st generation of panel data models is estimated, otherwise, the 2nd generation or 4 components panel data model is estimated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.u.0i.zero</code></td>
+<td>
+
+<p>logical. If <code>TRUE</code>, normal-half normal model is estimated, otherwise, normal-truncated model is estimated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.u.0i</code></td>
+<td>
+
+<p>one-sided formula; e.g. <code>mean.u.0i ~ z1 + z2</code>. Specifies whether the mean of pre-truncated normal distribution of inefficiency term is a linear function of exogenous variables. In cross-sectional models, used only when <code>distribution = "t"</code>. If <code>NULL</code>, mean is assumed to be constant for all ids. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ln.var.u.0i</code></td>
+<td>
+
+<p>one-sided formula; e.g. <code>ln.var.u.0i ~ z1 + z2</code>. Specifies exogenous variables entering the expression for the log of variance of inefficiency error component. If <code>NULL</code>, inefficiency term is assumed to be homoskedastic, i.e. <code class="reqn">\sigma_u^2 = exp(\gamma[0])</code>. Time invariant variables are expected.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ln.var.v.0i</code></td>
+<td>
+
+<p>one-sided formula; e.g. <code>ln.var.v.0i ~ z1 + z2</code>. Specifies exogenous variables entering the expression for variance of random noise error component. If <code>NULL</code>, random noise component is assumed to be homoskedastic, i.e. <code class="reqn">\sigma_v^2 = exp(\gamma[0])</code>. Time invariant variables are expected.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ln.var.v.it</code></td>
+<td>
+
+<p>one-sided formula; e.g. <code>ln.var.v.it ~ z1 + z2</code>. Specifies exogenous variables entering the expression for variance of random noise error component. If <code>NULL</code>, random noise component is assumed to be homoskedastic, i.e. <code class="reqn">\sigma_v^2 = exp(\gamma[0])</code>. Time invariant variables are expected.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simtype</code></td>
+<td>
+
+<p>character. Type of random deviates for the 4 components model. 'halton' draws are default.  One can specify 'rnorm.'
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>halton.base</code></td>
+<td>
+
+<p>numeric.  The prime number which is the base for the Halton draws. If not used, different bases are used for each id.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+
+<p>numeric.  Number of draws.  Default is 500.  Can be time consuming.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simtype_GHK</code></td>
+<td>
+
+<p>character. Type of random deviates for use in GHK for efficiency estimating by approximation. 'halton' draws are default.  One can specify 'runif.'
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R_GHK</code></td>
+<td>
+
+<p>numeric.  Number of draws for GHK.  Default is 500.  Can be time consuming.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.primes</code></td>
+<td>
+
+<p>logical. If <code>TRUE</code>, and <code>halton.base = NULL</code>, the primes are chosen on a random basis for each ID from 100008 available prime numbers.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cost.eff.less.one</code></td>
+<td>
+
+<p>logical. If <code>TRUE</code>, and <code>prod = FALSE</code>, reported cost efficiencies are larger than one. Interpretation: by what factor is total cost larger than the potential total cost.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+
+<p>numeric. Defines level% two-sided prediction interval for technical or cost efficiencies (see Horrace and Schmidt 1996). Default is 95.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marg.eff</code></td>
+<td>
+
+<p>logical. If <code>TRUE</code>, unit-specific marginal effects of exogenous variables on the mean of distribution of inefficiency term are returned.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.val</code></td>
+<td>
+
+<p>numeric. Starting values to be supplied to the optimization routine. If <code>NULL</code>, OLS and method of moments estimates are used (see Kumbhakar and Lovell 2000).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+
+<p>numeric. Maximum number of iterations. Default is 199.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>report.ll.optim</code></td>
+<td>
+
+<p>numeric. Not used for now.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reltol</code></td>
+<td>
+
+<p>numeric. One of convergence criteria. Not used for now.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lmtol</code></td>
+<td>
+
+<p>numeric. Tolerance for the scaled gradient in ML optimization. Default is sqrt(.Machine$double.eps).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+
+<p>numeric. Number of digits to be displayed in estimation results and for efficiency estimates. Default is 4.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.level</code></td>
+<td>
+
+<p>numeric. 1 - print estimation results. 2 - print optimization details. 3 - print summary of point estimates of technical or cost efficiencies. 7 - print unit-specific point and interval estimates of technical or cost efficiencies. Default is 4.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+
+<p>set seed for replicability. Default is 17345168.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>only.data</code></td>
+<td>
+
+<p>logical. If <code>TRUE</code>, only data are returned. Default is <code>FALSE</code>
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Models for <code>sf</code> are specified symbolically. A typical model has the form <code>y ~ x1 + ...</code>, where <code>y</code> represents the logarithm of outputs or total costs and <code>{x1,...}</code> is a series of inputs or outputs and input prices (in logs).  
+</p>
+<p>Options <code>ln.var.u.0i</code> and <code>ln.var.v.0i</code> can be used if multiplicative heteroskedasticity of either inefficiency or random noise component (or both) is assumed; i.e. if their variances can be expressed as exponential functions of (e.g. size-related) exogenous variables (including intercept) (see Caudill et al. 1995).
+</p>
+<p>If <code>marg.eff = TRUE</code> and <code>distribution = "h"</code>, the marginal effect of <em>k</em>th exogenous variable on the expected value of inefficiency term of unit <em>i</em> is computed as: <code class="reqn">\gamma[k]\sigma[i]/\sqrt2\pi</code>, where <code class="reqn">\sigma_u[i] = \sqrt exp(z[i]'\gamma)</code>. If <code>distribution = "t"</code>, marginal effects are returned if either <code>mean.u.0i</code> or <code>ln.var.u.0i</code> are not <code>NULL</code>. If the same exogenous variables are specified under both options, (non-monotonic) marginal effects are computed as explained in Wang (2002).
+</p>
+<p>See references and links below.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>sf</code> returns a list of class <code>npsf</code> containing the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coef</code></td>
+<td>
+
+<p>numeric. Named vector of ML parameter estimates.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcov</code></td>
+<td>
+
+<p>matrix. Estimated covariance matrix of ML estimator. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ll</code></td>
+<td>
+
+<p>numeric. Value of log-likelihood at ML estimates.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>efficiencies</code></td>
+<td>
+
+<p>data frame. Contains point estimates of unit-specific technical or cost efficiencies:  exp(-E(u|e)) of Jondrow et al. (1982), E(exp(-u)|e) of Battese and Coelli (1988), and exp(-M(u|e)), where M(u|e) is the mode of conditional distribution of inefficiency term. In addition, estimated lower and upper bounds of (1-<code class="reqn">\alpha</code>)100% two-sided prediction intervals are returned. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marg.effects</code></td>
+<td>
+
+<p>data frame. Contains unit-specific marginal effects of exogenous variables on the expected value of inefficiency term. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmas_u</code></td>
+<td>
+
+<p>matrix. Estimated unit-specific variances of inefficiency term. Returned if <code>ln.var.u.0i</code> is not <code>NULL</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmas_v</code></td>
+<td>
+
+<p>matrix. Estimated unit-specific variances of random noise component. Returned if <code>ln.var.v.0i</code> is not <code>NULL</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+
+<p>matrix. Estimated unit-specific means of pre-truncated normal distribution of inefficiency term. Returned if <code>mean.u.0i</code> is not <code>NULL</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>esample</code></td>
+<td>
+
+<p>logical. Returns TRUE if the observation in user supplied data is in the estimation subsample and FALSE otherwise.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Oleg Badunenko &lt;oleg.badunenko@brunel.ac.uk&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Badunenko, O. and Kumbhakar, S.C. (2016), When, Where and How to Estimate Persistent and Transient Efficiency in Stochastic Frontier Panel Data Models, <em>European Journal of Operational Research</em>, <b>255</b>(1), 272–287, doi: <a href="https://doi.org/10.1016/j.ejor.2016.04.049">10.1016/j.ejor.2016.04.049</a>.
+</p>
+<p>Battese, G., Coelli, T. (1988), Prediction of firm-level technical effiiencies with a generalized frontier production function and panel data. <em>Journal of Econometrics</em>, <b>38</b>, 387–399.
+</p>
+<p>Battese, G., Coelli, T. (1992), Frontier production functions, technical efficiency and panel data: With application to paddy farmers in India. <em>Journal of Productivity Analysis</em>, <b>3</b>, 153–169.
+</p>
+<p>Caudill, S., Ford, J., Gropper, D. (1995), Frontier estimation and firm-specific inefficiency measures in the presence of heteroscedasticity. <em>Journal of Business and Economic Statistics</em>, <b>13</b>, 105–111.
+</p>
+<p>Filippini, M. and Greene, W.H. (2016), Persistent and transient productive inefficiency: A maximum simulated likelihood approach. <em>Journal of Productivity Analysis</em>, <b>45</b> (2), 187–196.
+</p>
+<p>Horrace, W. and Schmidt, P. (1996), On ranking and selection from independent truncated normal distributions. <em>Journal of Productivity Analysis</em>, <b>7</b>, 257–282.
+</p>
+<p>Jondrow, J., Lovell, C., Materov, I., Schmidt, P. (1982), On estimation of technical inefficiency in the stochastic frontier production function model. <em>Journal of Econometrics</em>, <b>19</b>, 233–238.
+</p>
+<p>Kumbhakar, S. (1990),  Production Frontiers, Panel Data, and Time-varying Technical Inefficiency. <em>Journal of Econometrics</em>, <b>46</b>, 201–211.
+</p>
+<p>Kumbhakar, S. and Lovell, C. (2003), <em>Stochastic Frontier Analysis.</em> Cambridge: Cambridge University Press, doi: <a href="https://doi.org/10.1017/CBO9781139174411">10.1017/CBO9781139174411</a>.
+</p>
+<p>Wang, H.-J. (2002), Heteroskedasticity and non-monotonic efficiency effects of a stochastic frontier model. <em>Journal of Productivity Analysis</em>, <b>18</b>, 241–253.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>teradial</code>, <code>tenonradial</code>, <code>teradialbc</code>, <code>tenonradialbc</code>, <code>nptestrts</code>, <code>nptestind</code>, <code>halton</code>, <code>primes</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> 
+require( npsf )
+
+# Cross-sectional examples begin ------------------------------------------
+
+# Load Penn World Tables 5.6 dataset
+
+data( pwt56 )
+head( pwt56 )
+
+# Create some missing values
+
+pwt56 [4, "K"] &lt;- NA 
+
+# Stochastic production frontier model with 
+# homoskedastic error components (half-normal)
+
+# Use subset of observations - for year 1965
+
+m1 &lt;- sf(log(Y) ~ log(L) + log(K), data = pwt56, 
+         subset = year == 1965, distribution = "h")
+
+m1 &lt;- sf(log(Y) ~ log(L) + log(K), data = pwt56, 
+         subset = year == 1965, distribution = "e")
+
+# Test CRS: 'car' package in required for that
+## Not run: linearHypothesis(m1, "log(L) + log(K) = 1")
+
+# Write efficiencies to the data frame using 'esample':
+
+pwt56$BC[ m1$esample ] &lt;- m1$efficiencies$BC
+## Not run: View(pwt56)
+
+# Computation using matrices
+
+Y1 &lt;- as.matrix(log(pwt56[pwt56$year == 1965, 
+                          c("Y"), drop = FALSE]))
+X1 &lt;- as.matrix(log(pwt56[pwt56$year == 1965,
+                          c("K", "L"), drop = FALSE]))
+
+X1 [51, 2] &lt;- NA # create missing
+X1 [49, 1] &lt;- NA # create missing
+
+m2 &lt;- sf(Y1 ~ X1, distribution = "h")
+
+# Load U.S. commercial banks dataset
+
+data(banks05)
+head(banks05)
+
+# Doubly heteroskedastic stochastic cost frontier 
+# model (truncated normal)
+
+# Print summaries of cost efficiencies' estimates
+
+m3 &lt;- sf(lnC ~ lnw1 + lnw2 + lny1 + lny2, ln.var.u.0i = ~ ER, 
+         ln.var.v.0i = ~ LA, data = banks05, distribution = "t", 
+         prod = FALSE, print.level = 3)
+
+m3 &lt;- sf(lnC ~ lnw1 + lnw2 + lny1 + lny2, ln.var.u.0i = ~ ER, 
+         ln.var.v.0i = ~ LA, data = banks05, distribution = "e", 
+         prod = FALSE, print.level = 3)
+         
+# Non-monotonic marginal effects of equity ratio on 
+# the mean of distribution of inefficiency term
+
+m4 &lt;- sf(lnC ~ lnw1 + lnw2 + lny1 + lny2, ln.var.u.0i = ~ ER,
+         mean.u.0i = ~ ER, data = banks05, distribution = "t", 
+         prod = FALSE, marg.eff = TRUE)
+
+summary(m4$marg.effects)
+
+
+# Cross-sectional examples end --------------------------------------------
+
+## Not run: 
+
+# Panel data examples begin -----------------------------------------------
+
+# The only way to differentiate between cross-sectional and panel-data
+# models is by specifying "it".
+# If "it" is not specified, cross-sectional model will be estimated.
+# Example is below.
+
+# Read data ---------------------------------------------------------------
+
+# Load U.S. commercial banks dataset
+
+data(banks00_07)
+head(banks00_07, 5)
+
+banks00_07$trend &lt;- banks00_07$year - min(banks00_07$year) + 1
+
+# Model specification -----------------------------------------------------
+
+my.prod     &lt;- FALSE
+my.it       &lt;- c("id","year")
+
+# my.model = "BC1992"
+# my.model = "K1990modified"
+# my.model = "K1990"
+
+# translog ----------------------------------------------------------------
+formu &lt;- log(TC) ~ (log(Y1) + log(Y2) + log(W1) + log(W2) + trend)^2 +
+ I(0.5*log(Y1)^2) + I(0.5*log(Y2)^2) + I(0.5*log(W1)^2) + I(0.5*log(W2)^2) +
+ trend + I(0.5*trend^2)
+
+# Cobb-Douglas ------------------------------------------------------------
+# formu &lt;- log(TC) ~ log(Y1) + log(Y2) + log(W1) + log(W2) + trend + I(trend^2)
+
+ols &lt;- lm(formu, data = banks00_07)
+# just to mark the results of the OLS model
+summary(ols)
+
+# Components specifications -----------------------------------------------
+
+ln.var.v.it &lt;- ~ log(TA)
+ln.var.u.0i &lt;- ~ ER_ave
+mean.u.0i_1 &lt;- ~ LLP_ave + LA_ave
+mean.u.0i_2 &lt;- ~ LLP_ave + LA_ave - 1
+
+# Suppose "it" is not specified
+# Then it is a cross-sectional model
+
+t0_1st_0 &lt;- sf(formu, data = banks00_07, subset = year &gt; 2000,
+               prod = my.prod,
+               ln.var.v.it = ln.var.v.it,
+               ln.var.u.0i = ln.var.u.0i,
+               eff.time.invariant = TRUE,
+               mean.u.0i.zero = TRUE)
+
+# 1st generation models ---------------------------------------------------
+
+# normal-half normal ------------------------------------------------------
+
+# the same as above but "it" is specified
+
+t0_1st_0 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+               prod = my.prod,
+               ln.var.v.it = ln.var.v.it,
+               ln.var.u.0i = ln.var.u.0i, 
+               eff.time.invariant = TRUE, 
+               mean.u.0i.zero = TRUE)
+
+# Note efficiencies are time-invariant
+
+# confidence intervals for efficiencies -----------------------------------
+
+head(t0_1st_0$efficiencies, 20)
+
+
+# normal-truncated normal -------------------------------------------------
+
+# truncation point is constant (for all ids) ------------------------------
+
+t0_1st_1 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+               prod = my.prod,
+               eff.time.invariant = TRUE,
+               mean.u.0i.zero = FALSE,
+               ln.var.v.it = ln.var.v.it,
+               ln.var.u.0i = ln.var.u.0i,
+               mean.u.0i = NULL,
+               cost.eff.less.one = TRUE)
+
+
+
+# truncation point is determined by variables -----------------------------
+
+t0_1st_2 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+               prod = my.prod,
+               eff.time.invariant = TRUE,
+               mean.u.0i.zero = FALSE,
+               mean.u.0i = mean.u.0i_1,
+               ln.var.v.it = ln.var.v.it,
+               ln.var.u.0i = ln.var.u.0i,
+               cost.eff.less.one = TRUE)
+
+
+
+# the same, but without intercept in mean.u.0i
+
+t0_1st_3 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+               prod = my.prod,
+               eff.time.invariant = TRUE,
+               mean.u.0i.zero = FALSE,
+               mean.u.0i = mean.u.0i_2,
+               ln.var.v.it = ln.var.v.it,
+               ln.var.u.0i = ln.var.u.0i,
+               cost.eff.less.one = TRUE)
+
+# 2nd generation models ---------------------------------------------------
+
+# normal-half normal ------------------------------------------------------
+
+# Kumbhakar (1990) model --------------------------------------------------
+
+t_nhn_K1990 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+                  prod = my.prod,
+                  eff.time.invariant = FALSE,
+                  mean.u.0i.zero = TRUE, 
+                  ln.var.v.it = ln.var.v.it,
+                  ln.var.u.0i = ln.var.u.0i, 
+                  cost.eff.less.one = FALSE)
+
+
+# Kumbhakar (1990) modified model -----------------------------------------
+
+t_nhn_K1990modified &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+                          prod = my.prod, model = "K1990modified",
+                          eff.time.invariant = FALSE,
+                          mean.u.0i.zero = TRUE, 
+                          ln.var.v.it = ln.var.v.it,
+                          ln.var.u.0i = ln.var.u.0i, 
+                          cost.eff.less.one = FALSE)
+
+
+# Battese and Coelli (1992) model -----------------------------------------
+
+t_nhn_BC1992 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+                   prod = my.prod, model = "BC1992",
+                   eff.time.invariant = FALSE,
+                   mean.u.0i.zero = TRUE, 
+                   ln.var.v.it = ln.var.v.it,
+                   ln.var.u.0i = ln.var.u.0i, 
+                   cost.eff.less.one = FALSE)
+
+# normal-truncated normal -------------------------------------------------
+
+# Kumbhakar (1990) model --------------------------------------------------
+
+# truncation point is constant (for all ids) ------------------------------
+
+t_ntn_K1990_0 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+                    prod = my.prod,
+                    eff.time.invariant = FALSE, 
+                    mean.u.0i.zero = FALSE,
+                    ln.var.v.it = ln.var.v.it, 
+                    ln.var.u.0i = ln.var.u.0i,
+                    cost.eff.less.one = FALSE)
+
+
+# truncation point is determined by variables -----------------------------
+
+t_ntn_K1990_1 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+                    prod = my.prod,
+                    eff.time.invariant = FALSE, 
+                    mean.u.0i.zero = FALSE, 
+                    mean.u.0i = mean.u.0i_1,
+                    ln.var.v.it = ln.var.v.it, 
+                    ln.var.u.0i = ln.var.u.0i,
+                    cost.eff.less.one = FALSE)
+
+# Efficiencies are tiny, since empirically truncation points are quite big.
+# Try withouth an intercept in conditional mean f-n
+
+t_ntn_K1990_2 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+                    prod = my.prod,
+                    eff.time.invariant = FALSE, 
+                    mean.u.0i.zero = FALSE, 
+                    mean.u.0i = mean.u.0i_2,
+                    ln.var.v.it = ln.var.v.it, 
+                    ln.var.u.0i = ln.var.u.0i,
+                    cost.eff.less.one = FALSE)
+
+# Kumbhakar (1990) modified model -----------------------------------------
+
+t_ntn_K1990modified &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+                          prod = my.prod, model = "K1990modified",
+                          eff.time.invariant = FALSE, 
+                          mean.u.0i.zero = FALSE, 
+                          mean.u.0i = mean.u.0i_1,
+                          ln.var.v.it = ln.var.v.it, 
+                          ln.var.u.0i = ln.var.u.0i,
+                          cost.eff.less.one = FALSE)
+
+# Battese and Coelli (1992) model -----------------------------------------
+
+
+t_ntn_BC1992 &lt;- sf(formu, data = banks00_07, it = my.it, subset = year &gt; 2000,
+                   prod = my.prod, model = "BC1992",
+                   eff.time.invariant = FALSE, 
+                   mean.u.0i.zero = FALSE, 
+                   mean.u.0i = mean.u.0i_1,
+                   ln.var.v.it = ln.var.v.it, 
+                   ln.var.u.0i = ln.var.u.0i,
+                   cost.eff.less.one = FALSE)
+
+# The next one (without "subset = year &gt; 2000" option) converges OK
+
+t_ntn_BC1992 &lt;- sf(formu, data = banks00_07, it = my.it,
+                   prod = my.prod, model = "BC1992",
+                   eff.time.invariant = FALSE, 
+                   mean.u.0i.zero = FALSE, 
+                   mean.u.0i = mean.u.0i_1,
+                   ln.var.v.it = ln.var.v.it, 
+                   ln.var.u.0i = ln.var.u.0i,
+                   cost.eff.less.one = FALSE)
+
+# 4 component model ------------------------------------------------------
+
+# Note, R should better be more than 200, this is just for illustration.
+# This is the model that takes long to be estimated.  
+# For the following example, 'mlmaximize' required 357 iterations and
+# took 8 minutes.  
+# The time will increase with more data and more parameters.
+
+formu &lt;- log(TC) ~ log(Y1) + log(Y2) + log(W1) + log(W2) + trend
+
+t_4comp &lt;- sf(formu, data = banks00_07, it = my.it, 
+              subset = year &gt;= 2001 &amp; year &lt; 2006,
+              prod = my.prod, model = "4comp",
+              R = 500, initialize.halton = TRUE, 
+              lmtol = 1e-5, maxit = 500, print.level = 4)
+
+# With R = 500, 'mlmaximize' required 124 iterations and
+# took 7 minutes.  
+# The time will increase with more data and more parameters.
+
+formu &lt;- log(TC) ~ log(Y1) + log(Y2) + log(W1) + log(W2) + trend
+
+t_4comp_500 &lt;- sf(formu, data = banks00_07, it = my.it, 
+              subset = year &gt;= 2001 &amp; year &lt; 2006,
+              prod = my.prod, model = "4comp",
+              R = 500, initialize.halton = TRUE, 
+              lmtol = 1e-5, maxit = 500, print.level = 4)
+              
+# @e_i0, @e_it, and @e_over give efficiencies, 
+# where @ is either 'c' or 't' for cost or production function.
+# e.g., t_ntn_4comp$ce_i0 from last model, gives persistent cost efficiencies
+
+# Panel data examples end -------------------------------------------------
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

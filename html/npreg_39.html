@@ -1,0 +1,230 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>smooth.influence.measures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonparametric Regression Deletion Diagnostics
+</h2>
+
+<h3>Description</h3>
+
+<p>These functions compute several regression (leave-one-out deletion) diagnostics for a fit smoothing spline (fit by <code>ss</code>), smooth model (fit by <code>sm</code>), or generalized smooth model (fit by <code>gsm</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">smooth.influence.measures(model, infl = smooth.influence(model))
+
+## S3 method for class 'ss'
+rstandard(model, infl = NULL, sd = model$sigma, 
+          type = c("sd.1", "predictive"), ...)
+## S3 method for class 'sm'
+rstandard(model, infl = NULL, sd = model$sigma, 
+          type = c("sd.1", "predictive"), ...)
+## S3 method for class 'gsm'
+rstandard(model, infl = NULL, 
+          type = c("deviance", "pearson"), ...)
+
+## S3 method for class 'ss'
+rstudent(model, infl = influence(model, do.coef = FALSE), 
+         res = infl$wt.res, ...)
+## S3 method for class 'sm'
+rstudent(model, infl = influence(model, do.coef = FALSE), 
+         res = infl$wt.res, ...)
+## S3 method for class 'gsm'
+rstudent(model, infl = influence(model, do.coef = FALSE), ...)
+
+## S3 method for class 'ss'
+dfbeta(model, infl = NULL, ...)
+## S3 method for class 'sm'
+dfbeta(model, infl = NULL, ...)
+## S3 method for class 'gsm'
+dfbeta(model, infl = NULL, ...)
+
+## S3 method for class 'ss'
+dfbetas(model, infl = smooth.influence(model, do.coef = TRUE), ...)
+## S3 method for class 'sm'
+dfbetas(model, infl = smooth.influence(model, do.coef = TRUE), ...)
+## S3 method for class 'gsm'
+dfbetas(model, infl = smooth.influence(model, do.coef = TRUE), ...)
+
+cov.ratio(model, infl = smooth.influence(model, do.coef = FALSE),
+          res = weighted.residuals(model))
+
+## S3 method for class 'ss'
+cooks.distance(model, infl = NULL, res = weighted.residuals(model), 
+               sd = model$sigma, hat = hatvalues(model), ...)
+## S3 method for class 'sm'
+cooks.distance(model, infl = NULL, res = weighted.residuals(model), 
+               sd = model$sigma, hat = hatvalues(model), ...)
+## S3 method for class 'gsm'
+cooks.distance(model, infl = NULL, res = residuals(model, type = "pearson"), 
+               dispersion = model$dispersion, hat = hatvalues(model), ...)
+
+## S3 method for class 'ss'
+hatvalues(model, ...)
+## S3 method for class 'sm'
+hatvalues(model, ...)
+## S3 method for class 'gsm'
+hatvalues(model, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>an object of class "gsm" output by the <code>gsm</code> function, "sm" output by the <code>sm</code> function, or "ss" output by the <code>ss</code> function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>infl</code></td>
+<td>
+
+<p>influence structure as returned by <code>smooth.influence</code>  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res</code></td>
+<td>
+
+<p>(possibly weighted) residuals with proper defaults    
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd</code></td>
+<td>
+
+<p>standard deviation to use, see defaults
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dispersion</code></td>
+<td>
+
+<p>dispersion (for <code>gsm</code> objects) to use, see defaults  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hat</code></td>
+<td>
+
+<p>hat values <code class="reqn">S_{ii}</code>, see defaults  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>type of residuals for <code>rstandard</code>  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments (currently ignored)  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Inspired by <code>influence.measures</code> and related functions in R's <b>stats</b> package.
+</p>
+<p>The function <code>smooth.influence.measures</code> produces a class "infl" object, which displays the DFBETAS for each coefficient, DFFITS, covariance ratios, Cook's distance, and the diagonals of the smoothing matrix. Cases which are influential with respect to any of these measures are marked with an asterisk.
+</p>
+<p>The S3 methods <code>dfbetas</code>, <code>dffits</code>, <code>covratio</code>, and <code>cooks.distance</code> provide direct access to the corresponding diagnostic quantities. The S3 methods <code>rstandard</code> and <code>rstudent</code> give the standardized and Studentized residuals, respectively. (These re-normalize the residuals to have unit variance, using an overall and leave-one-out measure of the error variance, respectively.)
+</p>
+<p>Values for generalized smoothing models are approximations, as described in Williams (1987) (except that Cook's distances are scaled as <code class="reqn">F</code> rather than chi-square values). THe approximations can be poor when some cases have large influence.
+</p>
+<p>The optional <code>infl</code>, <code>res</code>, and <code>sd</code> arguments are there to encourage the use of these direct access functions in situations where the underlying basic influence measures, e.g., from <code>smooth.influence</code>, are already available.
+</p>
+<p>For <code>ss</code> and <code>sm</code> objects, the code <code>rstandard(*, type = "predictive")</code> returns the leave-one-out (ordinary) cross-validation residuals, and the PRESS (PREdictive Sum of Squares) statistic is defined as
+</p>
+<p><code>PRESS &lt;- sum(rstandard(model, type = "predictive")^2)</code>
+</p>
+<p>Note that <code>OCV = PRESS / n</code>, where OCV = ordinary cross-validation criterion
+</p>
+
+
+<h3>Note</h3>
+
+<p>Note: the <code>dffits</code> function in R's <b>stats</b> package can be used with the following syntax
+</p>
+<p><code>dffits(model, infl = smooth.influence(model, do.coef = FALSE),
+       res = weighted.residuals(model))</code>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>See references listed in <code>influence.measures</code>
+</p>
+<p>Williams, D. A. (1987). Generalized linear model diagnostics using the deviance and single case deletions. <em>Applied Statistics, 36</em>, 181-191. <a href="https://doi.org/10.2307/2347550">doi:10.2307/2347550</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ss</code>, <code>sm</code>, <code>gsm</code> for modeling functions
+</p>
+<p><code>smooth.influence</code> for some basic influence information
+</p>
+<p><code>diagnostic.plots</code> for regression diagnostic plots
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data
+set.seed(1)
+n &lt;- 100
+x &lt;- seq(0, 1, length.out = n)
+fx &lt;- 2 + 3 * x + sin(2 * pi * x)
+y &lt;- fx + rnorm(n, sd = 0.5)
+
+# fit models
+mod.ss &lt;- ss(x, y, nknots = 10)
+mod.sm &lt;- sm(y ~ x, knots = 10)
+mod.gsm &lt;- gsm(y ~ x, knots = 10)
+
+# calculate influence
+infl.ss &lt;- smooth.influence.measures(mod.ss)
+infl.sm &lt;- smooth.influence.measures(mod.sm)
+infl.gsm &lt;- smooth.influence.measures(mod.gsm)
+
+# standardized residuals
+rstan.ss &lt;- rstandard(mod.ss)
+rstan.sm &lt;- rstandard(mod.sm)
+rstan.gsm &lt;- rstandard(mod.gsm)
+
+# studentized residuals
+rstud.ss &lt;- rstudent(mod.ss)
+rstud.sm &lt;- rstudent(mod.sm)
+rstud.gsm &lt;- rstudent(mod.gsm)
+
+</code></pre>
+
+
+</div>

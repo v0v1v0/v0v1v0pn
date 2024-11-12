@@ -1,0 +1,229 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>addNodeStats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute Node-Level Network Properties
+</h2>
+
+<h3>Description</h3>
+
+<p>Given a list of network objects returned by
+<code>buildRepSeqNetwork()</code> or
+<code>generateNetworkObjects()</code>,
+computes a specified set of network properties for the network nodes.
+The list of network objects is returned
+with each property added as a variable to the node metadata.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">addNodeStats(
+  net,
+  stats_to_include = chooseNodeStats(),
+  cluster_fun = "fast_greedy",
+  cluster_id_name = "cluster_id",
+  overwrite = FALSE,
+  verbose = FALSE,
+  ...
+)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+
+<p>A <code>list</code> of network objects conforming to the output of
+<code>buildRepSeqNetwork()</code> or
+<code>generateNetworkObjects()</code>.
+See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats_to_include</code></td>
+<td>
+
+<p>Specifies which network properties to compute.
+Accepts a vector created using
+<code>chooseNodeStats()</code> or
+<code>exclusiveNodeStats()</code>,
+or the character string <code>"all"</code> to compute all network properties.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_fun</code></td>
+<td>
+
+<p>A character string specifying the clustering algorithm to use when
+computing cluster membership.
+Applicable only when <code>stats_to_include = "all"</code> or
+<code>stats_to_include["cluster_id"]</code> is <code>TRUE</code>.
+Passed to <code>addClusterMembership()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_id_name</code></td>
+<td>
+
+<p>A character string specifying the name of the cluster membership variable
+to be added to the node metadata.
+Applicable only when <code>stats_to_include = "all"</code> or
+<code>stats_to_include["cluster_id"]</code> is <code>TRUE</code>.
+Passed to <code>addClusterMembership()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code> and <code>net$node_data</code> contains a variable whose
+name matches the value of <code>cluster_id_name</code>, then its values will be
+overwritten with new cluster membership values (obtained using
+<code>addClusterMembership()</code>, to which
+the values of <code>cluster_fun</code>, <code>overwrite</code>).
+Applicable only when <code>stats_to_include = "all"</code> or
+<code>stats_to_include["cluster_id"]</code> is <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Named optional arguments to the function specified by <code>cluster_fun</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Node-level network properties are properties that pertain to each individual
+node in the network graph.
+</p>
+<p>Some are local properties, meaning that their value for a given node depends only
+on a subset of the nodes in the network. One example is the network degree of a
+given node, which represents the number of other nodes that are directly joined
+to the given node by an edge connection.
+</p>
+<p>Other properties are global properties, meaning that their value for a given node
+depends on all of the nodes in the network. An example is the authority score of
+a node, which is computed using the entire graph adjacency matrix (if we denote
+this matrix by <code class="reqn">A</code>, then the principal eigenvector of <code class="reqn">A^T A</code> represents
+the authority scores of the network nodes).
+</p>
+<p>See <code>chooseNodeStats()</code>
+for a list of the available node-level network properties.
+</p>
+<p>The list <code>net</code> must contain the named elements
+<code>igraph</code> (of class <code>igraph</code>),
+<code>adjacency_matrix</code> (a <code>matrix</code> or
+<code>dgCMatrix</code> encoding edge connections),
+and <code>node_data</code> (a <code>data.frame</code> containing node metadata),
+all corresponding to the same network. The lists returned by
+<code>buildRepSeqNetwork()</code> and
+<code>generateNetworkObjects()</code>
+are examples of valid inputs for the <code>net</code> argument.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A modified copy of <code>net</code>,
+with <code>net$node_data</code> containing an additional column
+for each new network property computed.
+See <code>chooseNodeStats()</code>
+for the network property names,
+which are used as the column names,
+except for the cluster membership variable,
+whose name is the value of <code>cluster_id_name</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>,
+vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>chooseNodeStats()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+net &lt;- generateNetworkObjects(
+  toy_data, "CloneSeq"
+)
+
+# Add default set of node properties
+net &lt;- addNodeStats(net)
+
+# Modify default set of node properties
+net &lt;- addNodeStats(
+  net,
+  stats_to_include =
+    chooseNodeStats(
+      closeness = TRUE,
+      page_rank = FALSE
+    )
+)
+
+# Add only the spepcified node properties
+net &lt;- addNodeStats(
+  net,
+  stats_to_include =
+    exclusiveNodeStats(
+      degree = TRUE,
+      transitivity = TRUE
+    )
+)
+
+# Add all node-level network properties
+net &lt;- addNodeStats(
+  net,
+  stats_to_include = "all"
+)
+
+
+</code></pre>
+
+
+</div>

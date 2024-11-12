@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_netcox_sp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>plots for <code>netcox</code> and <code>netcox_cv</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Plot the solution path produced by <code>netcox</code> or <code>netcox_cv</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_netcox_sp(
+  netcox_obj,
+  plot_min = FALSE,
+  plot_1se = FALSE,
+  type = "l",
+  log = "x",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>netcox_obj</code></td>
+<td>
+<p>The <code>netcox</code> or <code>netcox_cv</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_min</code></td>
+<td>
+<p>Logical, whether a vertical line at lambda.min acquired by <code>netcox_cv</code> is plotted. Not available if <code>netcox_obj</code> is a <code>netcox</code> fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_1se</code></td>
+<td>
+<p>Logical, whether a vertical line at lambda.1se acquired by <code>netcox_cv</code> is plotted. Not available if <code>netcox_obj</code> is a <code>netcox</code> fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Graphical argument to be passed to matplot, a character string (length 1 vector) or vector of 1-character strings indicating the type of plot for each column of y, see plot.default for all possible types. Default is "l" for lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Graphical argument to be passed to matplot, a character string which contains "x" if the x axis is to be logarithmic, "y" if the y axis is to be logarithmic, "" if neither, "xy" or "yx" if both axes are to be logarithmic. Default is "x".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments of matplot and ultimately of plot.default for some.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Produces a coefficient profile plot of the coefficient paths for a fitted <code>netcox</code> or <code>netcox_cv</code> object.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netcox</code>, <code>netcox_cv</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">grp &lt;- matrix(c(0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                1, 1, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 1, 0, 1, 0),
+              ncol = 5, byrow = TRUE)
+grp.var &lt;- matrix(c(1, 0, 0, 0, 0, #A1
+                    1, 0, 0, 0, 0, #A2
+                    0, 0, 0, 1, 0, #C1
+                    0, 0, 0, 1, 0, #C2
+                    0, 1, 0, 0, 0, #B
+                    0, 0, 1, 0, 0, #A1B
+                    0, 0, 1, 0, 0, #A2B
+                    0, 0, 0, 0, 1, #C1B
+                    0, 0, 0, 0, 1  #C2B
+                   ), ncol = 5, byrow = TRUE)
+eta_g &lt;- rep(1, 5)
+x &lt;- as.matrix(sim[, c("A1","A2","C1","C2","B",
+                       "A1B","A2B","C1B","C2B")])
+lam.seq &lt;- 10^seq(0, -2, by = -0.2)
+# plot solution path from a netcox fit
+fit &lt;- netcox(x = x,
+              ID = sim$Id,
+              time = sim$Start,
+              time2 = sim$Stop,
+              event = sim$Event,
+              lambda = lam.seq,
+              group = grp,
+              group_variable = grp.var,
+              penalty_weights = eta_g,
+              tol = 1e-4,
+              maxit = 1e3,
+              verbose = FALSE)
+plot_netcox_sp(netcox_obj = fit)
+              
+# plot solution path from a netcox_cv fit              
+cv &lt;- netcox_cv(x = x,
+                ID = sim$Id,
+                time = sim$Start,
+                time2 = sim$Stop,
+                event = sim$Event,
+                lambda = lam.seq,
+                group = grp,
+                group_variable = grp.var,
+                penalty_weights = eta_g,
+                nfolds = 5,
+                tol = 1e-4,
+                maxit = 1e3,
+                verbose = FALSE)
+plot_netcox_sp(netcox_obj = cv, plot_min = TRUE, plot_1se = TRUE)               
+</code></pre>
+
+
+</div>

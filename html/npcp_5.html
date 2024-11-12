@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cpBlockMax</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Nonparametric Tests for Change-Point Detection in the
+Distribution of Independent Block Maxima</h2>
+
+<h3>Description</h3>
+
+<p>Nonparametric tests for change-point detection in the distribution of
+independent block maxima based either on the probability weighted
+moment method (see the second reference) or on the generalized
+probability weighted moment method (see the first reference) for
+estimating the parameters of the generalized extreme value (GEV)
+distribution. It is assumed that the block maxima are independent and
+that their unknown distribution functions (d.f.s) are continuous, but not
+necessarily that they are GEV distributed. Three statistics are
+computed. Under the assumption that the block maxima are GEV
+distributed, these are statistics particularly sensitive to changes in
+the location, scale and shape parameters of the GEV. Details can be
+found in third reference.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cpBlockMax(x, method = c("pwm", "gpwm"), r = 10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector representing independent block maxima whose
+unknown d.f.s are assumed continuous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a string specifying how statistics will be defined; can
+be either <code>"pwm"</code> (the probability weighted moment method) or
+<code>"gpwm"</code> (the generalized probability weighted moment method).
+The method <code>"pwm"</code> is suggested for climate block maxima
+that are typically not too heavy tailed, more precisely, whose
+distributions are in
+the maximum domains of attraction of GEV distributions with shape parameters
+smaller than a half. The method <code>"gpwm"</code> should be preferred
+otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>strictly positive integer specifying the set of breakpoints
+that will be tested; more precisely, starting from the initial
+sample of block maxima, the tests compare subsamples formed by the
+<code>k</code> first maxima and <code>n-k</code> last maxima
+for <code>k</code> in the set <code>{r,...,n-r}</code>, where <code>n</code>
+is the sample size.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Approximate p-values are computed
+from the estimated asymptotic null distributions, which involve the
+Kolmogorov distribution. The latter is dealt with reusing code from
+the <code>ks.test()</code> function; credit to RCore.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of <code>class</code> <code>htest</code> which is a list,
+some of the components of which are
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>value of the three test statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvalues</code></td>
+<td>
+<p>corresponding approximate p-values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats.loc</code></td>
+<td>
+<p>the values of the <code>n - (2 * r - 1)</code> intermediate
+change-point statistics sensitive to changes in the location;
+the first test statistic is defined as the maximum of those.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats.scale</code></td>
+<td>
+<p>the values of the <code>n - (2 * r - 1)</code> intermediate
+change-point statistics sensitive to changes in the scale;
+the second test statistic is defined as the maximum of those.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats.shape</code></td>
+<td>
+<p>the values of the <code>n - (2 * r - 1)</code> intermediate
+change-point statistics sensitive to changes in the shape;
+the third test statistic is defined as the maximum of those.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>The tests were derived under the assumption of block maxima with
+continuous d.f., which implies that ties
+occur with probability zero. A way to deal with ties based on
+randomization is proposed in the third reference.
+</p>
+
+
+<h3>References</h3>
+
+<p>J. Diebolt, A. Guillou, P. Naveau and P. Ribereau (2008), Improving
+probability-weighted moment methods for the generalized extreme-value
+distribution, <em>REVSTAT</em> <b>6</b>, pages 33-50.
+</p>
+<p>J.R.M. Hosking, J.R. Wallis and E.F. Wood (1985), Estimation of the
+generalized extreme-value distribution by the method of
+probability-weighted moments, <em>Technometrics</em> <b>27</b>, pages 251-261.
+</p>
+<p>I. Kojadinovic and P. Naveau (2017), Nonparametric tests for
+change-point detection in the distribution of block maxima based on
+probability weighted moments, <em>Extremes</em> <b>20:2</b>, pages 417-450,
+<a href="https://arxiv.org/abs/1507.06121">https://arxiv.org/abs/1507.06121</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cpDist()</code> for a related test based on the empirical d.f.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+require(evd)
+n &lt;- 100
+k &lt;- 50 ## the true change-point
+
+## Change in the shape parameter of a GEV
+x &lt;- rgev(k,loc=0,scale=1,shape=-0.8)
+y &lt;- rgev(k,loc=0,scale=1,shape=0.4)
+cp &lt;- cpBlockMax(c(x,y))
+cp
+## Estimated change-point
+which(cp$stats.shape == max(cp$stats.shape))
+
+## Change in the scale parameter of a GEV
+x &lt;- rgev(k,loc=0,scale=0.5,shape=0)
+y &lt;- rgev(k,loc=0,scale=1,shape=0)
+cp &lt;- cpBlockMax(c(x,y))
+cp
+## Estimated change-point
+which(cp$stats.scale == max(cp$stats.scale))
+
+## Change in the location parameter of a GEV
+x &lt;- rgev(k,loc=0,scale=1,shape=0)
+y &lt;- rgev(k,loc=0.5,scale=1,shape=0)
+cp &lt;- cpBlockMax(c(x,y))
+cp
+## Estimated change-point
+which(cp$stats.loc == max(cp$stats.loc))
+## End(Not run)
+</code></pre>
+
+
+</div>

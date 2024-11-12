@@ -1,0 +1,207 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NVC_frequentist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fits frequentist penalized nonparametric varying coefficient (NVC) models</h2>
+
+<h3>Description</h3>
+
+<p>This function implements frequentist penalized nonparametric varying coefficient (NVC) models. It supports the following penalty functions: the group lasso penalty of Yuan and Lin (2006), the group minimax concave penalty (MCP) of Breheny and Huang (2015), and the group smoothly clipped absolute deviation (SCAD) penalty of Breheny and Huang (2015). This function solves a penalized regression problem of the form,
+</p>
+<p style="text-align: center;"><code class="reqn"> argmax_{\gamma} \frac{1}{N} \ell(\gamma) + pen_{\lambda}(\gamma),</code>
+</p>
+
+<p>where <code class="reqn">N</code> is the total number of observations, <code class="reqn">\ell(\gamma)</code> is the loss function, and <code class="reqn">pen_{\lambda}(\cdot)</code> is a penalty function with regularization parameter <code class="reqn">\lambda &gt; 0</code>. Since the objective function is rescaled by <code class="reqn">1/N</code>, the penalty <code class="reqn">\lambda</code> is typically smaller than the spike hyperparameter <code class="reqn">\lambda_0</code> used by the <code>NVC_SSL</code> function. The BIC criterion is used to select the optimal tuning parameter <code class="reqn">\lambda</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NVC_frequentist(y, t, X, n_basis=8, penalty=c("gLASSO","gSCAD","gMCP"),
+                lambda=NULL, include_intercept=TRUE) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p><code class="reqn">N \times 1</code> vector of response observations <code class="reqn">y_{11}, ..., y_{1m_1}, ..., y_{n1}, ..., y_{nm_n}</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p><code class="reqn">N \times 1</code> vector of observation times <code class="reqn">t_{11}, ..., t_{1m_1}, ..., t_{n1}, ..., t_{nm_n}</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p><code class="reqn">N \times p</code> design matrix with columns <code class="reqn">[X_1, ..., X_p]</code>, where the <code class="reqn">k</code>th column contains the entries <code class="reqn">x_{ik}(t_{ij})</code>'s</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_basis</code></td>
+<td>
+<p>number of basis functions to use. Default is <code>n_basis=8</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>string specifying which penalty function to use. Specify <code>"gLASSO"</code> for group lasso, <code>"gSCAD"</code> for group SCAD, or <code>"gMCP"</code> for group MCP.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>grid of tuning parameters. If <code>lambda</code> is not specified (i.e. <code>lambda=NULL</code>), then the program automatically chooses a grid for <code>lambda</code>. Note that since the objective function is scaled by <code class="reqn">1/N</code>, the automatically chosen grid for <code>lambda</code> typically consists of smaller values than the default grid for <code>lambda0</code> used by the function <code>NVC_SSL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_intercept</code></td>
+<td>
+<p>Boolean variable for whether or not to include an intercept function <code class="reqn">\beta_0(t)</code> in the estimation. Default is <code>include_intercept=TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function returns a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>t_ordered</code></td>
+<td>
+<p>all <code class="reqn">N</code> time points ordered from smallest to largest. Needed for plotting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classifications</code></td>
+<td>
+<p><code class="reqn">p \times 1</code> vector of indicator variables, where <code>"1"</code> indicates that the covariate is selected and <code>"0"</code> indicates that it is not selected. These classifications are determined by the optimal <code>lambda</code> chosen from BIC. Note that this vector does not include an intercept function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta_hat</code></td>
+<td>
+<p><code class="reqn">N \times p</code> matrix of the estimates for varying coefficient functions <code class="reqn">\beta_k(t), k = 1, ..., p</code>, using the optimal <code>lambda</code> chosen from BIC. The <code class="reqn">k</code>th column in the matrix is the <code class="reqn">k</code>th estimated function at the observation times in <code>t_ordered</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta0_hat</code></td>
+<td>
+<p>estmate of the intercept function <code class="reqn">\beta_0(t)</code> at the observation times in <code>t_ordered</code> for the optimal <code>lambda</code> chosen from BIC. This is not returned if <code>include_intercept = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma_hat</code></td>
+<td>
+<p>estimated basis coefficients (needed for prediction) for the optimal <code>lambda</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda_min</code></td>
+<td>
+<p>the individual <code>lambda</code> which minimizes the BIC. If only one value was originally passed for <code>lambda</code>, then this just returns that <code>lambda</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda0_all</code></td>
+<td>
+<p>grid of all <code class="reqn">L</code> regularization parameters in <code>lambda</code>.  Note that since the objective function is scaled by <code class="reqn">1/N</code> for the penalized frequentist methods in the <code>NVC_frequentist</code> function, the <code>lambda_all</code> grid that is chosen automatically by <code>NVC_frequentist</code> typically consists of smaller values than the default values in the <code>lambda0_all</code> grid for <code>NVC_SSL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BIC_all</code></td>
+<td>
+<p><code class="reqn">L \times 1</code> vector of BIC values corresponding to all <code class="reqn">L</code> entries in <code>lambda_all</code>. The <code class="reqn">l</code>th entry corresponds to the <code class="reqn">l</code>th entry in <code>lambda_all</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta_est_all_lambda</code></td>
+<td>
+<p>list of length <code class="reqn">L</code> of the estimated varying coefficients <code class="reqn">\beta_k(t), k = 1, ..., p</code>, corresponding to all <code class="reqn">L</code> lambdas in <code>lambda_all</code>. The <code class="reqn">l</code>th entry corresponds to the <code class="reqn">l</code>th entry in <code>lambda_all</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta0_est_all_lambda</code></td>
+<td>
+<p><code class="reqn">N \times L</code> matrix of estimated intercept function <code class="reqn">\beta_0(t)</code> corresponding to all <code class="reqn">L</code> entries in <code>lambda_all</code>. The <code class="reqn">l</code>th column corresponds to the <code class="reqn">l</code>th entry in <code>lambda_all</code>. This is not returned if <code>include_intercept=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma_est_all_lambda</code></td>
+<td>
+<p><code class="reqn">dp \times L</code> matrix of estimated basis coefficients corresponding to all entries in <code>lambda_all</code>. The <code class="reqn">l</code>th column corresponds to the <code class="reqn">l</code>th entry in <code>lambda_all</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classifications_all_lambda</code></td>
+<td>
+<p><code class="reqn">p \times L</code> matrix of classifications corresponding to all the entries in <code>lambda_all</code>. The <code class="reqn">l</code>th column corresponds to the <code class="reqn">l</code>th entry in <code>lambda_all</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iters_to_converge</code></td>
+<td>
+<p>number of iterations it took for the group ascent algorithm to converge for each entry in <code>lambda_all</code>. The <code class="reqn">l</code>th entry corresponds to the <code class="reqn">l</code>th entry in <code>lambda_all</code>.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Bai, R., Boland, M. R., and Chen, Y. (2023). "Scalable high-dimensional Bayesian varying coefficient models with unknown within-subject covariance." <em>arXiv pre-print arXiv:arXiv:1907.06477</em>.
+</p>
+<p>Breheny, P. and Huang, J. (2015). "Group descent algorithms for nonconvex penalized linear and logistic regression models with grouped predictors." <em>Statistics and Computing</em>, <b>25</b>:173-187.
+</p>
+<p>Wei, F., Huang, J., and Li, H. (2011). "Variable selection and estimation in high-dimensional varying coefficient models." <em>Statistica Sinica</em>, <b>21</b>:1515-1540.  
+</p>
+<p>Yuan, M. and Lin, Y. (2006). "Model selection and estimation in regression with grouped variables." <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, <b>68</b>:49-67.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load data
+data(SimulatedData)
+attach(SimulatedData)
+y = SimulatedData$y
+t = SimulatedData$t
+id = SimulatedData$id
+X = SimulatedData[,4:103]
+
+## Fit frequentist penalized NVC model with the SCAD penalty. 
+## Can set penalty as "gLASSO", "gSCAD", or "gMCP". 
+## No need to specify an 'id' argument when using NVC_frequentist() function
+
+NVC_gSCAD_mod = NVC_frequentist(y, t, X, penalty="gSCAD")
+
+## Classifications. First varying coefficients are selected as nonzero
+NVC_gSCAD_mod$classifications
+
+## Optimal lambda chosen from BIC
+NVC_gSCAD_mod$lambda_min
+
+## Plot first estimated varying coefficient function
+t_ordered = NVC_gSCAD_mod$t_ordered
+beta_hat= NVC_gSCAD_mod$beta_hat
+plot(t_ordered, beta_hat[,1], lwd=3, type='l', col='blue',
+     xlab="Time", ylim = c(-12,12), ylab=expression(beta[1]))
+
+## Plot third estimated varying coefficient function
+plot(t_ordered, beta_hat[,3], lwd=3, type='l', col='blue',
+     xlab="Time", ylim = c(-4,2), ylab=expression(beta[3]))
+
+## Plot fifth estimated varying coefficient function
+plot(t_ordered, beta_hat[,5], lwd=3, type='l', col='blue',
+     xlab="Time", ylim = c(0,15), ylab=expression(beta[5]))
+</code></pre>
+
+
+</div>

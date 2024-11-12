@@ -1,0 +1,326 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlsic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non Linear Least Squares with Inequality  Constraints</h2>
+
+<h3>Description</h3>
+
+<p>Solve non linear least squares problem  <code>min_par ||r(par,...)$res||</code>
+with optional inequality constraints <code>u%*%par &gt;= co</code>
+and optional equality constraints <code>e%*%par = eco</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlsic(
+  par,
+  r,
+  u = NULL,
+  co = NULL,
+  control = list(),
+  e = NULL,
+  eco = NULL,
+  flsi = lsi,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>par</code></td>
+<td>
+<p>initial values for parameter vector. It can be in non feasible domain,
+i.e. for which <code>u%*%par &gt;= co</code> is not always respected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>a function calculating residual vector
+by a call to <code>r(par, cjac, ...)</code>
+where par is a current parameter vector,
+and cjac is set to TRUE if Jacobian is required or FALSE if not.
+A call to <code>r()</code> must return a list having a field "res" containing the
+residual vector and optionally a field "jacobian"
+when cjac is set to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u</code></td>
+<td>
+<p>constraint matrix in <code>u%*%par &gt;= co</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>co</code></td>
+<td>
+<p>constraint right hand side vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of control parameters ('=' indicates default values):
+</p>
+
+<ul>
+<li>
+<p> errx=1.e-7 error on l2 norm of the iteration step sqrt(pt*p).
+</p>
+</li>
+<li>
+<p> maxit=100 maximum of newton iterations
+</p>
+</li>
+<li>
+<p> btstart=1 staring value for backtracking coefficient
+</p>
+</li>
+<li>
+<p> btfrac=0.5 (0;1) by this value we diminish the step till tight up
+to the quadratic model of norm reduction in backtrack (bt) iterations
+</p>
+</li>
+<li>
+<p> btdesc=0.1 (0;1) how good we have to tight up to the quadratic model
+0 - we are very relaxe, 1 - we are very tight (may need many bt iterations)
+</p>
+</li>
+<li>
+<p> btmaxit=15 maximum of backtrack iterations
+</p>
+</li>
+<li>
+<p> btkmin=1.e-7 a floor value for backtracking fractioning
+</p>
+</li>
+<li>
+<p> trace=0 no information is printed during iterations (1 - print is active)
+</p>
+</li>
+<li>
+<p> rcond=1.e10 maximal condition number in QR decomposition
+starting from which a matrix is considered as numerically rank
+deficient. The inverse of this number is also used as a measure of very
+small number.
+</p>
+</li>
+<li>
+<p> ci = list of options relative to confidence interval estimation
+</p>
+
+<ul>
+<li>
+<p> p=0.95 p-value of confidence interval. If you need a plain sd value,
+set p-value to 0.6826895
+</p>
+</li>
+<li>
+<p> report=T report (or not and hence calculate or not) confidence
+interval information (in the field hci, as 'half confidence interval' width)
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> history=TRUE report or not the convergence history
+</p>
+</li>
+<li>
+<p> adaptbt=FALSE use or not adaptive backtracking
+</p>
+</li>
+<li>
+<p> mnorm=NULL a norm matrix for a case sln==TRUE (cf next parameter)
+</p>
+</li>
+<li>
+<p> sln=FALSE use or not (default) least norm of the solution
+(instead of least norm of the increment)
+</p>
+</li>
+<li>
+<p> maxstep=NULL a maximal norm for increment step (if not NULL), must be positive
+</p>
+</li>
+<li>
+<p> monotone=FALSE should or not the cost decrease be monotone. If TRUE, then at
+first non decrease of the cost, the iterations are stopped with a warning message.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+<p>linear equality constraint matrix in <code>e%*%par = eco</code> (dense)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eco</code></td>
+<td>
+<p>right hand side vector in equality constraints</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flsi</code></td>
+<td>
+<p>function solving linear least squares problem. For a custom function,
+see interfaces in <code>lsi</code> or <code>lsi_ln</code> help pages.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>parameters passed through to r()</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Solving method consist in sequential LSI problems globalized by backtracking technique.
+If e, eco are not NULL, reduce jacobian to basis of e's kernel before <code>lsi()</code> call.<br>
+NB. If the function <code>r()</code> returns a list having a field "jacobian" it is
+supposed to be equal to the jacobian dr/dpar.
+If not, numerical derivation numDeriv::jacobian()
+is automatically used for its calculation.<br>
+NB2. nlsic() does not call stop() on possible errors. Instead, 'error' field is set to 1
+in the returned result. This is done to allow a user to examine the current state
+of data and possibly take another path then to merely stop the program. So, a
+user must allways check this field at return from nlsic().<br>
+NB3. User should test that field 'mes' is not NULL even when error is 0. It may
+contain a warning message.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list with following components (some components can be absent depending
+on 'control' parameter)
+</p>
+
+<ul>
+<li>
+<p> 'par' estimated values of par
+</p>
+</li>
+<li>
+<p> 'lastp' the last LSI solution during non linear iterations
+</p>
+</li>
+<li>
+<p> 'hci' vector of half-width confidence intervals for par
+</p>
+</li>
+<li>
+<p> 'ci_p' p-value for which CI was calculated
+</p>
+</li>
+<li>
+<p> 'ci_fdeg' freedom degree used for CI calculation
+</p>
+</li>
+<li>
+<p> 'sd_res' standard deviation of residuals
+</p>
+</li>
+<li>
+<p> 'covpar' covariance matrix for par
+</p>
+</li>
+<li>
+<p> 'laststep' the last increment after possible back-tracking iterations
+</p>
+</li>
+<li>
+<p> 'normp' the norm of lastp
+</p>
+</li>
+<li>
+<p> 'res' the last residual vector
+</p>
+</li>
+<li>
+<p> 'prevres' residual vector from previous non linear iteration
+</p>
+</li>
+<li>
+<p> 'jacobian' the last used jacobian
+</p>
+</li>
+<li>
+<p> 'retres' last returned result of <code>r()</code> call
+</p>
+</li>
+<li>
+<p> 'it' non linear iteration number where solution was obtained
+</p>
+</li>
+<li>
+<p> 'btit' back-tracking iteration number done during the last non linear iteration
+</p>
+</li>
+<li>
+<p> 'history' list with convergence history information
+</p>
+</li>
+<li>
+<p> 'error' error code: 0 - normal end, 1 - some error occurred, see message in 'mes'
+</p>
+</li>
+<li>
+<p> 'mes' textual message explaining what problem was in case of error
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>lsi, lsi_ln, uplo2uco
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># solve min_{a,b} ||exp(a*x+b)-meas||, a,b&gt;=1
+a_true=1; b_true=2; x=0:5
+# simulation function
+sim=function(par, x) exp(par[["a"]]*x+par[["b"]])
+# residual function to be passed to nlsic()
+resid=function(par, cjac, ...) {
+  dots=list(...)
+  s=sim(par, dots$x)
+  result=list(res=s-dots$meas)
+  if (cjac) {
+     result$jacobian=cbind(a=s*dots$x, b=s)
+  }
+  result
+}
+# simulated noised measurements for true parameters
+set.seed(7) # for reproducible results
+meas=sim(c(a=a_true, b=b_true), x)+rnorm(x)
+# starting values for par
+par=c(a=0, b=0)
+# prepare constraints
+uco=uplo2uco(par, lower=c(a=1, b=1))
+# main call: solve the problem
+fit=nlsic(par, resid, uco$u, uco$co, control=list(trace=1), x=x, meas=meas)
+if (fit$error == 1) {
+   stop(fit$mes)
+} else {
+   print(fit$par) # a=1.001590, b=1.991194
+   if (! is.null(fit$mes)) {
+      warning(fit$mes)
+   }
+}
+</code></pre>
+
+
+</div>

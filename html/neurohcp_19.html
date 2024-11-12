@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hcp_list_files</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>List files from HCP bucket</h2>
+
+<h3>Description</h3>
+
+<p>Lists a set of files from an HCP bucket for a specific sub-folder
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hcp_list_files(prefix = "", delimiter = NULL, query = NULL, ...)
+
+fcp_list_files(prefix = "", delimiter = NULL, query = NULL, ...)
+
+openneuro_list_files(prefix = "", delimiter = NULL, query = NULL, ...)
+
+hcp_list_dirs(prefix = "HCP/", ...)
+
+fcp_list_dirs(prefix = "data/Projects/", ...)
+
+openneuro_list_dirs(prefix = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>prefix</code></td>
+<td>
+<p>directory folder to list files.  If <code>""</code>, then it will be
+the root path</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delimiter</code></td>
+<td>
+<p>Delimiter to list files.  For example <code>".mat"</code>,
+for ".mat"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>query</code></td>
+<td>
+<p>Additional query arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments passed to <code>get_hcp_file</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List with the result of the GET command, the parsed result, and
+the content from the result.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (have_aws_key()){
+x = hcp_list_files(prefix = "HCP/100307/unprocessed/3T/Diffusion",
+   delimiter="bval")
+stopifnot(x$parsed_result$ListBucketResult$Name[[1]] == "hcp-openaccess")
+t1_niis = hcp_list_files(prefix ="HCP/100307/T1w",
+delimiter = ".nii.gz")
+all_dirs = hcp_list_dirs("HCP/")
+}
+
+if (have_aws_key()){
+  res = hcp_list_dirs("HCP/")
+  projects = unlist(parse_list_files(res)$prefixes)
+  projects = unname(projects)
+  projects = unname(projects)
+  head(projects)
+  head(basename(projects))
+  stopifnot("100307" %in% basename(projects))
+}
+if (have_aws_key()){
+res = fcp_list_dirs()
+projects = unlist(parse_list_files(res)$prefixes)
+projects = unname(projects)
+head(projects)
+head(basename(projects))
+stopifnot("ABIDE" %in% basename(projects))
+}
+res = openneuro_list_dirs()
+projects = unlist(parse_list_files(res)$prefixes)
+projects = unname(projects)
+head(projects)
+if (length(projects) &gt; 0) {
+head(basename(projects))
+stopifnot("ds000002" %in% basename(projects))
+}
+</code></pre>
+
+
+</div>

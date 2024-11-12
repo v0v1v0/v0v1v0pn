@@ -1,0 +1,222 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mlbncut</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The MLBNCut Clusters the Columns and the Rows Simultaneously of Data from 3 Different Sources.</h2>
+
+<h3>Description</h3>
+
+<p>It clusters the columns of Z,Y and X into K clusters and the samples into R clusters by representing
+each data type as one network layer.
+It represents the Z layer depending on Y, and the Y layer depending on X.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mlbncut(Z, Y, X, K = 2, R = 2, B = 30, N = 500, q0 = 0.25,
+  scale = TRUE, dist = "gaussian", sigmas = 1, sigmac = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>is a n x q matrix of q variables and n observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>is a n x p matrix of p variables and n observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>is a n x r matrix of r variables and n observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>is the number of column clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>is the number of row clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>is the number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>is the number of samples per iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q0</code></td>
+<td>
+<p>is the quantiles in the cross entropy method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>equals TRUE if data Y is to be scaled with mean 0 and variance 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>is the type of distance measure use in the similarity matrix.
+Options are 'gaussian' and 'correlation', with 'gaussian' being the default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmas</code></td>
+<td>
+<p>is the tuning parameter of the Gaussian kernel of the samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmac</code></td>
+<td>
+<p>is the tuning parameter of the Gaussian kernel of the variables.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function will output K clusters of columns of Z, Y and X and R clusters of the samples.
+</p>
+<p>The algorithm minimizes the NCut through the cross entropy method.
+The clusters correspond to partitions that minimize this objective function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the final value of the objective function and
+the clusters.
+</p>
+
+
+<h3>References</h3>
+
+<p>Sebastian J. Teran Hidalgo and Shuangge Ma.
+Multilayer Biclustering of Omics Data using MLBNCut. (Work in progress.)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#This sets up the initial parameters for the simulation.
+library(NCutYX)
+library(MASS)
+library(fields)
+
+n   &lt;- 50
+p   &lt;- 50
+h   &lt;- 0.15
+rho &lt;- 0.15
+mu  &lt;- 1
+
+W0 &lt;- matrix(1,p,p)
+W0[1:(p/5),1:(p/5)] &lt;- 0
+W0[(p/5+1):(3*p/5),(p/5+1):(3*p/5)] &lt;- 0
+W0[(3*p/5+1):(4*p/5),(3*p/5+1):(4*p/5)] &lt;- 0
+W0[(4*p/5+1):p,(4*p/5+1):p]=0
+W0=cbind(W0,W0,W0)
+W0=rbind(W0,W0,W0)
+
+W1 &lt;- matrix(1,n,n)
+W1[1:(n/2),1:(n/2)] &lt;- 0
+W1[(n/2+1):n,(n/2+1):n] &lt;- 0
+
+X &lt;- matrix(0,n,p)
+Y &lt;- matrix(0,n,p)
+Z &lt;- matrix(0,n,p)
+
+Sigma=matrix(0,p,p)
+Sigma[1:(p/5),1:(p/5)] &lt;- rho
+Sigma[(p/5+1):(3*p/5),(p/5+1):(3*p/5)] &lt;- rho
+Sigma[(3*p/5+1):(4*p/5),(3*p/5+1):(4*p/5)] &lt;- rho
+Sigma[(4*p/5+1):p,(4*p/5+1):p] &lt;- rho
+Sigma &lt;- Sigma - diag(diag(Sigma))
+Sigma &lt;- Sigma + diag(p)
+
+X[1:(n/2),]   &lt;- mvrnorm(n/2,rep(mu,p),Sigma)
+X[(n/2+1):n,] &lt;- mvrnorm(n/2,rep(-mu,p),Sigma)
+
+B11 &lt;- matrix(0,p,p)
+B12 &lt;- matrix(0,p,p)
+B21 &lt;- matrix(0,p,p)
+B22 &lt;- matrix(0,p,p)
+
+B11[1:(p/5),1:(p/5)]                     &lt;- runif((p/5)^2,h/2,h)*rbinom((p/5)^2,1,0.5)
+B11[(p/5+1):(3*p/5),(p/5+1):(3*p/5)]     &lt;- runif((2*p/5)^2,h/2,h)*rbinom((2*p/5)^2,1,0.5)
+B11[(3*p/5+1):(4*p/5),(3*p/5+1):(4*p/5)] &lt;- runif((p/5)^2,h/2,h)*rbinom((p/5)^2,1,0.5)
+B11[(4*p/5+1):p,(4*p/5+1):p]             &lt;- runif((1*p/5)^2,h/2,h)*rbinom((1*p/5)^2,1,0.5)
+
+B12[1:(p/5),1:(p/5)]                     &lt;- runif((p/5)^2,-h,-h/2)*rbinom((p/5)^2,1,0.5)
+B12[(p/5+1):(3*p/5),(p/5+1):(3*p/5)]     &lt;- runif((2*p/5)^2,-h,-h/2)*rbinom((2*p/5)^2,1,0.5)
+B12[(3*p/5+1):(4*p/5),(3*p/5+1):(4*p/5)] &lt;- runif((p/5)^2,-h,-h/2)*rbinom((p/5)^2,1,0.5)
+B12[(4*p/5+1):p,(4*p/5+1):p]             &lt;- runif((1*p/5)^2,-h,-h/2)*rbinom((1*p/5)^2,1,0.5)
+
+B21[1:(p/5),1:(p/5)]                     &lt;- runif((p/5)^2,h/2,h)*rbinom((p/5)^2,1,0.5)
+B21[(p/5+1):(3*p/5),(p/5+1):(3*p/5)]     &lt;- runif((2*p/5)^2,h/2,h)*rbinom((2*p/5)^2,1,0.5)
+B21[(3*p/5+1):(4*p/5),(3*p/5+1):(4*p/5)] &lt;- runif((p/5)^2,h/2,h)*rbinom((p/5)^2,1,0.5)
+B21[(4*p/5+1):p,(4*p/5+1):p]             &lt;- runif((1*p/5)^2,h/2,h)*rbinom((1*p/5)^2,1,0.5)
+
+B22[1:(p/5),1:(p/5)]                     &lt;- runif((p/5)^2,-h,-h/2)*rbinom((p/5)^2,1,0.5)
+B22[(p/5+1):(3*p/5),(p/5+1):(3*p/5)]     &lt;- runif((2*p/5)^2,-h,-h/2)*rbinom((2*p/5)^2,1,0.5)
+B22[(3*p/5+1):(4*p/5),(3*p/5+1):(4*p/5)] &lt;- runif((p/5)^2,-h,-h/2)*rbinom((p/5)^2,1,0.5)
+B22[(4*p/5+1):p,(4*p/5+1):p]             &lt;- runif((1*p/5)^2,-h,-h/2)*rbinom((1*p/5)^2,1,0.5)
+
+Y[1:(n/2),]   &lt;- X[1:(n/2),]%*%B11+matrix(rnorm((n/2)*p,0,0.25),n/2,p)
+Y[(n/2+1):n,] &lt;- X[(n/2+1):n,]%*%B12+matrix(rnorm((n/2)*p,0,0.25),n/2,p)
+
+Z[1:(n/2),]   &lt;- Y[1:(n/2),]%*%B21+matrix(rnorm((n/2)*p,0,0.25),n/2,p)
+Z[(n/2+1):n,] &lt;- Y[(n/2+1):n,]%*%B22+matrix(rnorm((n/2)*p,0,0.25),n/2,p)
+
+trial &lt;- mlbncut(Z,
+                 Y,
+                 X,
+                 K=4,
+                 R=2,
+                 B=10,
+                 N=50,
+                 dist='correlation',
+                 q0=0.15,
+                 scale=TRUE,
+                 sigmas=0.05,
+                 sigmac=1)
+
+plot(trial[[1]],type='l')
+image.plot(trial[[2]])
+image.plot(trial[[3]])
+
+errorK &lt;- sum((trial[[3]][,1]%*%t(trial[[3]][,1]) +
+                 trial[[3]][,2]%*%t(trial[[3]][,2]) +
+                 trial[[3]][,3]%*%t(trial[[3]][,3]) +
+                 trial[[3]][,4]%*%t(trial[[3]][,4]))*W0)/(3*p)^2 +
+            sum((trial[[2]][,1]%*%t(trial[[2]][,1]) +
+                 trial[[2]][,2]%*%t(trial[[2]][,2]))*W1)/(n)^2
+errorK
+</code></pre>
+
+
+</div>

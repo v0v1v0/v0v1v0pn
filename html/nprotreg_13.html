@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>weight_explanatory_points</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Weights the Specified Explanatory Points in a 3D Spherical Regression.</h2>
+
+<h3>Description</h3>
+
+<p>Returns the weights assigned to the specified explanatory points
+for each evaluation point under study, given a concentration parameter.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">weight_explanatory_points(evaluation_points, explanatory_points, concentration)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>evaluation_points</code></td>
+<td>
+<p>An <em>n</em>-by-3 matrix whose rows contain
+the Cartesian coordinates of the points on which the regression
+will be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>explanatory_points</code></td>
+<td>
+<p>An <em>m</em>-by-3 matrix whose rows contain
+the Cartesian coordinates of the explanatory points used to
+calculate the regression estimators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>concentration</code></td>
+<td>
+<p>A non negative scalar whose reciprocal value
+is proportional to the bandwidth applied while estimating
+a spherical regression model.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">X</code> be the <em>m</em>-by-3 matrix of explanatory points, and <code class="reqn">E</code>
+the <em>n</em>-by-3 matrix of evaluation points, and <code class="reqn">\kappa</code> the
+concentration parameter. This function will return
+an <em>m</em>-by-<em>n</em> matrix whose <code class="reqn">(i,j)</code> entry is defined as
+follows:
+</p>
+<p style="text-align: center;"><code class="reqn">exp(\kappa (s(i,j) - 1))</code>
+</p>
+
+<p>where <code class="reqn">s(i,j)</code> is the scalar product of the <code class="reqn">i</code>-th row of
+<code class="reqn">X</code> and the <code class="reqn">j</code>-th row of <code class="reqn">E</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <em>m</em>-by-<em>n</em> matrix whose <em>j</em>-th column contains
+the weights assigned to the explanatory points while analyzing the
+<em>j</em>-th evaluation point.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Regression functions: 
+<code>cross_validate_concentration()</code>,
+<code>fit_regression()</code>,
+<code>get_equally_spaced_points()</code>,
+<code>get_skew_symmetric_matrix()</code>,
+<code>simulate_regression()</code>,
+<code>simulate_rigid_regression()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nprotreg)
+
+# Define a matrix of evaluation points.
+
+north_pole &lt;- cbind(0, 0, 1)
+south_pole &lt;- cbind(0, 0, -1)
+evaluation_points &lt;- rbind(north_pole, south_pole)
+
+# Define a matrix of explanatory points
+
+explanatory_points &lt;- rbind(
+  cbind(.5, 0, .8660254),
+  cbind(-.5, 0, .8660254),
+  cbind(1, 0, 0),
+  cbind(0, 1, 0),
+  cbind(-1, 0, 0),
+  cbind(0, -1, 0),
+  cbind(.5, 0, -.8660254),
+  cbind(-.5, 0, -.8660254)
+)
+
+# Define a value for the concentration parameter.
+
+concentration &lt;- 1.0
+
+# Get the corresponding 8-by-2 matrix of weights.
+# Columns corresponds to evaluation points,
+# rows to explanatory ones.
+
+weights &lt;- weight_explanatory_points(evaluation_points,
+                                     explanatory_points,
+                                     concentration)
+
+# Get the weights assigned to the explanatory points
+# while analyzing the second evaluation point.
+
+cat("Weights assigned while analyzing the second evaluation point: \n")
+cat(weights[, 2], "\n")
+</code></pre>
+
+
+</div>

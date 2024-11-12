@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroAggregate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Regional averages on a self-organizing map
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimate district averages based on assigned map locations for each data point.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroAggregate(topology, districts, data = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>topology</code></td>
+<td>
+
+<p>A data frame with K rows and six columns, see details.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>districts</code></td>
+<td>
+ 
+<p>An integer vector of M best-matching districts.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A vector of M elements or an M x N matrix of data values. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Topology can be either the output from <code>nroKohonen()</code> or a
+data frame in the same format as the element <code>topology</code> within the
+the output from <code>nroKohonen()</code>.
+</p>
+<p>The input argument <code>districts</code> is expected to be the output from
+<code>nroMatch()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If the input argument <code>data</code> is empty, the histogram of the data points
+on the map is returned (a vector of K elements).
+</p>
+<p>If data are available, a matrix of K rows and N columns that contains
+the average district values after smoothing is returned. The output includes
+the attribute 'histogram' that contains data point counts over each data
+column. Column names and the attribute 'binary' are copied from the input.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Prepare training data.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- scale.default(dataset[,trvars]) 
+
+# K-means clustering.
+km &lt;- nroKmeans(data = trdata)
+
+# Self-organizing map.
+sm &lt;- nroKohonen(seeds = km)
+sm &lt;- nroTrain(map = sm, data = trdata)
+
+# Assign data points into districts.
+matches &lt;- nroMatch(centroids = sm, data = trdata)
+
+# District averages for one variable.
+chol &lt;- nroAggregate(topology = sm, districts = matches,
+                     data = dataset$CHOL)
+print(chol)
+
+# District averages for all variables.
+planes &lt;- nroAggregate(topology = sm, districts = matches, data = dataset)
+print(head(planes))
+</code></pre>
+
+
+</div>

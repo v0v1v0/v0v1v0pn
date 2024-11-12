@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pamrML</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Wrapper function around the pamr.* functions</h2>
+
+<h3>Description</h3>
+
+<p>The pamrML functions are wrappers around <code>pamr.train</code> and
+<code>pamr.predict</code> that provide a more classical R modelling interface than
+the original versions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pamrML(formula, data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>model formula</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data frame</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>argument for the <code>parmTrain</code> function</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The name of the response variable is kept as an attribute in the
+<code>pamrML</code> object to allow for predict methods that can be easily used
+for writing converter functions for use in the <code>MLInterfaces</code>
+framework.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>pamrML</code> an object of class <code>pamrML</code> which adds an
+attribute to the original object returned by <code>pamr.train</code> (or
+<code>pamrTrain</code>).
+</p>
+<p>The <code>print</code> method lists the names of the different components of the
+<code>pamrML</code> object.
+</p>
+<p>The <code>predict</code> method returns a vector of predicted values
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tobias Verbeke
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pamr.train</code>, <code>pamr.predict</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  set.seed(120)
+  x &lt;- matrix(rnorm(1000*20), ncol=20)
+  y &lt;- sample(c(1:4), size=20, replace=TRUE)
+  # for original pam
+  mydata &lt;- list(x=x, y=y)
+  mytraindata &lt;- list(x=x[,1:15],y=factor(y[1:15]))
+  mytestdata &lt;-  list(x = x[,16:20], y = factor(y[16:20]))
+
+  # for formula-based methods including pamrML
+  alldf &lt;- cbind.data.frame(t(mydata$x), y)
+  traindf &lt;- cbind.data.frame(t(mytraindata$x), y = mytraindata$y)
+  testdf &lt;- cbind.data.frame(t(mytestdata$x), y = mytestdata$y)
+
+  ### create pamrML object
+  pamrMLObj &lt;- pamrML(y ~ ., traindf)
+  pamrMLObj
+
+  ### test predict method
+  predict(object = pamrMLObj, newdata = testdf, 
+      threshold = 1) # threshold compulsory
+</code></pre>
+
+
+</div>

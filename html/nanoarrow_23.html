@@ -1,0 +1,100 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nanoarrow_array_init</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Modify nanoarrow arrays</h2>
+
+<h3>Description</h3>
+
+<p>Create a new array or from an existing array, modify one or more parameters.
+When importing an array from elsewhere, <code>nanoarrow_array_set_schema()</code> is
+useful to attach the data type information to the array (without this
+information there is little that nanoarrow can do with the array since its
+content cannot be otherwise interpreted). <code>nanoarrow_array_modify()</code> can
+create a shallow copy and modify various parameters to create a new array,
+including setting children and buffers recursively. These functions power the
+<code style="white-space: pre;">⁠$&lt;-⁠</code> operator, which can modify one parameter at a time.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nanoarrow_array_init(schema)
+
+nanoarrow_array_set_schema(array, schema, validate = TRUE)
+
+nanoarrow_array_modify(array, new_values, validate = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>schema</code></td>
+<td>
+<p>A nanoarrow_schema to attach to this
+<code>array</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>array</code></td>
+<td>
+<p>A nanoarrow_array.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validate</code></td>
+<td>
+<p>Use <code>FALSE</code> to skip validation. Skipping validation may
+result in creating an array that will crash R.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new_values</code></td>
+<td>
+<p>A named <code>list()</code> of values to replace.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+
+<ul>
+<li> <p><code>nanoarrow_array_init()</code> returns a possibly invalid but initialized
+array with a given <code>schema</code>.
+</p>
+</li>
+<li> <p><code>nanoarrow_array_set_schema()</code> returns <code>array</code>, invisibly. Note that
+<code>array</code> is modified in place by reference.
+</p>
+</li>
+<li> <p><code>nanoarrow_array_modify()</code> returns a shallow copy of <code>array</code> with the
+modified parameters such that the original array remains valid.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">nanoarrow_array_init(na_string())
+
+# Modify an array using $ and &lt;-
+array &lt;- as_nanoarrow_array(1:5)
+array$length &lt;- 4
+as.vector(array)
+
+# Modify potentially more than one component at a time
+array &lt;- as_nanoarrow_array(1:5)
+as.vector(nanoarrow_array_modify(array, list(length = 4)))
+
+# Attach a schema to an array
+array &lt;- as_nanoarrow_array(-1L)
+nanoarrow_array_set_schema(array, na_uint32())
+as.vector(array)
+
+</code></pre>
+
+
+</div>

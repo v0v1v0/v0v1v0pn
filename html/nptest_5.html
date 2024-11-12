@@ -1,0 +1,271 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>np.cor.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonparametric Tests of Correlation Coefficients
+</h2>
+
+<h3>Description</h3>
+
+<p>Denoting the Pearson product-moment correlation coefficient as
+</p>
+<p style="text-align: center;"><code class="reqn">\rho = Cov(X, Y) / \sqrt{Var(X) Var(Y)}</code>
+</p>
+ 
+<p>this function implements permutation tests of <code class="reqn">H_0: \rho = \rho_0</code> where <code class="reqn">\rho_0</code> is the user-specified null value. Can also implement tests of partial correlations, semi-partial (or part) correlations, and independence.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">np.cor.test(x, y, z = NULL,
+            alternative = c("two.sided", "less", "greater"),
+            rho = 0, independent = FALSE, partial = TRUE,
+            R = 9999, parallel = FALSE, cl = NULL,
+            perm.dist = TRUE, na.rm = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p><code class="reqn">X</code> vector (<code>n</code> by 1).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p><code class="reqn">Y</code> vector (<code>n</code> by 1).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+
+<p>Optional <code class="reqn">Z</code> matrix (<code>n</code> by <code>q</code>). If provided, the partial (or semi-partial if <code>partial = FALSE</code>) correlation is calculated between <code>x</code> and <code>y</code> controlling for <code>z</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+
+<p>Alternative hypothesis. Must be either "two.sided" (<code class="reqn">H_1: \rho \neq \rho_0</code>), "less" (<code class="reqn">H_1: \rho &lt; \rho_0</code>), or "greater" (<code class="reqn">H_1: \rho &gt; \rho_0</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+
+<p>Null hypothesis value <code class="reqn">\rho_0</code>. Defaults to zero.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>independent</code></td>
+<td>
+
+<p>If <code>FALSE</code> (default), the null hypothesis is <code class="reqn">H_0: \rho = \rho_0</code>. Otherwise, the null hythpothesis is that <code class="reqn">X</code> and <code class="reqn">Y</code> are independent, i.e., <code class="reqn">H_0: F_{XY}(x,y) = F_X(x) F_Y(y)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partial</code></td>
+<td>
+
+<p>Only applicable if <code>z</code> is provided. If <code>TRUE</code> (default), the partial correlation between <code>x</code> and <code>y</code> controlling for <code>z</code> is tested. Otherwise the semi-partial correlation is tested. See Details. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+
+<p>Number of resamples for the permutation test (positive integer). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+
+<p>Logical indicating if the <code>parallel</code> package should be used for parallel computing (of the permutation distribution). Defaults to <code>FALSE</code>, which implements sequential computing.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+
+<p>Cluster for parallel computing, which is used when <code>parallel = TRUE</code>. Note that if <code>parallel = TRUE</code> and <code>cl = NULL</code>, then the cluster is defined as <code>makeCluster(2L)</code> to use two cores. To make use of all available cores, use the code <code>cl = makeCluster(detectCores())</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>perm.dist</code></td>
+<td>
+
+<p>Logical indicating if the permutation distribution should be returned.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+
+<p>If <code>TRUE</code> (default), the arguments <code>x</code> and <code>y</code> (and <code>z</code> if provided) are passed to the <code>na.omit</code> function to remove cases with missing data.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Default use of this function tests the Pearson correlation between <code class="reqn">X</code> and <code class="reqn">Y</code> using the studentized test statistic proposed by DiCiccio and Romano (2017). If <code>independent = TRUE</code>, the classic (unstudentized) test statistic is used to test the null hypothesis of independence.
+</p>
+<p>If <code class="reqn">Z</code> is provided, the partial or semi-partial correlation between <code class="reqn">X</code> and <code class="reqn">Y</code> controlling for <code class="reqn">Z</code> is tested. For the semi-partial correlation, the effect of <code class="reqn">Z</code> is partialled out of <code class="reqn">X</code>. 
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic </code></td>
+<td>
+
+<p>Test statistic value.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value </code></td>
+<td>
+
+<p>p-value for testing <code class="reqn">H_0: \rho = \rho_0</code> or <code class="reqn">H_0: F_{XY}(x,y) = F_X(x) F_Y(y)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>perm.dist </code></td>
+<td>
+
+<p>Permutation distribution of <code>statistic</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative </code></td>
+<td>
+
+<p>Alternative hypothesis.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.value </code></td>
+<td>
+
+<p>Null hypothesis value for <code class="reqn">\rho</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>independent </code></td>
+<td>
+
+<p>Independence test?
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R </code></td>
+<td>
+
+<p>Number of resamples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exact </code></td>
+<td>
+
+<p>Exact permutation test? See Note.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimate </code></td>
+<td>
+
+<p>Sample estimate of correlation coefficient <code class="reqn">\rho</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>The permutation test will be exact when the requested number of resamples <code>R</code> is greater than <code>factorial(n)</code> minus one. In this case, the permutation distribution <code>perm.dist</code> contains all <code>factorial(n)</code> possible values of the test statistic.
+</p>
+<p>If <code>z = NULL</code>, the result will be the same as using <code>np.reg.test</code> with <code>method = "perm"</code>.
+</p>
+<p>If <code>z</code> is supplied and <code>partial = TRUE</code>, the result will be the same as using <code>np.reg.test</code> with <code>method = "KC"</code> and <code>homosced = FALSE</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>DiCiccio, C. J., &amp; Romano, J. P. (2017). Robust permutation tests for correlation and regression coefficients. Journal of the American Statistical Association, 112(519), 1211-1220. doi: 10.1080/01621459.2016.1202117
+</p>
+<p>Helwig, N. E. (2019). Statistical nonparametric mapping: Multivariate permutation tests for location, correlation, and regression problems in neuroimaging. WIREs Computational Statistics, 11(2), e1457. doi: 10.1002/wics.1457
+</p>
+<p>Pitman, E. J. G. (1937b). Significance tests which may be applied to samples from any populations. ii. the correlation coefficient test. Supplement to the Journal of the Royal Statistical Society, 4(2), 225-232. doi: 10.2307/2983647
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.np.cor.test</code> S3 plotting method for visualizing the results
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate data
+rho &lt;- 0.5
+val &lt;- c(sqrt(1 + rho), sqrt(1 - rho))
+corsqrt &lt;- matrix(c(val[1], -val[2], val), 2, 2) / sqrt(2)
+set.seed(1)
+n &lt;- 10
+z &lt;- cbind(rnorm(n), rnorm(n)) %*% corsqrt
+x &lt;- z[,1]
+y &lt;- z[,2]
+
+# test H0: rho = 0
+set.seed(0)
+np.cor.test(x, y)
+
+# test H0: X and Y are independent
+set.seed(0)
+np.cor.test(x, y, independent = TRUE)
+
+</code></pre>
+
+
+</div>

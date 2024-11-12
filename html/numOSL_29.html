@@ -1,0 +1,339 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fitGrowth</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Growth curve fitting
+</h2>
+
+<h3>Description</h3>
+
+<p>Fitting growth curves using the Levenberg-Marquardt algorithm.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fitGrowth(Curvedata, model = "gok", origin = FALSE, 
+          weight = TRUE, trial = FALSE, plot = TRUE, 
+          nofit.rgd = NULL, agID = NULL, Tn = NULL, 
+          Tn3BG = NULL, TnBG.ratio = NULL, rseTn = NULL, 
+          FR = NULL, RecyclingRatio1 = NULL, 
+          RecyclingRatio2 = NULL, RecyclingRatio3 = NULL, 
+          Recuperation1 = NULL, Recuperation2 = NULL, 
+          LnTn.curve = NULL, TxTn = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Curvedata</code></td>
+<td>
+<p>matrix(<b>required</b>): a three-column matrix (i.e., regenerative doses,<br>
+sensitivity-corrected regenerative-dose signals, and associated standard errors)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>character(with default): model used for growth curve fitting, see details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>origin</code></td>
+<td>
+<p>logical(optional): logical value indicating if the growth curve should be forced to pass the origin</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be fitted using a weighted procedure, see details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be fitted using other models if the given model fails, see details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical(with default): logical value indicating if the results should be plotted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nofit.rgd</code></td>
+<td>
+<p>integer(optional): regenerative doses that will not be used during the fitting. 
+For example, if <code>nofit.rgd=c(5,6)</code> then both the fifth and sixth regenerative doses will not be used during growth curve fitting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agID</code></td>
+<td>
+<p>vector(optional): a three-elemenet vector indicating aliquot (grain) ID, i.e.,<br><code>agID[1]=NO</code>, <code>agID[2]=Position</code>, <code>agID[3]=Grain</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tn</code></td>
+<td>
+<p>vector(optional): a two-element vector containing value and<br>
+standard error of Tn</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tn3BG</code></td>
+<td>
+<p>numeric(optional): 0-1 value indicating if Tn is more than 3 sigma above BG,<br>
+1 indicates Tn&gt;3_sigma_BG, 0 indicates Tn&lt;=3_sigma_BG</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TnBG.ratio</code></td>
+<td>
+<p>vector(optional): a two-element vector containing value and<br>
+standard error of ratio of initial Tn signal to BG</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rseTn</code></td>
+<td>
+<p>numeric(optional): relative standard error of Tn in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FR</code></td>
+<td>
+<p>vector(optional): a two-element vector containing value and<br>
+standard error of fast ratio of Tn</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RecyclingRatio1</code></td>
+<td>
+<p>vector(optional): a two-element vector containing value and<br>
+standard error of the first recycling ratio</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RecyclingRatio2</code></td>
+<td>
+<p>vector(optional): a two-element vector containing value and<br>
+standard error of the second recycling ratio</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RecyclingRatio3</code></td>
+<td>
+<p>vector(optional): a two-element vector containing value and<br>
+standard error of the third recycling ratio</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Recuperation1</code></td>
+<td>
+<p>vector(optional): a two-element vector containing value and<br>
+standard error of the first recuperation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Recuperation2</code></td>
+<td>
+<p>vector(optional): a two-element vector containing value and<br>
+standard error of the second recuperation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LnTn.curve</code></td>
+<td>
+<p>list(optional): decay curve data for Ln and Tn, it should contain four elements, 
+i.e., <code>names(LnTn.curve)=c("Ln.x","Ln.y","Tn.x","Tn.y")</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TxTn</code></td>
+<td>
+<p>vector(optional): ratios of Tx to Tn for various SAR cycles</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In growth curve fitting using function fitGrowth, five models are available: <br><b>(1)</b> <em>"line"</em>: a linear model, <code>y=a*x+b</code>;<br><b>(2)</b> <em>"exp"</em>: a single saturation exponential model, <code>y=a*[1-exp(-b*x)]+c</code>;<br><b>(3)</b> <em>"lexp"</em>: a single saturation exponential plus linear model, <code>y=a*[1-exp(-b*x)]+c*x+d</code>;<br><b>(4)</b> <em>"dexp"</em>: a double saturation exponential model, <code>y=a*[1-exp(-b*x)]+c*[1-exp(-d*x)]+e</code>;<br><b>(5)</b> <em>"gok"</em>: a general order kinetic model (Guralnik et al., 2015), <code>y=a*[1-(1+b*c*x)^(-1/c)]+d</code>.<br><br>
+The fitting process is performed using the Levenberg-Marquardt algorithm (minpack: Fortran 90 source code by John Burkardt, freely available at <a href="https://people.sc.fsu.edu/~jburkardt/f_src/minpack/minpack.html">https://people.sc.fsu.edu/~jburkardt/f_src/minpack/minpack.html</a>). If <code>weight=TRUE</code>, a weighted procedure will be performed through weighting each data point by its inverse variance. User is advised to set argument <code>plot=TRUE</code> if possible to visualize the quality of fit.<br><br>
+Argument <code>trial=TRUE</code> means that if the growth curve can not be fitted successfully using the user-supplied model, then the procedure will try to fit other models instead:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<b>Model</b>              </td>
+<td style="text-align: left;">  <b>Tried model</b>                       </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>"dexp"</code>             </td>
+<td style="text-align: left;">  <code>c("dexp", "gok", "exp", "line")</code>   </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>"lexp"</code>             </td>
+<td style="text-align: left;">  <code>c("lexp", "gok", "exp", "line")</code>   </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>"gok"</code>              </td>
+<td style="text-align: left;">  <code>c("gok", "exp", "line")</code>           </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>"exp"</code>              </td>
+<td style="text-align: left;">  <code>c("exp", "line")</code>                  </td>
+</tr>
+<tr>
+<td style="text-align: left;"> 
+<code>"line"</code>             </td>
+<td style="text-align: left;">  <code>c("line")</code>                                         
+</td>
+</tr>
+</table>
+<p>For example, if <code>model="dexp"</code> and <code>trial=TRUE</code>, then a number of models from sequence<br><code>c("dexp", "gok", "exp", "line")</code> will be applied one after another until the fit succeeds.<br></p>
+<p>The required number of data points for each model is (value inside the parentheses denotes the required number of observations if the model passes the origin):
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<b>Model</b>   </td>
+<td style="text-align: left;"> <b>Required NPoints</b>   </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>"dexp"</code>  </td>
+<td style="text-align: left;">   &gt;=5 (&gt;=4)               </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>"lexp"</code>  </td>
+<td style="text-align: left;">   &gt;=4 (&gt;=3)               </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>"gok"</code>   </td>
+<td style="text-align: left;">   &gt;=4 (&gt;=3)               </td>
+</tr>
+<tr>
+<td style="text-align: left;">  
+<code>"exp"</code>   </td>
+<td style="text-align: left;">   &gt;=3 (&gt;=2)               </td>
+</tr>
+<tr>
+<td style="text-align: left;">   
+<code>"line"</code>  </td>
+<td style="text-align: left;">   &gt;=2 (&gt;=1)                                                   
+</td>
+</tr>
+</table>
+<p>If user-provided data is not enough for model fitting (i.e., the number of data points is less than the number of parameters of a given model), 
+then a model with less parameters will be fitted. For example, if 4 data points are fitted using a <code>"dexp"</code> (<code>origin=FALSE</code>) model that actually needs at least 5 data points, 
+then a 4-parameter <code>"gok"</code> model will be fitted instead. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>Return a list that contains the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>message</code></td>
+<td>
+<p>return 0 if the fit succeeds, else 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitIDX</code></td>
+<td>
+<p>Indices of dose points used in growth curve fitting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LMpars</code></td>
+<td>
+<p>optimized parameters for the growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>minimized objective for the growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>avg.error</code></td>
+<td>
+<p>average fit error for the growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RCS</code></td>
+<td>
+<p>reduced chi-square value for the growth curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FOM</code></td>
+<td>
+<p>figure of merit value for the growth curve in percent</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Arguments <code>agID</code>, <code>Tn</code>,  <code>Tn3BG</code>, <code>TnBG.ratio</code>, <code>rseTn</code>, <code>FR</code>,<br><code>RecyclingRatio1</code>, <code>RecyclingRatio2</code>, <code>RecyclingRatio3</code>,<br><code>Recuperation1</code>, <code>Recuperation2</code>, <code>LnTn.curve</code>, <code>TxTn</code> have nothing to do with growth curve fitting. They are used only for plotting purpose.<br><br>
+The model to be optimized should not be underdetermined. This means that the number of data points should exceed (or at least be equal to) the number of parameters. For a given model, the procedure will return an error if any standard errors of parameters cannot be estimated by numerical difference-approximation.<br><br></p>
+
+
+<h3>References</h3>
+
+<p>Balian HG, Eddy NW, 1977. Figure-of-merit (FOM), an improved criterion over the normalized chi-squared test for assessing 
+goodness-of-fit of gamma-ray spectral peaks. Nuclear Instruments and Methods, 145(2): 389-95.
+</p>
+<p>Guralnik B, Li B, Jain M, Chen R, Paris RB, Murray AS, Li SH, Pagonis V, Valla PG, Herman F, 2015. Radiation-induced growth and isothermal decay of 
+infrared-stimulated luminescence from feldspar. Radiation Measurements, 81: 224-231. 
+</p>
+<p>More JJ, 1978. "The Levenberg-Marquardt algorithm: implementation and theory" in Lecture Notes in Mathematics: Numerical Analysis, 
+Springer-Verlag: Berlin. 105-116.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>analyseBINdata; SARdata; calED; calSARED; fastED;<br>
+pickSARdata; lsNORM; calSGCED
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> ### Example 1:
+ Curvedata &lt;- cbind(c(0, 18, 36, 54, 72, 0, 18),               
+                    c(0.026, 1.55, 2.39, 3.46, 4.13, 0.023, 1.61),  
+                    c(0.005, 0.11, 0.27, 0.22, 0.20, 0.008, 0.24)) 
+ fitGrowth(Curvedata, model="gok", origin=FALSE, plot=TRUE)
+
+ ### Example 2 (not run):
+ # data(SARdata)
+ # Curvedata &lt;- SARdata[!is.element(SARdata[,2], "N"),3:5]
+ # fitGrowth(Curvedata, model="gok", origin=FALSE)
+ 
+</code></pre>
+
+
+</div>

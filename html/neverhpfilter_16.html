@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>yth_glm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fits Hamilton's alternative model</h2>
+
+<h3>Description</h3>
+
+<p><code>yth_glm</code> fits a generalized linear model suggested by James D. Hamilton as a better alternative to the Hodrick-Prescott Filter.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">yth_glm(x, h = 8, p = 4, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A univariate <code>xts</code> object of any <code>zoo</code> index class,
+such as <code>Date</code>, <code>yearmon</code>, or <code>yearqtr</code>.
+For converting objects of type <code>timeSeries, ts, irts, fts, matrix, data.frame</code>
+or <code>zoo</code> to <code>xts</code>, please read  <code>as.xts</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>An <code>integer</code>, defining the lookahead period.
+Defaults to <code>h = 8</code>, suggested by Hamilton. The default assumes
+economic data of quarterly periodicity with a lookahead period of 2 years.
+This function is not limited by the default parameter, and Econometricians may
+change it as required.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>An <code>integer</code>, indicating the number of lags. A Default of 
+<code>p = 4</code>, suggested by Hamilton, assumes data is of quarterly periodicity. 
+If data is of monthly periodicity, one may choose <code>p = 12</code> or aggregate 
+the series to quarterly periodicity and maintain the default. Econometricians 
+should use this parameter to accommodate the Seasonality of their data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>all arguments passed to the function <code>glm</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For time series of quarterly periodicity, Hamilton suggests parameters of
+h = 8 and p = 4, or an <code class="reqn">AR(4)</code> process, additionally lagged by <code class="reqn">8</code>
+lookahead periods. Econometricians may explore variations of h. However, p is designed to correspond with the seasonality of a given periodicity and should be matched accordingly.
+</p>
+<p style="text-align: center;"><code class="reqn">y_{t+h} = \beta_0 + \beta_1 y_t + \beta_2 y_{t-1} + \beta_3 y_{t-2} + \beta_4 y_{t-3} + v_{t+h}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\hat{v}_{t+h} = y_{t+h} - \hat{\beta}_0 + \hat{\beta}_1 y_t + \hat{\beta}_2 y_{t-1} + \hat{\beta}_3 y_{t-2} + \hat{\beta}_4 y_{t-3}</code>
+</p>
+
+<p>Which can be rewritten as:
+</p>
+<p style="text-align: center;"><code class="reqn">y_{t} = \beta_0 + \beta_1 y_{t-8} + \beta_2 y_{t-9} + \beta_3 y_{t-10} + \beta_4 y_{t-11} + v_{t}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\hat{v}_{t} = y_{t} - \hat{\beta}_0 + \hat{\beta}_1 y_{t-8} + \hat{\beta}_2 y_{t-9} + \hat{\beta}_3 y_{t-10} + \hat{\beta}_4 y_{t-11}</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p><code>yth_glm</code> returns a generalized linear model object of class <code>glm</code>,
+which inherits from <code>lm</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>James D. Hamilton. <a href="http://econweb.ucsd.edu/~jhamilto/hp.pdf">Why You Should Never Use the Hodrick-Prescott Filter</a>.
+NBER Working Paper No. 23429, Issued in May 2017.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>glm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(GDPC1)
+
+gdp_model &lt;- yth_glm(GDPC1, h = 8, p = 4, family = gaussian)
+
+summary(gdp_model)
+
+plot(gdp_model)
+
+</code></pre>
+
+
+</div>

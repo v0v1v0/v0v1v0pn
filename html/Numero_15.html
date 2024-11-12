@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>numero.clean</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Clean datasets</h2>
+
+<h3>Description</h3>
+
+<p>Sets row names and removes unusable columns and rows.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">numero.clean(..., identity = NULL, na.freq = 0.9,
+             num.only = TRUE, select = "")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Matrices or a data frames. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>identity</code></td>
+<td>
+
+<p>Name(s) of the column(s) that contain identification information.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.freq</code></td>
+<td>
+
+<p>The proportion of how many missing values are allowed in
+each column and in each row.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.only</code></td>
+<td>
+
+<p>If true, only numeric columns are included.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+
+<p>Indicate if only identities present in all datasets
+or in exactly one of the datasets are included.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If multiple identity columns are provided, composite identity keys
+are constructed by concatenating elements from each column with
+"_" added as a separator.
+</p>
+<p>The frequency of missing values (against <code>na.freq</code>) is tested first
+by column then by row.
+</p>
+<p>Selection can take three values: "" for no selection, "union" for all
+identities expanded to every dataset, "shared" for only those data points
+present in all usable datasets or "distinct" for excluding any points that
+can be found in more than one dataset. Note that the union may result in
+rows with no usable values.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame if only one input dataset, or a list of data frames if
+multiple datasets.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ville-Petteri Makinen
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Create new versions for testing.
+dsA &lt;- dataset[1:250, c("INDEX","AGE","MALE","uALB")]
+dsB &lt;- dataset[151:300, c("INDEX","AGE","MALE","uALB","CHOL")]
+dsC &lt;- dataset[201:500, c("INDEX","AGE","MALE","DIAB_RETINO")]
+
+# Select all rows.
+results &lt;- numero.clean(a = dsA, b = dsB, c = dsC, identity = "INDEX")
+cat("\n\nNo selection:\n")
+print(nrow(results$a))
+print(nrow(results$b))
+print(nrow(results$c))
+
+# Select all rows and expanded for all identities.
+results &lt;- numero.clean(a = dsA, b = dsB, c = dsC, identity = "INDEX",
+                        select = "union")
+cat("\n\nUnion:\n")
+print(nrow(results$a))
+print(nrow(results$b))
+print(nrow(results$c))
+
+# Select only rows that are shared between all datasets.
+results &lt;- numero.clean(a = dsA, b = dsB, c = dsC, identity = "INDEX",
+                        select = "intersection")
+cat("\n\nIntersection:\n")
+print(nrow(results$a))
+print(nrow(results$b))
+print(nrow(results$c))
+
+# Select only rows with a unique INDEX ('dsB' has none).
+results &lt;- numero.clean(a = dsA, b = dsB, c = dsC, identity = "INDEX",
+                        select = "exclusion")
+cat("\n\nExclusion:\n")
+print(nrow(results$a))
+print(nrow(results$b))
+print(nrow(results$c))
+
+# Add extra identification information.
+dsA$GROUP &lt;- "A"
+dsB$GROUP &lt;- "B"
+dsC$GROUP &lt;- "C"
+
+# Select rows with a unique identifier.
+results &lt;- numero.clean(a = dsA, b = dsB, c = dsC,
+                        identity = c("GROUP","INDEX"),
+                        select = "exclusion")
+cat("\n\nMulti-identities:\n")
+print(nrow(results$a))
+print(nrow(results$b))
+print(nrow(results$c))
+</code></pre>
+
+
+</div>

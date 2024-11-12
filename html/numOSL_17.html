@@ -1,0 +1,266 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calSARED</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+SAR equivalent doses calculation and selection
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculating and selecting a series of equivalent doses in a batch mode according to the single aliquot regenerative-dose (SAR) method (Murray and Wintle, 2000).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calSARED(obj_analyseBIN, model = "gok", origin = FALSE, 
+         errMethod = "sp", nsim = 500, weight = TRUE, 
+         trial = TRUE, nofit.rgd = NULL, Tn.above.3BG = TRUE, 
+         TnBG.ratio.low = NULL, rseTn.up = NULL, FR.low = NULL, 
+         rcy1.range = NULL, rcy2.range = NULL, rcy3.range = NULL, 
+         rcp1.up = NULL, rcp2.up = NULL, fom.up = NULL, 
+         rcs.up = NULL, calED.method = NULL, rseED.up = NULL, 
+         use.se = TRUE, outpdf = NULL, outfile = NULL) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj_analyseBIN</code></td>
+<td>
+<p>list(<b>required</b>): an object of S3 class "analyseBIN" produced by<br> 
+function analyseBINdata or as_analyseBIN</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>character(with default): model used for growth curve fitting, see fitGrowth for available models</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>origin</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be forced to pass the origin</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errMethod</code></td>
+<td>
+<p>character(with default): method used for equivalent dose error assessment. See function calED for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>integer(with default): desired number of randomly simulated equivalent dose obtained by Monte Carlo simulation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be fitted using a weighted procedure, see function fitGrowth for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be fitted using other models if the given model fails, see function fitGrowth for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nofit.rgd</code></td>
+<td>
+<p>integer(optional): regenerative doses that will not be used during the fitting. 
+For example, if <code>nofit.rgd=6</code> then the sixth regenerative dose will not be used during growth curve fitting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tn.above.3BG</code></td>
+<td>
+<p>logical(with default): logical value indicating if aliquot (grain) with Tn below 3 sigma BG should be rejected</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TnBG.ratio.low</code></td>
+<td>
+<p>numeric(optional): lower limit on ratio of initial Tn signal to BG</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rseTn.up</code></td>
+<td>
+<p>numeric(optional): upper limit on relative standard error of Tn in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FR.low</code></td>
+<td>
+<p>numeric(optional): lower limit on fast ratio of Tn</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcy1.range</code></td>
+<td>
+<p>vector(optional): a two-element vector indicating the lower and upper limits on recycling ratio 1, 
+Example: <code>rcy1.range=c(0.9,1.1)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcy2.range</code></td>
+<td>
+<p>vector(optional): a two-element vector indicating the lower and upper limits on recycling ratio 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcy3.range</code></td>
+<td>
+<p>vector(optional): a two-element vector indicating the lower and upper limits on recycling ratio 3</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcp1.up</code></td>
+<td>
+<p>numeric(optional): upper limit on recuperation 1 (i.e., ratio of the<br>
+sensitivity-corrected zero-dose signal to natural-dose signal) in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcp2.up</code></td>
+<td>
+<p>numeric(optional): upper limit on recuperation 2 (i.e., ratio of the<br>
+sensitivity-corrected zero-dose signal to maximum regenerative-dose signal)<br>
+in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fom.up</code></td>
+<td>
+<p>numeric(optional): upper limit on figure of merit (FOM) values of growth curves in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcs.up</code></td>
+<td>
+<p>numeric(optional): upper limit on reduced chi-square (RCS) values of growth curves</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calED.method</code></td>
+<td>
+<p>character(optional): method used for equivalent dose calculation, i.e.,<br><code>"Interpolation"</code> or <code>"Extrapolation"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rseED.up</code></td>
+<td>
+<p>numeric(optional): upper limit on the relative standard error of equivalent dose in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.se</code></td>
+<td>
+<p>logical(with default): logical value indicating if standard errors of values should be used during application of rejection criteria</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outpdf</code></td>
+<td>
+<p>character(optional): if specified, results of SAR equivalent dose calculation will be written to a PDF file named <code>"outpdf"</code> and saved to the current work directory</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outfile</code></td>
+<td>
+<p>character(optional): if specified, SAR equivalent doses related quantities will be written
+to a CSV file named <code>"outfile"</code> and saved to the current work directory</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return an invisible list that contains the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>LMpars</code></td>
+<td>
+<p>a list containing optimized parameters of growth curves of calculated (selected) SAR equivalent doses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tn</code></td>
+<td>
+<p>values and standard errors of Tn of calculated (selected) SAR equivalent doses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ltx</code></td>
+<td>
+<p>sensitivity-corrected natural-dose signals and associated standard errors used for SAR equivalent dose calculation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sarED</code></td>
+<td>
+<p>calculated (selected) SAR equivalent doses and associated standard errors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ConfInt</code></td>
+<td>
+<p>68 percent (one sigma) and 95 percent (two sigma) confidence intervals of SAR equivalent doses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agID</code></td>
+<td>
+<p>aliquot (grain) ID of calculated (selected) SAR equivalent doses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary.info</code></td>
+<td>
+<p>a summary of the SAR equivalent dose calculation</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Rejection criteria used to select reliable SAR equivalent dose estimates can be catergorized into three groups:<br><b>(1)</b> signal-related criteria, such as <code>Tn.above.3BG</code>, <code>TnBG.ratio.low</code>, <code>rseTn.up</code>, and <code>FR.low</code>;<br><b>(2)</b> growth-curve-related criteria, such as <code>rcy1.range</code>, <code>rcy2.range</code>, <code>rcy3.range</code>, <code>rcp1.up</code>,<br><code>rcp2.up</code>, <code>fom.up</code>, and <code>rcs.up</code>;<br><b>(3)</b> equivalent-dose-related criteria, such as <code>calED.method</code> and <code>rseED.up</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Duller GAT, 2016. Analyst (v4.31.9), User Mannual.
+</p>
+<p>Murray AS, Wintle AG, 2000. Luminescence dating of quartz using improved single-aliquot regenerative-dose protocol. Radiation Measurements, 32(1): 57-73.
+</p>
+<p>Wintle AG, Murray AS, 2006. A review of quartz optically stimulated luminescence characteristics and their relevance in single-aliquot regeneration dating protocols. Radiation Measurements, 41(4): 369-391.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>analyseBINdata; fitGrowth; calED; calSGCED; pickSARdata
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  data(BIN)
+  obj_pickBIN &lt;- pickBINdata(BIN, Position=c(2,4,6,8,10), Grain=0, 
+                             LType="OSL", view=FALSE)
+  obj_analyseBIN &lt;- analyseBINdata(obj_pickBIN, nfchn=3, nlchn=20) 
+  res_SARED &lt;- calSARED(obj_analyseBIN, model="exp", origin=FALSE)
+  # plot(res_SARED$Tn[,1], res_SARED$sarED[,1], xlab="Tn", ylab="ED (&lt;Gy&gt;|&lt;s&gt;)")
+</code></pre>
+
+
+</div>

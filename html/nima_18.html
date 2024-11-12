@@ -1,0 +1,80 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim_plot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualize Summaries of Simulation Results</h2>
+
+<h3>Description</h3>
+
+<p>Visualize Summaries of Simulation Results
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim_plot(x, ..., sample_sizes, stat = c("bias", "mc_var", "mse"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>list</code> of several simulation summary objects, of class
+<code>simulation_stats</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Extra arguments currently ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_sizes</code></td>
+<td>
+<p>A <code>numeric</code> vector giving the sample sizes at which
+each of the simulations in the input <code>x</code> was performed. There should be
+one unique sample size corresponding to each element of <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat</code></td>
+<td>
+<p>A <code>character</code> indicating which of three simulation summary
+statistics for which to generate a plot. Options are currently limited to
+bias (<code>"bias"</code>), variance (<code>"mc_var"</code>), and mean-squared error
+(<code>"mse"</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">n_sim &lt;- 100
+n_obs &lt;- c(100, 10000)
+mu &lt;- 2
+sim_results &lt;- lapply(n_obs, function(sample_size) {
+  estimator_sim &lt;- lapply(seq_len(n_sim), function(iter) {
+    y_obs &lt;- rnorm(sample_size, mu)
+    est_param &lt;- mean(y_obs)
+    est_var &lt;- var(y_obs)
+    estimate &lt;- tibble::as_tibble(list(
+      param_est = est_param,
+      param_var = est_var
+    ))
+    return(estimate)
+  })
+  estimates &lt;- do.call(rbind, estimator_sim)
+  return(estimates)
+})
+sim_summary &lt;- lapply(sim_results, summarize_sim, truth = mu)
+p_sim_summary &lt;- sim_plot(sim_summary, sample_sizes = n_obs, stat = "mse")
+p_sim_summary
+</code></pre>
+
+
+</div>

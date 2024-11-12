@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ns_export</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Search exports</h2>
+
+<h3>Description</h3>
+
+<p>Search exports
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ns_export(
+  text = NULL,
+  text_adv = NULL,
+  status = NULL,
+  location = NULL,
+  record_type = NULL,
+  record_subtype = NULL,
+  modified_since = NULL,
+  format = "json",
+  lang = "en",
+  ...
+)
+
+ns_export_status(id, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>text</code></td>
+<td>
+<p>(character) basic text search, equiavalent to <code>text_adv</code>
+with <code>matchAgainst="allNames"</code> and <code>operator="similarTo"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text_adv</code></td>
+<td>
+<p>(list) advanced search, must specify the following three
+elements: <code>searchToken</code>, <code>matchAgainst</code>, and <code>operator</code>. see
+https://explorer.natureserve.org/api-docs/#_advanced_text_search_parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>status</code></td>
+<td>
+<p>(character) conservation status, one of G1, G2, G3, G4,
+G5, GH, GX, GNR, GNA, GU. case insensitive</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>location</code></td>
+<td>
+<p>(list) location, country and sub-country. specify either
+<code>nation</code> OR <code>nation</code> and <code>subnation</code>. each expects a two-letter ISO code</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>record_type</code></td>
+<td>
+<p>(character) limit results by record type, one of
+"species" or "ecosystem"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>record_subtype</code></td>
+<td>
+<p>(character) limit results by record sub-type, one of:
+"class", "subclass", "formation", "division", "macrogroup", "group",
+"alliance", "association", "terrestrial_ecological_system"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modified_since</code></td>
+<td>
+<p>(character) search for records modified since a
+given time. value must be a date and time with a UTC offset in ISO 8601
+format. optional</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format</code></td>
+<td>
+<p>(character) output format, one of "json" or "xlsx"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lang</code></td>
+<td>
+<p>(character) language, one of "en", "es", or "fr"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Curl options passed on to <code>verb-GET</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>(character) a job id, from output of <code>ns_export()</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>ns_export()</code> returns a single character string (a job id)
+<code>ns_export_status()</code> returns a list of metadata concerning the
+status of the export
+</p>
+
+
+<h3>References</h3>
+
+<p>https://explorer.natureserve.org/api-docs/
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+x &lt;- ns_export(text = "robin")
+res &lt;- ns_export_status(x)
+str(res)
+res$state
+res$data$errorMessage
+res$data$url
+
+w &lt;- ns_export(text_adv = list(searchToken = "western",
+  matchAgainst="allScientificNames", operator="startsWith"))
+m &lt;- ns_export_status(w)
+head(jsonlite::fromJSON(m$data$url))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

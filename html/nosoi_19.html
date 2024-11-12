@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getTransmissionTree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Gets the full transmission tree (phylogenetic tree-like) from a <code>nosoi</code> simulation</h2>
+
+<h3>Description</h3>
+
+<p>From a <code>nosoi</code> simulated epidemics, this function extracts the full transmission tree in a form mimicking a phylogenetic tree.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getTransmissionTree(nosoiInf)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>nosoiInf</code></td>
+<td>
+<p>an object of class <code>nosoiSim</code></p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>This function uses packages <span class="pkg">tidytree</span> and <span class="pkg">treeio</span>,
+that rely on <code>ape</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A tree of class <code>treedata</code>, containing a
+phylogenetic tree based on the transmission chain and the mapped data at all the nodes.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>For exporting the annotated tree to other software packages, see functions
+in <span class="pkg">treeio</span> (e.g. <code>write.beast</code>).
+</p>
+<p>To sub-sample this tree, see functions <code>sampleTransmissionTree</code> and <code>sampleTransmissionTreeFromExiting</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+t_incub_fct &lt;- function(x){rnorm(x,mean = 5,sd=1)}
+p_max_fct &lt;- function(x){rbeta(x,shape1 = 5,shape2=2)}
+p_Exit_fct  &lt;- function(t){return(0.08)}
+p_Move_fct  &lt;- function(t){return(0.1)}
+
+proba &lt;- function(t,p_max,t_incub){
+  if(t &lt;= t_incub){p=0}
+  if(t &gt;= t_incub){p=p_max}
+  return(p)
+}
+
+time_contact = function(t){round(rnorm(1, 3, 1), 0)}
+
+transition.matrix = matrix(c(0, 0.2, 0.4, 0.5, 0, 0.6, 0.5, 0.8, 0),
+                           nrow = 3, ncol = 3,
+                           dimnames = list(c("A", "B", "C"), c("A", "B", "C")))
+
+set.seed(805)
+test.nosoi &lt;- nosoiSim(type="single", popStructure="discrete",
+                        length=20,
+                        max.infected=100,
+                        init.individuals=1,
+                        init.structure="A",
+                        structure.matrix=transition.matrix,
+                        pMove=p_Move_fct,
+                        param.pMove=NA,
+                        nContact=time_contact,
+                        param.nContact=NA,
+                        pTrans = proba,
+                        param.pTrans = list(p_max=p_max_fct,
+                                            t_incub=t_incub_fct),
+                        pExit=p_Exit_fct,
+                        param.pExit=NA
+)
+
+## Make sure all needed packages are here
+if (requireNamespace("ape", quietly = TRUE) &amp;&amp;
+    requireNamespace("tidytree", quietly = TRUE) &amp;&amp;
+    requireNamespace("treeio", quietly = TRUE)) {
+  library(ape)
+  library(tidytree)
+  library(treeio)
+
+  #' ## Full transmission tree
+  ttreedata &lt;- getTransmissionTree(test.nosoi)
+  plot(ttreedata@phylo)
+
+  ## Sampling "non dead" individuals
+  hID &lt;- c("H-1", "H-7", "H-15", "H-100")
+  samples &lt;- data.table(hosts = hID,
+                        times = c(5.2, 9.3, 10.2, 16),
+                        labels = paste0(hID, "-s"))
+
+  sampledTree &lt;- sampleTransmissionTree(test.nosoi, ttreedata, samples)
+  plot(sampledTree@phylo)
+
+  ## Sampling "dead" individuals
+  sampledDeadTree &lt;- sampleTransmissionTreeFromExiting(ttreedata, hID)
+  plot(sampledDeadTree@phylo)
+  }
+
+
+</code></pre>
+
+
+</div>

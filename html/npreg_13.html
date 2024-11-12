@@ -1,0 +1,234 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>thinplate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Thin Plate Spline Basis and Penalty
+</h2>
+
+<h3>Description</h3>
+
+<p>Generate the smoothing spline basis and penalty matrix for a thin plate spline.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">basis.tps(x, knots, m = 2, rk = TRUE, intercept = FALSE, ridge = FALSE)
+
+penalty.tps(x, m = 2, rk = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Predictor variables (basis) or spline knots (penalty). Numeric or integer vector of length <code class="reqn">n</code>, or matrix of dimension <code class="reqn">n</code> by <code class="reqn">p</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knots</code></td>
+<td>
+
+<p>Spline knots. Numeric or integer vector of length <code class="reqn">r</code>, or matrix of dimension <code class="reqn">r</code> by <code class="reqn">p</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+
+<p>Penalty order. "m=1" for linear thin plate spline, "m=2" for cubic, and "m=3" for quintic. Must satisfy <code class="reqn">2m &gt; p</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rk</code></td>
+<td>
+
+<p>If true (default), the reproducing kernel parameterization is used. Otherwise, the classic thin plate basis is returned.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the first column of the basis will be a column of ones. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ridge</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the basis matrix is post-multiplied by the inverse square root of the penalty matrix. Only applicable if <code>rk = TRUE</code>. See Note and Examples.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Generates a basis function or penalty matrix used to fit linear, cubic, and quintic thin plate splines. 
+</p>
+<p>The basis function matrix has the form 
+</p>
+<p style="text-align: center;"><code class="reqn">X = [X_0,  X_1]</code>
+</p>
+
+<p>where the matrix <code>X_0</code> is of dimension <code class="reqn">n</code> by <code class="reqn">M-1</code> (plus 1 if an intercept is included) where <code class="reqn">M = {p+m-1 \choose p}</code>, and <code>X_1</code> is a matrix of dimension <code class="reqn">n</code> by <code class="reqn">r</code>. 
+</p>
+<p>The <code>X_0</code> matrix contains the "parametric part" of the basis, which includes polynomial functions of the columns of <code>x</code> up to degree <code class="reqn">m-1</code> (and potentially interactions).
+</p>
+<p>The matrix <code>X_1</code> contains the "nonparametric part" of the basis.
+</p>
+<p>If <code>rk = TRUE</code>, the matrix <code>X_1</code> consists of the <em>reproducing kernel</em> function
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = (I - P_x) (I - P_y) E(|x - y|)</code>
+</p>
+
+<p>evaluated at all combinations of <code>x</code> and <code>knots</code>. Note that <code class="reqn">P_x</code> and <code class="reqn">P_y</code> are projection operators, <code class="reqn">|.|</code> denotes the Euclidean distance, and the TPS semi-kernel is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">E(z) = \alpha z^{2m-p} \log(z)</code>
+</p>
+
+<p>if <code class="reqn">p</code> is even and
+</p>
+<p style="text-align: center;"><code class="reqn">E(z) = \beta z^{2m-p}</code>
+</p>
+
+<p>otherwise, where <code class="reqn">\alpha</code> and <code class="reqn">\beta</code> are positive constants (see References).
+</p>
+<p>If <code>rk = FALSE</code>, the matrix <code>X_1</code> contains the TPS semi-kernel <code class="reqn">E(.)</code> evaluated at all combinations of <code>x</code> and <code>knots</code>. Note: the TPS semi-kernel is <em>not</em> positive (semi-)definite, but the projection is.
+</p>
+<p>If <code>rk = TRUE</code>, the penalty matrix consists of the <em>reproducing kernel</em> function
+</p>
+<p style="text-align: center;"><code class="reqn">\rho(x, y) = (I - P_x) (I - P_y) E(|x - y|)</code>
+</p>
+
+<p>evaluated at all combinations of <code>x</code>. If <code>rk = FALSE</code>, the penalty matrix contains the TPS semi-kernel <code class="reqn">E(.)</code> evaluated at all combinations of <code>x</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Basis: Matrix of dimension <code>c(length(x), df)</code> where <code>df = nrow(as.matrix(knots)) + choose(p + m - 1, p) - !intercept</code> and <code>p = ncol(as.matrix(x))</code>.
+</p>
+<p>Penalty: Matrix of dimension <code>c(r, r)</code> where <code>r = nrow(as.matrix(x))</code> is the number of knots.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The inputs <code>x</code> and <code>knots</code> must have the same dimension.
+</p>
+<p>If <code>rk = TRUE</code> and <code>ridge = TRUE</code>, the penalty matrix is the identity matrix.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag.  <a href="https://doi.org/10.1007/978-1-4614-5369-7">doi:10.1007/978-1-4614-5369-7</a>
+</p>
+<p>Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. <em>Frontiers in Applied Mathematics and Statistics, 3</em>(15), 1-13. <a href="https://doi.org/10.3389/fams.2017.00015">doi:10.3389/fams.2017.00015</a>
+</p>
+<p>Helwig, N. E., &amp; Ma, P. (2015). Fast and stable multiple smoothing parameter selection in smoothing spline analysis of variance models with large samples. <em>Journal of Computational and Graphical Statistics, 24</em>(3), 715-732. <a href="https://doi.org/10.1080/10618600.2014.926819">doi:10.1080/10618600.2014.926819</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>polynomial</code> for a basis and penalty for numeric variables.
+</p>
+<p>See <code>spherical</code> for a basis and penalty for spherical variables.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">######***######   standard parameterization   ######***######
+
+# generate data
+set.seed(0)
+n &lt;- 101
+x &lt;- seq(0, 1, length.out = n)
+knots &lt;- seq(0, 0.95, by = 0.05)
+eta &lt;- 1 + 2 * x + sin(2 * pi * x)
+y &lt;- eta + rnorm(n, sd = 0.5)
+
+# cubic thin plate spline basis
+X &lt;- basis.tps(x, knots, intercept = TRUE)
+
+# cubic thin plate spline penalty
+Q &lt;- penalty.tps(knots)
+
+# pad Q with zeros (for intercept and linear effect)
+Q &lt;- rbind(0, 0, cbind(0, 0, Q))
+
+# define smoothing parameter
+lambda &lt;- 1e-5
+
+# estimate coefficients
+coefs &lt;- psolve(crossprod(X) + n * lambda * Q) %*% crossprod(X, y)
+
+# estimate eta
+yhat &lt;- X %*% coefs
+
+# check rmse
+sqrt(mean((eta - yhat)^2))
+
+# plot results
+plot(x, y)
+lines(x, yhat)
+
+
+
+######***######   ridge parameterization   ######***######
+
+# generate data
+set.seed(0)
+n &lt;- 101
+x &lt;- seq(0, 1, length.out = n)
+knots &lt;- seq(0, 0.95, by = 0.05)
+eta &lt;- 1 + 2 * x + sin(2 * pi * x)
+y &lt;- eta + rnorm(n, sd = 0.5)
+
+# cubic thin plate spline basis
+X &lt;- basis.tps(x, knots, intercept = TRUE, ridge = TRUE)
+
+# cubic thin plate spline penalty (ridge)
+Q &lt;- diag(rep(c(0, 1), times = c(2, ncol(X) - 2)))
+
+# define smoothing parameter
+lambda &lt;- 1e-5
+
+# estimate coefficients
+coefs &lt;- psolve(crossprod(X) + n * lambda * Q) %*% crossprod(X, y)
+
+# estimate eta
+yhat &lt;- X %*% coefs
+
+# check rmse
+sqrt(mean((eta - yhat)^2))
+
+# plot results
+plot(x, y)
+lines(x, yhat)
+
+</code></pre>
+
+
+</div>

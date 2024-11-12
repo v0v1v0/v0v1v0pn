@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>loop.tracker</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates a progess bar within a loop</h2>
+
+<h3>Description</h3>
+
+<p>Only requires a single line within a loop to run, in contrast
+with the built-in tracker which requires a line to initialise,
+and a line to close. Also has option to backup objects during long loops.
+Ideal for a loop with a counter such as a for loop.
+Tracks progress as either percentage of time remaining or
+by intermittently displaying the estimated number of minutes to go
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">loop.tracker(
+  cc,
+  max,
+  st.time = NULL,
+  sav.obj = NULL,
+  sav.fn = NA,
+  sav.freq = 10,
+  unit = c("m", "s", "h")[1]
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cc</code></td>
+<td>
+<p>integer, current value of the loop counter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max</code></td>
+<td>
+<p>integer, final value of the loop counter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st.time</code></td>
+<td>
+<p>'start time' when using 'time to go' mode, taken 
+from a call to proc.time()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sav.obj</code></td>
+<td>
+<p>optionally an object to backup during the course of 
+a very long loop, to restore in the event of a crash.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sav.fn</code></td>
+<td>
+<p>the file name to save 'save.obj'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sav.freq</code></td>
+<td>
+<p>how often to update 'sav.obj' to file, in terms of 
+percentage of run-time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit</code></td>
+<td>
+<p>time units h/m/s if using 'time to go' mode</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>returns nothing, simply prints progress to the console
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nicholas Cooper <a href="mailto:njcooper@gmx.co.uk">njcooper@gmx.co.uk</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># simple example with a for-loop
+max &lt;- 100; for (cc in 1:max) { loop.tracker(cc,max); wait(0.004,"s") }
+#example using the 'time to go' with a while loop
+cc &lt;- 0; max &lt;- 10; start &lt;- proc.time()
+while(cc &lt; max) { cc &lt;- cc + 1; wait(0.05,"s"); loop.tracker(cc,max,start,unit="s") }
+# example with saving an object, and restoring after a crash
+X &lt;- matrix(rnorm(5000),nrow=50); max &lt;- nrow(X); sums &lt;- numeric(max)
+for (cc in 1:max) { 
+  sums[cc] &lt;- sum(X[cc,])
+  wait(.05) # just so this trivial loop doesn't finish so quickly
+  loop.tracker(cc,max, sav.obj=sums, sav.fn="temp.rda", sav.freq=5);
+  if(cc==29) { warning("faked a crash at iteration 29!"); rm(sums); break }
+}
+cat("\nloaded latest backup from iteration 28:",paste(load("temp.rda")),"\n")
+print(sav.obj); unlink("temp.rda")
+</code></pre>
+
+
+</div>

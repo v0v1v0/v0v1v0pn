@@ -1,0 +1,69 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_streamlevel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Streamlevel</h2>
+
+<h3>Description</h3>
+
+<p>Applies a topological sort and calculates stream level.
+Algorithm: Terminal level paths are assigned level 1 (see note 1).
+Paths that terminate at a level 1 are assigned level 2. This pattern is
+repeated until no paths remain.
+</p>
+<p>If a TRUE/FALSE coastal attribute is included, coastal terminal paths
+begin at 1 and internal terminal paths begin at 4 as is implemented by
+the NHD stream leveling rules.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_streamlevel(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>data.frame with levelpathi, dnlevelpat, and optionally a
+coastal flag. If no coastal flag is included, all terminal paths are
+assumed to be coastal.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>numeric stream order in same order as input
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">source(system.file("extdata", "walker_data.R", package = "nhdplusTools"))
+
+test_flowline &lt;- data.frame(
+ levelpathi = walker_flowline$LevelPathI,
+ dnlevelpat = walker_flowline$DnLevelPat)
+
+ test_flowline$dnlevelpat[1] &lt;- 0
+
+(level &lt;- get_streamlevel(test_flowline))
+
+walker_flowline$level &lt;- level
+
+plot(sf::st_geometry(walker_flowline), lwd = walker_flowline$level, col = "blue")
+
+test_flowline$coastal &lt;- rep(FALSE, nrow(test_flowline))
+(level &lt;- get_streamlevel(test_flowline))
+
+test_flowline$coastal[!test_flowline$dnlevelpat %in% test_flowline$levelpathi] &lt;- TRUE
+(level &lt;- get_streamlevel(test_flowline))
+
+</code></pre>
+
+
+</div>

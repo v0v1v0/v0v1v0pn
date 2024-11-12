@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iterativePrincipalAxis</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterative Principal Axis Analysis</h2>
+
+<h3>Description</h3>
+
+<p>The <code>iterativePrincipalAxis</code> function returns a principal axis analysis with
+iterated communality estimates. Four different choices of initial communality
+estimates are given: maximum correlation, multiple correlation (usual and
+generalized inverse) or estimates based
+on the sum of the squared principal component analysis loadings. Generally, statistical
+packages initialize the communalities at the multiple correlation value.
+Unfortunately, this strategy cannot always deal with singular correlation or
+covariance matrices.
+If a generalized inverse, the maximum correlation or the estimated communalities
+based on the sum of loadings
+are used instead, then a solution can be computed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iterativePrincipalAxis(R, nFactors = 2, communalities = "component",
+  iterations = 20, tolerance = 0.001)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>numeric: correlation or covariance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nFactors</code></td>
+<td>
+<p>numeric: number of factors to retain</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>communalities</code></td>
+<td>
+<p>character: initial values for communalities (<code>"component", "maxr", "ginv" or "multiple"</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>numeric: maximum number of iterations to obtain a solution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tolerance</code></td>
+<td>
+<p>numeric: minimal difference in the estimated communalities after a given iteration</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>values       numeric: variance of each component
+</p>
+<p>varExplained numeric: variance explained by each component
+</p>
+<p>varExplained numeric: cumulative variance explained by each component
+</p>
+<p>loadings     numeric: loadings of each variable on each component
+</p>
+<p>iterations   numeric: maximum number of iterations to obtain a solution
+</p>
+<p>tolerance    numeric: minimal difference in the estimated communalities after a given iteration
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gilles Raiche <br> Centre sur les Applications des Modeles de
+Reponses aux Items (CAMRI) <br> Universite du Quebec a Montreal<br><a href="mailto:raiche.gilles@uqam.ca">raiche.gilles@uqam.ca</a>
+<br><br> David Magis <br> Departement de mathematiques <br> Universite de Liege
+<br><a href="mailto:David.Magis@ulg.ac.be">David.Magis@ulg.ac.be</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Kim, J.-O. and Mueller, C. W. (1978). <em>Introduction to factor analysis. What it
+is and how to do it</em>. Beverly Hills, CA: Sage.
+</p>
+<p>Kim, J.-O. and Mueller, C. W. (1987). <em>Factor analysis. Statistical methods and
+practical issues</em>. Beverly Hills, CA: Sage.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>componentAxis</code>, <code>principalAxis</code>, <code>rRecovery</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## ................................................
+# Example from Kim and Mueller (1978, p. 10)
+# Population: upper diagonal
+# Simulated sample: lower diagnonal
+R &lt;- matrix(c( 1.000, .6008, .4984, .1920, .1959, .3466,
+               .5600, 1.000, .4749, .2196, .1912, .2979,
+               .4800, .4200, 1.000, .2079, .2010, .2445,
+               .2240, .1960, .1680, 1.000, .4334, .3197,
+               .1920, .1680, .1440, .4200, 1.000, .4207,
+               .1600, .1400, .1200, .3500, .3000, 1.000),
+            nrow=6, byrow=TRUE)
+
+# Factor analysis: Principal axis factoring with iterated communalities
+# Kim and Mueller (1978, p. 23)
+# Replace upper diagonal with lower diagonal
+RU         &lt;- diagReplace(R, upper=TRUE)
+nFactors   &lt;- 2
+fComponent &lt;- iterativePrincipalAxis(RU, nFactors=nFactors,
+                                     communalities="component")
+fComponent
+rRecovery(RU,fComponent$loadings, diagCommunalities=FALSE)
+
+fMaxr      &lt;- iterativePrincipalAxis(RU, nFactors=nFactors,
+                                     communalities="maxr")
+fMaxr
+rRecovery(RU,fMaxr$loadings, diagCommunalities=FALSE)
+
+fMultiple  &lt;- iterativePrincipalAxis(RU, nFactors=nFactors,
+                                     communalities="multiple")
+fMultiple
+rRecovery(RU,fMultiple$loadings, diagCommunalities=FALSE)
+# .......................................................
+
+</code></pre>
+
+
+</div>

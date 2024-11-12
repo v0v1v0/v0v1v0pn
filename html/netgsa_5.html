@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>formatPathways</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Format cytoscape nested networks</h2>
+
+<h3>Description</h3>
+
+<p>Format cytoscape nested networks using preset NetGSA format</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">formatPathways(x, pways, graph_layout = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A NetGSA object returned from calling <code>NetGSA()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pways</code></td>
+<td>
+<p>Character vector of pathways to format</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph_layout</code></td>
+<td>
+<p>(Optional) Layout to pass to plots. Must be a string for Cytoscape which will be passed to <code>RCy3::layoutNetwork</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Loads gene testing data into each pathway. Genes are tested using an F-test if there are 2 or more conditions or a two-sided one-class t-test against the null hypothesis of mean = 0 if there is only one condition. FDR corrected q-values are mapped to the color of the node. The scale ranges from 0 to 1 with red represents q-values of 0 and white representing q-values of 1. Loaded data includes: p-value from the F-test/t-test (pval), FDR corrected q-value (pFdr), test statistic from the F-test/t-test (teststat).
+</p>
+<p>Custom formatting can be applied using the cytoscape GUI or the RCy3 pacakge.
+</p>
+
+
+<h3>Value</h3>
+
+<p>No return value, called for side effects
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michael Hellstern
+</p>
+
+
+<h3>References</h3>
+
+<p>Ma, J., Shojaie, A. &amp; Michailidis, G. (2016) Network-based pathway enrichment analysis with incomplete network information. Bioinformatics 32(20):165–3174. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.NetGSA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## load the data
+data("breastcancer2012_subset")
+
+## consider genes from just 2 pathways
+genenames    &lt;- unique(c(pathways[["Adipocytokine signaling pathway"]], 
+                         pathways[["Adrenergic signaling in cardiomyocytes"]]))
+sx           &lt;- x[match(rownames(x), genenames, nomatch = 0L) &gt; 0L,]
+
+db_edges       &lt;- obtainEdgeList(rownames(sx), databases = c("kegg", "reactome"))
+adj_cluster    &lt;- prepareAdjMat(sx, group, databases = db_edges, cluster = TRUE)
+out_cluster    &lt;- NetGSA(adj_cluster[["Adj"]], sx, group, 
+                         pathways_mat[c(1,2), rownames(sx)], lklMethod = "REHE", sampling = FALSE)
+plot(out_cluster)
+formatPathways(out_netgsa, "Adipocytokine signaling pathway")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

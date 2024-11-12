@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simdesign_GenAlg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add a Genetic Algorithm simdesign to a nl object</h2>
+
+<h3>Description</h3>
+
+<p>Add a Genetic Algorithm simdesign to a nl object
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simdesign_GenAlg(
+  nl,
+  popSize = 200,
+  iters = 100,
+  evalcrit = 1,
+  elitism = NA,
+  mutationChance = NA,
+  nseeds = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nl</code></td>
+<td>
+<p>nl object with a defined experiment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>popSize</code></td>
+<td>
+<p>population Size parameter for genetic algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iters</code></td>
+<td>
+<p>number of iterations for genetic algorithm function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evalcrit</code></td>
+<td>
+<p>position of evaluation criterion within defined NetLogo metrics of nl experiment or a function that reports a single numeric value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>elitism</code></td>
+<td>
+<p>elitism rate of genetic algorithm function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mutationChance</code></td>
+<td>
+<p>mutation rate of genetic algorithm function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nseeds</code></td>
+<td>
+<p>number of seeds for this simulation design</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function creates a simdesign S4 class which can be added to a nl object.
+</p>
+<p>Variables in the experiment variable list need to provide a numeric distribution with min and max (e.g. list(min=1, max=4)).
+</p>
+<p>The GenAlg simdesign generates a Genetic Algorithm experiment within the defined min and max parameter boundaries
+that are defined in the variables field of the experiment object within the nl object.
+</p>
+<p>The evalcrit reporter defines the evaluation criterion for the Genetic algorithm procedure.
+There are two options to evaluate the fitness value of each iteration of the algorithm:
+</p>
+
+<ol>
+<li>
+<p> Use a reporter that is defined within the experiment metrics vector.
+You can just enter the position of that metric within the experiment metrics vector (e.g. 1 would use the first defined metric of the experiment to evaluate each iteration).
+The algorithm automatically calculates the mean value of this reporter if evalticks is defined to measure multiple ticks during each simulation.
+</p>
+</li>
+<li>
+<p> Use a self-defined evaluation function
+You can define a function that post-processes NetLogo output to calculate an evaluation value. This function must accept the nl object as input and return one single numeric value.
+The nl object that is then provided to the evaluation function will have results of the current iteration attached. The results can be accessed via the simoutput slot of the simdesign.
+You can pass this function to evalcrit. It is then applied to the output of each iteration.
+</p>
+</li>
+</ol>
+<p>The function uses the genalg package to set up a Genetic Algorithm function.
+For details on the genalg function parameters see ?genalg::rbga
+Finally, the function reports a simdesign object.
+</p>
+<p>Genetic Algorithm simdesigns can only be executed using the run_nl_dyn function instead of run_nl_all or run_nl_one.
+</p>
+
+
+<h3>Value</h3>
+
+<p>simdesign S4 class object
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# To attach a simdesign, a nl object needs to be created first (see ?nl).
+# For this example, we load a nl object from test data.
+
+nl &lt;- nl_lhs
+
+# Example 1: Using a metric from the experiment metrics vector for evaluation:
+nl@simdesign &lt;- simdesign_GenAlg(nl=nl,
+                                  evalcrit=1,
+                                  nseeds=1)
+
+# Example 2: Using a self-defined evaluation function
+# For demonstration we define a simple function that calculates
+# the maximum value of count sheep output.
+critfun &lt;- function(nl) {
+results &lt;- nl@simdesign@simoutput
+crit &lt;- as.integer(max(results$`count sheep`))
+return(crit)
+}
+
+nl@simdesign &lt;- simdesign_GenAlg(nl=nl,
+                                  evalcrit=critfun,
+                                  nseeds=1)
+
+
+</code></pre>
+
+
+</div>

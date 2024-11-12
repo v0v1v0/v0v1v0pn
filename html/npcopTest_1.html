@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CopTestdm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test for break detection in copula with change-point known in the marginal cumulative distributions</h2>
+
+<h3>Description</h3>
+
+<p>Give the p-value of the test based on the sequential empirical copula process when a break occurs in the marginal cumulative distributions at time m known. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CopTestdm(X,b=1,M=1000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a (non-empty) numeric matrix of <code class="reqn">d</code>-dimensional data values, greater than 2. Each row of the matrix contains one mutlivariate data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>a strictly positive integer (default <code class="reqn">M=1000</code>) specifying the number of bootstrap repetitions. A sequence of i.i.d. normal multipliers is generated. For no independent or normal multipliers, you also can specify the matrix of multipliers as <code class="reqn">M</code>. The specified matrix is required to have an identical number of rows than <code class="reqn">X</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>a single value or a vector of real values on (0,1] indicating the location(s) of the potential break time(s) in marginal cumulative distribution functions. You can specify <code class="reqn">b=1</code> (default) for any break time. In this case, the test corresponds to the test described in the third reference using the hat version of bootstrap replications.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note that the e.c.d.f.s <code class="reqn">F_{k:l,j}</code> appearing in the construction of pseudo-values (as defined in the section 2 of the first reference) evaluated from the sub-samble <code class="reqn">X_{kj},\ldots, X_{lj}</code>  are multiplied by <code class="reqn">\frac{l-k+1}{l-k+2}</code>. Discussions about this subject can be found in the third reference. For serially dependent data, you need to specify dependent multipliers, see the second and third reference for details. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with class <code>htest</code> containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>the value of the potential break times in marginal cumulative distribution functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p>a character string giving the name of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a character string indicating what type of change-point test was performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>the estimated p-value for the test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>the value of the statistic <code class="reqn">S_{nm}</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Rohmer Tom
+</p>
+
+
+<h3>References</h3>
+
+<p>Tom Rohmer, Some results on change-point detection in cross-sectional dependence of multivariate data with changes in marginal distributions, Statistics &amp; Probability Letters, Volume 119, December 2016, Pages 45-54, ISSN 0167-7152
+</p>
+<p>A. Bucher and I. Kojadinovic (2016), A dependent multiplier bootstrap for the sequential empirical copula process under strong mixing, Bernoulli 22:2, pages 927-968
+</p>
+<p>A. Bucher, I. Kojadinovic, T. Rohmer and J. Segers (2014), Detecting changes in cross-sectional dependence in multivariate time series, Journal of Multivariate Analysis 132, pages 111-128
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+#Example 1: under the nulle hypothesis 
+#of an abrupt change in the m.c.d.f. at time m=50 and no change in the copula
+
+n=100
+m=50
+sigma = matrix(c(1,0.4,0.4,1),2,2)
+mean1 = rep(0,2)
+mean2 = rep(4,2)
+
+X=matrix(rep(0,n*2),n,2)
+
+for(j in 1:n) X[j,]=t(chol(sigma))%*%rnorm(2)
+
+X[1:m,] = X[1:m,]+mean1
+X[(m+1):n,] = X[(m+1):n,]+mean2
+
+CopTestdm(X,b=0.5)
+
+
+      
+#Example 2: under the alternative hypothesis 
+#of an abrupt change in the m.c.d.f at and in the copula time k=m=50  
+
+n=100
+m=50
+
+mean1 = rep(0,2)
+mean2 = rep(4,2)
+sigma1 = matrix(c(1,0.2,0.2,1),2,2)
+sigma2 = matrix(c(1,0.6,0.6,1),2,2)
+
+X=matrix(rep(0,n*2),n,2)
+for(j in 1:m) X[j,]=t(chol(sigma1))%*%rnorm(2) + mean1
+for(j in (m+1):n) X[j,]=t(chol(sigma2))%*%rnorm(2) + mean2
+
+CopTestdm(X,b=0.5)
+
+  
+#Example 3: under the alternative hypothesis 
+#of abrupt changes in the m.c.d.f at times m=100 and 150 and in the copula at time k=50
+
+n=200
+m1 = 100
+m2 = 150
+k = 50
+
+sigma1 = matrix(c(1,0.2,0.2,1),2,2)
+sigma2 = matrix(c(1,0.6,0.6,1),2,2)
+
+mean1 = rep(0,2)
+mean2 = rep(2,2)
+mean3 = rep(4,2)
+
+X=matrix(rep(0,n*2),n,2)
+for(j in 1:k) X[j,]=t(chol(sigma1))%*%rnorm(2)
+for(j in (k+1):n) X[j,]=t(chol(sigma2))%*%rnorm(2)
+
+X[1:m1,]=X[1:m1,]+mean1
+X[(m1+1):m2,]=X[(m1+1):m2,]+mean2
+X[(m2+1):n,]=X[(m2+1):n,]+mean3
+
+CopTestdm(X,b=c(0.5,0.75))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimate.disp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a parametric disperison model to thinned counts</h2>
+
+<h3>Description</h3>
+
+<p>Fit a parametric dispersion model to RNA-Seq counts data
+prepared by <code>prepare.nbp</code>. The model parameters
+are estimated from the pseudo counts: thinned/down-sampled
+counts that have the same effective library size.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimate.disp(obj, model = "NBQ", print.level = 1, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>output from <code>prepare.nbp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>a string, one of "NBQ" (default), "NBP" or
+"NB2".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.level</code></td>
+<td>
+<p>a number, controls the amount of
+messages printed: 0 for suppressing all messages, 1 for
+basic progress messages, larger values for more detailed
+messages.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional parameters controlling the
+estimation of the parameters.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For each individual gene <code class="reqn">i</code>, a negative binomial (NB)
+distribution uses a dispersion parameter <code class="reqn">\phi_i</code> to
+capture the extra-Poisson variation between biological
+replicates: the NB model imposes a mean-variance
+relationship <code class="reqn">\sigma_i^2 = \mu_i + \phi_i \mu_i^2</code>.  In
+many RNA-Seq data sets, the dispersion parameter
+<code class="reqn">\phi_i</code> tends to vary with the mean <code class="reqn">\mu_i</code>. We
+proposed to capture the dispersion-mean dependence using
+parametric models.
+</p>
+<p>With this function, <code>estimate.disp</code>, users can choose
+from three parametric models: NB2, NBP and NBQ (default).
+</p>
+<p>Under the NB2 model, the dispersion parameter is a constant
+and does not vary with the mean expression levels.
+</p>
+<p>Under the NBP model, the log dispersion is modeled as a
+linear function of preliminarily estimated log mean
+relative frequencies (<code>pi.pre</code>):
+</p>
+<p>log(phi) = par[1] + par[2] * log(pi.pre/pi.offset),
+</p>
+<p>Under the NBQ model, the log dispersion is modeled as a
+quadratic function of preliminarily estimated log mean
+relative frequencies (<code>pi.pre</code>):
+</p>
+<p>log(phi) = par[1] + par[2] * log(pi.pre/pi.offset) + par[3]
+* (log(pi.pre/pi.offset))^2;
+</p>
+<p>The NBQ model is more flexible than the NBP and NB2 models,
+and is the current default option.
+</p>
+<p>In the NBP and NBQ models, <code>pi.offset</code> is fixed to be
+1e-4, so par[1] corresponds to the dispersion level when
+the relative mean frequency is 100 reads per million (RPM).
+</p>
+<p>The dispersion parameters are estimated from the pseudo
+counts (counts adjusted to have the same effective library
+sizes).  The parameters are estimated by maximizing the log
+conditional likelihood of the model parameters given the
+row sums. The log conditional likelihood is computed for
+each gene in each treatment group and then summed over
+genes and treatment groups.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The list <code>obj</code> from the input with some added
+components summarizing the fitted dispersion model.  Users
+can print and plot the output to see brief summaries of the
+fitted dispersion model. The output is otherwise not
+intended for use by end users directly.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Users should call <code>prepare.nbp</code> before calling
+this function. The function <code>prepare.nbp</code> will
+normalize the counts and adjust the counts so that the
+effective library sizes are approximately the same
+(computing the conditional likelihood requires the library
+sizes to be the same).
+</p>
+
+
+<h3>References</h3>
+
+<p>Di Y, Schafer DW, Cumbie JS, and Chang JH (2011): "The NBP
+Negative Binomial Model for Assessing Differential Gene
+Expression from RNA-Seq", Statistical Applications in
+Genetics and Molecular Biology, 10 (1).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nbp.test</code>, <code>exact.nb.test</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## See the example for nb.exact.test
+</code></pre>
+
+
+</div>

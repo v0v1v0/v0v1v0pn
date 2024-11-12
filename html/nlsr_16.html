@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model2rjfun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>model2rjfun</h2>
+
+<h3>Description</h3>
+
+<p>These functions create functions to evaluate residuals or sums of squares at 
+particular parameter locations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">model2rjfun(modelformula, pvec, data = NULL, jacobian = TRUE, testresult = TRUE, ...)
+SSmod2rjfun(modelformula, pvec, data = NULL, jacobian = TRUE, testresult = TRUE, ...)
+model2ssgrfun(modelformula, pvec, data = NULL, gradient = TRUE, 
+              testresult = TRUE, ...)
+modelexpr(fun)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>modelformula</code></td>
+<td>
+<p>A formula describing a nonlinear regression model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvec</code></td>
+<td>
+<p>A vector of parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A dataframe, list or environment holding data used in the calculation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jacobian</code></td>
+<td>
+<p>Whether to compute the Jacobian matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>testresult</code></td>
+<td>
+<p>Whether to test the function by evaluating it at <code>pvec</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradient</code></td>
+<td>
+<p>Whether to compute the gradient vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>A function produced by one of <code>model2rjfun</code> or <code>model2ssgrfun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Dot arguments, that is, arguments that may be supplied by <code>name = value</code>
+to supply information needed to compute specific quantities in the model.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>pvec</code> does not have names, the parameters will have names
+generated in the form ‘<span class="samp">⁠p_&lt;n&gt;⁠</span>’, e.g. <code>p_1, p_2</code>.  Names that appear in
+<code>pvec</code> will be taken to be parameters of the model.  
+</p>
+<p>The <code>data</code> argument may be a dataframe, list or environment, or <code>NULL</code>.
+If it is not an environment, one will be constructed using the components
+of <code>data</code> with parent environment set to be
+the environment of <code>modelformula</code>.  
+</p>
+<p><code>SSmod2rjfun</code> returns a function with header <code>function(prm)</code>, which
+evaluates the residuals (and if <code>jacobian</code> is <code>TRUE</code> the
+Jacobian matrix) of the selfStart model (the rhs is used) at <code>prm</code>.  
+The residuals are defined to be the right hand side of <code>modelformula</code> 
+minus the left hand side. Note that the selfStart model used in the model
+formula must be available (i.e., loaded). If this function is called from 
+<code>nlxb()</code> then the <code>control</code> element <code>japprox</code> must be 
+set to value <code>SSJac</code>. 
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>model2rjfun</code> returns a function with header <code>function(prm)</code>, which
+evaluates the residuals (and if <code>jacobian</code> is <code>TRUE</code> the
+Jacobian matrix) of the model at <code>prm</code>.  The residuals are defined to be
+the right hand side of <code>modelformula</code> minus the left hand side.
+</p>
+<p><code>model2ssgrfun</code> returns a function with header <code>function(prm)</code>, which
+evaluates the sum of squared residuals (and if <code>gradient</code> is <code>TRUE</code> the
+gradient vector) of the model at <code>prm</code>. 
+</p>
+<p><code>modelexpr</code> returns the expression used to calculate the vector of 
+residuals (and possibly the Jacobian) used in the previous functions.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>John Nash and Duncan Murdoch
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nls</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># We do not appear to have an example for modelexpr. See nlsr-devdoc.Rmd for one.
+
+y &lt;- c(5.308, 7.24, 9.638, 12.866, 17.069, 23.192, 31.443, 38.558,
+       50.156, 62.948, 75.995, 91.972)
+
+tt &lt;- seq_along(y)  # for testing
+
+mydata &lt;- data.frame(y = y, tt = tt)
+f &lt;- y ~ b1/(1 + b2 * exp(-1 * b3 * tt))
+p &lt;- c(b1 = 1, b2 = 1, b3 = 1)
+rjfn &lt;- model2rjfun(f, p, data = mydata)
+rjfn(p)
+rjfnnoj &lt;- model2rjfun(f, p, data = mydata, jacobian=FALSE)
+rjfnnoj(p)
+
+myexp &lt;- modelexpr(rjfn)
+cat("myexp:"); print(myexp)
+
+ssgrfn &lt;- model2ssgrfun(f, p, data = mydata)
+ssgrfn(p)
+
+ssgrfnnoj &lt;- model2ssgrfun(f, p, data = mydata, gradient=FALSE)
+ssgrfnnoj(p)
+</code></pre>
+
+
+</div>

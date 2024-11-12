@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>diffreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Diffusion regression model</h2>
+
+<h3>Description</h3>
+
+<p>A wrapper of <code>glm</code>, this function estimates a lagged regression model of
+adoption as a function of exposure and other controls as especified by the
+user.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">diffreg(model, type = c("logit", "probit"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>An object of class formula where the right-hand-side is an object of
+class <code>diffnet</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Character scalar. Either <code>"probit"</code> or <code>"logit"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The model must be in the following form:
+</p>
+<pre>
+&lt;diffnet object&gt; ~ exposure + covariate1 + covariate2 + ...
+</pre>
+<p>Where <code>exposure</code> can be especified either as a simple term, or as a
+call to the exposure function, e.g. to compute exposure with a lag of
+length 2, the formula could be:
+</p>
+<pre>
+&lt;diffnet object&gt; ~ exposure(lags = 2) + covariate1 + covariate2 + ...
+</pre>
+<p>When no argument is passed to <code>exposure</code>, the function sets a lag
+of length 1 by default (see the <em>Lagged regression</em> section).
+</p>
+<p>This is a wrapper of <code>glm</code>. The function does the
+following steps:
+</p>
+
+<ol>
+<li>
+<p> Compute exposure by calling <code>exposure</code> on the LHS (dependent variable).
+</p>
+</li>
+<li>
+<p> Modify the formula so that the model is on adoption as a function of
+exposure and whatever covariates the user specifies.
+</p>
+</li>
+<li>
+<p> Selects either <code>"probit"</code> or <code>"logit"</code> and prepares the call
+to <code>glm</code>. This includes passing the following line:
+</p>
+<pre>
+ subset = ifelse(is.na(toa), TRUE, toa &gt;= per)
+ </pre>
+<p>This results in including observations that either did not adopted or up to
+the time of adoption.
+</p>
+</li>
+<li>
+<p> Estimates the model.
+</p>
+</li>
+</ol>
+<p>The data passed to <code>glm</code> is obtained by using <code>as.data.frame.diffnet</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>glm</code>.
+</p>
+
+
+<h3>Lagged regression</h3>
+
+<p>The model estimated is a lagged regression model that has two main assumptions:
+</p>
+
+<ol>
+<li>
+<p> The network is exogenous to the behavior (no selection effect)
+</p>
+</li>
+<li>
+<p> The influence effect (diffusion) happens in a lagged fasion, hence,
+exposure is computed lagged.
+</p>
+</li>
+</ol>
+<p>If either of these two assumptions is not met, then the model becomes endogenous,
+ans so inference becomes invalid.
+</p>
+<p>In the case of the first assumption, the user can overcome the non-exogeneity
+problem by providing an alternative network. This can be done by especifying
+<code>alt.graph</code> in the <code>exposure</code> function so that the network becomes
+exogenous to the adoption.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("medInnovationsDiffNet")
+
+# Default model
+ans &lt;- diffreg(
+  medInnovationsDiffNet ~ exposure + factor(city) + proage + per)
+summary(ans)
+</code></pre>
+
+
+</div>

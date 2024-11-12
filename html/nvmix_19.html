@@ -1,0 +1,446 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_set_param</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Algorithm-specific Parameters</h2>
+
+<h3>Description</h3>
+
+<p>Algorithm specific parameters for functionalities in the <code>nvmix</code>
+package, notably for <code>fitnvmix()</code>, <code>dnvmix()</code>,
+<code>pnvmix()</code>, <code>qnvmix()</code>, <code>pgammamix()</code>,
+<code>dgammamix()</code> and <code>ES_nvmix()</code> as well as the
+corresponding functions for grouped mixtures.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_set_param(control = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p><code>list</code> specifying algorithm specific
+parameters to beset; see below under details.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>For most functions in the <code>nvmix</code> package, internally, an
+iterative randomized Quasi-Monte Carlo (RQMC) approach is used to
+estimate probabilities, weights and (log-)densities. There are various
+parameters of underlying methods than can be changed.
+</p>
+<p>Algorithm specific parameters can be passed as a list via
+<code>control</code>.  It can contain any of the following:
+</p>
+
+<dl>
+<dt>For all algorithms:</dt>
+<dd>
+
+<dl>
+<dt><code>method</code></dt>
+<dd>
+<p><code>character</code> string indicating the
+method to be used to compute the integral. Available are:
+</p>
+
+<dl>
+<dt>
+<code>"sobol"</code>:</dt>
+<dd>
+<p>Sobol' sequence (default),</p>
+</dd>
+<dt>
+<code>"ghalton"</code>:</dt>
+<dd>
+<p>generalized Halton sequence,</p>
+</dd>
+<dt>
+<code>"PRNG"</code>:</dt>
+<dd>
+<p>plain Monte Carlo based on a pseudo-random
+number generator.</p>
+</dd>
+</dl>
+</dd>
+<dt><code>increment</code></dt>
+<dd>
+<p><code>character</code> string indicating how
+the sample size should be increased in each iteration. Available are:
+</p>
+
+<dl>
+<dt>
+<code>"doubling"</code>:</dt>
+<dd>
+<p>next iteration has as many sample points
+as all the previous iterations combined,</p>
+</dd>
+<dt>
+<code>"num.init"</code>:</dt>
+<dd>
+<p>all iterations use an additional
+<code>fun.eval[1]</code>-many points (default for most functions).</p>
+</dd>
+</dl>
+</dd>
+<dt><code>CI.factor</code></dt>
+<dd>
+<p>multiplier of the Monte Carlo confidence interval
+bounds. The algorithm runs until <code>CI.factor</code> times the estimated
+standard error is less than <code>abstol</code> or <code>reltol</code> (whichever
+is provided). If <code>CI.factor = 3.5</code> (the default), one can expect
+the actual absolute error to be less than <code>abstol</code> in
+99.9% of the cases.</p>
+</dd>
+<dt><code>fun.eval</code></dt>
+<dd>
+<p><code>numeric(2)</code> providing the size of
+the first point set to be used to estimate integrals
+(typically a power of 2) and the maximal number of function
+evaluations. <code>fun.eval</code> defaults to <code>c(2^7, 1e12)</code>.</p>
+</dd>
+<dt><code>max.iter.rqmc</code></dt>
+<dd>
+<p><code>numeric</code>, providing the maximum
+number of iterations allowed in the RQMC approach; the default is <code>15</code>
+if <code>increment = "doubling"</code> and <code>1250</code> otherwise.</p>
+</dd>
+<dt><code>B</code></dt>
+<dd>
+<p>number of randomizations for obtaining an error estimate
+in the RQMC approach; the default is <code>15</code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>For <code>pnvmix()</code> and <code>pgnvmix()</code>:</dt>
+<dd>
+
+<dl>
+<dt>
+<code>pnvmix.abstol</code>, <code>pnvmix.reltol</code>
+</dt>
+<dd>
+<p>non-negative <code>numeric</code>
+providing the relative/absolute precision required for the distribution
+function. Relative precision via <code>pnvmix.reltol</code> is only used
+when <code>pnvmix.abstol = NA</code>; in all other cases, absolute precision
+will be used. <code>pnvmix.abstol</code> defaults to <code>1e-3</code>.
+If <code>pnvmix.abstol = 0</code> and <code>pnvmix.reltol = 0</code>, the algorithm
+will typically run until the total number of function evaluations
+exceeds <code>fun.eval[2]</code> or until the total number of iterations exeeds
+<code>max.iter.rqmc</code>, whichever happens first.
+If <code class="reqn">n &gt; 1</code> (so <code>upper</code> has more than
+one row), the algorithm runs until the precision requirement is reached
+for all <code class="reqn">n</code> probability estimates.</p>
+</dd>
+<dt><code>mean.sqrt.mix</code></dt>
+<dd>
+<p>expectation of the square root <code class="reqn">\sqrt(W)</code>
+of the mixing variable <code class="reqn">W</code>. If <code>NULL</code>, it will be estimated via
+QMC; this is only needed for determining the reordering of the
+integration bounds, so a rather crude approximation is fine.</p>
+</dd>
+<dt><code>precond</code></dt>
+<dd>
+<p><code>logical</code> indicating whether
+preconditioning is applied, that is, reordering of the integration
+variables. If <code>TRUE</code>, integration limits <code>lower</code>, <code>upper</code>
+as well as <code>scale</code>
+are internally re-ordered in a way such that the overall variance of the
+integrand is usually smaller than with the original ordering; this
+usually leads smaller run-times.</p>
+</dd>
+<dt><code>cholesky.tol</code></dt>
+<dd>
+<p>non-negative numeric providing lower threshold
+for non-zero elements in the computation of the cholesky factor: If
+calculated <code class="reqn">C(i,i)^2 &lt; | cholesky.tol * Scale(i,i)|</code>, the diagonal
+element (and all other elements in column <code class="reqn">i</code>) of the cholesky factor
+<code class="reqn">C</code> are set to zero, yielding a singular matrix. <code>cholesky.tol</code>
+defaults to <code>1e-9</code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>For <code>dnvmix()</code> and <code>dgnvmix()</code>:</dt>
+<dd>
+
+<dl>
+<dt>
+<code>dnvmix.reltol</code>, <code>dnvmix.abstol</code>
+</dt>
+<dd>
+<p>non-negative
+<code>numeric</code> providing the relative/absolute precision for the *log-*
+density required. Absolute precision via <code>dnvmix.abstol</code>
+is only used when <code>dnvmix.reltol = NA</code>; in all other
+cases, relative precision will be used. <code>dnvmix.reltol</code>
+defaults to <code>1e-2</code>.
+If <code>dnvmix.reltol=0</code> and <code>dnvmix.abstol=0</code>, the algorithm
+will typically run until the total number of function evaluations exceeds
+<code>fun.eval[2]</code> or until the total number of iterations exeeds
+<code>max.iter.rqmc</code>, whichever happens first.
+If <code class="reqn">n &gt; 1</code> (so <code>x</code> has more than one row), the algorithm runs until
+the precision requirement is reached for all <code class="reqn">n</code> log-density estimates.</p>
+</dd>
+<dt><code>dnvmix.doAdapt</code></dt>
+<dd>
+<p><code>logical</code> indicating if an adaptive
+integration procedure shall be used that only samples in relevant subdomains
+of the mixing variable; defaults to <code>TRUE</code>.</p>
+</dd>
+<dt><code>dnvmix.max.iter.rqmc.pilot</code></dt>
+<dd>
+<p><code>numeric</code>, providing
+the maximum number of unstratified, non-adaptive pilot runs the internal
+integration procedure performs. Defaults to <code>6</code>.</p>
+</dd>
+<dt>
+<code>dnvmix.tol.int.lower</code>, <code>dnvmix.order.lower</code>
+</dt>
+<dd>
+<p>both <code>numeric</code> and nonnegative. RQMC integration
+is only performed where the integrand is &gt; than the maximum of
+<code>dnvmix.tol.int.lower</code> and <code class="reqn">10^{-c} g_{max}</code>, where
+<code class="reqn">g_{max}</code> is the theoretical maximum of the integrand and <code class="reqn">c</code>
+is the specified <code>dnvmix.order.lower</code>. Default to <code>1e-100</code>
+and <code>5</code>, respectively.</p>
+</dd>
+<dt><code>dnvmix.tol.bisec</code></dt>
+<dd>
+<p><code>numeric</code> <code>vector</code> of
+length 3 specifying bisection tolerances in the adaptive RQMC algorithm.
+First/second/third element specify the tolerance on <code class="reqn">u</code>, <code class="reqn">W</code> and
+the log-integrand and default to <code>1e-6</code>, <code>1e-1</code> and
+<code>1e-1</code>, respectively.</p>
+</dd>
+<dt><code>dnvmix.max.iter.bisec</code></dt>
+<dd>
+<p><code>numeric</code>, maximum number
+of iterations in the internal bisection procedure to find good cutting
+points allowed, defaults to <code>15</code>.</p>
+</dd>
+<dt><code>dnvmix.tol.stratlength</code></dt>
+<dd>
+<p><code>numeric</code>, nonnegative.
+If the stratum found by the adaptive integration method has length &gt;
+<code>dnvmix.tol.stratlength</code> RQMC integration is used there; otherwise
+a crude approximation. Defaults to <code>1e-50</code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>For <code>fitnvmix()</code>:</dt>
+<dd>
+
+<dl>
+<dt><code>ECMEstep</code></dt>
+<dd>
+<p><code>logical</code>, if <code>TRUE</code> (default),
+ECME iteration is performed;
+if <code>FALSE</code>, no ECME step is performed so that <code>fitnvmix()</code>
+performs between zero and two optimizations over <code class="reqn">nu</code>, depending
+on <code>laststep.do.nu</code> and whether <code>nu.init</code> was provided.</p>
+</dd>
+<dt><code>ECMEstep.do.nu</code></dt>
+<dd>
+<p><code>logical</code>, if <code>TRUE</code>
+(default), the likelihood is maximized over <code class="reqn">nu</code> in each ECME
+iteration; if <code>FALSE</code>, this step is omitted.</p>
+</dd>
+<dt><code>laststep.do.nu</code></dt>
+<dd>
+<p><code>logical</code>, if <code>TRUE</code>
+another last maximization of the likelihood over <code class="reqn">nu</code> is
+performed using all  observations after the ECME iterations.
+Only makes sense if either <code>ECMEstep.do.nu=FALSE</code> or
+if <code>size.subsample</code> is smaller than the number of observations.
+Defaults to <code>FALSE</code>.</p>
+</dd>
+<dt><code>resample</code></dt>
+<dd>
+<p><code>logical</code>, if <code>TRUE</code>, a different
+subsample of <code>x</code> is taken in each optimization over <code class="reqn">nu</code> in
+the ECME iterations. Only relevant when <code>size.subsample</code> is
+smaller than the number of observations. Defaults to <code>FALSE</code>.</p>
+</dd>
+<dt>
+<code>ECME.miniter</code>, <code>ECME.maxiter</code>
+</dt>
+<dd>
+<p><code>numeric</code>
+positive, minimum and maximum number
+of ECME iterations. Default to <code>5</code> and <code>200</code>, respectively.</p>
+</dd>
+<dt><code>max.iter.locscaleupdate</code></dt>
+<dd>
+<p><code>numeric</code> positive.
+Maximum number of location-scale updates (while helding <code class="reqn">nu</code> fixed)
+in each individual ECME iteration; defaults to <code>50</code>.</p>
+</dd>
+<dt><code>weights.reltol</code></dt>
+<dd>
+<p><code>numeric</code> non-negative. Relative
+tolerance to estimate internal weights used to update
+<code class="reqn">loc</code> and <code class="reqn">scale</code> estimates in the ECME iterations. Defaults to
+<code>1e-2</code>.</p>
+</dd>
+<dt><code>weights.interpol.reltol</code></dt>
+<dd>
+<p><code>numeric</code>
+non-negative. Some weights can be obtained by interpolating
+previously calculated weights; if the maximal relative
+interpolation error is smaller than
+<code>weights.interpol.reltol</code>, this is done. Defaults to <code>1e-2</code>.</p>
+</dd>
+<dt><code>ECME.rel.conv.tol</code></dt>
+<dd>
+<p><code>numeric(3)</code> vector
+specifying relative convergence tolerances for <code>loc</code>, <code>scale</code>
+and <code>nu</code> (in this order). Defaults to <code>c(1e-2, 1e-2, 1e-3)</code>.</p>
+</dd>
+<dt><code>control.optim</code></dt>
+<dd>
+<p><code>list</code> of control parameters
+passed to the underlying <code>optim</code> in the initial step as well as
+in the ECME iterations. See <code>optim()</code> for details; defaults to
+<code>list(maxit=75)</code>.</p>
+</dd>
+<dt><code>control.optim.laststep</code></dt>
+<dd>
+<p>like <code>control.optim</code>;
+this list of control arguments is passed to <code>optim</code> in the last-step.
+Only relevant when <code>laststep.do.nu = TRUE</code> and defaults to
+<code>list()</code> (so no defaults of <code>optim()</code> changed).</p>
+</dd>
+</dl>
+</dd>
+<dt>For <code>qnvmix()</code>:</dt>
+<dd>
+
+<dl>
+<dt><code>max.iter.newton</code></dt>
+<dd>
+<p><code>numeric</code>, maximum number
+of Newton iterations allowed to approximate the quantile; defaults
+to <code>45</code>.</p>
+</dd>
+<dt><code>newton.conv.abstol</code></dt>
+<dd>
+<p><code>numeric</code>, convergence
+tolerance for the Newton proceudre; convergence is detected once
+the difference of estimated quantiles in two successive iterations
+is smaller than <code>newton.conv.abstol</code>; defaults to <code>5e-4</code>.</p>
+</dd>
+<dt><code>newton.df.reltol</code></dt>
+<dd>
+<p><code>numeric</code>, relative error
+tolerance for estimating the univariate distribution function;
+defaults to <code>2.5e-4</code>.</p>
+</dd>
+<dt><code>newton.logdens.abstol</code></dt>
+<dd>
+<p><code>numeric</code>, absolute error
+tolerance for the internal estimation of the log-density needed for the
+update; defaults to <code>1e-2</code>.</p>
+</dd>
+<dt><code>newton.df.max.iter.rqmc</code></dt>
+<dd>
+<p><code>numeric</code>, maximum
+number of iterations to estimate the univariate distribution function
+required in the Newton update; defaults to <code>350</code>. Note that
+internally used is <code>increment = "doubling"</code>, no matter what.</p>
+</dd>
+</dl>
+</dd>
+<dt>For <code>qqplot_maha()</code>:</dt>
+<dd>
+
+<dl>
+<dt><code>qqplot.df.reltol</code></dt>
+<dd>
+<p><code>numeric</code>, with the same
+meaning as <code>newton.df.reltol</code> for the function <code>qnvmix()</code>.
+Defaults to <code>5e-3</code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>For <code>ES_nvmix()</code>:</dt>
+<dd>
+
+<dl>
+<dt><code>riskmeasures.abstol, riskmeasures.reltol</code></dt>
+<dd>
+<p><code>numeric</code>, absolute or relative error tolerance for
+estimating riskmeasures, notably for <code>ES_nvmix()</code>. By default,
+<code>riskmeasures.reltol=5e-2</code> and <code>riskmeasures.abstol=NA</code>,
+so that a relative tolerance is used.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Care should be taken when changing algorithm specific parameters, notably
+tolerances, as the accuracy of the result is heavily influenced by those.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>get_set_param()</code> returns a <code>list</code> with more
+than 30 elements specifying algorithm specific parameters for the
+functions <code>fitnvmix()</code>, <code>dnvmix()</code>,
+<code>pnvmix()</code>, <code>qnvmix()</code>, <code>pgammamix()</code>,
+<code>dgammamix()</code> and <code>ES_nvmix()</code>, as well as the
+corresponding functions for grouped mixtures such as <code>pgnvmix()</code>
+and <code>dgnvmix()</code>.
+Parameter values passed to <code>get_set_param()</code> via the
+<code>control</code> argument overwrite the defaults; for parameters not
+specified in the <code>control</code> argument, the default values are being
+returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2020),
+Grouped Normal Variance Mixtures.
+<em>Risks</em> 8(4), 103.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fitnvmix()</code>, <code>dnvmix()</code>,
+<code>pnvmix()</code>, <code>qnvmix()</code>, <code>pgammamix()</code>,
+<code>dgammamix()</code>, <code>ES_nvmix()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">get_set_param() # obtain defaults
+</code></pre>
+
+
+</div>

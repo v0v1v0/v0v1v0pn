@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>spot_price_simulate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate spot prices of an N-factor model through Monte Carlo simulation</h2>
+
+<h3>Description</h3>
+
+<p>Simulate risk-neutral price paths of an an N-factor commodity pricing model through Monte Carlo Simulation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">spot_price_simulate(
+  x_0,
+  parameters,
+  t = 1,
+  dt = 1,
+  N_simulations = 2,
+  antithetic = TRUE,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x_0</code></td>
+<td>
+<p><code>vector</code>. Initial values of the state variables, where the length must correspond to the number of factors specified in the parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameters</code></td>
+<td>
+<p><code>vector</code>. A named vector of parameter values of a specified N-factor model. Function <code>NFCP_parameters</code> is recommended.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p><code>numeric</code>. Number of years to simulate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt</code></td>
+<td>
+<p><code>numeric</code>. Discrete time step, in years, of the Monte Carlo simulation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N_simulations</code></td>
+<td>
+<p><code>numeric</code>. The total number of Monte Carlo simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>antithetic</code></td>
+<td>
+<p><code>logical</code>. Should antithetic price paths be simulated?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p><code>logical</code>. Should simulated state variables be output?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<script id="MathJax-script" async src="../../mathjaxr/doc/mathjax/es5/tex-chtml-full.js"></script><p>The <code>spot_price_simulate</code> function is able to quickly and efficiently simulate a large number of state variables and risk-neutral price paths of a commodity following the N-factor model.
+Simulating risk-neutral price paths of a commodity under an N-factor model through Monte Carlo simulations allows for the
+valuation of commodity related investments and derivatives, such as American options and real Options through dynamic programming methods.
+The <code>spot_price_simulate</code> function quickly and efficiently simulates an N-factor model over a specified number of years, simulating antithetic price paths as a simple variance reduction technique.
+The <code>spot_price_simulate</code> function uses the <code>mvrnorm</code> function from the <code>MASS</code> package to draw from a multivariate normal distribution for the correlated simulation shocks of state variables.
+</p>
+<p>The N-factor model stochastic differential equation is given by:
+</p>
+<p>Brownian Motion processes (ie. factor one when <code>GBM = T</code>) are simulated using the following solution:
+</p>
+\[x_{1,t+1} = x_{1,t} + \mu^*\Delta t + \sigma_1 \Delta t Z_{t+1}\]
+<p>Where \(\Delta t\) is the discrete time step, \(\mu^*\) is the risk-neutral growth rate and \(\sigma_1\) is the instantaneous volatility. \(Z_t\) represents the
+independent standard normal at time \(t\).
+</p>
+<p>Ornstein-Uhlenbeck Processes are simulated using the following solution:
+</p>
+\[x_{i,t} = x_{i,0}e^{-\kappa_it}-\frac{\lambda_i}{\kappa_i}(1-e^{-\kappa_it})+\int_0^t\sigma_ie^{\kappa_is}dW_s\]
+<p>Where a numerical solution is obtained by numerically discretising and approximating the integral term using the Euler-Maruyama integration scheme:
+\[\int_0^t\sigma_ie^{\kappa_is}dW_s = \sum_{j=0}^t \sigma_ie^{\kappa_ij}dW_s\]
+</p>
+<p>Finally, deterministic seasonality is considered within the spot prices of simulated price paths.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>spot_price_simulate</code> returns a list when <code>verbose = T</code> and a matrix of simulated price paths when <code>verbose = F</code>. The returned objects in the list are:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+
+<code>State_Variables</code> </td>
+<td style="text-align: left;"> A matrix of simulated state variables for each factor is returned when <code>verbose = T</code>. The number of factors returned corresponds to the number of factors in the specified N-factor model. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+<code>Prices</code> </td>
+<td style="text-align: left;"> A matrix of simulated price paths. Each column represents one simulated price path and each row represents one simulated observation. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Schwartz, E. S., and J. E. Smith, (2000). Short-Term Variations and Long-Term Dynamics in Commodity Prices. <em>Manage. Sci.</em>, 46, 893-911.
+</p>
+<p>Cortazar, G., and L. Naranjo, (2006). An N-factor Gaussian model of oil futures prices. <em>Journal of Futures Markets: Futures, Options, and Other Derivative Products</em>, 26(3), 243-268.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+# Example 1
+## Simulate a geometric Brownian motion (GBM) process:
+simulated_spot_prices &lt;- spot_price_simulate(
+ x_0 = log(20),
+ parameters = c(mu_rn = (0.05 - (1/2) * 0.2^2), sigma_1 = 0.2),
+ t = 1,
+ dt = 1/12,
+ N_simulations = 1e3)
+
+# Example 2
+## Simulate the Short-Term/Long-Term model:
+
+### Step 1 - Obtain contemporary state variable estimates through the Kalman Filter:
+SS_2F_filtered &lt;- NFCP_Kalman_filter(parameter_values = SS_oil$two_factor,
+                                    parameter_names = names(SS_oil$two_factor),
+                                    log_futures = log(SS_oil$stitched_futures),
+                                    dt = SS_oil$dt,
+                                    futures_TTM = SS_oil$stitched_TTM,
+                                    verbose = TRUE)
+
+### Step 2 - Use these state variable estimates to simulate futures spot prices:
+simulated_spot_prices &lt;- spot_price_simulate(
+ x_0 = SS_2F_filtered$x_t,
+ parameters = SS_oil$two_factor,
+ t = 1,
+ dt = 1/12,
+ N_simulations = 1e3,
+ antithetic = TRUE,
+ verbose = TRUE)
+</code></pre>
+
+
+</div>

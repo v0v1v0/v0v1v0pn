@@ -1,0 +1,286 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NMwriteData</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Write dataset for use in Nonmem (and R)</h2>
+
+<h3>Description</h3>
+
+<p>Instead of trying to remember the arguments to pass to write.csv,
+use this wrapper. It tells you what to write in $DATA and $INPUT
+in Nonmem, and it (additionally) exports an rds file as
+well which is highly preferable for use in R. It never edits the
+data before writing the datafile. The filenames for csv, rds
+etc. are derived by replacing the extension to the filename given
+in the file argument.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NMwriteData(
+  data,
+  file,
+  formats.write = c("csv", "rds"),
+  script,
+  args.stamp,
+  args.fwrite,
+  args.rds,
+  args.RData,
+  args.write_fst,
+  quiet,
+  args.NMgenText,
+  csv.trunc.as.nm = FALSE,
+  genText = TRUE,
+  save = TRUE,
+  write.csv,
+  write.rds,
+  write.RData,
+  nm.drop,
+  nmdir.data,
+  col.flagn,
+  nm.rename,
+  nm.copy,
+  nm.capitalize,
+  allow.char.TIME
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The dataset to write to file for use in Nonmem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>The file to write to. The extension (everything after
+and including last ".") is dropped. csv, rds and other
+standard file name extensions are added.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formats.write</code></td>
+<td>
+<p>character vector of formats.write. Default is
+c("csv","rds"). "fst" is possible too. Default can be modified
+with <code>NMdataConf()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>script</code></td>
+<td>
+<p>If provided, the object will be stamped with this
+script name before saved to rds or RData. See ?NMstamp.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.stamp</code></td>
+<td>
+<p>A list of arguments to be passed to NMstamp.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.fwrite</code></td>
+<td>
+<p>List of arguments passed to fwrite. Notice that
+except for "x" and "file", you need to supply all arguments to
+fwrite if you use this argument. Default values can be
+configured using NMdataConf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.rds</code></td>
+<td>
+<p>A list of arguments to be passed to saveRDS.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.RData</code></td>
+<td>
+<p>A list of arguments to be passed to save. Please
+note that writing RData is deprecated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.write_fst</code></td>
+<td>
+<p>An optional list of arguments to be passed
+to write_fst.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>The default is to give some information along the way
+on what data is found. But consider setting this to TRUE for
+non-interactive use. Default can be configured using
+NMdataConf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.NMgenText</code></td>
+<td>
+<p>List of arguments to pass to NMgenText - the
+function that generates text suggestion for INPUT and DATA
+sections in the Nonmem control stream. You can use these
+arguments to get a text suggestion you an use directly in
+Nonmem - and <code>NMwriteSection</code> can even update multiple
+Nonmem control streams based on the result. This will update
+your control streams to match your new data file with just one
+command.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>csv.trunc.as.nm</code></td>
+<td>
+<p>If TRUE, csv file will be truncated
+horizontally (columns will be dropped) to match the $INPUT
+text generated for Nonmem (genText must be TRUE for this
+option to be allowed). This can be a great advantage when
+dealing with large datasets that can create problems in
+parallellization. Combined with write.rds=TRUE, the full data
+set will still be written to an rds file, so this can be used
+when combining output and input data when reading model
+results. This is done by default by NMscanData. This means
+writing a lean (narrow) csv file for Nonmem while keeping
+columns of non-numeric class like character and factor for
+post-processing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genText</code></td>
+<td>
+<p>Run and report results of NMgenText? Default is
+TRUE. You may want to disable this if data set is not for
+Nonmem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save</code></td>
+<td>
+<p>Save defined files? Default is TRUE. If a variable is
+used to control whether a script generates outputs (say
+<code>writeOutputs=TRUE/FALSE)</code>, if you use
+<code>save=writeOutputs</code> to comply with this.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>write.csv</code></td>
+<td>
+<p>Write to csv file? Deprecated, use
+'formats.write' instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>write.rds</code></td>
+<td>
+<p>write an rds file? Deprecated, use
+'formats.write' instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>write.RData</code></td>
+<td>
+<p>Deprecated and not recommended - will be
+removed. RData is not a adequate format for a dataset (but is
+for environments). Please use write.rds instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nm.drop</code></td>
+<td>
+<p>Deprecated, use
+args.NMgenText=list(drop=c("column")) instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmdir.data</code></td>
+<td>
+<p>Deprecated, use
+args.NMgenText=list(dir.data="your/path") instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.flagn</code></td>
+<td>
+<p>Name of a numeric column with zero value for rows
+to include in Nonmem run, non-zero for rows to skip. The
+argument is only used for generating the proposed $DATA text
+to paste into the Nonmem control stream. To skip this feature,
+use col.flagn=NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nm.rename</code></td>
+<td>
+<p>Deprecated, use
+args.NMgenText=list(rename=c(newname="existing")) instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nm.copy</code></td>
+<td>
+<p>Deprecated, use
+args.NMgenText=list(copy=c(newname="existing")) instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nm.capitalize</code></td>
+<td>
+<p>Deprecated, use
+args.NMgenText=list(capitalize=TRUE) instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow.char.TIME</code></td>
+<td>
+<p>Deprecated, use
+args.NMgenText=list(allow.char.TIME=TRUE) instead.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When writing csv files, the file will be
+comma-separated. Because Nonmem does not support quoted
+fields, you must avoid commas in character fields. An error is
+returned if commas are found in strings.
+</p>
+<p>The user is provided with text to use in Nonmem. This lists names
+of the data columns. Once a column is reached that Nonmem will not
+be able to read as a numeric and column is not in nm.drop, the list
+is stopped. Only exception is TIME which is not tested for whether
+character or not.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Text for inclusion in Nonmem control stream, invisibly.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other DataCreate: 
+<code>NMorderColumns()</code>,
+<code>NMstamp()</code>,
+<code>addTAPD()</code>,
+<code>findCovs()</code>,
+<code>findVars()</code>,
+<code>flagsAssign()</code>,
+<code>flagsCount()</code>,
+<code>mergeCheck()</code>,
+<code>tmpcol()</code>
+</p>
+
+
+</div>

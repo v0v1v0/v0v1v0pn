@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.timing.info</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Retrieve the timing information present in a networkDynamic. </h2>
+
+<h3>Description</h3>
+
+<p>These methods return either the activity spells of each vertex or edge
+or the unique time points at which edges and vertices become active or
+inactive. 
+</p>
+<p>Finds all of the unique time points at which the edges and/or vertices
+become active or inactive.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.change.times(x, vertex.activity=TRUE, edge.activity=TRUE, ignore.inf=TRUE,
+             vertex.attribute.activity = TRUE, edge.attribute.activity = TRUE,
+             network.attribute.activity = TRUE)
+get.vertex.activity(x, v=seq_len(network.size(x)), 
+                   as.spellList=FALSE, active.default=TRUE)
+get.edge.activity(x, e=seq_along(x$mel), as.spellList=FALSE, active.default=TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> an object, of class <code>network</code> or <code>networkDynamic</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.activity</code></td>
+<td>
+<p> logical, whether the times at which vertices become
+active or inactive is to be returned. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge.activity</code></td>
+<td>
+<p> logical, whether the times at which edges become
+active or inactive is to be returned. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertex.attribute.activity</code></td>
+<td>
+<p>logical, whether the times attached to any dynamic vertex attributes should be returned</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge.attribute.activity</code></td>
+<td>
+<p>logical, whether the times attached to any dynamic edge attributes should be returned</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network.attribute.activity</code></td>
+<td>
+<p>logical, whether the times attached to any dynamic network attributes should be returned</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ignore.inf</code></td>
+<td>
+<p>logical, whether Inf value will be ignored or not. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+<p> IDs for the edges whose activity spells are wanted. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p> IDs for the vertices whose activity spells are wanted. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.spellList</code></td>
+<td>
+<p>should data be returned in spell matrix form? TODO: should this be callsed as.spellmatrix instead?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>active.default</code></td>
+<td>
+<p>logical, should edges / vertices with no spell activity defined be treated as always active (<code>TRUE</code>) and included in output, or never active (<code>FALSE</code>) and skipped.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>For the <code>get.change.times</code> function, the default settings return a
+vector of all of the finite time points at which any edge or any
+vertex becomes active or inactive, or any of their dynamic attributes change. If only one of the logical
+arguments, say <code>vertex.activity</code>, is set to <code>FALSE</code>, then
+the time points for the corresponding parts of the data structure will not be returned.  If both are
+<code>FALSE</code>, numeric(0) is returned.
+</p>
+<p>For the <code>get.vertex.activity</code> and <code>get.edge.activity</code> functions, a list
+of activity spells is returned with each list element corresponding to the id of the vertex or edge. Deleted edges will appear as NULL entries, as will any spell marked as inactive with the 'null' (Inf,Inf) spell.  If the argument <code>as.spellList=TRUE</code> the activity spells are instead formatted as a <code>data.frame</code> and include additional columns to indicate possible onset- and terminus-censoring.  Any 'null' spells and deleted edges will be omited. 
+</p>
+<p>For <code>get.vertex.activity</code> the columns are <code>[onset,terminus,vertex.id,onset.censored,terminus.censored,duration]</code>. 
+</p>
+<p>For <code>get.edge.activity</code> the columns are <code>[onset, terminus, tail, head, onset.censored, terminus.censored, duration, edge.id] </code>. 
+</p>
+<p>The data.frames will be sorted by id, onset, terminus.
+</p>
+<p>If a <code>net.obs.period</code> network attribute is set, the range of its <code>$observations</code> element is substituted in for the -Inf and Inf values that otherwise indicate the onset- and terminus-censored observations.  
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ayn Leslie-Cook <a href="mailto:aynlc3@uw.edu">aynlc3@uw.edu</a>, Carter T. Butts <a href="mailto:buttsc@uci.edu">buttsc@uci.edu</a>,skyebend </p>
+
+
+<h3>See Also</h3>
+
+<p> See also <code>activity.attribute</code>,<code>net.obs.period</code>,<code>as.data.frame.networkDynamic</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  library(networkDynamic)
+  data(flo)
+  net1 &lt;- network(flo)
+  activate.edges(net1, onset=1:20, terminus=101:120)
+  activate.vertices(net1, at=seq(2,32,2))
+  get.change.times(net1)
+  get.edge.activity(net1)
+  get.edge.activity(net1,as.spellList=TRUE)
+  get.vertex.activity(net1)
+  
+  a &lt;-network.initialize(5)
+  activate.vertices(a,onset=0,terminus=Inf)
+  get.change.times(a,ignore.inf=FALSE)
+
+
+</code></pre>
+
+
+</div>

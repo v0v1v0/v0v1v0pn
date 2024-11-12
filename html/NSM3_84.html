@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mblm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fitting Median-Based Linear Models (from 'mblm' oackage)
+</h2>
+
+<h3>Description</h3>
+
+<p>This function is used to fit linear models based on Theil-Sen single median, or Siegel repeated medians.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mblm(formula, dataframe, repeated = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A formula of type y ~ x (only linear models are accepted)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataframe</code></td>
+<td>
+<p>Optional dataframe</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repeated</code></td>
+<td>
+<p>If set to true, model is computed using repeated medians. If false, a single median estimators are calculated</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is from the 'mblm' package, which is no longer available on CRAN.
+</p>
+<p>Theil-Sen single median method computes slopes of lines crossing all possible pairs of points, when x coordinates differ. After calculating these n(n-1)/2 slopes (these value are true only if x is distinct), the median of them is taken as slope estimator. Next, the intercepts of n lines, crossing each point and having calculated slope are calculated. The median from them is intercept estimator.
+</p>
+<p>Siegel repeated medians is more complicated. For each point, the slopes between it and the others are calcuated (resulting n-1 slopes) and the median is taken. This results in n medians and median from this medians is slope estimator. Intercept is calculated in similar way, for more information please take a look in function source.
+</p>
+<p>The breakdown point of Theil-Sen method is about 29%, Siegel extended it to 50%, so these regression methods are very robust. Additionally, if the errors are normally distributed and no outliers are present, the estimators are very similar to classic least squares.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class c("mblm","lm"), containing minimal set of data to perform basic operations, such as in case of lm model. Additionally, the return value contains 2 fields:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>slopes  </code></td>
+<td>
+<p>The slopes (in single median), or medians of slopes (in repeated medians) between tested point pairs</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercepts</code></td>
+<td>
+<p>The intercepts calculated</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>This function should have compatibility with all 'lm' methods, but it is not guaranteed that they will work or have any cognitive value (this method is nonparametric). The compatibility was only introduced to use some basic methods from 'lm' without programming new functions.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Lukasz Komsta, some fixes by Sven Garbade
+</p>
+
+
+<h3>References</h3>
+
+<p>Theil, H. (1950) A rank invariant method for linear and polynomial regression analysis. Nederl. Akad. Wetensch. Proc. Ser. A 53, 386-392 (Part I), 521-525 (Part II), 1397-1412 (Part III).
+</p>
+<p>Sen, P.K. (1968). Estimates of Regression Coefficient Based on Kendall's tau. J. Am. Stat. Ass. 63, 324, 1379-1389.
+</p>
+<p>Siegel, A.F. (1982). Robust Regression Using Repeated Medians. Biometrika, 69, 1, 242-244.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1234)
+x &lt;- 1:100+rnorm(100)
+y &lt;- x+rnorm(100)
+y[100] &lt;- 200
+fit &lt;- mblm(y~x)
+fit
+summary(fit)
+fit2 &lt;- lm(y~x)
+plot(x,y)
+abline(fit)
+abline(fit2,lty=2)
+plot(fit)
+residuals(fit)
+fitted(fit)
+plot(density(fit$slopes))
+plot(density(fit$intercepts))
+anova(fit)
+anova(fit2)
+anova(fit,fit2)
+confint(fit)
+AIC(fit,fit2)
+</code></pre>
+
+
+</div>

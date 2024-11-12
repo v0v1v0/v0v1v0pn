@@ -1,0 +1,483 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NMAoutlier</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forward Search algorithm in network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>This function employs the Forward Search algorithm to detect
+outliers and influential studies fitted in network meta-analysis
+model from graph-theory.  This is an outlying diagnostic tool to
+detect outliers and studies that are potential sources for
+heterogeneity and inconsistency in network meta-analysis.
+</p>
+<p>Monitoring measures during the search are:
+</p>
+
+<ul>
+<li>
+<p> outlier detection measures (standardized residuals, Cook's
+distance, ratio of variance);
+</p>
+</li>
+<li>
+<p> ranking measures (P-scores);
+</p>
+</li>
+<li>
+<p> heterogeneity and inconsistency measures (Q statistics for
+overall heterogeneity / inconsistency, inconsistency by
+design-by-treatment interaction model, z-values for comparison
+between direct and indirect evidence by back-calculation method).
+</p>
+</li>
+</ul>
+<p>A description of the outlier detection methodology can be found in
+Petropoulou et al. (2021).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NMAoutlier(
+  TE,
+  seTE,
+  treat1,
+  treat2,
+  studlab,
+  data = NULL,
+  crit1 = "R",
+  crit2 = "R",
+  studies = NULL,
+  P = 100,
+  sm,
+  Isub = NULL,
+  reference = "",
+  small.values = "good",
+  n_cores = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>TE</code></td>
+<td>
+<p>Estimate of treatment effect, i.e. difference between
+first and second treatment (e.g. log odds ratio, mean difference,
+or log hazard ratio). This can also be a pairwise object
+(i.e. the result of pairwise function of netmeta package).  In
+this case, the pairwise object should include the following: TE,
+seTE, treat1, treat2, studlab</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE</code></td>
+<td>
+<p>Standard error of treatment estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat1</code></td>
+<td>
+<p>Label/Number for first treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat2</code></td>
+<td>
+<p>Label/Number for second treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studlab</code></td>
+<td>
+<p>Study labels (important when multi arm studies are
+included).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame containing the study information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crit1</code></td>
+<td>
+<p>A character string indicating the criterion to be used
+for selecting the initial subset, this criterion may be the
+minimum of median absolute residuals ("R") or the maximum of
+median absolute likelihood contributions ("L"). Default value is
+"R".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crit2</code></td>
+<td>
+<p>A character string indicating the criterion to be used
+for selecting the study entered from non-basic set to basic set,
+this criterion may be the minimum of absolute residuals ("R") or
+the maximum of absolute likelihood contributions ("L"). Default
+value is "R".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studies</code></td>
+<td>
+<p>An optional vector specifying the number of the
+initial subset of studies. The default value is the maximum of
+the number of treatments and the 20 percent of the total number
+of studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p>An optional vector specifying the number of candidate
+sample of studies (with length equal to <code>studies</code>) for the
+choice of the initial subset. Default value is 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sm</code></td>
+<td>
+<p>A character string indicating underlying summary measure,
+e.g., <code>"RD"</code>, <code>"RR"</code>, <code>"OR"</code>, <code>"ASD"</code>,
+<code>"HR"</code>, <code>"MD"</code>, <code>"SMD"</code>, or <code>"ROM"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Isub</code></td>
+<td>
+<p>A vector for the studies to be included in the initial
+subset (default: NULL, the initial subset not specified by the
+user).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference</code></td>
+<td>
+<p>Reference treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>small.values</code></td>
+<td>
+<p>A character string indicating if small values
+are considered beneficial (option:"good") or harmfull
+(option:"bad") on outcome.  This is requirement for p-scores
+computation. The default value is considered benefial outcome
+("good").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_cores</code></td>
+<td>
+<p>The number of cores that the process is running
+using the parallel (default: NULL, the process is running using
+all the available cores)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed on to
+<code>netmeta</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>FS algorithm for network meta-analysis model from graph theory is
+described in Petropoulou et al. (2021).
+</p>
+<p>Let <em>n</em> be the number of treatments and let <em>m</em> be the
+number of pairwise treatment comparisons.  If there are only
+two-arm studies, <em>m</em> is equal to the number of studies. Let TE
+and seTE be the vectors of observed effects and their standard
+errors.  Comparisons belonging to multi-arm studies are identified
+by identical study labels (argument <code>studlab</code>).
+</p>
+<p>The FS algorithm is an outlier diagnostic iterative procedure. FS
+algorithm apart from three steps. It starts with a subset of
+studies and it gradually adds studies until all studies entered.
+After the search, statistical measures are monitored for sharp
+changes.
+</p>
+<p>In more detail, the FS algorithm starts with an initial subset of
+the dataset with size <em>l</em>. Let (argument <code>P</code>)
+(eg. <em>P</em> = 100) a large number of candidate subset of studies
+with size <em>l</em>. The candidate subset that optimize the
+criterion (argument <code>crit1</code>) is taken as the initial subset
+(considered ideally to be outlying-free).  Criterion (<code>crit1</code>)
+to be used for selecting the initial subset, can be the minimum of
+median absolute residuals <code>"R"</code> or the maximum of median
+absolute likelihood contributions <code>"L"</code>. It is conventionally
+refer this subset as basic set, whereas the remaining studies
+constitute the non-basic set.
+</p>
+<p>The FS algorithm gradually adds studies from the non-basic to the
+basic subset based on how close the former studies are to the
+hypothesized model fit in the basic set.  A study from non-basic
+set entered into the basic set if optimize the criterion (argument
+<code>crit2</code>).  Criterion (<code>crit2</code>) for selecting the study
+from non-basic to basic set may be the minimum of median absolute
+residuals <code>"R"</code> or the maximum of median absolute likelihood
+contributions <code>"L"</code>.  The algorithm order the studies
+according to their closeness to the basic set by adding the study
+that optimize the criterion from non-basic set to basic set.
+</p>
+<p>The process is repeated until all studies are entered into the
+basic set.  The number of iterations of algorithm <em>index</em> is
+equal to the total number of studies minus the number of studies
+entered into the initial subset. Through the FS procedure,
+parameter estimates (summary estmates, heterogeneity estimator) and
+other statistics of interest (outlying measures, heterogeneity and
+inconsistency measures, ranking measures) are monitored. In each
+iteration, network meta-analysis model from graph theory (Rücker,
+2012) is fitted (<code>netmeta</code> function) with R package
+<b>netmeta</b>.
+</p>
+<p>Monitoring statistical measures for each FS iteration can be:
+</p>
+<p><b>Outlying detection measures:</b>
+Standardized residuals (arithmetic mean in case of multi-arm
+studies); Cook's statistic; Ratio of determinants of
+variance-covariance matrix
+</p>
+<p><b>Ranking measures:</b>
+P-scores for ranking of treatments (Rücker G &amp; Schwarzer G, 2015)
+for each basic set with implementation of (<code>netrank</code> function)
+from R package <b>netmeta</b>.
+</p>
+<p><b>Heterogeneity and inconsistency measures:</b>
+Overall heterogeneity / inconsistency Q statistic (<code>Q</code>) This
+is the design-based decomposition of Cochran Q as provided by Krahn
+et al. (2013); Overall heterogeneity Q statistic (<code>Q</code>);
+Between-designs Q statistic (<code>Q</code>), based on a random effects
+model with square-root of between-study variance estimated embedded
+in a full design-by-treatment interaction model.  Implementation
+with (<code>decomp.design</code> function) from R package <b>netmeta</b>;
+Z-values (Dias et al., 2010; König et al., 2013) for comparison
+between direct and indirect evidence in
+each iteration of forward search algorithm.  By monitoring
+difference of direct and indirect evidence, potential sources of
+consistency can be detected with the implementation of
+(<code>netsplit</code> function) from R package <b>netmeta</b> for each
+iteration of the search.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>NMAoutlier</code>; a list containing the
+following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>Matrix containing the data <code>"TE"</code>, <code>"seTE"</code>, <code>"studlab"</code>, <code>"treat1"</code>, <code>"treat2"</code> as defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>length.initial</code></td>
+<td>
+<p>The number of studies that constitute the initial (outlying-clean) subset of studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p>The number of iterations of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>basic</code></td>
+<td>
+<p>Studies entered into the basic set in each iteration of the search.
+At the first iteration, basic set constitute the studies that are included in the basic-initial subset.
+The number of studies in the first iteration is equal to length.initial.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>taub</code></td>
+<td>
+<p>Heterogeneity estimator variance for basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Qb</code></td>
+<td>
+<p>Overall heterogeneity - inconsistency Q statistic (<code>Q</code>) for the basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Qhb</code></td>
+<td>
+<p>Overall heterogeneity Q statistic (<code>Q</code>) for the basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Qib</code></td>
+<td>
+<p>Overall inconsistency Q statistic (<code>Q</code>) from design-by-treatment interaction model for the basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estb</code></td>
+<td>
+<p>Summary estimates for each treatment for the basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lb</code></td>
+<td>
+<p>Lower 95% confidence interval of summary estimates for the basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ub</code></td>
+<td>
+<p>Upper 95% confidence interval of summary estimates for the basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ratio</code></td>
+<td>
+<p>Ratio of determinants (<code>COVRATIOj</code>) of variance-covariance matrix of treatment estimates at iteration j to that iteration at (j-1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cook_d</code></td>
+<td>
+<p>Cook's statistic (<code>Cj</code>) at iteration j of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.score</code></td>
+<td>
+<p>P-score for ranking each treatment for the basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dif</code></td>
+<td>
+<p>Z-values for comparison between direct and indirect evidence for each iteration of forward search algorithm.
+Based on back-calculation method to derive indirect estimates from direct pairwise comparisons and network estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estand</code></td>
+<td>
+<p>Standardized residuals for each study for the basic set in each iteration of forward search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Function call</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Maria Petropoulou &lt;petropoulou@imbi.uni-freiburg.de&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Dias S, Welton NJ, Caldwell DM, Ades AE (2010):
+Checking consistency in mixed treatment comparison meta-analysis.
+<em>Statistics in Medicine</em>,
+<b>29</b>, 932–44
+</p>
+<p>König J, Krahn U, Binder H (2013):
+Visualizing the flow of evidence in network meta-analysis and
+characterizing mixed treatment comparisons.
+<em>Statistics in Medicine</em>,
+<b>32</b>, 5414–29
+</p>
+<p>Krahn U, Binder H, König J (2013):
+A graphical tool for locating inconsistency in network meta-analyses.
+<em>BMC Medical Research Methodology</em>,
+<b>13</b>, 35
+</p>
+<p>Petropoulou M, Salanti G, Rücker G, Schwarzer G, Moustaki I,
+Mavridis D (2021):
+A forward search algorithm for detecting extreme study effects in
+network meta-analysis.
+<em>Statistics in Medicine</em>
+</p>
+<p>Rücker G (2012):
+Network meta-analysis, electrical networks and graph theory.
+<em>Research Synthesis Methods</em>,
+<b>3</b>, 312–24
+</p>
+<p>Rücker G, Schwarzer G (2015):
+Ranking treatments in frequentist network meta-analysis works
+without resampling methods.
+<em>BMC Medical Research Methodology</em>,
+<b>15</b>, 58
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data(smokingcessation, package = "netmeta")
+smokingcessation$id &lt;- 1:nrow(smokingcessation)
+
+study912 &lt;- subset(smokingcessation, id %in% 9:12)
+p1 &lt;- netmeta::pairwise(list(treat1, treat2, treat3),
+                        list(event1, event2, event3),
+                        list(n1, n2, n3),
+                        data = study912,
+                        sm = "OR")
+
+# Forward search algorithm
+#
+FSresult &lt;- NMAoutlier(p1, P = 1, small.values = "bad", n_cores = 2)
+FSresult
+
+data(smokingcessation, package = "netmeta")
+
+# Transform data from arm-based to contrast-based format
+# We use 'sm' argument for odds ratios.
+# We use function pairwise from netmeta package
+#
+p1 &lt;- netmeta::pairwise(list(treat1, treat2, treat3),
+                        list(event1, event2, event3),
+                        list(n1, n2, n3),
+                        data = smokingcessation,
+                        sm = "OR")
+
+# Forward search algorithm
+#
+FSresult1 &lt;- NMAoutlier(p1, small.values = "bad")
+
+# Basic set for each iteration of forward search algorithm
+#
+FSresult1$basic
+
+# Forward search algorithm using the criteria (crit1, crit2)
+# with the maximum of absolute likelihood contributions ("L")
+#
+FSresult2 &lt;- NMAoutlier(p1, crit1 = "L", crit2 = "L",
+                        small.values = "bad")
+FSresult2
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

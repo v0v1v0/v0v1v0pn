@@ -1,0 +1,82 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>write_attribute_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Write attribute data to NetCDF-CF</h2>
+
+<h3>Description</h3>
+
+<p>Creates a NetCDF file with an instance dimension, and any attributes from a data frame. 
+Use to create the start of a NetCDF-DSG file. One character length dimension is created
+long enough to contain the longest provided character string.
+This function does not implement any CF convention attributes or standard names.
+Any columns of class date will be converted to character.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">write_attribute_data(
+  nc_file,
+  att_data,
+  instance_dim_name = "instance",
+  units = rep("unknown", ncol(att_data)),
+  overwrite = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nc_file</code></td>
+<td>
+<p><code>character</code> file path to the nc file to be created. 
+If adding to a file, it must already have the named instance dimension.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>att_data</code></td>
+<td>
+<p><code>data.frame</code> with instances as columns and attributes as rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>instance_dim_name</code></td>
+<td>
+<p><code>character</code> name for the instance dimension. Defaults to "instance"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>units</code></td>
+<td>
+<p><code>character</code> vector with units for each column of att_data. Defaults to "unknown" for all.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>boolean overwrite existing file? Will append if FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">sample_data &lt;- sf::st_set_geometry(sf::read_sf(system.file("shape/nc.shp", 
+                                                           package = "sf")), 
+                                   NULL)
+example_file &lt;-write_attribute_data(tempfile(), sample_data,
+                                    units = rep("unknown", ncol(sample_data)))
+
+try({
+  ncdump &lt;- system(paste("ncdump -h", example_file), intern = TRUE)
+  cat(ncdump ,sep = "\n")
+}, silent = TRUE)
+
+</code></pre>
+
+
+</div>

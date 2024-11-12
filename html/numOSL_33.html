@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lsNORM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Regenerative-dose signal optimization using the LS-normalisation procedure
+</h2>
+
+<h3>Description</h3>
+
+<p>Optimizing standardised regenerative-dose signals according to the least-squares normalisation (LS-normalisation) procedure using an iterative scaling and fitting procedure proposed by Li et al. (2016).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lsNORM(SARdata, model = "gok", origin = FALSE, 
+       weight = FALSE, natural.rm = TRUE, 
+       norm.dose = NULL, maxiter = 10, 
+       plot = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>SARdata</code></td>
+<td>
+<p>matrix(<b>required</b>): SAR data used for performing the LS-normalisation<br>
+procedure, it should contain five columns (i.e., <code>NO</code>, <code>SAR.Cycle</code>, <code>Dose</code>,<br><code>Signal</code>, and <code>Signal.Err</code>), see SARdata for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>character(with default): model used for growth curve fitting, see fitGrowth for available models</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>origin</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be forced to pass the origin</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>logical(with default): logical value indicating if the growth curve should be fitted using a weighted procedure, see function fitGrowth for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>natural.rm</code></td>
+<td>
+<p>logical(with default): logical value indicating if the standardised natural-dose signal 
+should be removed from <code>SARdata</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.dose</code></td>
+<td>
+<p>numeric(optional): regenerative-dose used for re-scaling established gSGC. 
+For example, if <code>norm.dose=100</code>, then the signal value for a dose value of 100 (Gy|s) will be re-scaled to unity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>integer(with default): allowed maximum number of iterations during the<br>
+LS-normalisation optimization process</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical(with default): logical value indicating if the results should be plotted</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function lsNORM is used for optimizing regenerative-dose signal data from a number of grains (aliquots) according to the least-squares normalisation (LS-normalisation) procedure outlined by Li et al. (2016) using an iterative scaling and fitting procedure.<br><br>
+The LS-normalisation procedure for growth curve optimization involves the following steps:<br>
+(1) Fit standardised regenerative-dose signals from all of the aliquots;<br>
+(2) Re-scale the individual growth curve from each aliquot using a scaling factor. The scaling factor for each aliquot is determined in a way such that the sum of squared residuals is minimized. Each aliquots is treated individually, and different scaling factors are calculated for different aliquots.<br>
+(3) Iterate the fitting (step 1) and re-scaling (step 2). The iterative procedure is performed repeatedly until there is negligible change in the relative standard deviation of the normalised growth curve data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Return an invisible list that contains the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>norm.SARdata</code></td>
+<td>
+<p>SAR data sets optimized using the LS-normalisation procedure</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sf</code></td>
+<td>
+<p>scaling factor of standardised regenerative-dose signals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>number of iterations required</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LMpars1</code></td>
+<td>
+<p>optimized parameters for the growth curve before LS-normalisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value1</code></td>
+<td>
+<p>minimized objective for the growth curve before LS-normalisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>avg.error1</code></td>
+<td>
+<p>average fit error for the growth curve before LS-normalisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RCS1</code></td>
+<td>
+<p>reduced chi-square value for the growth curve before LS-normalisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FOM1</code></td>
+<td>
+<p>figure of merit value for the growth curve before LS-normalisation in percent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LMpars2</code></td>
+<td>
+<p>optimized parameters for the growth curve after LS-normalisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value2</code></td>
+<td>
+<p>minimized objective for the growth curve after LS-normalisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>avg.error2</code></td>
+<td>
+<p>average fit error for the growth curve after LS-normalisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RCS2</code></td>
+<td>
+<p>reduced chi-square value for the growth curve after LS-normalisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FOM2</code></td>
+<td>
+<p>figure of merit value for the growth curve after LS-normalisation in percent</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Li B, Jacobs Z, Roberts RG, 2016. Investigation of the applicability of standardised growth curves for OSL dating of quartz from Haua Fteah cave, Libya. Quaternary Geochronology, 35: 1-15.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>analyseBINdata; fitGrowth; SARdata; scaleSGCN; calSGCED
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ### Example 1:
+  data(SARdata)
+  # Use only the first five aliquots of SARdata.
+  Data &lt;- SARdata[1:40,]
+  res_lsNORM &lt;- lsNORM(Data, model="gok")
+  res_lsNORM$norm.SARdata
+
+  ### Example 2 (not run):
+  # data(BIN)
+  # obj_pickBIN &lt;- pickBINdata(BIN, Position=1:48, Grain=0,
+  #                            LType="OSL", view=FALSE)
+  # obj_analyseBIN &lt;- analyseBINdata(obj_pickBIN, nfchn=3, nlchn=20)
+  # lsNORM(obj_analyseBIN$SARdata, norm.dose=300)
+  
+  
+</code></pre>
+
+
+</div>

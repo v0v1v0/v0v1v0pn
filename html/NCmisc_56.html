@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>replace.missing.df</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterate through numeric columns of a dataframe and replace missing with the mean</h2>
+
+<h3>Description</h3>
+
+<p>To simple replace missing data without changing column means.
+This will also use criteria to decide whether each column is numeric,
+so that illegal operations aren't performed on strings, etc.
+Also adjusting the 'error' parameter allows adding variance to the
+missing observations to help to reduce bias associated with inserting
+many of the same replacement value.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">replace.missing.df(
+  X,
+  repl.fun = mean,
+  error = 0,
+  thresh = 0.9,
+  digits = 99,
+  force = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a data.frame to replace missing values in</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repl.fun</code></td>
+<td>
+<p>the function to perform the replacement. Default
+is 'mean'. A replacement should take a vector 'x' and produce a
+single scalar as a result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error</code></td>
+<td>
+<p>default value is 0, meaning replacements will be all
+the same value for each column of the data.frame X. If you give
+a positive value, this amount of gaussian noise (in StDev units of
+the original variable) will be added to the replacement values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>passed to function 'is.vec.numeric', see explanation there.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Trim replacement values to this many digits</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force</code></td>
+<td>
+<p>TRUE means replace missing for all columns with testing for numeric</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>returns a data.frame with the same dimensions with missing
+values for numeric values imputed using the repl.fun function,
+optionally with noise added.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Nicholas Cooper
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">df &lt;- data.frame(first=c(1,2,NA,4,5),
+  second=paste(c(6,7,8,NA,10)),
+  third=c("jake", "fred", "cathy", "sandra", "mike"))
+df
+replace.missing.df(df)
+replace.missing.df(df, force=TRUE)
+df2 &lt;- data.frame(first=c(1:5, NA, NA, NA,9, 10),
+  second=paste(c(NA, NA, 6:10, "5|6", "7|8", 1)),
+  third=rep(c("jake", "fred", "cathy", "sandra", "mike"),2))
+df2
+replace.missing.df(df2)
+replace.missing.df(df2, thresh=0.7)
+replace.missing.df(df2, error = 1, thresh=0.7, digits=4)
+</code></pre>
+
+
+</div>

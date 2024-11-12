@@ -1,0 +1,414 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netcomparison</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate comparison effects of two arbitrary complex interventions
+in component network meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>Calculate comparison effects of two arbitrary complex interventions
+(i.e., combinations of several components) in component network
+meta-analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netcomparison(
+  x,
+  treat1,
+  treat2,
+  common = x$common,
+  random = x$random,
+  level = x$level.ma,
+  nchar.comps = x$nchar.comps,
+  backtransf = x$backtransf,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+
+## S3 method for class 'netcomparison'
+print(
+  x,
+  common = x$common,
+  random = x$random,
+  backtransf = x$backtransf,
+  nchar.comps = x$nchar.comps,
+  digits = gs("digits"),
+  digits.stat = gs("digits.stat"),
+  digits.pval = gs("digits.pval"),
+  scientific.pval = gs("scientific.pval"),
+  zero.pval = gs("zero.pval"),
+  JAMA.pval = gs("JAMA.pval"),
+  big.mark = gs("big.mark"),
+  legend = TRUE,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netcomb</code> or <code>netcomparison</code>
+(print function).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat1</code></td>
+<td>
+<p>A character vector defining the first complex
+intervention(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat2</code></td>
+<td>
+<p>A character vector defining the second complex
+intervention(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether results for common
+effects model should be conducted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether results for random
+effects model should be conducted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>The level used to calculate confidence intervals for
+combinations of components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.comps</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique names for components (see
+Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether printed results
+should be back transformed. If <code>backtransf=TRUE</code>, results
+for <code>sm="OR"</code> are printed as odds ratios rather than log
+odds ratios.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments (to catch deprecated arguments).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.stat</code></td>
+<td>
+<p>Minimal number of significant digits for z-value
+of test for overall effect, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.pval</code></td>
+<td>
+<p>Minimal number of significant digits for
+p-values, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scientific.pval</code></td>
+<td>
+<p>A logical specifying whether p-values should
+be printed in scientific notation, e.g., 1.2345e-01 instead of
+0.12345.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero.pval</code></td>
+<td>
+<p>A logical specifying whether p-values should be
+printed with a leading zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>JAMA.pval</code></td>
+<td>
+<p>A logical specifying whether p-values for test of
+combination effect should be printed according to JAMA reporting
+standards.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>big.mark</code></td>
+<td>
+<p>A character used as thousands separator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>A logical indicating whether a legend should be
+printed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>R functions <code>netcomb</code> and <code>discomb</code>
+calculate effects for individual components and complex
+interventions present in the component network meta-analysis
+(CNMA). This function can be used to calculate the effect for
+comparisons of two arbitrary complex interventions defined by
+arguments <code>treat1</code> and <code>treat2</code>.
+</p>
+<p>All complex interventions occuring in the network are considered
+for the first complex intervention if argument <code>treat1</code> is
+missing. The reference group defined in the (C)NMA is used as
+second complex intervention if argument <code>treat2</code> is
+missing. The first complex intervention in the (C)NMA is used if
+the reference group is not defined.
+</p>
+<p>The following matrices are needed to calculate comparison effects
+of arbitrary complex interventions, (Rücker et al., 2020, Section
+3.2):
+</p>
+
+<ul>
+<li>
+<p> B matrix describing how comparisons are composed by complex
+intervetions,
+</p>
+</li>
+<li>
+<p> C matrix describing how the complex interventions are
+composed by the components.
+</p>
+</li>
+</ul>
+<p>Internally, both matrices are constructed based on arguments
+<code>x</code>, <code>treat1</code> and <code>treat2</code>.
+</p>
+<p>By default, component names are not abbreviated in
+printouts. However, in order to get more concise printouts,
+argument <code>nchar.comps</code> can be used to define the minimum
+number of characters for abbreviated component names (see
+<code>abbreviate</code>, argument <code>minlength</code>). R function
+<code>treats</code> is utilised internally to create abbreviated
+component names.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list is returned by the function <code>netcomparison</code> with the
+following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>comparison</code></td>
+<td>
+<p>Comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE.common, TE.random</code></td>
+<td>
+<p>A vector of comparison effects (common
+and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.common, seTE.random</code></td>
+<td>
+<p>A vector with corresponding standard
+errors (common and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.common, lower.random</code></td>
+<td>
+<p>A vector with lower confidence
+limits for comparisons (common and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.common, upper.random</code></td>
+<td>
+<p>A vector with upper confidence
+limits for comparisons (common and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.common, statistic.random</code></td>
+<td>
+<p>A vector with z-values for
+the overall effect of comparisons (common and random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.common, pval.random</code></td>
+<td>
+<p>A vector with p-values for the
+overall effect of comparisons (common and random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trts</code></td>
+<td>
+<p>Treatments included in comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comps</code></td>
+<td>
+<p>Components included in comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat1, treat2</code></td>
+<td>
+<p>A defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common, random</code></td>
+<td>
+<p>A defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level, nchar.comps, backtransf, x</code></td>
+<td>
+<p>A defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B.matrix</code></td>
+<td>
+<p>B matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C.matrix</code></td>
+<td>
+<p>C matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>R function <code>netcomplex</code> can be used to calculate the
+effect for arbitrary complex interventions in a component network
+meta-analysis.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Rücker G, Petropoulou M, Schwarzer G (2020):
+Network meta-analysis of multicomponent interventions.
+<em>Biometrical Journal</em>,
+<b>62</b>, 808–21
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netcomb</code>, <code>discomb</code>,
+<code>netcomplex</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Linde2016)
+
+# Only consider studies including Face-to-face PST (to reduce
+# runtime of example)
+#
+face &lt;- subset(Linde2016, id %in% c(16, 24, 49, 118))
+
+# Conduct random effects network meta-analysis
+#
+net1 &lt;- netmeta(lnOR, selnOR, treat1, treat2, id,
+  data = face, ref = "placebo", sm = "OR", common = FALSE)
+
+# Additive model for treatment components (with placebo as inactive
+# treatment)
+#
+nc1 &lt;- netcomb(net1, inactive = "placebo")
+
+# Result for comparison Face-to-face PST vs TCA
+netcomparison(nc1, "Face-to-face PST", "TCA", nchar.comps = 4)
+netcomparison(nc1, "F", "T", nchar.comps = 4)
+
+# Result for comparison Face-to-face PST vs TCA + Placebo
+netcomparison(nc1, "Face-to-face PST", "TCA + Plac", nchar.comps = 4)
+
+## Not run: 
+# Artificial example
+t1 &lt;- rep("A", 3)
+t2 &lt;- c("B+C", "A+C", "C+D")
+TE &lt;- c(0, 1, 0)
+seTE &lt;- rep(1, 3)
+# Conduct (C)NMA
+net2 &lt;- netmeta(TE, seTE, t1, t2, random = FALSE)
+nc2 &lt;- netcomb(net2)
+
+# Result for comparison A vs B + D
+netcomparison(nc2, "A", "B + D")
+# Same results
+netcomparison(nc2, "A", "B+D")
+netcomparison(nc2, "A", "D+B")
+netcomparison(nc2, "a", "d+b")
+
+# Generated B matrix
+netcomparison(nc2, "A", "B + D")$C.matrix
+# Generated B matrix
+netcomparison(nc2, "A", "B + D")$B.matrix
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

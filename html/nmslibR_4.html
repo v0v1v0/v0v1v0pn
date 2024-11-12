@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>KernelKnn_nmslib</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Approximate Kernel k nearest neighbors using the nmslib library</h2>
+
+<h3>Description</h3>
+
+<p>Approximate Kernel k nearest neighbors using the nmslib library
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">KernelKnn_nmslib(
+  data,
+  y,
+  TEST_data = NULL,
+  k = 5,
+  h = 1,
+  weights_function = NULL,
+  Levels = NULL,
+  Index_Params = NULL,
+  Time_Params = NULL,
+  space = "l1",
+  space_params = NULL,
+  method = "hnsw",
+  data_type = "DENSE_VECTOR",
+  dtype = "FLOAT",
+  index_filepath = NULL,
+  print_progress = FALSE,
+  num_threads = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>either a matrix or a scipy sparse matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a numeric vector specifying the response variable (in classification the labels must be numeric from 1:Inf). The length of <em>y</em> must equal the rows of the <em>data</em> parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TEST_data</code></td>
+<td>
+<p>a test dataset (in case of a matrix the <em>TEST_data</em> should have equal number of columns with the <em>data</em>). It is assumed that the <em>TEST_data</em> is an unlabeled dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>an integer. The number of neighbours to return</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>the bandwidth (applicable if the weights_function is not NULL, defaults to 1.0)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights_function</code></td>
+<td>
+<p>there are various ways of specifying the kernel function. See the details section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Levels</code></td>
+<td>
+<p>a numeric vector. In case of classification the unique levels of the response variable are necessary</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Index_Params</code></td>
+<td>
+<p>a list of (optional) parameters to use in indexing (when creating the index)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Time_Params</code></td>
+<td>
+<p>a list of parameters to use in querying. Setting <em>Time_Params</em> to NULL will reset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>space</code></td>
+<td>
+<p>a character string (optional). The metric space to create for this index. Page 31 of the manual (see <em>references</em>) explains all available inputs</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>space_params</code></td>
+<td>
+<p>a list of (optional) parameters for configuring the space. See the <em>references</em> manual for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a character string specifying the index method to use</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_type</code></td>
+<td>
+<p>a character string. One of 'DENSE_UINT8_VECTOR', 'DENSE_VECTOR', 'OBJECT_AS_STRING' or 'SPARSE_VECTOR'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dtype</code></td>
+<td>
+<p>a character string. Either 'FLOAT' or 'INT'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index_filepath</code></td>
+<td>
+<p>a character string specifying the path to a file, where an existing index is saved</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print_progress</code></td>
+<td>
+<p>a boolean (either TRUE or FALSE). Whether or not to display progress bar</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_threads</code></td>
+<td>
+<p>an integer. The number of threads to use</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>There are three possible ways to specify the <em>weights function</em>, 1st option : if the weights_function is NULL then a simple k-nearest-neighbor is performed. 2nd option : the weights_function is one of 'uniform', 'triangular', 'epanechnikov', 'biweight', 'triweight', 'tricube', 'gaussian', 'cosine', 'logistic', 'gaussianSimple', 'silverman', 'inverse', 'exponential'. The 2nd option can be extended by combining kernels from the existing ones (adding or multiplying). For instance, I can multiply the tricube with the gaussian kernel by giving 'tricube_gaussian_MULT' or I can add the previously mentioned kernels by giving 'tricube_gaussian_ADD'. 3rd option : a user defined kernel function
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+try({
+  if (reticulate::py_available(initialize = FALSE)) {
+    if (reticulate::py_module_available("nmslib")) {
+
+      library(nmslibR)
+
+      x = matrix(runif(1000), nrow = 100, ncol = 10)
+
+      y = runif(100)
+
+      out = KernelKnn_nmslib(data = x, y = y, k = 5)
+    }
+  }
+}, silent=TRUE)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,266 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nicqTest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Non-inferiority control quantile test
+</h2>
+
+<h3>Description</h3>
+
+<p>Tests for a difference in proportion of failures between test and control by the time the qth quantile of the contol group has failed. Uses a variable margin function, and the time of the qth quantile of the control group is unknown. 
+</p>
+<p>If the cumulative distributions for the two groups are F1 (control) and F2 (test), then we are interested in the difference: delta=F2(t0)-F1(t0), where F1(t0)=q. Note F1,F2 are unknown and non-parametric, and t0 is unknown. In this case, using a constant delta does not give practical non-inferiority margins, therefore we use a variable margin function, so that we test (when alternative='less')  H0: F2(t) &gt;= g(F1(t)) versus H1: F2(t) &lt; g(F1(t)) for all t.  
+</p>
+<p>The test also works for other types of continuous responses besides time to failure (see details), but the help description uses time to failure for brevity. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nicqTest(x,delta0,q,g=nimDiffOR,yc=NULL,nc=NULL,nt=NULL,
+    ic="prop",
+    z=NULL,status=NULL,ties=c("cons","approx"),
+    alternative=c("less","greater"),
+    conf.level=0.95,
+    conf.int=TRUE,
+    conf.sided=c("two.sided","one.sided"), 
+    gname=NULL,
+    control=nicqControl())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>either a vector of failure times for the both groups (when z is given), a vector of failure times for the test group (when yc is given), or the number of failures in the test group that have occured by the ic^th failure in the control group (when ic is an integer, nc and nt are given). See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta0</code></td>
+<td>
+
+<p>difference, F2(t0)-F1(t0), on the boundary between the null and alternative hypotheses, where t0 is defined so 
+that F1(t0)=q.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+
+<p>probability associated with the quantile of interest in control group
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+
+<p>non-inferiority margin function. Must have arguments <code>q</code> (representing the quantile of interest in the control group) and <code>delta</code> (representing the difference, F2(t0)-F1(t0), where F2 and F2 are the cumulative distributions of failures for the test (F2) and control (F1) at t, where F1(t)=q). Default values for <code>q</code> and <code>delta</code> are ignored. Default function is  <code>nimDiffOR</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yc</code></td>
+<td>
+
+<p>vector of failure times in the control group. If given, <code>x</code> is the vector of failure times in the test group.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nc</code></td>
+<td>
+
+<p>number of individuals in the control group. Not needed if <code>z</code> or <code>yc</code> is given.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nt</code></td>
+<td>
+
+<p>number of individuals in the test group. Not needed if <code>z</code> or <code>yc</code> is given.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ic</code></td>
+<td>
+
+<p>used to find i.
+The test is based on the number of failures in the test group that have occured by the ith failure in the control group. 
+ic="prop" gives i=ceiling(q*nc), ic="maxpower" gives the i value that maximizes the power given F1=F2 and g, and ic=a postive integer gives i=ic (with  ic between 1 and nc inclusive).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+
+<p>a vector of group indicators, with either 1 (for control) or
+2 (for test). If given, x is a vector of all failures in both groups.   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>status</code></td>
+<td>
+
+<p>a vector denoting right censoring (0) or not (1). Not needed if there is no censoring. Only used when <code>z</code> is given. If any censoring occurs at or before the ith failure (see ic argument) in the control group, then the test is undefined. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ties</code></td>
+<td>
+
+<p>how should ties be handled, "cons" use a conservative adjustment for ties, "approx" use an approximate adjustment. See  details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+
+<p>direction of alternative hypothesis.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level</code></td>
+<td>
+<p>confidence level</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.int</code></td>
+<td>
+<p>logical, do confidence intervals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.sided</code></td>
+<td>
+<p>character, either 'one.sided' or 'two.sided' (see warning)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gname</code></td>
+<td>
+<p>name for g function, if NULL uses name of inputed g function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>a list of arguments for numeric calculation settings, see <code>nicqControl</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The data may be entered in 3 different formats, and the first argument <code>x</code> changes depending on which format. When <code>z</code> is given then <code>x</code> is the vector of failure times from both groups and z gives the group membership of each of those failures. If there is right censoring this may be given using <code>status</code>, and the <code>nicq</code> function will make sure that the censoring happens late enough so that the test can still be calculated.  When <code>yc</code> is given then <code>x</code> is a vector of failure times in the test group and <code>yc</code> are the failure times in the control group. When <code>ic</code>  is an integer, then <code>x</code> represents the number of failure times that have occurred in the test group at or before the time of the icth failure in the control group. In this last format only  <code>nc</code> (number in control group) and <code>nt</code> (number in the test group) must be given. 
+</p>
+<p>The confidence interval is calculated on the difference, F2(t0)-F1(t0), where t0 is unknonwn and defined so that F1(t0)=q, with q given.
+</p>
+<p>The responses can be any numeric values, as long as the difference, F2(t0)- F1(t0), is of interest.  
+</p>
+<p>For more details see Fay and Follmann (2015). 
+</p>
+<p>The confidence intervals for the qth quantile of the control is calculated using the <code>bpcp</code> function followed by the <code>quantile.kmciLR</code> from the <code>bpcp</code> R package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <code>nicq</code> object which inherits from <code>htest</code> class (the print method for is slightly different). A list with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>number of failure in test group at or before the qth quantile of the control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter</code></td>
+<td>
+<p>vector with elements: q (quantile of interest in control group),i (rank of qth quantile), n1 (number in control group), n2 (number in test group) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>one-sided p.value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.int</code></td>
+<td>
+<p>confidence interval on F2(t0)-F1(t0), may be one- or two-sided, see attributes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimate</code></td>
+<td>
+<p>vector of estimates. Values are: x2/n2= proportion of failures in test group by  i, i/n1= proportion failures in control group by i, 'x2/n2-i/n1'=difference, tau=qth quantile of control (same at t0), lower CL=lower confidence limit for tau, upper CL, conf.level=conf.level for CI on tau</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.value</code></td>
+<td>
+<p>null value for the difference</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>either 'less' or 'greater'. two.sided is not allowed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>description of test</p>
+</td>
+</tr>
+</table>
+<h3>warning</h3>
+
+<p> Since 'two.sided' alternatives are not allowed, the p-values may not match the confidence intervals in the usual way if <code>conf.sided</code>='two.sided' (the default). Consider the example below, 
+with  <code>alternative</code>='less' and  <code>delta0</code>=0.10. The p-value is 0.04, so we might expect that the upper limit of the 95 percent confidence limit would be less than 0.10, but this is not so because <code>conf.sided</code>='two.sided' and we are using the two-sided confidence interval and p is greater than 0.05/2=0.025. </p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michael P. Fay (mfay@niaid.nih.gov)
+</p>
+
+
+<h3>References</h3>
+
+<p>Fay, MP and Follmann DA (2016). Non-inferiority Tests for Anti-Infective Drugs using Control Group Quantiles. Clinical Trials. 13(6): 632-640.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## if you know that q=0.20 and there are no ties then ic=q*nc=40 
+nicqTest(66,g=nimDiffOR,delta0=.1,q=.2,nc=200,nt=300,ic=40,conf.int=FALSE)
+## examples with confidence intervals may be slower: see
+##  demo(nicqTest.examples)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>var_tests</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Variance Equality Tests</h2>
+
+<h3>Description</h3>
+
+<p>Displayed sample sizes and SDs and performs Brown-Forsythe and
+Fligner-Killeen variance equality tests (tests of homogeneity of variances)
+per group combinations. This is primarily a subfunction of
+<code>anova_neat</code>, but here it is available separately for other
+potential purposes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">var_tests(xvar, group_by, dat = NULL, hush = FALSE, sep = ", ")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xvar</code></td>
+<td>
+<p>Either a numeric vector (numbers of any given variable), or, if
+<code>dat</code> is given, a column name specifying the variable in the given data
+frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_by</code></td>
+<td>
+<p>Either a vector of factors with which to group the <code>xvar</code>
+values, or, if <code>dat</code> is given, one or more column names specifying the
+columns in the given data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>Either <code>NULL</code> or a data frame from which the respective column
+names should be selected for <code>xvar</code> and <code>group</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hush</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, prevents printing any details to console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>String (underscore <code>"_"</code> by default) for separating group
+names.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Prints test results.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Brown-Forsythe test (i.e., Levene's test using medians) is calculated via
+<code>car::leveneTest</code>. Fligner-Killeen test, which may
+be more robust (i.e., less affected by non-normal distribution), is calculated
+via <code>stats::fligner.test</code>. (See also Conover
+et al., 1981, p. 360.)
+</p>
+
+
+<h3>References</h3>
+
+<p>Brown, M. B. &amp; Forsythe, A. B. (1974). Robust tests for the equality of
+variances. Journal of the American Statistical Association, 69, pp. 364-367.
+</p>
+<p>Conover W. J., Johnson M. E., &amp; Johnson M. M. (1981). A comparative study of
+tests for homogeneity of variances, with applications to the outer continental
+shelf bidding data. Technometrics, 23, 351–361.
+</p>
+<p>Fligner, M. A. &amp; Killeen, T. J. (1976). Distribution-free two-sample tests for
+scale. ‘Journal of the American Statistical Association. 71(353), 210-213.
+</p>
+<p>Fox, J. &amp; Weisberg, S. (2019) An R Companion to Applied Regression, Third
+Edition, Sage.
+</p>
+<p>Levene, H. (1960). Robust tests for equality of variances. In I. Olkin, H.
+Hotelling, et al. (eds.). Contributions to Probability and Statistics: Essays
+in Honor of Harold Hotelling. Stanford University Press. pp. 278–292.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>anova_neat</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data("ToothGrowth") # load base R example dataset
+
+# the statistics of the four functions below should match
+var_tests(ToothGrowth$len, ToothGrowth$supp)
+var_tests('len', 'supp', ToothGrowth)
+car::leveneTest(len ~ supp, data = ToothGrowth)
+stats::fligner.test(len ~ supp, ToothGrowth)
+
+# again the results below should match each other
+var_tests(ToothGrowth$len,
+          interaction(ToothGrowth$supp, ToothGrowth$dose))
+var_tests('len', c('supp', 'dose'), ToothGrowth)
+car::leveneTest(len ~ supp * as.factor(dose), data = ToothGrowth)
+stats::fligner.test(len ~ interaction(supp, dose), ToothGrowth)
+
+</code></pre>
+
+
+</div>

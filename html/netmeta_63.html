@@ -1,0 +1,618 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pairwise</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transform meta-analysis data from two arm-based formats into
+contrast-based format</h2>
+
+<h3>Description</h3>
+
+<p>This function transforms data that are given in wide or long
+arm-based format (e.g. input format for WinBUGS) to a
+contrast-based format that is needed as input to R function
+<code>netmeta</code>. The function can transform data with binary,
+continuous, or generic outcomes as well as incidence rates from
+arm-based to contrast-based format.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pairwise(
+  treat,
+  event,
+  n,
+  mean,
+  sd,
+  TE,
+  seTE,
+  time,
+  data = NULL,
+  studlab,
+  incr = gs("incr"),
+  allincr = gs("allincr"),
+  addincr = gs("addincr"),
+  allstudies = gs("allstudies"),
+  reference.group,
+  keep.all.comparisons,
+  append = !is.null(data),
+  warn = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>treat</code></td>
+<td>
+<p>A list or vector with treatment information for
+individual treatment arms (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>A list or vector with information on number of events
+for individual treatment arms (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>A list or vector with information on number of
+observations for individual treatment arms (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean</code></td>
+<td>
+<p>A list or vector with estimated means for individual
+treatment arms (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd</code></td>
+<td>
+<p>A list or vector with information on the standard
+deviation for individual treatment arms (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE</code></td>
+<td>
+<p>A list or vector with estimated treatment effects for
+individual treatment arms (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE</code></td>
+<td>
+<p>A list or vector with standard errors of estimated
+treatment effect for individual treatment arms (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>A list or vector with information on person time at
+risk for individual treatment arms (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame containing the study
+information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studlab</code></td>
+<td>
+<p>A vector with study labels (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incr</code></td>
+<td>
+<p>A numerical value which is added to cell frequencies
+for studies with a zero cell count, see Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allincr</code></td>
+<td>
+<p>A logical indicating if <code>incr</code> is added to cell
+frequencies of all studies if at least one study has a zero cell
+count. If FALSE (default), <code>incr</code> is added only to cell
+frequencies of studies with a zero cell count.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>addincr</code></td>
+<td>
+<p>A logical indicating if <code>incr</code> is added to cell
+frequencies of all studies irrespective of zero cell counts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allstudies</code></td>
+<td>
+<p>A logical indicating if studies with zero or all
+events in two treatment arms are to be included in the
+meta-analysis (applies only if <code>sm</code> is equal to <code>"RR"</code>
+or <code>"OR"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference.group</code></td>
+<td>
+<p>Reference treatment (first treatment is used
+if argument is missing).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.all.comparisons</code></td>
+<td>
+<p>A logical indicating whether all
+pairwise comparisons or only comparisons with the study-specific
+reference group should be kept ('basic parameters').</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>append</code></td>
+<td>
+<p>A logical indicating whether variables from data set
+provided in argument <code>data</code> are appended to data set with
+pairwise comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>A logical indicating whether warnings should be printed
+(e.g., if studies are excluded due to only providing a single
+treatment arm).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed-through to the functions
+to calculate effects.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>R function <code>netmeta</code> expects data in a
+<b>contrast-based format</b>, where each row corresponds to a
+comparison of two treatments and contains a measure of the
+treatment effect comparing two treatments with standard error,
+labels for the two treatments and an optional study label.  In
+contrast-based format, a three-arm study contributes three rows
+with treatment comparison and corresponding standard error for
+pairwise comparison <em>A</em> vs <em>B</em>, <em>A</em> vs <em>C</em>, and
+<em>B</em> vs <em>C</em> whereas a four-arm study contributes six rows
+/ pairwise comparisons: <em>A</em> vs <em>B</em>, <em>A</em> vs <em>C</em>,
+..., <em>C</em> vs <em>D</em>.
+</p>
+<p>Other programs for network meta-analysis in WinBUGS and Stata
+require data in an <em>arm-based</em> format, i.e. treatment estimate
+for each treatment arm instead of a difference of two treatments. A
+common <b>(wide) arm-based format</b> consists of one data row per
+study, containing treatment and other necessary information for all
+study arms. For example, a four-arm study contributes one row with
+four treatment estimates and corresponding standard errors for
+treatments <em>A</em>, <em>B</em>, <em>C</em>, and <em>D</em>.  Another
+possible arm-based format is a long format where each row
+corresponds to a single study arm. Accordingly, in the <b>long
+arm-based format</b> a study contributes as many rows as treatments
+considered in the study.
+</p>
+<p>The pairwise function transforms data given in (wide or long)
+arm-based format into the contrast-based format which consists of
+<em>pairwise</em> comparisons and is needed as input to the
+<code>netmeta</code> function.
+</p>
+<p>The pairwise function can transform data with binary outcomes
+(using the <code>metabin</code> function from R package meta),
+continuous outcomes (<code>metacont</code> function), incidence
+rates (<code>metainc</code> function), and generic outcomes
+(<code>metagen</code> function). Depending on the outcome, the
+following arguments are mandatory:
+</p>
+
+<ul>
+<li>
+<p> treat, event, n (see <code>metabin</code>);
+</p>
+</li>
+<li>
+<p> treat, n, mean, sd (see <code>metacont</code>);
+</p>
+</li>
+<li>
+<p> treat, event, time (see <code>metainc</code>);
+</p>
+</li>
+<li>
+<p> treat, TE, seTE (see <code>metagen</code>).
+</p>
+</li>
+</ul>
+<p>Argument <code>treat</code> is mandatory to identify the individual
+treatments.  The other arguments contain outcome specific
+data. These arguments must be either lists (wide arm-based format,
+i.e., one row per study) or vectors (long arm-based format,
+i.e., multiple rows per study) of the same length.
+</p>
+<p>For the wide arm-based format, each list consists of as many
+vectors of the same length as the multi-arm study with the largest
+number of treatments. If a single multi-arm study has five arms,
+five vectors have to be provided for each lists. Two-arm studies
+have entries with <code>NA</code> for the third and subsequent
+vectors. Each list entry is a vector with information for each
+individual study; i.e., the length of this vector corresponds to
+the total number of studies incorporated in the network
+meta-analysis. Typically, list elements are part of a data frame
+(argument <code>data</code>, optional); see Examples. An optional vector
+with study labels can be provided which can be part of the data
+frame.
+</p>
+<p>In the long arm-based format, argument <code>studlab</code> is mandatory
+to identify rows contributing to individual studies.
+</p>
+<p>Additional arguments for meta-analysis functions can be provided
+using argument '...'. The most important argument is <code>sm</code>
+defining the summary measure. More information on this and other
+arguments is given in the help pages of R functions
+<code>metabin</code>, <code>metacont</code>,
+<code>metainc</code>, and <code>metagen</code>, respectively.
+</p>
+<p>For standardised mean differences (argument <code>sm = "SMD"</code>),
+equations (4) and (5) in Crippa &amp; Orsini (2016) are used to
+calculated SMDs and standard errors. These equations guarantee
+consistent SMDs and standard errors for multi-arm studies. Note,
+the summary measure is actually Cohen's d as Hedges' g is not
+consistent in multi-arm studies.
+</p>
+<p>For binary outcomes, 0.5 is added to all cell frequencies (odds
+ratio) or only the number of events (risk ratio) for studies with a
+zero cell count. For odds ratio and risk ratio, treatment estimates
+and standard errors are only calculated for studies with zero or
+all events in both groups if <code>allstudies</code> is <code>TRUE</code>. This
+continuity correction is used both to calculate individual study
+results with confidence limits and to conduct meta-analysis based
+on the inverse variance method. For the risk difference, 0.5 is
+only added to all cell frequencies to calculate the standard error.
+</p>
+<p>For incidence rates, 0.5 is added to all cell frequencies for the
+incidence rate ratio as summary measure. For the incidence risk
+difference, 0.5 is only added to all cell frequencies to calculate
+the standard error.
+</p>
+<p>The value of pairwise is a data frame with as many rows as there
+are pairwise comparisons. For each study with <em>p</em> treatments,
+<em>p*(p-1) / 2</em> contrasts are generated. Each row contains the
+treatment effect (<code>TE</code>), its standard error (<code>seTE</code>), the
+treatments compared ((<code>treat1</code>), (<code>treat2</code>)) and the
+study label ((<code>studlab</code>)). Further columns are added according
+to type of data.
+</p>
+<p>All variables from the original dataset are also part of the output
+dataset.  If data are provided in the long arm-based format, the
+value of a variable can differ between treatment arms; for example,
+the mean age or percentage of women in the treatment arm. In this
+situation, two variables instead of one variable will be included
+in the output dataset. The values "1" and "2" are added to the
+names for these variables, e.g. "mean.age1" and "mean.age2" for the
+mean age.
+</p>
+<p>In general, any variable names in the original dataset that are
+identical to the main variable names (i.e., "TE", "seTE", ...) will
+be renamed to variable names with ending ".orig".
+</p>
+<p>A reduced data set with basic comparisons (Rücker &amp; Schwarzer,
+2014) can be generated using argument <code>keep.all.comparisons =
+FALSE</code>. Furthermore, the reference group for the basic comparisons
+can be specified with argument <code>reference.group</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with the following columns:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>TE</code></td>
+<td>
+<p>Treatment estimate comparing treatment 'treat1' and
+'treat2'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE</code></td>
+<td>
+<p>Standard error of treatment estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studlab</code></td>
+<td>
+<p>Study labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat1</code></td>
+<td>
+<p>First treatment in comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat2</code></td>
+<td>
+<p>Second treatment in comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event1</code></td>
+<td>
+<p>Number of events for first treatment arm (for metabin
+and metainc).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event2</code></td>
+<td>
+<p>Number of events for second treatment arm (for
+metabin and metainc).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n1</code></td>
+<td>
+<p>Number of observations for first treatment arm (for
+metabin and metacont).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n2</code></td>
+<td>
+<p>Number of observations for second treatment arm (for
+metabin and metacont).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean1</code></td>
+<td>
+<p>Estimated mean for first treatment arm (for
+metacont).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean2</code></td>
+<td>
+<p>Estimated mean for second treatment arm (for
+metacont).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd1</code></td>
+<td>
+<p>Standard deviation for first treatment arm (for
+metacont).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd2</code></td>
+<td>
+<p>Standard deviation for second treatment arm (for
+metacont).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE1</code></td>
+<td>
+<p>Estimated treatment effect for first treatment arm (for
+metagen).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE2</code></td>
+<td>
+<p>Estimated treatment effect for second treatment arm (for
+metagen).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE1</code></td>
+<td>
+<p>Standard error of estimated treatment effect for first
+treatment arm (for metagen).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE2</code></td>
+<td>
+<p>Standard error of estimated treatment effect for
+second treatment arm (for metagen).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time1</code></td>
+<td>
+<p>Person time at risk for first treatment arm (for
+metainc).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time2</code></td>
+<td>
+<p>Person time at risk for second treatment arm (for
+metainc).</p>
+</td>
+</tr>
+</table>
+<p>All variables from the original dataset are also part of the output
+dataset; see Details.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function must not be confused with <code>netpairwise</code>
+which can be used to conduct pairwise meta-analyses for all
+comparisons with direct evidence in a network meta-analysis.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gerta Rücker<a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>, Guido
+Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Crippa A, Orsini N (2016):
+Dose-response meta-analysis of differences in means.
+<em>BMC Medical Research Methodology</em>,
+<b>16</b>:91.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>metacont</code>,
+<code>metagen</code>, <code>metabin</code>,
+<code>metainc</code>, <code>netgraph.netmeta</code>,
+<code>pairwise</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example using continuous outcomes (internal call of function
+# metacont)
+#
+data(Franchini2012)
+# Transform data from arm-based format to contrast-based format
+p1 &lt;- pairwise(list(Treatment1, Treatment2, Treatment3),
+  n = list(n1, n2, n3),
+  mean = list(y1, y2, y3), sd = list(sd1, sd2, sd3),
+  data = Franchini2012, studlab = Study)
+p1
+
+## Not run: 
+# Conduct network meta-analysis
+#
+net1 &lt;- netmeta(p1)
+net1
+
+# Draw network graphs
+#
+netgraph(net1, points = TRUE, cex.points = 3, cex = 1.5,
+  thickness = "se.common")
+netgraph(net1, points = TRUE, cex.points = 3, cex = 1.5,
+  plastic = TRUE, thickness = "se.common",
+  iterate = TRUE)
+netgraph(net1, points = TRUE, cex.points = 3, cex = 1.5,
+  plastic = TRUE, thickness = "se.common",
+  iterate = TRUE, start = "eigen")
+
+# Example using generic outcomes (internal call of function
+# metagen)
+#
+# Calculate standard error for means y1, y2, y3
+Franchini2012$se1 &lt;- with(Franchini2012, sqrt(sd1^2 / n1))
+Franchini2012$se2 &lt;- with(Franchini2012, sqrt(sd2^2 / n2))
+Franchini2012$se3 &lt;- with(Franchini2012, sqrt(sd3^2 / n3))
+# Transform data from arm-based format to contrast-based format
+# using means and standard errors (note, argument 'sm' has to be
+# used to specify that argument 'TE' is a mean difference)
+p2 &lt;- pairwise(list(Treatment1, Treatment2, Treatment3),
+  TE = list(y1, y2, y3), seTE = list(se1, se2, se3),
+  n = list(n1, n2, n3),
+  data = Franchini2012, studlab = Study,
+  sm = "MD")
+p2
+
+# Compare pairwise objects p1 (based on continuous outcomes) and p2
+# (based on generic outcomes)
+#
+all.equal(p1[, c("TE", "seTE", "studlab", "treat1", "treat2")],
+  p2[, c("TE", "seTE", "studlab", "treat1", "treat2")])
+
+# Same result as network meta-analysis based on continuous outcomes
+# (object net1)
+net2 &lt;- netmeta(p2)
+net2
+
+# Example with binary data
+#
+data(smokingcessation)
+# Transform data from arm-based format to contrast-based format
+# (interal call of metabin function). Argument 'sm' has to be used
+# for odds ratio as risk ratio (sm = "RR") is default of metabin
+# function.
+#
+p3 &lt;- pairwise(list(treat1, treat2, treat3),
+  list(event1, event2, event3), list(n1, n2, n3),
+  data = smokingcessation,
+  sm = "OR")
+p3
+
+# Conduct network meta-analysis
+#
+net3 &lt;- netmeta(p3)
+net3
+
+# Example with incidence rates
+#
+data(dietaryfat)
+
+# Transform data from arm-based format to contrast-based format
+#
+p4 &lt;- pairwise(list(treat1, treat2, treat3),
+  list(d1, d2, d3), time = list(years1, years2, years3),
+  studlab = ID,
+  data = dietaryfat)
+p4
+
+# Conduct network meta-analysis using incidence rate ratios (sm =
+# "IRR"). Note, the argument 'sm' is not necessary as this is the
+# default in R function metainc called internally.
+#
+net4 &lt;- netmeta(p4, sm = "IRR")
+summary(net4)
+
+# Example with long data format
+#
+data(Woods2010)
+
+# Transform data from long arm-based format to contrast-based
+# format Argument 'sm' has to be used for odds ratio as summary
+# measure; by default the risk ratio is used in the metabin
+# function called internally.
+#
+p5 &lt;- pairwise(treatment, event = r, n = N,
+  studlab = author, data = Woods2010, sm = "OR")
+p5
+
+# Conduct network meta-analysis
+net5 &lt;- netmeta(p5)
+net5
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

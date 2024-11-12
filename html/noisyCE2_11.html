@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>type_variable</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Functions for defining the types of variables</h2>
+
+<h3>Description</h3>
+
+<p>All functions permit fully-customised types of variable to be defined.
+Functions other than <code>type_custom</code> already include standard default values
+which make the definition of standard variable types easier and quicker.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">type_custom(
+  type = "custom",
+  init = c(0, 10),
+  randomXj = function(n, v) {     rnorm(n, v[1], v[2]) },
+  x2v = function(x) {     c(mean(x), sd(x)) },
+  v2x = function(v) {     v[1] },
+  smooth = list(quote(smooth_lin(x, xt, 1)), quote(smooth_dec(x, xt, 0.9, 10))),
+  ...
+)
+
+type_real(...)
+
+type_positive(...)
+
+type_negative(...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>label for identifying the type of variable. The name is not
+used internally in any case.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p><code>numeric</code> vector of starting values of parameters of the
+sampling distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>randomXj</code></td>
+<td>
+<p>function for randomly generating variable values according
+to the sampling distribution. The function should take the number of
+observations to be generated as a first argument, and the vector of
+parameters as a second argument; a vector of random values should be
+returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x2v</code></td>
+<td>
+<p>function for updating the parameters of the sampling distribution.
+<em>No smoothing is needed.</em> The function should take a single argument to be
+used for updating the parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v2x</code></td>
+<td>
+<p>function for obtaining point values of variable from the
+parameters of the sampling distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth</code></td>
+<td>
+<p>list of unevaluated expressions of smoothing functions for each
+parameter of the sampling distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments to be included into the <code>typevar</code> object. In
+case of function for predefined types, it is possible to use ellipsis for
+overwriting default values (see § Examples).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>type</code> and <code>typevar</code>, where <code>type</code> is the value of the
+argument <code>type</code> passed to <code>type_custom</code>, or predefined lables (if not
+overwritten) in case of other functions.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Define a new type of real variable where the first parameter of the
+# sampling distribution is updated through the median (instead of the
+# mean):
+type_real(
+  type = 'real2', 
+  x2v = function(x) { c(median(x), sd(x)) }
+)
+
+# Define a new type of real variable whith different smoothing
+# parameters:
+type_real(
+  type = 'real3', 
+  smooth = list(
+    quote(smooth_lin(x, xt, 0.8)),
+    quote(smooth_dec(x, xt, 0.99, 15))
+  )
+)
+
+</code></pre>
+
+
+</div>

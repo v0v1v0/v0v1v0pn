@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summary.dapp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summary Method for Dynamic Admixture of Poisson Process</h2>
+
+<h3>Description</h3>
+
+<p>Presents post-processing labels from a DAPP model fit to binned spiking data</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> 
+## S3 method for class 'dapp'
+summary(object, flat.cut = 0.15, wavy.cut = 0.85,
+    extreme.cut = 0.25, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a fitted model of the class 'dapp'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flat.cut</code></td>
+<td>
+<p>maximum range allowed to be labelled 'flat'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wavy.cut</code></td>
+<td>
+<p>minimum range allowed to be labelled 'wavy'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extreme.cut</code></td>
+<td>
+<p>for flat curves, maximum deviation from extremes (0 or 1) allowed to be labelled flat.B or flat.A (respectivel)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional parameters passed on to the call of <code>predict.dapp</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The summary function analyzes the prior and posterior predictive draws of the weight curves alpha(t). Each draw is assigned with one of the following labels: 'flat.A', 'flat.B', 'flat.Mid', 'wavy', or 'others'. The proportions of these categories are printed for the prior and posterior sets. Additionally, posterior
+draws of alpha(t), for each recorded AB trial, are also analyzed in the same way
+to produce similar labels for each trial, and, the trial is given the label
+that has the maximum posterior probability.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Gives prior and posterior summaries of the range and average predicted alpha curves
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dapp</code>, <code>plot.dapp</code> and <code>predict.dapp</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## generate 25 A and 30 B trials with rate functions
+##    lambda.A(t) = 160*exp(-2*t/1000) + 40*exp(-0.2*t/1000)
+##    lambda.B(t) = 40*exp(-2*t/1000)
+## where time t is measured in ms. Then, generate 40 AB trials,
+## roughly half with flat weight curves with a constant intensity
+## either close to A, or close to B or close to the 50-50 mark,
+## (equally likely). The remaining curves are sinusoidal
+## that snake between 0.01 and 0.99 with a period randomly
+## drawn between 400 and 1000
+
+ntrials &lt;- c(nA=25, nB=30, nAB=40)
+flat.range &lt;- list(A=c(0.85, 0.95),
+                   B=c(0.05, 0.15),
+                   mid=c(0.45,0.55))
+flat.mix &lt;- c(A=1/3, B=1/3, mid=1/3)
+wavy.span &lt;- c(0.01, 0.99)
+wavy.period &lt;- c(400, 1000)
+
+T.horiz &lt;- 1000
+rateB &lt;- 40 * exp(-2*(1:T.horiz)/T.horiz)
+rateA &lt;- 4*rateB + 40 * exp(-0.2*(1:T.horiz)/T.horiz)
+
+synth.data &lt;- synthesis.dapp(ntrials = ntrials, pr.flat = 0.5,
+                             intervals = flat.range, wts = flat.mix,
+                             span = wavy.span, period.range = wavy.period,
+                             lambda.A=rateA, lambda.B=rateB)
+
+## Visualize data and generated binned spike counts
+spike.counts &lt;- mplex.preprocess(synth.data$spiketimes, visualize=TRUE)
+
+## Fit the DAPP model to data
+fit.post &lt;- dapp(spike.counts, verbose=FALSE)
+
+## Visualize model fit
+plot(fit.post)
+
+## Post process results to assign second order stochasticity labels
+summary(fit.post)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

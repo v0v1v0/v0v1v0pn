@@ -1,0 +1,178 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CPPI</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Constant-Proportion Portfolio Insurance
+</h2>
+
+<h3>Description</h3>
+
+<p>Simulate constant-proportion portfolio insurance
+(CPPI) for a given price path.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CPPI(S, multiplier, floor, r, tau = 1, gap = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+
+<p>numeric: price path of risky asset
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiplier</code></td>
+<td>
+
+<p>numeric
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>floor</code></td>
+<td>
+
+<p>numeric: a percentage, should be smaller than 1
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+
+<p>numeric: interest rate (per time period tau)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+
+<p>numeric: time periods
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gap</code></td>
+<td>
+
+<p>numeric: how often to rebalance. 1 means every
+timestep, 2 means every second timestep, and so on.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Based on Dietmar Maringer's MATLAB code (function
+CPPIgap, Listing 9.1).
+</p>
+<p>See Gilli, Maringer and Schumann, 2011, chapter 9.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>V</code></td>
+<td>
+<p>normalised value (always starts at 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>cushion</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>bond investment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F</code></td>
+<td>
+<p>floor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>E</code></td>
+<td>
+<p>exposure</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>units of risky asset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>price path</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Original MATLAB code: Dietmar Maringer. <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>
+implementation: Enrico Schumann.
+</p>
+
+
+<h3>References</h3>
+
+<p>Chapter 9 of Gilli, M., Maringer, D. and Schumann, E. (2019)
+<em>Numerical Methods and Optimization in Finance</em>.
+2nd edition. Elsevier. <a href="https://doi.org/10.1016/C2017-0-01621-X">doi:10.1016/C2017-0-01621-X</a>
+</p>
+<p>Schumann, E. (2023) Financial Optimisation with R (<span class="pkg">NMOF</span> Manual).
+<a href="http://enricoschumann.net/NMOF.htm#NMOFmanual">http://enricoschumann.net/NMOF.htm#NMOFmanual</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">tau &lt;- 2
+S &lt;- gbm(npaths = 1, timesteps = tau*256,
+         r = 0.02, v = 0.2^2, tau = tau, S0 = 100)
+
+## rebalancing every day
+sol &lt;- CPPI(S, multiplier = 5, floor = 0.9, r = 0.01,
+            tau = tau, gap = 1)
+par(mfrow = c(3,1), mar = c(3,3,1,1))
+plot(0:(length(S)-1), S,     type = "s", main = "stock price")
+plot(0:(length(S)-1), sol$V, type = "s", main = "value")
+plot(0:(length(S)-1), 100*sol$E/sol$V, type = "s",
+     main = "% invested in risky asset")
+
+## rebalancing every 5th day
+sol &lt;- CPPI(S, multiplier = 5, floor = 0.9, r = 0.01,
+            tau = tau, gap = 5)
+par(mfrow = c(3,1), mar = c(3,3,1,1))
+plot(0:(length(S)-1), S,     type = "s", main = "stock price")
+plot(0:(length(S)-1), sol$V, type = "s", main = "value")
+plot(0:(length(S)-1), 100*sol$E/sol$V, type = "s",
+     main = "% invested in risky asset")
+</code></pre>
+
+
+</div>

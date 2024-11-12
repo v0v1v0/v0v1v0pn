@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>niw.coeffs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Posterior coefficients of the Normal-Inverse-Wishart distribution with its conjugate prior.</h2>
+
+<h3>Description</h3>
+
+<p>Given iid <code class="reqn">d</code>-dimensional niche indicators <code class="reqn">X = (X_1,\ldots,X_N)</code> with <code class="reqn">X_i \sim N(\mu, \Sigma)</code>, this function calculates the coefficients of the Normal-Inverse-Wishart (NIW) posterior <code class="reqn">p(\mu, \Sigma | X)</code> for a conjugate NIW prior.  Together with <code>niw.mom()</code>, this can be used to rapidly compute the point estimates <code class="reqn">E[\mu | X]</code> and <code class="reqn">E[\Sigma | X]</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">niw.coeffs(X, lambda, kappa, Psi, nu)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A data matrix with observations along the rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Location parameter. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>Scale parameter. Defaults to <code>kappa = 0</code>.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Psi</code></td>
+<td>
+<p>Scale matrix. Defaults to <code>Psi = 0</code>.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+<p>Degrees of freedom. Defaults to <code>nu = ncol(X)+1</code>.  See 'Details'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The NIW distribution <code class="reqn">p(\mu, \Sigma | \lambda, \kappa, \Psi, \nu)</code> is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">
+\Sigma \sim W^{-1}(\Psi, \nu), \quad \mu | \Sigma \sim N(\lambda, \Sigma/\kappa).
+</code>
+</p>
+
+<p>The default value <code>kappa = 0</code> uses the Lebesque prior on <code class="reqn">\mu</code>: <code class="reqn">p(\mu) \propto 1</code>.
+</p>
+<p>The default value <code>Psi = 0</code> uses the scale-invariant prior on <code class="reqn">\Sigma</code>: <code class="reqn">p(\Sigma) \propto |\Sigma|^{-(\nu+d+1)/2}</code>.
+</p>
+<p>The default value <code>nu = ncol(X)+1</code> for <code>kappa = 0</code> and <code>Psi = 0</code> makes <code class="reqn">E[\mu|X]=`colMeans(X)`</code> and <code class="reqn">E[\Sigma | X]=`var(X)`</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list with elements <code>lambda</code>, <code>kappa</code>, <code>Psi</code>, <code>nu</code> corresponding to the coefficients of the NIW posterior distribution <code class="reqn">p(\mu, \Sigma | X)</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rniw()</code>, <code>niw.mom()</code>, <code>niw.post()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># NIW prior coefficients
+d &lt;- 3
+lambda &lt;- rnorm(d)
+kappa &lt;- 5
+Psi &lt;- crossprod(matrix(rnorm(d^2), d, d))
+nu &lt;- 10
+
+# data
+data(fish)
+X &lt;- fish[fish$species == "ARCS",2:4]
+
+# NIW posterior coefficients
+post.coef &lt;- niw.coeffs(X, lambda, kappa, Psi, nu)
+
+# compare
+mu.mean &lt;- niw.mom(post.coef$lambda, post.coef$kappa, post.coef$Psi, post.coef$nu)$mu$mean
+mu.est &lt;- rbind(prior = niw.mom(lambda, kappa, Psi, nu)$mu$mean,
+                data = colMeans(X),
+                post = mu.mean)
+round(mu.est, 2)
+</code></pre>
+
+
+</div>

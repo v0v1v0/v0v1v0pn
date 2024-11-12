@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>alignment</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Detect Column Alignment</h2>
+
+<h3>Description</h3>
+
+<p>Many of the specialized functions in numform can change the type of the data
+from numeric to character causing the table formatting functions in various
+add-on packages to improperly align the elements.  This function passes the
+columns with a regular expression to detect alignment regardless of column
+class.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">alignment(
+  x,
+  left = "left",
+  right = ifelse(left == "l", "r", "right"),
+  additional.numeric = paste0("^((&lt;b&gt;(&amp;ndash;|\\+)&lt;/b&gt;)|(&lt;?([0-9.%-]+)",
+    "|(\\$?\\s*\\d+[KBM])))|(NaN|NA|Inf)$"),
+  sep = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>data.frame</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>left</code></td>
+<td>
+<p>A value to print for left aligned columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>right</code></td>
+<td>
+<p>A value to print for right aligned columns.  If <code>left = "l"</code>
+<code>right</code> will default to <code>"r"</code> otherwise defaults to <code>"right"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>additional.numeric</code></td>
+<td>
+<p>An additional regex to consider as numeric.  To turn
+off this feature use <code>additional.numeric = NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>A string to collapse the vector on.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a vector of lefts and rights or a string (if <code>sep</code> is not
+<code>NULL</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">CO &lt;- CO2
+CO[] &lt;- lapply(CO, as.character)
+alignment(CO)
+head(CO2)
+
+
+## Not run: 
+library(dplyr)
+library(pander)
+library(xtable)
+
+set.seed(10)
+dat &lt;- data_frame(
+    Team = rep(c("West Coast", "East Coast"), each = 4),
+    Year = rep(2012:2015, 2),
+    YearStart = round(rnorm(8, 2e6, 1e6) + sample(1:10/100, 8, TRUE), 2),
+    Won = round(rnorm(8, 4e5, 2e5) + sample(1:10/100, 8, TRUE), 2),
+    Lost = round(rnorm(8, 4.4e5, 2e5) + sample(1:10/100, 8, TRUE), 2),
+    WinLossRate = Won/Lost,
+    PropWon = Won/YearStart,
+    PropLost = Lost/YearStart
+)
+
+
+dat %&gt;%
+    group_by(Team) %&gt;%
+    mutate(
+        `%&amp;Delta;WinLoss` = fv_percent_diff(WinLossRate, 0),
+        `&amp;Delta;WinLoss` = f_sign(Won - Lost, '&lt;b&gt;+&lt;/b&gt;', '&lt;b&gt;&amp;ndash;&lt;/b&gt;')
+
+    ) %&gt;%
+    ungroup() %&gt;%
+    mutate_at(vars(Won:Lost), .funs = ff_denom(relative = -1, prefix = '$')) %&gt;%
+    mutate_at(vars(PropWon, PropLost), .funs = ff_prop2percent(digits = 0)) %&gt;%
+    mutate(
+        YearStart = f_denom(YearStart, 1, prefix = '$'),
+        Team = fv_runs(Team),
+        WinLossRate = f_num(WinLossRate, 1)
+    ) %&gt;%
+    as.data.frame() %&gt;%
+    pander::pander(split.tables = Inf, justify = alignment(.))
+
+
+alignment(CO, 'l', 'r')
+
+CO %&gt;%
+    xtable(align = c('', alignment(CO, 'l', 'r'))) %&gt;%
+    print(include.rownames = FALSE)
+
+
+CO %&gt;%
+    xtable(align = c('', alignment(CO, 'l|', 'r|'))) %&gt;%
+    print(include.rownames = FALSE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

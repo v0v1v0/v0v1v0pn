@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getHostData</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extracts specific data from a <code>nosoiSim</code> object</h2>
+
+<h3>Description</h3>
+
+<p>This function extracts data user-defined data (i.e. <code>table.hosts</code>, <code>N.infected</code>, <code>table.state</code> or <code>popStructure</code>) from a <code>nosoiSim</code> object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getHostData(
+  nosoi.output,
+  what = c("table.hosts", "N.infected", "table.state", "popStructure"),
+  pop = "A"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nosoi.output</code></td>
+<td>
+<p>an object of class <code>nosoiSim</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+<p>the data to get, among <code>table.hosts</code>, <code>N.infected</code>, <code>table.state</code> or <code>popStructure</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pop</code></td>
+<td>
+<p>the population to be extracted (one of "A" or "B")</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a <code>data.table</code> with the requested data.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>To directly extract <code>table.hosts</code> or <code>table.state</code>, you can also use <code>getTableHosts</code> and <code>getTableState</code> respectively.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+t_incub_fct &lt;- function(x){rnorm(x,mean = 5,sd=1)}
+p_max_fct &lt;- function(x){rbeta(x,shape1 = 5,shape2=2)}
+p_Exit_fct  &lt;- function(t){return(0.08)}
+
+proba &lt;- function(t,p_max,t_incub){
+  if(t &lt;= t_incub){p=0}
+  if(t &gt;= t_incub){p=p_max}
+  return(p)
+}
+
+time_contact &lt;- function(t){round(rnorm(1, 3, 1), 0)}
+
+test.nosoi &lt;- nosoiSim(type="single", popStructure="none",
+                       length=40,
+                       max.infected=100,
+                       init.individuals=1,
+                       nContact=time_contact,
+                       param.nContact=NA,
+                       pTrans = proba,
+                       param.pTrans = list(p_max=p_max_fct,
+                                           t_incub=t_incub_fct),
+                       pExit=p_Exit_fct,
+                       param.pExit=NA)
+
+
+data.extracted &lt;- getHostData(test.nosoi, "table.hosts", "A")
+
+</code></pre>
+
+
+</div>

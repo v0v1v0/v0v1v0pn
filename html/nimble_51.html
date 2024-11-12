@@ -1,0 +1,214 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculateWAIC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculating WAIC using an offline algorithm</h2>
+
+<h3>Description</h3>
+
+<p>In addition to the core online algorithm, NIMBLE implements an offline
+WAIC algorithm that can be computed on the results of an MCMC. In contrast
+to NIMBLE's built-in online WAIC, offline WAIC can compute only conditional
+WAIC and does not allow for grouping data nodes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculateWAIC(mcmc, model, nburnin = 0, thin = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mcmc</code></td>
+<td>
+<p>An MCMC object (compiled or uncompiled) or matrix or dataframe
+of MCMC samples as the first argument of <code>calculateWAIC</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A model (compiled or uncompiled) as the second argument of
+<code>calculateWAIC</code>. Only required if <code>mcmc</code> is a matrix/dataframe
+of samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nburnin</code></td>
+<td>
+<p>The number of pre-thinning MCMC samples to remove from the beginning
+of the posterior samples for offline WAIC calculation via <code>calculateWAIC</code>
+(default = 0). These samples are discarded in addition to any burn-in specified when
+running the MCMC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+<p>Thinning factor interval to apply to the samples for offline
+WAIC calculation using <code>calculateWAIC</code> (default = 1,
+corresponding to no thinning).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The ability to calculate WAIC post hoc after all MCMC sampling has been done
+has certain advantages (e.g., allowing a user to calculate WAIC from MCMC 
+chains run separately) in addition to providing compatibility with versions
+of NIMBLE before 0.12.0. This functionality includes the ability to call
+the <code>calculateWAIC</code> function on an MCMC object or matrix of samples
+after running an MCMC and without setting up the MCMC initially to use WAIC.
+</p>
+<p>Important: The necessary variables to compute WAIC (all stochastic parent
+nodes of the data nodes) must have been monitored when setting up the MCMC.
+</p>
+<p>Also note that while the <code>model</code> argument can be either a compiled or
+uncompiled model, the model must have been compiled prior to calling
+<code>calculateWAIC</code>.
+</p>
+<p>See <code>help(waic)</code> for details on using NIMBLE's recommended online
+algorithm for WAIC.
+</p>
+
+
+<h3>Offline WAIC (WAIC computed after MCMC sampling)</h3>
+
+<p>As an alternative to online WAIC, NIMBLE also provides a function,
+<code>calculateWAIC</code>, that can be called on an MCMC object or a matrix of
+samples, after running an MCMC. This function does not require that one
+set <code>enableWAIC = TRUE</code> nor <code>WAIC = TRUE</code> when calling
+<code>runMCMC</code>. The function checks that the necessary variables were
+monitored in the MCMC and returns an error if they were not. This function
+behaves identically to the <code>calculateWAIC</code> method of an MCMC object.
+Note that to use this function when using <code>nimbleMCMC</code> one would
+need to build the model outside of <code>nimbleMCMC</code>.
+</p>
+<p>The <code>calculateWAIC</code> function requires either an MCMC object or a matrix
+(or dataframe) of posterior samples plus a model object. In addition, one
+can provide optional <code>burnin</code> and <code>thin</code> arguments.
+</p>
+<p>In addition, for compatibility with older versions of NIMBLE (prior to
+v0.12.0), one can also use the <code>calculateWAIC</code> method of the MCMC
+object to calculate WAIC after all sampling has been completed.
+</p>
+<p>The <code>calculateWAIC()</code> method accepts a single argument, <code>nburnin</code>,
+equivalent to the <code>nburnin</code> argument of the <code>calculateWAIC</code>
+function described above.
+</p>
+<p>The <code>calculateWAIC</code> method can only be used if the <code>enableWAIC</code> 
+argument to <code>configureMCMC</code> or to <code>buildMCMC</code> is set to <code>TRUE</code>,
+or if the NIMBLE option <code>enableWAIC</code> is set to <code>TRUE</code>.  If a user
+attempts to call <code>calculateWAIC</code> without having set
+<code>enableWAIC = TRUE</code> (either in the call to <code>configureMCMC</code>, or
+<code>buildMCMC</code>, or as a NIMBLE option), an error will occur.  
+</p>
+<p>The <code>calculateWAIC</code> function and method calculate the WAIC based on
+Equations 5, 12, and 13 in Gelman et al. (2014) (i.e., using <em>p</em>WAIC2).
+</p>
+<p>Note that there is not a unique value of WAIC for a model. The 
+<code>calculateWAIC</code> function and method only provide the conditional WAIC,
+namely the version of WAIC where all parameters directly involved in the
+likelihood are treated as <code class="reqn">theta</code> for the purposes of Equation 5 from
+Gelman et al. (2014). As a result, the user must set the MCMC monitors
+(via the <code>monitors</code> argument) to include all stochastic nodes that
+are parents of any data nodes; by default the MCMC monitors are only the
+top-level nodes of the model. For more detail on the use of different
+predictive distributions, see Section 2.5 from Gelman et al. (2014) or
+Ariyo et al. (2019).
+Also note that WAIC relies on a partition of the observations, i.e.,
+'pointwise' prediction. In <code>calculateWAIC</code> the sum over log pointwise
+predictive density values treats each data node as contributing a single
+value to the sum. When a data node is multivariate, that data node contributes
+a single value to the sum based on the joint density of the elements in the
+node. Note that if one wants the WAIC calculation via <code>calculateWAIC</code>
+to be based on the joint predictive density for each group of observations
+(e.g., grouping the observations from each person or unit in a longitudinal
+data context), one would need to use a multivariate distribution for the
+observations in each group (potentially by writing a user-defined
+distribution).
+</p>
+<p>For more control over and flexibility in how WAIC is calculated, see
+<code>help(waic)</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Joshua Hug and Christopher Paciorek
+</p>
+
+
+<h3>References</h3>
+
+<p>Watanabe, S. (2010). Asymptotic equivalence of Bayes cross validation and
+widely applicable information criterion in singular learning theory.
+<em>Journal of Machine Learning Research</em> 11: 3571-3594.
+</p>
+<p>Gelman, A., Hwang, J. and Vehtari, A. (2014). Understanding predictive
+information criteria for Bayesian models.
+<em>Statistics and Computing</em> 24(6): 997-1016.
+</p>
+<p>Ariyo, O., Quintero, A., Munoz, J., Verbeke, G. and Lesaffre, E. (2019).
+Bayesian model selection in linear mixed models for longitudinal data.
+<em>Journal of Applied Statistics</em> 47: 890-913.
+</p>
+<p>Vehtari, A., Gelman, A. and Gabry, J. (2017). Practical Bayesian model
+evaluation using leave-one-out cross-validation and WAIC.
+<em>Statistics and Computing</em> 27: 1413-1432.
+</p>
+<p>Hug, J.E.  and Paciorek, C.J. (2021). A numerically stable online
+implementation and exploration of WAIC through variations of the
+predictive density, using NIMBLE. <em>arXiv e-print</em> &lt;arXiv:2106.13359&gt;.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>waic</code> <code>configureMCMC</code>
+<code>buildMCMC</code> <code>runMCMC</code> <code>nimbleMCMC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">code &lt;- nimbleCode({
+  for(j in 1:J) {
+    for(i in 1:n) 
+      y[j, i] ~ dnorm(mu[j], sd = sigma)
+    mu[j] ~ dnorm(mu0, sd = tau)
+  }
+  tau ~ dunif(0, 10)
+  sigma ~ dunif(0, 10)
+})
+J &lt;- 5
+n &lt;- 10
+y &lt;- matrix(rnorm(J*n), J, n)
+Rmodel &lt;- nimbleModel(code, constants = list(J = J, n = n), data = list(y = y),
+                      inits = list(tau = 1, sigma = 1))
+
+## Make sure the needed variables are monitored.
+## Only conditional WAIC without data grouping is available via this approach.
+conf &lt;- configureMCMC(Rmodel, monitors = c('mu', 'sigma'))
+## Not run: 
+Cmodel &lt;- compileNimble(Rmodel)
+Rmcmc &lt;- buildMCMC(conf)
+Cmcmc &lt;- compileNimble(Rmcmc, project = Rmodel)
+output &lt;- runMCMC(Cmcmc, niter = 1000)
+calculateWAIC(Cmcmc)           # Can run on the MCMC object
+calculateWAIC(output, Rmodel)  # Can run on the samples directly
+
+## Apply additional burnin (additional to any burnin already done in the MCMC.
+calculateWAIC(Cmcmc, burnin = 500)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

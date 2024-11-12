@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_pfaf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Pfafstetter Codes (DEPRECATED)</h2>
+
+<h3>Description</h3>
+
+<p>Determines Pfafstetter codes for a dendritic network with
+total drainage area, levelpath, and topo_sort attributes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_pfaf(x, max_level = 2, status = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>sf data.frame with ID, toID, totda, outletID, topo_sort,
+and levelpath attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_level</code></td>
+<td>
+<p>integer number of pfaf levels to attempt to calculate.
+If the network doesn't have resolution to support the desired level,
+unexpected behavior may occur.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>status</code></td>
+<td>
+<p>boolean print status or not</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data.frame with ID and pfaf columns.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(dplyr)
+source(system.file("extdata/nhdplushr_data.R", package = "nhdplusTools"))
+hr_flowline &lt;- align_nhdplus_names(hr_data$NHDFlowline)
+
+fl &lt;-  select(hr_flowline, COMID, AreaSqKM) %&gt;%
+  right_join(prepare_nhdplus(hr_flowline, 0, 0,
+                             purge_non_dendritic = FALSE,
+                             warn = FALSE),
+             by = "COMID") %&gt;%
+  sf::st_sf() %&gt;%
+  select(ID = COMID, toID = toCOMID, area = AreaSqKM)
+
+fl$nameID = ""
+fl$totda &lt;- calculate_total_drainage_area(sf::st_set_geometry(fl, NULL))
+fl &lt;- left_join(fl, get_levelpaths(rename(sf::st_set_geometry(fl, NULL),
+                                   weight = totda)), by = "ID")
+
+pfaf &lt;- get_pfaf(fl, max_level = 3)
+
+fl &lt;- left_join(fl, pfaf, by = "ID")
+
+plot(fl["pf_level_3"], lwd = 2)
+
+pfaf &lt;- get_pfaf(fl, max_level = 4)
+
+hr_catchment &lt;- left_join(hr_data$NHDPlusCatchment, pfaf, by = c("FEATUREID" = "ID"))
+
+colors &lt;- data.frame(pf_level_4 = unique(hr_catchment$pf_level_4),
+                     color = sample(terrain.colors(length(unique(hr_catchment$pf_level_4)))),
+                    stringsAsFactors = FALSE)
+hr_catchment &lt;- left_join(hr_catchment, colors, by = "pf_level_4")
+plot(hr_catchment["color"], border = NA, reset = FALSE)
+plot(sf::st_geometry(hr_flowline), col = "blue", add = TRUE)
+
+source(system.file("extdata", "walker_data.R", package = "nhdplusTools"))
+
+fl &lt;- select(walker_flowline, COMID, AreaSqKM) %&gt;%
+  right_join(prepare_nhdplus(walker_flowline, 0, 0,
+                            purge_non_dendritic = FALSE, warn = FALSE),
+            by = "COMID") %&gt;%
+  sf::st_sf() %&gt;%
+  select(ID = COMID, toID = toCOMID, area = AreaSqKM)
+
+fl$nameID = ""
+fl$totda &lt;- calculate_total_drainage_area(sf::st_set_geometry(fl, NULL))
+fl &lt;- left_join(fl, get_levelpaths(rename(sf::st_set_geometry(fl, NULL),
+                                   weight = totda)), by = "ID")
+
+pfaf &lt;- get_pfaf(fl, max_level = 2)
+
+fl &lt;- left_join(fl, pfaf, by = "ID")
+
+plot(fl["pf_level_2"], lwd = 2)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>buildMCMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an MCMC object from a NIMBLE model, or an MCMC configuration object</h2>
+
+<h3>Description</h3>
+
+<p>First required argument, which may be of class <code>MCMCconf</code> (an MCMC configuration object), or inherit from class <code>modelBaseClass</code> (a NIMBLE model object).  Returns an uncompiled executable MCMC object.  See details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">buildMCMC(conf, print, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>Either an MCMC configuration object of class <code>MCMCconf</code> or a NIMBLE model object. An MCMC configuration object would be returned from <code>configureMCMC</code> and contains information on the model, samplers, monitors, and thinning intervals to be used. Alternatively, <code>conf</code> may a NIMBLE model object, in which case default configuration from calling <code>configureMCMC(model, ...l)</code> will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print</code></td>
+<td>
+<p>A logical argument, specifying whether to print details of the MCMC samplers and monitors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to <code>configureMCMC</code> if <code>conf</code> is a NIMBLE model object (see <code>help(configureMCMC)</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Calling buildMCMC(conf) will produce an uncompiled MCMC object. The object contains several methods, including the main <code>run</code> function for running the MCMC, a <code>getTimes</code> function for determining the computation time spent in each sampler (see 'getTimes' section below), and functions related to WAIC (<code>getWAIC</code>, <code>getWAICdetails</code>, <code>calculateWAIC</code> (see <code>help(waic)</code>).
+</p>
+<p>The uncompiled <code>run</code> function will have arguments:
+</p>
+<p><code>niter</code>: The number of iterations to run the MCMC.
+</p>
+<p><code>nburnin</code>: Number of initial, pre-thinning, MCMC iterations to discard (default = 0).
+</p>
+<p><code>thin</code>: The thinning interval for the <code>monitors</code> that were specified in the MCMC configuration.  If this argument is provided at MCMC runtime, it will take precedence over the <code>thin</code> interval that was specified in the MCMC configuration.  If omitted, the <code>thin</code> interval from the MCMC configuration will be used.
+</p>
+<p><code>thin2</code>: The thinning interval for the second set of monitors (<code>monitors2</code>) that were specified in the MCMC configuration.  If this argument is provided at MCMC runtime, it will take precedence over the <code>thin2</code> interval that was specified in the MCMC configuration.  If omitted, the <code>thin2</code> interval from the MCMC configuration will be used.
+</p>
+<p><code>reset</code>: Boolean specifying whether to reset the internal MCMC sampling algorithms to their initial state (in terms of self-adapting tuning parameters), and begin recording posterior sample chains anew. Specifying <code>reset = FALSE</code> allows the MCMC algorithm to continue running from where it left off, appending additional posterior samples to the already existing sample chains. Generally, <code>reset = FALSE</code> should only be used when the MCMC has already been run (default = TRUE).
+</p>
+<p><code>resetMV</code>: Boolean specifying whether to begin recording posterior sample chains anew. This argument is only considered when using <code>reset = FALSE</code>.  Specifying <code>reset = FALSE, resetMV = TRUE</code> allows the MCMC algorithm to continue running from where it left off, but without appending the new posterior samples to the already existing samples, i.e. all previously obtained samples will be erased. This option can help reduce memory usage during burn-in (default = FALSE).
+</p>
+<p><code>resetWAIC</code>: Boolean specifying whether to reset the WAIC summary statistics to their initial states and thereby begin the WAIC calculation anew (default = TRUE). Specifying <code>resetWAIC = FALSE</code> allows the WAIC calculation to continue running from where it left off. 
+</p>
+<p><code>initializeModel</code>: Boolean specifying whether to run the initializeModel routine on the underlying model object, prior to beginning MCMC sampling (default = TRUE).
+</p>
+<p><code>chain</code>: Integer specifying the MCMC chain number.  The chain number is passed to each MCMC sampler's before_chain and after_chain methods.  The value for this argument is specified automatically from invocation via runMCMC, and genernally need not be supplied when calling mcmc$run (default = 1).
+<code>time</code>: Boolean specifying whether to record runtimes of the individual internal MCMC samplers.  When <code>time = TRUE</code>, a vector of runtimes (measured in seconds) can be extracted from the MCMC using the method <code>mcmc$getTimes()</code> (default = FALSE).
+</p>
+<p><code>progressBar</code>: Boolean specifying whether to display a progress bar during MCMC execution (default = TRUE).  The progress bar can be permanently disabled by setting the system option <code>nimbleOptions(MCMCprogressBar = FALSE)</code>.
+</p>
+<p>Samples corresponding to the <code>monitors</code> and <code>monitors2</code> from the MCMCconf are stored into the interval variables <code>mvSamples</code> and <code>mvSamples2</code>, respectively.
+These may be accessed and converted into R matrix or list objects via:
+<code>as.matrix(mcmc$mvSamples)</code>
+<code>as.list(mcmc$mvSamples)</code>
+<code>as.matrix(mcmc$mvSamples2)</code>
+<code>as.list(mcmc$mvSamples2)</code>
+</p>
+<p>The uncompiled MCMC function may be compiled to a compiled MCMC object, taking care to compile in the same project as the R model object, using:
+<code>Cmcmc &lt;- compileNimble(Rmcmc, project = Rmodel)</code>
+</p>
+<p>The compiled object will function identically to the uncompiled object except acting on the compiled model object.
+</p>
+
+
+<h3>Timing the MCMC samplers</h3>
+
+<p>If you want to obtain the computation time spent in each sampler, you can set <code>time=TRUE</code> as a run-time argument to <code>run()</code> and then use the method <code>getTimes()</code> to obtain the times.
+</p>
+
+
+<h3>Calculating WAIC</h3>
+
+<p>Please see <code>help(waic)</code> for more information.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Turek
+</p>
+
+
+<h3>References</h3>
+
+<p>Watanabe, S. (2010). Asymptotic equivalence of Bayes cross validation and widely applicable information criterion in singular learning theory. <em>Journal of Machine Learning Research</em> 11: 3571-3594.
+</p>
+<p>Gelman, A., Hwang, J. and Vehtari, A. (2014). Understanding predictive information criteria for Bayesian models. <em>Statistics and Computing</em> 24(6): 997-1016.
+</p>
+<p>Ariyo, O., Quintero, A., Munoz, J., Verbeke, G. and Lesaffre, E. (2019). Bayesian model selection in linear mixed models for longitudinal data. <em>Journal of Applied Statistics</em> 47: 890-913.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>configureMCMC</code> <code>runMCMC</code> <code>nimbleMCMC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+code &lt;- nimbleCode({
+    mu ~ dnorm(0, 1)
+    x ~ dnorm(mu, 1)
+    y ~ dnorm(x, 1)
+})
+Rmodel &lt;- nimbleModel(code, data = list(y = 0))
+conf &lt;- configureMCMC(Rmodel, monitors = c('mu', 'x'), enableWAIC = TRUE)
+Rmcmc &lt;- buildMCMC(conf)
+Cmodel &lt;- compileNimble(Rmodel)
+Cmcmc &lt;- compileNimble(Rmcmc, project=Rmodel)
+
+## Running the MCMC with `run`
+Cmcmc$run(10000)
+samples &lt;- as.matrix(Cmcmc$mvSamples)
+samplesAsList &lt;- as.list(Cmcmc$mvSamples)
+head(samples)
+
+## Getting WAIC
+waicInfo &lt;- Cmcmc$getWAIC()
+waicInfo$WAIC
+waicInfo$pWAIC
+
+## Timing the samplers (must set `time = TRUE` when running the MCMC)
+Cmcmc$run(10000, time = TRUE)
+Cmcmc$getTimes()
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

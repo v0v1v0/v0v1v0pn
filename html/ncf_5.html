@@ -1,0 +1,183 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>correlog.nc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-centered spatial (cross-)correlogram</h2>
+
+<h3>Description</h3>
+
+<p><code>correlog.nc</code> is the function to estimate the non-centered (cross-)correlogram. The non-centered correlogram provides estimates of the spatial correlation for discrete distance classes. The function requires multiple observations at each location (use <code>correlog</code> otherwise).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">correlog.nc(
+  x,
+  y,
+  z,
+  w = NULL,
+  increment,
+  resamp = 999,
+  na.rm = FALSE,
+  latlon = FALSE,
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of length n representing the x coordinates (or longitude; see latlon).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>vector of length n representing the y coordinates (or latitude).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>a matrix of dimension n x p representing p (&gt;1) observation at each location.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>an optional second variable with identical dimension to z (to estimate cross-correlograms).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>increment</code></td>
+<td>
+<p>increment for the uniformly distributed distance classes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resamp</code></td>
+<td>
+<p>the number of permutations under the null to assess level of significance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>If TRUE, NA's will be dealt with through pairwise deletion of missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latlon</code></td>
+<td>
+<p>If TRUE, coordinates are latitude and longitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>If TRUE, the counter is suppressed during execution.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The non-centered correlogram estimates spatial dependence at discrete distance  classes. The method corresponds to the modified correlogram of Koenig &amp; Knops(1998), but augmented to potentially estimate the cross-correlogram). The function requires multiple observations at each location. Missing values is allowed in the multivariate case (pairwise deletion will be used).
+</p>
+<p>Missing values are allowed – values are assumed missing at random.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "correlog" is returned, consisting of the following components: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>correlation</code></td>
+<td>
+<p>the value for the Moran (or Mantel) similarity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.of.class</code></td>
+<td>
+<p>the actual average of the distances within each distance class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlok</code></td>
+<td>
+<p>the number of pairs within each distance class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.intercept</code></td>
+<td>
+<p>the interpolate x.intercept of Epperson (1993).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>the permutation p-value for each distance-class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corr0</code></td>
+<td>
+<p>If a cross-correlogram is calculated, corr0 gives the empirical within-patch cross-correlation.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ottar N. Bjornstad <a href="mailto:onb1@psu.edu">onb1@psu.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bjornstad, O.N., Ims, R.A. &amp; Lambin, X. (1999) Spatial population dynamics: Analysing patterns and processes of population synchrony. Trends in Ecology and Evolution, 11, 427-431. &lt;doi:10.1016/S0169-5347(99)01677-8&gt;
+</p>
+<p>Koenig, W.D. &amp; Knops, J.M.H. (1998) Testing for spatial autocorrelation in ecological studies. Ecography, 21, 423-429. &lt;doi:10.1111/j.1600-0587.1998.tb00407.x&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.correlog</code>, <code>correlog</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># first generate some sample data
+x &lt;- expand.grid(1:20, 1:5)[, 1]
+y &lt;- expand.grid(1:20, 1:5)[, 2]
+
+# z data from an exponential random field
+z &lt;- cbind(
+  rmvn.spa(x = x, y = y, p = 2, method = "exp"), 
+  rmvn.spa(x = x, y = y, p = 2, method = "exp")
+  )
+
+# w data from a gaussian random field
+w &lt;- cbind(
+  rmvn.spa(x = x, y = y, p = 2, method = "gaus"), 
+  rmvn.spa(x = x, y = y, p = 2, method = "gaus")
+  )
+
+# noncentered (Mantel) correlogram 
+fit1 &lt;- correlog.nc(x = x, y = y, z = z, increment = 2, resamp = 499)
+## Not run: plot(fit1)
+</code></pre>
+
+
+</div>

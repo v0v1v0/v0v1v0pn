@@ -1,0 +1,538 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>buildRepSeqNetwork</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Network Analysis of Immune Repertoire
+</h2>
+
+<h3>Description</h3>
+
+<p>Given Adaptive Immune Receptor Repertoire Sequencing (AIRR-Seq) data, builds
+the network graph for the immune repertoire based on sequence similarity,
+computes specified network properties and generates customized visualizations.
+</p>
+<p><code>buildNet()</code> is identical to <code>buildRepSeqNetwork()</code>, existing as
+an alias for convenience.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">buildRepSeqNetwork(
+
+  ## Input ##
+  data,
+  seq_col,
+  count_col = NULL,
+  subset_cols = NULL,
+  min_seq_length = 3,
+  drop_matches = NULL,
+
+  ## Network ##
+  dist_type = "hamming",
+  dist_cutoff = 1,
+  drop_isolated_nodes = TRUE,
+  node_stats = FALSE,
+  stats_to_include = chooseNodeStats(),
+  cluster_stats = FALSE,
+  cluster_fun = "fast_greedy",
+  cluster_id_name = "cluster_id",
+
+  ## Visualization ##
+  plots = TRUE,
+  print_plots = FALSE,
+  plot_title = "auto",
+  plot_subtitle = "auto",
+  color_nodes_by = "auto",
+  ...,
+
+  ## Output ##
+  output_dir = NULL,
+  output_type = "rds",
+  output_name = "MyRepSeqNetwork",
+  pdf_width = 12,
+  pdf_height = 10,
+  verbose = FALSE
+
+)
+
+# Alias for buildRepSeqNetwork()
+buildNet(
+  data,
+  seq_col,
+  count_col = NULL,
+  subset_cols = NULL,
+  min_seq_length = 3,
+  drop_matches = NULL,
+  dist_type = "hamming",
+  dist_cutoff = 1,
+  drop_isolated_nodes = TRUE,
+  node_stats = FALSE,
+  stats_to_include = chooseNodeStats(),
+  cluster_stats = FALSE,
+  cluster_fun = "fast_greedy",
+  cluster_id_name = "cluster_id",
+  plots = TRUE,
+  print_plots = FALSE,
+  plot_title = "auto",
+  plot_subtitle = "auto",
+  color_nodes_by = "auto",
+  ...,
+  output_dir = NULL,
+  output_type = "rds",
+  output_name = "MyRepSeqNetwork",
+  pdf_width = 12,
+  pdf_height = 10,
+  verbose = FALSE
+
+)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A data frame containing the AIRR-Seq data, with variables indexed by column
+and observations (e.g., clones or cells) indexed by row.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq_col</code></td>
+<td>
+
+<p>Specifies the column(s) of <code>data</code> containing
+the receptor sequences to be used as the basis of similarity between rows.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+Also accepts a vector of length 2 specifying distinct sequence columns
+(e.g., alpha chain and beta chain), in which case
+similarity between rows depends on similarity in both sequence columns
+(see details).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count_col</code></td>
+<td>
+
+<p>Optional. Specifies the column of <code>data</code> containing a measure of abundance,
+e.g., clone count or unique molecular identifier (UMI) count. Accepts either
+the column name or column index. Passed to
+<code>addClusterStats()</code>; only
+relevant if <code>cluster_stats = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset_cols</code></td>
+<td>
+
+<p>Specifies which columns of the AIRR-Seq data are included in the output.
+Accepts a vector of column names or a vector of column indices. The default
+<code>NULL</code> includes all columns. The receptor sequence column is always
+included regardless of this argument's value.
+Passed to <code>filterInputData()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_seq_length</code></td>
+<td>
+
+<p>A numeric scalar, or <code>NULL</code>. Observations whose receptor sequences have
+fewer than <code>min_seq_length</code> characters are removed prior to network analysis.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_matches</code></td>
+<td>
+
+<p>Optional. Passed to <code>filterInputData()</code>.
+Accepts a character string
+containing a regular expression (see <code>regex</code>).
+Checks receptor sequences for a pattern match using <code>grep()</code>.
+Those returning a match are removed prior to network analysis.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_type</code></td>
+<td>
+
+<p>Specifies the function used to quantify the similarity between sequences.
+The similarity between two sequences determines the pairwise distance between
+their respective nodes in the network graph, with greater similarity corresponding
+to shorter distance. Valid options are <code>"hamming"</code> (the default), which
+uses <code>hamDistBounded()</code>,
+and <code>"levenshtein"</code>, which uses
+<code>levDistBounded()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_cutoff</code></td>
+<td>
+
+<p>A nonnegative scalar. Specifies the maximum pairwise distance (based on
+<code>dist_type</code>) for an edge connection to exist between two nodes. Pairs of
+nodes whose distance is less than or equal to this value will be joined by an
+edge connection in the network graph. Controls the stringency of the network
+construction and affects the number and density of edges in the network. A lower
+cutoff value requires greater similarity between sequences in order for their
+respective nodes to be joined by an edge connection. A value of <code>0</code>
+requires two sequences to be identical in order for their nodes to be joined
+by an edge.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_isolated_nodes</code></td>
+<td>
+
+<p>A logical scalar. When <code>TRUE</code>, removes each node that is not joined by an
+edge connection to any other node in the network graph.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>node_stats</code></td>
+<td>
+
+<p>A logical scalar. Specifies whether node-level network properties are computed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats_to_include</code></td>
+<td>
+
+<p>A named logical vector returned by
+<code>chooseNodeStats()</code> or
+<code>exclusiveNodeStats()</code>.
+Specifies the node-level network properties
+to compute. Also accepts the value <code>"all"</code>.
+Only relevant if <code>node_stats = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_stats</code></td>
+<td>
+
+<p>A logical scalar. Specifies whether to compute cluster-level network properties.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_fun</code></td>
+<td>
+
+<p>Passed to <code>addClusterMembership()</code>.
+Specifies the clustering algorithm
+used when cluster analysis is performed. Cluster analysis is performed when
+<code>cluster_stats = TRUE</code> or when <code>node_stats = TRUE</code> with the
+<code>cluster_id</code> property enabled via the <code>stats_to_include</code> argument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_id_name</code></td>
+<td>
+
+<p>Passed to <code>addClusterMembership()</code>.
+Specifies the name of the cluster membership variable added to the node metadata
+when cluster analysis is performed (see <code>cluster_fun</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+
+<p>A logical scalar. Specifies whether to generate plots of the network graph.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print_plots</code></td>
+<td>
+
+<p>A logical scalar. If <code>plots = TRUE</code>, specifies whether the plots should
+be printed to the R plotting window.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_title</code></td>
+<td>
+
+<p>A character string or <code>NULL</code>. If <code>plots = TRUE</code>, this is the title
+used for each plot. The default value <code>"auto"</code> generates the title based
+on the value of the <code>output_name</code> argument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_subtitle</code></td>
+<td>
+
+<p>A character string or <code>NULL</code>. If <code>plots = TRUE</code>, this is the subtitle
+used for each plot. The default value <code>"auto"</code> generates a subtitle based
+on the values of the <code>dist_type</code> and <code>dist_cutoff</code> arguments.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color_nodes_by</code></td>
+<td>
+
+<p>Optional. Specifies a variable to be used as metadata for coloring the nodes
+in the network graph plot. Accepts a character string. This can be a column
+name of <code>data</code> or (if <code>node_stats = TRUE</code>) the name of a computed
+node-level network property (based on <code>stats_to_include</code>). Also accepts
+a character vector specifying multiple variables, in which case one plot will
+be generated for each variable. The default value <code>"auto"</code> attempts to use
+one of several potential variables to color the nodes, depending on what is
+available. A value of <code>NULL</code> leaves the nodes uncolored.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Other named arguments to <code>addPlots()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_dir</code></td>
+<td>
+
+<p>A file path specifying the directory for saving the output. The directory will
+be created if it does not exist. If <code>NULL</code>, output will be returned but
+not saved.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_type</code></td>
+<td>
+
+<p>A character string specifying the file format to use when saving the output.
+The default value <code>"individual"</code> saves each element of the returned list
+as an individual uncompressed file, with data frames saved in csv format. For
+better compression, the values <code>"rda"</code> and <code>"rds"</code> save the returned
+list as a single file using the rda and rds format, respectively (in the former
+case, the list will be named <code>net</code> within the rda file). Regardless of the
+argument value, any plots generated will saved to a pdf file containing one plot
+per page.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_name</code></td>
+<td>
+
+<p>A character string. All files saved will have file names beginning with this value.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_width</code></td>
+<td>
+
+<p>Sets the width of each plot when writing to pdf.
+Passed to <code>saveNetwork()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_height</code></td>
+<td>
+
+<p>Sets the height of each plot when writing to pdf.
+Passed to <code>saveNetwork()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To construct the immune repertoire network, each TCR/BCR clone (bulk data)
+or cell (single-cell data) is modeled as a node in the network graph,
+corresponding to a single row of the AIRR-Seq data. For each node, the
+corresponding receptor sequence is considered. Both nucleotide and amino acid
+sequences are supported for this purpose. The receptor sequence is used as the
+basis of similarity and distance between nodes in the network.
+</p>
+<p>Similarity between sequences is measured using either the Hamming distance
+or Levenshtein (edit) distance. The similarity determines the pairwise distance
+between nodes in the network graph. The more similar two sequences are, the
+shorter the distance between their respective nodes. Two nodes in the graph
+are joined by an edge if the distance between them is sufficiently small,
+i.e., if their receptor sequences are sufficiently similar.
+</p>
+<p>For single-cell data, edge connections between nodes can be based on similarity
+in both the alpha chain and beta chain sequences.
+This is done by providing a vector of length 2 to <code>seq_cols</code>
+specifying the two sequence columns in <code>data</code>.
+The distance between two nodes is then the greater of the two distances between
+sequences in corresponding chains.
+Two nodes will be joined by an edge if their alpha chain sequences are sufficiently
+similar and their beta chain sequences are sufficiently similar.
+</p>
+<p>See the
+<a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/buildRepSeqNetwork.html">buildRepSeqNetwork package vignette</a>
+for more details. The vignette can be accessed offline using
+<code>vignette("buildRepSeqNetwork")</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If the constructed network contains no nodes, the function will return
+<code>NULL</code>, invisibly, with a warning. Otherwise, the function invisibly
+returns a list containing the following items:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>A list containing information about the network and the
+settings used during its construction.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>igraph</code></td>
+<td>
+<p>An object of class <code>igraph</code> containing the
+list of nodes and edges for the network graph.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjacency_matrix</code></td>
+<td>
+<p>The network graph adjacency matrix, stored as a sparse
+matrix of class <code>dgCMatrix</code> from the <code>Matrix</code> package.
+See <code>dgCMatrix-class</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>node_data</code></td>
+<td>
+<p> A data frame containing containing metadata for the network
+nodes, where each row corresponds to a node in the network graph. This data
+frame contains all variables from <code>data</code> (unless otherwise specified via
+<code>subset_cols</code>) in addition to the computed node-level network properties
+if <code>node_stats = TRUE</code>. Each row's name is the name of the corresponding
+row from <code>data</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_data</code></td>
+<td>
+<p>A data frame containing network properties for the clusters,
+where each row corresponds to a cluster in the network graph. Only included if
+<code>cluster_stats = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+<p>A list containing one element for each plot generated
+as well as an additional element for the matrix that specifies the graph layout.
+Each plot is an object of class <code>ggraph</code>. Only included
+if <code>plots = TRUE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/buildRepSeqNetwork.html">buildRepSeqNetwork vignette</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+# Simple call
+network = buildNet(
+  toy_data,
+  seq_col = "CloneSeq",
+  print_plots = TRUE
+)
+
+# Customized:
+network &lt;- buildNet(
+  toy_data, "CloneSeq",
+  dist_type = "levenshtein",
+  node_stats = TRUE,
+  cluster_stats = TRUE,
+  cluster_fun = "louvain",
+  cluster_id_name = "cluster_membership",
+  count_col = "CloneCount",
+  color_nodes_by = c("SampleID", "cluster_membership", "coreness"),
+  color_scheme = c("default", "Viridis", "plasma-1"),
+  size_nodes_by = "degree",
+  node_size_limits = c(0.1, 1.5),
+  plot_title = NULL,
+  plot_subtitle = NULL,
+  print_plots = TRUE,
+  verbose = TRUE
+)
+
+typeof(network)
+
+names(network)
+
+network$details
+
+head(network$node_data)
+
+head(network$cluster_data)
+
+</code></pre>
+
+
+</div>

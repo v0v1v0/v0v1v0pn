@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Dmean</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Differentiate the Mean Function of a Nonlinear Model
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the gradient and Hessian of the mean function of a 
+nonlinear heteroscedastic model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Dmean(nlregObj, hessian = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nlregObj</code></td>
+<td>
+
+<p>a nonlinear heteroscedastic model fit as obtained from a call to
+<code>nlreg</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hessian</code></td>
+<td>
+
+<p>logical value indicating whether the Hessian should be computed.  
+The default is <code>TRUE</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The mean function is differentiated with respect to the regression 
+coefficients as specified in the <code>coef</code> component of the 
+<code>nlreg</code> object.  The returned function definition, however, 
+includes all parameters — regression coefficients and variance 
+parameters — as arguments.  When evaluated, it implicitly refers 
+to the data to whom the model was fitted and which must be on the 
+search list.  The gradient and Hessian are calculated for each data
+point: the <code>gradient</code> attribute is a 
+<code class="reqn">n\times p</code> matrix and the <code>hessian</code> 
+attribute is a <code class="reqn">n\times p\times p</code> array, 
+where <code class="reqn">n</code> and <code class="reqn">p</code> are respectively the 
+number of data points and the number of regression coefficients.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a function whose arguments are named according to the parameters of
+the nonlinear model <code>nlregObj</code>.  When evaluated, it returns the
+value of the mean function along with attributes called 
+<code>gradient</code> and <code>hessian</code>, the latter if requested.  These 
+are the gradient and Hessian of the mean function with respect to the 
+regression coefficients.
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>Dmean</code> and <code>Dvar</code> are the two workhorse functions of the
+<code>nlreg</code> library.  The details are given in <cite>Brazzale 
+(2000, Section 6.1.2)</cite>.
+</p>
+<p>The symbolic differentiation algorithm is based upon the
+<code>D</code> function.  As this algorithm is highly
+recursive, the <code>hessian = TRUE</code> argument should only be used if
+the Hessian matrix is needed.  Whenever possible, derivatives should
+be stored so as to be re-used in further calculations.  This is, for
+instance, achieved by the nonlinear heteroscedastic model fitting
+routine <code>nlreg</code> through the argument 
+<code>hoa = TRUE</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Becker, R. A., Chambers, J. M. and Wilks, A. R. (1988) <em>The New
+S Language: A Programming Environment for Data Analysis and 
+Graphics</em>.  London: Chapman \&amp; Hall.  Section 9.6.
+</p>
+<p>Brazzale, A. R. (2000) <em>Practical Small-Sample Parametric 
+Inference</em>.  Ph.D. Thesis N. 2230, Department of Mathematics, Swiss
+Federal Institute of Technology Lausanne.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Dvar</code>, <code>nlreg.object</code>,
+<code>deriv3</code>, <code>D</code> 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(boot)
+data(calcium)
+calcium.nl &lt;- nlreg( cal ~ b0*(1-exp(-b1*time)), 
+                     start = c(b0 = 4, b1 = 0.1),  data = calcium )
+Dmean( calcium.nl )
+##function (b0, b1, logs)
+##{
+##    .expr3 &lt;- exp(-b1 * time)
+##    .expr4 &lt;- 1 - .expr3
+##    .expr6 &lt;- .expr3 * time
+##    .value &lt;- b0 * .expr4
+##    .grad &lt;- array(0, c(length(.value), 2), list(NULL, c("b0",
+##        "b1")))
+##    .hessian &lt;- array(0, c(length(.value), 2, 2), list(NULL,
+##        c("b0", "b1"), c("b0", "b1")))
+##    .grad[, "b0"] &lt;- .expr4
+##    .hessian[, "b0", "b0"] &lt;- 0
+##    .hessian[, "b0", "b1"] &lt;- .hessian[, "b1", "b0"] &lt;- .expr6
+##    .grad[, "b1"] &lt;- b0 * .expr6
+##    .hessian[, "b1", "b1"] &lt;- -(b0 * (.expr6 * time))
+##    attr(.value, "gradient") &lt;- .grad
+##    attr(.value, "hessian") &lt;- .hessian
+##    .value
+##}
+##
+param( calcium.nl )
+##        b0         b1       logs
+## 4.3093653  0.2084780 -1.2856765
+##
+attach( calcium )
+calcium.md &lt;- Dmean( calcium.nl )
+attr( calcium.md( 4.31, 0.208, -1.29 ), "gradient" )
+##              b0       b1
+## [1,] 0.08935305 1.766200
+## [2,] 0.08935305 1.766200
+## [3,] 0.08935305 1.766200
+## [4,] 0.23692580 4.275505
+## \dots
+detach()
+</code></pre>
+
+
+</div>

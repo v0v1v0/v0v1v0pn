@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Multiple Imputation for NIAID-OS.</h2>
+
+<h3>Description</h3>
+
+<p>Imputes NIAID OS data using a Markov model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute(
+  wide,
+  m,
+  by = NULL,
+  days = paste0("D", 1:28),
+  bin = rep(1, length(days) - 1),
+  Em = get_emission(wide, days),
+  listFormatOut = FALSE,
+  tol = 1e-06,
+  maxiter = 200,
+  silent = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>wide</code></td>
+<td>
+<p>Data in wide format (i.e., each day is a column).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>Number of imputations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>Character vector with column names. Data will be broken up and imputed separately for every combination of values for specified columns in the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>days</code></td>
+<td>
+<p>Names of the columns that contain the score for each day. Columns should be in sequential order.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin</code></td>
+<td>
+<p>The assigned bin for pooling together information across transitions. Must be a numeric vector of length=(length(days)-1). By default all transitions are pooled together.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Em</code></td>
+<td>
+<p>Emission probabilities. Generally the default should not be changed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>listFormatOut</code></td>
+<td>
+<p>Return each imputed dataset in a list or combine into a single dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Tolerance for relative reduction the log-likelihood to determine convergence of the Baum-Welch algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>Maximum iterations before stopping the EM algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>Allows silencing some messages.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>States for each patient/day in 'wide' may be the following: 
+</p>
+
+<ul>
+<li>
+<p>Not missing:An integer from 1 to 8.
+</p>
+</li>
+<li>
+<p>Missing:NA
+</p>
+</li>
+<li>
+<p>Partially Missing: Range which may be code as a characters string such as '[1,7]' or '[1,2]'. Such a character string indicates that while the actual value is unknown, it is known that the value falls within the specified range. 
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>If listFormatOut = TRUE, then a list will be returned with each element being an imputed data set.
+If listFormatOut = FALSE, then a single data.frame will be returned where IMP_ID column is created.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bootstrap_param_est</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">test &lt;- sim_data(100)
+bs &lt;- impute(wide=test,m=2, by="strata", silent=TRUE)
+</code></pre>
+
+
+</div>

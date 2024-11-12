@@ -1,0 +1,377 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>optimize_controls</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Select control units that optimize covariate balance</h2>
+
+<h3>Description</h3>
+
+<p>Select control units within strata that optimize covariate balance.
+Uses randomized rounding of a linear program or a mixed
+integer linear program.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">optimize_controls(
+  z,
+  X,
+  st,
+  importances = NULL,
+  treated = 1,
+  ratio = NULL,
+  q_s = NULL,
+  treated_star = NULL,
+  q_star_s = NULL,
+  weight_star = 1,
+  integer = FALSE,
+  solver = "Rglpk",
+  seed = NULL,
+  runs = 1,
+  time_limit = Inf,
+  threads = 1,
+  correct_sizes = TRUE,
+  low_memory = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>a factor with the <code>i</code>th entry equal to the treatment of unit <code>i</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a matrix or data frame containing constraints in the columns. The number
+of rows should equal the length of <code>z</code>. Balance is achieved when a constraint
+sums to 0, such that numbers closer to 0 are better. When a constraint
+does not apply to a particular unit, the entry should be <code>NA</code>.
+This should typically be generated using <code>generate_constraints()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a stratum vector with the <code>i</code>th entry equal to the
+stratum of unit <code>i</code>. This should have the same order of units and length
+as <code>z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>importances</code></td>
+<td>
+<p>a vector with length equal to the number of constraints or columns
+in <code>X</code>. This can be generated using <code>generate_constraints()</code> and each nonnegative value
+denotes how much to prioritize each constraint, with the default being 1
+for all constraints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treated</code></td>
+<td>
+<p>which treatment value should be considered the treated units. This
+must be one of the values of <code>z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratio</code></td>
+<td>
+<p>a numeric or vector specifying the desired ratio of controls to 'treated' in
+each stratum. If there is one control group and all treated units should be included,
+this can be a numeric. Otherwise, this should be
+a vector with one entry per treatment group, in the same order as the levels of
+<code>z</code>, including the treated level. If <code>NULL</code>, <code>q_s</code> should be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q_s</code></td>
+<td>
+<p>a named vector or matrix indicating how many units are to be selected from each stratum.
+If there is one control group and all treated units are desired, this can be a vector; otherwise,
+this should have one row per treatment group, where the order of the rows matches the order of
+the levels of <code>z</code>, including the treated level.
+If <code>NULL</code>, <code>ratio</code> should be specified. If both are specified, <code>q_s</code> will take priority.
+Typically, if the desired ratio is not feasible for every stratum, <code>q_s</code> should be generated
+using <code>generate_qs()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treated_star</code></td>
+<td>
+<p>which treatment value should be considered the treated units
+for the supplemental comparison. This
+must be one of the values of <code>z</code>.
+If multiple supplemental comparisons are desired, this should be a vector with one entry per supplemental
+comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q_star_s</code></td>
+<td>
+<p>a named vector or matrix,
+indicating how many supplemental units are to be selected from each stratum.
+The matrix should have one row per treatment group, where the order of the rows matches the order of
+the levels of <code>z</code>, including the treated level.
+If multiple supplemental comparisons are desired, this should be a list with one entry per supplemental
+comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight_star</code></td>
+<td>
+<p>a numeric stating how much to prioritize balance between the supplemental units as
+compared to balance between the main units.
+If multiple supplemental comparisons are desired, this should be a vector with one entry per supplemental
+comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>integer</code></td>
+<td>
+<p>a logical stating whether to use a mixed integer programming solver
+instead of randomized rounding. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver</code></td>
+<td>
+<p>a character stating which solver to use to run the linear program.
+Options are "Rglpk" (default) or "gurobi". You must have the 'gurobi' package
+installed to use the "gurobi" option. If available, this is the recommended solver.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>the seed to use when doing the randomized rounding of the linear program.
+This will allow results to be reproduced if desired. The default is <code>NULL</code>,
+which will choose a random seed to use and return.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>runs</code></td>
+<td>
+<p>the number of times to run randomized rounding of the linear solution.
+The objective values of all runs will be reported, but the detailed results
+will only be reported for the run with the lowest objective value. The default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_limit</code></td>
+<td>
+<p>numeric stating maximum amount of seconds for which the
+program is allowed to run before aborting. Default is <code>Inf</code> for no time limit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threads</code></td>
+<td>
+<p>The maximum number of threads that should be used. This is only
+applicable if <code>solver = 'gurobi'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct_sizes</code></td>
+<td>
+<p>boolean stating whether the desired sample sizes should
+be exactly correct (if <code>correct_sizes = TRUE</code>) or only need to be correct
+in expectation. For multiple comparisons, sample sizes may only be
+correct in expectation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>low_memory</code></td>
+<td>
+<p>boolean stating whether some outputs should not be included
+due to the scale of the problem being too large compared to memory space.
+If <code>TRUE</code>, <code>eps</code> and <code>eps_star</code> will not be reported. Imbalances
+can be computed post hoc using the <code>check_balance()</code> instead.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List containing:
+</p>
+
+<dl>
+<dt><code>objective</code></dt>
+<dd>
+<p>objective value of the randomized rounding or mixed integer
+linear program solution.</p>
+</dd>
+<dt><code>objective_wo_importances</code></dt>
+<dd>
+<p>objective value of the randomized rounding or mixed integer
+linear program solution not weighted by the variable importances.</p>
+</dd>
+<dt><code>eps</code></dt>
+<dd>
+<p>the amount of imbalance obtained in each constraint from the linear program.
+The row names specify the covariate, the population of interest, and, if there are
+more than two comparison groups, which groups are being compared.</p>
+</dd>
+<dt><code>eps_star</code></dt>
+<dd>
+<p>same as <code>eps</code> but for the supplemental units instead of the units
+in the main comparison. If there are multiple supplemental comparisons, this is a list.
+If there are none, this is <code>NULL</code>.</p>
+</dd>
+<dt><code>importances</code></dt>
+<dd>
+<p>the importance of each on the balance constraints.</p>
+</dd>
+<dt><code>weight_star</code></dt>
+<dd>
+<p>the importance of balancing in the supplemental comparison
+relative to the main comparison. If there are multiple supplemental comparisons,
+this is a vector. If there are none, this is <code>NULL</code>.</p>
+</dd>
+<dt><code>selected</code></dt>
+<dd>
+<p>whether each unit was selected for the main comparison.</p>
+</dd>
+<dt><code>selected_star</code></dt>
+<dd>
+<p>whether each unit was selected for the supplement.
+If there are multiple supplemental comparisons, this is a list.
+If there are none, this is <code>NULL</code>.</p>
+</dd>
+<dt><code>pr</code></dt>
+<dd>
+<p>the linear program weight assigned to each unit for the main comparison.</p>
+</dd>
+<dt><code>pr_star</code></dt>
+<dd>
+<p>the linear program weight assigned to each unit for the supplement.
+If there are multiple supplemental comparisons, this is a list.
+If there are none, this is <code>NULL</code>.</p>
+</dd>
+<dt><code>rrdetails</code></dt>
+<dd>
+<p>A list containing:
+</p>
+
+<dl>
+<dt><code>seed</code></dt>
+<dd>
+<p>the seed used before commencing the random sampling.</p>
+</dd>
+<dt><code>run_objectives</code></dt>
+<dd>
+<p>the objective values for each run of randomized rounding.</p>
+</dd>
+<dt><code>run_objectives_wo_importances</code></dt>
+<dd>
+<p>the objective values for each run of randomized rounding,
+not scaled by constraint importances.</p>
+</dd>
+</dl>
+</dd>
+<dt><code>lpdetails</code></dt>
+<dd>
+<p>the full return of the function <code>Rglpk_solve_LP()</code>
+or <code>gurobi()</code> plus information about the epsilons and objective values
+for the linear program solution.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data('nh0506')
+
+# Create strata
+age_cat &lt;- cut(nh0506$age,
+               breaks = c(19, 39, 50, 85),
+               labels = c('&lt; 40 years', '40 - 50 years', '&gt; 50 years'))
+strata &lt;- age_cat : nh0506$sex
+
+# Balance age, race, education, poverty ratio, and bmi both across and within the levels of strata
+constraints &lt;- generate_constraints(
+                 balance_formulas = list(age + race + education + povertyr + bmi ~ 1 + strata),
+                 z = nh0506$z,
+                 data = nh0506)
+
+# Choose one control for every treated unit in each stratum,
+# balancing the covariates as described by the constraints
+results &lt;- optimize_controls(z = nh0506$z,
+                             X = constraints$X,
+                             st = strata,
+                             importances = constraints$importances,
+                             ratio = 1)
+
+# If you want to use a ratio that's not feasible,
+# you can supply a vector of the desired number of controls per stratum, q_s,
+# typically generated by creating a distance matrix between strata and using
+# generate_qs():
+
+## Not run: 
+age_dist &lt;- matrix(data = c(0, 1, 2, 1, 0, 1, 2, 1, 0),
+                   nrow = 3,
+                   byrow = TRUE,
+                   dimnames = list(levels(age_cat), levels(age_cat)))
+
+sex_dist &lt;- matrix(data = c(0, 1, 1, 0),
+                   nrow = 2,
+                   dimnames = list(levels(nh0506$sex), levels(nh0506$sex)))
+
+strata_dist &lt;- create_dist_matrix(age_dist, sex_dist)
+
+qs &lt;- generate_qs(z = nh0506$z,
+                  st = strata,
+                  ratio = 2.5,
+                  max_ratio = 2.6,
+                  max_extra_s = 0,
+                  strata_dist = strata_dist)
+
+results &lt;- optimize_controls(z = nh0506$z,
+                             X = constraints$X,
+                             st = strata,
+                             importances = constraints$importances,
+                             q_s = qs)
+
+
+## End(Not run)
+
+# We can also have multiple treatment and control groups,
+# as well as multiple simultaneous comparisons:
+
+## Not run: 
+data('nh0506_3groups')
+strata2 &lt;- cut(nh0506_3groups$age, breaks = c(19, 39, 50, 85),
+              labels = c('&lt; 40 years', '40 - 50 years', '&gt; 50 years'))
+constraints2 &lt;- generate_constraints(
+  balance_formulas = list(age + race + education + povertyr + bmi + sex ~ 1 + strata2),
+  z = nh0506_3groups$z,
+  data = nh0506_3groups,
+  treated = 'daily smoker')
+q_star_s &lt;- matrix(c(rep(table(nh0506_3groups$z, strata2)['some smoking', ] -
+                           table(nh0506_3groups$z, strata2)['daily smoker', ], 2),
+                     rep(0, 3)), byrow = TRUE, nrow = 3,
+                   dimnames = list(levels(nh0506_3groups$z), levels(strata2)))
+
+results &lt;- optimize_controls(z = nh0506_3groups$z,
+                             X = constraints2$X,
+                             importances = constraints2$importances,
+                             st = strata2,
+                             ratio = 1,
+                             treated = 'daily smoker',
+                             treated_star = 'some smoking',
+                             q_star_s = q_star_s,
+                             correct_sizes = FALSE)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

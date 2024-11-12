@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getFactors</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>getFactors</h2>
+
+<h3>Description</h3>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getFactors(data, method = c("sizefactor", "DESeq", "RLE", "UQ", "TMM", "TU"),
+lib.size = NULL, pre_ratio = 0.5, lower_trim = 0.05, upper_trim = 0.65, min_ubq = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lib.size</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pre_ratio</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower_trim</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper_trim</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_ubq</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (data, method = c("sizefactor", "DESeq", "RLE", "UQ",
+    "TMM", "TU"), lib.size = NULL, pre_ratio = 0.5, lower_trim = 0.05,
+    upper_trim = 0.65, min_ubq = 100)
+{
+    if (!is.matrix(data))
+        data &lt;- as.matrix(data)
+    if (any(is.na(data)))
+        stop("NA counts not permitted")
+    if (is.null(lib.size))
+        libsize &lt;- colSums(data)
+    else libsize &lt;- lib.size
+    if (any(is.na(libsize)))
+        stop("NA libsizes not permitted")
+    method &lt;- match.arg(method)
+    i &lt;- apply(data &lt;= 0, 1, all)
+    if (any(i))
+        data &lt;- data[!i, , drop = FALSE]
+    f &lt;- switch(method, sizefactor = 1e+06/libsize, DESeq = 1/estimateSizeFactorsForMatrix(data,
+        p = 0.5), RLE = calcFactorRLE(data, p = 0.5)/libsize,
+        UQ = calcFactorUpperquartile(data, lib.size = libsize,
+            p = 0.75), TMM = {
+            fq &lt;- calcFactorUpperquartile(data = data, lib.size = libsize,
+                p = 0.75)
+            refColumn &lt;- which.min(abs(fq - mean(fq)))
+            if (length(refColumn) == 0 | refColumn &lt; 1 | refColumn &gt;
+                ncol(data)) refColumn &lt;- 1
+            f &lt;- rep(NA, ncol(data))
+            for (i in 1:ncol(data)) {
+                f[i] &lt;- calcFactorWeighted(obs = data[, i], ref = data[,
+                  refColumn], libsize.obs = libsize[i], libsize.ref = libsize[refColumn],
+                  logratioTrim = 0.3, sumTrim = 0.05, doWeighting = TRUE,
+                  Acutoff = -1e+10)
+            }
+            f
+        }, TU = {
+            if (!is.data.frame(data)) data &lt;- data.frame(data)
+            ubq_genes &lt;- identifyUbq(data, lower_trim = lower_trim,
+                upper_trim = upper_trim, pre_ratio = pre_ratio,
+                min_ubq = min_ubq)
+            ubq_sums &lt;- colSums(data[ubq_genes, ])
+            mean(ubq_sums)/ubq_sums
+        }, )
+    if (method == "RLE" || method == "UQ" || method == "TMM") {
+        f &lt;- 1e+06/libsize/f
+    }
+    norm.factors &lt;- f/exp(mean(base::log(f)))
+    round(norm.factors, digits = 5)
+  }
+</code></pre>
+
+
+</div>

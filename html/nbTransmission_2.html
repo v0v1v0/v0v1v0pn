@@ -1,0 +1,252 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimateR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimates the effective reproductive number</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>estimateR</code> uses the relative transmission probabilities to estimate
+the individual-level, time-level, and average effective reproductive numbers
+for an outbreak.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimateR(
+  df,
+  indIDVar,
+  dateVar,
+  pVar,
+  timeFrame = c("days", "months", "weeks", "years"),
+  rangeForAvg = NULL,
+  bootSamples = 0,
+  alpha = 0.05,
+  progressBar = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>The name of the dateset with transmission probabilities (column <code>pVar</code>),
+individual IDs (columns <code>&lt;indIDVar&gt;.1</code> and <code>&lt;indIDVar&gt;.2</code>), and the dates of
+observation (columns <code>&lt;dateVar&gt;.1</code> and <code>&lt;dateVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indIDVar</code></td>
+<td>
+<p>The name (in quotes) of the individual ID columns
+(data frame <code>df</code> must have variables called <code>&lt;indIDVar&gt;.1</code>
+and <code>&lt;indIDVar&gt;.2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dateVar</code></td>
+<td>
+<p>The name (in quotes) of the columns with the dates that the individuals are
+observed (data frame <code>df</code> must have variables called <code>&lt;dateVar&gt;.1</code> and
+<code>&lt;dateVar&gt;.2</code>) which must be date or date-time (POSIXt) objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pVar</code></td>
+<td>
+<p>The column name (in quotes) of the transmission probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeFrame</code></td>
+<td>
+<p>The time frame used to calculate Rt
+(one of <code>"days", "months", "weeks", "years"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rangeForAvg</code></td>
+<td>
+<p>A vector with the start and ending time period to be used to calculate
+the average effective reproductive number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootSamples</code></td>
+<td>
+<p>The number of bootstrap samples; if 0, then no confidence intervals
+are calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The alpha level for the confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progressBar</code></td>
+<td>
+<p>A logical indicating if a progress bar should be printed (default is TRUE).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The effective reproductive number is the average number of cases an infectious case
+will produce in a population of both susceptible and non-susceptibe individuals.
+The rational behind this reproductive number estimation is Wallinga and Teunis (2004)
+where the individual-level reproductive number is estimated by summing
+the relative probability that the individual infected any other individual. 
+</p>
+<p>If <code class="reqn">p_{ij}</code> equals the relative probability that case <code class="reqn">i</code> was infected by
+case <code class="reqn">j</code>, then the individual-level reproductive number (<code class="reqn">R_j</code>) is calculated by:
+</p>
+<p style="text-align: center;"><code class="reqn">R_j = \sum_{m \ne j} {p_{mj}}</code>
+</p>
+
+<p>The time-level reproductive number is then estimated by averaging the individual-level
+reproductive numbers for all individuals observed in the time frame (can specify days,
+weeks, months, years).
+</p>
+<p>Finally, the time-level reproductive numbers are averaged to
+estimate the average effective reproductive number within <code>rangeForAvg</code>.
+To get the best estimate of the average effective reproductive number, one should
+only consider the stable portion of the outbreak (exclude the beginning and end).
+</p>
+<p>If <code>bootSamples &gt; 0</code>, bootstrap confidence intervals will be estimated for
+both the time-level and average reproductive numbers using parametric bootstrapping.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with five elements:
+</p>
+
+<ol>
+<li> <p><code>RiDf</code> - a data frame with the individual-level reproductive numbers. Column names:
+</p>
+
+<ul>
+<li> <p><code>&lt;indIDVar&gt;</code> - the individual ID with name specified.
+</p>
+</li>
+<li> <p><code>&lt;dateVar&gt;</code> - the date the individual was observed with name specified.
+</p>
+</li>
+<li> <p><code>Ri</code> - the individual-level reproductive number.
+</p>
+</li>
+<li> <p><code>nInfectees</code> - the number of possible infectees for this individual.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>RtDf</code> - a data frame with the time-level reproductive numbers. Column names:
+</p>
+
+<ul>
+<li> <p><code>time</code> - the time frame corresponding to the reproductive number estimate 
+(day for "days" and "weeks", month for "months", year for "years").
+</p>
+</li>
+<li> <p><code>timeRank</code> - the rank of the time frame.
+</p>
+</li>
+<li> <p><code>Rt</code> - the time-level reproductive number for this time frame.
+</p>
+</li>
+<li> <p><code>ciLower</code> - lower bound of confidence interval for Rt
+(only if bootSamples &gt; 0).
+</p>
+</li>
+<li> <p><code>ciUpper</code> - upper bound of confidence interval for Rt 
+(only if bootSamples &gt; 0).
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>RtAvgDf</code> - a data frame with the average effective reproductive. Column names:
+</p>
+
+<ul>
+<li> <p><code>RtAvg</code> - the average time-level reproductive number between the range
+specified in <code>rangeForAvg</code>.
+</p>
+</li>
+<li> <p><code>ciLower</code> - lower bound of confidence interval for Rt
+(only if bootSamples &gt; 0).
+</p>
+</li>
+<li> <p><code>ciUpper</code> - upper bound of confidence interval for Rt 
+(only if bootSamples &gt; 0).
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>timeFrame</code> - a vector with the timeFrame input
+</p>
+</li>
+<li> <p><code>rangeForAvg</code> - a vector with the rangeForAvg input
+</p>
+</li>
+</ol>
+<h3>References</h3>
+
+<p>Wallinga J, Teunis P. Different epidemic curves for severe acute respiratory
+syndrome reveal similar impacts of control measures.
+<em>American Journal of Epidemiology</em>. 2004 Sep 15;160(6):509-16.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nbProbabilities</code> <code>estimateRi</code>
+<code>estimateRt</code> <code>estimateRtAvg</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Use the nbResults data frame included in the package which has the results
+## of the nbProbabilities() function on a TB-like outbreak.
+
+## Getting initial estimates of the reproductive number
+# (without specifying rangeForAvg and without confidence intervals)
+rInitial &lt;- estimateR(nbResults, dateVar = "infectionDate",
+               indIDVar = "individualID", pVar = "pScaled",
+               timeFrame = "months")
+               
+## Finding the stable portion of the outbreak for rangeForAvg using plot of Rt
+cut1 &lt;- 25
+cut2 &lt;- 125
+
+# Optional plot to determine the cutpoints above
+# ggplot(data = rInitial$RtDf, aes(x = timeRank, y = Rt)) +
+#    geom_point() +
+#    geom_line() +
+#    geom_hline(data = rInitial$RtAvgDf, aes(yintercept = RtAvg), size = 0.7) +
+#    geom_vline(aes(xintercept = cut1), linetype = 2, size = 0.7) +
+#    geom_vline(aes(xintercept = cut2), linetype = 2, size = 0.7)
+  
+## Finding the final reproductive number estimates with confidence intervals
+# NOTE should run with bootSamples &gt; 2.
+rFinal &lt;- estimateR(nbResults, dateVar = "infectionDate",
+             indIDVar = "individualID", pVar = "pScaled",
+             timeFrame = "months", rangeForAvg = c(cut1, cut2),
+             bootSamples = 2, alpha = 0.05)
+
+rFinal$RtAvgDf
+
+</code></pre>
+
+
+</div>

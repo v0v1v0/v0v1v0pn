@@ -1,0 +1,678 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npindex</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Semiparametric Single Index Model</h2>
+
+<h3>Description</h3>
+
+<p><code>npindex</code> computes a semiparametric single index model
+for a dependent variable and <code class="reqn">p</code>-variate explanatory data using
+the model <code class="reqn">Y = G(X\beta) + \epsilon</code>, given a
+set of evaluation points, training points (consisting of explanatory
+data and dependent data), and a <code>npindexbw</code> bandwidth
+specification. Note that for this semiparametric estimator, the
+bandwidth object contains parameters for the single index model and
+the (scalar) bandwidth for the index function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npindex(bws, ...)
+
+## S3 method for class 'formula'
+npindex(bws,
+        data = NULL,
+        newdata = NULL,
+        y.eval = FALSE,
+        ...)
+
+## S3 method for class 'call'
+npindex(bws,
+        ...)
+
+## Default S3 method:
+npindex(bws,
+        txdat,
+        tydat,
+        ...) 
+
+## S3 method for class 'sibandwidth'
+npindex(bws,
+        txdat = stop("training data 'txdat' missing"),
+        tydat = stop("training data 'tydat' missing"),
+        exdat,
+        eydat,
+        gradients = FALSE,
+        residuals = FALSE,
+        errors = FALSE,
+        boot.num = 399,
+        ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as a
+<code>sibandwidth</code>
+object returned from an invocation of <code>npindexbw</code>, or
+as a vector of parameters (beta) with each element <code class="reqn">i</code>
+corresponding to the coefficient for column <code class="reqn">i</code> in <code>txdat</code>
+where the first element is normalized to 1, and a scalar bandwidth
+(h). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradients</code></td>
+<td>
+
+<p>a logical value indicating that you want gradients and the
+asymptotic covariance matrix for beta computed and returned in the
+resulting <code>singleindex</code> object. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+
+<p>a logical value indicating that you want residuals computed and
+returned in the resulting <code>singleindex</code> object. Defaults to
+<code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errors</code></td>
+<td>
+
+<p>a logical value indicating that you want (bootstrapped)
+standard errors for the conditional mean, gradients (when
+<code>gradients=TRUE</code> is set), and average gradients (when
+<code>gradients=TRUE</code> is set), computed and returned in the
+resulting <code>singleindex</code> object. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+
+<p>an integer specifying the number of bootstrap replications to use
+when performing standard error calculations. Defaults to
+<code>399</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the parameters to the
+<code>sibandwidth</code> S3 method, which is called during estimation. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(bws)</code>, typically the environment from which
+<code>npindexbw</code> was called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, the training data are used.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y.eval</code></td>
+<td>
+
+<p>If <code>newdata</code> contains dependent data and <code>y.eval = TRUE</code>,
+<code>np</code> will compute goodness of fit statistics on these
+data and return them. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>txdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of explanatory data (training data) used to
+calculate the regression estimators. Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>txdat</code>. Defaults to the training data used to
+compute the bandwidth object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of points on which the regression will be
+estimated (evaluation data). By default,
+evaluation takes place on the data provided by <code>txdat</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eydat</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of the true values
+of the dependent variable. Optional, and used only to calculate the
+true errors. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A matrix of gradients along with average derivatives are computed and
+returned if <code>gradients=TRUE</code> is used.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npindex</code> returns a <code>npsingleindex</code> object.  The generic
+functions <code>fitted</code>, <code>residuals</code>,
+<code>coef</code>, <code>vcov</code>, <code>se</code>,
+<code>predict</code>, and <code>gradients</code>, extract (or
+generate) estimated values, residuals, coefficients,
+variance-covariance matrix, bootstrapped standard errors on estimates,
+predictions, and gradients, respectively, from the returned
+object. Furthermore, the functions <code>summary</code> and
+<code>plot</code> support objects of this type. The returned object
+has the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p> evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean</code></td>
+<td>
+<p> estimates of the regression function (conditional mean) at the
+evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p> the model coefficients </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betavcov</code></td>
+<td>
+<p> the asymptotic covariance matrix for the model coefficients</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>merr</code></td>
+<td>
+<p> standard errors of the regression function estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grad</code></td>
+<td>
+<p> estimates of the gradients at each evaluation point </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gerr</code></td>
+<td>
+<p> standard errors of the gradient estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.grad</code></td>
+<td>
+<p> mean (average) gradient over the evaluation points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.gerr</code></td>
+<td>
+<p> bootstrapped standard error of the mean gradient estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R2</code></td>
+<td>
+<p> if <code>method="ichimura"</code>, coefficient of determination
+(Doksum and Samarov (1995))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MSE</code></td>
+<td>
+<p>if <code>method="ichimura"</code>, mean squared error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MAE</code></td>
+<td>
+<p>if <code>method="ichimura"</code>, mean absolute error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MAPE</code></td>
+<td>
+<p>if <code>method="ichimura"</code>, mean absolute percentage error </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CORR</code></td>
+<td>
+<p>if <code>method="ichimura"</code>, absolute value of Pearson's correlation coefficient </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SIGN</code></td>
+<td>
+<p>if <code>method="ichimura"</code>, fraction of observations where fitted and observed values
+agree in sign </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confusion.matrix</code></td>
+<td>
+<p>if <code>method="kleinspady"</code>, the confusion matrix or <code>NA</code> if outcomes
+are not available </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CCR.overall</code></td>
+<td>
+<p>if <code>method="kleinspady"</code>,  the overall correct
+classification ratio, or <code>NA</code> if outcomes are not available </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CCR.byoutcome</code></td>
+<td>
+<p>if <code>method="kleinspady"</code>,  a numeric vector containing the correct
+classification ratio by outcome, or <code>NA</code> if outcomes are not
+available </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.mcfadden</code></td>
+<td>
+<p>if <code>method="kleinspady"</code>,  the McFadden-Puig-Kerschner performance measure
+or <code>NA</code> if outcomes are not available </p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+<p><code>vcov</code> requires that <code>gradients=TRUE</code> be set.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield  <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Doksum, K. and A. Samarov (1995), “Nonparametric estimation of
+global functionals and a measure of the explanatory power of
+covariates  regression,” The Annals of Statistics, 23 1443-1473.
+</p>
+<p>Ichimura, H., (1993), “Semiparametric least squares (SLS) and
+weighted SLS estimation of single-index models,” Journal of
+Econometrics, 58, 71-120.
+</p>
+<p>Klein, R. W. and R. H. Spady (1993), “An efficient semiparametric
+estimator for binary response models,” Econometrica, 61, 387-421.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics:
+Theory and Practice,</em> Princeton University Press.
+</p>
+<p>McFadden, D. and C. Puig and D. Kerschner (1977), “Determinants
+of the long-run demand for electricity,” Proceedings of the
+American Statistical Association (Business and Economics Section),
+109-117. 
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth
+estimators for discrete distributions,” Biometrika, 68, 301-309.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1 (INTERFACE=FORMULA): Generate a simple linear model then
+# estimate it using a semiparametric single index specification and
+# Ichimura's nonlinear least squares coefficients and bandwidth
+# (default). Also compute the matrix of gradients and average derivative
+# estimates.
+
+set.seed(12345)
+
+n &lt;- 100
+
+x1 &lt;- runif(n, min=-1, max=1)
+x2 &lt;- runif(n, min=-1, max=1)
+
+y &lt;- x1 - x2 + rnorm(n)
+
+# Note - this may take a minute or two depending on the speed of your
+# computer. Note also that the first element of the vector beta is
+# normalized to one for identification purposes, and that X must contain
+# at least one continuous variable.
+
+bw &lt;- npindexbw(formula=y~x1+x2)
+
+summary(bw)
+
+model &lt;- npindex(bws=bw, gradients=TRUE)
+
+summary(model)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Or you can visualize the input with plot.
+
+plot(bw)
+
+Sys.sleep(5)
+
+# EXAMPLE 1 (INTERFACE=DATA FRAME): Generate a simple linear model then
+# estimate it using a semiparametric single index specification and
+# Ichimura's nonlinear least squares coefficients and bandwidth
+# (default). Also compute the matrix of gradients and average derivative
+# estimates.
+
+set.seed(12345)
+
+n &lt;- 100
+
+x1 &lt;- runif(n, min=-1, max=1)
+x2 &lt;- runif(n, min=-1, max=1)
+
+y &lt;- x1 - x2 + rnorm(n)
+
+X &lt;- cbind(x1, x2)
+
+# Note - this may take a minute or two depending on the speed of your
+# computer. Note also that the first element of the vector beta is
+# normalized to one for identification purposes, and that X must contain
+# at least one continuous variable.
+
+bw &lt;- npindexbw(xdat=X, ydat=y)
+
+summary(bw)
+
+model &lt;- npindex(bws=bw, gradients=TRUE)
+
+summary(model)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Or you can visualize the input with plot.
+
+plot(bw)
+
+Sys.sleep(5)
+
+# EXAMPLE 2 (INTERFACE=FORMULA): Generate a simple binary outcome linear
+# model then estimate it using a semiparametric single index
+# specification and Klein and Spady's likelihood-based coefficients and
+# bandwidth (default). Also compute the matrix of gradients and average
+# derivative estimates.
+
+n &lt;- 100
+
+x1 &lt;- runif(n, min=-1, max=1)
+x2 &lt;- runif(n, min=-1, max=1)
+
+y &lt;- ifelse(x1 + x2 + rnorm(n) &gt; 0, 1, 0)
+
+# Note that the first element of the vector beta is normalized to one
+# for identification purposes, and that X must contain at least one
+# continuous variable.
+
+bw &lt;- npindexbw(formula=y~x1+x2, method="kleinspady")
+
+summary(bw)
+
+model &lt;- npindex(bws=bw, gradients=TRUE)
+
+# Note that, since the outcome is binary, we can assess model
+# performance using methods appropriate for binary outcomes. We look at
+# the confusion matrix, various classification ratios, and McFadden et
+# al's measure of predictive performance.
+
+summary(model)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# EXAMPLE 2 (INTERFACE=DATA FRAME): Generate a simple binary outcome
+# linear model then estimate it using a semiparametric single index
+# specification and Klein and Spady's likelihood-based coefficients and
+# bandwidth (default). Also compute the matrix of gradients and average
+# derivative estimates.
+
+n &lt;- 100
+
+x1 &lt;- runif(n, min=-1, max=1)
+x2 &lt;- runif(n, min=-1, max=1)
+
+y &lt;- ifelse(x1 + x2 + rnorm(n) &gt; 0, 1, 0)
+
+X &lt;- cbind(x1, x2)
+
+# Note that the first element of the vector beta is normalized to one
+# for identification purposes, and that X must contain at least one
+# continuous variable.
+
+bw &lt;- npindexbw(xdat=X, ydat=y, method="kleinspady")
+
+summary(bw)
+
+model &lt;- npindex(bws=bw, gradients=TRUE)
+
+# Note that, since the outcome is binary, we can assess model
+# performance using methods appropriate for binary outcomes. We look at
+# the confusion matrix, various classification ratios, and McFadden et
+# al's measure of predictive performance.
+
+summary(model)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# EXAMPLE 3 (INTERFACE=FORMULA): Replicate the DGP of Klein &amp; Spady
+# (1993) (see their description on page 405, pay careful attention to
+# footnote 6 on page 405).
+
+set.seed(123)
+
+n &lt;- 1000
+
+# x1 is chi-squared having 3 df truncated at 6 standardized by
+# subtracting 2.348 and dividing by 1.511
+
+x &lt;- rchisq(n, df=3)
+x1 &lt;- (ifelse(x &lt; 6, x, 6) - 2.348)/1.511
+
+# x2 is normal (0, 1) truncated at +- 2 divided by 0.8796
+
+x &lt;- rnorm(n)
+x2 &lt;- ifelse(abs(x) &lt; 2 , x, 2) / 0.8796
+
+# y is 1 if y* &gt; 0, 0 otherwise.
+
+y &lt;- ifelse(x1 + x2 + rnorm(n) &gt; 0, 1, 0)
+
+# Compute the parameter vector and bandwidth. Note that the first
+# element of the vector beta is normalized to one for identification
+# purposes, and that X must contain at least one continuous variable.
+
+
+bw &lt;- npindexbw(formula=y~x1+x2, method="kleinspady")
+
+# Next, create the evaluation data in order to generate a perspective
+# plot
+
+# Create an evaluation data matrix
+
+x1.seq &lt;- seq(min(x1), max(x1), length=50)
+x2.seq &lt;- seq(min(x2), max(x2), length=50)
+X.eval &lt;- expand.grid(x1=x1.seq, x2=x2.seq)
+
+# Now evaluate the single index model on the evaluation data
+
+fit &lt;- fitted(npindex(exdat=X.eval, 
+               eydat=rep(1, nrow(X.eval)), 
+               bws=bw))
+
+# Finally, coerce the fitted model into a matrix suitable for 3D
+# plotting via persp()
+
+fit.mat &lt;- matrix(fit, 50, 50)
+
+# Generate a perspective plot similar to Figure 2 b of Klein and Spady
+# (1993)
+
+persp(x1.seq, 
+      x2.seq, 
+      fit.mat, 
+      col="white", 
+      ticktype="detailed", 
+      expand=0.5, 
+      axes=FALSE, 
+      box=FALSE, 
+      main="Estimated Semiparametric Probability Perspective", 
+      theta=310, 
+      phi=25)
+
+# EXAMPLE 3 (INTERFACE=DATA FRAME): Replicate the DGP of Klein &amp; Spady
+# (1993) (see their description on page 405, pay careful attention to
+# footnote 6 on page 405).
+
+set.seed(123)
+
+n &lt;- 1000
+
+# x1 is chi-squared having 3 df truncated at 6 standardized by
+# subtracting 2.348 and dividing by 1.511
+
+x &lt;- rchisq(n, df=3)
+x1 &lt;- (ifelse(x &lt; 6, x, 6) - 2.348)/1.511
+
+# x2 is normal (0, 1) truncated at +- 2 divided by 0.8796
+
+x &lt;- rnorm(n)
+x2 &lt;- ifelse(abs(x) &lt; 2 , x, 2) / 0.8796
+
+# y is 1 if y* &gt; 0, 0 otherwise.
+
+y &lt;- ifelse(x1 + x2 + rnorm(n) &gt; 0, 1, 0)
+
+# Create the X matrix
+
+X &lt;- cbind(x1, x2)
+
+# Compute the parameter vector and bandwidth. Note that the first
+# element of the vector beta is normalized to one for identification
+# purposes, and that X must contain at least one continuous variable.
+
+
+bw &lt;- npindexbw(xdat=X, ydat=y, method="kleinspady")
+
+# Next, create the evaluation data in order to generate a perspective
+# plot
+
+# Create an evaluation data matrix
+
+x1.seq &lt;- seq(min(x1), max(x1), length=50)
+x2.seq &lt;- seq(min(x2), max(x2), length=50)
+X.eval &lt;- expand.grid(x1=x1.seq, x2=x2.seq)
+
+# Now evaluate the single index model on the evaluation data
+
+fit &lt;- fitted(npindex(exdat=X.eval, 
+               eydat=rep(1, nrow(X.eval)), 
+               bws=bw))
+
+# Finally, coerce the fitted model into a matrix suitable for 3D
+# plotting via persp()
+
+fit.mat &lt;- matrix(fit, 50, 50)
+
+# Generate a perspective plot similar to Figure 2 b of Klein and Spady
+# (1993)
+
+persp(x1.seq, 
+      x2.seq, 
+      fit.mat, 
+      col="white", 
+      ticktype="detailed", 
+      expand=0.5, 
+      axes=FALSE, 
+      box=FALSE, 
+      main="Estimated Semiparametric Probability Perspective", 
+      theta=310, 
+      phi=25)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

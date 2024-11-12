@@ -1,0 +1,1370 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netmeta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Network meta-analysis using graph-theoretical method</h2>
+
+<h3>Description</h3>
+
+<p>Network meta-analysis is a generalisation of pairwise meta-analysis
+that compares all pairs of treatments within a number of treatments
+for the same condition. The graph-theoretical approach for network
+meta-analysis uses methods that were originally developed in
+electrical network theory. It has been found to be equivalent to
+the frequentist approach to network meta-analysis which is based on
+weighted least squares regression (Rücker, 2012).
+</p>
+<p>Print method for objects of class <code>netmeta</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netmeta(
+  TE,
+  seTE,
+  treat1,
+  treat2,
+  studlab,
+  data = NULL,
+  subset = NULL,
+  sm,
+  level = gs("level"),
+  level.ma = gs("level.ma"),
+  common = gs("common"),
+  random = gs("random") | !is.null(tau.preset),
+  prediction = FALSE,
+  level.predict = gs("level.predict"),
+  reference.group,
+  baseline.reference = TRUE,
+  small.values = "desirable",
+  all.treatments = NULL,
+  seq = NULL,
+  method.tau = "DL",
+  tau.preset = NULL,
+  tol.multiarm = 0.001,
+  tol.multiarm.se = NULL,
+  details.chkmultiarm = FALSE,
+  sep.trts = ":",
+  nchar.trts = 666,
+  nchar.studlab = 666,
+  func.inverse = invmat,
+  n1 = NULL,
+  n2 = NULL,
+  event1 = NULL,
+  event2 = NULL,
+  incr = NULL,
+  sd1 = NULL,
+  sd2 = NULL,
+  time1 = NULL,
+  time2 = NULL,
+  backtransf = gs("backtransf"),
+  title = "",
+  keepdata = gs("keepdata"),
+  control = NULL,
+  warn = TRUE,
+  warn.deprecated = gs("warn.deprecated"),
+  nchar = nchar.trts,
+  ...
+)
+
+## S3 method for class 'netmeta'
+print(
+  x,
+  common = x$common,
+  random = x$random,
+  prediction = x$prediction,
+  reference.group = x$reference.group,
+  baseline.reference = x$baseline.reference,
+  all.treatments = x$all.treatments,
+  backtransf = x$backtransf,
+  nchar.trts = x$nchar.trts,
+  header = TRUE,
+  digits = gs("digits"),
+  digits.stat = gs("digits.stat"),
+  digits.pval = max(gs("digits.pval"), 2),
+  digits.pval.Q = max(gs("digits.pval.Q"), 2),
+  digits.Q = gs("digits.Q"),
+  digits.tau2 = gs("digits.tau2"),
+  digits.tau = gs("digits.tau"),
+  digits.I2 = gs("digits.I2"),
+  scientific.pval = gs("scientific.pval"),
+  big.mark = gs("big.mark"),
+  text.tau2 = gs("text.tau2"),
+  text.tau = gs("text.tau"),
+  text.I2 = gs("text.I2"),
+  legend = TRUE,
+  warn.deprecated = gs("warn.deprecated"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>TE</code></td>
+<td>
+<p>Estimate of treatment effect, i.e. difference between
+first and second treatment (e.g. log odds ratio, mean difference,
+or log hazard ratio). Or an R object created with
+<code>pairwise</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE</code></td>
+<td>
+<p>Standard error of treatment estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat1</code></td>
+<td>
+<p>Label/Number for first treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat2</code></td>
+<td>
+<p>Label/Number for second treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studlab</code></td>
+<td>
+<p>An optional - but important! - vector with study
+labels (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame containing the study
+information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional vector specifying a subset of studies to
+be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sm</code></td>
+<td>
+<p>A character string indicating underlying summary measure,
+e.g., <code>"RD"</code>, <code>"RR"</code>, <code>"OR"</code>, <code>"ASD"</code>,
+<code>"HR"</code>, <code>"MD"</code>, <code>"SMD"</code>, or <code>"ROM"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>The level used to calculate confidence intervals for
+individual comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level.ma</code></td>
+<td>
+<p>The level used to calculate confidence intervals
+for network estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common</code></td>
+<td>
+<p>A logical indicating whether results for the common
+effects model should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>A logical indicating whether results for the random
+effects model should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prediction</code></td>
+<td>
+<p>A logical indicating whether prediction intervals
+should be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level.predict</code></td>
+<td>
+<p>The level used to calculate prediction
+intervals for a new study.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference.group</code></td>
+<td>
+<p>Reference treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseline.reference</code></td>
+<td>
+<p>A logical indicating whether results
+should be expressed as comparisons of other treatments versus the
+reference treatment (default) or vice versa. This argument is
+only considered if <code>reference.group</code> has been specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>small.values</code></td>
+<td>
+<p>A character string specifying whether small
+treatment effects indicate a beneficial (<code>"desirable"</code>) or
+harmful (<code>"undesirable"</code>) effect (passed on to
+<code>netrank</code>, can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.treatments</code></td>
+<td>
+<p>A logical or <code>"NULL"</code>. If <code>TRUE</code>,
+matrices with all treatment effects, and confidence limits will
+be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq</code></td>
+<td>
+<p>A character or numerical vector specifying the sequence
+of treatments in printouts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method.tau</code></td>
+<td>
+<p>A character string indicating which method is
+used to estimate the between-study variance <code class="reqn">\tau^2</code> and its
+square root <code class="reqn">\tau</code>. Either <code>"DL"</code>, <code>"REML"</code>, or
+<code>"ML"</code>, can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.preset</code></td>
+<td>
+<p>An optional value for manually setting the
+square-root of the between-study variance <code class="reqn">\tau^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol.multiarm</code></td>
+<td>
+<p>A numeric for the tolerance for consistency of
+treatment estimates in multi-arm studies which are consistent by
+design.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol.multiarm.se</code></td>
+<td>
+<p>A numeric for the tolerance for consistency
+of standard errors in multi-arm studies which are consistent by
+design. This check is not conducted if the argument is
+<code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details.chkmultiarm</code></td>
+<td>
+<p>A logical indicating whether treatment
+estimates and / or variances of multi-arm studies with
+inconsistent results or negative multi-arm variances should be
+printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep.trts</code></td>
+<td>
+<p>A character used in comparison names as separator
+between treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.trts</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique treatment names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.studlab</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique study labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>func.inverse</code></td>
+<td>
+<p>R function used to calculate the pseudoinverse
+of the Laplacian matrix L (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n1</code></td>
+<td>
+<p>Number of observations in first treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n2</code></td>
+<td>
+<p>Number of observations in second treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event1</code></td>
+<td>
+<p>Number of events in first treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event2</code></td>
+<td>
+<p>Number of events in second treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incr</code></td>
+<td>
+<p>Numerical value added to cell frequencies (for details,
+see <code>pairwise</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd1</code></td>
+<td>
+<p>Standard deviation in first treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd2</code></td>
+<td>
+<p>Standard deviation in second treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time1</code></td>
+<td>
+<p>Person time at risk in first treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time2</code></td>
+<td>
+<p>Person time at risk in second treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf</code></td>
+<td>
+<p>A logical indicating whether results should be
+back transformed in printouts and forest plots. If
+<code>backtransf = TRUE</code>, results for <code>sm = "OR"</code> are
+presented as odds ratios rather than log odds ratios, for
+example.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Title of meta-analysis / systematic review.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keepdata</code></td>
+<td>
+<p>A logical indicating whether original data (set)
+should be kept in netmeta object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>An optional list to control the iterative process to
+estimate the between-study variance <code class="reqn">\tau^2</code>. This argument
+is passed on to <code>rma.mv</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>A logical indicating whether warnings should be printed
+(e.g., if studies are excluded from meta-analysis due to zero
+standard errors).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn.deprecated</code></td>
+<td>
+<p>A logical indicating whether warnings should
+be printed if deprecated arguments are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar</code></td>
+<td>
+<p>Deprecated argument (replaced by <code>nchar.trts</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netmeta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>header</code></td>
+<td>
+<p>A logical indicating whether information on title of
+meta-analysis, comparison and outcome should be printed at the
+beginning of the printout.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.stat</code></td>
+<td>
+<p>Minimal number of significant digits for tests
+of overall effect, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.pval</code></td>
+<td>
+<p>Minimal number of significant digits for p-value
+of overall effects, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.pval.Q</code></td>
+<td>
+<p>Minimal number of significant digits for
+p-value of heterogeneity tests, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.Q</code></td>
+<td>
+<p>Minimal number of significant digits for
+heterogeneity statistics, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.tau2</code></td>
+<td>
+<p>Minimal number of significant digits for
+between-study variance, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.tau</code></td>
+<td>
+<p>Minimal number of significant digits for square
+root of between-study variance, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits.I2</code></td>
+<td>
+<p>Minimal number of significant digits for I-squared
+statistic, see <code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scientific.pval</code></td>
+<td>
+<p>A logical specifying whether p-values should
+be printed in scientific notation, e.g., 1.2345e-01 instead of
+0.12345.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>big.mark</code></td>
+<td>
+<p>A character used as thousands separator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.tau2</code></td>
+<td>
+<p>Text printed to identify between-study variance
+<code class="reqn">\tau^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.tau</code></td>
+<td>
+<p>Text printed to identify <code class="reqn">\tau</code>, the square
+root of the between-study variance <code class="reqn">\tau^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text.I2</code></td>
+<td>
+<p>Text printed to identify heterogeneity statistic
+I<code class="reqn">^2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>A logical indicating whether a legend should be
+printed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Network meta-analysis using R package <b>netmeta</b> is described
+in detail in Schwarzer et al. (2015), Chapter 8.
+</p>
+<p>Let <em>n</em> be the number of different treatments (nodes,
+vertices) in a network and let <em>m</em> be the number of existing
+comparisons (edges) between the treatments. If there are only
+two-arm studies, <em>m</em> is the number of studies. Let TE and seTE
+be the vectors of observed effects and their standard errors. Let W
+be the <em>m</em>x<em>m</em> diagonal matrix that contains the inverse
+variance 1 / seTE^2.
+</p>
+<p>The given comparisons define the network structure. Therefrom an
+<em>m</em>x<em>n</em> design matrix X (edge-vertex incidence matrix) is
+formed; for more precise information, see Rücker (2012). Moreover,
+the <em>n</em>x<em>n</em> Laplacian matrix L and its Moore-Penrose
+pseudoinverse L+ are calculated (both matrices play an important
+role in graph theory and electrical network theory). Using these
+matrices, the variances based on both direct and indirect
+comparisons can be estimated. Moreover, the hat matrix H can be
+estimated by <strong>H = XL+X^tW = X(X^t W X)^+X^tW</strong> and finally
+consistent treatment effects can be estimated by applying the hat
+matrix to the observed (potentially inconsistent) effects. H is a
+projection matrix which maps the observed effects onto the
+consistent (n-1)-dimensional subspace. This is the Aitken estimator
+(Senn et al., 2013). As in pairwise meta-analysis, the Q statistic
+measures the deviation from consistency. Q can be separated into
+parts for each pairwise meta-analysis and a part for remaining
+inconsistency between comparisons.
+</p>
+<p>Often multi-arm studies are included in a network meta-analysis.
+In multi-arm studies, the treatment effects on different
+comparisons are not independent, but correlated. This is accounted
+for by reweighting all comparisons of each multi-arm study. The
+method is described in Rücker (2012) and Rücker and Schwarzer
+(2014).
+</p>
+<p>Comparisons belonging to multi-arm studies are identified by
+identical study labels (argument <code>studlab</code>). It is therefore
+important to use identical study labels for all comparisons
+belonging to the same multi-arm study, e.g., study label
+"Willms1999" for the three-arm study in the data example (Senn et
+al., 2013). The function netmeta then automatically accounts for
+within-study correlation by reweighting all comparisons of each
+multi-arm study.
+</p>
+<p>Data entry for this function is in <em>contrast-based</em> format,
+that is, data are given as contrasts (differences) between two
+treatments (argument <code>TE</code>) with standard error (argument
+<code>seTE</code>). In principle, meta-analysis functions from R package
+<b>meta</b>, e.g. <code>metabin</code> for binary outcomes or
+<code>metacont</code> for continuous outcomes, can be used to
+calculate treatment effects separately for each treatment
+comparison which is a rather tedious enterprise. If data are
+provided in <em>arm-based</em> format, that is, data are given for
+each treatment arm separately (e.g. number of events and
+participants for binary outcomes), a much more convenient way to
+transform data into contrast-based form is available. Function
+<code>pairwise</code> can automatically transform data with binary
+outcomes (using the <code>metabin</code> function from R package
+<b>meta</b>), continuous outcomes (<code>metacont</code>
+function), incidence rates (<code>metainc</code> function), and
+generic outcomes (<code>metagen</code> function). Additional
+arguments of these functions can be provided (see help page of
+function <code>pairwise</code>).
+</p>
+<p>Note, all pairwise comparisons must be provided for a multi-arm
+study. Consider a multi-arm study of <em>p</em> treatments with known
+variances. For this study, treatment effects and standard errors
+must be provided for each of <em>p</em>(<em>p</em> - 1) / 2 possible
+comparisons. For instance, a three-arm study contributes three
+pairwise comparisons, a four-arm study even six pairwise
+comparisons. Function <code>pairwise</code> automatically
+calculates all pairwise comparisons for multi-arm studies.
+</p>
+<p>A simple random effects model assuming that a constant
+heterogeneity variance is added to each comparison of the network
+can be defined via a generalised methods of moments estimate of the
+between-studies variance <code class="reqn">\tau^2</code> (Jackson et al., 2012). This
+is added to the observed sampling variance <code>seTE^2</code> of each
+comparison in the network (before appropriate adjustment for
+multi-arm studies). Then, as in standard pairwise meta-analysis,
+the procedure is repeated with the resulting enlarged standard
+errors.
+</p>
+<p>For the random-effects model, the direct treatment estimates are
+based on the common between-study variance <code class="reqn">\tau^2</code> from the
+network meta-analysis.
+</p>
+<p>Internally, both common and random effects models are calculated
+regardless of values choosen for arguments <code>common</code> and
+<code>random</code>. Accordingly, the network estimates for the random
+effects model can be extracted from component <code>TE.random</code> of
+an object of class <code>"netmeta"</code> even if argument <code>random =
+FALSE</code>. However, all functions in R package <b>netmeta</b> will
+adequately consider the values for <code>common</code> and
+<code>random</code>. E.g. function <code>print.summary.netmeta</code>
+will not print results for the random effects model if <code>random
+= FALSE</code>.
+</p>
+<p>By default, treatment names are not abbreviated in
+printouts. However, in order to get more concise printouts,
+argument <code>nchar.trts</code> can be used to define the minimum number
+of characters for abbreviated treatment names (see
+<code>abbreviate</code>, argument <code>minlength</code>). R function
+<code>treats</code> is utilised internally to create abbreviated
+treatment names.
+</p>
+<p>Names of treatment comparisons are created by concatenating
+treatment labels of pairwise comparisons using <code>sep.trts</code> as
+separator (see <code>paste</code>). These comparison names are
+used in the covariance matrices <code>Cov.common</code> and
+<code>Cov.random</code> and in some R functions, e.g,
+<code>decomp.design</code>. By default, a colon is used as the
+separator. If any treatment label contains a colon the following
+characters are used as separator (in consecutive order):
+<code>"-"</code>, <code>"_"</code>, <code>"/"</code>, <code>"+"</code>, <code>"."</code>,
+<code>"|"</code>, and <code>"*"</code>. If all of these characters are used in
+treatment labels, a corresponding error message is printed asking
+the user to specify a different separator.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>netmeta</code> with corresponding <code>print</code>,
+<code>summary</code>, <code>forest</code>, and <code>netrank</code> functions. The
+object is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>studlab, treat1, treat2, TE, seTE</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.adj.common, seTE.adj.random</code></td>
+<td>
+<p>Standard error of treatment
+estimate, adjusted for multi-arm studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>design</code></td>
+<td>
+<p>Design of study providing pairwise comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n1, n2, event1, event2, incr</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean1, mean2, sd1, sd2, time1, time2</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd1, sd2, time1, time2</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Total number of studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>Total number of pairwise comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Total number of treatments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Total number of designs (corresponding to the unique set
+of treatments compared within studies).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trts</code></td>
+<td>
+<p>Treatments included in network meta-analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k.trts</code></td>
+<td>
+<p>Number of studies evaluating a treatment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.trts</code></td>
+<td>
+<p>Number of observations receiving a treatment (if
+arguments <code>n1</code> and <code>n2</code> are provided).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>events.trts</code></td>
+<td>
+<p>Number of events observed for a treatment (if
+arguments <code>event1</code> and <code>event2</code> are provided).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiarm</code></td>
+<td>
+<p>Logical vector to identify pairwise comparisons
+from multi-arm studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.arms</code></td>
+<td>
+<p>Number of treatment arms in study providing pairwise
+comparison.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studies</code></td>
+<td>
+<p>Vector with unique study labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>narms</code></td>
+<td>
+<p>Number of arms for each study.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>designs</code></td>
+<td>
+<p>Vector with unique designs present in the network. A
+design corresponds to the set of treatments compared within a
+study.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>designs</code></td>
+<td>
+<p>Vector with unique direct comparisons present in the
+network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE.nma.common, TE.nma.random</code></td>
+<td>
+<p>A vector of length <em>m</em> of
+consistent treatment effects estimated by network meta-analysis
+(nma) (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.nma.common, seTE.nma.random</code></td>
+<td>
+<p>A vector of length <em>m</em>
+of effective standard errors estimated by network meta-analysis
+(common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.nma.common, lower.nma.random</code></td>
+<td>
+<p>A vector of length
+<em>m</em> of lower confidence interval limits for consistent
+treatment effects estimated by network meta-analysis (common
+effects / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.nma.common, upper.nma.random</code></td>
+<td>
+<p>A vector of length
+<em>m</em> of upper confidence interval limits for the consistent
+treatment effects estimated by network meta-analysis (common
+effects / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.nma.common, statistic.nma.random</code></td>
+<td>
+<p>A vector of length
+<em>m</em> of z-values for test of treatment effect for individual
+comparisons (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.nma.common, pval.nma.random</code></td>
+<td>
+<p>A vector of length <em>m</em>
+of p-values for test of treatment effect for individual
+comparisons (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>leverage.common</code></td>
+<td>
+<p>A vector of length <em>m</em> of leverages,
+interpretable as factors by which variances are reduced using
+information from the whole network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w.common, w.random</code></td>
+<td>
+<p>A vector of length <em>m</em> of weights of
+individual studies (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q.common</code></td>
+<td>
+<p>A vector of length <em>m</em> of contributions to
+total heterogeneity / inconsistency statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE.common, TE.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix with estimated
+overall treatment effects (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.common, seTE.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix with
+standard errors (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.common, upper.common, lower.random,
+upper.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with lower and upper
+confidence interval limits (common / random effects
+model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.common, pval.common, statistic.random,
+pval.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with z-value and p-value
+for test of overall treatment effect (common / random
+effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.predict</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix with standard errors
+for prediction intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.predict, upper.predict</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with
+lower and upper prediction interval limits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop.direct.common, prop.direct.random</code></td>
+<td>
+<p>A named vector of the
+direct evidence proportion of each network estimate. (common
+effects / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE.direct.common, TE.direct.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix
+with estimated treatment effects from direct evidence (common
+effects / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.direct.common, seTE.direct.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em>
+matrix with estimated standard errors from direct evidence (common
+effects / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.direct.common, upper.direct.common, lower.direct.random,
+</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with lower and upper confidence
+interval limits from direct evidence (common / random
+effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.direct.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with lower
+and upper confidence interval limits from direct evidence (common
+effects / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.direct.common, pval.direct.common,
+statistic.direct.random, </code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with
+z-value and p-value for test of overall treatment effect from
+direct evidence (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.direct.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with z-value
+and p-value for test of overall treatment effect from direct
+evidence (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TE.indirect.common, TE.indirect.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em>
+matrix with estimated treatment effects from indirect evidence
+(common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.indirect.common, seTE.indirect.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em>
+matrix with estimated standard errors from indirect evidence
+(common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.indirect.common, upper.indirect.common,
+lower.indirect.random, </code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with lower
+and upper confidence interval limits from indirect evidence
+(common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.indirect.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with lower
+and upper confidence interval limits from indirect evidence
+(common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic.indirect.common, pval.indirect.common,
+statistic.indirect.random, </code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with
+z-value and p-value for test of overall treatment effect from
+indirect evidence (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.indirect.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrices with z-value
+and p-value for test of overall treatment effect from indirect
+evidence (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>Overall heterogeneity / inconsistency statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.Q</code></td>
+<td>
+<p>Degrees of freedom for test of heterogeneity /
+inconsistency.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Q</code></td>
+<td>
+<p>P-value for test of heterogeneity / inconsistency.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I2, lower.I2, upper.I2</code></td>
+<td>
+<p>I-squared, lower and upper confidence
+limits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>Square-root of between-study variance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q.heterogeneity</code></td>
+<td>
+<p>Overall heterogeneity statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.Q.heterogeneity</code></td>
+<td>
+<p>Degrees of freedom for test of overall
+heterogeneity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Q.heterogeneity</code></td>
+<td>
+<p>P-value for test of overall
+heterogeneity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q.inconsistency</code></td>
+<td>
+<p>Overall inconsistency statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.Q.inconsistency</code></td>
+<td>
+<p>Degrees of freedom for test of overall
+inconsistency.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval.Q.inconsistency</code></td>
+<td>
+<p>P-value for test of overall
+inconsistency.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q.decomp</code></td>
+<td>
+<p>Data frame with columns 'treat1', 'treat2', 'Q',
+'df' and 'pval.Q', providing heterogeneity statistics for each
+pairwise meta-analysis of direct comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A.matrix</code></td>
+<td>
+<p>Adjacency matrix (<em>n</em>x<em>n</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X.matrix</code></td>
+<td>
+<p>Design matrix (<em>m</em>x<em>n</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B.matrix</code></td>
+<td>
+<p>Edge-vertex incidence matrix (<em>m</em>x<em>n</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L.matrix.common, L.matrix.random</code></td>
+<td>
+<p>Laplacian matrix
+(<em>n</em>x<em>n</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Lplus.matrix.common, Lplus.matrix.random</code></td>
+<td>
+<p>Moore-Penrose
+pseudoinverse of the Laplacian matrix (<em>n</em>x<em>n</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q.matrix</code></td>
+<td>
+<p>Matrix of heterogeneity statistics for pairwise
+meta-analyses, where direct comparisons exist
+(<em>n</em>x<em>n</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>G.matrix</code></td>
+<td>
+<p>Matrix with variances and covariances of
+comparisons (<em>m</em>x<em>m</em>). G is defined as
+<strong>BL+B^t</strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H.matrix.common, H.matrix.random</code></td>
+<td>
+<p>Hat matrix
+(<em>m</em>x<em>m</em>), defined as <strong>H = GW = BL+B^tW</strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.matrix</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix with number of
+observations in direct comparisons (if arguments <code>n1</code> and
+<code>n2</code> are provided).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>events.matrix</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix with number of events
+in direct comparisons (if arguments <code>event1</code> and
+<code>event2</code> are provided).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P.common, P.random</code></td>
+<td>
+<p><em>n</em>x<em>n</em> matrix with direct
+evidence proportions (common / random effects model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Cov.common</code></td>
+<td>
+<p>Variance-covariance matrix (common effects model)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Cov.random</code></td>
+<td>
+<p>Variance-covariance matrix (random effects
+model)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sm, level, level.ma</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common, random</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prediction, level.predict</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference.group, baseline.reference, small.values,
+all.treatments</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq, tau.preset, tol.multiarm, tol.multiarm.se</code></td>
+<td>
+<p>As defined
+above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details.chkmultiarm, sep.trts, nchar.trts</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backtransf, title, warn, warn.deprecated</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+<p>Version of R package netmeta used to create object.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>R function <code>rma.mv</code> from R package
+<span class="pkg">metafor</span> (Viechtbauer 2010) is called internally to estimate
+the between-study variance <code class="reqn">\tau^2</code> for the (restricted)
+maximum likelihood method. For binary outcomes, incidence rates,
+and the mean difference, the variance-covariance matrix is
+calculated if arguments <code>event1</code>, <code>event2</code>, <code>n1</code>,
+and <code>n2</code> (binary outcomes); <code>event1</code>, <code>event2</code>,
+<code>time1</code>, and <code>time2</code> (incidence rates); <code>n1</code>,
+<code>n2</code>, <code>sd1</code>, and <code>sd2</code> (mean difference) are
+provided. For data sets preprocessed with <code>pairwise</code>
+the respective variables are selected automatically.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gerta Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>, Guido
+Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Jackson D, White IR, Riley RD (2012):
+Quantifying the impact of between-study heterogeneity in
+multivariate meta-analyses.
+<em>Statistics in Medicine</em>,
+<b>31</b>, 3805–20
+</p>
+<p>Rücker G (2012):
+Network meta-analysis, electrical networks and graph theory.
+<em>Research Synthesis Methods</em>,
+<b>3</b>, 312–24
+</p>
+<p>Rücker G, Schwarzer G (2014):
+Reduce dimension or reduce weights? Comparing two approaches to
+multi-arm studies in network meta-analysis.
+<em>Statistics in Medicine</em>,
+<b>33</b>, 4353–69
+</p>
+<p>Schwarzer G, Carpenter JR, Rücker G (2015):
+<em>Meta-Analysis with R (Use R!)</em>.
+Springer International Publishing, Switzerland
+</p>
+<p>Senn S, Gavini F, Magrez D, Scheen A (2013):
+Issues in performing a network meta-analysis.
+<em>Statistical Methods in Medical Research</em>,
+<b>22</b>, 169–89
+</p>
+<p>Viechtbauer W (2010):
+Conducting Meta-Analyses in R with the metafor Package.
+<em>Journal of Statistical Software</em>,
+<b>36</b>, 1–48
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pairwise</code>, <code>forest.netmeta</code>,
+<code>netrank</code>, <code>metagen</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(smokingcessation)
+
+# Transform data from arm-based format to contrast-based format
+#
+p1 &lt;- pairwise(list(treat1, treat2, treat3),
+  event = list(event1, event2, event3), n = list(n1, n2, n3),
+  data = smokingcessation, sm = "OR")
+
+# Conduct random effects network meta-analysis
+#
+net1 &lt;- netmeta(p1, common = FALSE)
+net1
+
+## Not run: 
+data(Senn2013)
+
+# Conduct common effects network meta-analysis
+#
+net2 &lt;- netmeta(TE, seTE, treat1, treat2, studlab,
+  data = Senn2013, sm = "MD", random = FALSE)
+net2
+net2$Q.decomp
+
+# Comparison with reference group
+#
+print(net2, reference = "plac")
+
+# Conduct random effects network meta-analysis
+#
+net3 &lt;- netmeta(TE, seTE, treat1, treat2, studlab,
+  data = Senn2013, sm = "MD", common = FALSE)
+net3
+
+# Change printing order of treatments with placebo last and use
+# long treatment names
+#
+trts &lt;- c("acar", "benf", "metf", "migl", "piog",
+  "rosi", "sita", "sulf", "vild", "plac")
+net4 &lt;- netmeta(TE, seTE, treat1.long, treat2.long, studlab,
+  data = Senn2013, sm = "MD", common = FALSE,
+  seq = trts, reference = "Placebo")
+print(net4, digits = 2)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

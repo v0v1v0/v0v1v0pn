@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>field</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Capture a field</h2>
+
+<h3>Description</h3>
+
+<p>Capture a field with a pattern of the form
+list("field.name", <code>between.pattern</code>,
+field.name=list(<code>...</code>)) – see examples.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">field(field.name, between.pattern, 
+    ...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>field.name</code></td>
+<td>
+<p>Field name, used as a pattern and as a capture <code>group</code> (output
+column) name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>between.pattern</code></td>
+<td>
+<p>Pattern to match after <code>field.name</code> but before the field value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Pattern(s) for matching field value.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Pattern list which can be used in <code>capture_first_vec</code>,
+<code>capture_first_df</code>, or <code>capture_all_str</code>.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre]</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Two ways to create the same pattern.
+str(list("Alignment ", Alignment="[0-9]+"))
+## To avoid typing Alignment twice use:
+str(nc::field("Alignment", " ", "[0-9]+"))
+
+## An example with lots of different fields.
+info.txt.gz &lt;- system.file(
+  "extdata", "SweeD_Info.txt.gz", package="nc")
+info.vec &lt;- readLines(info.txt.gz)
+info.vec[24:40]
+## For each Alignment there are many fields which have a similar
+## pattern, and occur in the same order. One way to capture these
+## fields is by coding a pattern that says to look for all of those
+## fields in that order. Each field is coded using this helper
+## function.
+g &lt;- function(name, fun=identity, suffix=list()){
+  list(
+    "\t+",
+    nc::field(name, ":\t+", ".*"),
+    fun,
+    suffix,
+    "\n+")
+}
+nc::capture_all_str(
+  info.vec,
+  nc::field("Alignment", " ", "[0-9]+"),
+  "\n+",
+  g("Chromosome"),
+  g("Sequences", as.integer),
+  g("Sites", as.integer),
+  g("Discarded sites", as.integer),
+  g("Processing", as.integer, " seconds"),
+  g("Position", as.integer),
+  g("Likelihood", as.numeric),
+  g("Alpha", as.numeric))
+
+## Another example where field is useful.
+trackDb.txt.gz &lt;- system.file(
+  "extdata", "trackDb.txt.gz", package="nc")
+trackDb.vec &lt;- readLines(trackDb.txt.gz)
+cat(trackDb.vec[101:115], sep="\n")
+int.pattern &lt;- list("[0-9]+", as.integer)
+ cell.sample.type &lt;- list(
+  cellType="[^ ]*?",
+  "_",
+  sampleName=list(
+    "McGill",
+    sampleID=int.pattern),
+  dataType="Coverage|Peaks")
+## Each block in the trackDb file begins with track, followed by a
+## space, followed by the track name. That pattern is coded below,
+## using field:
+track.pattern &lt;- nc::field(
+  "track",
+  " ",
+  cell.sample.type,
+  "|",
+  "[^\n]+")
+nc::capture_all_str(trackDb.vec, track.pattern)
+
+## Each line in a block has the same structure (field name, space,
+## field value). Below we use the field function to extract the
+## color line, along with columns for each of the three channels
+## (red, green, blue).
+any.lines.pattern &lt;- "(?:\n[^\n]+)*"
+nc::capture_all_str(
+  trackDb.vec,
+  track.pattern,
+  any.lines.pattern,
+  "\\s+",
+  nc::field(
+    "color", " ",
+    red=int.pattern, ",",
+    green=int.pattern, ",",
+    blue=int.pattern))
+
+</code></pre>
+
+
+</div>

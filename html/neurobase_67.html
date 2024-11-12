@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dropEmptyImageDimensions</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Drop Empty Image Dimensions</h2>
+
+<h3>Description</h3>
+
+<p>Drops dimensions of an image that has all irrelevant
+values
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dropEmptyImageDimensions(
+  img,
+  value = 0,
+  threshold = 0,
+  other.imgs = NULL,
+  keep_ind = FALSE,
+  reorient = FALSE
+)
+
+drop_empty_dim(
+  img,
+  value = 0,
+  threshold = 0,
+  other.imgs = NULL,
+  keep_ind = FALSE,
+  reorient = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>nifti object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>Value to check against.  If zero, then 
+<code>dropEmptyImageDimensions</code> will drop any dimension that has 
+fewer than <code>threshold</code> zeroes.  May be a vector of values, matched with 
+<code>match</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>Drop dimension if fewer than <code>threshold</code> voxels
+are in the slice</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>other.imgs</code></td>
+<td>
+<p>List of other nifti objects or filenames 
+to apply the same dropping as <code>img</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_ind</code></td>
+<td>
+<p>keep indices in output.  Will return list, even if 
+<code>other.imgs</code> not specified</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reorient</code></td>
+<td>
+<p>Should image be reoriented if a filename?</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of output image indices, and other images
+if <code>other.imgs</code> not specified or <code>keep_ind = TRUE</code>. 
+Otherwise object of class <code>nifti</code>
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>drop_empty_dim</code> is a shorthand for <code>dropEmptyImageDimensions</code>
+with all the same arguments.  Also, <code>NA</code> are set to zero.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getEmptyImageDimensions</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(5)
+dims = rep(10, 3)
+arr = array(rnorm(prod(dims)), dim = dims)
+arr[,,10] = 0
+nim = oro.nifti::nifti(arr)
+
+dnim = dropEmptyImageDimensions(nim, keep_ind = TRUE)
+new_nim = dnim$outimg
+names(dnim)
+dnim = dropEmptyImageDimensions(nim, keep_ind = TRUE, other.imgs = nim)
+dims = rep(10, 4)
+arr = array(rnorm(prod(dims)), dim = dims)
+nim = oro.nifti::nifti(arr)
+
+testthat::expect_error(
+{dnim = dropEmptyImageDimensions(nim, keep_ind = TRUE)}
+)
+</code></pre>
+
+
+</div>

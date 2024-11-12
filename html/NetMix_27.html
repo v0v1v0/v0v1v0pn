@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.mmsbm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predict edges based on estimated mmsbm model</h2>
+
+<h3>Description</h3>
+
+<p>The function produces expected posterior edges based  
+on estimated parameters and (optionally new) predictor data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'mmsbm'
+predict(
+  object,
+  new.data.dyad = NULL,
+  new.data.monad = NULL,
+  forecast = FALSE,
+  type = c("link", "response", "mm"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Object of class <code>mmsbm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new.data.dyad</code></td>
+<td>
+<p>An optional <code>data.frame</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new.data.monad</code></td>
+<td>
+<p>An optional <code>data.frame</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>forecast</code></td>
+<td>
+<p>Boolean. Should prediction forcast one step into the future? Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Character string. The default is to use the linear predictor of edges. The alternative
+"response" returns predicted probabilities. The alternative "mm" returns predicted mixed-membership vectors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently ignored</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If <code>new.data.dyad = NULL</code>, vector of length <code>nrow(object$dyadic.data)</code>. Else, vector of length <code>nrow(new.data.dyad)</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Santiago Olivella (olivella@unc.edu), Adeline Lo (aylo@wisc.edu), Tyler Pratt (tyler.pratt@yale.edu), Kosuke Imai (imai@harvard.edu)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NetMix)
+## Load datasets
+data("lazega_dyadic")
+data("lazega_monadic")
+## Estimate model with 2 groups
+lazega_mmsbm &lt;- mmsbm(SocializeWith ~ Coworkers,
+                      ~  School + Practice + Status,
+                      senderID = "Lawyer1",
+                      receiverID = "Lawyer2",
+                      nodeID = "Lawyer",
+                      data.dyad = lazega_dyadic,
+                      data.monad = lazega_monadic,
+                      n.blocks = 2,
+                      mmsbm.control = list(seed = 123,
+                                           conv_tol = 1e-2, 
+                                           hessian = FALSE))
+
+## Get in-sample predicted edge probabilities
+lazega_preds &lt;- predict(lazega_mmsbm, type = "response")
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>one_hot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>One-hot encode</h2>
+
+<h3>Description</h3>
+
+<p>Fast one-hot encoding of all factor and character columns in a dataframe to
+convert it into a numeric matrix by creating dummy (binary) columns.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">one_hot(x, all_levels = FALSE, rename_binary = TRUE, sep = ".")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A dataframe, matrix or tibble. Matrices are returned untouched.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all_levels</code></td>
+<td>
+<p>Logical, whether to create dummy variables for all levels
+of each factor. Default is <code>FALSE</code> to avoid issues with regression models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rename_binary</code></td>
+<td>
+<p>Logical, whether to rename binary factors by appending
+the 2nd level of the factor to aid interpretation of encoded factor levels
+and to allow consistency with naming.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>Character for separating factor variable names and levels for
+encoded columns.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Binary factor columns and logical columns are converted to integers (0 or
+1). Multi-level unordered factors are converted to multiple columns of 0/1
+(dummy variables): if <code>all_levels</code> is set to <code>FALSE</code> (the default), then the
+first level is assumed to be a reference level and additional columns are
+created for each additional level; if <code>all_levels</code> is set to <code>TRUE</code> one
+column is used for each level. Unused levels are dropped. Character columns
+are first converted to factors and then encoded. Ordered factors are
+replaced by their internal codes. Numeric or integer columns are left
+untouched.
+</p>
+<p>Having dummy variables for all levels of a factor can cause problems with
+multicollinearity in regression (the dummy variable trap), so <code>all_levels</code>
+is set to <code>FALSE</code> by default which is necessary for regression models such
+as <code>glmnet</code> (equivalent to full rank parameterisation). However, setting
+<code>all_levels</code> to <code>TRUE</code> can aid with interpretability (e.g. with SHAP
+values), and in some cases filtering might result in some dummy variables
+being excluded. Note this function is designed to quickly generate dummy
+variables for more general machine learning purposes. To create a proper
+design matrix object for regression models, use <code>model.matrix()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric matrix with the same number of rows as the input data.
+Dummy variable columns replace the input factor or character columns.
+Numeric columns are left intact.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>caret::dummyVars()</code>, <code>model.matrix()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(iris)
+x &lt;- iris
+x2 &lt;- one_hot(x)
+head(x2)  # 3 columns for Species
+
+x2 &lt;- one_hot(x, all_levels = FALSE)
+head(x2)  # 2 columns for Species
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dropAIC.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate the AIC for all one-covariate deletions from the  current model</h2>
+
+<h3>Description</h3>
+
+<p> This function fits all models  obtained from the current model by deleting one covariate 
+(except the intercept),  and calculates their AIC value. 
+It selects the best covariate to be deleted, according to the AIC value.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dropAIC.fun(mlePP, modSim = FALSE,...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mlePP</code></td>
+<td>
+<p>A <code>"mlePP"</code>-class object; usually the output from <code>fitPP.fun</code>. 
+It defines the current model.  The fitted model cannot include fixed parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modSim</code></td>
+<td>
+<p>Logical flag. If it is FALSE, information about the process is shown on the screen.
+For automatic selection processes, the option TRUE should be preferred.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to pass to <code>AIC</code>, for example the constant k for the AIC calculation.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The definition of AIC uses constant k=2, but  a different value  k can be passed as
+an additional argument. The best covariate to be deleted  is the one  whose deletion leads to  the model with the lowest AIC value
+and it  improves the current model if the new AIC  is lower than the current one. </p>
+
+
+<h3>Value</h3>
+
+<p> A list with the following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>AICadd </code></td>
+<td>
+<p>Vector of the AIC values obtained from deleting each covariate  of the current model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posminAIC</code></td>
+<td>
+<p>An integer indicating the number of the column  of the covariates matrix with the covariate leading to the minimum AIC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>namecov</code></td>
+<td>
+<p>Name of the covariate leading to the minimum AIC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AICcurrent</code></td>
+<td>
+<p>AIC value of the current (initial) model.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Casella, G. and Berger, R.L., (2002). <em>Statistical inference.</em> Brooks/Cole.
+</p>
+<p>Cebrian, A.C., Abaurrea, J. and Asin, J. (2015). NHPoisson: An R Package for 
+Fitting and Validating Nonhomogeneous Poisson Processes. 
+<em>Journal of Statistical Software</em>, 64(6), 1-24.
+</p>
+<p>Venables, W. N. and Ripley, B. D. (2002). <em>Modern Applied Statistics with S.</em> Fourth edition. Springer.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>addAIC.fun</code>, <code>stepAICmle.fun</code>, <code>LRTpv.fun</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(BarTxTn)
+
+BarEv&lt;-POTevents.fun(T=BarTxTn$Tx,thres=318, 
+	date=cbind(BarTxTn$ano,BarTxTn$mes,BarTxTn$dia))
+
+covB&lt;-cbind(cos(2*pi*BarTxTn$dia/365), sin(2*pi*BarTxTn$dia/365), 
+	BarTxTn$TTx,BarTxTn$Txm31,BarTxTn$Txm31**2)
+
+dimnames(covB)&lt;-list(NULL,c('cos','sin','TTx','Txm31', 'Txm31**2'))
+
+mod1B&lt;-fitPP.fun(covariates=covB, posE=BarEv$Px, inddat=BarEv$inddat,
+	tit="BAR Tx; cos, sin, TTx, Txm31, Txm31**2", 
+	start=list(b0=-100,b1=1,b2=10,b3=0,b4=0,b5=0))
+
+
+aux&lt;-dropAIC.fun(mod1B)
+</code></pre>
+
+
+</div>

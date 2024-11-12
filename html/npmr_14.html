@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>print.npmr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Summarize a "npmr" object
+</h2>
+
+<h3>Description</h3>
+
+<p>Print the call that produced the <code>npmr</code> object and a dataframe
+showing, for each value of the regularization parameter on
+which the NPMR object was fit, the rank of the resulting regression coefficient
+matrix and the corresponding value of the NPMR objective function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'npmr'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>an object of class <code>npmr</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>ignored
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Scott Powers, Trevor Hastie, Rob Tibshirani
+</p>
+
+
+<h3>References</h3>
+
+<p>Scott Powers, Trevor Hastie and Rob Tibshirani (2016). “Nuclear penalized
+multinomial regression with an application to predicting at bat outcomes in
+baseball.” In prep.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npmr</code>, <code>print.cv.npmr</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#   Fit NPMR to simulated data
+
+K = 5
+n = 1000
+m = 10000
+p = 10
+r = 2
+
+# Simulated training data
+set.seed(8369)
+A = matrix(rnorm(p*r), p, r)
+C = matrix(rnorm(K*r), K, r)
+B = tcrossprod(A, C)            # low-rank coefficient matrix
+X = matrix(rnorm(n*p), n, p)    # covariate matrix with iid Gaussian entries
+eta = X 
+P = exp(eta)/rowSums(exp(eta))
+Y = t(apply(P, 1, rmultinom, n = 1, size = 1))
+
+# Simulate test data
+Xtest = matrix(rnorm(m*p), m, p)
+etatest = Xtest 
+Ptest = exp(etatest)/rowSums(exp(etatest))
+Ytest = t(apply(Ptest, 1, rmultinom, n = 1, size = 1))
+
+# Fit NPMR for a sequence of lambda values without CV:
+fit2 = npmr(X, Y, lambda = exp(seq(7, -2)))
+
+# Print the NPMR fit:
+fit2
+</code></pre>
+
+
+</div>

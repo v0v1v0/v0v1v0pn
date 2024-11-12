@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>msm.sim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MSM.sim : output of a stergm simulation of basic sex contact network model</h2>
+
+<h3>Description</h3>
+
+<p>A 1000 vertex networkDynamic object that contains the output of 10 timesteps of a discrete stergm simulation of a basic sex contact network model. The model has two vertex types ('races') with different contact preferencs expressed with a <code>nodematch</code> parameter.   The output network object is included as an example because re-running the model can take a while.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data(msm.sim)</code></pre>
+
+
+<h3>Format</h3>
+
+<p>a <code>networkDynamic object</code></p>
+
+
+<h3>Details</h3>
+
+<p>The model was built with the following stergm:
+</p>
+<pre>
+msm.net &lt;- network.initialize(1000, directed=F)  
+msm.net %v% 'race' &lt;- rep(c(1,2),500)
+sm.form.constraints &lt;- ~bd(maxout=2)
+msm.form.formula &lt;- ~edges+nodematch('race')+
+	degree(2)
+msm.target.stats &lt;- c(450,375,50)
+msm.diss.formula &lt;- ~offset(edges)+offset(nodematch("race"))
+msm.theta.diss &lt;- c(2.944, -0.747)
+msm.fit &lt;- stergm(msm.net,
+	formation= msm.form.formula,
+	dissolution= msm.diss.formula,
+	targets="formation",
+	target.stats= msm.target.stats,
+	offset.coef.diss = msm.theta.diss,
+	form.constraints=msm.form.constraints,
+	estimate = "EGMME",
+	control=control.stergm(SA.plot.progress=TRUE)
+)																				
+msm.sim &lt;- simulate(msm.fit,nsim=1,time.slices=100)
+</pre>
+<p>However, the tergm-related output that would normally be attached to the network (toggles, etc) has been removed.
+</p>
+
+
+<h3>Source</h3>
+
+<p>statnet project stergm tutorial. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(network)
+require(networkDynamic)
+data(msm.sim)
+# show the network, aggregating 5 timesteps
+plot(network.extract(msm.sim,onset=0,terminus=5),
+  vertex.col=msm.sim%v%"race",vertex.cex=0.5,edge.col="gray")
+
+# this could take 10 minutes, so don't run in example checking
+## Not run: 
+# use ndtv to render a movie of the momentary view of the network
+render.animation(msm.sim,vertex.col=msm.sim%v%'race',vertex.cex=.5)
+ani.replay()
+saveVideo(ani.replay(),video.name="msm.simMomentary.mp4", other.opts="-b 5000k",clean=TRUE)
+
+# another version, this time with more temporal aggregation
+msm.sim &lt;- compute.animation(msm.sim,slice.par=list(start=0,
+                                                    end=10,
+                                                    interval=1,
+                                                    aggregate.dur=3,
+                                                    rule='latest'))
+# also more render more inbetween frames
+render.animation(msm.sim,render.par = list(tween.frames = 15,show.times=TRUE), 
+  vertex.col=msm.net%v%'race',vertex.cex=.5)
+saveVideo(ani.replay(),video.name="msm.sim3Aggregated.mp4", other.opts="-b 5000k",clean=TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

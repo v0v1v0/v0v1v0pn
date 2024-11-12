@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>jackknife_variance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculates Jackknife variance with reweighting for PSA</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the variance of PSA by Leave-One-Out Jackknife (Quenouille, 1956) with reweighting in each iteration.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">jackknife_variance(
+  estimated_vars,
+  convenience_sample,
+  reference_sample,
+  covariates,
+  N = NULL,
+  algorithm = "glm",
+  smooth = FALSE,
+  proc = NULL,
+  trControl = trainControl(classProbs = TRUE),
+  weighting.func = "sc",
+  g = 5,
+  calib = FALSE,
+  calib_vars = NULL,
+  totals = NULL,
+  args.calib = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>estimated_vars</code></td>
+<td>
+<p>A string vector specifying the variables for which the estimators' variance are to be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convenience_sample</code></td>
+<td>
+<p>Data frame containing the non-probabilistic sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference_sample</code></td>
+<td>
+<p>Data frame containing the probabilistic sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covariates</code></td>
+<td>
+<p>String vector specifying the common variables to use for training.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>Integer indicating the population size. Optional.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>A string specifying which classification or regression model to use (same as caret's method). By default, its value is "glm" (logistic regression).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth</code></td>
+<td>
+<p>A logical value; if TRUE, propensity estimates pi_i are smoothed applying the formula (1000*pi_i + 0.5)/1001</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proc</code></td>
+<td>
+<p>A string or vector of strings specifying if any of the data preprocessing techniques available in train function from 'caret' package should be applied to data prior to the propensity estimation. By default, its value is NULL and no preprocessing is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trControl</code></td>
+<td>
+<p>A trainControl specifying the computational nuances of the train function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighting.func</code></td>
+<td>
+<p>A string specifying which function should be used to compute weights from propensity scores. Available functions are the following: </p>
+ <ul>
+<li> <p><code>sc</code> calls sc_weights. </p>
+</li>
+<li> <p><code>valliant</code> calls valliant_weights. </p>
+</li>
+<li> <p><code>lee</code> calls lee_weights. </p>
+</li>
+<li> <p><code>vd</code> calls vd_weights. </p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>If <code>weighting.func = "lee"</code> or <code>weighting.func = "vd"</code>, this element specifies the number of strata to use; by default, its value is 5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calib</code></td>
+<td>
+<p>A logical value; if TRUE, PSA weights are used as initial weights for calibration. By default, its value is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calib_vars</code></td>
+<td>
+<p>A string or vector of strings specifying the variables to be used for calibration. By default, its value is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>totals</code></td>
+<td>
+<p>A vector containing population totals for each column (class) of the calibration variables matrix. Ignored if <code>calib</code> is set to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.calib</code></td>
+<td>
+<p>A list containing further arguments to be passed to the calib_weights function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further parameters to be passed to the train function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The estimation of the variance requires a recalculation of the estimates in each iteration which might involve weighting adjustments, leading to an increase in computation time. It is expected that the estimated variance captures the weighting adjustments' variability and the estimator's variability.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The resulting variance.
+</p>
+
+
+<h3>References</h3>
+
+<p>Quenouille, M. H. (1956). <em>Notes on bias in estimation.</em> Biometrika, 43(3/4), 353-360.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#A simple example without calibration and default parameters
+covariates = c("education_primaria", "education_secundaria")
+jackknife_variance("vote_pens",sampleNP, sampleP, covariates)
+
+#An example with linear calibration and default parameters
+covariates = c("education_primaria", "education_secundaria")
+calib_vars = c("age", "sex")
+totals = c(2544377, 24284)
+
+jackknife_variance("vote_pens",sampleNP, sampleP, covariates,
+calib = T, calib_vars, totals, args.calib = list(method = "linear"))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,191 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pmd_con_ln</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>PMD-based confidence label noise</h2>
+
+<h3>Description</h3>
+
+<p>Introduction of <em>PMD-based confidence label noise</em> into a classification dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## Default S3 method:
+pmd_con_ln(x, y, level, sortid = TRUE, ...)
+
+## S3 method for class 'formula'
+pmd_con_ln(formula, data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data frame of input attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a factor vector with the output class of each sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>a double in [0,1] with the noise level to be introduced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sortid</code></td>
+<td>
+<p>a logical indicating if the indices must be sorted at the output (default: <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other options to pass to the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula with the output class and, at least, one input attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame in which to interpret the variables in the formula.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><em>PMD-based confidence label noise</em> approximates the probability of noise using 
+the confidence prediction of a neural network. These predictions are used to estimate the 
+mislabeling probability and the most possible noisy class label for each sample. Finally,
+(<code>level</code>·100)% of the samples in the dataset are randomly selected to be mislabeled
+according to their values of probability computed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>ndmodel</code> with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xnoise</code></td>
+<td>
+<p>a data frame with the noisy input attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ynoise</code></td>
+<td>
+<p>a factor vector with the noisy output class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numnoise</code></td>
+<td>
+<p>an integer vector with the amount of noisy samples per class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idnoise</code></td>
+<td>
+<p>an integer vector list with the indices of noisy samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numclean</code></td>
+<td>
+<p>an integer vector with the amount of clean samples per class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idclean</code></td>
+<td>
+<p>an integer vector list with the indices of clean samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distr</code></td>
+<td>
+<p>an integer vector with the samples per class in the original data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the full name of the noise introduction model used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>a list of the argument values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the function call.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Noise model adapted from the papers in References.
+</p>
+
+
+<h3>References</h3>
+
+<p>Y. Zhang, S. Zheng, P. Wu, M. Goswami, and C. Chen. 
+<strong>Learning with feature-dependent label noise: A progressive approach</strong>. 
+In <em>Proc. 9th International Conference on Learning Representations</em>, pages 1-13, 2021.
+url:<a href="https://openreview.net/forum?id=ZPa2SyGcbwh">https://openreview.net/forum?id=ZPa2SyGcbwh</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>clu_vot_ln</code>, <code>sco_con_ln</code>, <code>print.ndmodel</code>, <code>summary.ndmodel</code>, <code>plot.ndmodel</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load the dataset
+data(iris2D)
+
+# usage of the default method
+set.seed(9)
+outdef &lt;- pmd_con_ln(x = iris2D[,-ncol(iris2D)], y = iris2D[,ncol(iris2D)], level = 0.1)
+
+# show results
+summary(outdef, showid = TRUE)
+plot(outdef)
+
+# usage of the method for class formula
+set.seed(9)
+outfrm &lt;- pmd_con_ln(formula = Species ~ ., data = iris2D, level = 0.1)
+
+# check the match of noisy indices
+identical(outdef$idnoise, outfrm$idnoise)
+
+</code></pre>
+
+
+</div>

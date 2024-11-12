@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>GLT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Conduct the General Linear Test (GLT) procedure</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>GLT</code> fits two nested linear regression models (that are referred to as the unrestricted and the restricted models), and evaluates whether or not the fit of both models differs significantly. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">GLT(Dataset, Unrestricted.Model, Restricted.Model, Alpha=0.05, 
+Alpha.Homosc=0.05, Assume.Homoscedasticity=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Dataset</code></td>
+<td>
+<p>A <code>data.frame</code> that should consist of one line per test participant. Each line should contain (at least) one test score and one independent variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Unrestricted.Model</code></td>
+<td>
+<p>The unrestricted regression model to be fitted. A formula should be provided using the syntaxis of the <code>lm</code> function (for help, see <code>?lm</code>). For example, <code>Test.Score~ Gender</code> will fit a linear regression model in which <code>Gender</code> is regressed on <code>Test.Score</code>. <code>Test.Score~Gender+Age+Gender:Age</code> will regress <code>Test.Score</code> on <code>Gender</code>, <code>Age</code>, and their interaction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Restricted.Model</code></td>
+<td>
+<p>The restricted regression model to be fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha</code></td>
+<td>
+<p>The significance level that should be used in the GLT procedure. Default <code>Alpha= 0.05</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha.Homosc</code></td>
+<td>
+<p>The significance level to conduct the homoscedasticity test. If the unrestricted model only contains qualitative independent variables, the Levene test is used. If the model contains at least one quantitative independent variables, the Breusch-Pagan test is used. If the homoscedasticity assumption is violated, a heteroscedasticity-robust <code>F*</code> test is provided. Default <code>Alpha.Homosc=0.05</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Assume.Homoscedasticity</code></td>
+<td>
+<p>Logical. The <code>NormData</code> package ‘decides’ whether the homoscedasticity assumption is valid based on the Levene (or Breusch-Pagan) test. <br> The <code>Assume.Homoscedasticity= TRUE/FALSE</code> argument can be used to overrule this decision process and ‘force’ the <code>NormData</code> package to assume or not assume homoscedasticity.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details, see Van der Elst (2023).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>GLT</code> with components,
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>F.Test.Stat.Results</code></td>
+<td>
+<p>The result of the GLT procedure, i.e., the SSEs and DFs the fitted unrestricted and restricted models, and the <code class="reqn">F^*</code> test-statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fit.Unrestricted.Model</code></td>
+<td>
+<p>The fitted unrestricted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fit.Restricted.Model</code></td>
+<td>
+<p>The fitted restricted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha</code></td>
+<td>
+<p>The significance level that was used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.val.homoscedasticity</code></td>
+<td>
+<p>The p-value that was used in the homoscedasticity test for the unrestricted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F.Test.Hetero.Robust</code></td>
+<td>
+<p>The result of the heteroscedasticity-robust <code>F*</code> test. For details, see the <code>waldtest</code> function of the <code>lmtest package</code> (see <code>?waldtest</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha.Homoscedasticity</code></td>
+<td>
+<p>The significance level that was used to conduct the homoscedasticity test. Default <code>Alpha.Homoscedasticity=0.05</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Wim Van der Elst
+</p>
+
+
+<h3>References</h3>
+
+<p>Van der Elst, W. (2024). <em>Regression-based normative data for psychological assessment: A hands-on approach using R.</em> Springer Nature. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Replicate the GLT results that were obtained in 
+# Case study 1 of Chapter 5 in Van der Elst (2023)
+# ------------------------------------------------
+data(Personality)
+
+GLT.Openness &lt;- GLT(Dataset=Personality,
+     Unrestricted.Model=Openness~LE, Restricted.Model=Openness~1)
+summary(GLT.Openness)
+
+# Replicate the GLT results that were obtained in 
+# Case study 2 of Chapter 5 in Van der Elst (2023)
+# ------------------------------------------------
+data(Fluency)
+
+GLT.Fruits &lt;- GLT(Dataset=Fluency,
+     Unrestricted.Model=Fruits~LE, Restricted.Model=Fruits~1)
+summary(GLT.Fruits)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,239 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>graphres.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot NHPP residuals versus time or  monotonous variables</h2>
+
+<h3>Description</h3>
+
+<p>This function plots residuals of a NHPP (raw or scaled, 
+overlapping or disjoint) 
+versus time or other variables which are monotonous functions.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">graphres.fun(objres = NULL, typeRes = "Raw", t = NULL, res = NULL, lint = NULL, 
+posE = NULL, fittedlambda = NULL, typeI = "Disjoint", Xvariables = NULL, 
+namXv = NULL, histWgraph=TRUE, plotDisp=c(2,2), addlow = FALSE, lwd = 2, 
+tit = "", flow = 0.5, xlegend = "topleft", legcex = 0.5)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>objres</code></td>
+<td>
+<p>Optional. A list with (at least) elements t, typeI and Rawres  and/or ScaRes, depending on 
+the value of typeRes. For example, the output list from the functions 
+<code>CalcRes.fun</code> or <code>CalcResD.fun</code>; see those functions for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeRes</code></td>
+<td>
+<p>Label indicating the type of residuals ("Raw" or any type of scaled 
+residuals such as "Pearson").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Optional. Time vector of the PP observation period.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res</code></td>
+<td>
+<p>Optional. Vector of residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lint</code></td>
+<td>
+<p>Optional. Length of the  intervals used to calculate the residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posE</code></td>
+<td>
+<p>Optional. Numeric vector of the PP occurrence times. 
+Only used when typeI = "Overlapping".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fittedlambda</code></td>
+<td>
+<p>Optional. Vector of the cumulative  fitted PP intensity 
+over the intervals. Used  to calculate the envelopes when typeRes="Raw".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeI</code></td>
+<td>
+<p>Label indicating  the type ("Overlapping" or "Disjoint") of intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xvariables</code></td>
+<td>
+<p>Optional. Matrix  of the variables for
+the residual plots (each column is a variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>namXv</code></td>
+<td>
+<p>Optional. Vector of the  names of the variables in Xvariables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>histWgraph</code></td>
+<td>
+<p> Logical flag.   If it is TRUE,  a new graphical device is opened
+with the option <code>record=TRUE</code>, so that the history of all plots is recorded in the new device. 
+This option may not work on some platforms; for example, RStudio does not allow the user to open
+new  graphical devices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotDisp</code></td>
+<td>
+<p> A vector of the form <code>c(nr, nc)</code>.  The residual plots will be drawn in 
+a nr<code class="reqn">\times</code>nc array. It is used as argument <code>mfrow</code> in <code>par</code>. By default,  
+a 2 <code class="reqn">\times</code> 2 window is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tit</code></td>
+<td>
+<p>Character string. A title for the plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>addlow</code></td>
+<td>
+<p>Logical flag. If it is TRUE, a lowess is added to the residual plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>Argument lwd   for plotting the lowess lines, see <code>par</code>
+for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flow</code></td>
+<td>
+<p>Argument f for the lowess, see <code>lowess</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlegend</code></td>
+<td>
+<p>Label giving the position of the graph where the legend will 
+be located.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legcex</code></td>
+<td>
+<p>Argument cex for the legend, see <code>par</code> for details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Either argument objres or pair of arguments (t,res) must be specified. 
+If objres is provided, arguments t,res, typeRes, typeI, posE and  fittedlambda
+are ignored.  
+</p>
+<p>A residual plot versus time is always performed. 
+These plots are intended for time or variables which are monotonous functions,
+since residuals are  calculated over a given time interval and plotted versus the
+value of the variables in the mean point of the interval.
+</p>
+<p>A smoother (lowess) of the residuals can be optionally added to the plots. 
+In the case of overlapping intervals,
+the residuals of the occurrence points   are  marked differently from the rest.
+In the case typeRes="Raw" (if argument fittedlambda is available) or 
+typeRes="Pearson",  envelopes for the residuals are also plotted.
+The envelopes are based on an  approach analogous to the one shown in
+Baddeley et al. (2005) for spatial  Poisson processes.  
+The envelopes for raw residuals are,
+</p>
+<p style="text-align: center;"><code class="reqn">\pm {2 \over l_2-l_1} \sqrt{\sum_{ i \in (l_1,l_2)} \hat \lambda(i)} </code>
+</p>
+
+<p>where index i  runs over  the integers in the interval <code class="reqn">(l_1,l_2)</code>. 
+The envelopes for the Pearson residuals are,
+</p>
+<p style="text-align: center;"><code class="reqn">\pm 2/\sqrt{l_2-l_1}.</code>
+</p>
+  
+<p>These plots  allow us to analyze the effect on the intensity, of the covariates included
+in the model or other potentially influent variables. They 
+show  if the mean or the dispersion of the residuals vary sistematically, see  for 
+example  residual analysis in Atkinson (1985) or Collett (1994).</p>
+
+
+<h3>References</h3>
+
+<p>Atkinson, A. (1985). <em>Plots, transformations and regression.</em> Oxford 
+University Press.
+</p>
+<p>Baddeley, A., Turner, R., Moller, J. and Hazelton, M. (2005).
+Residual analysis for spatial point processes.
+<em>Journal of the Royal Statistical Society, Series B</em>, 67, 617-666.
+</p>
+<p>Cebrian, A.C., Abaurrea, J. and Asin, J. (2015). NHPoisson: An R Package for 
+Fitting and Validating Nonhomogeneous Poisson Processes. 
+<em>Journal of Statistical Software</em>, 64(6), 1-24.
+</p>
+<p>Collett, D. (1994). Modelling survival data in medical research. Chapman &amp; Hall.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>graphrate.fun</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Example using objres as input
+
+X1&lt;-c(1:1000)**0.5
+
+modE&lt;-fitPP.fun(tind=TRUE,covariates=cbind(X1), 
+	posE=round(runif(40,1,1000)), inddat=rep(1,1000),
+	tim=c(1:1000), tit="Simulated example", start=list(b0=1,b1=0),
+	modSim = TRUE, dplot = FALSE)
+
+ResDE&lt;-CalcResD.fun(mlePP=modE,lint=50)
+graphres.fun(objres=ResDE, typeRes="Raw", Xvariables=cbind(X1),
+	namXv=c("X1"), plotDisp=c(2,1), addlow=TRUE,tit="Example")
+
+
+#Example using the set of arguments res, t and fittedlambda as input
+#In this case, with typeI="Disjoint", only values of t, fittedlambda and Xvariables 
+#in the midpoint of the intervals must be provided.
+
+#Since   a 1X1 layout is  specified in plotDisp and only one  
+#graphical device is opened by default, the two  resulting plots can be scrolled  
+#up and down  with the "Page Up" and "Page Down" keys.
+
+X1&lt;-c(1:500)**0.5
+graphres.fun(res=rnorm(50),posE=round(runif(50,1,500)),
+	fittedlambda=runif(500,0,1)[seq(5,495,10)],
+	t=seq(5,495,10), typeRes="Raw", typeI="Disjoint",Xvariables=X1[seq(5,495,10)],
+	namXv=c("X1"), plotDisp=c(1,1), tit="Example 2",lint=10)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,331 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vpcfig2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visual Predictive Check (VPC) based on Perl-speaks-NONMEM (PsN) generated VPC files (ggplot2-version).</h2>
+
+<h3>Description</h3>
+
+<p>This function creates VPC using output files from the vpc command in Pearl Speaks NONMEM (PsN).
+Graphs are generated using the ggplot2 package and the return object is an ggplot class and
+can be further modified, see details below and documentation for ggplot2 for further details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">vpcfig2(
+  vpcdir = NULL,
+  vpctab = NULL,
+  vpcresult = NULL,
+  use.model.path = TRUE,
+  strata.names = NULL,
+  strata.subset = NULL,
+  median.only = FALSE,
+  bin.idv = c("median", "midpoint"),
+  percentile = 10,
+  fy = function(y) {     y },
+  fx = function(x) {     x },
+  xlab = NULL,
+  ylab = NULL,
+  col.data = "gray20",
+  cex.data = 1,
+  pch.data = 19,
+  alpha.data = 0.5,
+  col.line = "grey20",
+  lwd.line = 1,
+  lty.line = c(2, 1, 2),
+  col.segm = c("steelblue", "gray50", "steelblue"),
+  alpha.segm = 0.6,
+  type = 3,
+  panel.height.censored = 0.25,
+  censoring.labels = c("ALQ", "BLQ"),
+  ignore.censoring = FALSE,
+  control = GOF.control()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>vpcdir</code></td>
+<td>
+<p>Path of directory of the VPC files</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vpctab</code></td>
+<td>
+<p>Path to the vpctab-file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vpcresult</code></td>
+<td>
+<p>Path to the vpcresult file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.model.path</code></td>
+<td>
+<p>Load file from a global defined model library (TRUE=default).
+If so will look for a global character vector named <code>model.path</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strata.names</code></td>
+<td>
+<p>Character vector for strata names. Must have length equal to number of strata's in vpc files, otherwise ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strata.subset</code></td>
+<td>
+<p>Vector specifying subset of strata to use. Either a vector of index, e.g.  strata.subset=c(1,3),
+or a character vector naming which strata to use. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>median.only</code></td>
+<td>
+<p>Logical to plot only median and no quantiles for model and data (FALSE=default)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin.idv</code></td>
+<td>
+<p>Method for computed idv value for plotting bin summary values.
+Set to "median" to use median of independent variable in each bin on x-axis (default),
+or set to "midpoint" to use midpoint of bins on x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percentile</code></td>
+<td>
+<p>percentile to use, default=10 will display 10
+Percentile argument must match columns included in the vpcresult file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fy</code></td>
+<td>
+<p>transformation function for y-axis, default to identity function (f(y)=y).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fx</code></td>
+<td>
+<p>transformation function for x-axis, default to identity function (f(x)=x)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>label for x-axis, default is IDV as found in vpcresultfile, passed to labs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>label for y-axis, default is DV as found in vpcresultfile, passed to labs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.data</code></td>
+<td>
+<p>color for data points, passed to geom_point, default="gray20"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.data</code></td>
+<td>
+<p>cex for data points, passed to geom_point, default=1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch.data</code></td>
+<td>
+<p>plot symbol (pch) for data points, passed to geom_point, default=19</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.data</code></td>
+<td>
+<p>alpha for plotting of data points, passed to geom_point, default=0.5</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.line</code></td>
+<td>
+<p>line color for low quartile, median, and high quartile of data,
+passed to geom_line, default="gray20"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd.line</code></td>
+<td>
+<p>line width (lwd) for low quartile, median, and high quartile of data, passed to geom_line, default=1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty.line</code></td>
+<td>
+<p>line type (lty) for low quartile, median, and high quartile of data, passed to geom_line,
+should be vector of length 3, default=c(2,1,2)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.segm</code></td>
+<td>
+<p>Color of CI regions (low, median and high) for model, passed to geom_polygon,
+should be vector of length 3, default=c("steelblue", "gray50", "steelblue")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.segm</code></td>
+<td>
+<p>alpha of CI regions (low, median and high) for model, passed to geom_polygon, default=0.6</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>type of VPC plot:
+</p>
+<p>1=display model regions only,
+</p>
+<p>2=as 1 + lines (low, median and high) of data,
+</p>
+<p>3= as 2 + points for data.
+</p>
+<p>type=0 can also be used and then no graph is produced but instead a list with 2 dataframes is returned.
+one for the vpcresult and on for the observed data in the vpctab file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>panel.height.censored</code></td>
+<td>
+<p>Height for BLQ ALQ panels. Height is relative to height of Un-cenored panel, default=0.25</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>censoring.labels</code></td>
+<td>
+<p>Character vector used as labels for panels when VPC have either BLQ or ALQ data
+Default set to c("ALQ","BLQ"). NOTE: must be character vector of length 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ignore.censoring</code></td>
+<td>
+<p>Ignore any censoring results in VPC result file (BLQ and ALQ), defult=FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>an optional list of control settings. See GOF.control for the names of the settable control values and their effect.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The ggplot2 package is used for creating the VPC and vpcfig2 have functionality for e.g. modify
+names of strata, order of and subset of strata's, and transform the x- and or y-axis before plotting.
+</p>
+<p>The data used is either specified by the directory of the PsN generated files,
+or by specifying the file names of both the vpctab-file and the vpcresult file.
+See examples 1 and 2 below.
+</p>
+<p>Names of strata can be changed with the strata.names argument, if strata.names
+is NULL the names as specified in the vpcresult file are used.
+</p>
+<p>strata.subset can be used to select a subset of strata, and or to change the order of stratas.
+See example 3.
+</p>
+<p><strong>Strata.subset</strong> is matched with strata.names unless strata.names=NULL.
+If strata.names=NULL then strata.subset is matched to names as specified in vpcresult file.
+Default is to use all strata's (strata.subset=NULL).
+</p>
+<p>The fy and fx arguments can be used to alter the scale of data plotted.
+For example, using <code>fy=function(y){log(y+1)}</code>
+is a convenient way to get log-scale for y-axis but with an off-set to show any values==0.
+Proper y tick marks can then be set using the <code>scale_y_continuous</code> ggplot2 function.
+</p>
+<p>Since the returned objest is a ggplot-class object is can be further modified to e.g. to
+log-scale for y.axis;
+</p>
+<p><code>vpcfig2(...)+scale_y_log10()</code>,
+</p>
+<p>adding/changing labels &amp; titles;
+</p>
+<p><code>vpcfig2(...)+labs(y="Modified y-label", title="New title")</code>.
+</p>
+<p><strong>Axis-limits</strong> are preferably set using the ggplot2 function
+<code>coord_cartesian(...)</code>. This way data points outside the axis-limit are only hidden when plotting.
+</p>
+<p><strong>Stratified</strong> VPC's are created with <code>facet_wrap(~strata)</code> as deafult but can be
+modified to use <code>facet_grid</code> for setting the panel grid.
+</p>
+<p>However faceting must be done with <code>~strata</code>.
+</p>
+<p>See examples below and documentation for ggplot2 for further details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>ggplot object of VPC plot
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Get path to the example files included in nonmem2R package
+file1 &lt;- system.file("extdata", "vpctab004.dat", package = "nonmem2R")
+file2 &lt;- system.file("extdata", "vpc_results.csv", package = "nonmem2R")
+
+
+# Ex 1, produce VPC with default setting, here specifying both vpctab and vpcresult
+vpcfig2(vpctab=file1,vpcresult=file2)
+
+## Not run: 
+# Ex 2, produce VPC with default setting, here specifying only directory of vpc files
+path1&lt;-gsub("vpctab004.dat","",file1)
+vpcfig2(vpcdir=path1)
+
+## End(Not run)
+
+# Ex 3, produce VPC with i) modifies strata names, ii) strata in reverse order, and
+#        iii) labels
+strata.names&lt;-c("Group A","Group B")
+xlab&lt;-"Time after dose (hrs)"
+ylab&lt;-"Plasma Conc(mmol/L)"
+vpcfig2(vpctab=file1,vpcresult=file2,strata.names=strata.names,strata.subset=2:1,
+       xlab=xlab,ylab=ylab)
+
+
+# Example using the fy argument to transform y-axis setting y-ticks using scale_y_continuous(...)
+tmp&lt;-c(1,2,3,4,6)
+yticks&lt;-c(0.1,tmp,tmp*10,tmp*100,tmp*1000)
+vpcfig2(vpctab=file1,vpcresult=file2,fy=function(y){log(y+1)})+
+ scale_y_continuous(breaks=log(yticks+1),labels=yticks,minor_breaks=NULL)
+
+## Not run: 
+# Example changing to slog-scale using the ggplot2 function scale_y_log10
+vpcfig2(vpctab=file1,vpcresult=file2)+scale_y_log10()
+
+## End(Not run)
+# Example changing y-axis label and adding figure title using ggplot2 function labs(...).
+vpcfig2(vpctab=file1,vpcresult=file2)+labs(y="Modified y-label", title="New title")
+
+
+</code></pre>
+
+
+</div>

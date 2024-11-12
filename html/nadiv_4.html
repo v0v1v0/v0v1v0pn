@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>aiFun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sampling (co)variances</h2>
+
+<h3>Description</h3>
+
+<p>This function returns the sampling (co)variances of the variance components
+fitted in an mixed model solved using the Average Information algorithm
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">aiFun(model = NULL, AI.vec = NULL, inverse = TRUE, Dimnames = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A model object returned by a call to the <code>asreml</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AI.vec</code></td>
+<td>
+<p>A numeric vector of the Average Information matrix. The order
+must be the row-wise lower triangle of the matrix (including the diagonal).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inverse</code></td>
+<td>
+<p>A logical indicating whether the elements of the
+<em>inverse</em> Average Information matrix are being provided. If FALSE, 
+the Average Information matrix (and not its inverse) is being supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Dimnames</code></td>
+<td>
+<p>A vector of characters if names are desired for the output
+(co)variance matrix. If not specified, either the default labels from the
+<code>asreml</code> object will be used or the rows and columns will be
+unlabeled.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The inverse of the Average Information matrix provides the sampling
+(co)variance of each (co)variance component in the random portion of the
+mixed model. If a model from the ASReml-R function is supplied (<code>model</code>
+is not NULL), this function extracts the inverse of the AI matrix from an
+ASReml-R model and organizes it so that the sampling covariances between
+random terms are the off-diagonals and the sampling variances of random
+terms are located along the diagonal. The order of the variances along the
+diagonal is the same as the order entered in the random section of the
+<code>asreml</code> function. This is also the same order as the rows of a call to
+the summary function, <code>summary(model)$varcomp</code>.
+</p>
+<p>If <code>model</code> is NULL then <code>AI.vec</code> should contain the vector of
+values from an Average Information matrix. The function will then
+reconstruct this matrix, invert it, and supply the sampling (co) variances
+for the random terms in the model as described above. Note, either
+<code>model</code> or <code>AI.vec</code> must be supplied, but not both.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>matrix</code> of k x k dimensions is returned, if k is the number
+of (co)variance components estimated in the model. Sampling covariances are
+above and below the diagonal while variances are located along the
+diagonal. If <code>Dimnames</code> is specified, the row and column names are
+assigned according the vector of names in this argument.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The vector of <code>Dimnames</code> should match the same order of variance
+components specified in the model.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p><a href="mailto:matthewwolak@gmail.com">matthewwolak@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Gilmour, A.R., Gogel, B.J., Cullis, B.R., &amp; Thompson, R. 2009.
+ASReml User Guide Release 3.0. VSN International Ltd., Hemel Hempstead, UK.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  ## Not run: 
+    library(asreml)
+    ginvA &lt;- ainverse(warcolak)
+    ginvD &lt;- makeD(warcolak[, 1:3])$listDinv
+      attr(ginvD, "rowNames") &lt;- as.character(warcolak[, 1])
+      attr(ginvD, "INVERSE") &lt;- TRUE
+    warcolak$IDD &lt;- warcolak$ID
+    warcolak.mod &lt;- asreml(trait1 ~ sex,
+     random = ~ vm(ID, ginvA) + vm(IDD, ginvD), 
+	data = warcolak) 
+    summary(warcolak.mod)$varcomp
+    aiFun(model = warcolak.mod, Dimnames = c("Va", "Vd", "Ve"), inverse = TRUE)    
+   
+## End(Not run)
+
+  output &lt;- c(7.3075921, 7.0635161, 12.3423380, 1.9539486, 2.7586340, 0.6626111)
+  aiFun(AI.vec = output, inverse = FALSE, Dimnames = c("Va", "Vd", "Ve"))
+
+</code></pre>
+
+
+</div>

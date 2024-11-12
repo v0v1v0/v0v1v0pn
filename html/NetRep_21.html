@@ -1,0 +1,313 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>networkProperties</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate the topological properties for a network module</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the network properties used to assess module preservation for one
+or more modules in a user specified dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">networkProperties(
+  network,
+  data,
+  correlation,
+  moduleAssignments = NULL,
+  modules = NULL,
+  backgroundLabel = "0",
+  discovery = NULL,
+  test = NULL,
+  simplify = TRUE,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p>a list of interaction networks, one for each dataset. Each 
+entry of the list should be a <code class="reqn">n * n</code> matrix or where each element 
+contains the edge weight between nodes <code class="reqn">i</code> and <code class="reqn">j</code> in the inferred 
+network for that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a list of matrices, one for each dataset. Each entry of the list 
+should be the data used to infer the interaction <code>network</code> for that 
+dataset. The columns should correspond to variables in the data
+(nodes in the network) and rows to samples in that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correlation</code></td>
+<td>
+<p>a list of matrices, one for each dataset. Each entry of
+the list should be a <code class="reqn">n * n</code> matrix where each element contains the 
+correlation coefficient between nodes <code class="reqn">i</code> and <code class="reqn">j</code> in the 
+<code>data</code> used to infer the interaction network for that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>moduleAssignments</code></td>
+<td>
+<p>a list of vectors, one for each <em>discovery</em> 
+dataset, containing the module assignments for each node in that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modules</code></td>
+<td>
+<p>a list of vectors, one for each <code>discovery</code> dataset, 
+of modules to perform the analysis on. If unspecified, all modules
+in each <code>discovery</code> dataset will be analysed, with the exception of 
+those specified in <code>backgroundLabel</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backgroundLabel</code></td>
+<td>
+<p>a single label given to nodes that do not belong to 
+any module in the <code>moduleAssignments</code> argument. Defaults to "0". Set 
+to <code>NULL</code> if you do not want to skip the network background module.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discovery</code></td>
+<td>
+<p>a vector of names or indices denoting the <em>discovery</em>
+dataset(s) in the <code>data</code>, <code>correlation</code>, <code>network</code>, 
+<code>moduleAssignments</code>, <code>modules</code>, and <code>test</code> lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>a list of vectors, one for each <code>discovery</code> dataset,
+of names or indices denoting the <em>test</em> dataset(s) in the <code>data</code>, 
+<code>correlation</code>, and <code>network</code> lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplify</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, simplify the structure of the output
+list if possible (see Return Value).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical; should progress be reported? Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+
+<h4>Input data structures:</h4>
+
+<p>The preservation of network modules in a second
+dataset is quantified by measuring the preservation of topological
+properties between the <em>discovery</em> and <em>test</em> datasets. These 
+properties are calculated not only from the interaction networks inferred
+in each dataset, but also from the data used to infer those networks (e.g.
+gene expression data) as well as the correlation structure between 
+variables/nodes. Thus, all functions in the <code>NetRep</code> package have the 
+following arguments: 
+</p>
+
+<ul>
+<li>
+<p><code>network</code>:
+a list of interaction networks, one for each dataset.
+
+</p>
+</li>
+<li>
+<p><code>data</code>:
+a list of data matrices used to infer those networks, one for each 
+dataset.
+
+</p>
+</li>
+<li>
+<p><code>correlation</code>:
+a list of matrices containing the pairwise correlation coefficients 
+between variables/nodes in each dataset.
+ 
+</p>
+</li>
+<li>
+<p><code>moduleAssignments</code>:
+a list of vectors, one for each <em>discovery</em> dataset, containing 
+the module assignments for each node in that dataset.
+
+</p>
+</li>
+<li>
+<p><code>modules</code>:
+a list of vectors, one for each <em>discovery</em> dataset, containing
+the names of the modules from that dataset to analyse.  
+
+</p>
+</li>
+<li>
+<p><code>discovery</code>:
+a vector indicating the names or indices of the previous arguments' 
+lists to use as the <em>discovery</em> dataset(s) for the analyses.
+
+</p>
+</li>
+<li>
+<p><code>test</code>:
+a list of vectors, one vector for each <em>discovery</em> dataset, 
+containing the names or indices of the <code>network</code>, <code>data</code>, and 
+<code>correlation</code> argument lists to use as the <em>test</em> dataset(s) 
+for the analysis of each <em>discovery</em> dataset.
+
+</p>
+</li>
+</ul>
+<p>The formatting of these arguments is not strict: each function will attempt
+to make sense of the user input. For example, if there is only one 
+<code>discovery</code> dataset, then input to the <code>moduleAssigments</code> and 
+<code>test</code> arguments may be vectors, rather than lists. If the 
+<code>networkProperties</code> are being calculate within the <em>discovery</em> or
+<em>test</em> datasets, then the <code>discovery</code> and <code>test</code> arguments do
+not need to be specified, and the input matrices for the <code>network</code>,
+<code>data</code>, and <code>correlation</code> arguments do not need to be wrapped in
+a list.
+</p>
+
+
+
+<h4>Analysing large datasets:</h4>
+
+<p>Matrices in the <code>network</code>, <code>data</code>, and <code>correlation</code> lists
+can be supplied as <code>disk.matrix</code> objects. This class allows 
+matrix data to be kept on disk and loaded as required by <span class="pkg">NetRep</span>. 
+This dramatically decreases memory usage: the matrices for only one 
+dataset will be kept in RAM at any point in time.
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>A nested list structure. At the top level, the list has one element per 
+<code>'discovery'</code> dataset. Each of these elements is a list that has one
+element per <code>'test'</code> dataset analysed for that <code>'discovery'</code> 
+dataset. Each of these elements is a list that has one element per 
+<code>'modules'</code> specified. Each of these is a list containing the following  
+objects:
+</p>
+
+<ul>
+<li>
+<p><code>'degree'</code>:
+The weighted within-module degree: the sum of edge weights for each 
+node in the module.
+
+</p>
+</li>
+<li>
+<p><code>'avgWeight'</code>:
+The average edge weight within the module.
+
+</p>
+</li>
+</ul>
+<p>If the <code>'data'</code> used to infer the <code>'test'</code> network is provided  
+then the following are also returned:
+</p>
+
+<ul>
+<li>
+<p><code>'summary'</code>:
+A vector summarising the module across each sample. This is calculated 
+as the first eigenvector of the module from a principal component 
+analysis.
+
+</p>
+</li>
+<li>
+<p><code>'contribution'</code>:
+The <em>node contribution</em>: the similarity between each node and the
+<em>module summary profile</em> (<code>'summary'</code>).
+
+</p>
+</li>
+<li>
+<p><code>'coherence'</code>:
+The proportion of module variance explained by the <code>'summary'</code>
+vector.
+
+</p>
+</li>
+</ul>
+<p>When <code>simplify = TRUE</code> then the simplest possible structure will be 
+returned. E.g. if the network properties are requested for only one module 
+in only one dataset, then the returned list will have only the above elements. 
+</p>
+<p>When <code>simplify = FALSE</code> then a nested list of datasets will always be 
+returned, i.e. each element at the top level and second level correspond to
+a dataset, and each element at the third level will correspond to modules 
+discovered in the dataset specified at the top level if module labels are 
+provided in the corresponding <code>moduleAssignments</code> list element. E.g. 
+<code>results[["Dataset1"]][["Dataset2"]][["module1"]]</code> will contain the 
+properties of "module1" as calculated in "Dataset2", where "module1" was 
+indentified in "Dataset1". Modules and datasets for which calculation of 
+the network properties have not been requested will contain <code>NULL</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Getting nodes ordered by degree., and
+Ordering samples by module summary
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load in example data, correlation, and network matrices for a discovery and test dataset:
+data("NetRep")
+
+# Set up input lists for each input matrix type across datasets. The list
+# elements can have any names, so long as they are consistent between the
+# inputs.
+network_list &lt;- list(discovery=discovery_network, test=test_network)
+data_list &lt;- list(discovery=discovery_data, test=test_data)
+correlation_list &lt;- list(discovery=discovery_correlation, test=test_correlation)
+labels_list &lt;- list(discovery=module_labels)
+
+# Calculate the topological properties of all network modules in the discovery dataset
+props &lt;- networkProperties(
+  network=network_list, data=data_list, correlation=correlation_list, 
+  moduleAssignments=labels_list
+)
+  
+# Calculate the topological properties in the test dataset for the same modules
+test_props &lt;- networkProperties(
+  network=network_list, data=data_list, correlation=correlation_list,
+  moduleAssignments=labels_list, discovery="discovery", test="test"
+)
+
+</code></pre>
+
+
+</div>

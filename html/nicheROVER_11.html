@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>niw.mom</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mean and variance of the Normal-Inverse-Wishart distribution.</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the mean and variance of the Normal-Inverse-Wishart (NIW) distribution.  Can be used to very quickly compute Bayesian point estimates for the conjugate NIW prior.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">niw.mom(lambda, kappa, Psi, nu)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Location parameter. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>Scale parameter. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Psi</code></td>
+<td>
+<p>Scale matrix.  See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+<p>Degrees of freedom.  See 'Details'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The NIW distribution <code class="reqn">p(\mu, \Sigma | \lambda, \kappa, \Psi, \nu)</code> is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">
+\Sigma \sim W^{-1}(\Psi, \nu), \quad \mu | \Sigma \sim N(\lambda, \Sigma/\kappa).
+</code>
+</p>
+
+<p>Note that cov<code class="reqn">(\mu, \Sigma) = 0</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list with elements <code>mu</code> and <code>Sigma</code>, each containing lists with elements <code>mean</code> and <code>var</code>.  For <code>mu</code> these elements are of size <code>length(lambda)</code> and <code>c(length(lambda),length(lambda))</code>.  For <code>Sigma</code> they are of size <code>dim(Psi)</code> and <code>c(dim(Psi), dim(Psi))</code>, such that cov<code class="reqn">(\Sigma_{ij}, \Sigma_{kl})=</code><code>Sigma$var[i,j,k,l]</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rniw()</code>, <code>niw.coeffs()</code>, <code>niw.post()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># NIW parameters
+d &lt;- 3 # number of dimensions
+lambda &lt;- rnorm(d)
+kappa &lt;- 2
+Psi &lt;- crossprod(matrix(rnorm(d^2), d, d))
+nu &lt;- 10
+
+# simulate data
+niw.sim &lt;- rniw(n = 1e4, lambda, kappa, Psi, nu)
+
+# check moments
+niw.mV &lt;- niw.mom(lambda, kappa, Psi, nu)
+
+# mean of mu
+ii &lt;- 1
+c(true = niw.mV$mu$mean[ii], sim = mean(niw.sim$mu[,ii]))
+
+# variance of Sigma
+II &lt;- c(1,2)
+JJ &lt;- c(2,3)
+c(true = niw.mV$var[II[1],II[2],JJ[1],JJ[2]],
+  sim = cov(niw.sim$Sigma[II[1],II[2],], niw.sim$Sigma[JJ[1],JJ[2],]))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,195 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>uTAR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimation of a Univariate Two-Regime SETAR Model</h2>
+
+<h3>Description</h3>
+
+<p>Estimation of a univariate two-regime SETAR model, including threshold value, performing recursive least squares method or nested sub-sample search algorithm.
+The procedure of Li and Tong (2016) is used to search for the threshold.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">uTAR(
+  y,
+  p1,
+  p2,
+  d = 1,
+  thrV = NULL,
+  thrQ = c(0, 1),
+  Trim = c(0.1, 0.9),
+  include.mean = TRUE,
+  method = "RLS",
+  k0 = 300
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a vector of time series.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p1, p2</code></td>
+<td>
+<p>AR-orders of regime 1 and regime 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>delay for threshold variable, default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thrV</code></td>
+<td>
+<p>threshold variable. If thrV is not null, it must have the same length as that of y.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thrQ</code></td>
+<td>
+<p>lower and upper quantiles to search for threshold value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Trim</code></td>
+<td>
+<p>lower and upper quantiles for possible threshold values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.mean</code></td>
+<td>
+<p>a logical value indicating whether constant terms are included.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>"RLS": estimate the model by conditional least squares method implemented by recursive least squares; "NeSS": estimate the model by conditional least squares method implemented by Nested sub-sample search (NeSS) algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k0</code></td>
+<td>
+<p>the maximum number of threshold values to be evaluated, when the nested sub-sample search (NeSS) method is used. If the sample size is large (&gt; 3000), then k0 = floor(nT*0.5). The default is k0=300. But k0 = floor(nT*0.8) if nT &lt; 300.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>uTAR returns a list with components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the data matrix, y.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>arorder</code></td>
+<td>
+<p>AR orders of regimes 1 and 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delay</code></td>
+<td>
+<p>the delay for threshold variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>estimated innovations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sresi</code></td>
+<td>
+<p>standardized residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coef</code></td>
+<td>
+<p>a 2-by-(p+1) matrices. The first row shows the estimation results in regime 1, and the second row shows these in regime 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>estimated innovational covariance matrices of regimes 1 and 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nobs</code></td>
+<td>
+<p>numbers of observations in regimes 1 and 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model1,model2</code></td>
+<td>
+<p>estimated models of regimes 1 and 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thr</code></td>
+<td>
+<p>threshold value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>a set of threshold values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RSS</code></td>
+<td>
+<p>RSS</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AIC</code></td>
+<td>
+<p>AIC value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cnst</code></td>
+<td>
+<p>logical values indicating whether the constant terms are included in regimes 1 and 2.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Li, D., and Tong. H. (2016) Nested sub-sample search algorithm for estimation of threshold models. <em>Statisitca Sinica</em>, 1543-1554.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">phi=t(matrix(c(-0.3, 0.5,0.6,-0.3),2,2))
+y=uTAR.sim(nob=2000, arorder=c(2,2), phi=phi, d=2, thr=0.2, cnst=c(1,-1),sigma=c(1, 1))$series
+est=uTAR(y=y,p1=2,p2=2,d=2,thrQ=c(0,1),Trim=c(0.1,0.9),include.mean=TRUE,method="NeSS",k0=50)
+</code></pre>
+
+
+</div>

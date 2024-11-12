@@ -1,0 +1,186 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cendiff</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Test Censored ECDF Differences
+</h2>
+
+<h3>Description</h3>
+
+<p>Tests if there is a difference between two or more empirical cumulative
+distribution functions (ECDF) using the <code class="reqn">G^\rho</code> family of tests,
+or for a single curve against a known alternative.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">    cendiff(obs, censored, groups, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+
+<p>Either a numeric vector of observations or a formula.
+See examples below.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>censored</code></td>
+<td>
+
+<p>A logical vector indicating TRUE where an observation in ‘obs’ is
+censored (a less-than value) and FALSE otherwise.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+
+<p>A factor vector used for grouping ‘obs’ into subsets.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional items that are common to this function and the <code>survdiff</code>
+function from the ‘survival’ package.  See Details.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This, and related routines, are front ends to routines in the
+<code>survival</code> package.  Since the survival routines can not handle
+left-censored data, these routines transparently handle “flipping" input
+data and resultant calculations.  
+</p>
+<p>This function shares the same arguments as <code>survdiff</code>.  The
+most important of which is <code>rho</code> which controls the type of test.
+With <code>rho = 0</code> this is the log-rank or Mantel-Haenszel test, and with
+<code>rho = 1</code> it is equivalent to the Peto &amp; Peto modification of the
+Gehan-Wilcoxon test.  The default is <code>rho = 1</code>, or the Peto &amp; Peto
+test.  This is the most appropriate for left-censored log-normal data.
+</p>
+<p>For the formula interface: if the right hand side of the formula consists
+only of an offset term, then a one sample test is done.  To cause missing
+values in the predictors to be treated as a separate group, rather than
+being omitted, use the <code>factor</code> function with its <code>exclude</code>
+argument.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list with the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>the number of subjects in each group.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+
+<p>the weighted observed number of events in each group.  If there are
+strata, this will be a matrix with one column per stratum.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exp</code></td>
+<td>
+
+<p>the weighted expected number of events in each group.  If there are
+strata, this will be a matrix with one column per stratum.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chisq</code></td>
+<td>
+
+<p>the chisquare statistic for a test of equality.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+
+<p>the variance matrix of the test.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strata</code></td>
+<td>
+
+<p>optionally, the number of subjects contained in each stratum.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>R. Lopaka Lee &lt;rclee@usgs.gov&gt;
+</p>
+<p>Dennis Helsel &lt;dhelsel@practicalstats.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Helsel, Dennis R. (2005).  Nondectects and Data Analysis; Statistics for
+censored environmental data.  John Wiley and Sons, USA, NJ.
+</p>
+<p>Harrington, D. P. and Fleming, T. R. (1982).  A class of rank test
+procedures for censored survival data.  <em>Biometrika</em> <b>69</b>,
+553-566.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Cen</code>,
+
+<code>survdiff</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+    data(Cadmium)
+
+    obs      = Cadmium$Cd
+    censored = Cadmium$CdCen
+    groups   = Cadmium$Region
+
+    # Cd differences between regions?
+    cendiff(obs, censored, groups)
+    
+    # Same as above using formula interface
+    cenfit(Cen(obs, censored)~groups) 
+</code></pre>
+
+
+</div>

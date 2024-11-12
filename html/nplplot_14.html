@@ -1,0 +1,202 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nplplot.multi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plotting linkage or association statistics for multiple results files</h2>
+
+<h3>Description</h3>
+
+<p>Wrapper function for the 'nplplot' function. Creates mutiple plots
+from a list of plot files, with custom graphical parameters set by
+header files. </p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nplplot.multi(filenames, plotdata = NULL, col=2, row=2, mode="l",
+                output="screen", headerfiles=NULL, lgnd="page",
+                customtracks=FALSE, mega2mapfile=NULL,
+                pagewidth=NULL, pageheight=NULL, topmargin=0.25,
+                ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>filenames</code></td>
+<td>
+<p> Vector of strings giving file names
+containing tables of linkage analysis results. See
+<code>nplplot</code> for a description of the file format. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotdata</code></td>
+<td>
+<p> List of dataframes by chromosome
+containing tables of linkage analysis results. See
+<code>nplplot</code> for a description of the format. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p> Integer indicating number of columns of plots to be drawn
+on a page.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>row</code></td>
+<td>
+<p> Integer signifying number of rows of plots will be drawn
+on a page.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p> 'p' or 'l' to denote 'portrait' or 'landscape' mode.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p> String giving file name to save plots in. If
+set to 'screen', plots will be displayed and not saved. The file
+format is determined by the filename extension: '.pdf' for PDF, or
+'.ps' for postscript. If no extension is provided, or is not
+recognized, a PDF file will be produced with '.pdf' appended to the
+file name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>headerfiles</code></td>
+<td>
+<p> Files containing R language commands to set
+various plot parameters, which are passed onto the
+<code>nplplot</code> command. The recommended use is to have one
+headerfile per plot file. For a list of parameters, consult the
+<code>nplplot</code> documentation. If the number of headerfiles is
+fewer than plot files, the last header file will be reused as many
+times as needed. If more headerfiles are provided than necessary, the
+last ones will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lgnd</code></td>
+<td>
+<p> TRUE, FALSE, 'page' or a list consisting of plot
+numbers. If a single value is given, TRUE causes legends to be drawn
+inside every plot, FALSE omits legends altogether, and 'page' causes
+a legend to be drawn inside the first plot on every page. If a list
+of numbers is provided, only plots corresponding to these numbers
+will have legends. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>customtracks</code></td>
+<td>
+<p> TRUE or FALSE. If set to TRUE, data files are
+created to draw custom tracks within the UCSC genome browser in BED
+format, as well as a combined data file to add a genome-wide track
+over all chromosomes present in the data. If set to TRUE, a
+<code>mega2mapfile</code> also needs to be supplied (see below). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mega2mapfile</code></td>
+<td>
+<p> Mega2 annotated format map file containing
+physical positions for all the markers present in the
+nplplot input data files. Rather than a file name, the name of a 
+<em>data.frame</em> containing what would have been read from the file,
+may be given. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pagewidth</code></td>
+<td>
+<p> A number denoting width of the plot page in
+inches. If set to NULL, a width of 7.0 is used for the plot
+area. Assumes that a margin of 0.5 will be available around the plot
+area for axis annotations. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pageheight</code></td>
+<td>
+<p> A number denoting height of the plot page in
+inches. If set to NULL, a height of 10.0 is used for the plot area. 
+Assumes that a margin of 0.5 will be available around the plot
+area for axis annotations. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>topmargin</code></td>
+<td>
+<p> A number denoting the width of the outside top
+margin of each plot. Since this contains marker names, it may need to
+be increased to accommodate long names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Further graphical parameters to be passed onto the
+'plot', 'lines' and 'points' commands within <code>nplplot</code>. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p> This function is designed for use within the Mega2 software to
+generate graphical output for some of the target analysis options,
+namely Merlin, SimWalk2 and Allegro. It calls nplplot repeatedly to
+create plots corresponding to each input file. The input arguments
+control characteristics of all plots together, whereas the header
+files allow customization within each plot. Thus, it is expected that
+there should be as many header files as there are plot data files.
+</p>
+<p>This function can also be used to create custom tracks within the UCSC
+genome browser, as well as a genome-wide plot. To use this feature, make
+sure that the names of the nplplot input data files each have a
+"Mega2-style" chromosome extension (01 through 09 for chromosomes 1
+thorugh 9, otherwise the chromosome number, or X for the human
+X-chromosome, 23).
+</p>
+<p>To make this function more useful to other <strong>R</strong> programs, you may
+directly supply a <em>data.frame</em> for the <code>mapfile</code> argument
+and a list of <em>data.frames</em> for the <code>plotdata</code> argument
+and NULL for the <code>filename</code> argument.  (The name of each list
+element is the corresponding chromosome.)
+</p>
+
+
+<h3>Value</h3>
+
+<p>TRUE or FALSE depending on whether all plot commands were successful.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nplplot, nplplot.old</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">datadir &lt;- paste(system.file("data", package="nplplot"),
+                 .Platform$file.sep, sep="")
+f1 &lt;- paste(datadir, "lods1.txt.gz", sep="")
+f2 &lt;- paste(datadir, "lods2.txt.gz", sep="")
+h1 &lt;- system.file("extdata","lods1header.R",package="nplplot")
+h2 &lt;- system.file("extdata","lods2header.R",package="nplplot")
+nplplot.multi(c(f1, f2), col=1, row=2, output="screen", 
+	     headerfiles=c(h1, h2), topmargin=0.5)
+</code></pre>
+
+
+</div>

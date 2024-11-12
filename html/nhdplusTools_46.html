@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_split_catchment</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get split catchment</h2>
+
+<h3>Description</h3>
+
+<p>Uses catchment splitting web service to retrieve
+the portion of a catchment upstream of the point provided.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_split_catchment(point, upstream = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>point</code></td>
+<td>
+<p>scf POINT including crs as created by:
+<code>sf::st_sfc(sf::st_point(.. ,..), crs)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upstream</code></td>
+<td>
+<p>logical If TRUE, the entire drainage basin upstream
+of the point provided is returned in addition to the local catchment.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>sf data.frame containing the local catchment, the split portion
+and optionally the total drainage basin.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+point &lt;- sf::st_sfc(sf::st_point(x = c(-89.2158, 42.9561)), crs = 4326)
+
+trace &lt;- get_raindrop_trace(point)
+
+if(inherits(trace, "sf")) {
+
+(snap_point &lt;- sf::st_sfc(sf::st_point(trace$intersection_point[[1]]),
+                          crs = 4326))
+
+(catchment &lt;- get_split_catchment(snap_point))
+
+bbox &lt;- sf::st_bbox(catchment) + c(-0.005, -0.005, 0.005, 0.005)
+
+nhdplusTools::plot_nhdplus(bbox = bbox, cache_data = FALSE)
+
+plot(sf::st_transform(sf::st_geometry(catchment)[2], 3857), add = TRUE, col = "black")
+plot(sf::st_transform(sf::st_geometry(catchment)[1], 3857), add = TRUE, col = "red")
+plot(sf::st_transform(sf::st_sfc(point, crs = 4326), 3857), add = TRUE, col = "white")
+
+(catchment &lt;- get_split_catchment(snap_point, upstream = FALSE))
+
+bbox &lt;- sf::st_bbox(catchment) + c(-0.005, -0.005, 0.005, 0.005)
+
+nhdplusTools::plot_nhdplus(bbox = bbox, cache_data = FALSE)
+
+plot(sf::st_transform(sf::st_geometry(catchment)[1], 3857), add = TRUE, col = "red")
+plot(sf::st_transform(sf::st_geometry(catchment)[2], 3857), add = TRUE, col = "black")
+plot(sf::st_transform(sf::st_sfc(point, crs = 4326), 3857), add = TRUE, col = "white")
+
+pour_point &lt;- sf::st_sfc(sf::st_point(x = c(-89.25619, 42.98646)), crs = 4326)
+
+(catchment &lt;- get_split_catchment(pour_point, upstream = FALSE))
+
+bbox &lt;- sf::st_bbox(catchment) + c(-0.005, -0.005, 0.005, 0.005)
+
+nhdplusTools::plot_nhdplus(bbox = bbox, cache_data = FALSE)
+
+plot(sf::st_transform(sf::st_geometry(catchment)[1], 3857), add = TRUE, col = "red")
+plot(sf::st_transform(sf::st_geometry(catchment)[2], 3857), add = TRUE, col = "black")
+plot(sf::st_transform(sf::st_sfc(pour_point, crs = 4326), 3857), add = TRUE, col = "white")
+}
+
+
+</code></pre>
+
+
+</div>

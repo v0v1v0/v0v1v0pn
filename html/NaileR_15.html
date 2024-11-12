@@ -1,0 +1,224 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nail_catdes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Interpret a categorical latent variable</h2>
+
+<h3>Description</h3>
+
+<p>Generate an LLM response to analyze a categorical latent variable.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nail_catdes(
+  dataset,
+  num.var,
+  introduction = "",
+  request = NULL,
+  model = "llama3",
+  isolate.groups = FALSE,
+  drop.negative = FALSE,
+  proba = 0.05,
+  row.w = NULL,
+  generate = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>a data frame made up of at least one categorical variable and a set of quantitative variables and/or categorical variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.var</code></td>
+<td>
+<p>the index of the variable to be characterized.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>introduction</code></td>
+<td>
+<p>the introduction for the LLM prompt.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>request</code></td>
+<td>
+<p>the request made to the LLM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the model name ('llama3' by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isolate.groups</code></td>
+<td>
+<p>a boolean that indicates whether to give the LLM a single prompt, or one prompt per category. Recommended with long catdes results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop.negative</code></td>
+<td>
+<p>a boolean that indicates whether to drop negative v.test values for interpretation (keeping only positive v.tests). Recommended with long catdes results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proba</code></td>
+<td>
+<p>the significance threshold considered to characterize the categories (by default 0.05).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>row.w</code></td>
+<td>
+<p>a vector of integers corresponding to an optional row weights (by default, a vector of 1 for uniform row weights)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>generate</code></td>
+<td>
+<p>a boolean that indicates whether to generate the LLM response. If FALSE, the function only returns the prompt.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function directly sends a prompt to an LLM. Therefore, to get a consistent answer, we highly recommend to customize the parameters introduction and request and add all relevant information on your data for the LLM. We also recommend renaming the columns with clear, unshortened and unambiguous names.
+</p>
+<p>Additionally, if isolate.groups = TRUE, you will need an introduction and a request that take into account the fact that only one group is analyzed at a time.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame, or a list of data frames, containing the LLM's prompt and response (if generate = TRUE).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Processing time is often longer than ten seconds
+# because the function uses a large language model.
+
+### Example 1: Fisher's iris ###
+library(NaileR)
+data(iris)
+
+intro_iris &lt;- "A study measured various parts of iris flowers
+from 3 different species: setosa, versicolor and virginica.
+I will give you the results from this study.
+You will have to identify what sets these flowers apart."
+intro_iris &lt;- gsub('\n', ' ', intro_iris) |&gt;
+stringr::str_squish()
+
+req_iris &lt;- "Please explain what makes each species distinct.
+Also, tell me which species has the biggest flowers,
+and which species has the smallest."
+req_iris &lt;- gsub('\n', ' ', req_iris) |&gt;
+stringr::str_squish()
+
+res_iris &lt;- nail_catdes(iris, num.var = 5,
+introduction = intro_iris, request = req_iris)
+cat(res_iris$response)
+
+
+### Example 2: food waste dataset ###
+
+library(FactoMineR)
+
+data(waste)
+waste &lt;- waste[-14]    # no variability on this question
+
+set.seed(1)
+res_mca_waste &lt;- MCA(waste, quali.sup = c(1,2,50:76),
+ncp = 35, level.ventil = 0.05, graph = FALSE)
+plot.MCA(res_mca_waste, choix = "ind",
+invisible = c("var", "quali.sup"), label = "none")
+res_hcpc_waste &lt;- HCPC(res_mca_waste, nb.clust = 3, graph = FALSE)
+plot.HCPC(res_hcpc_waste, choice = "map", draw.tree = FALSE,
+ind.names = FALSE)
+don_clust_waste &lt;- res_hcpc_waste$data.clust
+
+intro_waste &lt;- 'These data were collected
+after a survey on food waste,
+with participants describing their habits.'
+intro_waste &lt;- gsub('\n', ' ', intro_waste) |&gt;
+stringr::str_squish()
+
+req_waste &lt;- 'Please summarize the characteristics of each group.
+Then, give each group a new name, based on your conclusions.
+Finally, give each group a grade between 0 and 10,
+based on how wasteful they are with food:
+0 being "not at all", 10 being "absolutely".'
+req_waste &lt;- gsub('\n', ' ', req_waste) |&gt;
+stringr::str_squish()
+
+res_waste &lt;- nail_catdes(don_clust_waste,
+num.var = ncol(don_clust_waste),
+introduction = intro_waste, request = req_waste,
+drop.negative = TRUE)
+
+cat(res_waste$response)
+
+
+### Example 3: local_food dataset ###
+
+data(local_food)
+
+set.seed(1)
+res_mca_food &lt;- MCA(local_food, quali.sup = 46:63,
+ncp = 100, level.ventil = 0.05, graph = FALSE)
+plot.MCA(res_mca_food, choix = "ind",
+invisible = c("var", "quali.sup"), label = "none")
+res_hcpc_food &lt;- HCPC(res_mca_food, nb.clust = 3, graph = FALSE)
+plot.HCPC(res_hcpc_food, choice = "map", draw.tree = FALSE,
+ind.names = FALSE)
+don_clust_food &lt;- res_hcpc_food$data.clust
+
+intro_food &lt;- 'A study on sustainable food systems
+was led on several French participants.
+This study had 2 parts. In the first part,
+participants had to rate how acceptable
+"a food system that..." (e.g, "a food system that
+only uses renewable energy") was to them.
+In the second part, they had to say
+if they agreed or disagreed with some statements.'
+intro_food &lt;- gsub('\n', ' ', intro_food) |&gt;
+stringr::str_squish()
+
+req_food &lt;- 'I will give you the answers from one group.
+Please explain who the individuals of this group are,
+what their beliefs are.
+Then, give this group a new name,
+and explain why you chose this name.
+Do not use 1st person ("I", "my"...) in your answer.'
+req_food &lt;- gsub('\n', ' ', req_food) |&gt;
+stringr::str_squish()
+
+res_food &lt;- nail_catdes(don_clust_food, num.var = 64,
+introduction = intro_food,
+request = req_food,
+isolate.groups = TRUE, drop.negative = TRUE)
+
+res_food[[1]]$response |&gt; cat()
+res_food[[2]]$response |&gt; cat()
+res_food[[3]]$response |&gt; cat()
+
+## End(Not run)
+</code></pre>
+
+
+</div>

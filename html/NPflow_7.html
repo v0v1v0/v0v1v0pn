@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cytoScatter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Scatterplot of flow cytometry data</h2>
+
+<h3>Description</h3>
+
+<p>Scatterplot of flow cytometry data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cytoScatter(
+  cytomatrix,
+  dims2plot = c(1, 2),
+  gating = NULL,
+  scale_log = FALSE,
+  xlim = NULL,
+  ylim = NULL,
+  gg.add = list(theme())
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cytomatrix</code></td>
+<td>
+<p>a <code>p x n</code> data matrix, of <code>n</code> cell observations measured over <code>p</code>
+markers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dims2plot</code></td>
+<td>
+<p>a vector of length at least 2, indicating of the dimensions to be plotted.
+Default is <code>c(1, 2)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gating</code></td>
+<td>
+<p>an optional vector of length <code>n</code> indicating a known gating of the cells to be 
+displayed. Default is <code>NULL</code> in which case no gating is displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale_log</code></td>
+<td>
+<p>a logical Flag indicating whether the data should be plotted on the log scale.
+Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>a vector of length 2 to specify the x-axis limits. Only used if <code>dims2plot</code> is
+of length 2Default is the data range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>a vector of length 2 to specify the y-axis limits. Only used if <code>dims2plot</code> is
+of length 2. Default is the data range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gg.add</code></td>
+<td>
+<p>A list of instructions to add to the <code>ggplot2</code> instruction (see <code>gg-add</code>).
+Default is <code>list(theme())</code>, which adds nothing.
+to the plot.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+rm(list=ls())
+#Number of data
+n &lt;- 500
+#n &lt;- 2000
+set.seed(1234)
+#set.seed(123)
+#set.seed(4321)
+
+# Sample data
+m &lt;- matrix(nrow=2, ncol=4, c(-1, 1, 1.5, 2, 2, -2, -1.5, -2))
+p &lt;- c(0.2, 0.1, 0.4, 0.3) # frequence des clusters
+
+sdev &lt;- array(dim=c(2,2,4))
+sdev[, ,1] &lt;- matrix(nrow=2, ncol=2, c(0.3, 0, 0, 0.3))
+sdev[, ,2] &lt;- matrix(nrow=2, ncol=2, c(0.1, 0, 0, 0.3))
+sdev[, ,3] &lt;- matrix(nrow=2, ncol=2, c(0.3, 0.15, 0.15, 0.3))
+sdev[, ,4] &lt;- .3*diag(2)
+c &lt;- rep(0,n)
+z &lt;- matrix(0, nrow=2, ncol=n)
+for(k in 1:n){
+ c[k] = which(rmultinom(n=1, size=1, prob=p)!=0)
+ z[,k] &lt;- m[, c[k]] + sdev[, , c[k]]%*%matrix(rnorm(2, mean = 0, sd = 1), nrow=2, ncol=1)
+ #cat(k, "/", n, " observations simulated\n", sep="")
+}
+
+cytoScatter(z)
+
+</code></pre>
+
+
+</div>

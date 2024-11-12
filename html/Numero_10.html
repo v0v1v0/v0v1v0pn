@@ -1,0 +1,204 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nroPlot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot a self-organizing map</h2>
+
+<h3>Description</h3>
+
+<p>Create a graphical interface for selecting subgroups from multiple
+map colorings simultaneously.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nroPlot(topology, colors, labels = NULL, subplot = NULL,
+        interactive = FALSE, clear = NULL)
+
+nroPlot.save(file, topology, colors, labels = NULL,
+             subplot = NULL, font = 1.0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>topology</code></td>
+<td>
+
+<p>A data frame with K rows and six or more columns that contain the district
+positions of a self-organizing map and optional region assignments.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colors</code></td>
+<td>
+
+<p>A character vector with K elements or a K x N matrix of hexadecimal
+color codes as strings.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+
+<p>A character vector with K elements or a K x N matrix of district labels.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subplot</code></td>
+<td>
+
+<p>A two-element vector that sets out the number of rows and columns for
+a grid layout of multiple colorings.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clear</code></td>
+<td>
+
+<p>If TRUE, all graphics devices are cleared when the plot is refreshed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interactive</code></td>
+<td>
+
+<p>If TRUE, an interactive version of the plot is launched.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+
+<p>If non-empty, the figure is saved as an SVG or HTML file
+instead of plotting on graphics device.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>font</code></td>
+<td>
+
+<p>Multiplier to adjust font size for SVG and HTML output.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The input <code>topology</code> must follow the format from
+<code>nroKohonen()</code>, but may also contain the columns REGION,
+and REGION.label that specify the names for subsets of districts and the
+single character labels to be shown on top of those districts. The input
+can also be the list object as returned by <code>nroKohonen()</code>.
+</p>
+<p>The color input can include the attribute 'contrast' that contains a
+binary vector or a matrix of equal size. If an element is set, it means
+a dark label or highlight will have better contrast with the background.
+</p>
+<p>The label input can include the attribute 'visible' that contains a
+binary vector or a matrix of equal size. If an element is set, it means
+a label is visible, otherwise it will not be shown on the map.
+</p>
+<p>Some non-alphanumeric characters are not supported and will be
+automatically converted to "_". Too long labels or column names will be
+truncated.
+</p>
+<p>The default value for <code>clear</code> is TRUE to prevent multiple plot windows
+from accumulating within the RStudio. If you are running R from the terminal
+or using detached devices, setting <code>clear</code> to FALSE will retain the
+current window when refreshing.
+</p>
+<p>If the file name ends with ".html", an interactive HTML document is
+produced, otherwise an SVG document is created. We recommend opening the
+HTML file with a web browser to select regions on large maps (i.e. when the
+R plot window becomes too slow to use). The HTML page allows you to assign
+subgroups and to save the results as tab-delimited text.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The main function returns a data frame with K rows that contains the
+topology and subgrouping information. The <code>.save</code> subroutine returns
+the number of bytes written in the output file.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Detect binary columns.
+dataset &lt;- nroPreprocess(dataset, method = "")
+
+# Prepare training data.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- scale.default(dataset[,trvars])
+
+# K-means clustering.
+km &lt;- nroKmeans(data = trdata)
+
+# Self-organizing map.
+sm &lt;- nroKohonen(seeds = km)
+sm &lt;- nroTrain(map = sm, data = trdata)
+
+# Assign data points into districts.
+matches &lt;- nroMatch(centroids = sm, data = trdata)
+
+# Select a subset of variables and detect binary data.
+vars &lt;- c("AGE", "MALE", "uALB", "CHOL", "DIAB_KIDNEY", "DECEASED")
+selected &lt;- nroPreprocess(dataset[,vars], method = "")
+
+# Calculate district averages for seleted variables.
+vars &lt;- c("AGE", "MALE", "uALB", "CHOL", "DIAB_KIDNEY", "DECEASED")
+planes &lt;- nroAggregate(topology = sm, districts = matches, data = selected)
+
+# Estimate statistics.
+stats &lt;- nroPermute(map = sm, districts = matches, data = selected)
+
+# Set visuals.
+colrs &lt;- nroColorize(values = planes, amplitudes = stats)
+labls &lt;- nroLabel(topology = sm, values = planes)
+
+# Add subgrouping information.
+topo &lt;- sm$topology
+topo$REGION &lt;- ""
+topo$REGION[1:8] &lt;- "Center"
+topo$REGION[9:21] &lt;- "Perimeter"
+
+# Add subgroup labels.
+topo$REGION.label &lt;- ""
+topo$REGION.label[1:8] &lt;- "C"
+topo$REGION.label[9:21] &lt;- "P"
+
+# Add subgroup colors.
+topo$REGION.color &lt;- ""
+topo$REGION.color[1:8] &lt;- "#00f00060"
+topo$REGION.color[9:21] &lt;- "#f000f060"
+
+# Plot colorings on screen.
+nroPlot(topology = topo, colors = colrs, labels = labls)
+
+# Save colorings in file.
+#fn &lt;- "colorings.html"
+#n &lt;- nroPlot.save(file = fn, topology = topo,
+#    colors = colrs, labels = labls)
+#cat(n, " bytes saved in '", fn, "'\n", sep="")
+</code></pre>
+
+
+</div>

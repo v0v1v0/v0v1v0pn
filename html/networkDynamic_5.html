@@ -1,0 +1,245 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>activate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Dynamic Activation and Inactivation of Edges and Vertices </h2>
+
+<h3>Description</h3>
+
+<p><code>activate</code> and <code>deactivate</code> set spells of activity and inactivity respectively for elements (edges and vertices) in a dynamic network.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">activate.edges(x, onset = NULL, terminus = NULL, length = NULL, at = NULL,
+    e = seq_along(x$mel))
+activate.vertices(x, onset = NULL, terminus = NULL, length = NULL, at = NULL, 
+    v = seq_len(network.size(x)))
+
+deactivate.edges(x, onset = NULL, terminus = NULL, length = NULL, at = NULL,
+    e = seq_along(x$mel))
+deactivate.vertices(x, onset = NULL, terminus = NULL, length = NULL, at = NULL,
+    v = seq_len(network.size(x)), deactivate.edges = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> an object of class <code>network</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>onset</code></td>
+<td>
+<p> an optional vector of timepoints that specifies the starts of the interval(s). This must be accompanied by one of <code>terminus</code> or <code>length</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terminus</code></td>
+<td>
+<p> an optional vector of timepoints that specifies the ends of the interval(s). This must be accompanied by one of <code>onset</code> or <code>length</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>length</code></td>
+<td>
+<p> an optional vector of interval lengths for the interval(s). This must be accompanied by one of <code>onset</code> or <code>terminus</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>at</code></td>
+<td>
+<p> optional, one or more time points to be activated. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+<p> optional, one or more IDs indicating edges to be modified. Ids can be repeated to indicate multiple time values per element.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p> optional, one or more IDs indicating vertices to be modified. Ids can be repeated to indicate multiple time values per element.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deactivate.edges</code></td>
+<td>
+<p>optional, TRUE setting will automatically deactivate all the edges associated with the vertex being deactivated</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An element in a dynamically extended network class is considered to be either “active” or “inactive” at any point in time, with the substantive meaning of “activity” determined by the specific application context.  The <code>activate</code> and <code>deactivate</code> functions provide an interface for controlling the state of the elements in a dynamic network.
+</p>
+<p><code>activate.edges</code> and <code>activate.vertices</code> have identical behavior, except for the elements they modify (the same is true for the <code>deactivate.*</code> functions).  
+</p>
+<p>There are several ways to specify the activity spell, and the general syntax rules are described at <code>activity.attribute</code>.  Activity can be set for a single time point, using either <code>at</code>, or by setting onset=terminus.  Activity can be set for an interval [onset,terminus), using a valid combination of the <code>onset</code>, <code>terminus</code> and <code>length</code> attributes.
+</p>
+<p>This allows for a wide range of options when specifying spells, but a correct specification must use only one of these forms:
+</p>
+<pre>
+  at
+  onset and terminus 
+  onset and length
+  terminus and length
+  or, you can provide no timing information 
+</pre>
+<p>If provided with no timing information, the element is activated/deactivated from <code>-Inf</code> to <code>Inf</code>.   
+The specified interval spans the period from the onset (inclusive) to the terminus (exclusive), so [onset,terminus).
+</p>
+<p>There are some special behaviors associated with the arguments  <code>Inf</code> and <code>-Inf</code>.
+</p>
+
+<ul>
+<li>
+<p> The open-ended interval <code>c(-Inf,x)</code> includes <code>-Inf</code>.  For consistency, we also allow the open-ended interval <code>c(x, Inf)</code> to include <code>Inf</code>. 
+Thus [onset, terminus) will be interpreted as [onset, terminus] when terminus = <code>Inf</code>.
+</p>
+</li>
+<li>
+<p> The arguments  <code>Inf</code> or <code>-Inf</code> are only valid when used to specify an interval, they can not be used 
+to specify status at a time point using  <code>at</code>.   In addition, they cannot be paired with themselves in a call.
+That is, both <code>(Inf,Inf)</code> and <code>(-Inf,-Inf)</code> are not valid specifications for any spell.
+</p>
+</li>
+<li>
+<p> Both <code>deactivate.*(x)</code> and <code>deactivate.*(x, -Inf, Inf)</code> create the null spell – specifying inactivity over the entire time span. Note that
+by convention the null spell is stored as <code>(Inf,Inf)</code>.
+</p>
+</li>
+</ul>
+<p>Calling the activation/deactivation functions with a vector of spell modifiers and a vector of elements to be modified
+(for example, <code>at=c(1,3,5 7), v=c(1:4)</code>) allows multiple elements in the network 
+to be activated/deactivated simultaneously (note, not multiple spells for a single element).  
+The spell modifiers are applied sequentially to the selected elements.   
+If the length of the spell vector is less than the number of elements, 
+the spell modifiers are recycled as needed.  
+When multiple network elements are activated in a single call, the spell modifiers must all be of one type, 
+either <code>at</code>, or a valid mix of <code>onset</code>, <code>terminus</code> and <code>length</code>.
+</p>
+<p>The <code>activate.*</code> and <code>deactivate.*</code> functions in general modify spells in similar, if opposite, ways.  
+However, there are some behaviors that are specific to each function.
+</p>
+ 
+<ul>
+<li>
+<p> Effects on an element that has no existing activity attributes.
+</p>
+
+<ul>
+<li>
+<p> For activate: the element is marked as being inactive before the onset time, then active for the specified spell, then inactive from the terminus on.  
+</p>
+</li>
+<li>
+<p> For deactivate: the element is marked as being active before the onset time, then inactive for the specified spell, then active from the terminus on (i.e., the opposite of <code>activate.*</code>.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> Effects of the <code>at</code>  specification.
+</p>
+
+<ul>
+<li>
+<p> For activate: the element is activated at that time point.  
+</p>
+</li>
+<li>
+<p> For deactivate: the element is deactivated at the  time point, but only if the time point is currently activated as a 0-length spell.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>Currently, there is no support for activating multiple spells for a single element
+in a single call. To activate 2 spells for a node,  for example, one must call
+activate.vertices twice.  It is advisable to remove duplicate edges or
+vertices from the <code>e</code> or <code>v</code> input vectors.
+</p>
+<p>Edge/vertex activity is tracked through an attribute called (eponymously) “active”, and which is explained in more detail under activity.attribute.  This may be modified or otherwise accessed using standard class methods (e.g., <code>get.edge.attribute</code>), as well as the specialized methods described here.
+</p>
+
+
+<h3>Value</h3>
+
+<p>None.  (But all four commands modify their arguments as a side-effect.)
+</p>
+
+
+<h3>Note</h3>
+
+<p> This function may not be entirely stable in the long run, since it makes explicit reference to internal elements of the network object; some syntactic changes could occur in the future. </p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ayn Leslie-Cook <a href="mailto:aynlc3@uw.edu">aynlc3@uw.edu</a>, Carter T. Butts <a href="mailto:buttsc@uci.edu">buttsc@uci.edu</a></p>
+
+
+<h3>References</h3>
+
+<p> ~put references to the literature/web site here ~ </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>is.active</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">triangle &lt;- network.initialize(3)  # create a toy network
+add.edge(triangle,1,2)    # add an edge between vertices 1 and 2
+add.edge(triangle,2,3)    # add more edges
+add.edge(triangle,3,1)
+
+# turn on all edges at time 1 only (0 length spell)
+activate.edges(triangle,at=1) 
+
+# activate edge (1,2) from t=2 to t=3
+activate.edges(triangle,onset=2, terminus=3,
+               e=get.edgeIDs(triangle,v=1,alter=2))
+               
+# activate edge (2,3) from t=4 for 2 time lengths
+activate.edges(triangle,onset=4, length=2, 
+               e=get.edgeIDs(triangle,v=2,alter=3))
+               
+deactivate.edges(triangle, at=2, e=1) # does not work since the spell is not 0-length
+is.active(triangle, at=2, e=1:3)
+
+deactivate.edges(triangle, e=1, onset=2, length=0.1)  # this deactivates the vertex
+is.active(triangle, at=2, e=1:3)  
+
+# this activates edges 2 and 3 at time 5
+activate.edges(triangle, e=2:3, at=5)
+
+# this activates edge 1 at multiple times;
+deactivate.edges(triangle)
+activate.edges(triangle, e=c(1,1,1), at=6:8)
+is.active(triangle, at=6, e=1:3)
+is.active(triangle, at=7, e=1:3)
+is.active(triangle, at=8, e=1:3)
+
+# this activates vertex 1 for two spells, (0,1) and (3,4)
+test &lt;- network.initialize(3)
+activate.vertices(test,onset=0:3,terminus=1:4,v=c(1,2,3,1))
+get.vertex.activity(test, as.spellList=TRUE)
+
+
+</code></pre>
+
+
+</div>

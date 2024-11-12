@@ -1,0 +1,205 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pwr2n.LR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sample Size Calculation under Proportional Hazards</h2>
+
+<h3>Description</h3>
+
+<p><code>pwr2n.LR</code> calculates the total number of events and total
+number of subjects required given the provided design parameters based on either
+schoenfeld or freedman formula.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pwr2n.LR(
+  method = c("schoenfeld", "freedman"),
+  lambda0,
+  lambda1,
+  ratio = 1,
+  entry = 0,
+  fup,
+  alpha = 0.05,
+  beta = 0.1,
+  alternative = c("two.sided"),
+  Lparam = NULL,
+  summary = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>calculation formula, Default: c("schoenfeld", "freedman")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda0</code></td>
+<td>
+<p>hazard rate for the control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda1</code></td>
+<td>
+<p>hazard rate for the treatment group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratio</code></td>
+<td>
+<p>randomization ratio between treatment and control. For example,
+ratio=2 if randomization ratio is 2:1 to treatment and control group.
+Default:1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry</code></td>
+<td>
+<p>enrollment time. A constant enrollment rate is assumed,
+Default: 0</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fup</code></td>
+<td>
+<p>follow-up time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>type I error rate, Default: 0.05</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>type II error rate. For example,if the target power is 80%, beta is 0.2.
+Default: 0.1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>a value must be one of ("two.sided", "one.sided"), indicating
+whether a two-sided or one-sided test to use.  Default: c("two.sided")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Lparam</code></td>
+<td>
+<p>a vector of shape and scale parameters for the drop-out Weibull distribution,
+See Details below. Default: NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary</code></td>
+<td>
+<p>a logical controlling whether a brief summary is printed or not
+, Default: TRUE</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Both Schoenfeld's formula and Freedman's formula are included in the
+function <code>pwr2n.LR</code>.
+The total event number is determined by <code class="reqn">\alpha, \beta</code> and
+hazard ratio, i.e., <code class="reqn">\lambda_1/\lambda_0</code>. Other design parameters such as
+enrollment period affects the event probability and thus the total sample size.
+A fixed duration design is assumed in the calculation. All patients are enrolled
+at a constant rate within <code>entry</code> time and have at least <code>fup</code>
+time of follow-up. So the total study duration is <code>entry</code>+<code>fup</code>.
+If drop-out is expected, a Weibull distribution with shape parameter -<code class="reqn">\alpha</code>
+and scale parameter - <code class="reqn">\beta</code> is considered. The CDF of Weibull is
+<code class="reqn">F(x)=1-exp(-(x/\beta)^\alpha)</code>, where <code class="reqn">\alpha</code> is the shape
+parameter and <code class="reqn">\beta</code> is the scale parameter. The event rate
+is calculated through numeric integration. See more details in
+<code>cal_event</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of components including
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>eventN</code></td>
+<td>
+<p>a numeric value giving the total number of events</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>totalN</code></td>
+<td>
+<p>a numeric value giving the total number of subjects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary</code></td>
+<td>
+<p>a list containing the input parameters and output results</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Schoenfeld, D. (1981) The asymptotic properties of nonparametric
+tests for comparing survival distributions. Biometrika, 68,
+316–319.
+</p>
+<p>Freedman, L. S. (1982) Tables of the number of patients required
+in clinical trials using the logrank test. Statistics in medicine, 1, 121–129.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pwr2n.NPH</code>,
+<code>evalfup</code>, <code>cal_event</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># define design parameters
+l0 &lt;- log(2)/14; HR &lt;- 0.8; RR &lt;- 2; entry &lt;- 12; fup &lt;- 12;
+eg1 &lt;- pwr2n.LR( method    = c("schoenfeld")
+                 ,l0
+                 ,l0*HR
+                 ,ratio=RR
+                 ,entry
+                 ,fup
+                 ,alpha     = 0.05
+                 ,beta      = 0.1
+)
+# event number, total subjects, event probability
+c(eg1$eventN,eg1$totalN,eg1$eventN/eg1$totalN)
+
+# example 2: drop-out from an exponential with median time is 30
+eg2 &lt;- pwr2n.LR( method    = c("schoenfeld")
+                 ,l0
+                 ,l0*HR
+                 ,ratio=RR
+                 ,entry
+                 ,fup
+                 ,alpha     = 0.05
+                 ,beta      = 0.1
+                 ,Lparam = c(1,30/log(2))
+)
+# event number, total subjects, event probability
+c(eg2$eventN,eg2$totalN,eg2$eventN/eg2$totalN)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,680 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npksum</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Sums with Mixed Data Types </h2>
+
+<h3>Description</h3>
+
+<p><code>npksum</code> computes kernel sums on evaluation
+data, given a set of training data, data to be weighted (optional), and a
+bandwidth specification (any bandwidth object).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npksum(...)
+
+## S3 method for class 'formula'
+npksum(formula, data, newdata, subset, na.action, ...)
+
+## Default S3 method:
+npksum(bws,
+       txdat = stop("training data 'txdat' missing"),
+       tydat = NULL,
+       exdat = NULL,
+       weights = NULL,
+       leave.one.out = FALSE,
+       kernel.pow = 1.0,
+       bandwidth.divide = FALSE,
+       operator = names(ALL_OPERATORS),
+       permutation.operator = names(PERMUTATION_OPERATORS),
+       compute.score = FALSE,
+       compute.ocg = FALSE,
+       return.kernel.weights = FALSE,
+       ...)
+
+## S3 method for class 'numeric'
+npksum(bws,
+       txdat = stop("training data 'txdat' missing"),
+       tydat,
+       exdat,
+       weights,
+       leave.one.out,
+       kernel.pow,
+       bandwidth.divide,
+       operator,
+       permutation.operator,
+       compute.score,
+       compute.ocg,
+       return.kernel.weights,
+       ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>a symbolic description of variables on which the sum is
+to be performed. The details of constructing a formula are
+described below.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object
+coercible to a data frame by <code>as.data.frame</code>) containing the variables
+in the model. If not found in data, the variables are taken from
+<code>environment(formula)</code>, typically the environment from which the
+function is called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>An optional data frame in which to look for evaluation data. If
+omitted, <code>data</code> is used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>an optional vector specifying a subset of observations to be used. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+
+<p>a function which indicates what should happen when the data contain
+<code>NA</code>s. The default is set by the <code>na.action</code> setting of options, and is
+<code>na.fail</code> if that is unset. The (recommended) default is
+<code>na.omit</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to specify the parameters to the
+<code>default</code> S3 method, which is called during estimation. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>txdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of sample realizations (training data) used to
+compute the sum.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tydat</code></td>
+<td>
+
+<p>a numeric vector of data to be weighted. The <code class="reqn">i</code>th kernel weight
+is applied to the <code class="reqn">i</code>th element. Defaults to  <code>1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exdat</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of sum evaluation points (if omitted,
+defaults to the training data itself).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bws</code></td>
+<td>
+
+<p>a bandwidth specification. This can be set as any suitable bandwidth
+object returned from a bandwidth-generating function, or a numeric vector.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>a <code class="reqn">n</code> by <code class="reqn">q</code>  matrix of weights which can optionally be
+applied to <code>tydat</code> in the sum. See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>leave.one.out</code></td>
+<td>
+
+<p>a logical value to specify whether or not to compute the leave one
+out sums. Will not work if <code>exdat</code> is specified. Defaults to
+<code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel.pow</code></td>
+<td>
+
+<p>an integer specifying the power to which the kernels will be raised
+in the sum. Defaults to <code>1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bandwidth.divide</code></td>
+<td>
+
+<p>a logical specifying whether or not to divide continuous kernel
+weights by their bandwidths. Use this with nearest-neighbor
+methods. Defaults to <code>FALSE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>operator</code></td>
+<td>
+
+<p>a string specifying whether the <code>normal</code>, <code>convolution</code>,
+<code>derivative</code>, or <code>integral</code> kernels are to be
+used. Operators scale results by factors of <code class="reqn">h</code> or <code class="reqn">1/h</code> where
+appropriate. Defaults to <code>normal</code> and applies to all elements in a
+multivariate object. See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>permutation.operator</code></td>
+<td>
+
+<p>a string which can have a value of <code>none</code>, <code>normal</code>,
+<code>derivative</code>, or <code>integral</code>. If set to something other
+than <code>none</code> (the default), then a separate result will be returned for each
+term in the product kernel, with the operator applied to that term.
+Permutation operators scale results by factors of <code class="reqn">h</code> or <code class="reqn">1/h</code> where
+appropriate. This is useful for computing gradients, for example.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compute.score</code></td>
+<td>
+
+<p>a logical specifying whether or not to return the score
+(the ‘grad h’ terms) for each dimension in addition to the kernel
+sum. Cannot be <code>TRUE</code> if a permutation operator other than
+<code>"none"</code> is selected. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compute.ocg</code></td>
+<td>
+
+<p>a logical specifying whether or not to return a separate result for
+each unordered and ordered dimension, where the product kernel term
+for that dimension is evaluated at an appropriate reference
+category. This is used primarily in <code>np</code> to compute ordered and
+unordered categorical gradients. See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.kernel.weights</code></td>
+<td>
+
+<p>a logical specifying whether or not to return the matrix of
+generalized product kernel weights. Defaults to <code>FALSE</code>. See
+details.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npksum</code>
+exists so that you can create your own kernel objects with
+or without a variable to be weighted (default <code class="reqn">Y=1</code>). With the options
+available, you could create new nonparametric tests or even new kernel
+estimators. The convolution kernel option would allow you to create,
+say, the least squares cross-validation function for kernel density
+estimation.
+</p>
+<p><code>npksum</code> uses highly-optimized C code that strives to minimize
+its ‘memory footprint’, while there is low overhead involved
+when using repeated calls to this function (see, by way of
+illustration, the example below that conducts leave-one-out
+cross-validation for a local constant regression estimator via calls
+to the <code>R</code> function <code>nlm</code>, and compares this to the
+<code>npregbw</code> function).
+</p>
+<p><code>npksum</code> implements a variety of methods for computing
+multivariate kernel sums (<code class="reqn">p</code>-variate) defined over a set of
+possibly continuous and/or discrete (unordered, ordered) data. The
+approach is based on Li and Racine (2003) who employ
+‘generalized product kernels’ that admit a mix of continuous
+and discrete data types.
+</p>
+<p>Three classes of kernel estimators for the continuous data types are
+available: fixed, adaptive nearest-neighbor, and generalized
+nearest-neighbor. Adaptive nearest-neighbor bandwidths change with
+each sample realization in the set, <code class="reqn">x_i</code>, when estimating
+the kernel sum at the point <code class="reqn">x</code>. Generalized nearest-neighbor
+bandwidths change with the point at which the sum is computed,
+<code class="reqn">x</code>. Fixed bandwidths are constant over the support of <code class="reqn">x</code>.
+</p>
+<p><code>npksum</code> computes <code class="reqn">\sum_{j=1}^{n}{W_j^\prime Y_j
+  K(X_j)}</code>, where <code class="reqn">W_j</code>
+represents a row vector extracted from <code class="reqn">W</code>.  That is, it computes
+the kernel weighted sum of the outer product of the rows of <code class="reqn">W</code>
+and <code class="reqn">Y</code>. In the examples, the uses of such sums are illustrated.
+</p>
+<p><code>npksum</code> may be invoked <em>either</em> with a formula-like
+symbolic 
+description of variables on which the sum is to be
+performed <em>or</em> through a simpler interface whereby data is passed
+directly to the function via the <code>txdat</code> and <code>tydat</code>
+parameters. Use of these two interfaces is <b>mutually exclusive</b>.
+</p>
+<p>Data contained in the data frame <code>txdat</code> (and also <code>exdat</code>)
+may be a mix of continuous (default), unordered discrete (to be
+specified in the data frame <code>txdat</code> using the
+<code>factor</code> command), and ordered discrete (to be specified
+in the data frame <code>txdat</code> using the <code>ordered</code>
+command). Data can be entered in an arbitrary order and data types
+will be detected automatically by the routine (see <code>np</code>
+for details).
+</p>
+<p>Data for which bandwidths are to be estimated may be specified
+symbolically. A typical description has the form <code>dependent data
+  ~ explanatory data</code>, where <code>dependent data</code> and <code>explanatory
+  data</code> are both series of variables specified by name, separated by the
+separation character '+'. For example, <code> y1 ~ x1 + x2 </code> specifies
+that <code>y1</code> is to be kernel-weighted by <code>x1</code> and <code>x2</code>
+throughout the sum. See below for further examples.
+</p>
+<p>A variety of kernels may be specified by the user. Kernels implemented
+for continuous data types include the second, fourth, sixth, and
+eighth order Gaussian and Epanechnikov kernels, and the uniform
+kernel. Unordered discrete data types use a variation on Aitchison and
+Aitken's (1976) kernel, while ordered data types use a variation of
+the Wang and van Ryzin (1981) kernel (see <code>np</code> for
+details).
+</p>
+<p>The option <code>operator=</code> can be used to ‘mix and match’
+operator strings to create a ‘hybrid’ kernel provided they
+match the dimension of the data. For example, for a two-dimensional
+data frame of numeric datatypes,
+<code>operator=c("normal","derivative")</code> will use the normal
+(i.e. PDF) kernel for variable one and the derivative of the PDF
+kernel for variable two. Please note that applying operators will scale the
+results by factors of <code class="reqn">h</code> or <code class="reqn">1/h</code> where appropriate.
+</p>
+<p>The option <code>permutation.operator=</code> can be used to ‘mix and match’
+operator strings to create a ‘hybrid’ kernel, in addition to
+the kernel sum with no operators applied, one for each continuous
+dimension in the data. For example, for a two-dimensional
+data frame of numeric datatypes,
+<code>permutation.operator=c("derivative")</code> will return the usual
+kernel sum as if <code>operator = c("normal","normal")</code> in the
+<code>ksum</code> member, and in the <code>p.ksum</code> member, it will return
+kernel sums for <code>operator = c("derivative","normal")</code>, and
+<code>operator = c("normal","derivative")</code>. This makes the computation
+of gradients much easier.
+</p>
+<p>The option <code>compute.score=</code> can be used to compute the gradients
+with respect to <code class="reqn">h</code> in addition to the normal kernel sum. Like
+permutations, the additional results are returned in the
+<code>p.ksum</code>. This option does not work in conjunction with
+<code>permutation.operator</code>.
+</p>
+<p>The option <code>compute.ocg=</code> works much like <code>permutation.operator</code>,
+but for discrete variables. The kernel is evaluated at a reference
+category in each dimension: for ordered data, the next lowest category
+is selected, except in the case of the lowest category, where the
+second lowest category is selected; for unordered data, the first
+category is selected. These additional data are returned in the
+<code>p.ksum</code> member. This option can be set simultaneously with
+<code>permutation.operator</code>.
+</p>
+<p>The option <code>return.kernel.weights=TRUE</code> returns a matrix of
+dimension ‘number of training observations’ by ‘number
+of evaluation observations’ and contains only the generalized product
+kernel weights ignoring all other objects and options that may be
+provided to <code>npksum</code> (e.g. <code>bandwidth.divide=TRUE</code> will be
+ignored, etc.). Summing the columns of the weight matrix and dividing
+by ‘number of training observations’ times the product of the
+bandwidths (i.e. <code>colMeans(foo$kw)/prod(h)</code>) would produce
+the kernel estimator of a (multivariate) density
+(<code>operator="normal"</code>) or multivariate cumulative distribution
+(<code>operator="integral"</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npksum</code> returns a <code>npkernelsum</code> object
+with the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p> the evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ksum</code></td>
+<td>
+<p> the sum at the evaluation points </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kw</code></td>
+<td>
+<p> the kernel weights (when <code>return.kernel.weights=TRUE</code>
+is specified)</p>
+</td>
+</tr>
+</table>
+<h3>Usage Issues</h3>
+
+<p>If you are using data of mixed types, then it is advisable to use the
+<code>data.frame</code> function to construct your input data and not
+<code>cbind</code>, since <code>cbind</code> will typically not work as
+intended on mixed data types and will coerce the data to the same
+type.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Aitchison, J. and C.G.G. Aitken (1976), “ Multivariate binary
+discrimination by the kernel method,” Biometrika, 63, 413-420.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics: Theory
+and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2003), “Nonparametric estimation of
+distributions with categorical and continuous data,” Journal
+of Multivariate Analysis, 86, 266-292.
+</p>
+<p>Pagan, A. and A. Ullah (1999), <em>Nonparametric Econometrics,</em> Cambridge
+University Press. 
+</p>
+<p>Scott, D.W. (1992), <em>Multivariate Density Estimation. Theory,
+Practice and Visualization,</em> New York: Wiley.
+</p>
+<p>Silverman, B.W. (1986), <em>Density Estimation,</em> London: Chapman and
+Hall.
+</p>
+<p>Wang, M.C. and J. van Ryzin (1981), “A class of smooth
+estimators for discrete distributions,” Biometrika, 68, 301-309.  </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# EXAMPLE 1: For this example, we generate 100,000 observations from a
+# N(0, 1) distribution, then evaluate the kernel density on a grid of 50
+# equally spaced points using the npksum() function, then compare
+# results with the (identical) npudens() function output
+
+n &lt;- 100000
+x &lt;- rnorm(n)
+x.eval &lt;- seq(-4, 4, length=50)
+
+# Compute the bandwidth with the normal-reference rule-of-thumb
+
+bw &lt;- npudensbw(dat=x, bwmethod="normal-reference")
+
+# Compute the univariate kernel density estimate using the 100,000
+# training data points evaluated on the 50 evaluation data points, 
+# i.e., 1/nh times the sum of the kernel function evaluated at each of
+# the 50 points
+
+den.ksum &lt;- npksum(txdat=x, exdat=x.eval, bws=bw$bw)$ksum/(n*bw$bw[1])
+
+# Note that, alternatively (easier perhaps), you could use the
+# bandwidth.divide=TRUE argument and drop the *bw$bw[1] term in the
+# denominator, as in
+# npksum(txdat=x, exdat=x.eval, bws=bw$bw, bandwidth.divide=TRUE)$ksum/n
+
+# Compute the density directly with the npudens() function...
+
+den &lt;- fitted(npudens(tdat=x, edat=x.eval, bws=bw$bw))
+
+# Plot the true DGP, the npksum()/(nh) estimate and (identical)
+# npudens() estimate
+
+plot(x.eval, dnorm(x.eval), xlab="X", ylab="Density", type="l")
+points(x.eval, den.ksum, col="blue")
+points(x.eval, den, col="red", cex=0.2)
+legend(1, .4, 
+       c("DGP", "npksum()", 
+       "npudens()"), 
+       col=c("black", "blue", "red"), 
+       lty=c(1, 1, 1))
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# EXAMPLE 2: For this example, we first obtain residuals from a
+# parametric regression model, then compute a vector of leave-one-out
+# kernel weighted sums of squared residuals where the kernel function is
+# raised to the power 2. Note that this returns a vector of kernel
+# weighted sums, one for each element of the error vector. Note also
+# that you can specify the bandwidth type, kernel function, kernel order
+# etc.
+
+data("cps71")
+attach(cps71)
+
+error &lt;- residuals(lm(logwage~age+I(age^2)))
+
+bw &lt;- npreg(error~age)
+
+ksum &lt;- npksum(txdat=age, 
+               tydat=error^2, 
+               bws=bw$bw,
+               leave.one.out=TRUE, 
+               kernel.pow=2)
+
+ksum
+
+# Obviously, if we wanted the sum of these weighted kernel sums then, 
+# trivially, 
+
+sum(ksum$ksum)
+
+detach(cps71)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# Note that weighted leave-one-out sums of squared residuals are used to
+# construct consistent model specification tests. In fact, the
+# npcmstest() routine in this package is constructed purely from calls
+# to npksum(). You can type npcmstest to see the npcmstest()
+# code and also examine some examples of the many uses of
+# npksum().
+
+# EXAMPLE 3: For this example, we conduct local-constant (i.e., 
+# Nadaraya-Watson) kernel regression. We shall use cross-validated
+# bandwidths using npregbw() by way of example. Note we extract
+# the kernel sum from npksum() via the `$ksum' argument in both
+# the numerator and denominator.
+
+data("cps71")
+attach(cps71)
+
+bw &lt;- npregbw(xdat=age, ydat=logwage)
+
+fit.lc &lt;- npksum(txdat=age, tydat=logwage, bws=bw$bw)$ksum/
+          npksum(txdat=age, bws=bw$bw)$ksum
+
+plot(age, logwage, xlab="Age", ylab="log(wage)")
+lines(age, fit.lc)
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# If you wished to compute the kernel sum for a set of evaluation points, 
+# you first generate the set of points then feed this to npksum, 
+# e.g., for the set (20, 30, ..., 60) we would use
+
+age.seq &lt;- seq(20, 60, 10)
+
+fit.lc &lt;- npksum(txdat=age, exdat=age.seq, tydat=logwage, bws=bw$bw)$ksum/
+          npksum(txdat=age, exdat=age.seq, bws=bw$bw)$ksum
+
+# Note that now fit.lc contains the 5 values of the local constant
+# estimator corresponding to age.seq...
+
+fit.lc
+
+detach(cps71)
+
+# EXAMPLE 4: For this example, we conduct least-squares cross-validation
+# for the local-constant regression estimator. We first write an R
+# function `ss' that computes the leave-one-out sum of squares using the
+# npksum() function, and then feed this function, along with
+# random starting values for the bandwidth vector, to the nlm() routine
+# in R (nlm = Non-Linear Minimization). Finally, we compare results with
+# the function npregbw() that is written solely in C and calls
+# a tightly coupled C-level search routine.  Note that one could make
+# repeated calls to nlm() using different starting values for h (highly
+# recommended in general).
+
+# Increase the number of digits printed out by default in R and avoid
+# using scientific notation for this example (we wish to compare
+# objective function minima)
+
+options(scipen=100, digits=12)
+
+# Generate 100 observations from a simple DGP where one explanatory
+# variable is irrelevant.
+
+n &lt;- 100
+
+x1 &lt;- runif(n)
+x2 &lt;- rnorm(n)
+x3 &lt;- runif(n)
+
+txdat &lt;- data.frame(x1, x2, x3)
+
+# Note - x3 is irrelevant
+
+tydat &lt;- x1 + sin(x2) + rnorm(n)
+
+# Write an R function that returns the average leave-one-out sum of
+# squared residuals for the local constant estimator based upon
+# npksum(). This function accepts one argument and presumes that
+# txdat and tydat have been defined already.
+
+ss &lt;- function(h) {
+
+# Test for valid (non-negative) bandwidths - return infinite penalty
+# when this occurs
+
+  if(min(h)&lt;=0) {
+
+    return(.Machine$double.xmax)
+
+  } else {
+
+    mean &lt;-  npksum(txdat, 
+                    tydat, 
+                    leave.one.out=TRUE, 
+                    bandwidth.divide=TRUE, 
+                    bws=h)$ksum/
+             npksum(txdat, 
+                    leave.one.out=TRUE, 
+                    bandwidth.divide=TRUE, 
+                    bws=h)$ksum
+  
+    return(sum((tydat-mean)^2)/length(tydat))
+
+  }
+
+}
+
+# Now pass this function to R's nlm() routine along with random starting
+# values and place results in `nlm.return'.
+
+nlm.return &lt;- nlm(ss, runif(length(txdat)))
+
+bw &lt;- npregbw(xdat=txdat, ydat=tydat)
+
+# Bandwidths from nlm()
+
+nlm.return$estimate
+
+# Bandwidths from npregbw()
+
+bw$bw
+
+# Function value (minimum) from nlm()
+
+nlm.return$minimum
+
+# Function value (minimum) from npregbw()
+
+bw$fval
+
+# Sleep for 5 seconds so that we can examine the output...
+
+Sys.sleep(5)
+
+# EXAMPLE 5: For this example, we use npksum() to plot the kernel
+# function itself. Our `training data' is the singleton, 0, and our
+# evaluation data a grid in [-4,4], while we use a bandwidth of 1. By
+# way of example we plot a sixth order Gaussian kernel (note that this
+# kernel function can assume negative values)
+
+x &lt;- 0
+x.eval &lt;- seq(-4,4,length=500)
+
+kernel &lt;- npksum(txdat=x,exdat=x.eval,bws=1,
+                 bandwidth.divide=TRUE,
+                 ckertype="gaussian",
+                 ckerorder=6)$ksum
+
+plot(x.eval,kernel,type="l",xlab="X",ylab="Kernel Function") 
+abline(0,0)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

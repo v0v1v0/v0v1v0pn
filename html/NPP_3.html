@@ -1,0 +1,200 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>BerNPP_MCMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MCMC Sampling for Bernoulli Population using Normalized Power Prior</h2>
+
+<h3>Description</h3>
+
+<p>Conduct posterior sampling for Bernoulli population with normalized power prior.
+For the power parameter <code class="reqn">\delta</code>, a Metropolis-Hastings algorithm with either
+independence proposal, or a random walk proposal on its logit scale is used.
+For the model parameter <code class="reqn">p</code>, Gibbs sampling is used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">BerNPP_MCMC(Data.Cur = c(100, 50), Data.Hist = c(100, 50),
+            CompStat = list(n0 = NULL, y0 = NULL, n1 = NULL, y1 = NULL),
+            prior = list(p.alpha = 1, p.beta = 1, delta.alpha = 1, delta.beta = 1),
+            MCMCmethod = 'IND', rw.logit.delta = 0.1,
+            ind.delta.alpha = 1, ind.delta.beta = 1, nsample = 5000,
+            control.mcmc = list(delta.ini = NULL, burnin = 0, thin = 1))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Data.Cur</code></td>
+<td>
+<p>a non-negative integer vector of two elements: c(number of trials, number of successes) in the current data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Data.Hist</code></td>
+<td>
+<p>a non-negative integer vector of two elements: c(number of trials, number of successes) in the historical data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CompStat</code></td>
+<td>
+<p>a list of four elements that represents the
+"compatibility(sufficient) statistics" for <code class="reqn">p</code>.
+Default is <code>NULL</code> so the fitting will be based on
+the data. If the <code>CompStat</code> is provided then the inputs in
+<code>Data.Cur</code> and <code>Data.Hist</code> will be ignored.
+Note: in Bernoulli population providing <code>CompStat</code> is equivalent to provide the data summary as in
+<code>Data.Cur</code> and <code>Data.Cur</code>.
+</p>
+<p><code>n0</code> is the number of trials in the historical data.
+</p>
+<p><code>y0</code> is the number of successes in the historical data.
+</p>
+<p><code>n1</code> is the number of trials in the current data.
+</p>
+<p><code>y1</code> is the number of successes in the current data.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>a list of the hyperparameters in the prior for both <code class="reqn">p</code> and <code class="reqn">\delta</code>.
+</p>
+<p><code>p.alpha</code> is the hyperparameter <code class="reqn">\alpha</code> in the prior distribution <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">p</code>.
+</p>
+<p><code>p.beta</code> is the hyperparameter <code class="reqn">\beta</code> in the prior distribution <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">p</code>.
+</p>
+<p><code>delta.alpha</code> is the hyperparameter <code class="reqn">\alpha</code> in the prior distribution <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">\delta</code>.
+</p>
+<p><code>delta.beta</code> is the hyperparameter <code class="reqn">\beta</code> in the prior distribution <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">\delta</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MCMCmethod</code></td>
+<td>
+<p>sampling method for <code class="reqn">\delta</code> in MCMC. It can be either 'IND' for independence proposal; or 'RW' for
+random walk proposal on logit scale. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rw.logit.delta</code></td>
+<td>
+<p>the stepsize(variance of the normal distribution) for the random walk proposal of logit <code class="reqn">\delta</code>.
+Only applicable if <code>MCMCmethod = 'RW'. </code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.delta.alpha</code></td>
+<td>
+<p>specifies the first parameter <code class="reqn">\alpha</code> when
+independent proposal <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">\delta</code> is used. Only applicable if <code>MCMCmethod = 'IND'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.delta.beta</code></td>
+<td>
+<p>specifies the first parameter <code class="reqn">\beta</code> when
+independent proposal <code class="reqn">Beta(\alpha, \beta)</code> for <code class="reqn">\delta</code> is used. Only applicable if <code>MCMCmethod = 'IND'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsample</code></td>
+<td>
+<p>specifies the number of posterior samples in the output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.mcmc</code></td>
+<td>
+<p>a list of three elements used in posterior sampling.
+</p>
+<p><code>delta.ini</code> is the initial value of <code class="reqn">\delta</code> in MCMC sampling.
+</p>
+<p><code>burnin</code> is the number of burn-ins. The output will only show MCMC samples after bunrin.
+</p>
+<p><code>thin</code> is the thinning parameter in MCMC sampling.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The outputs include posteriors of the model parameter(s) and power parameter, acceptance rate in sampling <code class="reqn">\delta</code>, and
+the deviance information criteria.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class "NPP" with four elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>posterior of the model parameter <code class="reqn">p</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>posterior of the power parameter <code class="reqn">\delta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acceptance</code></td>
+<td>
+<p>the acceptance rate in MCMC sampling for <code class="reqn">\delta</code> using Metropolis-Hastings algorithm. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DIC</code></td>
+<td>
+<p>the deviance information criteria for model diagnostics.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Zifei Han <a href="mailto:hanzifei1@gmail.com">hanzifei1@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Ibrahim, J.G., Chen, M.-H., Gwon, Y. and Chen, F. (2015).
+The Power Prior: Theory and Applications.
+<em>Statistics in Medicine  34:3724-3749.</em>
+</p>
+<p>Duan, Y., Ye, K. and Smith, E.P. (2006).
+Evaluating Water Quality: Using Power Priors to Incorporate Historical Information.
+<em>Environmetrics  17:95-106.</em>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>MultinomialNPP_MCMC</code>;
+<code>NormalNPP_MCMC</code>;
+<code>PoissonNPP_MCMC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">BerNPP_MCMC(Data.Cur = c(493, 473), Data.Hist = c(680, 669),
+            prior = list(p.alpha = 0.5, p.beta = 0.5, delta.alpha = 1, delta.beta = 1),
+            MCMCmethod = 'RW', rw.logit.delta = 1, nsample = 5000,
+            control.mcmc = list(delta.ini = NULL, burnin = 2000, thin = 5))
+</code></pre>
+
+
+</div>

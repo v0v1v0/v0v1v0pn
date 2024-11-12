@@ -1,0 +1,257 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>test.coefficient</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Large-sample Test for a Regression Coefficient in an
+Negative Binomial Regression Model</h2>
+
+<h3>Description</h3>
+
+<p><code>test.coefficient</code> performs large-sample tests
+(higher-order asymptotic test, likelihood ratio test,
+and/or Wald test) for testing regression coefficients in an
+NB regression model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">test.coefficient(nb, dispersion, x, beta0, tests = c("HOA", "LR", "Wald"),
+  alternative = "two.sided", subset = 1:m, print.level = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nb</code></td>
+<td>
+<p>an NB data object, output from
+<code>prepare.nb.data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dispersion</code></td>
+<td>
+<p>dispersion estimates, output from
+<code>estimate.disp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an <code class="reqn">n</code> by <code class="reqn">p</code> design matrix describing
+the treatment structure</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta0</code></td>
+<td>
+<p>a <code class="reqn">p</code>-vector specifying the null
+hypothesis. Non-NA components specify the parameters to
+test and their null values. (Currently, only
+one-dimensional test is implemented, so only one non-NA
+component is allowed).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tests</code></td>
+<td>
+<p>a character string vector specifying the
+tests to be performed, can be any subset of <code>"HOA"</code>
+(higher-order asymptotic test), <code>"LR"</code> (likelihood
+ratio test), and <code>"Wald"</code> (Wald test).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>a character string specifying the
+alternative hypothesis, must be one of <code>"two.sided"</code>
+(default), <code>"greater"</code> or <code>"less"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>an index vector specifying on which rows
+should the tests be performed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.level</code></td>
+<td>
+<p>a number controlling the amount of
+messages printed: 0 for suppressing all messages, 1
+(default) for basic progress messages, and 2 to 5 for
+increasingly more detailed message.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>test.coefficient</code> performs large-sample tests for a
+one-dimensional (<code class="reqn">q=1</code>) component <code class="reqn">\psi</code> of the
+<code class="reqn">p</code>-dimensional regression coefficient <code class="reqn">\beta</code>. The
+hypothesized value <code class="reqn">\psi_0</code> of <code class="reqn">\psi</code> is specified
+by the non-NA component of the vector <code>beta0</code> in the
+input.
+</p>
+<p>The likelihood ratio statistic, </p>
+<p style="text-align: center;"><code class="reqn"> \lambda = 2
+(l(\hat\beta) - l(\tilde\beta)),</code>
+</p>
+<p> converges in distribution
+to a chi-square distribution with <code class="reqn">1</code> degree of
+freedom.  The signed square root of the likelihood ratio
+statistic <code class="reqn">\lambda</code>, also called the directed deviance,
+</p>
+<p style="text-align: center;"><code class="reqn">r = sign (\hat\psi - \psi_0) \sqrt \lambda</code>
+</p>
+<p> converges
+to a standard normal distribution.
+</p>
+<p>For testing a one-dimensional parameter of interest,
+Barndorff-Nielsen (1986, 1991) showed that a modified
+directed </p>
+<p style="text-align: center;"><code class="reqn"> r^* = r - \frac{1}{r} \log(z)</code>
+</p>
+<p> is, in wide
+generality, asymptotically standard normally distributed to
+a higher order of accuracy than the directed deviance
+<code class="reqn">r</code> itself, where <code class="reqn">z</code> is an adjustment term. Tests
+based on high-order asymptotic adjustment to the likelihood
+ratio statistic, such as <code class="reqn">r^*</code> or its approximation,
+are referred to as higher-order asymptotic (HOA) tests.
+They generally have better accuracy than corresponding
+unadjusted likelihood ratio tests, especially in situations
+where the sample size is small and/or when the number of
+nuisance parameters (<code class="reqn">p-q</code>) is large. The
+implementation here is based on Skovgaard (2001). See Di et
+al. 2013 for more details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>beta.hat</code></td>
+<td>
+<p>an <code class="reqn">m</code> by <code class="reqn">p</code> matrix of regression
+coefficient under the full model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu.hat</code></td>
+<td>
+<p>an <code class="reqn">m</code>
+by <code class="reqn">n</code> matrix of fitted mean frequencies under the full
+model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta.tilde</code></td>
+<td>
+<p>an <code class="reqn">m</code> by <code class="reqn">p</code> matrix of
+regression coefficient under the null model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu.tilde</code></td>
+<td>
+<p>an <code class="reqn">m</code> by <code class="reqn">n</code> matrix of fitted mean
+frequencies under the null model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HOA, LR,
+Wald</code></td>
+<td>
+<p>each is a list of two <code class="reqn">m</code>-vectors,
+<code>p.values</code> and <code>q.values</code>, giving p-values and
+q-values of the corresponding tests when that test is
+included in <code>tests</code>.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Barndorff-Nielsen, O. (1986): "Infereni on full or partial
+parameters based on the standardized signed log likelihood
+ratio," Biometrika, 73, 307-322
+</p>
+<p>Barndorff-Nielsen, O. (1991): "Modified signed log
+likelihood ratio," Biometrika, 78, 557-563.
+</p>
+<p>Skovgaard, I. (2001): "Likelihood asymptotics,"
+Scandinavian Journal of Statistics, 28, 3-32.
+</p>
+<p>Di Y, Schafer DW, Emerson SC, Chang JH (2013): "Higher
+order asymptotics for negative binomial regression
+inferences from RNA-sequencing data". Stat Appl Genet Mol
+Biol, 12(1), 49-70.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load Arabidopsis data
+data(arab);
+
+## Estimate normalization factors (we want to use the entire data set)
+norm.factors = estimate.norm.factors(arab);
+
+## Prepare the data
+## For demonstration purpose, only the first 50 rows are used
+nb.data = prepare.nb.data(arab[1:50,], lib.sizes = colSums(arab), norm.factors = norm.factors);
+
+## For real analysis, we will use the entire data set, and can omit lib.sizes parameter)
+## nb.data = prepare.nb.data(arab, norm.factors = norm.factors);
+
+print(nb.data);
+plot(nb.data);
+
+## Specify the model matrix (experimental design)
+grp.ids = as.factor(c(1, 1, 1, 2, 2, 2));
+x = model.matrix(~grp.ids);
+
+## Estimate dispersion model
+dispersion = estimate.dispersion(nb.data, x);
+
+print(dispersion);
+plot(dispersion);
+
+## Specify the null hypothesis
+## The null hypothesis is beta[2]=0 (beta[2] is the log fold change).
+beta0 = c(NA, 0);
+
+## Test regression coefficient
+res = test.coefficient(nb.data, dispersion, x, beta0);
+
+## The result contains the data, the dispersion estimates and the test results
+print(str(res));
+
+## Show HOA test results for top ten most differentially expressed genes
+top = order(res$HOA$p.values)[1:10];
+print(cbind(nb.data$counts[top,], res$HOA[top,]));
+
+## Plot log fold change versus the fitted mean of sample 1 (analagous to an MA-plot).
+plot(res$mu.tilde[,1], res$beta.hat[,2]/log(2), log="x",
+     xlab="Fitted mean of sample 1 under the null",
+     ylab="Log (base 2) fold change");
+
+## Highlight top DE genes
+points(res$mu.tilde[top,1], res$beta.hat[top,2]/log(2), col="magenta");
+
+
+
+</code></pre>
+
+
+</div>

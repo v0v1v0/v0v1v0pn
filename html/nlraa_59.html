@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SSprofd</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>self start for profile decay function</h2>
+
+<h3>Description</h3>
+
+<p>Self starter for a decay of a variable within a canopy (e.g. nitrogen concentration).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">profd(x, a, b, c, d)
+
+SSprofd(x, a, b, c, d)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>input vector (x)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>represents the maximum value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>represents the minimum value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>represents the rate of decay</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>represents an empirical coefficient which provides flexibility</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is described in Archontoulis and Miguez (2015) - (doi:10.2134/agronj2012.0506) and originally in Johnson et al. (2010) Annals of Botany 106: 735–749, 2010. (doi:10.1093/aob/mcq183).
+</p>
+
+
+<h3>Value</h3>
+
+<p>a numeric vector of the same length as x containing parameter estimates for equation specified
+</p>
+<p>profd: vector of the same length as x using the profd function
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(ggplot2)
+set.seed(1234)
+x &lt;- 1:10
+y &lt;- profd(x, 0.3, 0.05, 0.5, 4) + rnorm(10, 0, 0.01)
+dat &lt;- data.frame(x = x, y = y)
+fit &lt;- nls(y ~ SSprofd(x, a, b, c, d), data = dat)
+## plot
+ggplot(data = dat, aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_line(aes(y = fitted(fit)))
+## profiling
+## It does not work at a lower alphamax level
+## Use this if you want to look at all four parameters
+## par(mfrow=c(2,2))
+plot(profile(fit, alphamax = 0.016))
+## Reset graphical parameter as appropriate: par(mfrow=c(1,1))
+## parameter 'd' is not well constrained
+confint(fit, level = 0.9)
+
+
+</code></pre>
+
+
+</div>

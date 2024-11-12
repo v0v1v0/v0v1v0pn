@@ -1,0 +1,61 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>declare</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Explicitly declare a variable in run-time code of a nimbleFunction</h2>
+
+<h3>Description</h3>
+
+<p>Explicitly declare a variable in run-time code of a nimbleFunction, for cases when its dimensions cannot be inferred before it is used.  Works in R and NIMBLE.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">declare(name, def)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Name of a variable to declare, without quotes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>def</code></td>
+<td>
+<p>NIMBLE type declaration, of the form <code>TYPE(nDim, sizes)</code>, where <code>TYPE</code> is <code>integer</code>, <code>double</code>, or <code>logical</code>, <code>nDim</code> is the number of dimensions, and <code>sizes</code> is an optional vector of sizes concatenated with <code>c</code>.  If <code>nDim</code> is omitted, it defaults to 0, indicating a scalar.  If sizes are provided, they should not be changed subsequently in the function, including by assignment.  Omitting <code>nDim</code> results in a scalar.  For <code>logical</code>, only scalar is currently supported.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In a run-time function of a nimbleFunction (either the <code>run</code> function or a function provided in <code>methods</code> when calling <code>nimbleFunction</code>), the dimensionality and numeric type of a variable is inferred when possible from the statement first assigning into it.  E.g. <code>A &lt;- B + C</code> infers that <code>A</code> has numeric types, dimensions and sizes taken from <code>B + C</code>.  However, if the first appearance of <code>A</code> is e.g. <code>A[i] &lt;- 5</code>, <code>A</code> must have been explicitly declared.  In this case, <code>declare(A, double(1))</code> would make <code>A</code> a 1-dimensional (i.e. vector) double.
+</p>
+<p>When sizes are not set, they can be set by a call to <code>setSize</code> or by assignment to the whole object.  Sizes are not automatically extended if assignment is made to elements beyond the current sizes.  In compiled nimbleFunctions doing so can cause a segfault and crash the R session.
+</p>
+<p>This part of the NIMBLE language is needed for compilation, but it also runs in R.  When run in R, is works by the side effect of creating or modifying <code>name</code> in the calling environment.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>NIMBLE development team
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">declare(A, logical())             ## scalar logical, the only kind allowed
+declare(B, integer(2, c(10, 10))) ## 10 x 10 integer matrix
+declare(C, double(3))             ## 3-dimensional double array with no sizes set.
+</code></pre>
+
+
+</div>

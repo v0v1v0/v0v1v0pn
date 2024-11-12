@@ -1,0 +1,185 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netsnp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reconstructs intra- and inter- chromosomal conditional interactions among genetic loci</h2>
+
+<h3>Description</h3>
+
+<p>This is one of the main functions of the <span class="pkg">netgwas</span> package. This function can be used to reconstruct the intra- and inter-chromosomal interactions among genetic loci in diploids and polyploids. The input data can be belong to any biparental genotype data which contains at least two genotype states. Two methods are available to reconstruct the network, namely (1) approximation method, and (2) gibbs sampling within the Gaussian copula graphical model. Both methods are able to deal with missing genotypes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netsnp(data, method = "gibbs", rho = NULL, n.rho = NULL, rho.ratio = NULL, 
+		ncores = 1, em.iter = 5, em.tol = .001, verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p> An (<code class="reqn">n \times p</code>) matrix or a <code>data.frame</code> corresponding to a genotype data matrix (<code class="reqn">n</code> is the sample size and <code class="reqn">p</code> is the number of variables). It also could be an object of class <code>"simgeno"</code>. Input data can contain missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p> Reconstructs intra- and inter- chromosomal conditional interactions (epistatic selection) network with three methods: "gibbs", "approx", and "npn". For a medium (~500) and a large number of variables we would recommend to choose "gibbs" and "approx", respectively. For a very large number of variables (&gt; 2000) choose "npn". The default method is "gibbs".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p> A decreasing sequence of non-negative numbers that control the sparsity level. Leaving the input as <code>rho = NULL</code>, the program automatically computes a sequence of <code>rho</code> based on <code>n.rho</code> and <code>rho.ratio</code>. Users can also supply a decreasing sequence values to override this.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.rho</code></td>
+<td>
+<p> The number of regularization parameters. The default value is <code>10</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho.ratio</code></td>
+<td>
+<p>Determines the distance between the elements of <code>rho</code> sequence. A small value of <code>rho.ratio</code> results in a large distance between the elements of <code>rho</code> sequence. And a large value of <code>rho.ratio</code> results into a small distance between elements of <code>rho</code>. If keep it as NULL the program internally chooses a value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p> The number of cores to use for the calculations. Using <code>ncores = "all"</code> automatically detects number of available cores and runs the computations in parallel on (available cores - 1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em.iter</code></td>
+<td>
+<p> The number of EM iterations. The default value is 5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em.tol</code></td>
+<td>
+<p> A criteria to stop the EM iterations. The default value is .001. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Providing a detail message for tracing output. The default value is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Viability is a phenotype that can be considered. This function detects the conditional dependent short- and long-range linkage disequilibrium structure of genomes and thus reveals aberrant marker-marker associations that are due to epistatic selection.
+This function can be used to estimate conditional independence relationships between partially observed data that not follow Gaussianity assumption (e.g. continuous non-Gaussian, discrete, or mixed dataset).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object with S3 class <code>"netgwas"</code> is returned:  
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Theta</code></td>
+<td>
+<p> A list of estimated p by p precision matrices that show the conditional independence relationships patterns among genetic loci.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+<p> A list of estimated p by p adjacency matrices. This is the graph path corresponding to <code>Theta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ES</code></td>
+<td>
+<p> A list of estimated p by p conditional expectation corresponding to <code>rho</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p> A list of n by p transformed data based on Gaussian copula. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p> A <code>n.rho</code> dimensional vector containing the penalty terms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loglik </code></td>
+<td>
+<p> A <code>n.rho</code> dimensional vector containing the maximized log-likelihood values along the graph path. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p> The <code class="reqn">n</code> by <code class="reqn">p</code> input data matrix. </p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p> This function estimates a graph path . To select an optimal graph please refer to <code>selectnet</code>.</p>
+
+
+<h3>Author(s)</h3>
+
+ 
+<p>Pariya Behrouzi and Ernst C. Wit <br>
+Maintainers: Pariya Behrouzi <a href="mailto:pariya.behrouzi@gmail.com">pariya.behrouzi@gmail.com</a><br></p>
+
+
+<h3>References</h3>
+
+<p>1. Behrouzi, P., and Wit, E. C. (2019). Detecting epistatic selection with partially observed genotype data by using copula graphical models. Journal of the Royal Statistical Society: Series C (Applied Statistics), 68(1), 141-160. <br>
+2. Behrouzi, P., and Wit, E. C. (2017c). netgwas: An R Package for Network-Based Genome-Wide Association Studies. arXiv preprint, arXiv:1710.01236.
+3. D. Witten and J. Friedman. New insights and faster computations for the graphical lasso. <em>Journal of Computational and Graphical Statistics</em>, to appear, 2011. <br>
+4. Guo, Jian, et al. "Graphical models for ordinal data." Journal of Computational and Graphical Statistics 24.1 (2015): 183-204. <br></p>
+
+
+<h3>See Also</h3>
+
+<p><code>selectnet</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">    
+	
+		data(CviCol)
+		out &lt;- netsnp(CviCol); out
+		plot(out)
+		
+		#select optimal graph
+		epi &lt;- selectnet(out)
+		plot(epi, vis="CI", xlab="markers", ylab="markers", 
+		    n.mem = c(24,14,17,16,19), vertex.size=4)
+		    
+		#Visualize interactive plot of the selected network
+		#Different colors for each chromosome
+		cl &lt;- c(rep("red", 24), rep("white",14), rep("tan1",17), 
+		      rep("gray",16), rep("lightblue2",19))
+		plot(epi, vis="interactive", vertex.color= cl)
+		
+		#Partial correlations between markers on genome
+		image(as.matrix(epi$par.cor), xlab="markers", ylab="markers", sub="")
+		
+</code></pre>
+
+
+</div>

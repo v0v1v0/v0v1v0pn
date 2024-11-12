@@ -1,0 +1,280 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npsdeptest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Kernel Consistent Serial Dependence Test for Univariate Nonlinear Processes </h2>
+
+<h3>Description</h3>
+
+<p><code>npsdeptest</code> implements the consistent metric entropy test of
+nonlinear serial dependence as described in Granger, Maasoumi and
+Racine (2004).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">
+npsdeptest(data = NULL,
+           lag.num = 1,
+           method = c("integration","summation"),
+           bootstrap = TRUE,
+           boot.num = 399,
+           random.seed = 42)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>a vector containing the variable that can be of type
+<code>numeric</code> or <code>ts</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lag.num</code></td>
+<td>
+
+<p>an integer value specifying the maximum number of lags to
+use. Defaults to <code>1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>a character string used to specify whether to compute the integral
+version or the summation version of the statistic. Can be set as
+<code>integration</code> or <code>summation</code> (see below for
+details). Defaults to <code>integration</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstrap</code></td>
+<td>
+
+<p>a logical value which specifies whether to conduct
+the bootstrap test or not. If set to <code>FALSE</code>, only the
+statistic will be computed. Defaults to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+
+<p>an integer value specifying the number of bootstrap
+replications to use. Defaults to <code>399</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+
+<p>an integer used to seed R's random number generator. This is to
+ensure replicability. Defaults to 42.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>npsdeptest</code> computes the nonparametric metric entropy
+(normalized Hellinger of Granger, Maasoumi and Racine (2004)) for
+testing for nonlinear serial dependence, <code class="reqn">D[f(y_t, \hat y_{t-k}),
+   f(y_t)\times f(\hat y_{t-k})]</code>.  Default bandwidths are of the Kullback-Leibler
+variety obtained via likelihood cross-validation.
+</p>
+<p>The test may be applied to a raw data series or to residuals of user
+estimated models.
+</p>
+<p>The summation version of this statistic may be numerically unstable
+when <code>data</code> is sparse (the summation version involves division of
+densities while the integration version involves differences). Warning
+messages are produced should this occur (‘integration recommended’)
+and should be heeded.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npsdeptest</code> returns an object of type <code>deptest</code> with the
+following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Srho</code></td>
+<td>
+<p> the statistic vector <code>Srho</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Srho.cumulant</code></td>
+<td>
+<p> the cumulant statistic vector <code>Srho.cumulant</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Srho.bootstrap.mat</code></td>
+<td>
+<p> contains the bootstrap replications of
+<code>Srho</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Srho.cumulant.bootstrap.mat</code></td>
+<td>
+<p> contains the bootstrap
+replications of <code>Srho.cumulant</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p> the P-value vector of the Srho statistic vector </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P.cumulant</code></td>
+<td>
+<p> the P-value vector of the cumulant Srho statistic vector </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstrap</code></td>
+<td>
+<p> a logical value indicating whether bootstrapping was
+performed </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.num</code></td>
+<td>
+<p> number of bootstrap replications </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lag.num</code></td>
+<td>
+<p> the number of lags </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw.y</code></td>
+<td>
+<p> the numeric vector of bandwidths for <code>data</code>
+marginal density at lag <code>num.lag</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw.y.lag</code></td>
+<td>
+<p> the numeric vector of bandwidths for lagged
+<code>data</code> marginal density  at lag <code>num.lag</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw.joint</code></td>
+<td>
+<p> the numeric matrix of bandwidths for <code>data</code>
+and lagged <code>data</code> joint density  at lag <code>num.lag</code></p>
+</td>
+</tr>
+</table>
+<p><code>summary</code> supports object of type <code>deptest</code>.
+</p>
+
+
+<h3>Usage Issues</h3>
+
+<p>The <code>integration</code> version of the statistic uses multidimensional
+numerical methods from the <code>cubature</code> package. See
+<code>adaptIntegrate</code> for details. The <code>integration</code>
+version of the statistic will be substantially slower than the
+<code>summation</code> version, however, it will likely be both more
+accurate and powerful.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tristen Hayfield <a href="mailto:tristen.hayfield@gmail.com">tristen.hayfield@gmail.com</a>, Jeffrey S. Racine
+<a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Granger, C.W. and E. Maasoumi and J.S. Racine (2004), “A
+dependence metric for possibly nonlinear processes”, Journal of Time
+Series Analysis, 25, 649-669.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npdeptest,npdeneqtest,npsymtest,npunitest</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+set.seed(1234)
+
+## A function to create a time series
+
+ar.series &lt;- function(phi,epsilon) {
+  n &lt;- length(epsilon)
+  series &lt;- numeric(n)
+  series[1] &lt;- epsilon[1]/(1-phi)
+  for(i in 2:n) {
+    series[i] &lt;- phi*series[i-1] + epsilon[i]
+  }
+  return(series)
+}
+
+n &lt;- 100
+
+## Stationary persistent time-series
+
+yt &lt;- ar.series(0.95,rnorm(n))
+npsdeptest(yt,lag.num=2,boot.num=99,method="summation")
+
+Sys.sleep(5)
+
+## Stationary independent time-series
+
+yt &lt;- ar.series(0.0,rnorm(n))
+npsdeptest(yt,lag.num=2,boot.num=99,method="summation")
+
+## Stationary persistent time-series
+
+yt &lt;- ar.series(0.95,rnorm(n))
+npsdeptest(yt,lag.num=2,boot.num=99,method="integration")
+
+Sys.sleep(5)
+
+## Stationary independent time-series
+
+yt &lt;- ar.series(0.0,rnorm(n))
+npsdeptest(yt,lag.num=2,boot.num=99,method="integration")
+
+
+## End(Not run) 
+
+</code></pre>
+
+
+</div>

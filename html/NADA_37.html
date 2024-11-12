@@ -1,0 +1,177 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cenmle</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Regression by Maximum Likelihood Estimation for Left-censored Data
+</h2>
+
+<h3>Description</h3>
+
+<p>Regression by Maximum Likelihood (ML) Estimation for left-censored
+("nondetect" or "less-than") data.  This routine computes regression
+estimates of slope(s) and intercept by maximum likelihood
+when data are left-censored.  It will compute ML estimates of
+descriptive statistics when explanatory variables following the ~
+are left blank.  It will compute ML tests similar in function and
+assumptions to two-sample t-tests and analysis of variance when
+groups are specified following the ~.  It will compute regression
+equations, including multiple regression, when continuous explanatory
+variables are included following the ~.  It will compute the ML
+equivalent of analysis of covariance when both group and continuous
+explanatory variables are specified following the ~.  To avoid
+an appreciable loss of power with regression and group hypothesis
+tests, a probability plot of residuals should be checked to ensure
+that residuals from the regression model are approximately gaussian.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">    cenmle(obs, censored, groups, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+
+<p>Either a numeric vector of observations or a formula.
+See examples below.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>censored</code></td>
+<td>
+
+<p>A logical vector indicating TRUE where an observation in ‘obs’ is
+censored (a less-than value) and FALSE otherwise.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+
+<p>A factor vector used for grouping ‘obs’ into subsets.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional items that are common to this function and the <code>survreg</code>
+function from the ‘survival’ package.  The most important of which
+is ‘dist’ and ‘conf.int’.  See Details below.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This routine is a front end to the <code>survreg</code> routine in the
+<code>survival</code> package.  
+</p>
+<p>There are many additional options that are supported and documented
+in <code>survfit</code>.  Only a few have relevance to the evironmental
+sciences.
+</p>
+<p>A very important option is ‘dist’ which specifies the distributional
+model to use in the regression.  The default is ‘lognormal’.  
+</p>
+<p>Another important option is ‘conf.int’.  This is NOT an option to
+<code>survreg</code> but is an added feature (due to some arcane details of
+R it can't be documented above).  The ‘conf.int’ option specifies
+the level for a two-sided confidence interval on the regression.
+The default is 0.95.  This interval will be used in when the output
+object is passed to other generic functions such as <code>mean</code>
+and <code>quantile</code>.  See Examples below.
+</p>
+<p>Also supported is a ‘gaussian’ or a normal distribution.  The use of
+a gaussian distribution requires an interval censoring context for
+left-censored data.  Luckily, this routine automatically does this
+for you – simply specify ‘gaussian’ and the correct manipulations
+are done.
+</p>
+<p>If any other distribution is specified besides lognormal or gaussian, 
+the return object is a raw survreg object – it is up to the user to
+‘do the right thing’ with the output (and input for that matter).
+</p>
+<p>If you are using the formula interface:  The <code>censored</code> and
+<code>groups</code> parameters are not specified – all information is provided
+via a formula as the <code>obs</code> parameter.  The formula must have a
+<code>Cen</code> object as the response on the left of the <code>~</code> operator and,
+if desired, terms separated by + operators on the right.  
+See Examples below.  
+</p>
+
+
+<h3>Value</h3>
+
+<p>a <code>cenmle</code> object.
+Methods defined for <code>cenmle</code> objects are provided for
+<code>mean</code>, <code>median</code>, <code>sd</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>R. Lopaka Lee &lt;rclee@usgs.gov&gt;
+</p>
+<p>Dennis Helsel &lt;dhelsel@practicalstats.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Helsel, Dennis R. (2005).  Nondectects and Data Analysis; Statistics for
+censored environmental data.  John Wiley and Sons, USA, NJ.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Cen</code>, 
+<code>cenmle-methods</code>,
+<code>mean-methods</code>, 
+<code>sd-methods</code>, 
+<code>median-methods</code>, 
+<code>quantile-methods</code>, 
+<code>summary-methods</code> 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+    # Create a MLE regression object 
+
+    data(TCEReg)
+
+    tcemle = with(TCEReg, cenmle(TCEConc, TCECen)) 
+
+    summary(tcemle)
+    median(tcemle)
+    mean(tcemle)
+    sd(tcemle)
+    quantile(tcemle)
+
+    # This time specifiy a different confidence interval
+    tcemle = with(TCEReg, cenmle(TCEConc, TCECen, conf.int=0.80)) 
+
+    # Use the model's confidence interval with the quantile function
+    quantile(tcemle, conf.int=TRUE)
+
+    # With groupings
+    with(TCEReg, cenmle(TCEConc, TCECen, PopDensity)) 
+</code></pre>
+
+
+</div>

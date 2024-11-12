@@ -1,0 +1,278 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fitPP.fun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit  a non homogeneous Poisson Process</h2>
+
+<h3>Description</h3>
+
+<p>This function fits by maximum likelihood a NHPP where the  intensity <code class="reqn">\lambda(t)</code>  
+is formulated  as a function of covariates.  It also calculates and plots 
+approximate confidence intervals for <code class="reqn">\lambda(t)</code>.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fitPP.fun(covariates = NULL, start, fixed=list(), posE = NULL, inddat = NULL, 
+POTob = NULL,  nobs = NULL, tind = TRUE, tim = NULL, minfun="nlminb",
+ modCI = "TRUE", CIty = "Transf", clevel = 0.95,
+ tit = "", modSim = "FALSE", dplot = TRUE, xlegend = "topleft",
+lambdaxlim=NULL,lambdaylim=NULL,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>covariates</code></td>
+<td>
+<p>Matrix of the covariates to be included in the 
+linear predictor of the PP intensity (each column is a covariate). It is advisable to give 
+names to the columns of this matrix
+(using <code>dimnames</code>), since they  will be used in the output.  
+Otherwise the default names 'Covariate i' are used.
+The offset covariates must be included in this matrix.  A maximum of 50 covariates are allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>Named list of the initial values  for the estimation of 
+the <code class="reqn">\beta</code> parameters (including fixed parameters).
+The names of the list  must be (compulsory): b0 (for the intercept), b1 (for the first column in <code>covariates</code>), b2 (for the second column), 
+b3 (for the third column), etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p>Named list of the fixed <code class="reqn">\beta</code> parameters. The elements of this list  must be elements 
+of the list <code>start</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posE</code></td>
+<td>
+<p>Optional (see Details section). Numeric vector of the position of the PP occurrence points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inddat</code></td>
+<td>
+<p>Optional (see Details section). Index vector equal to 1 for the observations  used in the estimation process
+By default, all the observations are considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>POTob</code></td>
+<td>
+<p>Optional (see Details section). List with  elements T and thres 
+that defines the PP resulting from a POT approach; 
+see <code>POTevents.fun</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nobs</code></td>
+<td>
+<p>Optional. Number of observations  in the observation period; 
+it is only neccessary if POTob, inddat and covariates are NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tind</code></td>
+<td>
+<p>Logical flag. If it is TRUE, an independent term is fitted in the 
+linear predictor. It cannot be a character string, so TRUE and not'TRUE' should be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tim</code></td>
+<td>
+<p>Optional. Time vector  of  the observation period.
+By default, a vector 1,...n is considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minfun</code></td>
+<td>
+<p>Label indicating  the function to minimize the negative of the loglikelihood function.
+There are two possible values: "nlminb"  (the default option) and  "optim". In the last case, 
+the method of optimization can be chosen with an additional method argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modCI</code></td>
+<td>
+<p>Logical flag. If it is TRUE, confidence intervals  
+for <code class="reqn">\lambda(t)</code> values are calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CIty</code></td>
+<td>
+<p>Label indicating  the method to calculate the approximate
+confidence intervals  for <code class="reqn">\lambda(t)</code>. It can be "Transf" for transformed asymptotic intervals (default) or 
+"Delta" for the delta method; see <code>CItran.fun</code>  and <code>CIdelta.fun</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clevel</code></td>
+<td>
+<p>Confidence level of the  confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tit</code></td>
+<td>
+<p>Character string. A title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modSim</code></td>
+<td>
+<p>Logical flag. If it is FALSE, information on the  
+estimation process is shown on the screen.
+For simulation process, the option TRUE should be preferred.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dplot</code></td>
+<td>
+<p>Logical flag. If it is TRUE,  the fitted intensity is plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlegend</code></td>
+<td>
+<p>Label indicating the position where the legend on 
+the graph will be located. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaxlim</code></td>
+<td>
+<p>Optional. Numeric vector of length 2, giving the  lowest and highest values which determine the x  range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaylim</code></td>
+<td>
+<p>Optional. Numeric vector of length 2, giving the  lowest and highest values which determine the y  range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to pass to <code>optim</code> or to <code>nlminb</code> (depending on the value of  the 
+<code>minfun</code> argument).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A Poisson process (PP)  is usually specified by a vector containing the  occurrence 
+points of the process <code class="reqn">(t_i)_{i=1}^k</code>,  (argument posE). 
+Since PP are often used in the framework of POT models, <code>fitPP.fun</code> also 
+provides the possibility of 
+using as input the  series of the observed values  in a POT model 
+<code class="reqn">(x_i)_{i=1}^n</code> and the threshold used to define the  extreme events 
+(argument POTob). 
+</p>
+<p>In the case of PP defined by a POT approach, 
+the observations of the extreme events which are 
+not defined as the occurrence point are not considered in the estimation. This is done
+through the argument inddat, see <code>POTevents.fun</code>. If  the input is provided via argument POTob, index inddat
+is calculated automatically. See <cite>Coles (2001)</cite> for more details on the POT approach.
+</p>
+<p>The maximization of the loglikelihood function can be done using  two different optimization  routines, 
+<code>optim</code> or <code>nlminb</code>, selected in the argument <code>minfun</code>. Depending on 
+the covariates included in the function, one routine can  succeed to converge when the other fails.
+</p>
+<p>This function allows  us to  keep fixed some <code class="reqn">\beta</code> parameters  (offset terms).  This can be 
+used to specify an a priori known component to be included in the linear predictor during fitting. The fixed parameters
+must be specified in the <code>fixed</code>  argument (and also   in <code>start</code>); 
+the fixed covariates must be included as columns of <code>covariates</code>.
+</p>
+<p>The estimation of the <code class="reqn">\hat \beta</code> covariance matrix is based on the 
+asymptotic distribution of the MLE <code class="reqn">\hat \beta</code>, and calculated as the inverse of the negative of the  hessian matrix.
+Confidence intervals for <code class="reqn">\lambda(t)</code> can be calculated using  two approaches
+specified in the argument <code>CIty</code>. See <cite>Casella (2002)</cite> for more details on ML theory and delta method.</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class  <code>mlePP</code>, which is a subclass of <code>mle</code>. 
+Consequently, many of the generic functions with <code>mle</code> methods, such as 
+<code>logLik</code> or <code>summary</code>, can be applied to the output of this function.  Some other generic 
+functions related to fitted models, such as <code>AIC</code> or <code>BIC</code>, can  also  be applied to <code>mlePP</code> objects. 
+</p>
+
+
+<h3>Note</h3>
+
+<p>A homogeneous Poisson process (HPP) can be fitted as a particular case,  
+using  an intensity defined by  only an intercept  and no covariate.</p>
+
+
+<h3>References</h3>
+
+<p>Cebrian, A.C., Abaurrea, J. and Asin, J. (2015). NHPoisson: An R Package for 
+Fitting and Validating Nonhomogeneous Poisson Processes. 
+<em>Journal of Statistical Software</em>, 64(6), 1-24.
+</p>
+<p>Coles, S. (2001). <em>An introduction to statistical modelling of extreme
+values.</em> Springer.
+</p>
+<p>Casella, G. and Berger, R.L., (2002). <em>Statistical inference.</em> Brooks/Cole.
+</p>
+<p>Kutoyants Y.A. (1998).<em>Statistical inference for spatial Poisson processes.</em> 
+Lecture notes in Statistics 134. Springer.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>POTevents.fun</code>, <code>globalval.fun</code>,
+<code>VARbeta.fun</code>, <code>CItran.fun</code>, <code>CIdelta.fun</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#model fitted  using as input posE and inddat and  no confidence intervals 
+
+data(BarTxTn)
+covB&lt;-cbind(cos(2*pi*BarTxTn$dia/365), sin(2*pi*BarTxTn$dia/365), 
+	BarTxTn$TTx,BarTxTn$Txm31,BarTxTn$Txm31**2)
+BarEv&lt;-POTevents.fun(T=BarTxTn$Tx,thres=318, 
+	date=cbind(BarTxTn$ano,BarTxTn$mes,BarTxTn$dia))
+
+
+mod1B&lt;-fitPP.fun(covariates=covB, 
+	posE=BarEv$Px, inddat=BarEv$inddat,
+	tit="BAR Tx; cos, sin, TTx, Txm31, Txm31**2", 
+	start=list(b0=-100,b1=1,b2=-1,b3=0,b4=0,b5=0))
+
+#model fitted  using as input  a list from POTevents.fun and with  confidence intervals 
+
+tiempoB&lt;-BarTxTn$ano+rep(c(0:152)/153,55)
+
+mod2B&lt;-fitPP.fun(covariates=covB, 
+	POTob=list(T=BarTxTn$Tx, thres=318),
+	tim=tiempoB, tit="BAR Tx; cos, sin, TTx, Txm31, Txm31**2", 
+	start=list(b0=-100,b1=1,b2=-1,b3=0,b4=0,b5=0),CIty="Delta",modCI=TRUE,
+	modSim=TRUE)
+
+#model  with a fixed parameter (b0)
+
+mod1BF&lt;-fitPP.fun(covariates=covB, 
+	posE=BarEv$Px, inddat=BarEv$inddat,
+	tit="BAR Tx; cos, sin, TTx, Txm31, Txm31**2", 
+	start=list(b0=-89,b1=1,b2=10,b3=0,b4=0,b5=0), 
+	fixed=list(b0=-100))
+</code></pre>
+
+
+</div>

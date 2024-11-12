@@ -1,0 +1,701 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npregiv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonparametric Instrumental Regression
+</h2>
+
+<h3>Description</h3>
+
+<p><code>npregiv</code> computes nonparametric estimation of an instrumental
+regression function <code class="reqn">\varphi</code> defined by conditional moment
+restrictions stemming from a structural econometric model: <code class="reqn">E [Y -
+\varphi (Z,X) | W ] = 0</code>, and involving
+endogenous variables <code class="reqn">Y</code> and <code class="reqn">Z</code> and exogenous variables
+<code class="reqn">X</code> and instruments <code class="reqn">W</code>. The function <code class="reqn">\varphi</code> is the
+solution of an ill-posed inverse problem.
+</p>
+<p>When <code>method="Tikhonov"</code>, <code>npregiv</code> uses the approach of
+Darolles, Fan, Florens and Renault (2011) modified for local
+polynomial kernel regression of any order (Darolles et al use local
+constant kernel weighting which corresponds to setting <code>p=0</code>; see
+below for details). When <code>method="Landweber-Fridman"</code>,
+<code>npregiv</code> uses the approach of Horowitz (2011) again using local
+polynomial kernel regression (Horowitz uses B-spline weighting).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npregiv(y,
+        z,
+        w,
+        x = NULL,
+        zeval = NULL,
+        xeval = NULL,
+        p = 1,
+        nmulti = 1,
+        random.seed = 42,
+        optim.maxattempts = 10,
+        optim.method = c("Nelder-Mead", "BFGS", "CG"),
+        optim.reltol = sqrt(.Machine$double.eps),
+        optim.abstol = .Machine$double.eps,
+        optim.maxit = 500,
+        alpha = NULL,
+        alpha.iter = NULL,
+        alpha.min = 1e-10,
+        alpha.max = 1e-01,
+        alpha.tol = .Machine$double.eps^0.25,
+        iterate.Tikhonov = TRUE,
+        iterate.Tikhonov.num = 1,
+        iterate.max = 1000,
+        iterate.diff.tol = 1.0e-08,
+        constant = 0.5,
+        method = c("Landweber-Fridman","Tikhonov"),
+        penalize.iteration = TRUE,
+        smooth.residuals = TRUE,        
+        start.from = c("Eyz","EEywz"),
+        starting.values  = NULL,
+        stop.on.increase = TRUE,
+        return.weights.phi = FALSE,
+        return.weights.phi.deriv.1 = FALSE,
+        return.weights.phi.deriv.2 = FALSE,
+        bw = NULL,
+        ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>a one (1) dimensional numeric or integer vector of dependent data, each
+element <code class="reqn">i</code> corresponding to each observation (row) <code class="reqn">i</code> of
+<code>z</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of endogenous regressors. The data
+types may be continuous, discrete (unordered and ordered factors),
+or some combination thereof.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+
+<p>a <code class="reqn">q</code>-variate data frame of instruments. The data types may be
+continuous, discrete (unordered and ordered factors), or some
+combination thereof.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>an <code class="reqn">r</code>-variate data frame of exogenous regressors. The data
+types may be continuous, discrete (unordered and ordered factors),
+or some combination thereof.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zeval</code></td>
+<td>
+
+<p>a <code class="reqn">p</code>-variate data frame of endogenous regressors on which the
+regression will be estimated (evaluation data). By default, evaluation
+takes place on the data provided by <code>z</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xeval</code></td>
+<td>
+
+<p>an <code class="reqn">r</code>-variate data frame of exogenous regressors on which the
+regression will be estimated (evaluation data). By default,
+evaluation takes place on the data provided by <code>x</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+
+<p>the order of the local polynomial regression (defaults to
+<code>p=1</code>, i.e. local linear).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmulti</code></td>
+<td>
+
+<p>integer number of times to restart the process of finding extrema of
+the cross-validation function from different (random) initial
+points.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random.seed</code></td>
+<td>
+
+<p>an integer used to seed R's random number generator. This ensures
+replicability of the numerical search. Defaults to 42.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.method</code></td>
+<td>
+<p> method used by <code>optim</code> for minimization of
+the objective function. See <code>?optim</code> for references. Defaults
+to <code>"Nelder-Mead"</code>.
+</p>
+<p>the default method is an implementation of that of Nelder and Mead
+(1965), that uses only function values and is robust but relatively
+slow.  It will work reasonably well for non-differentiable
+functions.
+</p>
+<p>method <code>"BFGS"</code> is a quasi-Newton method (also known as a
+variable metric algorithm), specifically that published
+simultaneously in 1970 by Broyden, Fletcher, Goldfarb and Shanno.
+This uses function values and gradients to build up a picture of the
+surface to be optimized.
+</p>
+<p>method <code>"CG"</code> is a conjugate gradients method based
+on that by Fletcher and Reeves (1964) (but with the option of
+Polak-Ribiere or Beale-Sorenson updates).  Conjugate gradient
+methods will generally be more fragile than the BFGS method, but as
+they do not store a matrix they may be successful in much larger
+optimization problems.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.maxattempts</code></td>
+<td>
+
+<p>maximum number of attempts taken trying to achieve successful
+convergence in <code>optim</code>. Defaults to <code>100</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.abstol</code></td>
+<td>
+
+<p>the absolute convergence tolerance used by <code>optim</code>. Only useful
+for non-negative functions, as a tolerance for reaching
+zero. Defaults to <code>.Machine$double.eps</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.reltol</code></td>
+<td>
+
+<p>relative convergence tolerance used by <code>optim</code>.  The algorithm
+stops if it is unable to reduce the value by a factor of 'reltol *
+(abs(val) + reltol)' at a step.  Defaults to
+<code>sqrt(.Machine$double.eps)</code>, typically about <code>1e-8</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.maxit</code></td>
+<td>
+
+<p>maximum number of iterations used by <code>optim</code>. Defaults
+to <code>500</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+
+<p>a numeric scalar that, if supplied, is used rather than numerically
+solving for <code>alpha</code>, when using <code>method="Tikhonov"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.iter</code></td>
+<td>
+
+<p>a numeric scalar that, if supplied, is used for iterated Tikhonov
+rather than numerically solving for <code>alpha</code>, when using
+<code>method="Tikhonov"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.min</code></td>
+<td>
+
+<p>minimum of search range for <code class="reqn">\alpha</code>, the Tikhonov
+regularization parameter, when using <code>method="Tikhonov"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.max</code></td>
+<td>
+
+<p>maximum of search range for <code class="reqn">\alpha</code>, the Tikhonov
+regularization parameter, when using  <code>method="Tikhonov"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.tol</code></td>
+<td>
+
+<p>the search tolerance for <code>optimize</code> when solving for
+<code class="reqn">\alpha</code>, the Tikhonov regularization parameter,
+when using <code>method="Tikhonov"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterate.Tikhonov</code></td>
+<td>
+
+<p>a logical value indicating whether to use iterated Tikhonov (one
+iteration) or not when using <code>method="Tikhonov"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterate.Tikhonov.num</code></td>
+<td>
+
+<p>an integer indicating the number of iterations to conduct when using
+<code>method="Tikhonov"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterate.max</code></td>
+<td>
+
+<p>an integer indicating the maximum number of iterations permitted
+before termination occurs when using <code>method="Landweber-Fridman"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterate.diff.tol</code></td>
+<td>
+
+<p>the search tolerance for the difference in the stopping rule from
+iteration to iteration when using <code>method="Landweber-Fridman"</code>
+(disable by setting to zero).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constant</code></td>
+<td>
+
+<p>the constant to use when using  <code>method="Landweber-Fridman"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>the regularization method employed (defaults to
+<code>"Landweber-Fridman"</code>, see Horowitz (2011); see Darolles,
+Fan, Florens and Renault (2011) for details for
+<code>"Tikhonov"</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalize.iteration</code></td>
+<td>
+<p> a logical value indicating whether to
+penalize the norm by the number of iterations or not (default
+<code>TRUE</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth.residuals</code></td>
+<td>
+<p> a logical value indicating whether to
+optimize bandwidths for the regression of
+<code class="reqn">(y-\varphi(z))</code> on <code class="reqn">w</code> (defaults to
+<code>TRUE</code>) or for the regression of <code class="reqn">\varphi(z)</code> on
+<code class="reqn">w</code> during iteration
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.from</code></td>
+<td>
+<p> a character string indicating whether to start from
+<code class="reqn">E(Y|z)</code> (default, <code>"Eyz"</code>) or from <code class="reqn">E(E(Y|z)|z)</code> (this can
+be overridden by providing <code>starting.values</code> below)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starting.values</code></td>
+<td>
+<p> a value indicating whether to commence
+Landweber-Fridman assuming
+<code class="reqn">\varphi_{-1}=starting.values</code> (proper
+Landweber-Fridman) or instead begin from <code class="reqn">E(y|z)</code> (defaults to
+<code>NULL</code>, see details below)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop.on.increase</code></td>
+<td>
+
+<p>a logical value (defaults to <code>TRUE</code>) indicating whether to halt
+iteration if the stopping criterion (see below) increases over the
+course of one iteration (i.e. it may be above the iteration tolerance
+but increased)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.weights.phi</code></td>
+<td>
+
+<p>a logical value (defaults to <code>FALSE</code>) indicating whether to
+return the weight matrix which when postmultiplied by the response
+<code class="reqn">y</code> delivers the instrumental regression
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.weights.phi.deriv.1</code></td>
+<td>
+
+<p>a logical value (defaults to <code>FALSE</code>) indicating whether to
+return the weight matrix which when postmultiplied by the response
+<code class="reqn">y</code> delivers the first partial derivative of the instrumental
+regression with respect to <code class="reqn">z</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.weights.phi.deriv.2</code></td>
+<td>
+
+<p>a logical value (defaults to <code>FALSE</code>) indicating whether to
+return the weight matrix which when postmultiplied by the response
+<code class="reqn">y</code> delivers the second partial derivative of the instrumental
+regression with respect to <code class="reqn">z</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw</code></td>
+<td>
+
+<p>an object which, if provided, contains bandwidths and parameters
+(obtained from a previous invocation of <code>npregiv</code>) required to
+re-compute the estimator without having to re-run cross-validation
+and/or numerical optimization which is particularly costly in this
+setting (see details below for an illustration of its use)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments supplied to <code>npksum</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Tikhonov regularization requires computation of weight matrices of
+dimension <code class="reqn">n\times n</code> which can be computationally costly
+in terms of memory requirements and may be unsuitable for large
+datasets. Landweber-Fridman will be preferred in such settings as it
+does not require construction and storage of these weight matrices
+while it also avoids the need for numerical optimization methods to
+determine <code class="reqn">\alpha</code>.
+</p>
+<p><code>method="Landweber-Fridman"</code> uses an optimal stopping rule based
+upon <code class="reqn">||E(y|w)-E(\varphi_k(z,x)|w)||^2
+  </code>. However, if insufficient training is
+conducted the estimates can be overly noisy. To best guard against
+this eventuality set <code>nmulti</code> to a larger number than the default
+<code>nmulti=1</code> for <code>npreg</code>.
+</p>
+<p>When using <code>method="Landweber-Fridman"</code>, iteration will terminate
+when either the change in the value of
+<code class="reqn">||(E(y|w)-E(\varphi_k(z,x)|w))/E(y|w)||^2
+  </code> from iteration to iteration is
+less than <code>iterate.diff.tol</code> or we hit <code>iterate.max</code> or
+<code class="reqn">||(E(y|w)-E(\varphi_k(z,x)|w))/E(y|w)||^2
+  </code> stops falling in value and
+starts rising.
+</p>
+<p>The option <code>bw=</code> would be useful, say, when bootstrapping is
+necessary. Note that when passing <code>bw</code>, it must be obtained from
+a previous invocation of <code>npregiv</code>. For instance, if
+<code>model.iv</code> was obtained from an invocation of <code>npregiv</code> with
+<code>method="Landweber-Fridman"</code>, then the following needs to be fed
+to the subsequent invocation of <code>npregiv</code>:
+</p>
+<pre>
+
+    model.iv &lt;- npregiv(\dots)
+
+    bw &lt;- NULL
+    bw$bw.E.y.w &lt;- model.iv$bw.E.y.w
+    bw$bw.E.y.z &lt;- model.iv$bw.E.y.z
+    bw$bw.resid.w &lt;- model.iv$bw.resid.w
+    bw$bw.resid.fitted.w.z &lt;- model.iv$bw.resid.fitted.w.z
+    bw$norm.index &lt;- model.iv$norm.index
+
+    foo &lt;- npregiv(\dots,bw=bw)
+  </pre>
+<p>If, on the other hand <code>model.iv</code> was obtained from an invocation
+of <code>npregiv</code> with <code>method="Tikhonov"</code>, then the following
+needs to be fed to the subsequent invocation of <code>npregiv</code>:
+</p>
+<pre>
+
+    model.iv &lt;- npregiv(\dots)
+
+    bw &lt;- NULL
+    bw$alpha &lt;- model.iv$alpha
+    bw$alpha.iter &lt;- model.iv$alpha.iter
+    bw$bw.E.y.w &lt;- model.iv$bw.E.y.w
+    bw$bw.E.E.y.w.z &lt;- model.iv$bw.E.E.y.w.z
+    bw$bw.E.phi.w &lt;- model.iv$bw.E.phi.w
+    bw$bw.E.E.phi.w.z &lt;- model.iv$bw.E.E.phi.w.z
+
+    foo &lt;- npregiv(\dots,bw=bw)    
+
+  </pre>
+<p>Or, if <code>model.iv</code> was obtained from an invocation of
+<code>npregiv</code> with either <code>method="Landweber-Fridman"</code> or
+<code>method="Tikhonov"</code>, then the following would also work:
+</p>
+<pre>
+
+    model.iv &lt;- npregiv(\dots)
+
+    foo &lt;- npregiv(\dots,bw=model.iv)    
+
+  </pre>
+<p>When exogenous predictors <code>x</code> (<code>xeval</code>) are passed, they are
+appended to both the endogenous predictors <code>z</code> and the
+instruments <code>w</code> as additional columns. If this is not desired,
+one can manually append the exogenous variables to <code>z</code> (or
+<code>w</code>) prior to passing <code>z</code> (or <code>w</code>), and then they will
+only appear among the <code>z</code> or <code>w</code> as desired.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>npregiv</code> returns a list with components <code>phi</code>,
+<code>phi.mat</code> and either <code>alpha</code> when <code>method="Tikhonov"</code>
+or <code>norm.index</code>, <code>norm.stop</code> and <code>convergence</code> when
+<code>method="Landweber-Fridman"</code>, among others.
+</p>
+<p>In addition, if any of <code>return.weights.*</code> are invoked
+(<code>*=1,2</code>), then <code>phi.weights</code> and <code>phi.deriv.*.weights</code>
+return weight matrices for computing the instrumental regression and
+its partial derivatives. Note that these weights, post multiplied by
+the response vector <code class="reqn">y</code>, will deliver the estimates returned in
+<code>phi</code>, <code>phi.deriv.1</code>, and <code>phi.deriv.2</code> (the latter
+only being produced when <code>p</code> is 2 or greater). When invoked with
+evaluation data, similar matrices are returned but named
+<code>phi.eval.weights</code> and <code>phi.deriv.eval.*.weights</code>. These
+weights can be used for constrained estimation, among others.
+</p>
+<p>When <code>method="Landweber-Fridman"</code> is invoked, bandwidth objects
+are returned in <code>bw.E.y.w</code> (scalar/vector), <code>bw.E.y.z</code>
+(scalar/vector), and <code>bw.resid.w</code> (matrix) and
+<code>bw.resid.fitted.w.z</code>, the latter matrices containing bandwidths
+for each iteration stored as rows. When <code>method="Tikhonov"</code> is
+invoked, bandwidth objects are returned in <code>bw.E.y.w</code>,
+<code>bw.E.E.y.w.z</code>, and <code>bw.E.phi.w</code> and <code>bw.E.E.phi.w.z</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function should be considered to be in ‘beta test’ status until further notice.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jeffrey S. Racine <a href="mailto:racinej@mcmaster.ca">racinej@mcmaster.ca</a>, Samuele Centorrino
+<a href="mailto:samuele.centorrino@univ-tlse1.fr">samuele.centorrino@univ-tlse1.fr</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Carrasco, M. and J.P. Florens and E. Renault (2007), “Linear
+Inverse Problems in Structural Econometrics Estimation Based on
+Spectral Decomposition and Regularization,” In: James J. Heckman and
+Edward E. Leamer, Editor(s), Handbook of Econometrics, Elsevier, 2007,
+Volume 6, Part 2, Chapter 77, Pages 5633-5751
+</p>
+<p>Darolles, S. and Y. Fan and J.P. Florens and E. Renault (2011),
+“Nonparametric instrumental regression,” Econometrica, 79,
+1541-1565.
+</p>
+<p>Feve, F. and J.P. Florens (2010), “The practice of
+non-parametric estimation by solving inverse problems: the example of
+transformation models,” Econometrics Journal, 13, S1-S27.
+</p>
+<p>Florens, J.P. and J.S. Racine and S. Centorrino (forthcoming),
+“Nonparametric instrumental derivatives,” Journal of
+Nonparametric Statistics.
+</p>
+<p>Fridman, V. M. (1956), “A method of successive approximations
+for Fredholm integral equations of the first kind,” Uspeskhi,
+Math. Nauk., 11, 233-334, in Russian.
+</p>
+<p>Horowitz, J.L. (2011), “Applied nonparametric instrumental
+variables estimation,” Econometrica, 79, 347-394.
+</p>
+<p>Landweber, L. (1951), “An iterative formula for Fredholm
+integral equations of the first kind,” American Journal of
+Mathematics, 73, 615-24.
+</p>
+<p>Li, Q. and J.S. Racine (2007), <em>Nonparametric Econometrics:
+Theory and Practice,</em> Princeton University Press.
+</p>
+<p>Li, Q. and J.S. Racine (2004), “Cross-validated Local Linear
+Nonparametric Regression,” Statistica Sinica, 14, 485-512.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>npregivderiv,npreg</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## This illustration was made possible by Samuele Centorrino
+## &lt;samuele.centorrino@univ-tlse1.fr&gt;
+
+set.seed(42)
+n &lt;- 500
+
+## The DGP is as follows:
+
+## 1) y = phi(z) + u
+
+## 2) E(u|z) != 0 (endogeneity present)
+
+## 3) Suppose there exists an instrument w such that z = f(w) + v and
+## E(u|w) = 0
+
+## 4) We generate v, w, and generate u such that u and z are
+## correlated. To achieve this we express u as a function of v (i.e. u =
+## gamma v + eps)
+
+v &lt;- rnorm(n,mean=0,sd=0.27)
+eps &lt;- rnorm(n,mean=0,sd=0.05)
+u &lt;- -0.5*v + eps
+w &lt;- rnorm(n,mean=0,sd=1)
+
+## In Darolles et al (2011) there exist two DGPs. The first is
+## phi(z)=z^2 and the second is phi(z)=exp(-abs(z)) (which is
+## discontinuous and has a kink at zero).
+
+fun1 &lt;- function(z) { z^2 }
+fun2 &lt;- function(z) { exp(-abs(z)) }
+
+z &lt;- 0.2*w + v
+
+## Generate two y vectors for each function.
+
+y1 &lt;- fun1(z) + u
+y2 &lt;- fun2(z) + u
+
+## You set y to be either y1 or y2 (ditto for phi) depending on which
+## DGP you are considering:
+
+y &lt;- y1
+phi &lt;- fun1
+
+## Sort on z (for plotting)
+
+ivdata &lt;- data.frame(y,z,w)
+ivdata &lt;- ivdata[order(ivdata$z),]
+rm(y,z,w)
+attach(ivdata)
+
+model.iv &lt;- npregiv(y=y,z=z,w=w)
+phi.iv &lt;- model.iv$phi
+
+## Now the non-iv local linear estimator of E(y|z)
+
+ll.mean &lt;- fitted(npreg(y~z,regtype="ll"))
+
+## For the plots, restrict focal attention to the bulk of the data
+## (i.e. for the plotting area trim out 1/4 of one percent from each
+## tail of y and z)
+
+trim &lt;- 0.0025
+
+curve(phi,min(z),max(z),
+      xlim=quantile(z,c(trim,1-trim)),
+      ylim=quantile(y,c(trim,1-trim)),
+      ylab="Y",
+      xlab="Z",
+      main="Nonparametric Instrumental Kernel Regression",
+      lwd=2,lty=1)
+
+points(z,y,type="p",cex=.25,col="grey")
+
+lines(z,phi.iv,col="blue",lwd=2,lty=2)
+
+lines(z,ll.mean,col="red",lwd=2,lty=4)
+
+legend("topright",
+       c(expression(paste(varphi(z))),
+         expression(paste("Nonparametric ",hat(varphi)(z))),
+         "Nonparametric E(y|z)"),
+       lty=c(1,2,4),
+       col=c("black","blue","red"),
+       lwd=c(2,2,2),
+       bty="n")
+       
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

@@ -1,0 +1,539 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>addClusterStats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute Cluster-Level Network Properties
+</h2>
+
+<h3>Description</h3>
+
+<p>Given a list of network objects returned by
+<code>buildRepSeqNetwork()</code> or
+<code>generateNetworkObjects()</code>,
+computes cluster-level network properties,
+performing clustering first if needed.
+The list of network objects is returned
+with the cluster properties added as a data frame.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">addClusterStats(
+  net,
+  cluster_id_name = "cluster_id",
+  seq_col = NULL,
+  count_col = NULL,
+  degree_col = "degree",
+  cluster_fun = "fast_greedy",
+  overwrite = FALSE,
+  verbose = FALSE,
+  ...
+)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+
+<p>A <code>list</code> of network objects conforming to the output of
+<code>buildRepSeqNetwork()</code> or
+<code>generateNetworkObjects()</code>.
+See details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_id_name</code></td>
+<td>
+
+<p>A character string specifying the name of the cluster membership variable
+in <code>net$node_data</code> that identifies the cluster to which each node belongs.
+If the variable does not exist, it will be added by calling
+<code>addClusterMembership()</code>.
+If the variable does exist, its values will be used
+unless <code>overwrite = TRUE</code>,
+in which case its values will be overwritten and the new values used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq_col</code></td>
+<td>
+
+<p>Specifies the column(s) of <code>net$node_data</code> containing
+the receptor sequences upon whose similarity the network is based.
+Accepts a character or numeric vector of length 1 or 2,
+containing either column names or column indices.
+If provided, related cluster-level properties will be computed.
+The default <code>NULL</code> will use the value contained in
+<code>net$details$seq_col</code> if it exists and is valid.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count_col</code></td>
+<td>
+
+<p>Specifies the column of <code>net$node_data</code> containing
+a measure of abundance (such as clone count or UMI count).
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+If provided,  related cluster-level properties will be computed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>degree_col</code></td>
+<td>
+
+<p>Specifies the column of <code>net$node_data</code> containing
+the network degree of each node.
+Accepts a character string containing the column name.
+If the column does not exist, it will be added.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_fun</code></td>
+<td>
+
+<p>A character string specifying the clustering algorithm to use when
+adding or overwriting the cluster membership variable in
+<code>net$node_data</code> specified by <code>cluster_id_name</code>.
+Passed to <code>addClusterMembership()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code> and <code>net</code> already contains an element named
+<code>cluster_data</code>, it will be overwritten. Similarly, if
+<code>overwrite = TRUE</code> and <code>net$node_data</code> contains a variable whose
+name matches the value of <code>cluster_id_name</code>, then its values will be
+overwritten with new cluster membership values (obtained using
+<code>addClusterMembership()</code>
+with the specified value of <code>cluster_fun</code>),
+and cluster properties will be computed based on the new values.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Named optional arguments to the function specified by <code>cluster_fun</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The list <code>net</code> must contain the named elements
+<code>igraph</code> (of class <code>igraph</code>),
+<code>adjacency_matrix</code> (a <code>matrix</code> or
+<code>dgCMatrix</code> encoding edge connections),
+and <code>node_data</code> (a <code>data.frame</code> containing node metadata),
+all corresponding to the same network. The lists returned by
+<code>buildRepSeqNetwork()</code> and
+<code>generateNetworkObjects()</code>
+are examples of valid inputs for the <code>net</code> argument.
+</p>
+<p>If the network graph has previously been partitioned into clusters using
+<code>addClusterMembership()</code> and the user
+wishes to compute network properties for these clusters, the name of the
+cluster membership variable in <code>net$node_data</code> should be provided to
+the <code>cluster_id_name</code> argument.
+</p>
+<p>If the value of <code>cluster_id_name</code> is not the name of a variable
+in <code>net$node_data</code>, then clustering is performed using
+<code>addClusterMembership()</code>
+with the specified value of <code>cluster_fun</code>,
+and the cluster membership values are written to <code>net$node_data</code> using
+the value of <code>cluster_id_name</code> as the variable name.
+If <code>overwrite = TRUE</code>, this is done even if this variable already exists.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A modified copy of <code>net</code>, with cluster properties contained in the element
+<code>cluster_data</code>. This is a <code>data.frame</code> containing
+one row for each cluster in the network and the following variables:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>cluster_id</code></td>
+<td>
+
+<p>The cluster ID number.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>node_count</code></td>
+<td>
+
+<p>The number of nodes in the cluster.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean_seq_length</code></td>
+<td>
+
+<p>The mean sequence length in the cluster.
+Only present when <code>length(seq_col) == 1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A_mean_seq_length</code></td>
+<td>
+
+<p>The mean first sequence length in the cluster.
+Only present when <code>length(seq_col) == 2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B_mean_seq_length</code></td>
+<td>
+
+<p>The mean second sequence length in the cluster.
+Only present when <code>length(seq_col) == 2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean_degree</code></td>
+<td>
+
+<p>The mean network degree in the cluster.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_degree</code></td>
+<td>
+
+<p>The maximum network degree in the cluster.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq_w_max_degree</code></td>
+<td>
+
+<p>The receptor sequence possessing the maximum degree within the cluster.
+Only present when <code>length(seq_col) == 1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A_seq_w_max_degree</code></td>
+<td>
+
+<p>The first sequence of the node possessing the maximum degree within the cluster.
+Only present when <code>length(seq_col) == 2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B_seq_w_max_degree</code></td>
+<td>
+
+<p>The second sequence of the node possessing the maximum degree within the cluster.
+Only present when <code>length(seq_col) == 2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agg_count</code></td>
+<td>
+
+<p>The aggregate count among all nodes in the cluster (based on the counts in
+<code>count_col</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_count</code></td>
+<td>
+
+<p>The maximum count among all nodes in the cluster (based on the counts in
+<code>count_col</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq_w_max_count</code></td>
+<td>
+
+<p>The receptor sequence possessing the maximum count within the cluster.
+Only present when <code>length(seq_col) == 1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A_seq_w_max_count</code></td>
+<td>
+
+<p>The first sequence of the node possessing the maximum count within the cluster.
+Only present when <code>length(seq_col) == 2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B_seq_w_max_count</code></td>
+<td>
+
+<p>The second sequence of the node possessing the maximum count within the cluster.
+Only present when <code>length(seq_col) == 2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diameter_length</code></td>
+<td>
+
+<p>The longest geodesic distance in the cluster, computed as the length of the
+vector returned by <code>get_diameter()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>assortativity</code></td>
+<td>
+
+<p>The assortativity coefficient of the cluster's graph, based on the degree
+(minus one) of each node in the cluster (with the degree computed based only
+upon the nodes within the cluster). Computed using
+<code>assortativity_degree()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>global_transitivity</code></td>
+<td>
+
+<p>The transitivity (i.e., clustering coefficient) for the cluster's graph, which
+estimates the probability that adjacent vertices are connected. Computed using
+<code>transitivity()</code> with <code>type = "global"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge_density</code></td>
+<td>
+
+<p>The number of edges in the cluster as a fraction of the maximum possible number
+of edges. Computed using <code>edge_density()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>degree_centrality_index</code></td>
+<td>
+
+<p>The centrality index of the cluster's graph based on within-cluster network degree.
+Computed as the <code>centralization</code> element of the output from
+<code>centr_degree()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>closeness_centrality_index</code></td>
+<td>
+
+<p>The centrality index of the cluster's graph based on closeness,
+i.e., distance to other nodes in the cluster.
+Computed using <code>centralization()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eigen_centrality_index</code></td>
+<td>
+
+<p>The centrality index of the cluster's graph based on the eigenvector centrality scores,
+i.e., values of the first eigenvector of the adjacency matrix for the cluster.
+Computed as the <code>centralization</code> element of the output from
+<code>centr_eigen()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eigen_centrality_eigenvalue</code></td>
+<td>
+
+<p>The eigenvalue corresponding to the first eigenvector of the adjacency matrix
+for the cluster. Computed as the <code>value</code> element of the output from
+<code>eigen_centrality()</code>.
+</p>
+</td>
+</tr>
+</table>
+<p>If <code>net$node_data</code> did not previously contain a variable whose name matches
+the value of <code>cluster_id_name</code>, then this variable will be present
+and will contain values for cluster membership, obtained through a call to
+<code>addClusterMembership()</code>
+using the clustering algorithm specified by <code>cluster_fun</code>.
+</p>
+<p>If <code>net$node_data</code> did previously contain a variable whose name matches
+the value of <code>cluster_id_name</code> and <code>overwrite = TRUE</code>, then the
+values of this variable will be overwritten with new values for cluster membership,
+obtained as above based on <code>cluster_fun</code>.
+</p>
+<p>If <code>net$node_data</code> did not previously contain a variable whose name matches
+the value of <code>degree_col</code>, then this variable will be present
+and will contain values for network degree.
+</p>
+<p>Additionally, if <code>net</code> contains a list named <code>details</code>, then the
+following elements will be added to <code>net$details</code>, or overwritten if they
+already exist:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>cluster_data_goes_with</code></td>
+<td>
+
+<p>A character string containing the value of <code>cluster_id_name</code>.
+When <code>net$node_data</code> contains multiple cluster membership variables
+(e.g., from applying different clustering methods),
+<code>cluster_data_goes_with</code> allows the user
+to distinguish which of these variables corresponds to
+<code>net$cluster_data</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count_col_for_cluster_data</code></td>
+<td>
+
+<p>A character string containing the value of <code>count_col</code>.
+If <code>net$node_data</code> contains multiple count variables, this allows
+the user to distinguish which of these variables corresponds to the
+count-related properties in <code>net$cluster_data</code>, such as
+<code>max_count</code>.
+If <code>count_col = NULL</code>, then the value will be <code>NA</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>addClusterMembership()</code>
+<code>getClusterStats()</code>
+<code>labelClusters()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+toy_data &lt;- simulateToyData()
+
+net &lt;- generateNetworkObjects(
+  toy_data, "CloneSeq"
+)
+
+net &lt;- addClusterStats(
+  net,
+  count_col = "CloneCount"
+)
+
+head(net$cluster_data)
+net$details
+
+# won't change net since net$cluster_data exists
+net &lt;- addClusterStats(
+  net,
+  count_col = "CloneCount",
+  cluster_fun = "leiden",
+  verbose = TRUE
+)
+
+# overwrites values in net$cluster_data
+# and cluster membership values in net$node_data$cluster_id
+# with values obtained using "cluster_leiden" algorithm
+net &lt;- addClusterStats(
+  net,
+  count_col = "CloneCount",
+  cluster_fun = "leiden",
+  overwrite = TRUE
+)
+
+net$details
+
+# overwrites existing values in net$cluster_data
+# with values obtained using "cluster_louvain" algorithm
+# saves cluster membership values to net$node_data$cluster_id_louvain
+# (net$node_data$cluster_id retains membership values from "cluster_leiden")
+net &lt;- addClusterStats(
+  net,
+  count_col = "CloneCount",
+  cluster_fun = "louvain",
+  cluster_id_name = "cluster_id_louvain",
+  overwrite = TRUE
+)
+
+net$details
+
+# perform clustering using "cluster_fast_greedy" algorithm,
+# save cluster membership values to net$node_data$cluster_id_greedy
+net &lt;- addClusterMembership(
+  net,
+  cluster_fun = "fast_greedy",
+  cluster_id_name = "cluster_id_greedy"
+)
+
+# compute cluster properties for the clusters from previous step
+# overwrites values in net$cluster_data
+net &lt;- addClusterStats(
+  net,
+  cluster_id_name = "cluster_id_greedy",
+  overwrite = TRUE
+)
+
+net$details
+</code></pre>
+
+
+</div>

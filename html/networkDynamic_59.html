@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>is.active</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Determine Activation State of Edges and Vertices </h2>
+
+<h3>Description</h3>
+
+<p>Query the activity state of one or more network elements (edges or vertices) for either a single time point or an extended interval.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">is.active(x, onset = NULL, terminus = NULL, length = NULL, at = NULL, e = NULL, v = NULL, 
+    rule = c("any", "all","earliest","latest"), active.default = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> an object of class <code>network</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>onset</code></td>
+<td>
+<p> an optional vector of timepoints that specifies the start of the queried interval(s). This must be accompanied by one of <code>terminus</code> or <code>length</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terminus</code></td>
+<td>
+<p> an optional vector of timepoints that specifies the end of the queried interval(s). This must be accompanied by one of <code>onset</code> or <code>length</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>length</code></td>
+<td>
+<p> an optional vector of interval lengths for the queried interval(s). This must be
+accompanied by one of <code>onset</code> or <code>terminus</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>at</code></td>
+<td>
+<p> an optional vector of single time point(s) to query. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+<p> a vector of edge IDs to evaluate. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p> a vector of vertex IDs to evaluate. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rule</code></td>
+<td>
+<p> a character string indicating the definition of "active" for this query:  <code>any</code> (default) to define active as any active spell during the interval, or <code>all</code> to define active as being active over the entire interval.  Because we are only testing for activity, the values of <code>earliest</code> and <code>latest</code> are equivilent to <code>any</code> and are only included for compatibility with calling functions.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>active.default</code></td>
+<td>
+<p>logical; should elements without an activity attribute be regarded as active by default?  </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function can be used to query the activity status of an element at single time point, or over an interval.  
+The specification of timepoints and intervals is the same as for the <code>activate</code> function.  
+The general rules are discussed in <code>activity.attribute</code>.
+</p>
+<p>To query status at a single time point, use one of the following:
+</p>
+
+<ul>
+<li>
+<p> the <code>at</code> argument, or 
+</p>
+</li>
+<li>
+<p> set <code>onset=terminus</code>.
+</p>
+</li>
+</ul>
+<p>To query status over a particular interval, one of the following valid combinations of <code>onset</code>, <code>terminus</code> and <code>length</code> is required:
+</p>
+
+<ul>
+<li> <p><code>onset</code> and <code>terminus</code>.
+</p>
+</li>
+<li> <p><code>onset</code> and <code>length</code>.
+</p>
+</li>
+<li> <p><code>terminus</code> and <code>length</code>.  
+</p>
+</li>
+<li>
+<p> or, you can specify no information.
+</p>
+</li>
+</ul>
+<p>If the query is specified with no timing information the spell is defined as <code>(-Inf,Inf)</code>.
+The query interval spans the period from the onset (inclusive) to the terminus (exclusive), so [onset,terminus).
+</p>
+<p>There are some special behaviors associated with the arguments  <code>Inf</code> and <code>-Inf</code>.
+</p>
+
+<ul>
+<li>
+<p> The open-ended interval <code>c(-Inf,x)</code> includes <code>-Inf</code>.  For consistency, we also allow the open-ended interval <code>c(x, Inf)</code> to include <code>Inf</code>. 
+Thus [onset, terminus) will be interpreted as [onset, terminus] when terminus = <code>Inf</code>.
+</p>
+</li>
+<li>
+<p> Queries for intervals specified by <code>c(Inf, Inf)</code> or <code>c(-Inf, -Inf)</code> are ignored.
+</p>
+</li>
+</ul>
+<p>If the <code>e</code> argument includes edge ids corresponding to deleted edges, a warning will be generated because the length of the output vector will not match the vector of edge ids.  In this case it is a good idea to use <code>valid.eids</code> to determine the edge ids.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A logical vector indicating the activity states of vertices or edges.  In the case of vertices, the elements of the vector correspond to the vertex ids provided via the <code>v</code> paramter.  In the edges case, if the network has deleted edges, they will be omited from the result so the elements of the vector may not correspond to the eids provided via the <code>e</code> parameter.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ayn Leslie-Cook <a href="mailto:aynlc3@uw.edu">aynlc3@uw.edu</a>, Carter T. Butts <a href="mailto:buttsc@uci.edu">buttsc@uci.edu</a> </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>activity.attribute</code>, <code>activate</code>, <code>valid.eids</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">triangle &lt;- network.initialize(3)  # create a toy network
+add.edge(triangle,1,2)    # add an edge between vertices 1 and 2
+add.edge(triangle,2,3)    # add more edges
+add.edge(triangle,3,1)
+
+# turn on all edges at time 1 only (0 length spell)
+activate.edges(triangle,at=1) 
+# activate edge (1,2) from t=2 to t=3
+activate.edges(triangle,onset=2, terminus=3,
+               e=get.edgeIDs(triangle,v=1,alter=2))
+# activate edge (2,3) from t=4 for 2 time lengths
+activate.edges(triangle,onset=4, length=2, 
+               e=get.edgeIDs(triangle,v=2,alter=3))
+
+# are the edges active at a particular time?
+is.active(triangle, at=1, e=1:3)
+is.active(triangle, at=4, e=seq_along(triangle$mel))
+
+# delete an edge
+delete.edges(triangle,e=2)
+is.active(triangle, at=4, e=seq_along(triangle$mel))
+# gives warning, and only two values returned, which edges are they?
+# much safer to use
+is.active(triangle, at=4, e=valid.eids(triangle))
+
+
+
+</code></pre>
+
+
+</div>

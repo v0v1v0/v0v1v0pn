@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rho_momt_pick</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Optimal rho for moment and Pickands frontier estimator
+</h2>
+
+<h3>Description</h3>
+
+<p>This function gives the optimal rho involved in the moment and Pickands estimators of Daouia, Florens and Simar (2010).    
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rho_momt_pick(xtab, ytab, x, method="moment", lrho=1, urho=Inf)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a character equal to "moment" or "pickands".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lrho</code></td>
+<td>
+<p>a scalar, minimum rho threshold value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>urho</code></td>
+<td>
+<p>a scalar, maximum rho threshold value.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function computes the moment and Pickands estimates of the extreme-value index 
+<code class="reqn">\rho_x</code> involved in the frontier estimators <code class="reqn">\tilde\varphi_{momt}(x)</code>  [see <code>dfs_momt</code>] and 
+<code class="reqn">\hat\varphi_{pick}(x)</code> [see <code>dfs_pick</code>].
+In case <code>method="moment"</code>, the estimator of <code class="reqn">\rho_x</code> defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\tilde{\rho}_x = -\left(M^{(1)}_n + 1 -\frac{1}{2}\left[1-(M^{(1)}_n)^2/M^{(2)}_n\right]^{-1}\right)^{-1}</code>
+</p>
+
+<p>is based on the moments <code class="reqn">M^{(j)}_n = (1/k)\sum_{i=0}^{k-1}\left(\log  z^x_{(n-i)}- \log   z^x_{(n-k)}\right)^j</code>   
+for <code class="reqn">j=1,2</code>, with <code class="reqn">z^{x}_{(1)}\leq \cdots\leq  z^{x}_{(n)}</code> are the ascending order statistics  
+corresponding to the transformed sample <code class="reqn">\{z^{x}_i := y_i\mathbf{1}_{\{x_i\le x\}}, \,i=1,\cdots,n\}</code>
+In case <code>method="pickands"</code>, the estimator of <code class="reqn">\rho_x</code> is given by
+</p>
+<p style="text-align: center;"><code class="reqn">\hat{\rho}_x = - \log 2/\log\{(z^x_{(n-k+1)} - z^x_{(n-2k+1)})/(z^x_{(n-2k+1)} - z^x_{(n-4k+1)})\}.</code>
+</p>
+
+<p>To select the threshold <code class="reqn">k=k_n(x)</code> in <code class="reqn">\tilde{\rho}_x</code> and <code class="reqn">\hat{\rho}_x</code>, Daouia et al. (2010) have suggested to use the following data driven method for each 
+<code class="reqn">x</code>: They first select a grid of values for <code class="reqn">k=k_n(x)</code>.
+For the Pickands estimator <code class="reqn">\hat{\rho}_x</code>, they choose <code class="reqn">k_n(x) = [N_x /4] - k + 1</code>, where <code class="reqn">k</code> is an integer varying between 1 
+and the integer part <code class="reqn">[N_x/4]</code> of <code class="reqn">N_x/4</code>, with <code class="reqn">N_x=\sum_{i=1}^n1_{\{x_i\le x\}}</code>.
+For the moment estimator <code class="reqn">\tilde{\rho}_x</code>, they choose <code class="reqn">k_n(x) = N_x - k</code>, where <code class="reqn">k</code> is an integer varying between 1 and <code class="reqn">N_x -1</code>.
+Then, they evaluate the estimator <code class="reqn">\hat{\rho}_x(k)</code>  (respectively, <code class="reqn">\tilde{\rho}_x(k)</code>) and select the k where the variation of the results is the smallest. 
+They achieve this by computing the standard deviation of <code class="reqn">\hat{\rho}_x(k)</code> (respectively, <code class="reqn">\tilde{\rho}_x(k)</code>) over a “window” of 
+<code class="reqn">\max([\sqrt{N_x /4}],3)</code> (respectively, <code class="reqn">\max([\sqrt{N_x-1}],3)</code>) 
+successive values of <code class="reqn">k</code>. The value of <code class="reqn">k</code> where this standard deviation is minimal defines the value of <code class="reqn">k_n(x)</code>.
+The user can also appreciably improve the estimation of <code class="reqn">\rho_x</code> and <code class="reqn">\varphi(x)</code> itself by tuning the choice of the lower limit (default option <code>lrho=1</code>) 
+and upper limit (default option <code>urho=Inf</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>In order to choose a raisonable estimate <code class="reqn">\tilde\rho_x=\tilde\rho_x(k)</code> and 
+<code class="reqn">\hat\rho_x=\hat\rho_x(k)</code> of the extreme-value index <code class="reqn">\rho_x</code>, 
+for each fixed <code class="reqn">x</code>, one can construct the plot of the estimator of interest, consisting of the points <code class="reqn">\{(k,\tilde\rho_x(k))\}_k</code> or
+<code class="reqn">\{(k,\hat\rho_x(k))\}_k</code>, and select a value of the estimate at which the obtained graph looks stable. This is this kind of idea
+which guides the propoed automatic data-driven rule for a chosen grid of values of <code class="reqn">x</code>. The main difficulty with such a method is that the plots of
+<code class="reqn">\tilde\rho_x(k)</code> or <code class="reqn">\hat\rho_x(k)</code> as functions of <code class="reqn">k</code>, for each <code class="reqn">x</code>, may be so unstable that reasonable values of
+<code class="reqn">k</code> [which would correspond to the true value of <code class="reqn">\rho_x</code>] may be hidden in the graphs. In results, the obtained extreme-value index estimator and the frontier estimator itself may 
+exhibits considerable volatility as functions of <code class="reqn">x</code>. The user can appreciably improve the estimation of <code class="reqn">\rho_x</code> and <code class="reqn">\varphi(x)</code> 
+by tuning the choice of the lower limit (default option <code>lrho=1</code>) and upper limit (default option <code>urho=Inf</code>). 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Abdelaati Daouia and Thibault Laurent (codes converted from Matlab's Leopold Simar code). 
+</p>
+
+
+<h3>References</h3>
+
+<p>Daouia, A., Florens, J.P. and Simar, L. (2010). Frontier Estimation and Extreme Value Theory, <em>Bernoulli</em>, 16, 1039-1063.
+</p>
+<p>Dekkers, A.L.M., Einmahl, J.H.J. and L. de Haan (1989), A moment estimator for the index of an extreme-value distribution, <em>The Annals of Statistics</em>, 17(4), 1833-1855.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dfs_momt</code>, <code>dfs_pick</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("post")
+x.post&lt;- seq(post$xinput[100],max(post$xinput), 
+ length.out=100) 
+## Not run: 
+# a. Optimal rho for Pickands frontier estimator
+rho_pick&lt;-rho_momt_pick(post$xinput, post$yprod, 
+ x.post, method="pickands")
+# b. Optimal rho for moment frontier estimator
+rho_momt&lt;-rho_momt_pick(post$xinput, post$yprod, 
+ x.post, method="moment")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>entropy_bivar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bivariate Entropy</h2>
+
+<h3>Description</h3>
+
+<p>Computes the bivariate entropies between all pairs of (discrete) variables in a multivariate data set.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">entropy_bivar(dat)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>dataframe with rows as observations and columns as variables. Variables must all be observed or transformed categorical with finite range spaces.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>The bivariate entropy <em>H(X,Y)</em> of two discrete random variables <em>X</em> and <em>Y</em>
+can be used to check for functional relationships and stochastic independence between pairs of variables.
+The bivariate entropy is bounded according to <br></p>
+<p><em>H(X) &lt;= H(X,Y) &lt;= H(X) + H(Y)</em>
+<br></p>
+<p>where <em>H(X)</em> and
+<em>H(Y)</em> are the univariate entropies.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Upper triangular matrix giving bivariate entropies between pairs of variables given as
+rows and columns of the matrix. The univariate entropies are given in the diagonal.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Termeh Shafie
+</p>
+
+
+<h3>References</h3>
+
+<p>Frank, O., &amp; Shafie, T. (2016). Multivariate entropy analysis of network data.
+<em>Bulletin of Sociological Methodology/Bulletin de Méthodologie Sociologique</em>, 129(1), 45-63.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>joint_entropy</code>,  <code>entropy_trivar</code>, <code>redundancy</code>, <code>prediction_power</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># use internal data set
+data(lawdata)
+df.att &lt;- lawdata[[4]]
+
+# three steps of data editing:
+# 1. categorize variables 'years' and 'age' based on
+# approximately three equally size groups (values based on cdf)
+# 2. make sure all outcomes start from the value 0 (optional)
+# 3. remove variable 'senior' as it consists of only unique values (thus redundant)
+df.att.ed &lt;- data.frame(
+    status = df.att$status,
+    gender = df.att$gender,
+    office = df.att$office - 1,
+    years = ifelse(df.att$years &lt;= 3, 0,
+        ifelse(df.att$years &lt;= 13, 1, 2)
+    ),
+    age = ifelse(df.att$age &lt;= 35, 0,
+        ifelse(df.att$age &lt;= 45, 1, 2)
+    ),
+    practice = df.att$practice,
+    lawschool = df.att$lawschool - 1
+)
+
+# calculate bivariate entropies
+H.biv &lt;- entropy_bivar(df.att.ed)
+# univariate entropies are then given as
+diag(H.biv)
+</code></pre>
+
+
+</div>

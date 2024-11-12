@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>loc_max</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Local maximum frontier estimators
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes the local constant and local DEA  boundary estimates  proposed by  Gijbels and Peng (2000).   
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">loc_max(xtab, ytab, x, h, type="one-stage")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector of evaluation points in which the estimator is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>determines the bandwidth at which the estimate will be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>a character equal to "one-stage" or "two-stage".</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When estimating <code class="reqn">\varphi(x)</code>, for a given point <code class="reqn">x\in\R</code>, 
+the methodology of Gijbels and Peng consists of considering a strip around <code class="reqn">x</code> of width <code class="reqn">2h</code>,
+where <code class="reqn">h=h_n\to 0</code> with <code class="reqn">nh_n\to\infty</code>
+as <code class="reqn">n\to\infty</code>, and focusing then on the <code class="reqn">y_i</code> observations falling into this strip.
+More precisely, they consider the transformend variables <code class="reqn">z^{xh}_i = y_i\mathbf{1}_{(|x_i-x|\leq h)}</code>, 
+<code class="reqn">i=1,\ldots,n</code>, and the corresponding order statistics <code class="reqn">z^{xh}_{(1)}\le\cdots\le z^{xh}_{(n)}</code>.
+</p>
+<p>The simple maximum <code class="reqn">z^{xh}_{(n)}=\max_{i=1,\ldots,n}z^{xh}_i</code> defines then the local constant estimator of the
+frontier point <code class="reqn">\varphi(x)</code> [option <code>type="one-stage"</code>].
+This opens a way to a  two-stage estimation procedure as follows.
+In a first stage, Gijbels and Peng calculate the maximum <code class="reqn">z^{xh}_{(n)}</code>.
+Then,  they  suggest to replace each observation <code class="reqn">y_i</code>  in  the strip of width <code class="reqn">2h</code> around <code class="reqn">x</code> by  this maximum,  leaving all observations outside the strip unchanged.
+More precisely, they define
+<code class="reqn">\tilde{y}_i= y_i</code> if <code class="reqn">|x_i-x| &gt; h</code> and <code class="reqn">\tilde{y}_i= z^{xh}_{(n)}</code> if <code class="reqn">|x_i-x| \leq h</code> either.
+Then, they apply the DEA estimator (see the function <code>dea_est</code>) to these transformed data <code class="reqn">(x_i,\tilde{y}_i)</code>,
+giving  the local DEA  estimator  (option  <code>type="two-stage"</code>). 
+An <em>ad hoc</em> way of selecting <code class="reqn">h</code> is by using for instance the function <code>npcdistbw</code> from the <span class="pkg">np</span> package (see Daouia et al. (2016) for details).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a numeric vector with the same length as <code>x</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Abdelaati Daouia and Thibault Laurent.
+</p>
+
+
+<h3>References</h3>
+
+<p>Daouia, A., Laurent, T. and Noh, H. (2017). npbr: A Package for Nonparametric Boundary Regression in R. <em>Journal of Statistical Software</em>, <b>79</b>(9), 1-43. doi:10.18637/jss.v079.i09.
+</p>
+<p>Gijbels, I. and Peng, L. (2000). Estimation of a support curve  via order statistics, <em>Extremes</em>, 3,  251–277. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dea_est</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("green")
+x.green &lt;- seq(min(log(green$COST)), max(log(green$COST)), 
+ length.out=101)
+# Local maximum frontier estimates
+# a. Local constant estimator
+loc_max_1stage&lt;-loc_max(log(green$COST), log(green$OUTPUT), 
+ x.green, h=0.5, type="one-stage")
+# b. Local DEA estimator
+loc_max_2stage&lt;-loc_max(log(green$COST), log(green$OUTPUT), 
+ x.green, h=0.5, type="two-stage")  
+# Representation 
+plot(log(OUTPUT)~log(COST), data=green)
+lines(x.green, loc_max_1stage, lty=1, col="magenta")
+lines(x.green, loc_max_2stage, lty=2, col="cyan")
+legend("topleft",legend=c("one-stage", "two-stage"), 
+ col=c("magenta","cyan"), lty=c(1,2))
+</code></pre>
+
+
+</div>

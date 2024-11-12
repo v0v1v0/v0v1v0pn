@@ -1,0 +1,156 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dea</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Linear Programming for the Data Envelopment Analysis</h2>
+
+<h3>Description</h3>
+
+<p>Solve input(output)-oriented DEA under the CRS (VRS)</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dea(base = NULL, frontier = NULL, noutput = 1, orientation=1, rts = 1, onlytheta = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>base</code></td>
+<td>
+<p>A data set for DMUs to be evaluated. A data frame with
+J1*(M+N) dimention, where J1 is the number of DMUs, M for the number
+of inputs, and N for the number of outputs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frontier</code></td>
+<td>
+<p>A data set for DMUs to be used in constructing a
+production possibility set (PPS). A data frame with J2*(M+N)
+dimention, where J2 is the number of DMUs, M for the number of
+inputs, and N for the number of outputs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noutput</code></td>
+<td>
+<p>The number of outputs (N).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orientation</code></td>
+<td>
+<p>Orientation of measurement. 1 for the input-oriented
+measure, and 2 for the output-oriented measure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rts</code></td>
+<td>
+<p>Returns to scale. 1 for the CRS assumption, and 2 for the
+VRS assumption.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>onlytheta</code></td>
+<td>
+<p>Logical. If onlytheta is TRUE, then only efficiency
+scores are obtained. If it is FALSE, then optimal lambda's and
+slacks are also obtained.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The input (output) -oriented DEA under the CRS (VRS) assumption are
+calcuated. For model specification, take a look at Cooper et al. (2007).
+</p>
+
+
+<h3>Value</h3>
+
+<p>If onlytheta is TRUE, then a (J1*1) data.frame is obtained. If
+onlytheta if FALSE, then a data frame with a J1*(J1+M+N) dimension is
+obtained, in which optimal weights, input slacks and output slacks are
+presented.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Dong-hyun Oh, <a href="mailto:oh.donghyun77@gmail.com">oh.donghyun77@gmail.com</a></p>
+
+
+<h3>References</h3>
+
+<p>Cooper, W., Seiford, L. and Tone, K. (2007). <em>Data envelopment
+analysis: a comprehensive text with models, applications, references
+and DEA-solver software</em> (2nd ed.). Springer Verlag, New York.
+</p>
+<p>Lee, J. and Oh, D. (forthcoming). <em>Efficiency Analysis: Data
+Envelopment Analysis</em>. Press (in Korean)
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dual.dea</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## input-oriented DEA under the CRS assumption (1 input and 1 output)
+tab3.1.dat &lt;- data.frame(y = c(1, 2, 4, 6, 7, 9, 9), 
+                         x = c(3, 2, 6, 4, 8, 8, 10))
+(re &lt;- dea(base = tab3.1.dat, noutput = 1, orientation = 1, rts = 1,
+onlytheta = FALSE))
+
+## input-oriented DEA under the CRS assumption (2 inputs and 1 output)
+tab3.3.dat &lt;- data.frame(y = c(1, 1, 1, 1, 1, 1),
+                              x1 = c(1, 3, 6, 2, 5, 9),
+                              x2 = c(4, 1, 1, 8, 5, 2))
+re &lt;- dea(base=tab3.3.dat, noutput = 1, orientation = 1, rts = 1)
+## finding references points
+(ref &lt;- data.frame(y = c(tab3.3.dat$y + re$slack.y1),
+x1 = c(tab3.3.dat$x1 * re$eff - re$slack.x1),
+x2 = c(tab3.3.dat$x2 * re$eff - re$slack.x2)))
+
+
+## output-oriented DEA under the CRS assumption (1 input and 2 outputs)
+tab5.1.dat &lt;- data.frame(y1 = c(4, 8, 8, 4, 3, 1),
+                         y2 = c(9, 6, 4, 3, 5, 6),
+                         x = c(1, 1, 1, 1, 1, 1))
+(re &lt;- dea(tab5.1.dat, noutput = 2, orientation = 2, rts = 1))
+
+## input-oriented DEA under the VRS assumption (1 input and 1 output)
+tab6.1.dat &lt;- data.frame(y = c(1, 2, 4, 6, 7, 9, 9),
+                              x = c(3, 2, 6, 4, 8, 8, 10))
+(re &lt;- dea(tab6.1.dat, noutput = 1, orientation = 1, rts = 2))
+
+## output-oriented DEA under the VRS assumtion (1 input and 1 output)
+(re &lt;- dea(tab6.1.dat, noutput = 1, orientation = 2, rts = 2))
+
+## scale efficiency
+re.crs &lt;-
+    dea(tab6.1.dat, noutput = 1, orientation = 1, rts = 1,onlytheta = TRUE)
+re.vrs&lt;-
+    dea(tab6.1.dat, noutput = 1, orientation = 1, rts = 2,
+         onlytheta = TRUE)
+scale.eff &lt;- re.crs/re.vrs
+
+## finding DRS, IRS, CRS
+dat6.1 &lt;- data.frame(y = c(1, 2, 4, 6, 7, 9, 9),
+     x = c(3, 2, 6, 4, 8, 8, 10))
+re &lt;- dea(dat6.1, noutput = 1, rts = 1)
+lambdas &lt;- re[, 2:8]
+apply(lambdas, 1, sum) 
+</code></pre>
+
+
+</div>

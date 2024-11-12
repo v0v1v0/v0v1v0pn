@@ -1,0 +1,216 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Annotation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Annotation objects</h2>
+
+<h3>Description</h3>
+
+<p>Creation and manipulation of annotation objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Annotation(id = NULL, type = NULL, start, end, features = NULL,
+           meta = list())
+as.Annotation(x, ...)
+## S3 method for class 'Span'
+as.Annotation(x, id = NULL, type = NULL, ...)
+is.Annotation(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>an integer vector giving the annotation ids, or <code>NULL</code>
+(default) resulting in missing ids.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>a character vector giving the annotation types, or
+<code>NULL</code> (default) resulting in missing types.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start, end</code></td>
+<td>
+<p>integer vectors giving the start and end positions
+of the character spans the annotations refer to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>features</code></td>
+<td>
+<p>a list of (named or empty) feature lists, or
+<code>NULL</code> (default), resulting in empty feature lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta</code></td>
+<td>
+<p>a named or empty list of annotation metadata tag-value
+pairs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object (an object of class <code>"Span"</code> for the
+coercion methods for such objects).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A single annotation (of natural language text) is a quintuple with
+“slots” ‘id’, ‘type’, ‘start’,
+‘end’, and ‘features’.  These give, respectively, id and
+type, the character span the annotation refers to, and a collection of
+annotation features (tag/value pairs).
+</p>
+<p>Annotation objects provide sequences (allowing positional access) of
+single annotations, together with metadata about these.  They have
+class <code>"Annotation"</code> and, as they contain character spans, also
+inherit from class <code>"Span"</code>.  Span objects can be coerced
+to annotation objects via <code>as.Annotation()</code> which allows to
+specify ids and types (using the default values sets these to
+missing), and annotation objects can be coerced to span objects using
+<code>as.Span()</code>.
+</p>
+<p>The features of a single annotation are represented as named or empty
+lists.
+</p>
+<p>Subscripting annotation objects via <code>[</code> extracts subsets of
+annotations; subscripting via <code>$</code> extracts the sequence of values
+of the named slot, i.e., an integer vector for ‘id’,
+‘start’, and ‘end’, a character vector for
+‘type’, and a list of named or empty lists for
+‘features’.
+</p>
+<p>There are several additional methods for class <code>"Annotation"</code>:
+<code>print()</code> and <code>format()</code> (which both have a <code>values</code>
+argument which if <code>FALSE</code> suppresses indicating the feature map
+values);
+<code>c()</code> combines annotations (or objects coercible to these using
+<code>as.Annotation()</code>);
+<code>merge()</code> merges annotations by combining the feature lists of
+annotations with otherwise identical slots;
+<code>subset()</code> allows subsetting by expressions involving the slot
+names; and
+<code>as.list()</code> and <code>as.data.frame()</code> coerce, respectively, to
+lists (of single annotation objects) and data frames (with annotations
+and slots corresponding to rows and columns).
+</p>
+<p><code>Annotation()</code> creates annotation objects from the given sequences
+of slot values: those not <code>NULL</code> must all have the same length
+(the number of annotations in the object).
+</p>
+<p><code>as.Annotation()</code> coerces to annotation objects, with a method
+for span objects.
+</p>
+<p><code>is.Annotation()</code> tests whether an object inherits from class
+<code>"Annotation"</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>Annotation()</code> and <code>as.Annotation()</code>, an annotation
+object (of class <code>"Annotation"</code> also inheriting from class
+<code>"Span"</code>).
+</p>
+<p>For <code>is.Annotation()</code>, a logical.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## A simple text.
+s &lt;- String("  First sentence.  Second sentence.  ")
+##           ****5****0****5****0****5****0****5**
+
+## Basic sentence and word token annotations for the text.
+a1s &lt;- Annotation(1 : 2,
+                  rep.int("sentence", 2L),
+                  c( 3L, 20L),
+                  c(17L, 35L))
+a1w &lt;- Annotation(3 : 6,
+                  rep.int("word", 4L),
+                  c( 3L,  9L, 20L, 27L),
+                  c( 7L, 16L, 25L, 34L))
+
+## Use c() to combine these annotations:
+a1 &lt;- c(a1s, a1w)
+a1
+## Subscripting via '[':
+a1[3 : 4]
+## Subscripting via '$':
+a1$type
+## Subsetting according to slot values, directly:
+a1[a1$type == "word"]
+## or using subset():
+subset(a1, type == "word")
+
+## We can subscript string objects by annotation objects to extract the
+## annotated substrings:
+s[subset(a1, type == "word")]
+## We can also subscript by lists of annotation objects:
+s[annotations_in_spans(subset(a1, type == "word"),
+                       subset(a1, type == "sentence"))]
+
+## Suppose we want to add the sentence constituents (the ids of the
+## words in the respective sentences) to the features of the sentence
+## annotations.  The basic computation is
+lapply(annotations_in_spans(a1[a1$type == "word"],
+                            a1[a1$type == "sentence"]),
+       function(a) a$id)
+## For annotations, we need lists of feature lists:
+features &lt;-
+    lapply(annotations_in_spans(a1[a1$type == "word"],
+                                a1[a1$type == "sentence"]),
+           function(e) list(constituents = e$id))
+## Could add these directly:
+a2 &lt;- a1
+a2$features[a2$type == "sentence"] &lt;- features
+a2
+## Note how the print() method summarizes the features.
+## We could also write a sentence constituent annotator
+## (note that annotators should always have formals 's' and 'a', even
+## though for computing the sentence constituents s is not needed):
+sent_constituent_annotator &lt;-
+Annotator(function(s, a) {
+              i &lt;- which(a$type == "sentence")
+              features &lt;-
+                  lapply(annotations_in_spans(a[a$type == "word"],
+                                              a[i]),
+                        function(e) list(constituents = e$id))
+              Annotation(a$id[i], a$type[i], a$start[i], a$end[i],
+                         features)
+         })
+sent_constituent_annotator(s, a1)
+## Can use merge() to merge the annotations:
+a2 &lt;- merge(a1, sent_constituent_annotator(s, a1))
+a2
+## Equivalently, could have used
+a2 &lt;- annotate(s, sent_constituent_annotator, a1)
+a2
+## which merges automatically.
+</code></pre>
+
+
+</div>

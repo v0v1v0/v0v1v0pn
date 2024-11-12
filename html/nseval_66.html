@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_call</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get information about currently executing calls.</h2>
+
+<h3>Description</h3>
+
+<p><code>get_call(env)</code>, given an environment associated with a currently
+executing call, returns the function call and its arguments, as a
+dots object. To replicate a call, the dots object returned can
+be passed to do.
+</p>
+<p><code>get_function(env)</code> finds the function object associated with a
+currently executing call.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_call(
+  env = caller(environment()),
+  ifnotfound = stop("get_call: environment not found on stack")
+)
+
+get_function(
+  env = caller(environment()),
+  ifnotfound = stop("get_function: environment not found on stack")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>An environment belonging to a currently executing
+function call. By default, the caller of get_call itself
+(so <code>get_call()</code> is equivalent to <code>get_call(environment())</code>.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ifnotfound</code></td>
+<td>
+<p>What to return if the call is not found. By
+default an error is thrown.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>get_call</code> is meant to replace <code>match.call</code> and <code>sys.call</code>;
+its advantage is that it captures the environments bound to
+arguments in addition to their written form.
+</p>
+<p><code>get_function</code> is similar to <code>sys.function</code>, but is keyed by
+environment rather than number.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>get_call</code> returns a dots object, the first element of
+which represents the function name and caller environment.
+</p>
+<p><code>get_function</code> returns a closure.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>do dots caller
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># We might think of re-writing the start of [lm] like so:
+LM &lt;- function(formula, data, subset, weights, na.action, method = "qr",
+               model = TRUE, x = FALSE, y = FALSE, qr = TRUE, singular.ok = TRUE, 
+               contrasts = NULL, offset, ...) {
+  cl &lt;- get_call()
+  mf &lt;- do(model.frame,
+           arg_list(formula, data, subset, weights, na.action, offset))
+
+  z &lt;- get.call()
+
+  class(z) &lt;- c("LM", class(z))
+  z$call &lt;- cl
+  z
+}
+
+# and `update` like so:
+update.LM &lt;- function(object, formula., ...) {
+  call &lt;- object$call
+  extras &lt;- dots(...)
+  call$formula &lt;- forced_quo(update.formula(formula(object), formula.))
+  do(call)
+}
+</code></pre>
+
+
+</div>

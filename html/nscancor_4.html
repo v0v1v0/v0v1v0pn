@@ -1,0 +1,245 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mcancor</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-Negative and Sparse Multi-Domain CCA</h2>
+
+<h3>Description</h3>
+
+<p>Performs a canonical correlation analysis (CCA) on multiple data domains,
+where constraints such as non-negativity or sparsity are enforced on the
+canonical vectors. The result
+of the analysis is returned as a list of class <code>mcancor</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mcancor(
+  x,
+  center = TRUE,
+  scale_ = FALSE,
+  nvar = min(sapply(x, dim)),
+  predict,
+  cor_tol = NULL,
+  nrestart = 10,
+  iter_tol = 0,
+  iter_max = 50,
+  partial_model = NULL,
+  verbosity = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a list of numeric matrices which contain the data from the different
+domains</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>a list of logical values indicating whether the empirical mean
+of (each column of) the corresponding data matrix should be subtracted.
+Alternatively, a list of vectors can be supplied, where each vector
+specifies the mean to be subtracted from the corresponding data matrix.
+Each list element is passed to <code>scale</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale_</code></td>
+<td>
+<p>a list of logical values indicating whether the columns of the
+corresponding data matrix should be scaled to have unit variance before the
+analysis takes place. The default is <code>FALSE</code> for consistency with
+<code>nscancor</code>. Alternatively, a list of vectors can be supplied, where
+each vector specifies the standard deviations used to rescale the columns
+of the corresponding data matrix. Each list element is passed to
+<code>scale</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nvar</code></td>
+<td>
+<p>the number of canonical variables to be computed for each domain.
+With the default setting, canonical variables are computed until at least
+one data matrix is fully deflated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predict</code></td>
+<td>
+<p>a list of regression functions to predict the sum of the
+canonical variables of all other domains. The formal arguments for each
+regression function are the design matrix <code>x</code> corresponding to the
+data from the current domain, the regression target <code>sc</code> as the sum of
+the canonical variables for all other domains, and <code>cc</code> as a counter
+of which canonical variable is currently computed (e.g. for enforcing
+different constraints for subsequent canonical vectors of a given domain).
+See the examples for an illustration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cor_tol</code></td>
+<td>
+<p>a threshold indicating the magnitude below which canonical
+variables should be omitted. Variables are omitted if the sum of all their
+correlations are less than or equal to <code>cor_tol</code> times the sum of all
+correlations of the first canonical variables of all domains. With the
+default <code>NULL</code> setting, no variables are omitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrestart</code></td>
+<td>
+<p>the number of random restarts for computing the canonical
+variables via iterated regression steps. The solution achieving maximum
+explained correlation over all random restarts is kept. A value greater
+than one can help to avoid poor local maxima.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter_tol</code></td>
+<td>
+<p>If the relative change of the objective is less than
+<code>iter_tol</code> between iterations, the procedure is assumed to have
+converged to a local optimum.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter_max</code></td>
+<td>
+<p>the maximum number of iterations to be performed. The
+procedure is terminated if either the <code>iter_tol</code> or the
+<code>iter_max</code> criterion is satisfied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partial_model</code></td>
+<td>
+<p><code>NULL</code> or an object of class <code>mcancor</code>. The
+computation can be continued from a partial model by providing an
+<code>mcancor</code> object (either from a previous run of this function or from
+<code>macor</code>) and setting <code>nvar</code> to a value greater than the
+number of canonical variables contained in the partial model. See the
+examples for an illustration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbosity</code></td>
+<td>
+<p>an integer specifying the verbosity level. Greater values
+result in more output, the default is to be quiet.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>mcancor</code> generalizes <code>nscancor</code> to the case where more than
+two data domains are available for an analysis. Its objective is to maximize
+the sum of all pairwise correlations of the canonical variables.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>mcancor</code> returns a list of class <code>mcancor</code> with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>cor</code></td>
+<td>
+<p>a multi-dimensional array containing the additional correlations
+explained by each pair of canonical variables. The first two dimensions
+correspond to the domains, and the third dimension corresponds to the
+different canonical variables per domain (see also <code>macor</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coef</code></td>
+<td>
+<p>a list of matrices containing the canonical vectors related to
+each data domain. The canonical vectors are stored as the columns of each
+matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>the list of empirical means used to center the data
+matrices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>the list of empirical standard deviations used to
+scale the data matrices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xp</code></td>
+<td>
+<p>the list of deflated
+data matrices corresponding to <code>x</code></p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>macor</code>, <code>nscancor</code>, <code>scale</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+# As of version 1.2.1 of the PMA package, breastdata.rda is no longer
+# contained in the package and needs to be downloaded separately
+breastdata_url &lt;- "https://statweb.stanford.edu/~tibs/PMA/breastdata.rda"
+breastdata_file &lt;- tempfile("breastdata_", fileext = ".rda")
+status &lt;- download.file(breastdata_url, breastdata_file, mode = "wb")
+if (status &gt; 0)
+  stop("Unable to download from", breastdata_url)
+load(breastdata_file)
+
+# Three data domains: a subset of genes, and CGH spots for the first and
+# second chromosome
+x &lt;- with(
+  breastdata,
+  list(t(rna)[ , 1:100], t(dna)[ , chrom == 1], t(dna)[ , chrom == 2])
+)
+
+# Sparse regression functions with different cardinalities for different domains
+generate_predict &lt;- function(dfmax) {
+  force(dfmax)
+  return(
+    function(x, sc, cc) {
+      en &lt;- glmnet::glmnet(x, sc, alpha = 0.05, intercept = FALSE, dfmax = dfmax)
+      W &lt;- coef(en)
+      return(W[2:nrow(W), ncol(W)])
+    }
+  )
+}
+predict &lt;- lapply(c(20, 10, 10), generate_predict)
+
+# Compute two canonical variables per domain
+mcc &lt;- mcancor(x, predict = predict, nvar = 2)
+
+# Compute another canonical variable for each domain
+mcc &lt;- mcancor(x, predict = predict, nvar = 3, partial_model = mcc)
+mcc$cor
+
+
+</code></pre>
+
+
+</div>

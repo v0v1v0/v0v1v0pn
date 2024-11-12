@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nutriNetwork</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reconstructs conditional (in)dependence networks among variables</h2>
+
+<h3>Description</h3>
+
+<p>This is the main functions of the <span class="pkg">nutriNetwork</span> package. This function infers the direct associations between variables. In another words, it measures pairwise associations among variables while correcting the effect of remaining variables. Three methods are available to reconstruct networks, namely (i) Gibbs sampling, (ii) approximation method, and (iii) nonparanormal approach within the copula graphical model. The first two methods are able to deal with missing genotypes. The last one is computationally faster.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nutriNetwork(data, method = "gibbs", rho = NULL, n.rho = NULL, rho.ratio = NULL,
+		ncores = 1, em.iter = 5, em.tol=.001, verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p> An (<code class="reqn">n \times p</code>) matrix or a <code>data.frame</code> corresponding to the data matrix, where <code class="reqn">n</code> is sample size and <code class="reqn">p</code> is the number of variables. Input data can contain missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Reconstructing undirected graph using the three methods: "gibbs", "approx", and "npn". For a medium (~500) and a large number of variables we recommend to choose "gibbs" and "approx", respectively. Choosing "npn" for a very large number of variables (&gt; 2000) is computationally efficient. The default method is "gibbs".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>Optional. A decreasing sequence of non-negative numbers that control the sparsity level. Leaving the input as <code>rho = NULL</code>, the program automatically computes a sequence of <code>rho</code> based on <code>n.rho</code> and <code>rho.ratio</code>. Users can also supply a decreasing sequence values to override this.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.rho</code></td>
+<td>
+<p>Optional. The number of regularization parameters. The default value is <code>10</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho.ratio</code></td>
+<td>
+<p>Optional. Determines distance between the elements of <code>rho</code> sequence. A small value of <code>rho.ratio</code> results in a large distance between the elements of <code>rho</code> sequence. And a large value of <code>rho.ratio</code> results into a small distance between elements of <code>rho</code>.Optional. The default value is <code>0.3</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Optional. The number of cores to use for the calculations. Using <code>ncores = "all"</code> automatically detects number of available cores and runs the computations in parallel on (available cores - 1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em.iter</code></td>
+<td>
+<p>Optional. The number of EM iterations. The default value is 5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em.tol</code></td>
+<td>
+<p>Optional. A criteria to stop the EM iterations. The default value is .001. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Optional. Providing a detail message for tracing output. The default value is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p> This function estimates a graph path . To select an optimal graph please refer to <code>selectnet</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object with S3 class <code>"nutriNetwork"</code> is returned:  
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Theta</code></td>
+<td>
+<p> A list of estimated p by p precision matrices that show the conditional independence relationships patterns among measured items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+<p> A list of estimated p by p adjacency matrices. This is the graph path corresponding to <code>Theta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ES</code></td>
+<td>
+<p> A list of estimated p by p conditional expectation corresponding to <code>rho</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p> A list of n by p transformed data based on Gaussian copula. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p> A <code>n.rho</code> dimensional vector containing the penalty terms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loglik </code></td>
+<td>
+<p> A <code>n.rho</code> dimensional vector containing the maximized log-likelihood values along the graph path. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p> The <code class="reqn">n</code> by <code class="reqn">p</code> input data matrix. The <code class="reqn">n</code> by <code class="reqn">p</code> transformed data in case of using "npn". </p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+ 
+<p>Pariya Behrouzi <br>
+Maintainers: Pariya Behrouzi <a href="mailto:pariya.behrouzi@gmail.com">pariya.behrouzi@gmail.com</a><br></p>
+
+
+<h3>See Also</h3>
+
+<p><code>selectnet</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">######## toy example
+data(vfit)
+test_dat &lt;- vfit[1:10, c("sex", "ani.pro", "veg.pro", "B6", 
+           "B12", "B9", "SPPB.total", "HandGrip"  )]
+ out_test &lt;- nutriNetwork(test_dat, method = "gibbs")  
+ ########
+           
+  
+ out &lt;- nutriNetwork(vfit, method = "gibbs")
+ sel &lt;- selectnet(out)
+  		
+ cl &lt;- c(rep("gray70", 7), rep("green3",17), rep("red3",5))
+ plot(sel, vis= "parcor.network", sign.edg = TRUE, 
+      vertex.color = cl, curve = TRUE, layout.tree= TRUE, 
+      root.node= c(26, 29), pos.legend= "bottomleft", 
+      cex.legend=1) 
+ #diffeent visualization      
+ plot(sel, vis= "parcor.network", sign.edg = TRUE, layout = NULL, 
+     vertex.color = cl, curve = TRUE, pos.legend= "topleft", 
+     cex.legend=1 )
+           
+</code></pre>
+
+
+</div>

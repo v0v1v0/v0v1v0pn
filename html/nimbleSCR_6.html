@@ -1,0 +1,176 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dbernppACmovement_exp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bernoulli point process for activity center movement (exponential kernel)</h2>
+
+<h3>Description</h3>
+
+<p>Density and random generation functions of the Bernoulli point process for activity center movement between occasions based on a bivariate exponential distribution.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dbernppACmovement_exp(
+  x,
+  lowerCoords,
+  upperCoords,
+  s,
+  lambda = -999,
+  rate,
+  baseIntensities,
+  habitatGrid,
+  numGridRows,
+  numGridCols,
+  numWindows,
+  log = 0
+)
+
+rbernppACmovement_exp(
+  n,
+  lowerCoords,
+  upperCoords,
+  s,
+  lambda = -999,
+  rate,
+  baseIntensities,
+  habitatGrid,
+  numGridRows,
+  numGridCols,
+  numWindows
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector of x- and y-coordinates of a single spatial point (typically AC location at time t+1) scaled to the habitat (see (<code>scaleCoordsToHabitatGrid</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lowerCoords, upperCoords</code></td>
+<td>
+<p>Matrices of lower and upper x- and y-coordinates of all habitat windows. One row for each window.
+Each window should be of size 1x1 (after rescaling if necessary).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>Vector of x- and y-coordinates of the isotropic multivariate exponential distribution mean (AC location at time t).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Rate parameter of the isotropic bivariate exponential distribution. Soon deprecated, use argument "rate" instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rate</code></td>
+<td>
+<p>Rate parameter of the isotropic multivariate exponential distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseIntensities</code></td>
+<td>
+<p>Vector of baseline habitat intensities for all habitat windows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>habitatGrid</code></td>
+<td>
+<p>Matrix of habitat window indices. Cell values should correspond to the order of habitat windows in  <code>lowerCoords</code> and <code>upperCoords</code>. 
+When the habitat grid only consists of a single row or column of windows, an additional row or column of dummy indices has to be added because the <code>nimble</code> model code requires a matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numGridRows, numGridCols</code></td>
+<td>
+<p>Numbers of rows and columns of the habitat grid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numWindows</code></td>
+<td>
+<p>Number of habitat windows. This value (positive integer) can be used to truncate <code>lowerCoords</code> and <code>upperCoords</code> so that extra rows beyond <code>numWindows</code> are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Logical argument, specifying whether to return the log-probability of the distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Integer specifying the number of realisations to generate.  Only n = 1 is supported.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>dbernppACmovement_exp</code> distribution is a NIMBLE custom distribution which can be used to model and simulate
+movement of activity centers between consecutive occasions in open population models.
+The distribution assumes that the new individual activity center location (<em>x</em>)
+follows an isotropic exponential normal centered on the previous activity center (<em>s</em>) with rate (<em>lambda</em>).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>dbernppACmovement_exp</code> gives the (log) probability density of the observation vector <code>x</code>. 
+<code>rbernppACmovement_exp</code> gives coordinates of a randomly generated spatial point.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Wei Zhang and Cyril Milleret
+</p>
+
+
+<h3>References</h3>
+
+<p>W. Zhang, J. D. Chipperfield, J. B. Illian, P. Dupont, C. Milleret, P. de Valpine and R. Bischof. 2020. 
+A hierarchical point process model for spatial capture-recapture data. bioRxiv. DOI 10.1101/2020.10.06.325035
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Use the distribution in R
+lowerCoords &lt;- matrix(c(0, 0, 1, 0, 0, 1, 1, 1), nrow = 4, byrow = TRUE)
+upperCoords &lt;- matrix(c(1, 1, 2, 1, 1, 2, 2, 2), nrow = 4, byrow = TRUE)  
+s &lt;- c(1, 1) # Currrent activity center location
+rate &lt;- 0.1
+baseIntensities &lt;- c(1:4)
+habitatGrid &lt;- matrix(c(1:4), nrow = 2, byrow = TRUE)
+numRows &lt;- nrow(habitatGrid)
+numCols &lt;- ncol(habitatGrid)
+numWindows &lt;- 4
+# The log probability density of moving from (1,1) to (1.2, 0.8) 
+dbernppACmovement_exp(x = c(1.2, 0.8),
+lowerCoords = lowerCoords,
+upperCoords = upperCoords,
+s = s,
+rate = rate,
+baseIntensities = baseIntensities, 
+habitatGrid = habitatGrid,
+numGridRows = numRows,
+numGridCols = numCols,
+numWindows = numWindows,
+log = TRUE)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hpilot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute the Pilot Bandwidth for the Nonparametric Estimators of
+Cure Probability and Latency
+</h2>
+
+<h3>Description</h3>
+
+<p>This function computes local pilot bandwidths for the
+nonparametric estimators of the probability of cure and the latency
+function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hpilot(x, x0, nnfrac = 0.25)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric vector of observed covariate values.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x0</code></td>
+<td>
+<p>A numeric vector specifying a grid of covariate values.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nnfrac</code></td>
+<td>
+<p>A numeric value giving the fraction of the sample size
+that determines the order of the nearest neighbor. This is taken as
+<code>floor(length(x)*nnfrac)</code>. The default is 0.25.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function computes a data-driven local pilot bandwidth,
+required for the bootstrap bandwidth selector of the nonparametric
+estimators of the cure rate and latency functions. Simulations
+in López-Cheda et al. (2017) show that the choice of pilot bandwidth
+has small effect on the bootstrap bandwidth. This pilot bandwidth only
+depends on the sample size and the distribution of the covariate x
+(see López-Cheda, 2018):
+</p>
+<p style="text-align: center;"><code class="reqn">g(x0) = 0.5(d_k^{+}(x0) + d_k^{-}(x0))(100/n)^{1/9}</code>
+</p>
+
+<p>where <code class="reqn">d_k^{+}(x0)</code> and <code class="reqn">d_k^{-}(x0)</code> are the distances from
+<code class="reqn">x0</code> to the <code class="reqn">k</code>-th nearest neighbor on the right and the left,
+respectively, and <code class="reqn">k</code> is a suitable integer depending on the
+sample size <code class="reqn">n</code>. If there are not at least <code class="reqn">k</code> neighbors on
+the right or on the left, we use <code class="reqn">d_k^{+}(x0) = d_k^{-}(x0)</code>. The
+default value of <code class="reqn">k</code> is <code class="reqn">n/4</code>. The order
+<code class="reqn">n^{-1/9}</code> satisfies the conditions in Theorem 1 of Li
+and Datta (2001) and coincides with the order obtained by Cao and
+González-Manteiga (1993) for the uncensored case.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric vector of local pilot bandwidths corresponding to each
+one of the values of the grid of covariate values given by <code>x0</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ignacio López-de-Ullibarri [aut, cre],
+Ana López-Cheda [aut],
+Maria Amalia Jácome [aut]
+</p>
+
+
+<h3>References</h3>
+
+<p>Cao R., González-Manteiga W. (1993). Bootstrap methods in
+regression smoothing. Journal of Nonparametric Statistics, 2:
+379-388. <a href="https://doi.org/10.1080/10485259308832566">https://doi.org/10.1080/10485259308832566</a>.
+</p>
+<p>Li, G., Datta, S. (2001). A bootstrap approach to nonparametric
+regression for right censored data. Annals of the Institute of
+Statistical Mathematics, 53(4):
+708-729. <a href="https://doi.org/10.1023/A:1014644700806">https://doi.org/10.1023/A:1014644700806</a>.
+</p>
+<p>López-Cheda A. (2018). <em>Nonparametric Inference in Mixture Cure
+Models</em>. PhD dissertation, Universidade da Coruña. Spain.
+</p>
+<p>López-Cheda, A., Cao, R., Jácome, M. A., Van Keilegom,
+I. (2017). Nonparametric incidence estimation and bootstrap bandwidth
+selection in mixture cure models. Computational Statistics &amp; Data
+Analysis, 105:
+144–165. <a href="https://doi.org/10.1016/j.csda.2016.08.002">https://doi.org/10.1016/j.csda.2016.08.002</a>.
+</p>
+<p>López-Cheda, A., Jácome, M. A., Cao, R. (2017). Nonparametric latency
+estimation for mixture cure models. TEST, 26:
+353–376. <a href="https://doi.org/10.1007/s11749-016-0515-1">https://doi.org/10.1007/s11749-016-0515-1</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>controlpars</code>, <code>latencyhboot</code>,
+<code>probcurehboot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Some artificial data
+set.seed(123)
+n &lt;- 50
+x &lt;- runif(n, -2, 2) ## Covariate values
+y &lt;- rweibull(n, shape = .5*(x + 4)) ## True lifetimes
+c &lt;- rexp(n) ## Censoring values
+p &lt;- exp(2*x)/(1 + exp(2*x)) ## Probability of being susceptible
+u &lt;- runif(n)
+t &lt;- ifelse(u &lt; p, pmin(y, c), c) ## Observed times
+d &lt;- ifelse(u &lt; p, ifelse(y &lt; c, 1, 0), 0) ## Uncensoring indicator
+data &lt;- data.frame(x = x, t = t, d = d)
+
+## Computing pilot bandwidths for covariate values -1, -0.8, ..., 1
+## by taking the 5-th nearest neighbor
+hpilot(data$x, x0 = seq(-1, 1, by = .2), nnfrac = .05)
+</code></pre>
+
+
+</div>

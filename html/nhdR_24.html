@@ -1,0 +1,66 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>select_point_overlay</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Select features clipped by a point buffer around a point</h2>
+
+<h3>Description</h3>
+
+<p>Select features clipped by a point buffer around a point
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">select_point_overlay(pnt, sp, buffer_dist = units::as_units(4.75, "km"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pnt</code></td>
+<td>
+<p>geographic point of class sfc</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sp</code></td>
+<td>
+<p>list of sf data frames</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer_dist</code></td>
+<td>
+<p>numeric buffer with specified units</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of sf spatial objects
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+wk &lt;- wikilake::lake_wiki("Gull Lake (Michigan)")
+pnt &lt;- sf::st_sfc(sf::st_point(c(wk$Lon, wk$Lat)))
+sf::st_crs(pnt) &lt;- 4326
+sp &lt;- lapply(c("NHDWaterbody", "NHDFlowLine"),
+  function(x) nhd_plus_load(vpu = 4, dsn = x))
+names(sp) &lt;- c("NHDWaterbody", "NHDFlowLine")
+qry &lt;- select_point_overlay(pnt = pnt, sp = sp)
+plot(qry$NHDWaterbody$geometry, col = "blue")
+plot(qry$NHDFlowLine$geometry, col = "cyan", add = TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

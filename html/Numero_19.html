@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>numero.prepare</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prepare datasets for analysis</h2>
+
+<h3>Description</h3>
+
+<p>Prepare training data by mitigating confounding factors and
+standardizing values.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">numero.prepare(data, variables = NULL, confounders = NULL,
+               batch = NULL, method = "standard", clip = 5.0,
+	       pipeline = NULL, undo = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A matrix or a data frame.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+
+<p>A character vector of column names, see details.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confounders</code></td>
+<td>
+
+<p>Names of columns that contain confounder data.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>batch</code></td>
+<td>
+
+<p>The name of the column that contains batch labels.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Method to standardize values, see <code>nroPreprocess()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clip</code></td>
+<td>
+
+<p>Range for clipping extreme values in multiples of standard deviations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pipeline</code></td>
+<td>
+
+<p>Processing parameters from a previous use of the function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>undo</code></td>
+<td>
+
+<p>If true, standardization is reversed after adjusting for
+batches and confounders.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We recommend first applying <code>numero.clean()</code> to the full
+dataset, then selecting a subset for training using the input argument
+<code>variables</code>. This preserves any attributes that may be used in
+Numero functions.
+</p>
+<p>If a previous <code>pipeline</code> is available, it overrides all processing
+parameters irrespective of other input arguments.
+</p>
+<p>Due to safeguards against numerical instability, the standardized values
+may deviate slightly from the expected range (&lt;0.1 percent error is typical).
+</p>
+<p>Clipping of extreme values is applied only during the first round of
+standardization before adjustments for confounders. Therefore, the final
+output may contain values that exceed the threshold.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix with the attributes 'pipeline' that contains the processing
+parameters and 'subsets' that contains row names divided into batches if
+batch correction was applied.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Import data.
+fname &lt;- system.file("extdata", "finndiane.txt", package = "Numero")
+dataset &lt;- read.delim(file = fname)
+
+# Set identities and manage missing data.
+dataset &lt;- numero.clean(dataset, identity = "INDEX")
+
+# Prepare training variables using default standardization.
+trvars &lt;- c("CHOL", "HDL2C", "TG", "CREAT", "uALB")
+trdata &lt;- numero.prepare(data = dataset, variables = trvars)
+print(summary(trdata))
+
+# Prepare training values adjusted for age and sex and
+# standardized by rank-based method.
+trdata &lt;- numero.prepare(data = dataset, variables = trvars,
+                         batch = "MALE", confounders = "AGE",
+			 method = "tapered")
+print(summary(trdata))
+</code></pre>
+
+
+</div>

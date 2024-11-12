@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>measplot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot(s) to monitor selected outlier and influential measure(s).</h2>
+
+<h3>Description</h3>
+
+<p>This function generates plot(s) of the selected outlier detection
+measure(s) for each study included in the network. Candidate
+statistics to be monitored are: Standardized residual; Studentized
+residual; Mahalanobis distance and leverage.
+</p>
+<p>The function also generates plot(s) of the selected outlier
+detection measure(s) considering a deletion of each study included
+in the network (Shift the mean measures).  Candidate statistics to
+be monitored are: Standardized deleted residual; Studentized
+deleted residual; Cook distance between the treatment estimates for
+study j and treatment estimates when study j is removed; Ratio of
+determinants of variance-covariance matrix of treatment estimates
+for study j to treatment estimates when study j is removed; weight
+leave one out;leverage leave one out; heterogeneity estimator leave
+one out; R statistic for heterogeneity; R statistic for Q
+(<code>Qtotal</code>), R statistic for heterogeneity Q (<code>Qhet</code>), R
+statistic for Qinconsistency (<code>Qinc</code>), DFbetas.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">measplot(object, stat, measure = "simple")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>an object of class NMAoutlier.measures (mandatory).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat</code></td>
+<td>
+<p>selected statistical outlier and influential detection
+measure (mandatory), For simply outlier and influential measures
+available choices are: ("estand"/ "estud"/ "mah"/ "leverage").
+For outlier and influential deletion measures available choices
+are: ("estand.deleted", "estud.deleted", "leverage.leaveoneout",
+"weight.leaveoneout", "heterog.leaveoneout", "covratio", "cook",
+"rheterogeneity", "restimates", "rqhet", "rqinc", "rqtotal",
+"dfbetas")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>measure</code></td>
+<td>
+<p>Outlier and influential detection measures. Simple
+measures (default: "simple") and measures considered study
+deletion (measure = "deletion").</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Plot of outlier and influential (simple or/and deletion) detection
+measures for each study included in the network.  Vertical axis
+provides each study included in the network (or the study deleted
+for outlier deletion measures). Horizontal axis provides a
+monitoring outlier and influential detection measure.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Maria Petropoulou &lt;petropoulou@imbi.uni-freiburg.de&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(smokingcessation, package = "netmeta")
+smokingcessation$id &lt;- 1:nrow(smokingcessation)
+
+study912 &lt;- subset(smokingcessation, id %in% 9:12)
+p1 &lt;- netmeta::pairwise(list(treat1, treat2, treat3),
+                        list(event1, event2, event3),
+                        list(n1, n2, n3),
+                        data = study912,
+                        sm = "OR")
+
+# Outlier and influential detection measures for each study in the
+# network
+measures &lt;- NMAoutlier.measures(p1)
+
+# plot of standardized residuals for each study
+measplot(measures, "estand")
+
+# plot of Mahalanobis distance values for each study
+measplot(measures, "mah")
+
+# plot of leverage values for each study
+measplot(measures, "leverage")
+
+## Not run: 
+# Outlier detection measures considered deletion each time of an
+# included study
+deletion &lt;- NMAoutlier.measures(p1, measure = "deletion")
+
+# plot for R statistic for heterogeneity estimator
+measplot(deletion, "rheterogeneity", measure = "deletion")
+
+# plot for R statistic for Qinconsistency
+measplot(deletion, "rqinc", measure = "deletion")
+
+# plot of COVRATIO values when considering deletion for each study
+measplot(deletion, "covratio", measure = "deletion")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

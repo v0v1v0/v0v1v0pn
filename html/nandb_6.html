@@ -1,0 +1,156 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>brightness_timeseries_folder</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Brightness time-series calculations for every image in a folder.</h2>
+
+<h3>Description</h3>
+
+<p>Perform <code>brightness_timeseries()</code> calculations on all tif images in a folder
+and save the resulting number images to disk.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">brightness_timeseries_folder(
+  folder_path = ".",
+  def,
+  frames_per_set,
+  overlap = FALSE,
+  thresh = NULL,
+  detrend = FALSE,
+  quick = FALSE,
+  filt = NULL,
+  s = 1,
+  offset = 0,
+  readout_noise = 0,
+  parallel = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>folder_path</code></td>
+<td>
+<p>The path (relative or absolute) to the folder you wish to
+process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>def</code></td>
+<td>
+<p>A character. Which definition of brightness do you want to use,
+<code>"B"</code> or <code>"epsilon"</code>?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frames_per_set</code></td>
+<td>
+<p>The number of frames with which to calculate the
+successive brightnesses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlap</code></td>
+<td>
+<p>A boolean. If <code>TRUE</code>, the windows used to calculate number are
+overlapped, if <code>FALSE</code>, they are not. For example, for a 20-frame image
+series with 5 frames per set, if the windows are not overlapped, then the
+frame sets used are 1-5, 6-10, 11-15 and 16-20; whereas if they are
+overlapped, the frame sets are 1-5, 2-6, 3-7, 4-8 and so on up to 16-20.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>The threshold or thresholding method (see
+<code>autothresholdr::mean_stack_thresh()</code>) to use on the image prior to
+detrending and brightness calculations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detrend</code></td>
+<td>
+<p>Detrend your data with <code>detrendr::img_detrend_rh()</code>. This is
+the best known detrending method for brightness analysis. For more
+fine-grained control over your detrending, use the <code>detrendr</code> package. If
+there are many channels, this may be specified as a vector, one element for
+each channel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quick</code></td>
+<td>
+<p>If <code>FALSE</code> (the default), the swap finding routine is run
+several times to get a consensus for the best parameter. If <code>TRUE</code>, the
+swap finding routine is run only once.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filt</code></td>
+<td>
+<p>Do you want to smooth (<code>filt = 'mean'</code>) or median (<code>filt = 'median'</code>) filter the number image using <code>smooth_filter()</code> or
+<code>median_filter()</code> respectively? If selected, these are invoked here with a
+filter radius of 1 (with corners included, so each median is the median of
+9 elements) and with the option <code>na_count = TRUE</code>. If you want to
+smooth/median filter the number image in a different way, first calculate
+the numbers without filtering (<code>filt = NULL</code>) using this function and then
+perform your desired filtering routine on the result. If there are many
+channels, this may be specified as a vector, one element for each channel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>A positive number. The <code class="reqn">S</code>-factor of microscope acquisition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>Microscope acquisition parameters. See reference
+Dalal et al.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>readout_noise</code></td>
+<td>
+<p>Microscope acquisition parameters. See reference
+Dalal et al.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Would you like to use multiple cores to speed up this
+function? If so, set the number of cores here, or to use all available
+cores, use <code>parallel = TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>brightness_timeseries()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+setwd(tempdir())
+img &lt;- ijtiff::read_tif(system.file("extdata", "50.tif", package = "nandb"))
+ijtiff::write_tif(img, "img1.tif")
+ijtiff::write_tif(img, "img2.tif")
+brightness_timeseries_folder(def = "e", thresh = "tri", frames_per_set = 20)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

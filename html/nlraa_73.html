@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SSsharp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>self start for temperature response</h2>
+
+<h3>Description</h3>
+
+<p>Self starter for temperature response function
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sharp(temp, r_tref, e, el, tl, eh, th, tref = 25)
+
+SSsharp(temp, r_tref, e, el, tl, eh, th, tref = 25)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>temp</code></td>
+<td>
+<p>input vector (x) which is normally ‘temperature’.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r_tref</code></td>
+<td>
+<p>rate at the standardised temperature, tref</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e</code></td>
+<td>
+<p>activation energy (eV)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>el</code></td>
+<td>
+<p>low temperature de-activation energy (eV)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tl</code></td>
+<td>
+<p>temperature at which the enzyme is half active and half suppressed due to low temperatures</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eh</code></td>
+<td>
+<p>high temperature de-activation energy (eV)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>th</code></td>
+<td>
+<p>temperature at which enzyme is half active and half suppressed dut to high temperatures</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tref</code></td>
+<td>
+<p>standardisation temperature in degrees centigrade. Temperature at which rates are not inactivated by either high or low temperatures. Typically, 25 degrees.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details see Schoolfield, R. M., Sharpe, P. J. &amp; Magnuson, C. E. Non-linear regression of biological temperature-dependent rate models based on absolute reaction-rate theory. Journal of Theoretical Biology 88, 719-731 (1981)
+</p>
+
+
+<h3>Value</h3>
+
+<p>sharp: vector of the same length as x using a sharp function
+</p>
+
+
+<h3>Note</h3>
+
+<p>I do not recommend using this function.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(ggplot2)
+require(minpack.lm)
+
+temp &lt;- 0:45
+rate &lt;- sharp(temp, 1, 0.03, 1.44, 28, 19, 44) + rnorm(length(temp), 0, 0.05)
+dat &lt;- data.frame(temp = temp, rate = rate)
+## Fit model
+fit &lt;- nlsLM(rate ~ SSsharp(temp, r_tref, e, el, tl, eh, th, tref = 20), data = dat)
+## Visualize
+ggplot(data = dat, aes(temp, rate)) + geom_point() + geom_line(aes(y = fitted(fit)))
+
+
+</code></pre>
+
+
+</div>

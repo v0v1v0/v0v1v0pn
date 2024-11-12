@@ -1,0 +1,304 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NetworkChange</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Changepoint analysis of a degree-corrected multilinear tensor model</h2>
+
+<h3>Description</h3>
+
+<p>NetworkChange implements Bayesian multiple changepoint models to network time series data
+using a degree-corrected multilinear tensor decomposition method
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NetworkChange(
+  Y,
+  R = 2,
+  m = 1,
+  initial.s = NULL,
+  mcmc = 100,
+  burnin = 100,
+  verbose = 0,
+  thin = 1,
+  reduce.mcmc = NULL,
+  degree.normal = "eigen",
+  UL.Normal = "Orthonormal",
+  DIC = FALSE,
+  Waic = FALSE,
+  marginal = FALSE,
+  plotUU = FALSE,
+  plotZ = FALSE,
+  constant = FALSE,
+  b0 = 0,
+  B0 = 1,
+  c0 = NULL,
+  d0 = NULL,
+  u0 = NULL,
+  u1 = NULL,
+  v0 = NULL,
+  v1 = NULL,
+  a = NULL,
+  b = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Reponse tensor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>Dimension of latent space. The default is 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>Number of change point.
+If <code>m = 0</code> is specified, the result should be the same as <code>NetworkStatic</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.s</code></td>
+<td>
+<p>The starting value of latent state vector. The default is
+sampling from equal probabilities for all states.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mcmc</code></td>
+<td>
+<p>The number of MCMC iterations after burnin.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+<p>The number of burn-in iterations for the sampler.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A switch which determines whether or not the progress of the
+sampler is printed to the screen.  If <code>verbose</code> is greater than 0 the
+iteration number, the <code class="reqn">\beta</code> vector, and the error variance are
+printed to the screen every <code>verbose</code>th iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+<p>The thinning interval used in the simulation.  The number of
+MCMC iterations must be divisible by this value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reduce.mcmc</code></td>
+<td>
+<p>The number of reduced MCMC iterations for marginal likelihood computations.
+If <code>reduce.mcmc = NULL</code>, <code>mcmc/thin</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>degree.normal</code></td>
+<td>
+<p>A null model for degree correction. Users can choose "NULL", "eigen" or "Lsym."
+"NULL" is no degree correction. "eigen" is a principal eigen-matrix consisting of
+the first eigenvalue and the corresponding eigenvector. "
+Lsym" is a modularity matrix. Default is "eigen."</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>UL.Normal</code></td>
+<td>
+<p>Transformation of sampled U. Users can choose "NULL", "Normal" or "Orthonormal."
+"NULL" is no normalization. "Normal" is the standard normalization.
+"Orthonormal" is the Gram-Schmidt orthgonalization. Default is "NULL."</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DIC</code></td>
+<td>
+<p>If <code>DIC = TRUE</code>, the deviation information criterion is computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Waic</code></td>
+<td>
+<p>If <code>Waic = TRUE</code>, the Watanabe information criterion is computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marginal</code></td>
+<td>
+<p>If <code>marginal = TRUE</code>, the log marignal likelihood is computed using the method of Chib (1995).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotUU</code></td>
+<td>
+<p>If <code>plotUU = TRUE</code> and <code>verbose &gt; 0</code>,
+then the plot of the latent space will be
+printed to the screen at every <code>verbose</code>th iteration.
+The default is <code>plotUU = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotZ</code></td>
+<td>
+<p>If <code>plotZ = TRUE</code> and <code>verbose &gt; 0</code>,
+then the plot of the degree-corrected input matrix will be
+printed to the screen with the sampled mean values at every <code>verbose</code>th iteration.
+The default is <code>plotUU = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constant</code></td>
+<td>
+<p>If <code>constant = TRUE</code>, constant parameter is sampled
+and saved in the output as attribute <code>bmat</code>. Default is <code>constant = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0</code></td>
+<td>
+<p>The prior mean of <code class="reqn">\beta</code>. This must be a scalar. The default value is 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B0</code></td>
+<td>
+<p>The prior variance of <code class="reqn">\beta</code>. This must be a scalar.  The default value is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c0</code></td>
+<td>
+<p>= 0.1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d0</code></td>
+<td>
+<p>= 0.1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u0</code></td>
+<td>
+<p><code class="reqn">u_0/2</code> is the shape parameter for the inverse
+Gamma prior on variance parameters for U. The default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u1</code></td>
+<td>
+<p><code class="reqn">u_1/2</code> is the scale parameter for the
+inverse Gamma prior on variance parameters for U.
+The default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v0</code></td>
+<td>
+<p><code class="reqn">v_0/2</code> is the shape parameter for the inverse
+Gamma prior on variance parameters for V.
+The default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v1</code></td>
+<td>
+<p><code class="reqn">v_1/2</code> is the scale parameter for the
+inverse Gamma prior on variance parameters for V.
+The default is the time length of Y.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p><code class="reqn">a</code> is the shape1 beta prior for transition probabilities. By default,
+the expected duration is computed and corresponding a and b values are assigned. The expected
+duration is the sample period divided by the number of states.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p><code class="reqn">b</code> is the shape2 beta prior for transition probabilities. By default,
+the expected duration is computed and corresponding a and b values are assigned. The expected
+duration is the sample period divided by the number of states.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An mcmc object that contains the posterior sample. This object can
+be summarized by functions provided by the coda package. The object
+contains an attribute <code>Waic.out</code> that contains results of WAIC and the log-marginal
+likelihood of the model (<code>logmarglike</code>). The object
+also contains an attribute <code>prob.state</code> storage matrix that contains the
+probability of <code class="reqn">state_i</code> for each period
+</p>
+
+
+<h3>References</h3>
+
+<p>Jong Hee Park and Yunkyun Sohn. 2020. "Detecting Structural Change
+in Longitudinal Network Data." <em>Bayesian Analysis</em>. Vol.15, No.1, pp.133-157.
+</p>
+<p>Peter D. Hoff 2011. "Hierarchical Multilinear Models for Multiway Data."
+<em>Computational Statistics \&amp; Data Analysis</em>. 55: 530-543.
+</p>
+<p>Siddhartha Chib. 1998. "Estimation and comparison of multiple change-point models."
+<em>Journal of Econometrics</em>. 86: 221-241.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NetworkStatic</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+   ## Not run: 
+   set.seed(1973)
+   \## Generate an array (30 by 30 by 40) with block transitions
+   from 2 blocks to 3 blocks
+   Y &lt;- MakeBlockNetworkChange(n=10, T=40, type ="split")
+   G &lt;- 100 ## Small mcmc scans to save time
+
+   \## Fit multiple models for break number detection using Bayesian model comparison
+   out0 &lt;- NetworkStatic(Y, R=2, mcmc=G, burnin=G, verbose=G, Waic=TRUE)
+   out1 &lt;- NetworkChange(Y, R=2, m=1, mcmc=G, burnin=G, verbose=G, Waic=TRUE)
+   out2 &lt;- NetworkChange(Y, R=2, m=2, mcmc=G, burnin=G, verbose=G, Waic=TRUE)
+   out3 &lt;- NetworkChange(Y, R=2, m=3, mcmc=G, burnin=G, verbose=G, Waic=TRUE)
+   outlist &lt;- list(out0, out1, out2, out3)
+
+   \## The most probable model given break number 0 to 3 and data is out1 according to WAIC 
+   WaicCompare(outlist)
+
+   plotU(out1)
+ 
+   plotV(out1)
+   
+## End(Not run)
+</code></pre>
+
+
+</div>

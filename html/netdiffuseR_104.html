@@ -1,0 +1,227 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>infection</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Susceptibility and Infection</h2>
+
+<h3>Description</h3>
+
+<p>Calculates infectiousness and susceptibility for each node in the graph
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">infection(
+  graph,
+  toa,
+  t0 = NULL,
+  normalize = TRUE,
+  K = 1L,
+  r = 0.5,
+  expdiscount = FALSE,
+  valued = getOption("diffnet.valued", FALSE),
+  outgoing = getOption("diffnet.outgoing", TRUE)
+)
+
+susceptibility(
+  graph,
+  toa,
+  t0 = NULL,
+  normalize = TRUE,
+  K = 1L,
+  r = 0.5,
+  expdiscount = FALSE,
+  valued = getOption("diffnet.valued", FALSE),
+  outgoing = getOption("diffnet.outgoing", TRUE)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>A dynamic graph (see <code>netdiffuseR-graphs</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>toa</code></td>
+<td>
+<p>Integer vector of length <code class="reqn">n</code> with the times of adoption.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t0</code></td>
+<td>
+<p>Integer scalar. See <code>toa_mat</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalize</code></td>
+<td>
+<p>Logical. Whether or not to normalize the outcome</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>Integer scalar. Number of time periods to consider</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>Numeric scalar. Discount rate used when <code>expdiscount=TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expdiscount</code></td>
+<td>
+<p>Logical scalar. When TRUE, exponential discount rate is used (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valued</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code> weights will be considered. Otherwise non-zero values will be replaced by ones.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outgoing</code></td>
+<td>
+<p>Logical scalar. When <code>TRUE</code>, computed using outgoing ties.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Normalization, <code>normalize=TRUE</code>, is applied by dividing the
+resulting number from the infectiousness/susceptibility stat
+by the number of individuals who adopted the innovation at
+time <code class="reqn">t</code>.
+</p>
+<p>Given that node <code class="reqn">i</code> adopted the innovation in time <code class="reqn">t</code>, its
+Susceptibility is calculated as follows
+</p>
+<p style="text-align: center;"><code class="reqn">S_i = \frac{%
+\sum_{k=1}^K\sum_{j=1}^n x_{ij(t-k+1)}z_{j(t-k)}\times \frac{1}{w_k}}{%
+\sum_{k=1}^K\sum_{j=1}^n x_{ij(t-k+1)}z_{j(1\leq t \leq t-k)} \times \frac{1}{w_k} }\qquad \mbox{for }i,j=1,\dots,n\quad i\neq j</code>
+</p>
+
+<p>where <code class="reqn">x_{ij(t-k+1)}</code> is 1 whenever there's a link from <code class="reqn">i</code>
+to <code class="reqn">j</code> at time <code class="reqn">t-k+1</code>, <code class="reqn">z_{j(t-k)}</code>
+is 1 whenever individual <code class="reqn">j</code> adopted the innovation at time <code class="reqn">t-k</code>,
+<code class="reqn">z_{j(1\leq t \leq t-k)}</code> is 1 whenever
+<code class="reqn">j</code> had adopted the innovation up to <code class="reqn">t-k</code>, and <code class="reqn">w_k</code> is
+the discount rate used (see below).
+</p>
+<p>Similarly, infectiousness is calculated as follows
+</p>
+<p style="text-align: center;"><code class="reqn">I_i = \frac{%
+\sum_{k=1}^K \sum_{j=1}^n x_{ji(t+k-1)}z_{j(t+k)}\times \frac{1}{w_k}}{%
+\sum_{k=1}^K \sum_{j=1}^n x_{ji(t+k-1)}z_{j(t+k\leq t \leq T)}\times \frac{1}{w_k} }\qquad \mbox{for }i,j=1,\dots,n\quad i\neq j</code>
+</p>
+
+<p>It is worth noticing that, as we can see in the formulas, while susceptibility
+is from alter to ego, infection is from ego to alter.
+</p>
+<p>When <code>outgoing=FALSE</code> the algorithms are based on incoming edges, this is
+the adjacency matrices are transposed swapping the indexes <code class="reqn">(i,j)</code> by
+<code class="reqn">(j,i)</code>. This can be useful for some users.
+</p>
+<p>Finally, by default both are normalized by the number of individuals who
+adopted the innovation in time <code class="reqn">t-k</code>. Thus, the resulting formulas,
+when <code>normalize=TRUE</code>, can be rewritten as
+</p>
+<p style="text-align: center;"><code class="reqn">%
+S_i' = \frac{S_i}{\sum_{k=1}^K\sum_{j=1}^nz_{j(t-k)}\times \frac{1}{w_k}} %
+\qquad I_i' = \frac{I_i}{\sum_{k=1}^K\sum_{j=1}^nz_{j(t-k)} \times\frac{1}{w_k}}</code>
+</p>
+
+<p>For more details on these measurements, please refer to the vignette titled
+<em>Time Discounted Infection and Susceptibility</em>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric column vector (matrix) of size <code class="reqn">n</code> with either infection/susceptibility rates.
+</p>
+
+
+<h3>Discount rate</h3>
+
+<p>Discount rate, <code class="reqn">w_k</code> in the formulas above, can be either exponential
+or linear. When <code>expdiscount=TRUE</code>, <code class="reqn">w_k = (1 + r)^{k-1}</code>, otherwise
+it will be <code class="reqn">w_k = k</code>.
+</p>
+<p>Note that when <code class="reqn">K=1</code>, the above formulas are equal to the ones presented
+in Valente et al. (2015).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>George G. Vega Yon
+</p>
+
+
+<h3>References</h3>
+
+<p>Thomas W. Valente, Stephanie R. Dyal, Kar-Hai Chu, Heather Wipfli, Kayo
+Fujimoto Diffusion of innovations theory applied to global tobacco control
+treaty ratification, Social Science &amp; Medicine, Volume 145, November 2015,
+Pages 89-97, ISSN 0277-9536
+<a href="https://doi.org/10.1016/j.socscimed.2015.10.001">doi:10.1016/j.socscimed.2015.10.001</a>
+</p>
+<p>Myers, D. J. (2000). The Diffusion of Collective Violence: Infectiousness,
+Susceptibility, and Mass Media Networks. American Journal of Sociology, 106(1),
+173–208. <a href="https://doi.org/10.1086/303110">doi:10.1086/303110</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The user can visualize the distribution of both statistics
+by using the function <code>plot_infectsuscep</code>
+</p>
+<p>Other statistics: 
+<code>bass</code>,
+<code>classify_adopters()</code>,
+<code>cumulative_adopt_count()</code>,
+<code>dgr()</code>,
+<code>ego_variance()</code>,
+<code>exposure()</code>,
+<code>hazard_rate()</code>,
+<code>moran()</code>,
+<code>struct_equiv()</code>,
+<code>threshold()</code>,
+<code>vertex_covariate_dist()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Creating a random dynamic graph
+set.seed(943)
+graph &lt;- rgraph_er(n=100, t=10)
+toa &lt;- sample.int(10, 100, TRUE)
+
+# Computing infection and susceptibility (K=1)
+infection(graph, toa)
+susceptibility(graph, toa)
+
+# Now with K=4
+infection(graph, toa, K=4)
+susceptibility(graph, toa, K=4)
+
+</code></pre>
+
+
+</div>

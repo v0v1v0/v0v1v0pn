@@ -1,0 +1,318 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>origin</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Origin Estimation for Propagation Processes on Complex Networks</h2>
+
+<h3>Description</h3>
+
+<p>This is the main function for origin estimation for propagation processes on complex networks. Different methods are available: effective distance median (<code>'edm'</code>), recursive backtracking (<code>'backtracking'</code>), and centrality-based source estimation (<code>'centrality'</code>).
+For details on the methodological background, we refer to the corresponding publications.
+</p>
+<p><code>origin_edm</code> for effective distance-median origin estimation (Manitz et al., 2016)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">origin(events, type = c("edm", "backtracking", "centrality", "bayesian"), ...)
+
+origin_edm(events, distance, silent = TRUE)
+
+origin_backtracking(events, graph, start_with_event_node = TRUE, silent = TRUE)
+
+origin_centrality(events, graph, silent = TRUE)
+
+origin_bayesian(
+  events,
+  thres.vec,
+  obs.vec,
+  mu.mat,
+  lambda.list,
+  poss.candidate.vec,
+  prior,
+  use.prior = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>events</code></td>
+<td>
+<p>numeric vector of event counts at a specific time point; if type is 'bayesian', 'events' is a matrix, number of nodes x time points; entries represent number of cases</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character specifying the method, <code>'edm'</code>, <code>'backtracking'</code>, <code>'centrality'</code> and <code>'bayesian'</code> are available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>parameters to be passed to origin methods <code>origin_edm</code>, <code>origin_backtracking</code>, <code>origin_centrality</code> or <code>origin_centrality</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>numeric matrix specifying the distance matrix (for <code>type='edm'</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>locigal, should the messages be suppressed?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>igraph object specifying the underlying network graph (for <code>type='backtracking'</code> and <code>type='centrality'</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start_with_event_node</code></td>
+<td>
+<p>logical specifying whether backtracking only starts from nodes that experienced events (for <code>type='backtracking'</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thres.vec</code></td>
+<td>
+<p>vector, length represents number of cities/nodes, representing thresholds for cities/nodes that they are infected</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs.vec</code></td>
+<td>
+<p>list of cities ids used as observers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu.mat</code></td>
+<td>
+<p>matrix- number of cities/nodes x number of observers, each row represents - if this node is the source, the mean of arrival time vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda.list</code></td>
+<td>
+<p>a length-number of cities/nodes list, each element is a number of observers x number of observers matrix - if a node is the source, the covariance matrix for arrival time vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>poss.candidate.vec</code></td>
+<td>
+<p>a boolean vector indicating if a node has the potential to be the source</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>vector, length - number of cities/nodes, prior for cities</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.prior</code></td>
+<td>
+<p>boolean, TRUE or FALSE, if use prior, default TRUE</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>origin_edm</code> returns an object of class <code>origin</code>, list with 
+</p>
+
+<ul>
+<li> <p><code>est</code> origin estimate
+</p>
+</li>
+<li> <p><code>aux</code> <code>data.frame</code> with auxiliary variables 
+</p>
+
+<ul>
+<li> <p><code>id</code> as node identifier, 
+</p>
+</li>
+<li> <p><code>events</code> for event magnitude, 
+</p>
+</li>
+<li> <p><code>wmean</code> for weighted mean, 
+</p>
+</li>
+<li> <p><code>wvar</code> for weighted variance, and 
+</p>
+</li>
+<li> <p><code>mdist</code> mean distance from a node to all other nodes.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>type = 'edm'</code> effective distance median origin estimation
+</p>
+</li>
+</ul>
+<p><code>origin_backtracking</code> returns an object of class <code>origin</code>, list with 
+</p>
+
+<ul>
+<li> <p><code>est</code> origin estimate
+</p>
+</li>
+<li> <p><code>aux</code> <code>data.frame</code> with auxiliary variables 
+</p>
+
+<ul>
+<li> <p><code>id</code> as node identifier, 
+</p>
+</li>
+<li> <p><code>events</code> for event magnitude, and
+</p>
+</li>
+<li> <p><code>bcount</code> for backtracking counts, how often backtracking identifies this source node.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>type = 'backtracking'</code> backtracking origin estimation
+</p>
+</li>
+</ul>
+<p><code>origin_centrality</code> returns an object of class <code>origin</code>, list with 
+</p>
+
+<ul>
+<li> <p><code>est</code> origin estimate
+</p>
+</li>
+<li> <p><code>aux</code> <code>data.frame</code> with auxiliary variables 
+</p>
+
+<ul>
+<li> <p><code>id</code> as node identifier, 
+</p>
+</li>
+<li> <p><code>events</code> for event magnitude, and
+</p>
+</li>
+<li> <p><code>cent</code> for node centrality (betweenness divided degree).
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>type = 'centrality'</code> centrality-based origin estimation
+</p>
+</li>
+</ul>
+<p>a dataframe with columns 'nodes' and 'probab', indicating nodes indices and their posteriors
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Juliane Manitz with contributions by Jonas Harbering
+</p>
+<p>Jun Li
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Comin, C. H. and da Fontoura Costa, L. (2011). Identifying the starting point of a spreading process in complex networks. Physical Review E, 84. &lt;doi: 10.1103/PhysRevE.84.056105&gt;
+</p>
+</li>
+<li>
+<p> Manitz, J., J. Harbering, M. Schmidt, T. Kneib, and A. Schoebel (2017): Source Estimation for Propagation Processes on Complex Networks with an Application to Delays in Public Transportation Systems. Journal of Royal Statistical Society C (Applied Statistics), 66: 521-536. &lt;doi: 10.1111/rssc.12176&gt;
+</p>
+</li>
+<li>
+<p> Manitz, J. (2014). Statistical Inference for Propagation Processes on Complex Networks. Ph.D. thesis, Georg-August-University Goettingen. Verlag Dr.~Hut, ISBN 978-3-8439-1668-4. Available online: <a href="https://ediss.uni-goettingen.de/handle/11858/00-1735-0000-0022-5F38-B">https://ediss.uni-goettingen.de/handle/11858/00-1735-0000-0022-5F38-B</a>.
+</p>
+</li>
+<li>
+<p> Manitz, J., Kneib, T., Schlather, M., Helbing, D. and Brockmann, D. (2014). Origin detection during food-borne disease outbreaks - a case study of the 2011 EHEC/HUS outbreak in Germany. PLoS Currents Outbreaks, 1. &lt;doi: 10.1371/currents.outbreaks.f3fdeb08c5b9de7c09ed9cbcef5f01f2&gt;
+</p>
+</li>
+<li>
+<p> Li, J., Manitz, J., Bertuzzo, E. and Kolaczyk, E.D. (2020). Sensor-based localization of epidemic sources on human mobility networks. arXiv preprint Available online: <a href="https://arxiv.org/abs/2011.00138">https://arxiv.org/abs/2011.00138</a>.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Other origin-est: 
+<code>origin_multiple()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(delayGoe)
+
+# compute effective distance
+data(ptnGoe)
+goenet &lt;- igraph::as_adjacency_matrix(ptnGoe, sparse=FALSE)
+p &lt;- goenet/rowSums(goenet)
+eff &lt;- eff_dist(p)
+# apply effective distance median source estimation
+om &lt;- origin(events=delayGoe[10,-c(1:2)], type='edm', distance=eff)
+summary(om)
+plot(om, 'mdist',start=1)
+plot(om, 'wvar',start=1)
+performance(om, start=1, graph=ptnGoe)
+
+# backtracking origin estimation (Manitz et al., 2016)
+ob &lt;- origin(events=delayGoe[10,-c(1:2)], type='backtracking', graph=ptnGoe)
+summary(ob)
+plot(ob, start=1)
+performance(ob, start=1, graph=ptnGoe)
+
+# centrality-based origin estimation (Comin et al., 2011)
+oc &lt;- origin(events=delayGoe[10,-c(1:2)], type='centrality', graph=ptnGoe)
+summary(oc)
+plot(oc, start=1)
+performance(oc, start=1, graph=ptnGoe)
+
+# fake training data, indicating format
+nnodes &lt;- 851
+max.day &lt;- 1312
+nsimu &lt;- 20
+max.case.per.day &lt;- 10
+train.data.fake &lt;- list()
+for (j in 1:nnodes) {
+  train.data.fake[[j]] &lt;- matrix(sample.int(max.day, 
+    size = nsimu*nnodes, replace = TRUE), nrow = nsimu, ncol = nnodes)
+}
+obs.vec &lt;- (1:9)
+candidate.thres &lt;- 0.3
+mu.lambda.list &lt;- compute_mu_lambda(train.data.fake, obs.vec, candidate.thres)
+# matrix representing number of cases per node per day
+cases.node.day &lt;- matrix(sample.int(max.case.per.day, 
+  size = nnodes*max.day, replace = TRUE), nrow = nnodes, ncol = max.day)
+nnodes &lt;- dim(cases.node.day)[1] # number of nodes
+# fixed threshold for all nodes - 10 infected people
+thres.vec &lt;- rep(10, nnodes)
+# flat/non-informative prior
+prior &lt;- rep(1, nnodes) 
+result2.df &lt;- origin(events = cases.node.day, type = "bayesian",
+                     thres.vec = thres.vec,
+                     obs.vec = obs.vec,
+                     mu.mat=mu.lambda.list$mu.mat, lambda.list = mu.lambda.list$lambda.list, 
+                     poss.candidate.vec=mu.lambda.list$poss.candidate.vec,
+                     prior=prior, use.prior=TRUE)
+
+</code></pre>
+
+
+</div>

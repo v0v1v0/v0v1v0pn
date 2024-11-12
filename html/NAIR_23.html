@@ -1,0 +1,484 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>findPublicClusters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Find Public Clusters Among RepSeq Samples
+</h2>
+
+<h3>Description</h3>
+
+<p>Part of the workflow
+<a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/public_clusters.html">Searching for Public TCR/BCR Clusters</a>.
+</p>
+<p>Given multiple samples of bulk Adaptive Immune Receptor Repertoire Sequencing
+(AIRR-Seq) data, construct the repertoire network for each sample. Within each
+sample's network, perform cluster analysis and filter the clusters based on node
+count and aggregate clone count.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">findPublicClusters(
+
+  ## Input ##
+  file_list,
+  input_type,
+  data_symbols = NULL,
+  header, sep, read.args,
+  sample_ids =
+    paste0("Sample", 1:length(file_list)),
+  seq_col,
+  count_col = NULL,
+
+  ## Search Criteria ##
+  min_seq_length = 3,
+  drop_matches = "[*|_]",
+  top_n_clusters = 20,
+  min_node_count = 10,
+  min_clone_count = 100,
+
+  ## Optional Visualization ##
+  plots = FALSE,
+  print_plots = FALSE,
+  plot_title = "auto",
+  color_nodes_by = "cluster_id",
+
+  ## Output ##
+  output_dir,
+  output_type = "rds",
+
+  ## Optional Output ##
+  output_dir_unfiltered = NULL,
+  output_type_unfiltered = "rds",
+
+  verbose = FALSE,
+
+  ...
+
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file_list</code></td>
+<td>
+
+<p>A character vector of file paths, or a list containing
+<code>connections</code> and file paths.
+Each element corresponds to a single file containing the data
+for a single sample.
+Passed to <code>loadDataFromFileList()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input_type</code></td>
+<td>
+
+<p>A character string specifying the file format of the sample data files. Options
+are <code>"table"</code>, <code>"txt"</code>, <code>"tsv"</code>, <code>"csv"</code>, <code>"rds"</code> and
+<code>"rda"</code>. Passed to <code>loadDataFromFileList()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_symbols</code></td>
+<td>
+
+<p>Used when <code>input_type = "rda"</code>. Specifies the name of each sample's data
+frame within its respective Rdata file.
+Passed to <code>loadDataFromFileList()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>header</code></td>
+<td>
+
+<p>For values of <code>input_type</code> other than <code>"rds"</code> and <code>"rda"</code>,
+this argument can be used to specify a non-default value of the <code>header</code>
+argument to <code>read.table()</code>,
+<code>read.csv()</code>, etc.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+
+<p>For values of <code>input_type</code> other than <code>"rds"</code> and <code>"rda"</code>,
+this argument can be used to specify a non-default value of the <code>sep</code>
+argument to <code>read.table()</code>,
+<code>read.csv()</code>, etc.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>read.args</code></td>
+<td>
+
+<p>For values of <code>input_type</code> other than <code>"rds"</code> and <code>"rda"</code>,
+this argument can be used to specify non-default values of optional
+arguments to <code>read.table()</code>,
+<code>read.csv()</code>, etc.
+Accepts a named list of argument values.
+Values of <code>header</code> and <code>sep</code>
+in this list take precedence over values specified via the <code>header</code>
+and <code>sep</code> arguments.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_ids</code></td>
+<td>
+
+<p>A character or numeric vector of sample IDs, whose length matches that of
+<code>file_list</code>. The values should be valid for use as filenames and should
+avoid using the forward slash or backslash characters (<code>/</code> or <code>\</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq_col</code></td>
+<td>
+
+<p>Specifies the column of each sample's data frame containing the TCR/BCR
+sequences.
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count_col</code></td>
+<td>
+
+<p>Specifies the column of each sample's data frame containing the clone count
+(measure of clonal abundance).
+Accepts a character string containing the column name
+or a numeric scalar containing the column index.
+If <code>NULL</code>, the clusters in each sample's network will be selected solely
+based upon node count.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_seq_length</code></td>
+<td>
+
+<p>Passed to <code>buildRepSeqNetwork()</code>
+when constructing the network for
+each sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop_matches</code></td>
+<td>
+
+<p>Passed to <code>buildRepSeqNetwork()</code>
+when constructing the network for
+each sample. Accepts a character string containing a regular expression
+(see <code>regex</code>).
+Checks TCR/BCR sequences for a pattern match using <code>grep()</code>.
+Those returning a match are dropped.
+By default, sequences containing any of the characters <code>*</code>, <code>|</code>
+or <code>_</code> are dropped.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>top_n_clusters</code></td>
+<td>
+
+<p>The number of clusters from each sample to be automatically be included among
+the filtered clusters, based on greatest node count.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_node_count</code></td>
+<td>
+
+<p>Clusters with at least this many nodes will be included among the filtered
+clusters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_clone_count</code></td>
+<td>
+
+<p>Clusters with an aggregate clone count of at least this value will be included
+among the filtered clusters. A value of <code>NULL</code> ignores this criterion
+and does not select additional clusters based on clone count.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+
+<p>Passed to <code>buildRepSeqNetwork()</code>
+when constructing the network for each sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print_plots</code></td>
+<td>
+
+<p>Passed to <code>buildRepSeqNetwork()</code>
+when constructing the network for each sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_title</code></td>
+<td>
+
+<p>Passed to <code>buildRepSeqNetwork()</code>
+when constructing the network for each sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color_nodes_by</code></td>
+<td>
+
+<p>Passed to <code>buildRepSeqNetwork()</code>
+when constructing the network for each sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_dir</code></td>
+<td>
+
+<p>The file path of the directory for saving the output. The directory will be
+created if it does not already exist.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_type</code></td>
+<td>
+
+<p>A character string specifying the file format to use for saving the output.
+Valid options include <code>"csv"</code>, <code>"rds"</code> and <code>"rda"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_dir_unfiltered</code></td>
+<td>
+
+<p>An optional directory for saving the unfiltered network data for each sample.
+By default, only the filtered results are saved.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_type_unfiltered</code></td>
+<td>
+
+<p>A character string specifying the file format to use for saving the unfiltered
+network data for each sample. Only applicable if <code>output_dir_unfiltered</code>
+is non-null. Passed to <code>buildRepSeqNetwork()</code>
+when constructing the network for each sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, generates messages about the tasks
+performed and their progress, as well as relevant properties of intermediate
+outputs. Messages are sent to <code>stderr()</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Other arguments to <code>buildRepSeqNetwork</code> when constructing the network
+for each sample, not including <code>node_stats</code>, <code>stats_to_include</code>,
+<code>cluster_stats</code>, <code>cluster_id_name</code> or <code>output_name</code>
+(see details).
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Each sample's network is constructed using an individual call to
+<code>buildNet()</code> with
+<code>node_stats = TRUE</code>, <code>stats_to_include = "all"</code>,
+<code>cluster_stats = TRUE</code> and <code>cluster_id_name = "ClusterIDInSample"</code>.
+The node-level properties are renamed to reflect their
+correspondence to the sample-level network. Specifically, the properties are named:
+</p>
+
+<ul>
+<li> <p><code>SampleLevelNetworkDegree</code>
+</p>
+</li>
+<li> <p><code>SampleLevelTransitivity</code>
+</p>
+</li>
+<li> <p><code>SampleLevelCloseness</code>
+</p>
+</li>
+<li> <p><code>SampleLevelCentralityByCloseness</code>
+</p>
+</li>
+<li> <p><code>SampleLevelCentralityByEigen</code>
+</p>
+</li>
+<li> <p><code>SampleLevelEigenCentrality</code>
+</p>
+</li>
+<li> <p><code>SampleLevelBetweenness</code>
+</p>
+</li>
+<li> <p><code>SampleLevelCentralityByBetweenness</code>
+</p>
+</li>
+<li> <p><code>SampleLevelAuthorityScore</code>
+</p>
+</li>
+<li> <p><code>SampleLevelCoreness</code>
+</p>
+</li>
+<li> <p><code>SampleLevelPageRank</code>
+</p>
+</li>
+</ul>
+<p>A variable <code>SampleID</code>
+is added to both the node-level and cluster-level meta data for each sample.
+</p>
+<p>After the clusters in each sample are filtered, the node-level and cluster-level
+metadata are saved in the respective subdirectories <code>node_meta_data</code> and
+<code>cluster_meta_data</code> of the output directory specified by <code>output_dir</code>.
+</p>
+<p>The unfiltered network results for each sample can also be saved by supplying a
+directory to <code>output_dir_unfiltered</code>, if these results are desired for
+downstream analysis. Each sample's unfiltered network results will then be saved
+to its own subdirectory created within this directory.
+</p>
+<p>The files containing the node-level metadata for the filtered clusters can be
+supplied to <code>buildPublicClusterNetwork()</code>
+in order to construct a global
+network of public clusters. If the full global network is too large to practically
+construct, the files containing the cluster-level meta data for the filtered
+clusters can be supplied to
+<code>buildPublicClusterNetworkByRepresentative()</code>
+to build a global network using only a single representative sequence from each
+cluster. This allows prominent public clusters to still be identified.
+</p>
+<p>See the
+<a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/public_clusters.html">Searching for Public TCR/BCR Clusters</a>
+article on the package website.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns <code>TRUE</code>, invisibly.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Brian Neal (<a href="mailto:Brian.Neal@ucsf.edu">Brian.Neal@ucsf.edu</a>)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hai Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in Immunology</em>, vol. 14.
+<a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">doi: 10.3389/fimmu.2023.1181825</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/index.html">Webpage for the NAIR package</a>
+</p>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/public_clusters.html">Searching for Public TCR/BCR Clusters vignette</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>buildPublicClusterNetwork()</code>
+</p>
+<p><code>buildPublicClusterNetworkByRepresentative()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+
+## Simulate 30 samples with a mix of public/private sequences ##
+samples &lt;- 30
+sample_size &lt;- 30 # (seqs per sample)
+base_seqs &lt;- c(
+  "CASSIEGQLSTDTQYF", "CASSEEGQLSTDTQYF", "CASSSVETQYF",
+  "CASSPEGQLSTDTQYF", "RASSLAGNTEAFF", "CASSHRGTDTQYF", "CASDAGVFQPQHF",
+  "CASSLTSGYNEQFF", "CASSETGYNEQFF", "CASSLTGGNEQFF", "CASSYLTGYNEQFF",
+  "CASSLTGNEQFF", "CASSLNGYNEQFF", "CASSFPWDGYGYTF", "CASTLARQGGELFF",
+  "CASTLSRQGGELFF", "CSVELLPTGPLETSYNEQFF", "CSVELLPTGPSETSYNEQFF",
+  "CVELLPTGPSETSYNEQFF", "CASLAGGRTQETQYF", "CASRLAGGRTQETQYF",
+  "CASSLAGGRTETQYF", "CASSLAGGRTQETQYF", "CASSRLAGGRTQETQYF",
+  "CASQYGGGNQPQHF", "CASSLGGGNQPQHF", "CASSNGGGNQPQHF", "CASSYGGGGNQPQHF",
+  "CASSYGGGQPQHF", "CASSYKGGNQPQHF", "CASSYTGGGNQPQHF",
+  "CAWSSQETQYF", "CASSSPETQYF", "CASSGAYEQYF", "CSVDLGKGNNEQFF")
+# Relative generation probabilities
+pgen &lt;- cbind(
+  stats::toeplitz(0.6^(0:(sample_size - 1))),
+  matrix(1, nrow = samples, ncol = length(base_seqs) - samples)
+)
+simulateToyData(
+  samples = samples,
+  sample_size = sample_size,
+  prefix_length = 1,
+  prefix_chars = c("", ""),
+  prefix_probs = cbind(rep(1, samples), rep(0, samples)),
+  affixes = base_seqs,
+  affix_probs = pgen,
+  num_edits = 0,
+  output_dir = tempdir(),
+  no_return = TRUE
+)
+
+sample_files &lt;-
+  file.path(tempdir(),
+            paste0("Sample", 1:samples, ".rds")
+  )
+findPublicClusters(
+  file_list = sample_files,
+  input_type = "rds",
+  seq_col = "CloneSeq",
+  count_col = "CloneCount",
+  min_seq_length = NULL,
+  drop_matches = NULL,
+  top_n_clusters = 3,
+  min_node_count = 5,
+  min_clone_count = 15000,
+  output_dir = tempdir()
+)
+
+
+
+</code></pre>
+
+
+</div>

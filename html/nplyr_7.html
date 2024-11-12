@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nest_count</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Count observations in a nested data frame by group</h2>
+
+<h3>Description</h3>
+
+<p><code>nest_count()</code> lets you quickly count the unique values of one or more
+variables within each nested data frame. <code>nest_count()</code> results in a summary
+with one row per each set of variables to count by. <code>nest_add_count()</code> is
+equivalent with the exception that it retains all rows and adds a new column
+with group-wise counts.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nest_count(.data, .nest_data, ..., wt = NULL, sort = FALSE, name = NULL)
+
+nest_add_count(.data, .nest_data, ..., wt = NULL, sort = FALSE, name = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>A data frame, data frame extension (e.g., a tibble), or a lazy
+data frame (e.g., from dbplyr or dtplyr).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.nest_data</code></td>
+<td>
+<p>A list-column containing data frames</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Variables to group by.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wt</code></td>
+<td>
+<p>Frequency weights.
+Can be <code>NULL</code> or a variable:
+</p>
+
+<ul>
+<li>
+<p> If <code>NULL</code> (the default), counts the number of rows in each group.
+</p>
+</li>
+<li>
+<p> If a variable, computes <code>sum(wt)</code> for each group.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sort</code></td>
+<td>
+<p>If <code>TRUE</code>, will show the largest groups at the top.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>The name of the new column in the output.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>nest_count()</code> and <code>nest_add_count()</code> are largely wrappers for
+<code>dplyr::count()</code> and <code>dplyr::add_count()</code> and maintain the functionality of
+<code>count()</code> and <code>add_count()</code> within each nested data frame. For more
+information on <code>count()</code> and <code>add_count()</code>, please refer to the documentation
+in <a href="https://dplyr.tidyverse.org/"><code>dplyr</code></a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of the same type as <code>.data</code>. Each object in the column <code>.nest_data</code>
+will also be of the same type as the input. <code>nest_count()</code> and
+<code>nest_add_count()</code> group each object in <code>.nest_data</code> transiently, so the
+output returned in <code>.nest_data</code> will have the same groups as the input.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">gm_nest &lt;- gapminder::gapminder %&gt;% tidyr::nest(country_data = -continent)
+
+# count the number of times each country appears in each nested tibble
+gm_nest %&gt;% nest_count(country_data, country)
+gm_nest %&gt;% nest_add_count(country_data, country)
+
+# count the sum of population for each country in each nested tibble
+gm_nest %&gt;% nest_count(country_data, country, wt = pop)
+gm_nest %&gt;% nest_add_count(country_data, country, wt = pop)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NestedMenu-shiny</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Shiny bindings for 'NestedMenu'</h2>
+
+<h3>Description</h3>
+
+<p>Output and render functions for using 'NestedMenu'
+within Shiny applications and interactive Rmd documents.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NestedMenuOutput(outputId, width = "100%", height = "auto")
+
+renderNestedMenu(expr, env = parent.frame(), quoted = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>outputId</code></td>
+<td>
+<p>output variable to read from</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width, height</code></td>
+<td>
+<p>dimensions; must be valid CSS measurements
+(like <code>"100%"</code>, <code>"400px"</code>, <code>"auto"</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expr</code></td>
+<td>
+<p>an expression that generates a nested menu
+(with <code>NestedMenu</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>the environment in which to evaluate <code>expr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quoted</code></td>
+<td>
+<p>Boolean, whether <code>expr</code> is a quoted expression</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>NestedMenuOutput</code> returns an output element that can be
+included in a Shiny UI definition, and <code>renderNestedMenu</code> returns
+a <code>shiny.render.function</code> object that can be included in a Shiny
+server definition.
+</p>
+
+
+<h3>Shiny value</h3>
+
+<p>If the <code>outputId</code> is called <code>"ID"</code> for example, then the
+value of the clicked leaf item is available in the Shiny server in
+the reactive variable <code>input[["ID"]]</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(NestedMenu)
+library(shiny)
+
+cities &lt;- list(
+  europe = list(
+    name = "Europe",
+    items = list(
+      france = list(
+        name = "France",
+        icon = "fa-cheese",
+        items = list(
+          paris = list(name = "Paris"),
+          lyon = list(name = "Lyon")
+        )
+      ),
+      italy = list(
+        name = "Italy",
+        icon = "fa-pizza-slice",
+        items = list(
+          roma = list(name = "Roma"),
+          milano = list(name = "Milano")
+        )
+      )
+    )
+  ),
+  america = list(
+    name = "America",
+    items = list(
+      namerica = list(
+        name = "North America",
+        items = list(
+          usa = list(
+            name = "USA",
+		   icon = "fa-flag-usa",
+            items = list(
+              chicago = list(name = "Chicago"),
+              newyork = list(name = "New York")
+            )
+          ),
+          canada = list(
+            name = "Canada",
+            icon = "fa-canadian-maple-leaf",
+            items = list(
+              ottawa = list(name = "Ottawa"),
+              toronto = list(name = "Toronto")
+            )
+          )
+        )
+      ),
+      samerica = list(
+        name = "South America",
+        items = list(
+          brazil = list(
+            name = "Brazil",
+            icon = "fa-lemon",
+            items = list(
+              brasilia = list(name = "Brasilia"),
+              saopolo = list(name = "Sao Polo")
+            )
+          ),
+          mexico = list(
+            name = "Mexico",
+            icon = "fa-hat-cowboy",
+            items = list(
+              mexicocity = list(name = "Mexico City"),
+              tijuana = list(name = "Tijuana")
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+ui &lt;- fluidPage(
+  br(),
+  NestedMenuOutput("menu", height = "auto"),
+  br(),
+  verbatimTextOutput("clicked")
+)
+
+server &lt;- function(input, output, session){
+
+  output[["menu"]] &lt;- renderNestedMenu({
+    NestedMenu(
+      "Cities", items = cities
+    )
+  })
+
+  output[["clicked"]] &lt;- renderPrint({
+    input[["menu"]]
+  })
+
+}
+
+if(interactive()){
+  shinyApp(ui, server)
+}
+</code></pre>
+
+
+</div>

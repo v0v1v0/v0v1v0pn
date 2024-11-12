@@ -1,0 +1,398 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pwr2n.NPH</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sample Size Calculation with Combination Test</h2>
+
+<h3>Description</h3>
+
+<p><code>pwr2n.NPH</code> calculates the number of events and
+subjects required to achieve pre-specified power in the setup of two groups.
+The method extends the calculation in the framework of the Markov model by Lakatos, allowing
+for using the maximum weighted logrank tests or projection test with an arbitrary number of weight
+functions. For maximum weighted logrank type test, if only one weight function
+is provided, the test is essentially
+the classic (weighted) logrank test.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pwr2n.NPH(
+  method = "MaxLR",
+  entry = 1,
+  fup = 1,
+  maxfup = entry + fup,
+  CtrlHaz,
+  hazR,
+  transP1 = c(0, 0),
+  transP0 = c(0, 0),
+  Wlist = list(function(x) {
+     x^0
+ }),
+  entry_pdf0 = function(x) {
+     (1/entry) * (x &gt;= 0 &amp; x &lt;= entry)
+ },
+  entry_pdf1 = entry_pdf0,
+  ratio = 1,
+  alpha = 0.05,
+  beta = 0.1,
+  alternative = c("two.sided"),
+  criteria = 500,
+  k = 100,
+  m = 0,
+  nreps = 10,
+  varianceType = c("equal"),
+  weightBase = "C",
+  summary = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a text specifying the calculation method, either
+<code>"MaxLR"</code> or <code>"Projection"</code>. Maximum weighted
+logrank test is used if <code>"MaxLR"</code> is specified; otherwise,
+projection test is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry</code></td>
+<td>
+<p>a numeric value indicating the enrollment time, Default: 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fup</code></td>
+<td>
+<p>a numeric value indicating the minimum follow-up time for subjects.
+, Default: 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxfup</code></td>
+<td>
+<p>maximum follow-up time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CtrlHaz</code></td>
+<td>
+<p>a function,  specifying the hazard function for control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hazR</code></td>
+<td>
+<p>a function, specifying the hazard ratio function between
+treatment and control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transP1</code></td>
+<td>
+<p>a numeric vector of length 2, consisting of the transition
+probability from
+receiving treatment to drop-out (drop-out rate) and
+from receiving treatment to receiving control (drop-in rate) per time unit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transP0</code></td>
+<td>
+<p>a numeric vector of length 2, consisting of the transition
+probability from
+receiving control to drop-out (drop-out rate) and
+from receiving control to receiving treatment (drop-in rate) per time unit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Wlist</code></td>
+<td>
+<p>a list, consisting of weight functions applied to the test.
+The element of the list must be functions. Default is a list of one constant
+function, corresponding to the logrank test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry_pdf0</code></td>
+<td>
+<p>a function, indicating the probability density function (pdf)
+of enrollment time for control group. The default assumes a uniform distribution
+corresponding to the constant enrollment rate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry_pdf1</code></td>
+<td>
+<p>a pdf of enrollment time for treatment
+group. See <code>entry_pdf0</code>, Default: assume same pdf as control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratio</code></td>
+<td>
+<p>an integer, indicating the randomization ratio between treatment
+and control group, Default: 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>type I error rate, Default: 0.05</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>type II error rate, Default: 0.1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>a character string specifying the alternative hypothesis,
+must be one of "<code>two.sided</code>", "<code>greater</code>","<code>less</code>". See details.
+For <code>"Projection"</code> method, only <code>"two-sided"</code>
+alternative is supported. Default: c("<code>two.sided</code>")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criteria</code></td>
+<td>
+<p>an integer indicating the maximum iteration allowed in
+obtaining the number of events. See details , Default: 500</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>an integer, indicating number of sub-intervals per time unit,
+Default: 100</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>a value within 0 and 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nreps</code></td>
+<td>
+<p>an integer, indicating number of iterations in calculating
+the quantile of multivariate normal. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varianceType</code></td>
+<td>
+<p>Default: <code>equal</code>. Indicates different variance assumptions
+for the sample size calculation.
+It is not applicable for the maximum weighted logrank test. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weightBase</code></td>
+<td>
+<p>A character, either "<code>F</code>" or "<code>T</code>". <code>F</code> indicates
+a CDF is the base for the weight function used in the weighted logrank or maximum weighted
+logrank test. <code>T</code> indicates time is the base for weight function. Default: <code>F</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary</code></td>
+<td>
+<p>a logical value, controlling whether to print the
+summary of calculation, Default: TRUE</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The detailed methods can be found in the reference papers. The number
+of subjects is determined by several factors, including the control hazard function,
+hazard ratio function, entry time distribution, follow-up time, etc.  Under proportional
+hazard assumption, the number of events is mainly determined by the hazard ratio besides
+type i/ii error rates. However, under nonproportional hazards, all the above design parameters
+may have an impact on the number of events.
+The study design assumes <code>entry</code> time units of
+enrollment and at least <code>fup</code> time units of follow-up. If enrollment
+time <code>entry</code> is set to zero, all subjects are enrolled simultaneously,
+so there is no staggered entry. Otherwise, if
+<code>entry</code> is greater than 0, administrative censoring is considered. The user-defined
+enrollment time function, hazard function for the control group and hazard ratio function can be either discrete or continuous.
+Various non-proportional hazards types are accommodated. See examples below.
+If multiple weight functions are provided in <code>Wlist</code>, a maximum weighted logrank
+test or combination test is implemented. An iterative procedure
+is used to obtain the event number based on the multivariate normal distribution.  Package
+<span class="pkg">mvtnorm</span> is used to calculate the quantiles. Because the algorithm is slightly
+seed dependent, the quantiles are mean values of ten replicates by default. The
+number of replicates is controlled by argument <code>ninter</code>.
+</p>
+<p>The "<code>alternative</code>" option supports both two-sided and one-sided test.
+Let <code class="reqn">\Lambda_1</code> and <code class="reqn">\Lambda_0</code> denote the cumulative hazard of
+treatment and control group. The <code>less</code> option tests
+<code class="reqn">H_0: \Lambda_1 &gt; \Lambda_0</code> against
+<code class="reqn">H_a: \Lambda_1 &lt;= \Lambda_0</code>. The <code>greater</code> option tests
+<code class="reqn">H_0: \Lambda_1 &lt; \Lambda_0</code> against <code class="reqn">H_a: \Lambda_1 &gt;= \Lambda_0</code>.
+</p>
+<p>When <code>varianceType</code> is <code>equal</code>, the sample size for a two sided test is
+<code class="reqn">(z_{1-\alpha/2}+z_{1-\beta})^2\tilde{\sigma}^2/\mu_w^2</code>, where <code class="reqn">\tilde{\sigma}^2</code>
+is the variance estimate under alternative. when <code>varianceType</code> is not
+<code>equal</code>. The formula is <code class="reqn">(z_{1-\alpha/2}\sigma_w+z_{1-\beta}\tilde{\sigma})^2/\mu_w^2</code>.
+Please use <code>equal</code> variance type for the maximum weighted logrank test.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "<code>NPHpwr</code>" with corresponding <code>plot</code> function.
+The object is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>eventN</code></td>
+<td>
+<p>total number of events</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>totalN</code></td>
+<td>
+<p>total number of subjects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pwr</code></td>
+<td>
+<p>actual power given the number of events</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob_event</code></td>
+<td>
+<p>event probability at the end of trial</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob1</code></td>
+<td>
+<p>event probability for the treatment group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob0</code></td>
+<td>
+<p>event probability for the control group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L_trans</code></td>
+<td>
+<p>a list, consisting of transition matrix at each interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdat</code></td>
+<td>
+<p> a dataframe including all the intermediate variables in the calculation.
+see Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studytime</code></td>
+<td>
+<p>a vector of length 2, including the entry and follow-up time as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RandomizationRatio</code></td>
+<td>
+<p>as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eventlist</code></td>
+<td>
+<p>a vector containing the number of events using each
+weight function alone</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inputfun</code></td>
+<td>
+<p>a list containing all the input functions specified by
+users</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Brendel, M., Janssen, A., Mayer, C. D., &amp; Pauly, M. (2014). Weighted logrank
+permutation tests for randomly right censored life science data. Scandinavian
+Journal of Statistics, 41(3), 742-761.
+</p>
+<p>Cheng, H., &amp; He, J. (2021). A Maximum Weighted Logrank Test in Detecting
+Crossing Hazards. arXiv preprint arXiv:2110.03833.
+</p>
+<p>Cheng H, He J. Sample size calculation for the combination test under
+nonproportional hazards. Biom J. 2023 Apr;65(4):e2100403. doi: 10.1002/bimj.202100403.
+Epub 2023 Feb 15. PMID: 36789566
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pwr2n.LR</code>
+<code>gen.wgt</code>, <code>evalfup</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> #------------------------------------------------------------
+ ## Delayed treatment effects using maxcombo test
+ ## generate a list of weight functions for maxcombot test
+ wmax &lt;- gen.wgt(method = "Maxcombo" )
+ t_enrl &lt;- 12; t_fup &lt;- 18; lmd0 &lt;- log(2)/12
+ ## delayed treatment effects
+ f_hr_delay &lt;- function(x){(x&lt;=6)+(x&gt;6)*0.75}
+ f_haz0 &lt;- function(x){lmd0*x^0}
+ ##  The following code takes more than 5 seconds to run
+ 
+ snph1 &lt;- pwr2n.NPH(entry = t_enrl, fup = t_fup, Wlist = wmax,
+                    k = 100, ratio = 2, CtrlHaz = f_haz0, hazR = f_hr_delay)
+ 
+ #-------------------------------------------------------------
+ # same setting using projection test
+ snph2 &lt;- pwr2n.NPH(method = "Projection", entry = t_enrl,
+  fup = t_fup, Wlist = wmax, k = 10, ratio = 2, CtrlHaz = f_haz0,
+  hazR = f_hr_delay)
+
+ #-------------------------------------------------------------
+ #proportional hazards with weibull survival for control group
+ #logrank test
+ wlr &lt;- gen.wgt(method = "LR" )
+ b0 &lt;- 3
+ th0 &lt;- 10/(-log(0.2))^(1/b0)
+ #Weibull hazard function
+ f_hz_weibull &lt;- function(x){b0/th0^b0*x^(b0-1)}
+ #hazard ratio function
+ f_hr &lt;- function(x){0.5*x^0}
+ # define entry and follow-up time
+ t_enrl &lt;- 5; t_fup &lt;- 5
+ exph1 &lt;- pwr2n.NPH(entry = t_enrl, fup = t_fup, k = 100,
+ Wlist = wlr,  CtrlHaz = f_hz_weibull, hazR = f_hr, summary = FALSE)
+ summary(exph1)
+</code></pre>
+
+
+</div>

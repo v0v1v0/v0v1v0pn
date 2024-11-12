@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>secondary</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Secondary growth models</h2>
+
+<h3>Description</h3>
+
+<p>Formulas of secondary growth models commonly used in predictive microbiology</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  cpm_T
+  cpm_pH_4p
+  cpm_pH_3p
+  cpm_aw_3p
+  cpm_aw_2p
+  cpm_T_pH_aw
+</code></pre>
+
+
+<h3>Details</h3>
+
+<p>All the models describe the evolution of the square root of the maximum specific growth rate (sqrtmumax) as a function 
+of one or more environmental factors among temperature (T), pH (pH) and water activity (aw).
+Each model must be fitted to a data frame including at least two columns, the last one named "sqrtmumax" 
+and the first ones named "T", "pH" or "aw" according to the model.
+</p>
+<p><code>cpm_T</code> is the cardinal temperature model with inflection (Rosso et al., 1993) with four parameters (Tmin, Topt, Tmax,muopt)<br><br><code>cpm_pH_4p</code> is the cardinal pH model (Rosso et al., 1995) with four parameters (pHmin, pHopt, pHmax, muopt)<br><br><code>cpm_pH_3p</code> is a symetric cardinal pH model with three parameters (pHmin, pHopt, muopt), obtained by fixing pHmax to 2pHopt-pHmin in the <code>cpm_pH_4p</code> model<br><br><code>cpm_aw_3p</code> is the cardinal aw model (Rosso and Robinson, 2001) with three parameters (awmin, awopt, muopt)<br><br><code>cpm_aw_2p</code> is a simplified cardinal aw model (Rosso and Robinson, 2001) with two parameters (awmin, muopt) obtained by fixing awopt to 1 in the <code>cpm_aw_3p</code> model<br><br><code>cpm_T_pH_aw</code> is the cardinal model based on the gamma concept (Pinon et al., 2004) with 9 parameters (Tmin, Topt, Tmax, pHmin, pHopt, pHmax, awmin, awopt, muopt)<br><br></p>
+
+
+<h3>Value</h3>
+
+<p>A formula</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Florent Baty, Marie-Laure Delignette-Muller</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Pinon A, Zwietering M, Perrier L, Membr\'e J, Leporq B, Mettler E, Thuault D, Coroller L, Stahl V, Vialette M (2004) Development and validation of experimental protocols for use of cardinal models for prediction of microorganism growth in food   products. <em>Applied Environmental Microbiology</em>, <b>70</b>, 1081-1087.<br><br>
+Rosso L, Robinson TP (2001) A cardinal model to describe the effect of water activity on the growth of moulds. <em>International Journal of Food Microbiology</em>, <b>63</b>, 265-273.<br><br>
+Rosso L, Lobry JR, Bajard S, Flandrois JP (1995) Convenient model to describe the combined effects of temperature and pH on microbial growth. <em>Applied Environmental Microbiology</em>, <b>61</b>, 610-616.<br><br>
+Rosso L, Lobry JR, Flandrois JP (1993) An unexpected correlation between cardinal temperatures of microbial growth highlighted by a new model. <em>Journal of Theoretical Biology</em> <b>162</b>, 447-463.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(ross)
+
+# Example for the cpm_T model
+
+d1 &lt;- subset(ross, author == "salter" &amp; aw == 0.997, 
+	select = c(T, sqrtmumax))
+nls1 &lt;- nls(cpm_T, d1, list(muopt = 1.7, Tmin = 4, Topt = 40, Tmax = 47))
+plotfit(nls1, smooth = TRUE)
+overview(nls1)
+
+# Example for the cpm_pH_4p model
+
+d2 &lt;- subset(ross, author == "presser" &amp; aw &gt; 0.99, 
+	select = c(pH, sqrtmumax))
+nls2 &lt;- nls(cpm_pH_4p, d2, list(muopt = 0.5, pHmin = 4, 
+	pHopt = 6.5, pHmax = 9))
+plotfit(nls2, smooth = TRUE)
+overview(nls2)
+
+# Example for the cpm_pH_3p model
+
+d3 &lt;- subset(ross, author == "presser" &amp; aw == 0.997, 
+	select = c(pH, sqrtmumax))
+nls3 &lt;- nls(cpm_pH_3p, d3, list(muopt = 0.5, pHmin = 4, pHopt = 6.5))
+plotfit(nls3, smooth = TRUE)
+overview(nls3)
+
+# Example for the cpm_aw_3p model
+
+d4&lt;-subset(ross, author == "mellefont", select = c(aw, sqrtmumax))
+nls4 &lt;- nls(cpm_aw_3p, d4, list(muopt = 0.6, awmin = 0.95, awopt = 0.995))
+plotfit(nls4, smooth = TRUE)
+overview(nls4)
+
+# Example for the cpm_aw_2p model
+
+d5 &lt;- subset(ross, author == "mellefont" &amp; aw &lt; 0.99, 
+	select = c(aw, sqrtmumax))
+nls5 &lt;- nls(cpm_aw_2p, d5, list(muopt = 0.6, awmin = 0.95))
+plotfit(nls5, smooth = TRUE)
+overview(nls5)
+
+
+# Examples for the cpm_T_pH_aw model
+
+d6 &lt;- subset(ross, select = c(T, pH, aw, sqrtmumax))
+nls6 &lt;- nls(cpm_T_pH_aw, d6, list(muopt = 2, Tmin = 4, Topt = 40, Tmax = 49, 
+	pHmin = 4, pHopt = 6.5, pHmax = 9, awmin = 0.95, awopt = 0.995))
+def.par &lt;- par(no.readonly = TRUE)
+par(mfrow = c(2, 2))
+plotfit(nls6, variable = 1)
+plotfit(nls6, variable = 2)
+plotfit(nls6, variable = 3)
+overview(nls6)
+par(def.par)
+</code></pre>
+
+
+</div>

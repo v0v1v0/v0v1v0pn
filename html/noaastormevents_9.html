@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>match_forecast_county</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Match events by forecast zone to county</h2>
+
+<h3>Description</h3>
+
+<p>For events reported by forecast zone, use regular expressions to match
+as many as possible to counties.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">match_forecast_county(storm_data_z)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>storm_data_z</code></td>
+<td>
+<p>A dataframe of storm events reported by forecast zone
+(i.e., <code>cz_type == "Z"</code>) rather than county. This dataframe should
+include the columns:
+</p>
+
+<ul>
+<li>
+<p><code>state</code>: State name, in lowercase
+</p>
+</li>
+<li>
+<p><code>cz_name</code>: Location name, in lowercase
+</p>
+</li>
+<li>
+<p><code>cz_fips</code>: Forecast zone FIPS
+</p>
+</li>
+</ul>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>This function tries to match the <code>cz_name</code> of each event to
+a state and county name from the <code>county.fips</code> dataframe that comes
+with the <code>maps</code> package. The following steps are taken to try to
+match each <code>cz_name</code> to a state and county name from <code>county.fips</code>:
+</p>
+
+<ol>
+<li>
+<p> Tries to match <code>cz_name</code> to the county name in <code>county.fips</code>
+after removing any periods or apostrophes in <code>cz_name</code>.
+</p>
+</li>
+<li>
+<p> Next, for county names with "county" in them, try to match the word before
+"county" to county name in <code>county.fips</code>. Then check the two words before
+"county", then the one and two words before "counties".
+</p>
+</li>
+<li>
+<p> Next, pull out the last word in <code>cz_name</code> and try to match it to the county
+name in <code>county.fips</code>. The check the last two words in <code>cz_name</code>, then check
+the last three words in <code>cz_name</code>.
+</p>
+</li>
+<li>
+<p> Next, pull any words right before a slash and check that against the county name.
+</p>
+</li>
+<li>
+<p> Finally, try removing anything in parentheses in <code>cz_name</code> before matching.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>The dataframe of events input to the function, with county FIPS
+added for events matched to a county in the <code>fips</code> column. Events
+that could not be matched are kept in the dataframe, but the <code>fips</code>
+code is set to <code>NA</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function does not provide any matches for events outside
+of the continental U.S.
+</p>
+<p>You may want to hand-check that event listings with names like "Lake", "Mountain", and
+"Park" have not been unintentionally linked to a county like "Lake County". While such
+examples seem rare in the example data used to develop this function (NOAA Storm Events
+for 2015), it can sometimes happen. To do so, you can use the <code>str_detect</code> function
+from the <code>stringr</code> package.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">counties_to_parse &lt;- dplyr::data_frame(
+           event_id = c(1:19),
+           cz_name = c("Suffolk",
+                       "Eastern Greenbrier",
+                       "Ventura County Mountains",
+                       "Central And Southeast Montgomery",
+                       "Western Cape May",
+                       "San Diego County Coastal Areas",
+                       "Blount/Smoky Mountains",
+                       "St. Mary's",
+                       "Central &amp; Eastern Lake County",
+                       "Mountains Southwest Shasta County To Northern Lake County",
+                       "Kings (Brooklyn)",
+                       "Lower Bucks",
+                       "Central St. Louis",
+                       "Curry County Coast",
+                       "Lincoln County Except The Sheep Range",
+                       "Shasta Lake/North Shasta County",
+                       "Coastal Palm Beach County",
+                       "Larimer &amp; Boulder Counties Between 6000 &amp; 9000 Feet",
+                       "Yellowstone National Park"),
+          state = c("Virginia",
+                    "West Virginia",
+                    "California",
+                    "Maryland",
+                    "New Jersey",
+                    "California",
+                    "Tennessee",
+                    "Maryland",
+                    "Oregon",
+                    "California",
+                    "New York",
+                    "Pennsylvania",
+                    "Minnesota",
+                    "Oregon",
+                    "Nevada",
+                    "California",
+                    "Florida",
+                    "Colorado",
+                    "Wyoming"))
+match_forecast_county(counties_to_parse)
+</code></pre>
+
+
+</div>

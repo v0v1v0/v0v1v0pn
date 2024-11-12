@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>HealthInsurance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Choice of Health Insurance Product</h2>
+
+<h3>Description</h3>
+
+<p>A company recently introduced a new health insurance provider for
+its employees. At the beginning of the year the employees had to choose one of
+three (or four) different health plan products from this provider to best suit
+their needs.
+</p>
+<p>This dataset was modified from its original source (McNulty, 2022) for the
+present purposes by adding a fourth choice, sampled randomly from the original three.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data("HealthInsurance", package = "nestedLogit")
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 1448 rows and 7 columns.
+</p>
+
+<dl>
+<dt>product</dt>
+<dd>
+<p>Choice among three products, a factor with levels <code>"A"</code>, <code>"B"</code>,
+and <code>"C"</code>.</p>
+</dd>
+<dt>product4</dt>
+<dd>
+<p>Choice among four products, a factor with levels <code>"A"</code>, <code>"B"</code>,
+<code>"C"</code>, and <code>"D"</code>.</p>
+</dd>
+<dt>age</dt>
+<dd>
+<p>The age of the individual, in years.</p>
+</dd>
+<dt>household</dt>
+<dd>
+<p>The number of people living with the individual in the
+same household.</p>
+</dd>
+<dt>position_level</dt>
+<dd>
+<p>Position level in the company at the time the choice was made,
+where 1 is is the lowest level and 5 is the highest, a numeric vector.</p>
+</dd>
+<dt>gender</dt>
+<dd>
+<p>The gender of the individual, a factor with levels <code>"Female"</code>
+and <code>"Male"</code>.</p>
+</dd>
+<dt>absent</dt>
+<dd>
+<p>The number of days the individual was absent from work in the year
+prior to the choice,</p>
+</dd>
+</dl>
+<h3>Source</h3>
+
+<p>Originally taken from McNulty, K. (2022).
+<em>Handbook of Regression Modeling in People Analytics</em>,
+<a href="https://peopleanalytics-regression-book.org/data/health_insurance.csv">https://peopleanalytics-regression-book.org/data/health_insurance.csv</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>nestedLogit</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">lbinary &lt;- logits(AB_CD = dichotomy(c("A", "B"), c("C", "D")),
+                  A_B   = dichotomy("A", "B"),
+                  C_D   = dichotomy("C", "D"))
+as.matrix(lbinary)
+health.nested &lt;- nestedLogit(product4 ~ age  + gender * household + position_level,
+                             dichotomies = lbinary, data = HealthInsurance)
+                             car::Anova(health.nested)
+coef(health.nested)
+</code></pre>
+
+
+</div>

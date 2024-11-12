@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>optTU</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>optTU</h2>
+
+<h3>Description</h3>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">optTU(data, nonzeroRatio = NULL, pre_ratio_range = c(0.2, 0.6), prResolution = 0.1,
+lower_range = c(0.05, 0.4), upper_range = c(0.6, 0.95),
+qResolution = 0.05, min_ubq = 100, cvNorm = TRUE, cvResolution = 0.005)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonzeroRatio</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pre_ratio_range</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prResolution</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower_range</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper_range</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qResolution</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_ubq</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvNorm</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvResolution</code></td>
+<td>
+
+<p>Please refer to the file /inst/doc/readme.pdf.
+</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (data, nonzeroRatio = NULL, pre_ratio_range = c(0.2,
+    0.6), prResolution = 0.1, lower_range = c(0.05, 0.4), upper_range = c(0.6,
+    0.95), qResolution = 0.05, min_ubq = 100, cvNorm = TRUE,
+    cvResolution = 0.005)
+{
+    if (is.null(nonzeroRatio)) {
+        stop("Please provide nonzeroRatios!")
+    }
+    pre_ratio_times &lt;- (pre_ratio_range[2] - pre_ratio_range[1] +
+        prResolution) * 10
+    lower_times &lt;- (upper_range[2] - upper_range[1] + qResolution)/qResolution
+    lower_range_tmp &lt;- rep(seq(lower_range[1], lower_range[2],
+        qResolution), each = round(lower_times))
+    lower_range2 &lt;- rep(lower_range_tmp, times = round(pre_ratio_times))
+    upper_times &lt;- (lower_range[2] - lower_range[1] + qResolution)/qResolution
+    upper_range_tmp &lt;- rep(seq(upper_range[1], upper_range[2],
+        qResolution), times = round(upper_times))
+    upper_range2 &lt;- rep(upper_range_tmp, times = round(pre_ratio_times))
+    lower_upper_tmp_len &lt;- length(lower_range_tmp)
+    pre_ratio_range2 &lt;- rep(seq(pre_ratio_range[1], pre_ratio_range[2],
+        0.1), each = round(lower_upper_tmp_len))
+    nozeroIndex &lt;- filteredZero(data, nonzeroRatio = nonzeroRatio)
+    all_aucvc &lt;- mapply(function(lower_trim, upper_trim, pre_ratio) {
+        factors.TU &lt;- getFactors(data, method = "TU", lower_trim = lower_trim,
+            upper_trim = upper_trim, pre_ratio = pre_ratio, min_ubq = min_ubq)
+        norm.TU &lt;- getNormMatrix(data, factors.TU)
+        dataUse2CV &lt;- norm.TU[nozeroIndex, ]
+        cv.TU &lt;- getCV(dataUse2CV, cvNorm = cvNorm)
+        TU.AUCVC &lt;- CV2AUCVC(cv.TU, cvResolution = cvResolution)
+        return(c(TU.AUCVC = TU.AUCVC, lower = lower_trim, upper = upper_trim,
+            ratio = pre_ratio))
+    }, lower_range2, upper_range2, pre_ratio_range2)
+    all_aucvc2 &lt;- t(all_aucvc)
+    max_index &lt;- which(max(all_aucvc2[, "TU.AUCVC"]) == all_aucvc2[,
+        "TU.AUCVC"])
+    return(all_aucvc2[max_index, ])
+  }
+</code></pre>
+
+
+</div>

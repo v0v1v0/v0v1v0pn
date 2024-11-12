@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netimpact</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Determine the importance of individual studies in network
+meta-analysis</h2>
+
+<h3>Description</h3>
+
+<p>This function measures the importance of individual studies in
+network meta-analysis by the reduction of the precision if the
+study is removed / ignored from the network (Rücker et al., 2020).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">netimpact(
+  x,
+  seTE.ignore = 100 * max(x$seTE, na.rm = TRUE),
+  event.ignore = 0.01,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netmeta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.ignore</code></td>
+<td>
+<p>Assumed (large) standard error in order to
+mimicking the removal of individual studies from the network
+meta-analysis (ignored for <code>netmetabin</code> objects).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event.ignore</code></td>
+<td>
+<p>Assumed event number mimicking the removal of
+individual studies from the network meta-analysis (considered for
+<code>netmetabin</code> objects).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical indicating whether information on the
+estimation progress should be printed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>"netimpact"</code> with corresponding
+<code>netgraph</code> and <code>print</code> function. The object is a list
+containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>impact.common</code></td>
+<td>
+<p>A matrix with contributions of individual
+studies (columns) to comparisons (rows) under the common effects
+model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>impact.random</code></td>
+<td>
+<p>A matrix with contributions of individual
+studies (columns) to comparisons (rows) under the random effects
+model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ignored.comparisons</code></td>
+<td>
+<p>List with comparisons of ignored study.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seTE.ignore, event.ignore, x</code></td>
+<td>
+<p>As defined above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nets</code></td>
+<td>
+<p>List of all network meta-analyses (removing a single
+study).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+<p>Version of R package netmeta used to create object.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Guido Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>,
+Gerta Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Rücker G, Nikolakopoulou A, Papakonstantinou T, Salanti G, Riley
+RD, Schwarzer G (2020):
+The statistical importance of a study for a network meta-analysis
+estimate.
+<em>BMC Medical Research Methodology</em>,
+<b>20</b>, 190
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>netmetabin</code>,
+<code>netgraph.netimpact</code>, <code>print.netimpact</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Franchini2012)
+
+# Only consider first two studies (to reduce runtime of example)
+#
+studies &lt;- unique(Franchini2012$Study)
+p1 &lt;- pairwise(list(Treatment1, Treatment2, Treatment3),
+  n = list(n1, n2, n3),
+  mean = list(y1, y2, y3), sd = list(sd1, sd2, sd3),
+  data = subset(Franchini2012, Study %in% studies[1:2]),
+  studlab = Study)
+
+net1 &lt;- netmeta(p1)
+ni1 &lt;- netimpact(net1, verbose = TRUE)
+ni1
+
+netgraph(ni1)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,254 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlfb</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>nlfb: nonlinear least squares modeling by functions</h2>
+
+<h3>Description</h3>
+
+<p>A simplified and hopefully robust alternative to finding
+the nonlinear least squares minimizer that causes
+'formula' to give a minimal residual sum of squares.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlfb(
+  start,
+  resfn,
+  jacfn = NULL,
+  trace = FALSE,
+  lower = -Inf,
+  upper = Inf,
+  weights = NULL,
+  data = NULL,
+  ctrlcopy = FALSE,
+  control = list(),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>a numeric vector with all elements present
+e.g., start=c(b1=200, b2=50, b3=0.3) 
+The start vector for this <code>nlfb</code>, unlike <code>nlxb</code>, does
+not need to be named.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resfn</code></td>
+<td>
+<p>A function that evaluates the residual vector for 
+computing the elements of the sum of squares function at the set of 
+parameters <code>start</code>. Where this function is created by actions on 
+a formula or expression in <code>nlxb</code>, this residual vector will be 
+created by evaluation of the 'model - data', rather than 
+the conventional 'data - model' approach. The sum of squares is the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jacfn</code></td>
+<td>
+<p>A function that evaluates the Jacobian of the sum of squares 
+function, that is, the matrix of partial derivatives of the residuals 
+with respect to each of the parameters. If NULL (default), uses an 
+approximation.
+</p>
+<p>The Jacobian MUST be returned as the attribute "gradient" of this function,
+allowing <code>jacfn</code> to have the same name and be the same code block
+as <code>resfn</code>, which may permit some efficiencies of computation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>TRUE for console output during execution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+<p>a vector of lower bounds on the parameters. 
+If a single number, this will be applied to all. Default <code>-Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+<p>a vector of upper bounds on the parameters. If a single number, 
+this will be applied to all parameters. Default <code>Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A vector of fixed weights or a function producing one.
+See the Details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame of variables used by resfn and jacfn to compute the
+required residuals and Jacobian.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ctrlcopy</code></td>
+<td>
+<p>If TRUE use control supplied as is.
+This avoids reprocessing controls.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of control parameters. See nlsr.control().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional data needed to evaluate the modeling functions</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>nlfb is particularly intended to allow for the
+resolution of very ill-conditioned or else near
+zero-residual problems for which the regular nls()
+function is ill-suited. 
+</p>
+<p>This variant uses a qr solution without forming the sum
+of squares and cross products t(J)
+</p>
+<p>Neither this function nor <code>nlxb</code> have provision for parameter
+scaling (as in the <code>parscale</code> control of <code>optim</code> and
+package <code>optimx</code>). This would be more tedious than difficult to
+introduce, but does not seem to be a priority feature to add.
+</p>
+<p>The <code>weights</code> argument can be a vector of fixed weights, in which
+case the objective function that will be 
+minimized is the sum of squares where each residual is multiplied by the 
+square root of the corresponding weight. Default <code>NULL</code> implies 
+unit weights.  <code>weights</code> may alternatively be a function with header <code>function(parms, resids)</code> to compute such a vector.
+</p>
+
+
+<h3>Value</h3>
+
+
+<p>A list of the following items: </p>
+
+<dl>
+<dt>coefficients</dt>
+<dd>
+<p>A named vector giving the parameter values at
+the supposed solution.</p>
+</dd>
+<dt>ssquares</dt>
+<dd>
+<p>The sum of squared residuals at this set of parameters.</p>
+</dd>
+<dt>resid</dt>
+<dd>
+<p>The weighted residual vector at the returned parameters.</p>
+</dd>
+<dt>jacobian</dt>
+<dd>
+<p>The jacobian matrix (partial derivatives of residuals w.r.t.
+the parameters) at the returned parameters.</p>
+</dd>
+<dt>feval</dt>
+<dd>
+<p>The number of residual evaluations (sum of squares
+computations) used.</p>
+</dd>
+<dt>jeval</dt>
+<dd>
+<p>The number of Jacobian evaluations used.</p>
+</dd>
+<dt>weights0</dt>
+<dd>
+<p>The weights argument as specified.</p>
+</dd>
+<dt>weights</dt>
+<dd>
+<p>The weights vector at the final fit.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>J C Nash 2014-7-16   nashjc _at_ uottawa.ca
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nlsr)
+# Scaled Hobbs problem
+shobbs.res  &lt;-  function(x){ # scaled Hobbs weeds problem -- residual
+  # This variant uses looping
+  if(length(x) != 3) stop("shobbs.res -- parameter vector n!=3")
+  y  &lt;-  c(5.308, 7.24, 9.638, 12.866, 17.069, 23.192, 31.443,
+           38.558, 50.156, 62.948, 75.995, 91.972)
+  tt  &lt;-  1:12
+  res  &lt;-  100.0*x[1]/(1+x[2]*10.*exp(-0.1*x[3]*tt)) - y
+}
+shobbs.jac  &lt;-  function(x) { # scaled Hobbs weeds problem -- Jacobian
+  jj  &lt;-  matrix(0.0, 12, 3)
+  tt  &lt;-  1:12
+  yy  &lt;-  exp(-0.1*x[3]*tt)
+  zz  &lt;-  100.0/(1+10.*x[2]*yy)
+  jj[tt,1]   &lt;-   zz
+  jj[tt,2]   &lt;-   -0.1*x[1]*zz*zz*yy
+  jj[tt,3]   &lt;-   0.01*x[1]*zz*zz*yy*x[2]*tt
+  attr(jj, "gradient") &lt;- jj
+  jj
+}
+st &lt;- c(b1=2, b2=1, b3=1) # a default starting vector (named!)
+# Default controls, standard Nash-Marquardt algorithm
+anlf0 &lt;- nlfb(start=st, resfn=shobbs.res, jacfn=shobbs.jac,
+               trace=TRUE, control=list(prtlvl=1))
+anlf0
+
+# Hartley with step reduction factor of .2
+anlf0h &lt;- nlfb(start=st, resfn=shobbs.res, jacfn=shobbs.jac,
+              trace=TRUE, control=list(prtlvl=1, lamda=0, laminc=1.0,
+              lamdec=1.0, phi=0, stepredn=0.2))
+anlf0h
+
+anlf1bm &lt;- nlfb(start=st, resfn=shobbs.res, jacfn=shobbs.jac, lower=c(2,0,0),
+                upper=c(2,6,3), trace=TRUE, control=list(prtlvl=1))
+anlf1bm
+cat("backtrack using stepredn=0.2\n")
+anlf1bmbt &lt;- nlfb(start=st, resfn=shobbs.res, jacfn=shobbs.jac, lower=c(2,0,0),
+                upper=c(2,6,3), trace=TRUE, control=list(stepredn=0.2, prtlvl=1))
+anlf1bmbt
+## Short output
+pshort(anlf1bm)
+anlf2bm &lt;- nlfb(start=st, resfn=shobbs.res, jacfn=shobbs.jac, lower=c(2,0,0),
+                upper=c(2,6,9), trace=TRUE, control=list(prtlvl=1))
+anlf2bm
+cat("backtrack using stepredn=0.2\n")
+
+anlf2bmbt &lt;- nlfb(start=st, resfn=shobbs.res, jacfn=shobbs.jac, lower=c(2,0,0),
+                upper=c(2,6,9), trace=TRUE, control=list(stepredn=0.2, prtlvl=1))
+anlf2bmbt
+## Short output
+pshort(anlf2bm)
+</code></pre>
+
+
+</div>

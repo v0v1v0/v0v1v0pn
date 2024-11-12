@@ -1,0 +1,338 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neldermead.algo</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nelder-Mead Algorithm
+</h2>
+
+<h3>Description</h3>
+
+<p><code>neldermead.algo</code> performs an optimization without restart using the
+method associated with the <code>method</code> element of the neldermead object;
+<code>neldermead.fixed</code>, <code>neldermead.variable</code>, <code>neldermead.box</code>,
+<code>boxlinesearch</code>, <code>neldermead.storehistory</code>,
+<code>neldermead.termination</code>, and <code>neldermead.interpolate</code> are utility
+functions for <code>neldermead.algo</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  neldermead.algo(this = NULL)
+  neldermead.fixed(this = NULL)
+  neldermead.variable(this = NULL)
+  neldermead.box(this = this)
+  boxlinesearch(this = NULL, n = NULL, xbar = NULL, xhigh = NULL, fhigh = NULL,
+                rho = NULL)
+  neldermead.storehistory(this = NULL, n = NULL, fopt = NULL, xopt = NULL,
+                          fv = NULL, xcoords = NULL)
+  neldermead.termination(this = NULL, fvinitial = NULL, oldfvmean = NULL,
+                         newfvmean = NULL, previousxopt = NULL,
+                         currentxopt = NULL, simplex = NULL)
+  neldermead.interpolate(x1 = NULL, x2 = NULL, fac = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>this</code></td>
+<td>
+<p>A neldermead object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xbar</code></td>
+<td>
+<p>The centroid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xhigh</code></td>
+<td>
+<p>The high point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fhigh</code></td>
+<td>
+<p>The value of the cost function at <code>xhigh</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>The reflection factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fopt</code></td>
+<td>
+<p>The current value of the function at the current optimum point
+estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xopt</code></td>
+<td>
+<p>The current optimum point estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fv</code></td>
+<td>
+<p>The function values, with size nbve x 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xcoords</code></td>
+<td>
+<p>Matrix of size n x n+1, coordinates of the n+1 vertices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fvinitial</code></td>
+<td>
+<p>The initial cost function value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oldfvmean</code></td>
+<td>
+<p>The old cost function value average on the simplex.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newfvmean</code></td>
+<td>
+<p>The new cost function value average on the simplex.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>previousxopt</code></td>
+<td>
+<p>The previous point estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>currentxopt</code></td>
+<td>
+<p>The current point estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplex</code></td>
+<td>
+<p>The simplex. The best point estimate in the simplex is expected
+to be stored at 1, while the worst point estimate in the simplex is expected
+to be stored at n+1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x1</code></td>
+<td>
+<p>The first reference point estimate to perform the
+interpolation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x2</code></td>
+<td>
+<p>The second reference point estimate to perform the
+interpolation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fac</code></td>
+<td>
+<p>A factor to perform the interpolation.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<dl>
+<dt><code>neldermead.fixed</code></dt>
+<dd>
+<p>The simplex algorithm with fixed size simplex.
+We implement the following 'rules' of the method of Spendley et al.
+</p>
+
+<ul>
+<li>
+<p> Rule 1 is strictly applied, but the reflection is done by reflection
+of the high point, since we minimize a function instead of maximizing it,
+like Spendley.
+</p>
+</li>
+<li>
+<p> Rule 2 is NOT implemented, as we expect that the function evaluation
+is not subject to errors.
+</p>
+</li>
+<li>
+<p> Rule 3 is applied, i.e. reflection with respect to next to high point.
+A shrink step is included, with shrinkage factor sigma.
+</p>
+</li>
+</ul>
+<p>Rule 1. Ascertain the lowest reading y, of yi ... Yk+1
+Complete a new simplex Sp by excluding the point Vp corresponding to
+y, and replacing it by V* defined as above.
+</p>
+<p>Rule 2. If a result has occurred in (k + 1) successive simplexes, and is not
+then eliminated by application of Rule 1, do not move in the direction
+indicated by Rule 1, or at all, but discard the result and replace it by a
+new observation at the same point.
+</p>
+<p>Rule 3. If y is the lowest reading in So , and if the next observation made,
+y* , is the lowest reading in the new simplex S , do not apply Rule 1 and
+return to So from Sp . Move out of S, by rejecting the second lowest reading
+(which is also the second lowest reading in So).
+</p>
+</dd>
+<dt><code>neldermead.variable</code></dt>
+<dd>
+<p>The original Nelder-Mead algorithm, with
+variable-size simplex.</p>
+</dd>
+<dt><code>neldermead.box</code></dt>
+<dd>
+<p>The Nelder-Mead algorithm, with variable-size
+simplex and modifications by Box for bounds and inequality constraints.</p>
+</dd>
+<dt><code>boxlinesearch</code></dt>
+<dd>
+<p>Called by <code>neldermead.box</code>, i.e. Box's
+method. Perform a line search from xbar, on the line (xhigh,xbar). The
+reflected point estimate satisfies the following constraints: </p>
+
+<ul>
+<li>
+<p> fr &lt; fhigh
+</p>
+</li>
+<li>
+<p> xr satisfies the bounds constraints
+</p>
+</li>
+<li>
+<p> xr satisfies the nonlinear positive inequality constraints
+</p>
+</li>
+<li>
+<p> xr satisfies the linear positive inequality constraints
+</p>
+</li>
+</ul>
+<p>The method is based on projection and scaling toward the centroid.</p>
+</dd>
+<dt><code>neldermead.storehistory</code></dt>
+<dd>
+<p>Store the optimization history into the
+neldermead object.</p>
+</dd>
+<dt><code>neldermead.termination</code></dt>
+<dd>
+<p>Determine if the algorithm must continue
+or terminate. The function uses the cost function average in the simplex
+instead of the best cost function value. This is because the function
+average changes at each iteration. Instead, the best function value has a
+step-by-step evolution and may not change between two successive iterations,
+leading to a stop of the algorithm.</p>
+</dd>
+<dt><code>neldermead.interpolate</code></dt>
+<dd>
+<p>Compute the point estimate xi as an
+interpolation between x1 and x2, as follows:  xi = (1+fac)x1 - fac*x2</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+
+<dl>
+<dt>
+<code>neldermead.fixed</code>, <code>neldermead.variable</code>, and
+<code>neldermead.box</code>
+</dt>
+<dd>
+<p>Return the updated neldermead object, containing the
+optimum point estimate.</p>
+</dd>
+<dt><code>boxlinesearch</code></dt>
+<dd>
+<p>Return a list with the following elements:
+</p>
+
+<dl>
+<dt>this</dt>
+<dd>
+<p>The updated neldermead object.</p>
+</dd>
+<dt>status</dt>
+<dd>
+<p>TRUE if the search is successful, FALSE otherwise.</p>
+</dd>
+<dt>xr</dt>
+<dd>
+<p>The reflected point estimate.</p>
+</dd>
+<dt>fr</dt>
+<dd>
+<p>The value of the cost function at <code>xr</code>.</p>
+</dd>
+</dl>
+</dd>
+<dt><code>neldermead.storehistory</code></dt>
+<dd>
+<p>Return the updated neldermead object.</p>
+</dd>
+<dt><code>neldermead.termination</code></dt>
+<dd>
+<p>Return a list with the following
+elements: </p>
+
+<dl>
+<dt>this</dt>
+<dd>
+<p>The updated neldermead object</p>
+</dd>
+<dt>terminate</dt>
+<dd>
+<p>TRUE if the algorithm terminates, FALSE if the algorithm
+must continue.</p>
+</dd>
+<dt>status</dt>
+<dd>
+<p>The termination status: 'continue', 'maxiter', 'maxfuneval',
+'tolf', 'tolx', 'tolsize', 'tolsizedeltafv', 'kelleystagnation',
+'tolboxf', 'tolvariance' or the user-defined termination status.</p>
+</dd>
+</dl>
+</dd>
+<dt><code>neldermead.interpolate</code></dt>
+<dd>
+<p>Return a new point estimate, i.e. a
+column vector.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Author of Scilab neldermead module: Michael Baudin (INRIA - Digiteo)
+</p>
+<p>Author of R adaptation: Sebastien Bihorel (<a href="mailto:sb.pmlab@gmail.com">sb.pmlab@gmail.com</a>)
+</p>
+
+
+</div>

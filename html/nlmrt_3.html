@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model2grfun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate a gradient function from a nonlinear model expression
+and a vector of named parameters.
+</h2>
+
+<h3>Description</h3>
+
+<p>Given a nonlinear model expressed as an expression of the form
+lhs ~ formula_for_rhs
+and a start vector where parameters used in the model formula are named,
+attempts to build the the <code>R</code> function for the gradient of the 
+residual sum of squares.
+As a side effect, a text file with the program code is generated.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">   model2grfun(modelformula, pvec, funname="mygr", filename=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>modelformula</code></td>
+<td>
+
+<p>This is a modeling formula of the form (as in <code>nls</code>)
+lhsvar ~ rhsexpression
+for example,
+y ~ b1/(1+b2*exp(-b3*tt))
+You may also give this as a string.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvec</code></td>
+<td>
+
+<p>A named parameter vector. For our example, we could use
+start=c(b1=1, b2=2.345, b3=0.123)
+WARNING: the parameters in the output function will be used in the 
+order presented in this vector. Names are NOT respected in the 
+output function. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>funname</code></td>
+<td>
+
+<p>The (optional) name for the function that is generated in the file
+named in the next argument. The default name is 'mygr'.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filename</code></td>
+<td>
+
+<p>The (optional) name of a file that is written containing the (text) program code
+for the function. If NULL, no file is written.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>None.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <code>R</code> function object that computes the gradient of the sum of 
+squared residuals of a nonlinear model at a set of parameters. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>John C Nash &lt;nashjc@uottawa.ca&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Nash, J. C. (1979, 1990) _Compact Numerical Methods for Computers.
+Linear Algebra and Function Minimisation._ Adam Hilger./Institute
+of Physics Publications
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Function <code>nls()</code>, packages <code>optim</code> and <code>optimx</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  cat("See also examples in nlmrt-package.Rd\n")
+  require(numDeriv)
+  y &lt;- c(5.308, 7.24, 9.638, 12.866, 17.069, 23.192, 31.443, 38.558, 
+      50.156, 62.948, 75.995, 91.972)  # for testing
+  tt &lt;- seq_along(y)  # for testing
+  f &lt;- y ~ b1/(1 + b2 * exp(-1 * b3 * tt))
+  p &lt;- c(b1 = 1, b2 = 1, b3 = 1)
+  mygr &lt;- model2grfun(f, p)
+  myss &lt;- model2ssfun(f, p) # for check
+  cat("mygr:\n")
+  print(mygr)
+  
+  ans &lt;- mygr(p, tt = tt, y = y)
+  print(ans)
+  gnum &lt;- grad(myss, p, tt = tt, y = y)
+  cat("Max(abs(ans-gnum)) = ",max(abs(ans-gnum)),"\n")
+
+  bnew &lt;- c(b1 = 200, b2 = 50, b3 = 0.3)
+  ans &lt;- mygr(prm = bnew, tt = tt, y = y)
+  print(ans)
+  gnum &lt;- grad(myss, bnew, tt = tt, y = y)
+  cat("Max(abs(ans-gnum)) = ",max(abs(ans-gnum)),"\n")
+  
+  cat("Test with un-named vector\n")  # At 20120424 should fail
+  bthree &lt;- c(100, 40, 0.1)
+  ans &lt;- mygr(prm = bthree, tt = tt, y = y)
+  print(ans)
+  gnum &lt;- grad(myss, bthree, tt = tt, y = y)
+  cat("Max(abs(ans-gnum)) = ",max(abs(ans-gnum)),"\n")
+</code></pre>
+
+
+</div>

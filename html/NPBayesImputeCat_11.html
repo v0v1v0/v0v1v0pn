@@ -1,0 +1,195 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Lcm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Class <code>"Rcpp_Lcm"</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>This class implements the MCMC sampler for non-parametric imputation of discrete multivariate data described in Manrique-Vallier and Reiter (2014). It provides methods for updating and monitoring the sampler. 
+</p>
+
+
+<h3>Details</h3>
+
+<p>Rcpp_lcm objects should be created with CreateModel. Please see the examples in the demo folder for more detailed explanation on model fitting and parameter tracing.
+</p>
+
+
+<h3>Extends</h3>
+
+<p>Class <code>"C++Object"</code>, directly.
+</p>
+<p>All reference classes extend and inherit methods from <code>"envRefClass"</code>.
+</p>
+
+
+<h3>Fields</h3>
+
+
+<dl>
+<dt>
+<code>CurrentIteration</code>:</dt>
+<dd>
+<p>the total number of iterations that have been run so far.</p>
+</dd>
+<dt>
+<code>EnableTracer</code>:</dt>
+<dd>
+<p>to check tracer status or to enable/disable the tracer.</p>
+</dd>
+<dt>
+<code>MCZ</code>:</dt>
+<dd>
+<p>the disjointed structural zero matrix.</p>
+</dd>
+<dt>
+<code>snapshot</code>:</dt>
+<dd>
+<p>retrieve a list with the current state of all the parameters in the sampler, including the imputed sample. A call the the "snapshot" method returns a list with the following components:</p>
+
+<dl>
+<dt>alpha:</dt>
+<dd>
+<p>the concentration parameter of the stick breaking prior.</p>
+</dd>
+<dt>k_star:</dt>
+<dd>
+<p>the effective number number of latent classes (mixture components)</p>
+</dd>
+<dt>Nmis: </dt>
+<dd>
+<p>the size of the augmented sample.</p>
+</dd>
+<dt>nu: </dt>
+<dd>
+<p>a vector with the mixture weights</p>
+</dd>
+<dt>z: </dt>
+<dd>
+<p>a matrix with the current latent class assignment of each member of the sample</p>
+</dd>
+<dt>ImputedX: </dt>
+<dd>
+<p>the current raw imputed dataset. Use GetDataFrame to convert the raw data to a data frame of factors as defined in the input data set.</p>
+</dd>
+<dt>psi:</dt>
+<dd>
+<p>The conditional multinomial probabilties. A Lmax * K * J array, where Lmax is the maximum number of levels of all discrete factors in the dataset, J is the number of factors in the dataset, and K is the number of latent classes. Since variables might have different numbers of levels, unused entries in the first dimension are filled with NAs to complete Lmax.</p>
+</dd>
+</dl>
+</dd>
+<dt>
+<code>traceable</code>:</dt>
+<dd>
+<p>list of model parameters that can be traced by the tracer.</p>
+</dd>
+<dt>
+<code>traced</code>:</dt>
+<dd>
+<p>list of model parameters that are traced.</p>
+</dd>
+</dl>
+<h3>Methods</h3>
+
+
+<dl>
+<dt>
+<code>SetTrace(paralist,num_of_iterations)</code>:</dt>
+<dd>
+<p>set parameters to be traced.</p>
+
+<dl>
+<dt>paralist:</dt>
+<dd>
+<p>a list of parameters to be traced.</p>
+</dd>
+<dt>num_of_iterations:</dt>
+<dd>
+<p>the maximum number of traced iterations.</p>
+</dd>
+</dl>
+</dd>
+<dt>
+<code>Run(burnin, iter, thinning,silent)</code>:</dt>
+<dd>
+<p>run MCMC iterations.
+</p>
+
+<dl>
+<dt>burnin:</dt>
+<dd>
+<p>number of burn in iterations.</p>
+</dd>
+<dt>iter:</dt>
+<dd>
+<p>number of MCMC iterations.</p>
+</dd>
+<dt>thinning:</dt>
+<dd>
+<p>thinning parameter.</p>
+</dd>
+<dt>silent:</dt>
+<dd>
+<p>boolean indication if more iteration should be printed.</p>
+</dd>
+</dl>
+</dd>
+<dt>
+<code>Resume()</code>:</dt>
+<dd>
+<p>resume from an interrupted call to run method.</p>
+</dd>
+<dt>
+<code>Parameters(paralist)</code>:</dt>
+<dd>
+<p>retrieve a selected list of model parameters from last MCMC iteration.</p>
+
+<dl>
+<dt>paralist:</dt>
+<dd>
+<p>a list of parameters to be traced.</p>
+</dd>
+</dl>
+</dd>
+<dt>
+<code>GetTrace()</code>:</dt>
+<dd>
+<p>retrieve all traced iterations. Returns a list with all the parameters set using the method SetTrace(). See description of snapshotreference method for a description of the parameters.  </p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Manrique-Vallier, D. and Reiter, J.P. (2013), "Bayesian Estimation of Discrete Multivariate Latent Structure Models with Structural Zeros", JCGS. 
+<br><br>
+Si, Y. and Reiter, J.P. (2013), "Nonparametric Bayesian multiple imputation for incomplete categorical variables in large-scale assessment surveys", Journal of Educational and Behavioral Statistics, 38, 499 - 521 
+<br><br>
+Manrique-Vallier, D. and Reiter, J.P. (2014), "Bayesian Multiple Imputation for Large-Scale Categorical Data with Structural Zeros", Survey Methodology.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(NPBayesImputeCat)
+#Please use NYexample data set for a more realistic example
+data('NYMockexample')
+
+#create the model
+model &lt;- CreateModel(X,MCZ,10,10000,0.25,0.25,8888)
+
+#run 1 burnins, 2 mcmc iterations and thin every 2 iterations
+model$Run(1,2,2,TRUE)
+
+#retrieve parameters from the final iteration
+result &lt;- model$snapshot
+
+#convert ImputedX matrix to dataframe, using proper factors/names etc.
+ImputedX &lt;- GetDataFrame(result$ImputedX,X)
+#View(ImputedX)
+</code></pre>
+
+
+</div>

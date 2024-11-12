@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>TotalPoints.rms</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Caculate Total Points for nomogram Picture</h2>
+
+<h3>Description</h3>
+
+<p>Compared with points_cal() command, TotalPoints.rms() is suit 
+for more complexed condition. Since this command is based on formula 
+from 'rms' package, it may be also more accurate. However, formula for 
+each variable can not be caculated.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">TotalPoints.rms(rd, fit, nom, kint = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>rd</code></td>
+<td>
+<p>raw data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>regression result in 'rma' package</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nom</code></td>
+<td>
+<p>nomoram() command result</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kint</code></td>
+<td>
+<p>number of intercept. Default is to use fit$interceptRef if it 
+exists, or 1.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a dataframe contains rawdata and total points
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(rms)
+n &lt;- 1000    
+set.seed(17) 
+d &lt;- data.frame(age = rnorm(n, 50, 10),
+                blood.pressure = rnorm(n, 120, 15),
+                cholesterol = rnorm(n, 200, 25),
+                sex = factor(sample(c('female','male'), n,TRUE)))
+
+d &lt;- upData(d,
+            L = .4*(sex=='male') + .045*(age-50) +
+              (log(cholesterol - 10)-5.2)*(-2*(sex=='female') + 2*(sex=='male')),
+            y = ifelse(runif(n) &lt; plogis(L), 1, 0))
+
+ddist &lt;- datadist(d); options(datadist='ddist')
+
+f &lt;- lrm(y ~ lsp(age,50) + sex * rcs(cholesterol, 4) + blood.pressure,
+         data=d)
+nom &lt;- nomogram(f)
+TotalPoints.rms(rd = d,fit = f,nom = nom)
+</code></pre>
+
+
+</div>

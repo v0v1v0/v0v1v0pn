@@ -1,0 +1,312 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>netconnection.default</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get information on network connectivity (number of subnetworks,
+distance matrix)</h2>
+
+<h3>Description</h3>
+
+<p>To determine the network structure and to test whether a given
+network is fully connected. Network information is provided as a
+triple of vectors <code>treat1</code>, <code>treat2</code>, and <code>studlab</code>
+where each row corresponds to an existing pairwise treatment
+comparison (<code>treat1</code>, <code>treat2</code>) in a study
+(<code>studlab</code>). The function calculates the number of subnetworks
+(connectivity components; value of 1 corresponds to a fully
+connected network) and the distance matrix (in block-diagonal form
+in the case of subnetworks). If some treatments are combinations of
+other treatments or have common components, an analysis based on
+the additive network meta-analysis model might be possible, see
+discomb function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## Default S3 method:
+netconnection(
+  data = NULL,
+  treat1,
+  treat2,
+  studlab = NULL,
+  subset = NULL,
+  sep.trts = ":",
+  nchar.trts = 666,
+  title = "",
+  details.disconnected = FALSE,
+  warn = FALSE,
+  ...
+)
+
+## S3 method for class 'pairwise'
+netconnection(
+  data,
+  treat1,
+  treat2,
+  studlab = NULL,
+  subset = NULL,
+  sep.trts = ":",
+  nchar.trts = 666,
+  title = "",
+  details.disconnected = FALSE,
+  warn = FALSE,
+  ...
+)
+
+## S3 method for class 'netconnection'
+print(
+  x,
+  digits = max(4, .Options$digits - 3),
+  nchar.trts = x$nchar.trts,
+  details = FALSE,
+  details.disconnected = x$details.disconnected,
+  ...
+)
+
+netconnection(data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame, e.g., created with
+<code>pairwise</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat1</code></td>
+<td>
+<p>Label / number for first treatment (ignored if
+<code>data</code> was created with <code>pairwise</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat2</code></td>
+<td>
+<p>Label / number for second treatment (ignored if
+<code>data</code> was created with <code>pairwise</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>studlab</code></td>
+<td>
+<p>Study labels (ignored if <code>data</code> was created
+with <code>pairwise</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional vector specifying a subset of studies to
+be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep.trts</code></td>
+<td>
+<p>A character used in comparison names as separator
+between treatment labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchar.trts</code></td>
+<td>
+<p>A numeric defining the minimum number of
+characters used to create unique treatment names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Title of meta-analysis / systematic review.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details.disconnected</code></td>
+<td>
+<p>A logical indicating whether to print
+more details for disconnected networks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>A logical indicating whether warnings should be
+printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments (ignored at the moment)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>netconnection</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Minimal number of significant digits, see
+<code>print.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>A logical indicating whether to print the distance
+matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>netconnection</code> with corresponding
+<code>print</code> function. The object is a list containing the
+following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>treat1, treat2, studlab, title, warn, nchar.trts</code></td>
+<td>
+<p>As defined
+above.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Total number of studies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>Total number of pairwise comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Total number of treatments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.subnets</code></td>
+<td>
+<p>Number of subnetworks; equal to 1 for a fully
+connected network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D.matrix</code></td>
+<td>
+<p>Distance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A.matrix</code></td>
+<td>
+<p>Adjacency matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L.matrix</code></td>
+<td>
+<p>Laplace matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+<p>Version of R package netmeta used to create object.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Gerta Rücker <a href="mailto:gerta.ruecker@uniklinik-freiburg.de">gerta.ruecker@uniklinik-freiburg.de</a>, Guido
+Schwarzer <a href="mailto:guido.schwarzer@uniklinik-freiburg.de">guido.schwarzer@uniklinik-freiburg.de</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>netmeta</code>, <code>netdistance</code>,
+<code>discomb</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(Senn2013)
+
+nc1 &lt;- netconnection(treat1, treat2, studlab, data = Senn2013)
+nc1
+
+# Extract number of (sub)networks
+#
+nc1$n.subnets
+
+# Extract distance matrix
+#
+nc1$D.matrix
+
+## Not run: 
+# Conduct network meta-analysis (results not shown)
+#
+net1 &lt;- netmeta(TE, seTE, treat1, treat2, studlab, data = Senn2013)
+
+# Artificial example with two subnetworks
+#
+t1 &lt;- c("G", "B", "B", "D", "A", "F")
+t2 &lt;- c("B", "C", "E", "E", "H", "A")
+#
+nc2 &lt;- netconnection(t1, t2)
+print(nc2, details = TRUE)
+
+# Number of subnetworks
+#
+nc2$n.subnets
+
+# Extract distance matrix
+#
+nc2$D.matrix
+
+# Conduct network meta-analysis (results in an error message due to
+# unconnected network)
+try(net2 &lt;- netmeta(1:6, 1:6, t1, t2, 1:6))
+
+# Conduct network meta-analysis on first subnetwork
+#
+net2.1 &lt;- netmeta(1:6, 1:6, t1, t2, 1:6, subset = nc2$subnet == 1)
+
+# Conduct network meta-analysis on second subnetwork
+#
+net2.2 &lt;- netmeta(1:6, 1:6, t1, t2, 1:6, subset = nc2$subnet == 2)
+
+net2.1
+net2.2
+
+## End(Not run)  
+
+</code></pre>
+
+
+</div>

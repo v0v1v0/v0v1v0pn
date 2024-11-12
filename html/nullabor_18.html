@@ -1,0 +1,69 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>null_ts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate null data by simulating from a time series model.</h2>
+
+<h3>Description</h3>
+
+<p>Null hypothesis: data follows a time series model using auto.arima from the forecast package
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">null_ts(var, modelfn)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>variable to model as a time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelfn</code></td>
+<td>
+<p>method for simulating from ts model.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a function that given <code>data</code> generates a null data set.
+For use with <code>lineup</code> or <code>rorschach</code>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>null_model
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(forecast)
+require(ggplot2)
+require(dplyr)
+data(aud)
+l &lt;- lineup(null_ts("rate", auto.arima), aud)
+ggplot(l, aes(x=date, y=rate)) + geom_line() +
+  facet_wrap(~.sample, scales="free_y") +
+  theme(axis.text = element_blank()) +
+  xlab("") + ylab("")
+l_dif &lt;- l %&gt;%
+  group_by(.sample) %&gt;%
+  mutate(d=c(NA,diff(rate))) %&gt;%
+  ggplot(aes(x=d)) + geom_density() +
+  facet_wrap(~.sample)
+</code></pre>
+
+
+</div>

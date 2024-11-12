@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nbr_lm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Network-based R-statistics using Linear Model</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the specified linear model (LM) for each edge in the network,
+and calculates the family wise error (FWE) p-value for the size of the clusters of connected
+edges that are individually below the P threshold (<em>thrP</em>), or above the T threshold
+(<em>thrT</em>). FWE estimation is based on the null distribution of the maximum size of sets
+of connected edges (defined as above), obtained with <em>nperm</em> permutations of the
+original data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nbr_lm(net, nnodes, idata, mod, 
+       alternative = c("two.sided", "lower", "greater"),
+       diag = FALSE, nperm, thrP = 0.05, thrT = NULL,
+       cores = NULL, nudist = FALSE, expList = NULL, verbose = TRUE,
+       ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net</code></td>
+<td>
+<p>3D volume (2D matrices for each observation) or 2D matrix of edges as columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nnodes</code></td>
+<td>
+<p>Number of network nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idata</code></td>
+<td>
+<p>Matrix or data.frame including independent variables of interest of the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod</code></td>
+<td>
+<p>Model, specify as a string, e.g., "~Group + Age".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "lower". You can specify just the initial letter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diag</code></td>
+<td>
+<p>Logical indicating if matrix diagonal is to be included in the analysis (default: FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nperm</code></td>
+<td>
+<p>Number of permutations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thrP</code></td>
+<td>
+<p>Individual edge p-value threshold (if NULL, thrT should be given).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thrT</code></td>
+<td>
+<p>Individual edge T-value threshold (if NULL, thrP should be given).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Number of selected cores for parallel computing (default: NULL).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nudist</code></td>
+<td>
+<p>Logical indicating if null distribution should be returned (default: FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expList</code></td>
+<td>
+<p>Character string adding variable names to the varlist of 'clusterExport' (default: NULL).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical indicating if messages should be printed (default: TRUE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to the low level 'lm' function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It's VERY IMPORTANT when giving <em>net</em> as a 2D matrix or data.frame, to be
+completely sure that column distribution fits that of the upper triangle indices of an
+<em>nnodes</em> * <em>nnodes</em> matrix. This may be verified through the edge indices, e.g.,
+"which(upper.tri(matrix(nrow = nnodes, ncol = nnodes)), arr.ind = T)" (see vignette NBR-LME
+for more details).
+</p>
+<p>Regarding <em>nperm</em>, I suggest first setting it to small values (5 or 10) in order to test that
+everything runs fine. After that, set <em>nperm</em> to 1000 or larger number to decrease the
+margin of error of the FWE p-value (see <a href="https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Randomise/Theory#Conditional_Monte_Carlo_Permutation_Tests">https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Randomise/Theory#Conditional_Monte_Carlo_Permutation_Tests</a>
+to explore the behavior of FWE p-value as a function of <em>nperm</em>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>List containing the observed statistics and their corresponding FWE p-values,
+if requested by <em>nudist</em> it will return the null distribution.
+</p>
+
+<ol>
+<li>
+<p> Observed statistics for every individual edge: corresponding subset of connected
+nodes and strength for each model term.
+</p>
+</li>
+<li>
+<p> FWE for components: binary and strength sum, with their corresponding FWE p-value.
+</p>
+</li>
+<li>
+<p> Null Distribution: maximal component size and strength for each permutation. Only
+returned if <em>nudist</em> is TRUE.
+</p>
+</li>
+</ol>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(frontal2D)
+
+nbr_result &lt;- nbr_lm(net = frontal2D[,-(1:3)], nnodes = 28,
+  idata = frontal2D[,1:3], mod = "~ Group + Sex * Age",
+  thrP = NULL, thrT = 4, nperm = 5)
+show(nbr_result)
+
+
+</code></pre>
+
+
+</div>

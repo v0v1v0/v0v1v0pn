@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>meta_inla</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fitting a pairwise meta-analysis model using INLA.</h2>
+
+<h3>Description</h3>
+
+<p><code>meta_inla</code> fits a pairwise meta-analysis model using INLA
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">meta_inla(
+  datINLA,
+  fixed.par = c(0, 1000),
+  tau.prior = "uniform",
+  tau.par = c(0, 5),
+  type = "FE",
+  approach = "arm-level",
+  mreg = FALSE,
+  verbose = FALSE,
+  inla.strategy = "simplified.laplace",
+  improve.hyperpar.dz = 0.75,
+  correct = FALSE,
+  correct.factor = 10
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>datINLA</code></td>
+<td>
+<p>An object of <code>create_INLA_dat_pair</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.par</code></td>
+<td>
+<p>A numerical vector specifying the parameter of the normal prior
+density for mean treatment effect, first value is parameter for mean, second is for variance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.prior</code></td>
+<td>
+<p>A string specifying the prior density for the heterogeneity standard deviation,
+options are 'uniform' for uniform prior and 'half-normal' for half-normal prior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau.par</code></td>
+<td>
+<p>A numerical vector specifying the parameter of the prior
+density for heterogenety stdev.
+</p>
+
+<ul>
+<li> <p><code>var.par = c(u, l)</code>: <code>u</code> is lower bound and <code>l</code> is upper
+bound when <code>var.prior = 'uniform'</code>
+</p>
+</li>
+<li> <p><code>var.par = c(m, v)</code>: <code>m</code> is mean and <code>v</code> is variance
+when <code>var.prior = 'uniform'</code>
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A string indicating the type of the model, options are "FE", "RE".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>approach</code></td>
+<td>
+<p>A string indicating the approach of the model, options are "summary-level", "arm-level"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mreg</code></td>
+<td>
+<p>Logical indicating whether covariate(s) should be incorporated to fit a
+meta-regression model, default <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical indicating whether the program should run in a verbose model, default <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inla.strategy</code></td>
+<td>
+<p>A string specfying the strategy to use for the approximations of INLA;
+one of 'gaussian', 'simplified.laplace' (default) or 'laplace', see <code>?INLA::control.inla</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>improve.hyperpar.dz</code></td>
+<td>
+<p>Step length in the standardized scale used in the construction of the grid, default 0.75,
+see <code>INLA::inla.hyperpar</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct</code></td>
+<td>
+<p>Logical Add correction for the Laplace approximation, default <code>FALSE</code>,
+see <code>INLA::inla.hyperpar</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct.factor</code></td>
+<td>
+<p>Numerical Factor used in adjusting the correction factor if <code>correct=TRUE</code>, default 10,
+see <code>INLA::inla.hyperpar</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The following model types are supported
+</p>
+
+<ul>
+<li> <p><code>FE</code>, fixed-effect model
+</p>
+</li>
+<li> <p><code>RE</code>, random effects model
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p><code>meta_inla</code> returns a <code>meta_inla</code> object with components:
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data('TBdat')
+## Create the dataset suitable for INLA
+TBdatINLA &lt;- create_INLA_dat_pair(TBdat$TRT, TBdat$CON, TBdat$TRTTB, TBdat$CONTB)
+
+## Fitting a random-effects model using arm-level approach
+## Not run: 
+if(requireNamespace('INLA', quietly = TRUE)){
+ require('INLA', quietly = TRUE)
+fit.TB.RE.INLA &lt;- meta_inla(TBdatINLA, type = 'RE', approach = 'arm-level',
+tau.prior = 'uniform', tau.par = c(0, 5))
+}
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

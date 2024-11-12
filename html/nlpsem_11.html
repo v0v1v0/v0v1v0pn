@@ -1,0 +1,227 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getLGCM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a Latent Growth Curve Model with Time-invariant Covariate (If Any)</h2>
+
+<h3>Description</h3>
+
+<p>This function fits a latent growth curve model with or without time-invariant covariates to the provided data.
+It manages model setup, optimization, and if requested, outputs parameter estimates and standard errors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getLGCM(
+  dat,
+  t_var,
+  y_var,
+  curveFun,
+  intrinsic = TRUE,
+  records,
+  growth_TIC = NULL,
+  starts = NULL,
+  res_scale = NULL,
+  tries = NULL,
+  OKStatus = 0,
+  jitterD = "runif",
+  loc = 1,
+  scale = 0.25,
+  paramOut = FALSE,
+  names = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>A wide-format data frame, with each row corresponding to a unique ID. It contains the observed variables with
+repeated measurements and occasions, and time-invariant covariates (TICs) if any.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t_var</code></td>
+<td>
+<p>A string specifying the prefix of the column names corresponding to the time variable at each study wave.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_var</code></td>
+<td>
+<p>A string specifying the prefix of the column names corresponding to the outcome variable at each study wave.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>curveFun</code></td>
+<td>
+<p>A string specifying the functional form of the growth curve. Supported options for latent growth curve
+models are: <code>"linear"</code> (or <code>"LIN"</code>), <code>"quadratic"</code> (or <code>"QUAD"</code>), <code>"negative exponential"</code>
+(or <code>"EXP"</code>), <code>"Jenss-Bayley"</code> (or <code>"JB"</code>), and <code>"bilinear spline"</code> (or <code>"BLS"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intrinsic</code></td>
+<td>
+<p>A logical flag indicating whether to build an intrinsically nonlinear longitudinal model. Default is
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>records</code></td>
+<td>
+<p>A numeric vector specifying indices of the study waves.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>growth_TIC</code></td>
+<td>
+<p>A string or character vector specifying the column name(s) of time-invariant covariate(s) contributing to the
+variability of growth factors if any. Default is <code>NULL</code>, indicating no growth TICs are included in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starts</code></td>
+<td>
+<p>A list containing initial values for the parameters. Default is <code>NULL</code>, indicating no user-specified
+initial values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res_scale</code></td>
+<td>
+<p>A numeric value representing the scaling factor for the initial calculation of the residual variance. This
+value should be between <code>0</code> and <code>1</code>, exclusive. By default, this is <code>NULL</code>, as it is unnecessary when the
+user specifies the initial values using the <code>starts</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tries</code></td>
+<td>
+<p>An integer specifying the number of additional optimization attempts. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OKStatus</code></td>
+<td>
+<p>An integer (vector) specifying acceptable status codes for convergence. Default is <code>0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jitterD</code></td>
+<td>
+<p>A string specifying the distribution for jitter. Supported values are: <code>"runif"</code> (uniform
+distribution), <code>"rnorm"</code> (normal distribution), and <code>"rcauchy"</code> (Cauchy distribution). Default is <code>"runif"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc</code></td>
+<td>
+<p>A numeric value representing the location parameter of the jitter distribution. Default is <code>1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>A numeric value representing the scale parameter of the jitter distribution. Default is <code>0.25</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>paramOut</code></td>
+<td>
+<p>A logical flag indicating whether to output the parameter estimates and standard errors. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>A character vector specifying parameter names. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>myMxOutput</code>. Depending on the <code>paramOut</code> argument, the object may contain the following slots:
+</p>
+
+<ul>
+<li> <p><code>mxOutput</code>: This slot contains the fitted latent growth curve model. A summary of this model can be obtained using the
+<code>ModelSummary()</code> function.
+</p>
+</li>
+<li> <p><code>Estimates</code> (optional): If <code>paramOut = TRUE</code>, a data frame with parameter estimates and standard errors. The content
+of this slot can be printed using the <code>printTable()</code> method for S4 objects.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul>
+<li> <p>Liu, J., Perera, R. A., Kang, L., Kirkpatrick, R. M., &amp; Sabo, R. T. (2021). "Obtaining Interpretable Parameters from
+Reparameterizing Longitudinal Models: Transformation Matrices between Growth Factors in Two Parameter Spaces". Journal of
+Educational and Behavioral Statistics. <a href="https://doi.org/10.3102/10769986211052009">doi:10.3102/10769986211052009</a>
+</p>
+</li>
+<li> <p>Sterba, S. K. (2014). "Fitting Nonlinear Latent Growth Curve Models With Individually Varying Time Points". Structural
+Equation Modeling: A Multidisciplinary Journal, 21(4), 630-647. <a href="https://doi.org/10.1080/10705511.2014.919828">doi:10.1080/10705511.2014.919828</a>
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+# Load ECLS-K (2011) data
+data("RMS_dat")
+RMS_dat0 &lt;- RMS_dat
+# Re-baseline the data so that the estimated initial status is for the starting point of the study
+baseT &lt;- RMS_dat0$T1
+RMS_dat0$T1 &lt;- RMS_dat0$T1 - baseT
+RMS_dat0$T2 &lt;- RMS_dat0$T2 - baseT
+RMS_dat0$T3 &lt;- RMS_dat0$T3 - baseT
+RMS_dat0$T4 &lt;- RMS_dat0$T4 - baseT
+RMS_dat0$T5 &lt;- RMS_dat0$T5 - baseT
+RMS_dat0$T6 &lt;- RMS_dat0$T6 - baseT
+RMS_dat0$T7 &lt;- RMS_dat0$T7 - baseT
+RMS_dat0$T8 &lt;- RMS_dat0$T8 - baseT
+RMS_dat0$T9 &lt;- RMS_dat0$T9 - baseT
+# Standardized time-invariant covariates
+RMS_dat0$ex1 &lt;- scale(RMS_dat0$Approach_to_Learning)
+RMS_dat0$ex2 &lt;- scale(RMS_dat0$Attention_focus)
+
+
+# Fit bilinear spline latent growth curve model (fixed knots)
+BLS_LGCM_r &lt;- getLGCM(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "bilinear spline",
+  intrinsic = FALSE, records = 1:9, growth_TIC = NULL, res_scale = 0.1
+)
+# Fit bilinear spline latent growth curve model (random knots) with
+# time-invariant covariates for mathematics development
+## Define parameter names
+paraBLS.TIC_LGCM.f &lt;- c(
+  "alpha0", "alpha1", "alpha2", "alphag",
+  paste0("psi", c("00", "01", "02", "0g", "11", "12", "1g", "22", "2g", "gg")),
+  "residuals", paste0("beta1", c(0:2, "g")), paste0("beta2", c(0:2, "g")),
+  paste0("mux", 1:2), paste0("phi", c("11", "12", "22")),
+  "mueta0", "mueta1", "mueta2", "mu_knot"
+)
+## Fit the model
+BLS_LGCM.TIC_f &lt;- getLGCM(
+  dat = RMS_dat0, t_var = "T", y_var = "M", curveFun = "bilinear spline",
+  intrinsic = TRUE, records = 1:9, growth_TIC = c("ex1", "ex2"), res_scale = 0.1,
+  paramOut = TRUE, names = paraBLS.TIC_LGCM.f
+)
+## Output point estimate and standard errors
+printTable(BLS_LGCM.TIC_f)
+
+
+</code></pre>
+
+
+</div>

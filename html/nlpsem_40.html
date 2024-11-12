@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getPosterior</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute Posterior Probabilities, Cluster Assignments, and Model Entropy for a Longitudinal Mixture Model</h2>
+
+<h3>Description</h3>
+
+<p>This function computes posterior probabilities, cluster assignments, and model entropy for a given mixture model
+with a predefined number of classes. If the true labels are available, it can also compute the model accuracy.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getPosterior(model, nClass, label = FALSE, cluster_TIC = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A fitted mxModel object. Specifically, this should be the <code>mxOutput</code> slot from the output of <code>getMIX()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nClass</code></td>
+<td>
+<p>An integer representing the predefined number of latent classes in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>A logical value indicating whether the data contains true labels, which are often available in a simulated data set.
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_TIC</code></td>
+<td>
+<p>A string or character vector representing the column name(s) for time-invariant covariate(s)
+indicating cluster formations. Default is <code>NULL</code>, indicating that no such time-invariant covariates are present
+in the model.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>postOutput</code>. Depending on the <code>label</code> argument, the object may contain the following slots:
+</p>
+
+<ul>
+<li> <p><code>prob</code>: A matrix of posterior probabilities.
+</p>
+</li>
+<li> <p><code>membership</code>: A vector indicating class membership based on maximum posterior probability.
+</p>
+</li>
+<li> <p><code>entropy</code>: The entropy of the model, a measure of uncertainty in class assignment.
+</p>
+</li>
+<li> <p><code>accuracy</code> (optional): If <code>label = TRUE</code>, the model's accuracy based on true labels.
+</p>
+</li>
+</ul>
+<p>The content of these slots can be printed using the <code>printTable()</code> method for S4 objects.
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li> <p>Peugh, J., &amp; Fan, X. (2015). Enumeration Index Performance in Generalized Growth Mixture Models:
+A Monte Carlo Test of Muthén's (2003) Hypothesis. Structural Equation Modeling: A Multidisciplinary Journal, 22(1), 115-131.
+Routledge. <a href="https://doi.org/10.1080/10705511.2014.919823">doi:10.1080/10705511.2014.919823</a>
+</p>
+</li>
+<li> <p>Lubke, G., &amp; Muthén, B.O. (2007). Performance of Factor Mixture Models as a Function of Model Size,
+Covariate Effects, and Class-Specific Parameters. Structural Equation Modeling: A Multidisciplinary Journal, 14(1), 26-47.
+Routledge. <a href="https://doi.org/10.1080/10705510709336735">doi:10.1080/10705510709336735</a>
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">mxOption(model = NULL, key = "Default optimizer", "CSOLNP", reset = FALSE)
+data("RMS_dat")
+# Re-baseline the data so that the estimated initial status is for the starting point of the study
+RMS_dat0 &lt;- RMS_dat
+baseT &lt;- RMS_dat0$T1
+RMS_dat0$T1 &lt;- RMS_dat0$T1 - baseT
+RMS_dat0$T2 &lt;- RMS_dat0$T2 - baseT
+RMS_dat0$T3 &lt;- RMS_dat0$T3 - baseT
+RMS_dat0$T4 &lt;- RMS_dat0$T4 - baseT
+RMS_dat0$T5 &lt;- RMS_dat0$T5 - baseT
+RMS_dat0$T6 &lt;- RMS_dat0$T6 - baseT
+RMS_dat0$T7 &lt;- RMS_dat0$T7 - baseT
+RMS_dat0$T8 &lt;- RMS_dat0$T8 - baseT
+RMS_dat0$T9 &lt;- RMS_dat0$T9 - baseT
+RMS_dat0$ex1 &lt;- scale(RMS_dat0$Approach_to_Learning)
+RMS_dat0$ex2 &lt;- scale(RMS_dat0$Attention_focus)
+RMS_dat0$gx1 &lt;- scale(RMS_dat0$INCOME)
+RMS_dat0$gx2 &lt;- scale(RMS_dat0$EDU)
+
+# Fit longitudinal mixture group model of bilinear spline functional form with fixed knot but no
+# cluster TICs or growth TICs
+set.seed(20191029)
+MIX_BLS_LGCM_r &lt;-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.33, 0.34, 0.33), sub_Model = "LGCM",
+  cluster_TIC = NULL, y_var = "M", t_var = "T", records = 1:9, curveFun = "BLS",
+  intrinsic = FALSE, res_scale = list(0.3, 0.3, 0.3), growth_TIC = NULL, tries = 10
+)
+label1 &lt;- getPosterior(
+  model = MIX_BLS_LGCM_r@mxOutput, nClass = 3, label = FALSE, cluster_TIC = NULL
+)
+# Fit longitudinal mixture group model of bilinear spline functional form with fixed knot, cluster
+# TICs, and growth TICs
+set.seed(20191029)
+MIX_BLS_LGCM.TIC_r &lt;-  getMIX(
+  dat = RMS_dat0, prop_starts = c(0.33, 0.34, 0.33), sub_Model = "LGCM",
+  cluster_TIC = c("gx1", "gx2"), y_var = "M", t_var = "T", records = 1:9,
+  curveFun = "BLS", intrinsic = FALSE, res_scale = list(0.3, 0.3, 0.3),
+  growth_TIC = c("ex1", "ex2"), tries = 10
+)
+label2 &lt;- getPosterior(
+  model = MIX_BLS_LGCM.TIC_r@mxOutput, nClass = 3, label = FALSE, cluster_TIC = c("gx1", "gx2")
+)
+
+
+</code></pre>
+
+
+</div>

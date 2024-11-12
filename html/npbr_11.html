@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>kern_smooth_bw</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bandwidth selection for kernel smoothing frontier estimators
+</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>kern_smooth_bw</code> provides two bandwidth selection methods. One is the least squares cross-validation developed by Parmeter and Racine (2013). The other is the BIC developed in Noh (2014).    
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">kern_smooth_bw(xtab, ytab, method="u", technique="noh", bw_method="bic", 
+ control = list("tm_limit" = 700))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xtab</code></td>
+<td>
+<p>a numeric vector containing the observed inputs  <code class="reqn">x_1,\ldots,x_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytab</code></td>
+<td>
+<p>a numeric vector of the same length as <code>xtab</code> containing the observed outputs <code class="reqn">y_1,\ldots,y_n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a character equal to "u" (unconstrained estimator), "m" (under the monotonicity constraint) or "mc" (under simultaneous monotonicity and concavity constraints).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>technique</code></td>
+<td>
+<p>which estimation technique to use: "Noh" specifies the use of the method in Noh (2014), while "pr" is for the method in Parameter and Racine (2013).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw_method</code></td>
+<td>
+<p>which bandwidth selection method to use: "cv" returns the bandwidth that minimizes the least squares cross-validation criterion, and "bic" returns the bandwidth minimizing the BIC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of parameters to the GLPK solver. See *Details* of help(Rglpk_solve_LP).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>As with any smoothed techniques, the bandwidth selection is critical to the quality of the frontier estimator. Parmeter and Racine (2013)'s recommendation is to use the least squares cross-validation method implemented with <code>bw\_method="cv"</code> in the function <code>kern\_smooth\_bw</code>.
+Instead, Noh (2014) proposed to select the bandwidth which minimizes the following criterion: 
+</p>
+<p style="text-align: center;"><code class="reqn"> 
+BIC(h) = \log \left( \sum_{i=1}^n (\hat \varphi(x_i|\hat p(h))-y_i)\right)+\frac {\log n \cdot tr(S(h))}{2n},</code>
+</p>
+
+<p>where <code class="reqn">\hat p(h)</code> is the chosen weight vector associated to the bandwidth <code class="reqn">h</code>, and <code class="reqn">tr(S(h))</code> is the trace of the smoothing matrix 
+</p>
+<p style="text-align: center;"><code class="reqn">
+S(h) = \left( \begin{array}{ccc} A_1(x_1) &amp; \cdots &amp; A_n(x_1)
+\\ \vdots &amp; \ddots&amp; \vdots
+\\ A_1(x_n) &amp; \cdots &amp; A_n(x_n) \end{array} \right).
+</code>
+</p>
+
+<p>The function <code>kern\_smooth\_bw</code> computes the optimal bandwidth from this criterion with option <code>bw\_method="bic"</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns an optimal bandwidth depending on the specified selection method. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hohsuk Noh
+</p>
+
+
+<h3>References</h3>
+
+<p>Noh, H. (2014). Frontier estimation using kernel smoothing estimators with data transformation. <em>Journal of the Korean Statistical Society</em>, 43, 503-512.
+</p>
+<p>Parmeter, C.F. and Racine, J.S. (2013). Smooth constrained frontier analysis in <em>Recent Advances and Future Directions in Causality, Prediction, and Specification Analysis</em>, Springer-Verlag, New York, 463-488.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>kern_smooth</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data("green")
+x.green &lt;- seq(min(log(green$COST)), max(log(green$COST)),length.out=101)
+options(np.tree=TRUE,crs.messages=FALSE,np.messages=FALSE)
+h.pr.green.m&lt;-kern_smooth_bw(log(green$COST),log(green$OUTPUT), method="m", 
+ technique="pr", bw_method="cv")
+h.noh.green.m&lt;-kern_smooth_bw(log(green$COST),log(green$OUTPUT), method="m", 
+ technique="noh", bw_method="bic")
+y.pr.green.m&lt;-kern_smooth(log(green$COST),log(green$OUTPUT), x.green, 
+ h=h.pr.green.m, method="m", technique="pr")
+y.noh.green.m&lt;-kern_smooth(log(green$COST),log(green$OUTPUT), x.green, 
+ h=h.noh.green.m, method="m", technique="noh")
+plot(log(OUTPUT)~log(COST), data=green, xlab="log(COST)",ylab="log(OUTPUT)") 
+lines(x.green, y.pr.green.m, lwd=4, lty=3, col="red") 
+lines(x.green, y.noh.green.m, lwd=4, lty=3, col="blue")  
+legend("topleft", col=c("blue","red"),lty=3, legend=c("noh","pr"), 
+ lwd=4, cex=0.8)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

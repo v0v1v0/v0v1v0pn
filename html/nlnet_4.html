@@ -1,0 +1,190 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>nlnet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Non-Linear Network reconstruction from expression matrix
+</h2>
+
+<h3>Description</h3>
+
+<p>Non-Linear Network reconstruction method
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">nlnet(input, min.fdr.cutoff=0.05,max.fdr.cutoff=0.2, conn.proportion=0.007, 
+gene.fdr.plot=FALSE, min.module.size=0, gene.community.method="multilevel", 
+use.normal.approx=FALSE, normalization="standardize", plot.method="communitygraph")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>input</code></td>
+<td>
+<p>the data matrix with no missing values.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.fdr.cutoff</code></td>
+<td>
+
+<p>the minimun allowable value of the local false discovery cutoff in establishing links between genes. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.fdr.cutoff</code></td>
+<td>
+
+<p>the maximun allowable value of the local false discovery cutoff in establishing links between genes.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conn.proportion</code></td>
+<td>
+
+<p>the target proportion of connections between all pairs of genes, if allowed by the fdr cutoff limits. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gene.fdr.plot</code></td>
+<td>
+
+<p>whether plot a figure with estimated densities, distribution functions, and (local) false discovery rates.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.module.size</code></td>
+<td>
+
+<p>the min number of genes together as a module.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gene.community.method</code></td>
+<td>
+<p>the method for community detection.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.normal.approx</code></td>
+<td>
+<p>whether to use the normal approximation for the null hypothesis. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalization</code></td>
+<td>
+<p>the normalization method for the array. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.method</code></td>
+<td>
+
+<p>the method for graph and community ploting.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>gene.community.method: It provides three kinds of community detection method:
+"mutilevel", "label.propagation" and "leading.eigenvector".
+</p>
+<p>use.normal.approx: If TRUE, normal approximation is used for every feature, AND all covariances are assumed to be zero. If FALSE, generates permutation based null distribution - mean vector and a variance-covariance matrix.
+</p>
+<p>normalization: There are three choices:
+"standardize" means removing the mean of each row and make the standard deviation one; 
+"normal_score" means normal score transformation; 
+"none" means do nothing. In that case we still assume some normalization has been done by the user such that each row has approximately mean 0 and sd 1. 
+</p>
+<p>plot.method: It provides three kinds of ploting method:
+"none" means ploting no graph,
+"communitygraph" means ploting community with graph, 
+"graph" means ploting graph, 
+"membership" means ploting membership of the community 
+</p>
+
+
+<h3>Value</h3>
+
+<p>it returns a graph and the community membership of the graph.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>The algorithm name for community detection</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>An igraph object including edges : Numeric vector defining the edges, the first edge points from the first element to the second, the second edge from the third to the fourth, etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>community</code></td>
+<td>
+<p>Numeric vector, one value for each vertex, the membership vector of the community structure.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Haodong Liu &lt;liuhaodong0828@gmail.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>https://www.ncbi.nlm.nih.gov/pubmed/27380516
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>data.gen</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> 
+ ## generating the data matrix &amp; hiden clusters as a sample
+  input&lt;-data.gen(n.genes=40, n.grps=4)
+## now input includes data matrix and hiden clusters, so get the matrix as input.
+input&lt;-input$data 
+##change the ploting method
+ result&lt;-nlnet(input,plot.method="graph")
+  ## get the result and see it values
+ graph&lt;-result$graph ##a igraph object.
+ comm&lt;-result$community ##community of the graph
+ 
+ ## use different community detection method
+ #nlnet(input,gene.community.method="label.propagation")
+ 
+ ## change the fdr pro to control connections of genes
+ ## adjust the modularity size
+ #nlnet(input,conn.proportion=0.005,min.module.size=10)
+ 
+</code></pre>
+
+
+</div>

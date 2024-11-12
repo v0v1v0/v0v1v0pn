@@ -1,0 +1,254 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dgnvmix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Density of Grouped Normal Variance Mixtures</h2>
+
+<h3>Description</h3>
+
+<p>Evaluating grouped normal variance mixture density functions
+(including Student <em>t</em> with multiple degrees-of-freedom).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dgnvmix(x, groupings = 1:d, qmix, loc = rep(0, d), scale = diag(d), factor = NULL,
+        factor.inv = NULL, control = list(), log = FALSE, verbose = TRUE, ...)
+dgStudent(x, groupings = 1:d, df, loc = rep(0, d), scale = diag(d), factor = NULL,
+          factor.inv = NULL, control = list(), log = FALSE, verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>see <code>dnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groupings</code></td>
+<td>
+<p>see <code>pgnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmix</code></td>
+<td>
+<p>specification of the mixing variables <code class="reqn">W_i</code> via quantile
+functions; see <code>pgnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc</code></td>
+<td>
+<p>see <code>pnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>see <code>pnvmix()</code>; must be positive definite.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factor</code></td>
+<td>
+<p><code class="reqn">(d, d)</code> lower triangular <code>matrix</code>
+such that <code>factor %*% t(factor)</code> equals <code>scale</code>. Internally
+used is <code>factor.inv</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factor.inv</code></td>
+<td>
+<p>inverse of <code>factor</code>; if not provided, computed via
+<code>solve(factor)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p><code>vector</code> of length <code>length(unique(groupings))</code> so that
+variable <code>i</code> has degrees-of-freedom <code>df[groupings[i]]</code>; all elements
+must be positive
+and can be <code>Inf</code>, in which case the corresponding marginal is normally
+distributed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p><code>list</code> specifying algorithm specific
+parameters; see <code>get_set_param()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p><code>logical</code> indicating whether the logarithmic
+density is to be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>see <code>pnvmix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (for example, parameters) passed
+to the underlying mixing distribution when <code>qmix</code> is a
+<code>character</code> string or an element of <code>qmix</code> is a
+<code>function</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Internally used is <code>factor.inv</code>, so <code>factor</code> and <code>scale</code> are not
+required to be provided (but allowed for consistency with other functions in the
+package).
+</p>
+<p><code>dgStudent()</code> is a wrapper of
+<code>dgnvmix(, qmix = "inverse.gamma", df = df)</code>. If there is no grouping,
+the analytical formula for the density of a multivariate <em>t</em> distribution
+is used.
+</p>
+<p>Internally, an adaptive randomized Quasi-Monte Carlo (RQMC) approach
+is used to estimate the log-density. It is an iterative algorithm that
+evaluates the integrand at a randomized Sobol' point-set (default) in
+each iteration until the pre-specified error tolerance
+<code>control$dnvmix.reltol</code> in the <code>control</code> argument
+is reached for the log-density.  The attribute
+<code>"numiter"</code> gives the worst case number of such iterations needed
+(over all rows of <code>x</code>). Note that this function calls underlying
+C code.
+</p>
+<p>Algorithm specific parameters (such as above mentioned <code>control$dnvmix.reltol</code>)
+can be passed as a <code>list</code> via the <code>control</code> argument,
+see <code>get_set_param()</code> for details and defaults.
+</p>
+<p>If the error tolerance cannot be achieved within <code>control$max.iter.rqmc</code>
+iterations and <code>fun.eval[2]</code> function evaluations, an additional
+warning is thrown if <code>verbose=TRUE</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>dgnvmix()</code> and <code>dgStudent()</code> return a
+<code>numeric</code> <code class="reqn">n</code>-vector with the computed density values
+and corresponding attributes <code>"abs. error"</code> and <code>"rel. error"</code>
+(error estimates of the RQMC estimator) and <code>"numiter"</code> (number of iterations).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Erik Hintz, Marius Hofert and Christiane Lemieux</p>
+
+
+<h3>References</h3>
+
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2020),
+Grouped Normal Variance Mixtures.
+<em>Risks</em> 8(4), 103.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2021),
+Normal variance mixtures: Distribution, density and parameter estimation.
+<em>Computational Statistics and Data Analysis</em> 157C, 107175.
+</p>
+<p>Hintz, E., Hofert, M. and Lemieux, C. (2022),
+Multivariate Normal Variance Mixtures in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>: The <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> Package nvmix.
+<em>Journal of Statistical Software</em>, <a href="https://doi.org/10.18637/jss.v102.i02">doi:10.18637/jss.v102.i02</a>.
+</p>
+<p>McNeil, A. J., Frey, R. and Embrechts, P. (2015).
+<em>Quantitative Risk Management: Concepts, Techniques, Tools</em>.
+Princeton University Press.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rgnvmix()</code>, <code>pgnvmix()</code>, <code>get_set_param()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 100 # sample size to generate evaluation points
+
+### 1. Inverse-gamma mixture
+## 1.1. Grouped t with mutliple dof
+
+d &lt;- 3 # dimension
+set.seed(157)
+A &lt;- matrix(runif(d * d), ncol = d)
+P &lt;- cov2cor(A %*% t(A)) # random scale matrix
+df &lt;- c(1.1, 2.4, 4.9) # dof for margin i
+groupings &lt;- 1:d
+x &lt;- rgStudent(n, df = df, scale = P) # evaluation points for the density
+
+### Call 'dgnvmix' with 'qmix' a string:
+set.seed(12)
+dgt1 &lt;- dgnvmix(x, qmix = "inverse.gamma", df = df, scale = P)
+### Version providing quantile functions of the mixing distributions as list
+qmix_ &lt;- function(u, df) 1 / qgamma(1-u, shape = df/2, rate = df/2)
+qmix &lt;- list(function(u) qmix_(u, df = df[1]), function(u) qmix_(u, df = df[2]),
+             function(u) qmix_(u, df = df[3]))
+set.seed(12)
+dgt2 &lt;- dgnvmix(x, groupings = groupings, qmix = qmix, scale = P)
+### Similar, but using ellipsis argument:
+qmix &lt;- list(function(u, df1) qmix_(u, df1), function(u, df2) qmix_(u, df2),
+             function(u, df3) qmix_(u, df3))
+set.seed(12)
+dgt3 &lt;- dgnvmix(x, groupings = groupings, qmix = qmix, scale = P, df1 = df[1],
+                df2 = df[2], df3 = df[3])
+### Using the wrapper 'dgStudent()'
+set.seed(12)
+dgt4 &lt;- dgStudent(x, groupings = groupings, df = df, scale = P)
+stopifnot(all.equal(dgt1, dgt2, tol = 1e-5, check.attributes = FALSE),
+          all.equal(dgt1, dgt3, tol = 1e-5, check.attributes = FALSE),
+          all.equal(dgt1, dgt4, tol = 1e-5, check.attributes = FALSE))
+
+
+## 1.2 Classical multivariate t
+
+df &lt;- 2.4
+groupings &lt;- rep(1, d) # same df for all components
+x &lt;- rStudent(n, scale = P, df = df) # evaluation points for the density
+dt1 &lt;- dStudent(x, scale = P, df = df, log = TRUE) # uses analytical formula
+## If 'qmix' provided as string and no grouping, dgnvmix() uses analytical formula
+dt2 &lt;- dgnvmix(x, qmix = "inverse.gamma", groupings = groupings, df = df, scale = P, log = TRUE)
+stopifnot(all.equal(dt1, dt2))
+## Provide 'qmix' as a function to force estimation in 'dgnvmix()'
+dt3 &lt;- dgnvmix(x, qmix = qmix_, groupings = groupings, df = df, scale = P, log = TRUE)
+stopifnot(all.equal(dt1, dt3, tol = 5e-4, check.attributes = FALSE))
+
+### 2. More complicated mixutre
+
+## Let W1 ~ IG(1, 1), W2 = 1, W3 ~ Exp(1), W4 ~ Par(2, 1), W5 = W1, all comonotone
+## =&gt; X1 ~ t_2; X2 ~ normal; X3 ~ Exp-mixture; X4 ~ Par-mixture; X5 ~ t_2
+
+d &lt;- 5
+set.seed(157)
+A &lt;- matrix(runif(d * d), ncol = d)
+P &lt;- cov2cor(A %*% t(A))
+b &lt;- 3 * runif(d) * sqrt(d) # random upper limit
+groupings &lt;- c(1, 2, 3, 4, 1) # since W_5 = W_1
+qmix &lt;- list(function(u) qmix_(u, df = 2), function(u) rep(1, length(u)),
+             list("exp", rate=1), function(u) (1-u)^(-1/2)) # length 4 (# of groups)
+x &lt;- rgnvmix(n, groupings = groupings, qmix = qmix, scale = P)
+dg &lt;- dgnvmix(x, groupings = groupings, qmix = qmix, scale = P, log = TRUE)
+</code></pre>
+
+
+</div>

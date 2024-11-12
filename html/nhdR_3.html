@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>extract_network</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return nhd plus stream network upstream of a waterbody</h2>
+
+<h3>Description</h3>
+
+<p>Return nhd plus stream network upstream of a waterbody
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">extract_network(
+  lon = NA,
+  lat = NA,
+  lines = NA,
+  lines_network = TRUE,
+  buffer_dist = 0.01,
+  maxsteps = 3,
+  approve_all_dl = FALSE,
+  temporary = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lon</code></td>
+<td>
+<p>numeric decimal degree longitude</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lat</code></td>
+<td>
+<p>numeric decimal degree latitude</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lines</code></td>
+<td>
+<p>sf spatial lines object to limit extent of the network search</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lines_network</code></td>
+<td>
+<p>boolean treat lines as the complete network object.
+If FALSE, simply start network extraction at the terminal reach of the
+lines object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer_dist</code></td>
+<td>
+<p>numeric buffer around lat-lon point in dec. deg.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxsteps</code></td>
+<td>
+<p>maximum number of stream climbing iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>approve_all_dl</code></td>
+<td>
+<p>logical blanket approval to download all missing data.
+Defaults to TRUE if session is non-interactive.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temporary</code></td>
+<td>
+<p>logical set FALSE to save data to a persistent
+rappdirs location</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>parameters passed on to sf::st_read</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The lon and lat arguments are used for querying the corresponding
+lake polygon layer which is then used to climb its intersecting stream
+network.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An sf data frame with LINESTRING geometries
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(mapview)
+library(sf)
+
+# headwater lakes have no upstream network
+coords &lt;- data.frame(lat = 46.32711, lon = -89.58893)
+res &lt;- extract_network(coords$lon, coords$lat, maxsteps = 9)
+
+# fails if no lake nhdp lake found within the buffer at the query point
+coords &lt;- data.frame(lat = 43.62453, lon = -85.47164)
+res &lt;- extract_network(coords$lon, coords$lat, maxsteps = 9)
+
+coords &lt;- data.frame(lat = 20.79722, lon = -156.47833)
+# use a non-geographic (projected) buffer size
+res &lt;- extract_network(coords$lon, coords$lat, maxsteps = 9,
+  buffer_dist = units::as_units(5, "km"))
+
+# use a projected buffer size
+res &lt;- extract_network(coords$lon, coords$lat, maxsteps = 9)
+
+# no upstream network for lakes intersecting the Great Lakes
+coords &lt;- data.frame(lat = 44.6265, lon = -86.23121)
+res &lt;- extract_network(coords$lon, coords$lat, maxsteps = 3)
+
+coords &lt;- data.frame(lat = 42.96523, lon = -89.2527)
+res &lt;- extract_network(coords$lon, coords$lat, maxsteps = 9)
+
+mapview(res)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

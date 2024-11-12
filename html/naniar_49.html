@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute_below</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Impute data with values shifted 10 percent below range.</h2>
+
+<h3>Description</h3>
+
+<p>It can be useful in exploratory graphics to impute data outside the range of
+the data. <code>impute_below</code> imputes variables with missings to have values
+10 percent below the range for numeric values, plus some jittered noise,
+to separate repeated values, so that missing values can be visualised
+along with the rest of the data. For character or factor
+values, it adds a new string or label.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute_below(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a variable of interest to shift</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>extra arguments to pass</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>add_shadow_shift()</code> <code>cast_shadow_shift()</code> <code>cast_shadow_shift_label()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+vec &lt;- rnorm(10)
+
+vec[sample(1:10, 3)] &lt;- NA
+
+impute_below(vec)
+impute_below(vec, prop_below = 0.25)
+impute_below(vec,
+            prop_below = 0.25,
+            jitter = 0.2)
+
+dat &lt;- tibble(
+ num = rnorm(10),
+ int = as.integer(rpois(10, 5)),
+ fct = factor(LETTERS[1:10])
+) %&gt;%
+ mutate(
+   across(
+     everything(),
+     \(x) set_prop_miss(x, prop = 0.25)
+   )
+ )
+
+dat
+
+dat %&gt;%
+ nabular() %&gt;%
+ mutate(
+   num = impute_below(num),
+   int = impute_below(int),
+   fct = impute_below(fct),
+ )
+
+dat %&gt;%
+ nabular() %&gt;%
+ mutate(
+   across(
+     where(is.numeric),
+     impute_below
+   )
+ )
+
+dat %&gt;%
+ nabular() %&gt;%
+ mutate(
+   across(
+     c("num", "int"),
+     impute_below
+   )
+ )
+
+
+</code></pre>
+
+
+</div>
